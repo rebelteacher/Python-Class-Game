@@ -64,16 +64,21 @@ export default function ClassroomPage({ user }) {
     e.preventDefault();
     
     if (!newAssignment.title.trim() || !newAssignment.solution_code.trim()) {
-      toast.error("Please fill in all required fields");
+      toast.error("Please fill in title and solution code");
       return;
     }
+
+    // Filter out empty test cases
+    const validTestCases = newAssignment.test_cases.filter(
+      tc => tc.description.trim() || tc.input_data.trim() || tc.expected_output.trim()
+    );
 
     try {
       await axios.post(
         `${API}/assignments`,
         {
           ...newAssignment,
-          classroom_id: classroomId,
+          test_cases: validTestCases,
         },
         { withCredentials: true }
       );
