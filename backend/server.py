@@ -682,6 +682,13 @@ Format your response as JSON:
         final_score = base_score
         feedback = f"Test Results: {passed_tests}/{total_tests} passed. {assignment['title']} - Keep practicing!"
     
+    # Determine if passing (70% threshold)
+    is_passing = final_score >= 70
+    
+    # Calculate lives after this submission
+    if not is_passing:
+        lives_remaining -= 1
+    
     # Save submission
     new_submission = Submission(
         assignment_id=submission.assignment_id,
@@ -689,7 +696,10 @@ Format your response as JSON:
         code=submission.code,
         score=final_score,
         feedback=feedback,
-        test_results=test_results
+        test_results=test_results,
+        attempt_number=attempt_number,
+        lives_remaining=lives_remaining,
+        is_passing=is_passing
     )
     
     submission_dict = new_submission.model_dump()
