@@ -135,7 +135,7 @@ class AssignmentCreate(BaseModel):
     description: str
     starter_code: str
     solution_code: str
-    test_cases: List[TestCase]
+    test_cases: List[TestCase] = Field(default_factory=list)  # Optional - empty list if not provided
 
 class Submission(BaseModel):
     model_config = ConfigDict(extra="ignore")
