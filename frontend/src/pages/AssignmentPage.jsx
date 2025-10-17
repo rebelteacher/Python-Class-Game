@@ -66,6 +66,7 @@ export default function AssignmentPage({ user }) {
   const handleRunCode = async () => {
     setRunning(true);
     setOutput("");
+    setHasRun(true);
     try {
       const response = await axios.post(
         `${API}/code/execute`,
@@ -85,6 +86,16 @@ export default function AssignmentPage({ user }) {
   };
 
   const handleSubmit = async () => {
+    if (!hasRun) {
+      toast.error("Please run your code first before submitting!");
+      return;
+    }
+    
+    if (isLockedOut) {
+      toast.error("You've used all 3 lives on this assignment. No more submissions allowed.");
+      return;
+    }
+
     if (!code.trim()) {
       toast.error("Please write some code before submitting");
       return;
@@ -101,11 +112,30 @@ export default function AssignmentPage({ user }) {
         { withCredentials: true }
       );
       
-      toast.success(`Submitted! Score: ${response.data.score.toFixed(1)}%`);
+      const isPassing = response.data.score >= 70;
+      const newLivesRemaining = response.data.lives_remaining;
+      
+      setLivesRemaining(newLivesRemaining);
+      setIsLockedOut(newLivesRemaining <= 0);
+      
+      if (isPassing) {
+        toast.success(`✅ Great job! Score: ${response.data.score.toFixed(1)}%`);
+      } else if (newLivesRemaining > 0) {
+        toast.warning(`Score: ${response.data.score.toFixed(1)}% - ${newLivesRemaining} ${newLivesRemaining === 1 ? 'life' : 'lives'} remaining`);
+      } else {
+        toast.error(`Score: ${response.data.score.toFixed(1)}% - No lives remaining. Assignment locked.`);
+      }
+      
+      setHasRun(false);
       fetchSubmissions();
     } catch (error) {
       console.error("Error submitting assignment:", error);
-      toast.error("Failed to submit assignment");
+      if (error.response?.status === 403) {
+        toast.error(error.response.data.detail || "Submission not allowed");
+        setIsLockedOut(true);
+      } else {
+        toast.error("Failed to submit assignment");
+      }
     } finally {
       setSubmitting(false);
     }
