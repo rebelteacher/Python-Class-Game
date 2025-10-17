@@ -51,6 +51,13 @@ export default function AssignmentPage({ user }) {
         withCredentials: true,
       });
       setSubmissions(response.data);
+      
+      // Calculate lives remaining
+      if (response.data.length > 0 && user.role === "student") {
+        const lastSubmission = response.data[response.data.length - 1];
+        setLivesRemaining(lastSubmission.lives_remaining || 0);
+        setIsLockedOut(lastSubmission.lives_remaining <= 0);
+      }
     } catch (error) {
       console.error("Error fetching submissions:", error);
     }
