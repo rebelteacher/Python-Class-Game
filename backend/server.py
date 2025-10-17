@@ -318,7 +318,9 @@ async def join_classroom(join_data: ClassroomJoin, request: Request):
         {"$push": {"students": user["id"]}}
     )
     
-    return {"success": True, "classroom": classroom}
+    # Remove MongoDB ObjectId before returning
+    classroom_clean = {k: v for k, v in classroom.items() if k != "_id"}
+    return {"success": True, "classroom": classroom_clean}
 
 @api_router.get("/classrooms/{classroom_id}")
 async def get_classroom(classroom_id: str, request: Request):
