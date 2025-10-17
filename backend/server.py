@@ -495,6 +495,30 @@ async def submit_assignment(submission: SubmissionCreate, request: Request):
     if not assignment:
         raise HTTPException(status_code=404, detail="Assignment not found")
     
+    # Check previous submissions and lives
+    previous_submissions = await db.submissions.find(
+        {"assignment_id": submission.assignment_id, "student_id": user["id"]},
+        {"_id": 0}
+    ).sort("submitted_at", -1).to_list(100)
+    
+    # Calculate current state
+    if previous_submissions:
+        last_submission = previous_submissions[0]
+        lives_used = sum(1 for sub in previous_submissions if not sub.get("is_passing", False))
+        lives_remaining = 3 - lives_used
+        attempt_number = len(previous_submissions) + 1
+        
+        # Check if locked out
+        if lives_remaining <= 0:
+            raise HTTPException(
+                status_code=403, 
+                detail="You have used all 3 lives on this assignment. No more submissions allowed."
+            )
+    else:
+        lives_remaining = 3
+        attempt_number = 1
+        raise HTTPException(status_code=404, detail="Assignment not found")
+    
     # Run test cases (if provided)
     test_results = []
     total_tests = len(assignment.get("test_cases", []))
