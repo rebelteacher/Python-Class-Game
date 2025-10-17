@@ -263,12 +263,31 @@ export default function AssignmentPage({ user }) {
                 <Card data-testid="code-editor-card">
                   <CardHeader>
                     <CardTitle className="flex justify-between items-center">
-                      <span>Code Editor</span>
+                      <div className="flex items-center gap-4">
+                        <span>Code Editor</span>
+                        {!isTeacher && (
+                          <div className="flex items-center gap-2 text-sm">
+                            <span className="text-gray-600">Lives:</span>
+                            {isLockedOut ? (
+                              <span className="text-red-600 font-semibold">🚫 Locked</span>
+                            ) : (
+                              <span>
+                                {Array.from({ length: livesRemaining }).map((_, i) => (
+                                  <span key={i} className="text-red-500">❤️</span>
+                                ))}
+                                {Array.from({ length: 3 - livesRemaining }).map((_, i) => (
+                                  <span key={i} className="text-gray-300">🤍</span>
+                                ))}
+                              </span>
+                            )}
+                          </div>
+                        )}
+                      </div>
                       <div className="flex gap-2">
                         <Button 
                           data-testid="run-code-btn" 
                           onClick={handleRunCode} 
-                          disabled={running}
+                          disabled={running || isLockedOut}
                           variant="outline" 
                           size="sm"
                           className="gap-2"
@@ -279,15 +298,18 @@ export default function AssignmentPage({ user }) {
                         <Button 
                           data-testid="submit-code-btn" 
                           onClick={handleSubmit} 
-                          disabled={submitting}
+                          disabled={submitting || isLockedOut || !hasRun}
                           className="bg-indigo-600 hover:bg-indigo-700 gap-2"
                           size="sm"
                         >
                           <Send className="w-4 h-4" />
-                          {submitting ? "Submitting..." : "Submit"}
+                          {submitting ? "Submitting..." : isLockedOut ? "Locked" : !hasRun ? "Run First" : "Submit"}
                         </Button>
                       </div>
                     </CardTitle>
+                    {!hasRun && !isLockedOut && (
+                      <p className="text-xs text-amber-600 mt-2">⚠️ You must run your code before submitting</p>
+                    )}
                   </CardHeader>
                   <CardContent className="p-0">
                     <Editor
