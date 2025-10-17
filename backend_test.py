@@ -349,26 +349,38 @@ class CodeClassAPITester:
         student_id = f"test-student-{student_timestamp}"
         student_token = f"test_student_session_{student_timestamp}"
         
-        mongo_commands = f"""
-        use test_database;
-        db.users.insertOne({{
-            id: "{student_id}",
-            email: "test.student.{student_timestamp}@example.com",
-            name: "Test Student {student_timestamp}",
-            role: "student",
-            created_at: new Date().toISOString()
-        }});
-        db.user_sessions.insertOne({{
-            user_id: "{student_id}",
-            session_token: "{student_token}",
-            expires_at: new Date(Date.now() + 7*24*60*60*1000).toISOString(),
-            created_at: new Date().toISOString()
-        }});
-        """
-        
         try:
-            import subprocess
-            subprocess.run(['mongosh', '--eval', mongo_commands], capture_output=True, timeout=10)
+            from motor.motor_asyncio import AsyncIOMotorClient
+            import asyncio
+            
+            async def create_student_data():
+                client = AsyncIOMotorClient("mongodb://localhost:27017")
+                db = client["test_database"]
+                
+                # Create student user
+                user_doc = {
+                    "id": student_id,
+                    "email": f"test.student.{student_timestamp}@example.com",
+                    "name": f"Test Student {student_timestamp}",
+                    "role": "student",
+                    "created_at": datetime.now(timezone.utc).isoformat()
+                }
+                await db.users.insert_one(user_doc)
+                
+                # Create session
+                session_doc = {
+                    "user_id": student_id,
+                    "session_token": student_token,
+                    "expires_at": datetime.now(timezone.utc) + timedelta(days=7),
+                    "created_at": datetime.now(timezone.utc).isoformat()
+                }
+                await db.user_sessions.insert_one(session_doc)
+                
+                client.close()
+                return True
+            
+            # Run async function
+            asyncio.run(create_student_data())
             
             # Temporarily switch to student token
             original_token = self.session_token
