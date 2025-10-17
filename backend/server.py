@@ -32,6 +32,67 @@ api_router = APIRouter(prefix="/api")
 
 # ----- Helper Functions -----
 
+RANK_THRESHOLDS = [
+    {"name": "Rookie", "level": 1, "min_xp": 0, "icon": "🟤", "color": "#6B7280"},
+    {"name": "Bronze Coder", "level": 2, "min_xp": 500, "icon": "🥉", "color": "#CD7F32"},
+    {"name": "Silver Coder", "level": 3, "min_xp": 1000, "icon": "🥈", "color": "#C0C0C0"},
+    {"name": "Gold Coder", "level": 4, "min_xp": 2000, "icon": "🥇", "color": "#FFD700"},
+    {"name": "Platinum Coder", "level": 5, "min_xp": 3500, "icon": "💎", "color": "#E5E4E2"},
+    {"name": "Diamond Coder", "level": 6, "min_xp": 5500, "icon": "💠", "color": "#00CED1"},
+    {"name": "Elite Coder", "level": 7, "min_xp": 8000, "icon": "⭐", "color": "#9333EA"},
+    {"name": "Master Coder", "level": 8, "min_xp": 12000, "icon": "🔥", "color": "#DC2626"},
+    {"name": "Legend", "level": 9, "min_xp": 18000, "icon": "👑", "color": "#FBBF24"},
+]
+
+SHOP_ITEMS = {
+    "themes": [
+        {"id": "dark_pro", "name": "Dark Mode Pro", "price": 500, "color": "#1F2937"},
+        {"id": "ocean_breeze", "name": "Ocean Breeze", "price": 700, "color": "#0EA5E9"},
+        {"id": "sunset_vibes", "name": "Sunset Vibes", "price": 700, "color": "#F97316"},
+        {"id": "matrix", "name": "Matrix", "price": 800, "color": "#10B981"},
+        {"id": "championship_gold", "name": "Championship Gold", "price": 1000, "color": "#FFD700"},
+    ],
+    "badges": [
+        {"id": "speed_demon", "name": "Speed Demon ⚡", "price": 300, "description": "Fast solver"},
+        {"id": "perfect_streak", "name": "Perfect Streak 🌟", "price": 500, "description": "5 perfect scores"},
+        {"id": "bug_hunter", "name": "Bug Hunter 🐛", "price": 200, "description": "Fixed your code"},
+        {"id": "soccer_star", "name": "Soccer Star ⚽", "price": 400, "description": "Sport pride"},
+        {"id": "basketball_pro", "name": "Basketball Pro 🏀", "price": 400, "description": "Sport pride"},
+        {"id": "football_legend", "name": "Football Legend 🏈", "price": 400, "description": "Sport pride"},
+        {"id": "baseball_champ", "name": "Baseball Champ ⚾", "price": 400, "description": "Sport pride"},
+    ]
+}
+
+def calculate_rank(xp: int) -> dict:
+    """Calculate rank based on XP"""
+    for i in range(len(RANK_THRESHOLDS) - 1, -1, -1):
+        if xp >= RANK_THRESHOLDS[i]["min_xp"]:
+            return RANK_THRESHOLDS[i]
+    return RANK_THRESHOLDS[0]
+
+def calculate_xp_and_coins(score: float, is_first_try: bool, current_streak: int) -> dict:
+    """Calculate XP and coins earned"""
+    xp = 0
+    coins = 0
+    
+    if score >= 70:  # Passing
+        xp = 100
+        coins = 50
+        
+        if score == 100:  # Perfect score
+            xp = 200
+            coins = 100
+        
+        if is_first_try:  # First try bonus
+            xp += 50
+            coins += 25
+        
+        if current_streak >= 3:  # Streak bonus
+            xp += 25
+            coins += 10
+    
+    return {"xp": xp, "coins": coins}
+
 def generate_class_code():
     """Generate a unique 6-character class code"""
     return ''.join(random.choices(string.ascii_uppercase + string.digits, k=6))
