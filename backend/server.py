@@ -77,6 +77,18 @@ class User(BaseModel):
     name: str
     picture: Optional[str] = None
     role: str  # "teacher" or "student"
+    xp: int = 0
+    coins: int = 0
+    rank: str = "Rookie"
+    rank_level: int = 1
+    problems_solved: int = 0
+    perfect_scores: int = 0
+    current_streak: int = 0
+    best_streak: int = 0
+    owned_themes: List[str] = Field(default_factory=lambda: ["default"])
+    owned_badges: List[str] = Field(default_factory=list)
+    active_theme: str = "default"
+    active_badges: List[str] = Field(default_factory=list)
     created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
 
 class UserSession(BaseModel):
