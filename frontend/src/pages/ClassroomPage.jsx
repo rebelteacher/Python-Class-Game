@@ -243,12 +243,15 @@ export default function ClassroomPage({ user }) {
 
                       <div>
                         <div className="flex justify-between items-center mb-2">
-                          <Label>Test Cases</Label>
+                          <Label>Test Cases (Optional)</Label>
                           <Button data-testid="add-test-case-btn" type="button" onClick={addTestCase} size="sm" variant="outline">
                             <Plus className="w-4 h-4 mr-1" />
                             Add Test Case
                           </Button>
                         </div>
+                        <p className="text-xs text-gray-500 mb-3">
+                          Leave empty to grade based on output comparison only. Add test cases for specific input/output validation.
+                        </p>
                         {newAssignment.test_cases.map((testCase, index) => (
                           <Card key={index} className="mb-3">
                             <CardContent className="pt-4">
