@@ -78,6 +78,7 @@ export default function ClassroomPage({ user }) {
         `${API}/assignments`,
         {
           ...newAssignment,
+          classroom_id: classroomId,
           test_cases: validTestCases,
         },
         { withCredentials: true }
