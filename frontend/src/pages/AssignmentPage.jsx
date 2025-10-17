@@ -21,6 +21,9 @@ export default function AssignmentPage({ user }) {
   const [running, setRunning] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [submissions, setSubmissions] = useState([]);
+  const [hasRun, setHasRun] = useState(false);
+  const [livesRemaining, setLivesRemaining] = useState(3);
+  const [isLockedOut, setIsLockedOut] = useState(false);
 
   useEffect(() => {
     fetchAssignment();
