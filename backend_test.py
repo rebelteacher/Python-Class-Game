@@ -305,13 +305,13 @@ class CodeClassAPITester:
             email: "test.student.{student_timestamp}@example.com",
             name: "Test Student {student_timestamp}",
             role: "student",
-            created_at: new Date()
+            created_at: new Date().toISOString()
         }});
         db.user_sessions.insertOne({{
             user_id: "{student_id}",
             session_token: "{student_token}",
-            expires_at: new Date(Date.now() + 7*24*60*60*1000),
-            created_at: new Date()
+            expires_at: new Date(Date.now() + 7*24*60*60*1000).toISOString(),
+            created_at: new Date().toISOString()
         }});
         """
         
