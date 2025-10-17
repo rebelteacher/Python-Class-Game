@@ -182,7 +182,7 @@ async def create_session(request: SessionDataRequest):
         existing_user = await db.users.find_one({"email": data["email"]})
         
         if existing_user:
-            user = existing_user
+            user_dict = existing_user
         else:
             # Create new user with default role as student
             user = User(
@@ -199,7 +199,7 @@ async def create_session(request: SessionDataRequest):
         # Create session
         session_token = str(uuid.uuid4())
         session = UserSession(
-            user_id=user["id"],
+            user_id=user_dict["id"],
             session_token=session_token,
             expires_at=datetime.now(timezone.utc) + timedelta(days=7)
         )
@@ -209,12 +209,12 @@ async def create_session(request: SessionDataRequest):
         await db.user_sessions.insert_one(session_dict)
         
         return SessionDataResponse(
-            id=user["id"],
-            email=user["email"],
-            name=user["name"],
-            picture=user.get("picture"),
+            id=user_dict["id"],
+            email=user_dict["email"],
+            name=user_dict["name"],
+            picture=user_dict.get("picture"),
             session_token=session_token,
-            role=user["role"]
+            role=user_dict["role"]
         )
     except Exception as e:
         logging.error(f"Session creation error: {str(e)}")
