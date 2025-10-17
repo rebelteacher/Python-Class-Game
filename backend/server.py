@@ -487,31 +487,58 @@ async def submit_assignment(submission: SubmissionCreate, request: Request):
     if not assignment:
         raise HTTPException(status_code=404, detail="Assignment not found")
     
-    # Run test cases
+    # Run test cases (if provided)
     test_results = []
-    total_tests = len(assignment["test_cases"])
+    total_tests = len(assignment.get("test_cases", []))
     passed_tests = 0
     
-    for test_case in assignment["test_cases"]:
-        result = run_python_code(submission.code, test_case["input_data"])
-        expected = test_case["expected_output"].strip()
-        actual = result["output"].strip() if result["success"] else ""
+    if total_tests > 0:
+        # Traditional test case evaluation
+        for test_case in assignment["test_cases"]:
+            result = run_python_code(submission.code, test_case["input_data"])
+            expected = test_case["expected_output"].strip()
+            actual = result["output"].strip() if result["success"] else ""
+            
+            passed = result["success"] and actual == expected
+            if passed:
+                passed_tests += 1
+            
+            test_results.append({
+                "test_id": test_case["id"],
+                "description": test_case["description"],
+                "passed": passed,
+                "expected": expected,
+                "actual": actual,
+                "error": result.get("error")
+            })
         
-        passed = result["success"] and actual == expected
-        if passed:
-            passed_tests += 1
+        base_score = (passed_tests / total_tests) * 100
+    else:
+        # No test cases - compare outputs directly
+        solution_result = run_python_code(assignment["solution_code"], "")
+        student_result = run_python_code(submission.code, "")
+        
+        solution_output = solution_result["output"].strip() if solution_result["success"] else ""
+        student_output = student_result["output"].strip() if student_result["success"] else ""
+        
+        # Basic comparison
+        if student_result["success"] and student_output == solution_output:
+            base_score = 100
+            passed_tests = 1
+            total_tests = 1
+        else:
+            base_score = 50 if student_result["success"] else 0
+            passed_tests = 0
+            total_tests = 1
         
         test_results.append({
-            "test_id": test_case["id"],
-            "description": test_case["description"],
-            "passed": passed,
-            "expected": expected,
-            "actual": actual,
-            "error": result.get("error")
+            "test_id": "output_comparison",
+            "description": "Compare output to solution",
+            "passed": student_output == solution_output,
+            "expected": solution_output,
+            "actual": student_output,
+            "error": student_result.get("error")
         })
-    
-    # Calculate base score from test results
-    base_score = (passed_tests / total_tests) * 100 if total_tests > 0 else 0
     
     # AI Evaluation for partial credit and feedback
     llm_key = os.environ.get("EMERGENT_LLM_KEY")
@@ -521,7 +548,9 @@ async def submit_assignment(submission: SubmissionCreate, request: Request):
         system_message="You are a coding instructor evaluating student Python code submissions. Provide constructive feedback and award partial credit."
     ).with_model("openai", "gpt-4o")
     
-    prompt = f"""
+    if total_tests > 0 and len(assignment.get("test_cases", [])) > 0:
+        # Traditional test case prompt
+        prompt = f"""
 Evaluate this Python code submission:
 
 Assignment: {assignment['title']}
@@ -555,6 +584,45 @@ Provide:
    - What worked well
    - Areas for improvement
    - Hints for failed test cases
+
+Format your response as JSON:
+{{
+  "score": <number 0-100>,
+  "feedback": "<your feedback here>"
+}}
+"""
+    else:
+        # Simple comparison prompt
+        prompt = f"""
+Evaluate this Python code submission:
+
+Assignment: {assignment['title']}
+Description: {assignment['description']}
+
+Expected Solution:
+```python
+{assignment['solution_code']}
+```
+
+Student Code:
+```python
+{submission.code}
+```
+
+Expected Output: {test_results[0]['expected']}
+Student Output: {test_results[0]['actual']}
+
+Provide:
+1. A final score (0-100) considering:
+   - Does the output match? (baseline: {base_score}%)
+   - Code quality and correctness
+   - Partial credit if output is close or logic is correct
+   - Syntax and Python best practices
+
+2. Constructive feedback (2-3 sentences) on:
+   - What worked well or what's correct
+   - What needs improvement
+   - Specific guidance to fix the code
 
 Format your response as JSON:
 {{
