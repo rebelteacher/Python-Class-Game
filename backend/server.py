@@ -49,7 +49,17 @@ async def get_current_user(request: Request):
         raise HTTPException(status_code=401, detail="Not authenticated")
     
     session = await db.user_sessions.find_one({"session_token": session_token})
-    if not session or session["expires_at"] < datetime.now(timezone.utc):
+    if not session:
+        raise HTTPException(status_code=401, detail="Session not found")
+    
+    # Handle timezone-aware/naive datetime comparison
+    expires_at = session["expires_at"]
+    if isinstance(expires_at, str):
+        expires_at = datetime.fromisoformat(expires_at.replace('Z', '+00:00'))
+    elif expires_at.tzinfo is None:
+        expires_at = expires_at.replace(tzinfo=timezone.utc)
+    
+    if expires_at < datetime.now(timezone.utc):
         raise HTTPException(status_code=401, detail="Session expired")
     
     user = await db.users.find_one({"id": session["user_id"]})
