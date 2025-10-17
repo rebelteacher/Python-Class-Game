@@ -163,6 +163,11 @@ class CodeExecuteResponse(BaseModel):
 
 # ----- Auth Routes -----
 
+# Add your routes to the router instead of directly to app
+@api_router.get("/")
+async def root():
+    return {"message": "CodeClass API"}
+
 @api_router.post("/auth/session")
 async def create_session(request: SessionDataRequest):
     """Exchange session_id for user data and session_token"""
