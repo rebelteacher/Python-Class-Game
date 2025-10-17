@@ -762,6 +762,58 @@ Format your response as JSON:
     if not is_passing:
         lives_remaining -= 1
     
+    # Award XP and coins if passing
+    xp_earned = 0
+    coins_earned = 0
+    rank_up = False
+    old_rank = user.get("rank", "Rookie")
+    
+    if is_passing:
+        # Check if this is first successful submission for this assignment
+        successful_submissions = [s for s in previous_submissions if s.get("is_passing", False)]
+        is_first_success = len(successful_submissions) == 0
+        
+        # Calculate rewards
+        rewards = calculate_xp_and_coins(final_score, is_first_success, user.get("current_streak", 0))
+        xp_earned = rewards["xp"]
+        coins_earned = rewards["coins"]
+        
+        # Update user stats
+        new_xp = user.get("xp", 0) + xp_earned
+        new_coins = user.get("coins", 0) + coins_earned
+        new_problems_solved = user.get("problems_solved", 0) + (1 if is_first_success else 0)
+        new_perfect_scores = user.get("perfect_scores", 0) + (1 if final_score == 100 else 0)
+        
+        # Update streak
+        new_streak = user.get("current_streak", 0) + 1 if is_first_success else user.get("current_streak", 0)
+        new_best_streak = max(new_streak, user.get("best_streak", 0))
+        
+        # Calculate new rank
+        new_rank_data = calculate_rank(new_xp)
+        new_rank = new_rank_data["name"]
+        rank_up = new_rank != old_rank
+        
+        # Update user in database
+        await db.users.update_one(
+            {"id": user["id"]},
+            {"$set": {
+                "xp": new_xp,
+                "coins": new_coins,
+                "rank": new_rank,
+                "rank_level": new_rank_data["level"],
+                "problems_solved": new_problems_solved,
+                "perfect_scores": new_perfect_scores,
+                "current_streak": new_streak,
+                "best_streak": new_best_streak
+            }}
+        )
+    else:
+        # Reset streak on failure
+        await db.users.update_one(
+            {"id": user["id"]},
+            {"$set": {"current_streak": 0}}
+        )
+    
     # Save submission
     new_submission = Submission(
         assignment_id=submission.assignment_id,
@@ -779,7 +831,14 @@ Format your response as JSON:
     submission_dict["submitted_at"] = submission_dict["submitted_at"].isoformat()
     await db.submissions.insert_one(submission_dict)
     
-    return new_submission
+    # Add reward info to response
+    response_dict = new_submission.model_dump()
+    response_dict["xp_earned"] = xp_earned
+    response_dict["coins_earned"] = coins_earned
+    response_dict["rank_up"] = rank_up
+    response_dict["new_rank"] = calculate_rank(user.get("xp", 0) + xp_earned)["name"] if is_passing else old_rank
+    
+    return response_dict
 
 @api_router.get("/submissions/assignment/{assignment_id}")
 async def get_submissions(assignment_id: str, request: Request):
