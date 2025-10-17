@@ -78,51 +78,57 @@ class CodeClassAPITester:
         """Create test user and session directly in MongoDB"""
         print("\n🔧 Setting up test user...")
         
-        # Generate unique IDs
-        timestamp = str(int(datetime.now().timestamp()))
-        self.user_id = f"test-user-{timestamp}"
-        self.session_token = f"test_session_{timestamp}"
-        
-        # MongoDB commands to create test user and session
-        mongo_commands = f"""
-        use test_database;
-        db.users.insertOne({{
-            id: "{self.user_id}",
-            email: "test.user.{timestamp}@example.com",
-            name: "Test User {timestamp}",
-            picture: "https://via.placeholder.com/150",
-            role: "teacher",
-            created_at: new Date().toISOString()
-        }});
-        db.user_sessions.insertOne({{
-            user_id: "{self.user_id}",
-            session_token: "{self.session_token}",
-            expires_at: new Date(Date.now() + 7*24*60*60*1000).toISOString(),
-            created_at: new Date().toISOString()
-        }});
-        """
-        
-        # Try to execute MongoDB commands
         try:
-            import subprocess
-            result = subprocess.run(
-                ['mongosh', '--eval', mongo_commands],
-                capture_output=True,
-                text=True,
-                timeout=10
-            )
+            from motor.motor_asyncio import AsyncIOMotorClient
+            from datetime import datetime, timezone, timedelta
+            import asyncio
             
-            if result.returncode == 0:
+            # Generate unique IDs
+            timestamp = str(int(datetime.now().timestamp()))
+            self.user_id = f"test-user-{timestamp}"
+            self.session_token = f"test_session_{timestamp}"
+            
+            async def create_test_data():
+                client = AsyncIOMotorClient("mongodb://localhost:27017")
+                db = client["test_database"]
+                
+                # Create user
+                user_doc = {
+                    "id": self.user_id,
+                    "email": f"test.user.{timestamp}@example.com",
+                    "name": f"Test User {timestamp}",
+                    "picture": "https://via.placeholder.com/150",
+                    "role": "teacher",
+                    "created_at": datetime.now(timezone.utc).isoformat()
+                }
+                await db.users.insert_one(user_doc)
+                
+                # Create session
+                session_doc = {
+                    "user_id": self.user_id,
+                    "session_token": self.session_token,
+                    "expires_at": datetime.now(timezone.utc) + timedelta(days=7),
+                    "created_at": datetime.now(timezone.utc).isoformat()
+                }
+                await db.user_sessions.insert_one(session_doc)
+                
+                client.close()
+                return True
+            
+            # Run async function
+            result = asyncio.run(create_test_data())
+            
+            if result:
                 print(f"✅ Test user created: {self.user_id}")
                 print(f"✅ Session token: {self.session_token}")
                 return True
             else:
-                print(f"❌ MongoDB setup failed: {result.stderr}")
                 return False
                 
         except Exception as e:
             print(f"❌ MongoDB setup error: {str(e)}")
-            return False
+            # Fallback to mongosh
+            return self.setup_test_user_fallback()
 
     def test_auth_endpoints(self):
         """Test authentication endpoints"""
