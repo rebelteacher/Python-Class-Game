@@ -142,7 +142,7 @@ export default function StudentDashboard({ user, setUser }) {
         <div className="container mx-auto px-6 py-4 flex justify-between items-center">
           <div className="flex items-center space-x-2">
             <Code2 className="w-7 h-7 text-teal-600" />
-            <span className="text-xl font-bold text-gray-900">CodeClass</span>
+            <span className="text-xl font-bold text-gray-900">ByteBattles Arena</span>
             <span className="ml-4 px-3 py-1 bg-teal-100 text-teal-700 text-sm font-medium rounded-full">
               Student
             </span>
