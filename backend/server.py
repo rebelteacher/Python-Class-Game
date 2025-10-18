@@ -623,6 +623,29 @@ async def get_problems(
     problems = await db.problems.find(query, {"_id": 0}).to_list(1000)
     return problems
 
+@api_router.put("/problems/{problem_id}")
+async def update_problem(problem_id: str, problem: ProblemCreate, request: Request):
+    """Update a problem in the library"""
+    user = await get_current_user(request)
+    
+    if user["role"] != "teacher":
+        raise HTTPException(status_code=403, detail="Only teachers can update library problems")
+    
+    # Check if problem exists
+    existing = await db.problems.find_one({"id": problem_id})
+    if not existing:
+        raise HTTPException(status_code=404, detail="Problem not found")
+    
+    # Update problem
+    problem_dict = problem.model_dump()
+    await db.problems.update_one(
+        {"id": problem_id},
+        {"$set": problem_dict}
+    )
+    
+    updated_problem = await db.problems.find_one({"id": problem_id}, {"_id": 0})
+    return updated_problem
+
 
 @api_router.post("/assignments")
 async def create_assignment(assignment: AssignmentCreate, request: Request):
