@@ -186,7 +186,15 @@ export default function AssignmentPage({ user }) {
           <div className="flex items-center space-x-4">
             <Button 
               data-testid="back-to-classroom-btn" 
-              onClick={() => navigate(`/classroom/${assignment.classroom_id}`)} 
+              onClick={() => {
+                // Handle both old (classroom_id) and new (classroom_ids array) structure
+                const classroomId = assignment.classroom_id || (assignment.classroom_ids && assignment.classroom_ids[0]);
+                if (classroomId) {
+                  navigate(`/classroom/${classroomId}`);
+                } else {
+                  navigate(-1); // Fallback to previous page
+                }
+              }} 
               variant="ghost" 
               size="sm"
             >
