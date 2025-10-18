@@ -468,6 +468,96 @@ export default function ClassroomPage({ user }) {
             </TabsContent>
           )}
         </Tabs>
+
+        {/* Edit Schedule Dialog */}
+        {editingAssignment && (
+          <Dialog open={editScheduleDialogOpen} onOpenChange={setEditScheduleDialogOpen}>
+            <DialogContent className="max-w-2xl">
+              <DialogHeader>
+                <DialogTitle>Edit Assignment Schedule</DialogTitle>
+                <DialogDescription>
+                  Update availability and due dates for: {editingAssignment.title}
+                </DialogDescription>
+              </DialogHeader>
+              <form onSubmit={handleUpdateSchedule} className="space-y-4">
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <Label htmlFor="edit-available-date">Available Date</Label>
+                    <Input
+                      id="edit-available-date"
+                      type="date"
+                      value={editingAssignment.available_date}
+                      onChange={(e) => setEditingAssignment({ ...editingAssignment, available_date: e.target.value })}
+                      className="mt-1"
+                    />
+                  </div>
+                  <div>
+                    <Label htmlFor="edit-available-time">Available Time</Label>
+                    <Input
+                      id="edit-available-time"
+                      type="time"
+                      value={editingAssignment.available_time}
+                      onChange={(e) => setEditingAssignment({ ...editingAssignment, available_time: e.target.value })}
+                      className="mt-1"
+                    />
+                  </div>
+                  <div>
+                    <Label htmlFor="edit-due-date">Due Date</Label>
+                    <Input
+                      id="edit-due-date"
+                      type="date"
+                      value={editingAssignment.due_date}
+                      onChange={(e) => setEditingAssignment({ ...editingAssignment, due_date: e.target.value })}
+                      className="mt-1"
+                    />
+                  </div>
+                  <div>
+                    <Label htmlFor="edit-due-time">Due Time</Label>
+                    <Input
+                      id="edit-due-time"
+                      type="time"
+                      value={editingAssignment.due_time}
+                      onChange={(e) => setEditingAssignment({ ...editingAssignment, due_time: e.target.value })}
+                      className="mt-1"
+                    />
+                  </div>
+                </div>
+
+                <div className="space-y-3">
+                  <div className="flex items-center space-x-2">
+                    <input
+                      type="checkbox"
+                      id="edit-allow-late"
+                      checked={editingAssignment.allow_late_submission}
+                      onChange={(e) => setEditingAssignment({ ...editingAssignment, allow_late_submission: e.target.checked })}
+                    />
+                    <label htmlFor="edit-allow-late" className="text-sm font-medium cursor-pointer">
+                      Allow late submissions
+                    </label>
+                  </div>
+                  {editingAssignment.allow_late_submission && (
+                    <div>
+                      <Label htmlFor="edit-late-penalty">Late Penalty (%)</Label>
+                      <Input
+                        id="edit-late-penalty"
+                        type="number"
+                        min="0"
+                        max="100"
+                        value={editingAssignment.late_penalty_percent}
+                        onChange={(e) => setEditingAssignment({ ...editingAssignment, late_penalty_percent: e.target.value })}
+                        className="mt-1"
+                      />
+                    </div>
+                  )}
+                </div>
+
+                <Button type="submit" className="w-full bg-indigo-600 hover:bg-indigo-700">
+                  Update Schedule
+                </Button>
+              </form>
+            </DialogContent>
+          </Dialog>
+        )}
       </main>
     </div>
   );
