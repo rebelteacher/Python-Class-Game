@@ -339,13 +339,9 @@ class CodeClassAPITester:
             code_with_input
         )
 
-    def test_submission_endpoints(self, assignment_id):
-        """Test submission endpoints"""
-        print("\n📤 Testing Submission Endpoints...")
-        
-        # Create student user for submission
-        print("   Creating student user for submission test...")
-        student_timestamp = str(int(datetime.now().timestamp()) + 1)
+    def create_student_user(self, suffix=""):
+        """Helper method to create a student user"""
+        student_timestamp = str(int(datetime.now().timestamp()) + int(suffix or "1"))
         student_id = f"test-student-{student_timestamp}"
         student_token = f"test_student_session_{student_timestamp}"
         
@@ -357,12 +353,24 @@ class CodeClassAPITester:
                 client = AsyncIOMotorClient("mongodb://localhost:27017")
                 db = client["test_database"]
                 
-                # Create student user
+                # Create student user with default stats
                 user_doc = {
                     "id": student_id,
                     "email": f"test.student.{student_timestamp}@example.com",
                     "name": f"Test Student {student_timestamp}",
                     "role": "student",
+                    "xp": 0,
+                    "coins": 0,
+                    "rank": "Rookie",
+                    "rank_level": 1,
+                    "problems_solved": 0,
+                    "perfect_scores": 0,
+                    "current_streak": 0,
+                    "best_streak": 0,
+                    "owned_themes": ["default"],
+                    "owned_badges": [],
+                    "active_theme": "default",
+                    "active_badges": [],
                     "created_at": datetime.now(timezone.utc).isoformat()
                 }
                 await db.users.insert_one(user_doc)
@@ -381,11 +389,253 @@ class CodeClassAPITester:
             
             # Run async function
             asyncio.run(create_student_data())
+            return {"id": student_id, "token": student_token}
             
-            # Temporarily switch to student token
-            original_token = self.session_token
-            self.session_token = student_token
+        except Exception as e:
+            print(f"   ❌ Failed to create student user: {str(e)}")
+            return None
+
+    def add_student_to_classroom(self, student_id, classroom_id):
+        """Helper method to add student to classroom"""
+        try:
+            from motor.motor_asyncio import AsyncIOMotorClient
+            import asyncio
             
+            async def add_student():
+                client = AsyncIOMotorClient("mongodb://localhost:27017")
+                db = client["test_database"]
+                
+                # Add student to classroom
+                await db.classrooms.update_one(
+                    {"id": classroom_id},
+                    {"$push": {"students": student_id}}
+                )
+                
+                client.close()
+                return True
+            
+            asyncio.run(add_student())
+            return True
+            
+        except Exception as e:
+            print(f"   ❌ Failed to add student to classroom: {str(e)}")
+            return False
+
+    def test_403_forbidden_fix(self, assignment_id, classroom_id):
+        """Test the 403 Forbidden error fix for first-time submissions"""
+        print("\n🔒 Testing 403 Forbidden Error Fix...")
+        
+        # Create a fresh student user
+        student = self.create_student_user("403test")
+        if not student:
+            print("❌ Cannot test 403 fix without student user")
+            return
+        
+        # Add student to classroom
+        if not self.add_student_to_classroom(student["id"], classroom_id):
+            print("❌ Cannot test 403 fix without adding student to classroom")
+            return
+        
+        # Switch to student token
+        original_token = self.session_token
+        self.session_token = student["token"]
+        
+        try:
+            # Test first-time submission (should NOT get 403 error)
+            submission_data = {
+                "assignment_id": assignment_id,
+                "code": "def add_numbers(a, b):\n    return a + b\n\nprint(add_numbers(2, 3))"
+            }
+            
+            print("   Testing first-time submission (should succeed)...")
+            submission = self.run_test(
+                "First-time submission (no 403 error)",
+                "POST",
+                "submissions",
+                200,
+                submission_data
+            )
+            
+            if submission:
+                lives_remaining = submission.get('lives_remaining', 0)
+                attempt_number = submission.get('attempt_number', 0)
+                print(f"   ✅ First submission successful!")
+                print(f"   Lives remaining: {lives_remaining}")
+                print(f"   Attempt number: {attempt_number}")
+                
+                # Verify lives_remaining = 3 for first submission
+                if lives_remaining == 3:
+                    self.log_test("First submission has 3 lives remaining", True)
+                else:
+                    self.log_test("First submission has 3 lives remaining", False, f"Expected 3, got {lives_remaining}")
+                
+                # Verify attempt_number = 1 for first submission
+                if attempt_number == 1:
+                    self.log_test("First submission is attempt number 1", True)
+                else:
+                    self.log_test("First submission is attempt number 1", False, f"Expected 1, got {attempt_number}")
+            else:
+                print("   ❌ First submission failed - 403 error fix not working")
+        
+        finally:
+            # Switch back to teacher token
+            self.session_token = original_token
+
+    def test_lives_system(self, assignment_id, classroom_id):
+        """Test the lives system with proper tracking of 3 lives"""
+        print("\n❤️  Testing Lives System...")
+        
+        # Create a fresh student user for lives testing
+        student = self.create_student_user("livestest")
+        if not student:
+            print("❌ Cannot test lives system without student user")
+            return
+        
+        # Add student to classroom
+        if not self.add_student_to_classroom(student["id"], classroom_id):
+            print("❌ Cannot test lives system without adding student to classroom")
+            return
+        
+        # Switch to student token
+        original_token = self.session_token
+        self.session_token = student["token"]
+        
+        try:
+            # Test scenario: Submit failing code 3 times, then verify lockout
+            failing_code = "def add_numbers(a, b):\n    return 0  # Wrong answer\n\nprint(add_numbers(2, 3))"
+            
+            lives_tracking = []
+            
+            # Submit failing code 3 times
+            for attempt in range(1, 4):
+                print(f"   Submitting failing code - Attempt {attempt}...")
+                
+                submission_data = {
+                    "assignment_id": assignment_id,
+                    "code": failing_code
+                }
+                
+                submission = self.run_test(
+                    f"Failing submission attempt {attempt}",
+                    "POST",
+                    "submissions",
+                    200,
+                    submission_data
+                )
+                
+                if submission:
+                    lives_remaining = submission.get('lives_remaining', 0)
+                    score = submission.get('score', 0)
+                    is_passing = submission.get('is_passing', False)
+                    
+                    lives_tracking.append({
+                        "attempt": attempt,
+                        "lives_remaining": lives_remaining,
+                        "score": score,
+                        "is_passing": is_passing
+                    })
+                    
+                    print(f"     Score: {score}%, Lives remaining: {lives_remaining}, Passing: {is_passing}")
+                    
+                    # Verify score is below 70% (failing)
+                    if score < 70:
+                        self.log_test(f"Attempt {attempt} is failing (<70%)", True)
+                    else:
+                        self.log_test(f"Attempt {attempt} is failing (<70%)", False, f"Score was {score}%")
+                    
+                    # Verify lives decrease correctly
+                    expected_lives = 3 - attempt
+                    if lives_remaining == expected_lives:
+                        self.log_test(f"Attempt {attempt} has correct lives remaining ({expected_lives})", True)
+                    else:
+                        self.log_test(f"Attempt {attempt} has correct lives remaining ({expected_lives})", False, f"Expected {expected_lives}, got {lives_remaining}")
+            
+            # Now try 4th attempt - should get 403 error
+            print("   Attempting 4th submission (should be blocked with 403)...")
+            
+            submission_data = {
+                "assignment_id": assignment_id,
+                "code": failing_code
+            }
+            
+            # This should return 403 Forbidden
+            response = self.run_test(
+                "4th attempt should be blocked (403 error)",
+                "POST",
+                "submissions",
+                403,
+                submission_data
+            )
+            
+            # Test that passing submission does NOT deduct a life
+            print("\n   Testing that passing submissions don't deduct lives...")
+            
+            # Create another fresh student
+            student2 = self.create_student_user("passingtest")
+            if student2 and self.add_student_to_classroom(student2["id"], classroom_id):
+                # Switch to second student
+                self.session_token = student2["token"]
+                
+                # Submit passing code
+                passing_code = "def add_numbers(a, b):\n    return a + b\n\nprint(add_numbers(2, 3))"
+                
+                submission_data = {
+                    "assignment_id": assignment_id,
+                    "code": passing_code
+                }
+                
+                submission = self.run_test(
+                    "Passing submission (should not deduct life)",
+                    "POST",
+                    "submissions",
+                    200,
+                    submission_data
+                )
+                
+                if submission:
+                    lives_remaining = submission.get('lives_remaining', 0)
+                    score = submission.get('score', 0)
+                    is_passing = submission.get('is_passing', False)
+                    
+                    print(f"     Score: {score}%, Lives remaining: {lives_remaining}, Passing: {is_passing}")
+                    
+                    # Verify it's passing (>=70%)
+                    if score >= 70:
+                        self.log_test("Passing submission has score >=70%", True)
+                    else:
+                        self.log_test("Passing submission has score >=70%", False, f"Score was {score}%")
+                    
+                    # Verify lives remain at 3 (no deduction for passing)
+                    if lives_remaining == 3:
+                        self.log_test("Passing submission does not deduct lives", True)
+                    else:
+                        self.log_test("Passing submission does not deduct lives", False, f"Expected 3 lives, got {lives_remaining}")
+        
+        finally:
+            # Switch back to teacher token
+            self.session_token = original_token
+
+    def test_submission_endpoints(self, assignment_id, classroom_id):
+        """Test submission endpoints"""
+        print("\n📤 Testing Submission Endpoints...")
+        
+        # Create student user for basic submission test
+        print("   Creating student user for basic submission test...")
+        student = self.create_student_user()
+        if not student:
+            print("❌ Cannot test submissions without student user")
+            return
+        
+        # Add student to classroom
+        if not self.add_student_to_classroom(student["id"], classroom_id):
+            print("❌ Cannot test submissions without adding student to classroom")
+            return
+        
+        # Temporarily switch to student token
+        original_token = self.session_token
+        self.session_token = student["token"]
+        
+        try:
             # Submit assignment
             submission_data = {
                 "assignment_id": assignment_id,
@@ -402,6 +652,8 @@ class CodeClassAPITester:
             
             if submission:
                 print(f"   Submission score: {submission.get('score', 0)}%")
+                print(f"   XP earned: {submission.get('xp_earned', 0)}")
+                print(f"   Coins earned: {submission.get('coins_earned', 0)}")
             
             # Get submissions for assignment (as student)
             self.run_test(
