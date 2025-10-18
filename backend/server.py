@@ -260,6 +260,7 @@ class Submission(BaseModel):
     attempt_number: int = 1
     lives_remaining: int = 3
     is_passing: bool = False
+    is_late: bool = False
     submitted_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
 
 class SubmissionCreate(BaseModel):
