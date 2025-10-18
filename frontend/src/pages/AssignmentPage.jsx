@@ -358,18 +358,7 @@ export default function AssignmentPage({ user }) {
               </Card>
             </div>
           ) : (
-                  <CardHeader>
-                    <CardTitle className="text-lg">Output</CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <pre className="p-4 bg-gray-900 text-green-400 rounded-lg font-mono text-sm min-h-[150px] max-h-[300px] overflow-auto">
-                      {output || "Run your code to see output here..."}
-                    </pre>
-                  </CardContent>
-                </Card>
-              </>
-            ) : (
-              <Card data-testid="teacher-view-card">
+            <Card data-testid="teacher-view-card">
                 <CardHeader>
                   <CardTitle>Solution Code</CardTitle>
                   <CardDescription>This is your reference solution</CardDescription>
