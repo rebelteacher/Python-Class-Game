@@ -697,42 +697,68 @@ async def get_assignments(classroom_id: str, request: Request):
     if user["role"] == "student" and user["id"] not in classroom.get("students", []):
         raise HTTPException(status_code=403, detail="Access denied")
     
+    # Find assignments that include this classroom
     assignments = await db.assignments.find(
-        {"classroom_id": classroom_id},
+        {"classroom_ids": classroom_id},
         {"_id": 0}
     ).to_list(1000)
+    
+    # Add problem count and progress for each assignment
+    for assignment in assignments:
+        assignment["problem_count"] = len(assignment.get("problem_ids", []))
+        
+        # For students, calculate completion progress
+        if user["role"] == "student":
+            completed_problems = 0
+            for problem_id in assignment.get("problem_ids", []):
+                # Check if student has passing submission for this problem
+                passing_submission = await db.submissions.find_one({
+                    "assignment_id": assignment["id"],
+                    "problem_id": problem_id,
+                    "student_id": user["id"],
+                    "is_passing": True
+                })
+                if passing_submission:
+                    completed_problems += 1
+            
+            assignment["completed_problems"] = completed_problems
+            assignment["is_complete"] = completed_problems == assignment["problem_count"]
     
     return assignments
 
 @api_router.get("/assignments/{assignment_id}")
 async def get_assignment(assignment_id: str, request: Request):
-    """Get assignment details"""
+    """Get assignment details with all problems"""
     user = await get_current_user(request)
     
     assignment = await db.assignments.find_one({"id": assignment_id}, {"_id": 0})
     if not assignment:
         raise HTTPException(status_code=404, detail="Assignment not found")
     
-    classroom = await db.classrooms.find_one({"id": assignment["classroom_id"]})
+    # Check if user has access to any of the classrooms
+    has_access = False
+    if user["role"] == "teacher":
+        if assignment.get("teacher_id") == user["id"]:
+            has_access = True
+    elif user["role"] == "student":
+        for classroom_id in assignment.get("classroom_ids", []):
+            classroom = await db.classrooms.find_one({"id": classroom_id})
+            if classroom and user["id"] in classroom.get("students", []):
+                has_access = True
+                break
     
-    # Check access
-    if user["role"] == "teacher" and classroom["teacher_id"] != user["id"]:
+    if not has_access:
         raise HTTPException(status_code=403, detail="Access denied")
     
+    # Check availability for students
     if user["role"] == "student":
-        if user["id"] not in classroom.get("students", []):
-            raise HTTPException(status_code=403, detail="Access denied")
-        
-        # Check if assignment is available
         now = datetime.now(timezone.utc)
         available_date = datetime.fromisoformat(assignment["available_date"]) if assignment.get("available_date") else None
         
         if available_date and now < available_date:
-            # Assignment not yet available - return limited info
             return {
                 "id": assignment["id"],
                 "title": assignment["title"],
-                "classroom_id": assignment["classroom_id"],
                 "is_locked": True,
                 "available_date": assignment["available_date"],
                 "message": "This assignment is not yet available"
@@ -742,10 +768,29 @@ async def get_assignment(assignment_id: str, request: Request):
         due_date = datetime.fromisoformat(assignment["due_date"]) if assignment.get("due_date") else None
         assignment["is_late"] = due_date and now > due_date
         assignment["is_locked"] = False
-        
-        # Hide solution code from students
-        assignment["solution_code"] = "[Hidden]"
     
+    # Fetch all problems for this assignment
+    problems = []
+    for problem_id in assignment.get("problem_ids", []):
+        problem = await db.problems.find_one({"id": problem_id}, {"_id": 0})
+        if problem:
+            # For students, hide solution code
+            if user["role"] == "student":
+                problem["solution_code"] = "[Hidden]"
+            
+            # Add completion status for students
+            if user["role"] == "student":
+                passing_submission = await db.submissions.find_one({
+                    "assignment_id": assignment_id,
+                    "problem_id": problem_id,
+                    "student_id": user["id"],
+                    "is_passing": True
+                })
+                problem["is_completed"] = passing_submission is not None
+            
+            problems.append(problem)
+    
+    assignment["problems"] = problems
     return assignment
 
 # ----- Code Execution -----
