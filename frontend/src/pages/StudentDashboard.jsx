@@ -298,6 +298,87 @@ export default function StudentDashboard({ user, setUser }) {
             ))}
           </div>
         )}
+
+        {/* Shop Dialog */}
+        <Dialog open={shopDialogOpen} onOpenChange={setShopDialogOpen}>
+          <DialogContent className="max-w-4xl max-h-[80vh] overflow-y-auto" data-testid="shop-dialog">
+            <DialogHeader>
+              <DialogTitle className="text-2xl flex items-center gap-2">
+                <ShoppingBag className="w-6 h-6" />
+                Virtual Shop
+              </DialogTitle>
+              <DialogDescription>
+                Your coins: 🪙 {userProfile.coins || 0}
+              </DialogDescription>
+            </DialogHeader>
+            
+            <Tabs defaultValue="themes">
+              <TabsList className="mb-4">
+                <TabsTrigger value="themes">Themes</TabsTrigger>
+                <TabsTrigger value="badges">Badges</TabsTrigger>
+              </TabsList>
+
+              <TabsContent value="themes">
+                <div className="grid md:grid-cols-2 gap-4">
+                  {shopItems.themes?.map((item) => {
+                    const isOwned = userProfile.owned_themes?.includes(item.id);
+                    return (
+                      <Card key={item.id} data-testid={`shop-theme-${item.id}`}>
+                        <CardHeader>
+                          <CardTitle className="text-lg">{item.name}</CardTitle>
+                        </CardHeader>
+                        <CardContent>
+                          <div 
+                            className="w-full h-20 rounded-lg mb-3"
+                            style={{ backgroundColor: item.color }}
+                          />
+                          <div className="flex justify-between items-center">
+                            <span className="font-semibold text-lg">🪙 {item.price}</span>
+                            <Button
+                              onClick={() => handlePurchase("themes", item.id)}
+                              disabled={isOwned || (userProfile.coins || 0) < item.price}
+                              size="sm"
+                            >
+                              {isOwned ? "Owned" : "Buy"}
+                            </Button>
+                          </div>
+                        </CardContent>
+                      </Card>
+                    );
+                  })}
+                </div>
+              </TabsContent>
+
+              <TabsContent value="badges">
+                <div className="grid md:grid-cols-2 gap-4">
+                  {shopItems.badges?.map((item) => {
+                    const isOwned = userProfile.owned_badges?.includes(item.id);
+                    return (
+                      <Card key={item.id} data-testid={`shop-badge-${item.id}`}>
+                        <CardHeader>
+                          <CardTitle className="text-lg">{item.name}</CardTitle>
+                          <CardDescription>{item.description}</CardDescription>
+                        </CardHeader>
+                        <CardContent>
+                          <div className="flex justify-between items-center">
+                            <span className="font-semibold text-lg">🪙 {item.price}</span>
+                            <Button
+                              onClick={() => handlePurchase("badges", item.id)}
+                              disabled={isOwned || (userProfile.coins || 0) < item.price}
+                              size="sm"
+                            >
+                              {isOwned ? "Owned" : "Buy"}
+                            </Button>
+                          </div>
+                        </CardContent>
+                      </Card>
+                    );
+                  })}
+                </div>
+              </TabsContent>
+            </Tabs>
+          </DialogContent>
+        </Dialog>
       </main>
     </div>
   );
