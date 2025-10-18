@@ -127,6 +127,39 @@ export default function AssignmentLibrary({ user }) {
     }
   };
 
+  const handleEditProblem = async (e) => {
+    e.preventDefault();
+    
+    if (!editingProblem.title.trim() || !editingProblem.solution_code.trim()) {
+      toast.error("Please fill in title and solution code");
+      return;
+    }
+
+    try {
+      await axios.put(
+        `${API}/problems/${editingProblem.id}`,
+        {
+          title: editingProblem.title,
+          description: editingProblem.description,
+          starter_code: editingProblem.starter_code,
+          solution_code: editingProblem.solution_code,
+          expected_output: editingProblem.expected_output,
+          category: editingProblem.category,
+          difficulty: editingProblem.difficulty,
+          csta_standard: editingProblem.csta_standard
+        },
+        { withCredentials: true }
+      );
+      toast.success("Problem updated!");
+      setEditDialogOpen(false);
+      setEditingProblem(null);
+      fetchProblems();
+    } catch (error) {
+      console.error("Error updating problem:", error);
+      toast.error("Failed to update problem");
+    }
+  };
+
   const handleBulkUpload = async (e) => {
     e.preventDefault();
     
