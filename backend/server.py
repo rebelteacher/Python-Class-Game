@@ -874,6 +874,105 @@ async def get_submissions(assignment_id: str, request: Request):
     
     return submissions
 
+# ----- Gamification Routes -----
+
+@api_router.get("/leaderboard/classroom/{classroom_id}")
+async def get_classroom_leaderboard(classroom_id: str, request: Request):
+    """Get leaderboard for a classroom"""
+    user = await get_current_user(request)
+    
+    classroom = await db.classrooms.find_one({"id": classroom_id})
+    if not classroom:
+        raise HTTPException(status_code=404, detail="Classroom not found")
+    
+    # Get all students in classroom
+    student_ids = classroom.get("students", [])
+    students = await db.users.find(
+        {"id": {"$in": student_ids}},
+        {"_id": 0}
+    ).to_list(1000)
+    
+    # Sort by XP
+    leaderboard = sorted(students, key=lambda x: x.get("xp", 0), reverse=True)
+    
+    # Add rank position
+    for i, student in enumerate(leaderboard):
+        student["position"] = i + 1
+        rank_data = calculate_rank(student.get("xp", 0))
+        student["rank_icon"] = rank_data["icon"]
+        student["rank_color"] = rank_data["color"]
+    
+    return leaderboard[:10]  # Top 10
+
+@api_router.get("/shop")
+async def get_shop_items(request: Request):
+    """Get all shop items"""
+    await get_current_user(request)
+    return SHOP_ITEMS
+
+@api_router.post("/shop/purchase")
+async def purchase_item(item_data: dict, request: Request):
+    """Purchase an item from shop"""
+    user = await get_current_user(request)
+    
+    item_type = item_data.get("type")  # "themes" or "badges"
+    item_id = item_data.get("item_id")
+    
+    if item_type not in SHOP_ITEMS:
+        raise HTTPException(status_code=400, detail="Invalid item type")
+    
+    # Find item
+    item = next((i for i in SHOP_ITEMS[item_type] if i["id"] == item_id), None)
+    if not item:
+        raise HTTPException(status_code=404, detail="Item not found")
+    
+    # Check if user has enough coins
+    user_coins = user.get("coins", 0)
+    if user_coins < item["price"]:
+        raise HTTPException(status_code=400, detail="Not enough coins")
+    
+    # Check if already owned
+    owned_field = "owned_themes" if item_type == "themes" else "owned_badges"
+    if item_id in user.get(owned_field, []):
+        raise HTTPException(status_code=400, detail="Already owned")
+    
+    # Purchase item
+    await db.users.update_one(
+        {"id": user["id"]},
+        {
+            "$inc": {"coins": -item["price"]},
+            "$push": {owned_field: item_id}
+        }
+    )
+    
+    return {"success": True, "item": item, "remaining_coins": user_coins - item["price"]}
+
+@api_router.post("/profile/customize")
+async def customize_profile(customization: dict, request: Request):
+    """Customize user profile (active theme/badges)"""
+    user = await get_current_user(request)
+    
+    updates = {}
+    
+    if "active_theme" in customization:
+        theme_id = customization["active_theme"]
+        if theme_id in user.get("owned_themes", []):
+            updates["active_theme"] = theme_id
+    
+    if "active_badges" in customization:
+        badges = customization["active_badges"]
+        # Verify all badges are owned (max 3)
+        if len(badges) <= 3 and all(b in user.get("owned_badges", []) for b in badges):
+            updates["active_badges"] = badges
+    
+    if updates:
+        await db.users.update_one(
+            {"id": user["id"]},
+            {"$set": updates}
+        )
+    
+    return {"success": True}
+
 # Include the router in the main app
 app.include_router(api_router)
 
