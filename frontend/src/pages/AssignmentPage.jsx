@@ -202,10 +202,10 @@ export default function AssignmentPage({ user }) {
       </nav>
 
       <main className="container mx-auto px-6 py-6">
-        <PanelGroup direction="horizontal" className="gap-6">
+        <PanelGroup direction="horizontal">
           {/* Left Side: Instructions & Test Cases */}
-          <Panel defaultSize={35} minSize={25}>
-            <div className="space-y-6">
+          <Panel defaultSize={30} minSize={20} maxSize={50}>
+            <div className="space-y-6 pr-3">
               <Card data-testid="assignment-instructions">
                 <CardHeader>
                   <CardTitle>Instructions</CardTitle>
