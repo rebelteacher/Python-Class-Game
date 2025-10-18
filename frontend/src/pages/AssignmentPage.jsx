@@ -278,13 +278,15 @@ export default function AssignmentPage({ user }) {
           </Panel>
 
           {/* Resize Handle */}
-          <PanelResizeHandle className="w-2 bg-gray-200 hover:bg-indigo-400 transition-colors rounded-full cursor-col-resize" />
+          <PanelResizeHandle className="w-2 bg-gray-300 hover:bg-indigo-500 transition-colors cursor-col-resize mx-2" />
 
           {/* Right Side: Code Editor & Output */}
-          {!isTeacher ? (
-            <PanelGroup direction="horizontal" className="gap-4">
-              {/* Code Editor - Left */}
-              <Panel defaultSize={50} minSize={30}>
+          <Panel defaultSize={70} minSize={50}>
+            <div className="pl-3">
+            {!isTeacher ? (
+              <PanelGroup direction="horizontal">
+                {/* Code Editor - Left */}
+                <Panel defaultSize={50} minSize={30}>
                 <Card data-testid="code-editor-card" className="h-full">
                   <CardHeader>
                     <CardTitle className="flex flex-col gap-3">
