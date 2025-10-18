@@ -37,7 +37,12 @@ export default function AssignmentPage({ user }) {
         withCredentials: true,
       });
       setAssignment(response.data);
-      setCode(response.data.starter_code || "# Write your code here\n");
+      
+      // Handle both old (direct starter_code) and new (problems array) structure
+      const starterCode = response.data.starter_code || 
+                         (response.data.problems && response.data.problems[0]?.starter_code) ||
+                         "# Write your code here\n";
+      setCode(starterCode);
     } catch (error) {
       console.error("Error fetching assignment:", error);
       toast.error("Failed to load assignment");
