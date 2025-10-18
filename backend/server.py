@@ -422,6 +422,28 @@ async def join_classroom(join_data: ClassroomJoin, request: Request):
     classroom_clean = {k: v for k, v in classroom.items() if k != "_id"}
     return {"success": True, "classroom": classroom_clean}
 
+@api_router.get("/classrooms/available-for-battle")
+async def get_available_classrooms(request: Request):
+    """Get classrooms available to challenge"""
+    user = await get_current_user(request)
+    
+    if user["role"] != "teacher":
+        raise HTTPException(status_code=403, detail="Only teachers can view this")
+    
+    # Get all classrooms except user's own
+    classrooms = await db.classrooms.find(
+        {"teacher_id": {"$ne": user["id"]}},
+        {"_id": 0, "id": 1, "name": 1, "class_code": 1, "teacher_id": 1}
+    ).to_list(1000)
+    
+    # Add teacher names
+    for classroom in classrooms:
+        teacher = await db.users.find_one({"id": classroom["teacher_id"]}, {"_id": 0, "name": 1})
+        if teacher:
+            classroom["teacher_name"] = teacher["name"]
+    
+    return classrooms
+
 @api_router.get("/classrooms/{classroom_id}")
 async def get_classroom(classroom_id: str, request: Request):
     """Get classroom details"""
