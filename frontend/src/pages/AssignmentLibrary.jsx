@@ -410,6 +410,27 @@ export default function AssignmentLibrary({ user }) {
                 </form>
               </DialogContent>
             </Dialog>
+                </>
+              ) : (
+                <>
+                  <Button 
+                    onClick={() => {
+                      setSelectionMode(false);
+                      setSelectedProblems([]);
+                    }}
+                    variant="outline"
+                  >
+                    Cancel
+                  </Button>
+                  <Button 
+                    onClick={handleCreateAssignment}
+                    disabled={selectedProblems.length === 0}
+                    className="bg-purple-600 hover:bg-purple-700"
+                  >
+                    Create Assignment ({selectedProblems.length} selected)
+                  </Button>
+                </>
+              )}
             </div>
           )}
         </div>
