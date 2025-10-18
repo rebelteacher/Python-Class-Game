@@ -27,7 +27,47 @@ export default function StudentDashboard({ user, setUser }) {
 
   useEffect(() => {
     fetchClassrooms();
+    fetchShopItems();
+    fetchUserProfile();
   }, []);
+
+  const fetchUserProfile = async () => {
+    try {
+      const response = await axios.get(`${API}/auth/me`, {
+        withCredentials: true,
+      });
+      setUserProfile(response.data);
+    } catch (error) {
+      console.error("Error fetching profile:", error);
+    }
+  };
+
+  const fetchShopItems = async () => {
+    try {
+      const response = await axios.get(`${API}/shop`, {
+        withCredentials: true,
+      });
+      setShopItems(response.data);
+    } catch (error) {
+      console.error("Error fetching shop:", error);
+    }
+  };
+
+  const handlePurchase = async (itemType, itemId) => {
+    try {
+      const response = await axios.post(
+        `${API}/shop/purchase`,
+        { type: itemType, item_id: itemId },
+        { withCredentials: true }
+      );
+      toast.success("Item purchased!");
+      fetchUserProfile();
+      fetchShopItems();
+    } catch (error) {
+      console.error("Error purchasing:", error);
+      toast.error(error.response?.data?.detail || "Purchase failed");
+    }
+  };
 
   const fetchClassrooms = async () => {
     try {
