@@ -243,19 +243,19 @@ export default function AssignmentPage({ user }) {
                 </CardHeader>
                 <CardContent>
                   <p className="text-gray-700 whitespace-pre-wrap">
-                    {(assignment.problems && assignment.problems[0]?.description) || assignment.description || "No description provided."}
+                    {(assignment.problems && assignment.problems[currentProblemIndex]?.description) || assignment.description || "No description provided."}
                   </p>
                 </CardContent>
               </Card>
 
-              {(assignment.expected_output || (assignment.problems && assignment.problems[0]?.expected_output)) && (
+              {(assignment.expected_output || (assignment.problems && assignment.problems[currentProblemIndex]?.expected_output)) && (
                 <Card data-testid="expected-output-card" className="border-2 border-green-200 bg-green-50">
                   <CardHeader>
                     <CardTitle className="text-lg">Expected Output</CardTitle>
                   </CardHeader>
                   <CardContent>
                     <pre className="p-3 bg-white rounded border border-green-300 text-gray-800 text-sm font-mono whitespace-pre-wrap">
-                      {assignment.expected_output || assignment.problems[0].expected_output}
+                      {assignment.expected_output || assignment.problems[currentProblemIndex].expected_output}
                     </pre>
                   </CardContent>
                 </Card>
