@@ -1094,7 +1094,7 @@ Format your response as JSON:
     except Exception as e:
         logging.error(f"AI evaluation error: {str(e)}")
         final_score = base_score
-        feedback = f"Test Results: {passed_tests}/{total_tests} passed. {assignment['title']} - Keep practicing!"
+        feedback = f"Test Results: {passed_tests}/{total_tests} passed. {problem.get('title', 'Problem')} - Keep practicing!"
     
     # Determine if passing (70% threshold)
     is_passing = final_score >= 70
