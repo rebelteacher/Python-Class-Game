@@ -267,7 +267,7 @@ class Submission(BaseModel):
 
 class SubmissionCreate(BaseModel):
     assignment_id: str
-    problem_id: str  # NEW: specific problem being submitted
+    problem_id: Optional[str] = None  # Optional for backward compatibility
     code: str
 
 class Battle(BaseModel):
