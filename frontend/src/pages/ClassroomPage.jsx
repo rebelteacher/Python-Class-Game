@@ -9,8 +9,9 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { ArrowLeft, Plus, Users, BookOpen, Trash2, Code2, Trophy } from "lucide-react";
+import { ArrowLeft, Plus, Users, BookOpen, Trash2, Code2, Trophy, Swords } from "lucide-react";
 import Leaderboard from "@/components/Leaderboard";
+import BattleZone from "@/components/BattleZone";
 
 const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
 const API = `${BACKEND_URL}/api`;
