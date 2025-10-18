@@ -359,40 +359,39 @@ export default function AssignmentPage({ user }) {
             </div>
           ) : (
             <Card data-testid="teacher-view-card">
-                <CardHeader>
-                  <CardTitle>Solution Code</CardTitle>
-                  <CardDescription>This is your reference solution</CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <pre className="p-4 bg-gray-900 text-gray-100 rounded-lg font-mono text-sm overflow-auto max-h-[500px]">
-                    {assignment.solution_code}
-                  </pre>
-                </CardContent>
-              </Card>
-            )}
+              <CardHeader>
+                <CardTitle>Solution Code</CardTitle>
+                <CardDescription>This is your reference solution</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <pre className="p-4 bg-gray-900 text-gray-100 rounded-lg font-mono text-sm overflow-auto max-h-[500px]">
+                  {assignment.solution_code}
+                </pre>
+              </CardContent>
+            </Card>
+          )}
 
-            {isTeacher && submissions.length > 0 && (
-              <Card data-testid="teacher-submissions-card">
-                <CardHeader>
-                  <CardTitle>Student Submissions</CardTitle>
-                  <CardDescription>{submissions.length} submission(s)</CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <div className="space-y-3 max-h-[400px] overflow-auto">
-                    {submissions.map((sub, index) => (
-                      <div key={sub.id} data-testid={`submission-${index}`} className="p-3 bg-gray-50 rounded-lg border border-gray-200">
-                        <div className="flex justify-between items-start mb-2">
-                          <div className="font-semibold text-sm">{sub.student_name}</div>
-                          <div className="text-sm font-bold text-indigo-600">{sub.score.toFixed(1)}%</div>
-                        </div>
-                        <div className="text-xs text-gray-600">{sub.feedback}</div>
+          {isTeacher && submissions.length > 0 && (
+            <Card data-testid="teacher-submissions-card">
+              <CardHeader>
+                <CardTitle>Student Submissions</CardTitle>
+                <CardDescription>{submissions.length} submission(s)</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-3 max-h-[400px] overflow-auto">
+                  {submissions.map((sub, index) => (
+                    <div key={sub.id} data-testid={`submission-${index}`} className="p-3 bg-gray-50 rounded-lg border border-gray-200">
+                      <div className="flex justify-between items-start mb-2">
+                        <div className="font-semibold text-sm">{sub.student_name}</div>
+                        <div className="text-sm font-bold text-indigo-600">{sub.score.toFixed(1)}%</div>
                       </div>
-                    ))}
-                  </div>
-                </CardContent>
-              </Card>
-            )}
-          </div>
+                      <div className="text-xs text-gray-600">{sub.feedback}</div>
+                    </div>
+                  ))}
+                </div>
+              </CardContent>
+            </Card>
+          )}
         </div>
       </main>
     </div>
