@@ -545,14 +545,16 @@ export default function AssignmentLibrary({ user }) {
                   <div className="text-xs text-gray-500 pt-2">
                     By {problem.creator_name}
                   </div>
-                  <Button
-                    data-testid={`import-${problem.id}`}
-                    onClick={() => navigate(`/library/import/${problem.id}`)}
-                    className="w-full mt-3 bg-indigo-600 hover:bg-indigo-700"
-                    size="sm"
-                  >
-                    Import to Classroom
-                  </Button>
+                  {!selectionMode && (
+                    <Button
+                      data-testid={`import-${problem.id}`}
+                      onClick={() => navigate(`/library/import/${problem.id}`)}
+                      className="w-full mt-3 bg-indigo-600 hover:bg-indigo-700"
+                      size="sm"
+                    >
+                      Import to Classroom
+                    </Button>
+                  )}
                 </CardContent>
               </Card>
             ))}
