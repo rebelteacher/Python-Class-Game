@@ -52,11 +52,18 @@ export default function AssignmentPage({ user }) {
       });
       setSubmissions(response.data);
       
-      // Calculate lives remaining
-      if (response.data.length > 0 && user.role === "student") {
-        const lastSubmission = response.data[response.data.length - 1];
-        setLivesRemaining(lastSubmission.lives_remaining || 0);
-        setIsLockedOut(lastSubmission.lives_remaining <= 0);
+      // Calculate lives remaining for students
+      if (user.role === "student") {
+        if (response.data.length === 0) {
+          // No submissions yet - start with 3 lives
+          setLivesRemaining(3);
+          setIsLockedOut(false);
+        } else {
+          const lastSubmission = response.data[response.data.length - 1];
+          const lives = lastSubmission.lives_remaining !== undefined ? lastSubmission.lives_remaining : 3;
+          setLivesRemaining(lives);
+          setIsLockedOut(lives <= 0);
+        }
       }
     } catch (error) {
       console.error("Error fetching submissions:", error);
