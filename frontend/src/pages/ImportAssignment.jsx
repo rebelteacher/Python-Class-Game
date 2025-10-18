@@ -73,6 +73,17 @@ export default function ImportAssignment({ user }) {
       return;
     }
 
+    // Date validation
+    if (availableDate && dueDate) {
+      const availableDateTime = new Date(`${availableDate}T${availableTime}`);
+      const dueDateTime = new Date(`${dueDate}T${dueTime}`);
+      
+      if (dueDateTime <= availableDateTime) {
+        toast.error("Due date must be after available date");
+        return;
+      }
+    }
+
     setImporting(true);
 
     try {
