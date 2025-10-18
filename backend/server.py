@@ -214,6 +214,7 @@ class LibraryAssignment(BaseModel):
     description: str
     starter_code: str
     solution_code: str
+    expected_output: str = ""  # NEW: What the output should be
     category: str  # "Basics", "Loops", "Functions", etc.
     difficulty: str  # "Easy", "Medium", "Hard"
     csta_standard: str  # CSTA K-12 CS Standards
@@ -228,6 +229,7 @@ class LibraryAssignmentCreate(BaseModel):
     description: str
     starter_code: str = ""
     solution_code: str
+    expected_output: str = ""
     category: str
     difficulty: str
     csta_standard: str = ""
