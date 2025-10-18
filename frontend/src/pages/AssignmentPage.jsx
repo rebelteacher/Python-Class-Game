@@ -405,7 +405,7 @@ export default function AssignmentPage({ user }) {
               </CardContent>
             </Card>
           )}
-        </div>
+        </PanelGroup>
       </main>
     </div>
   );
