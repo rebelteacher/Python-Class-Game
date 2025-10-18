@@ -100,7 +100,14 @@ export default function AssignmentPage({ user }) {
   const handleRunCode = async () => {
     setRunning(true);
     setOutput("");
-    setHasRun(true);
+    
+    // Mark current problem as run
+    const currentProblemId = getCurrentProblemId();
+    setHasRunPerProblem(prev => ({
+      ...prev,
+      [currentProblemId]: true
+    }));
+    
     try {
       const response = await axios.post(
         `${API}/code/execute`,
