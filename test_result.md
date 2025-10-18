@@ -231,3 +231,29 @@ agent_communication:
       ⚠️ FRONTEND: Library button removal not tested (system limitations)
       
       RECOMMENDATION: All critical backend bugs are fixed and verified. Main agent should summarize and finish the task.
+  - agent: "user"
+    message: "User reports submission still fails - 403 error persists despite passing backend tests"
+  - agent: "troubleshoot"
+    message: |
+      ROOT CAUSE: Submission endpoint missing availability date validation causing intermittent 403s
+      - Assignment detail endpoint validates available_date (lines 747-751)
+      - Submission endpoint lacked this check
+      - Mixed 200/403 responses due to timing-based race condition
+      FIX: Add classroom membership + available_date validation in submission endpoint
+  - agent: "main"
+    message: |
+      ADDITIONAL FIX APPLIED - Submission endpoint now validates:
+      1. Student is enrolled in assignment's classroom
+      2. Assignment available_date has been reached
+      3. Prevents submissions to unavailable or unauthorized assignments
+      
+      Changes made after line 838 in server.py:
+      - Added classroom lookup and student membership verification
+      - Added available_date check matching assignment detail endpoint
+      - Raises 403 with clear error messages
+      
+      Please retest submission flow with various scenarios:
+      - Assignment with available_date in future (should block with clear message)
+      - Assignment with available_date in past (should allow)
+      - Student not in classroom (should block)
+      - Normal submission flow (should work)
