@@ -1042,12 +1042,12 @@ Format your response as JSON:
         prompt = f"""
 Evaluate this Python code submission:
 
-Assignment: {assignment['title']}
-Description: {assignment['description']}
+Problem: {problem.get('title', assignment.get('title', 'Coding Problem'))}
+Description: {problem.get('description', assignment.get('description', ''))}
 
 Expected Solution:
 ```python
-{assignment['solution_code']}
+{problem['solution_code']}
 ```
 
 Student Code:
