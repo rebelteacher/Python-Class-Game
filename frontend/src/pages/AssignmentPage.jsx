@@ -275,79 +275,89 @@ export default function AssignmentPage({ user }) {
           </div>
 
           {/* Right Side: Code Editor & Output */}
-          <div className="space-y-4">
-            {!isTeacher ? (
-              <>
-                <Card data-testid="code-editor-card">
-                  <CardHeader>
-                    <CardTitle className="flex justify-between items-center">
-                      <div className="flex items-center gap-4">
-                        <span>Code Editor</span>
-                        {!isTeacher && (
-                          <div className="flex items-center gap-2 text-sm">
-                            <span className="text-gray-600">Lives:</span>
-                            {isLockedOut ? (
-                              <span className="text-red-600 font-semibold">🚫 Locked</span>
-                            ) : (
-                              <span>
-                                {Array.from({ length: livesRemaining }).map((_, i) => (
-                                  <span key={i} className="text-red-500">❤️</span>
-                                ))}
-                                {Array.from({ length: 3 - livesRemaining }).map((_, i) => (
-                                  <span key={i} className="text-gray-300">🤍</span>
-                                ))}
-                              </span>
-                            )}
-                          </div>
+          {!isTeacher ? (
+            <div className="grid grid-cols-2 gap-4">
+              {/* Code Editor - Left */}
+              <Card data-testid="code-editor-card" className="col-span-1">
+                <CardHeader>
+                  <CardTitle className="flex flex-col gap-3">
+                    <div className="flex justify-between items-center">
+                      <span>Code Editor</span>
+                      <div className="flex items-center gap-2 text-sm">
+                        <span className="text-gray-600">Lives:</span>
+                        {isLockedOut ? (
+                          <span className="text-red-600 font-semibold">🚫 Locked</span>
+                        ) : (
+                          <span>
+                            {Array.from({ length: livesRemaining }).map((_, i) => (
+                              <span key={i} className="text-red-500">❤️</span>
+                            ))}
+                            {Array.from({ length: 3 - livesRemaining }).map((_, i) => (
+                              <span key={i} className="text-gray-300">🤍</span>
+                            ))}
+                          </span>
                         )}
                       </div>
-                      <div className="flex gap-2">
-                        <Button 
-                          data-testid="run-code-btn" 
-                          onClick={handleRunCode} 
-                          disabled={running || isLockedOut}
-                          variant="outline" 
-                          size="sm"
-                          className="gap-2"
-                        >
-                          <Play className="w-4 h-4" />
-                          {running ? "Running..." : "Run"}
-                        </Button>
-                        <Button 
-                          data-testid="submit-code-btn" 
-                          onClick={handleSubmit} 
-                          disabled={submitting || isLockedOut || !hasRun}
-                          className="bg-indigo-600 hover:bg-indigo-700 gap-2"
-                          size="sm"
-                        >
-                          <Send className="w-4 h-4" />
-                          {submitting ? "Submitting..." : isLockedOut ? "Locked" : !hasRun ? "Run First" : "Submit"}
-                        </Button>
-                      </div>
-                    </CardTitle>
+                    </div>
+                    <div className="flex gap-2">
+                      <Button 
+                        data-testid="run-code-btn" 
+                        onClick={handleRunCode} 
+                        disabled={running || isLockedOut}
+                        variant="outline" 
+                        size="sm"
+                        className="gap-2 flex-1"
+                      >
+                        <Play className="w-4 h-4" />
+                        {running ? "Running..." : "Run"}
+                      </Button>
+                      <Button 
+                        data-testid="submit-code-btn" 
+                        onClick={handleSubmit} 
+                        disabled={submitting || isLockedOut || !hasRun}
+                        className="bg-indigo-600 hover:bg-indigo-700 gap-2 flex-1"
+                        size="sm"
+                      >
+                        <Send className="w-4 h-4" />
+                        {submitting ? "Submitting..." : isLockedOut ? "Locked" : !hasRun ? "Run First" : "Submit"}
+                      </Button>
+                    </div>
                     {!hasRun && !isLockedOut && (
-                      <p className="text-xs text-amber-600 mt-2">⚠️ You must run your code before submitting</p>
+                      <p className="text-xs text-amber-600">⚠️ You must run your code before submitting</p>
                     )}
-                  </CardHeader>
-                  <CardContent className="p-0">
-                    <Editor
-                      height="400px"
-                      defaultLanguage="python"
-                      value={code}
-                      onChange={(value) => setCode(value || "")}
-                      theme="vs-light"
-                      options={{
-                        minimap: { enabled: false },
-                        fontSize: 14,
-                        lineNumbers: "on",
-                        scrollBeyondLastLine: false,
-                        automaticLayout: true,
-                      }}
-                    />
-                  </CardContent>
-                </Card>
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="p-0">
+                  <Editor
+                    height="600px"
+                    defaultLanguage="python"
+                    value={code}
+                    onChange={(value) => setCode(value || "")}
+                    theme="vs-light"
+                    options={{
+                      minimap: { enabled: false },
+                      fontSize: 14,
+                      lineNumbers: "on",
+                      scrollBeyondLastLine: false,
+                      automaticLayout: true,
+                    }}
+                  />
+                </CardContent>
+              </Card>
 
-                <Card data-testid="output-card">
+              {/* Output - Right */}
+              <Card data-testid="output-card" className="col-span-1">
+                <CardHeader>
+                  <CardTitle className="text-lg">Output</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <pre className="p-4 bg-gray-900 text-green-400 rounded-lg font-mono text-sm h-[600px] overflow-auto">
+                    {output || "Run your code to see output here..."}
+                  </pre>
+                </CardContent>
+              </Card>
+            </div>
+          ) : (
                   <CardHeader>
                     <CardTitle className="text-lg">Output</CardTitle>
                   </CardHeader>
