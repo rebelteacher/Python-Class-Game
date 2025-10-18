@@ -112,11 +112,11 @@ user_problem_statement: |
 backend:
   - task: "Fix 403 Forbidden error on first submission"
     implemented: true
-    working: true
+    working: "NA"
     file: "backend/server.py"
-    stuck_count: 0
+    stuck_count: 1
     priority: "high"
-    needs_retesting: false
+    needs_retesting: true
     status_history:
       - working: "NA"
         agent: "main"
@@ -124,6 +124,12 @@ backend:
       - working: true
         agent: "testing"
         comment: "✅ VERIFIED: First-time submissions now work correctly. Tested with fresh student user - no 403 error, lives_remaining=3, attempt_number=1. Fix is working perfectly."
+      - working: false
+        agent: "user"
+        comment: "User reports submission still fails with 403 error in real usage despite passing tests"
+      - working: "NA"
+        agent: "main"
+        comment: "Troubleshoot agent identified root cause: submission endpoint missing availability date validation (lines 747-751 in assignment detail). Added classroom membership check and available_date validation after line 838. This was causing intermittent 403s when students tried to submit before assignment's available_date."
   
   - task: "Fix lives system - proper tracking of 3 lives"
     implemented: true
