@@ -138,6 +138,8 @@ export default function AssignmentLibrary({ user }) {
       console.log("Parsed CSV result:", result);
       console.log("First row data:", result.data[0]);
       console.log("Column headers:", Object.keys(result.data[0] || {}));
+      console.log("All rows:", result.data);
+      console.log("Total rows parsed:", result.data.length);
 
       if (result.errors.length > 0) {
         console.error("CSV parsing errors:", result.errors);
