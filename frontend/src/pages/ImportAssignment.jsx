@@ -35,14 +35,14 @@ export default function ImportAssignment({ user }) {
 
   const fetchAssignment = async () => {
     try {
-      const response = await axios.get(`${API}/library/assignments`, {
+      const response = await axios.get(`${API}/problems`, {
         withCredentials: true,
       });
-      const found = response.data.find(a => a.id === assignmentId);
+      const found = response.data.find(p => p.id === assignmentId);
       setAssignment(found);
     } catch (error) {
-      console.error("Error fetching assignment:", error);
-      toast.error("Failed to load assignment");
+      console.error("Error fetching problem:", error);
+      toast.error("Failed to load problem");
     } finally {
       setLoading(false);
     }
