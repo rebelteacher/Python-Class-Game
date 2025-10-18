@@ -132,8 +132,12 @@ export default function AssignmentLibrary({ user }) {
       const result = Papa.parse(text, {
         header: true,
         skipEmptyLines: true,
-        transformHeader: (header) => header.trim().toLowerCase()
+        transformHeader: (header) => header.trim().toLowerCase().replace(/[^a-z0-9_]/g, '_')
       });
+
+      console.log("Parsed CSV result:", result);
+      console.log("First row data:", result.data[0]);
+      console.log("Column headers:", Object.keys(result.data[0] || {}));
 
       if (result.errors.length > 0) {
         console.error("CSV parsing errors:", result.errors);
