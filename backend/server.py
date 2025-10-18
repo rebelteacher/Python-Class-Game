@@ -550,6 +550,7 @@ async def bulk_upload_assignments(request: Request):
                     description=row.get("description", ""),
                     starter_code=row.get("starter_code", ""),
                     solution_code=row.get("solution_code", ""),
+                    expected_output=row.get("expected_output", ""),
                     category=row.get("category", "Uncategorized"),
                     difficulty=row.get("difficulty", "Easy"),
                     csta_standard=row.get("csta_standard", ""),
