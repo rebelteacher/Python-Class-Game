@@ -1172,6 +1172,7 @@ Format your response as JSON:
     # Save submission
     new_submission = Submission(
         assignment_id=submission.assignment_id,
+        problem_id=submission.problem_id,
         student_id=user["id"],
         code=submission.code,
         score=final_score,
