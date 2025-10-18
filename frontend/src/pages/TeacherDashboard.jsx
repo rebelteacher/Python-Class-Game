@@ -19,6 +19,24 @@ export default function TeacherDashboard({ user, setUser }) {
   const [newClassName, setNewClassName] = useState("");
   const navigate = useNavigate();
 
+  // Fun classroom name suggestions
+  const classroomNameSuggestions = [
+    "Python Pandemonium",
+    "Code Crusaders",
+    "Debug Dynasty",
+    "Algorithm Avengers",
+    "Syntax Squad",
+    "Loop Legends",
+    "Binary Brawlers",
+    "Function Fighters",
+    "Variable Vikings",
+    "Exception Explorers"
+  ];
+
+  const getRandomSuggestion = () => {
+    return classroomNameSuggestions[Math.floor(Math.random() * classroomNameSuggestions.length)];
+  };
+
   useEffect(() => {
     fetchClassrooms();
   }, []);
