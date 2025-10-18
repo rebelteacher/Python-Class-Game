@@ -962,6 +962,20 @@ Format your response as JSON:
     # Determine if passing (70% threshold)
     is_passing = final_score >= 70
     
+    # Check if submission is late and apply penalty
+    is_late_submission = False
+    if assignment.get("due_date"):
+        due_date = datetime.fromisoformat(assignment["due_date"])
+        now = datetime.now(timezone.utc)
+        if now > due_date:
+            is_late_submission = True
+            if assignment.get("allow_late_submission", True):
+                late_penalty = assignment.get("late_penalty_percent", 0)
+                final_score = final_score * (1 - late_penalty / 100)
+                feedback = f"[LATE SUBMISSION - {late_penalty}% penalty applied] " + feedback
+            else:
+                raise HTTPException(status_code=403, detail="Late submissions are not allowed for this assignment")
+    
     # Calculate lives after this submission
     if not is_passing:
         lives_remaining -= 1
