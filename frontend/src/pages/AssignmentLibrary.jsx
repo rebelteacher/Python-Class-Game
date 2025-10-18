@@ -444,35 +444,35 @@ export default function AssignmentLibrary({ user }) {
           </div>
 
           <div className="text-sm text-gray-600">
-            Showing {filteredAssignments.length} of {assignments.length} assignments
+            Showing {filteredProblems.length} of {problems.length} problems
           </div>
         </div>
 
-        {/* Assignment Grid */}
+        {/* Problem Grid */}
         {loading ? (
           <div className="text-center py-20 text-gray-600">Loading library...</div>
-        ) : filteredAssignments.length === 0 ? (
+        ) : filteredProblems.length === 0 ? (
           <div className="text-center py-20">
             <BookOpen className="w-16 h-16 text-gray-400 mx-auto mb-4" />
-            <h3 className="text-xl font-semibold text-gray-700 mb-2">No assignments found</h3>
-            <p className="text-gray-500">Try adjusting your filters or add a new assignment</p>
+            <h3 className="text-xl font-semibold text-gray-700 mb-2">No problems found</h3>
+            <p className="text-gray-500">Try adjusting your filters or add a new problem</p>
           </div>
         ) : (
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {filteredAssignments.map((assignment) => (
+            {filteredProblems.map((problem) => (
               <Card
-                key={assignment.id}
-                data-testid={`library-card-${assignment.id}`}
+                key={problem.id}
+                data-testid={`library-card-${problem.id}`}
                 className="hover:shadow-lg transition-shadow border-2 border-gray-100"
               >
                 <CardHeader>
                   <div className="flex justify-between items-start mb-2">
                     <div className={`px-2 py-1 rounded text-xs font-semibold ${
-                      assignment.difficulty === "Easy" ? "bg-green-100 text-green-700" :
-                      assignment.difficulty === "Medium" ? "bg-yellow-100 text-yellow-700" :
+                      problem.difficulty === "Easy" ? "bg-green-100 text-green-700" :
+                      problem.difficulty === "Medium" ? "bg-yellow-100 text-yellow-700" :
                       "bg-red-100 text-red-700"
                     }`}>
-                      {assignment.difficulty}
+                      {problem.difficulty}
                     </div>
                     <div className="text-xs text-gray-500">
                       <Download className="w-3 h-3 inline mr-1" />
