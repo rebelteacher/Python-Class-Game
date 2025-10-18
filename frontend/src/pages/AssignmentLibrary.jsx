@@ -584,25 +584,40 @@ export default function AssignmentLibrary({ user }) {
                     By {problem.creator_name}
                   </div>
                   {!selectionMode && (
-                    <div className="flex gap-2">
-                      <Button
-                        data-testid={`edit-${problem.id}`}
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          setEditingProblem(problem);
-                          setEditDialogOpen(true);
-                        }}
-                        variant="outline"
-                        className="w-full mt-3"
-                        size="sm"
-                      >
-                        <Edit className="w-4 h-4 mr-1" />
-                        Edit
-                      </Button>
+                    <div className="space-y-2 mt-3">
+                      <div className="flex gap-2">
+                        <Button
+                          data-testid={`edit-${problem.id}`}
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            setEditingProblem(problem);
+                            setEditDialogOpen(true);
+                          }}
+                          variant="outline"
+                          className="flex-1"
+                          size="sm"
+                        >
+                          <Edit className="w-4 h-4 mr-1" />
+                          Edit
+                        </Button>
+                        <Button
+                          data-testid={`practice-${problem.id}`}
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            navigate(`/teacher-practice/${problem.id}`);
+                          }}
+                          variant="outline"
+                          className="flex-1 bg-green-50 border-green-300 hover:bg-green-100"
+                          size="sm"
+                        >
+                          <Code2 className="w-4 h-4 mr-1" />
+                          Practice
+                        </Button>
+                      </div>
                       <Button
                         data-testid={`import-${problem.id}`}
                         onClick={() => navigate(`/library/import/${problem.id}`)}
-                        className="w-full mt-3 bg-indigo-600 hover:bg-indigo-700"
+                        className="w-full bg-indigo-600 hover:bg-indigo-700"
                         size="sm"
                       >
                         Import to Classroom
