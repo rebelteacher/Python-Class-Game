@@ -682,6 +682,342 @@ class CodeClassAPITester:
             print(f"   ⚠️  Student submission test failed: {str(e)}")
             self.session_token = original_token
 
+    def test_availability_date_validation(self, classroom_id):
+        """Test the ADDITIONAL fix for 403 submission errors - availability date validation"""
+        print("\n🔒 Testing ADDITIONAL 403 Fix - Availability Date Validation...")
+        
+        # Create student user for testing
+        student = self.create_student_user("availtest")
+        if not student:
+            print("❌ Cannot test availability validation without student user")
+            return
+        
+        # Add student to classroom
+        if not self.add_student_to_classroom(student["id"], classroom_id):
+            print("❌ Cannot test availability validation without adding student to classroom")
+            return
+        
+        # Switch to student token
+        original_token = self.session_token
+        self.session_token = student["token"]
+        
+        try:
+            # SCENARIO 1: Assignment with future available_date (should get 403)
+            print("\n   SCENARIO 1: Testing assignment with future available_date...")
+            
+            # Switch back to teacher to create assignment with future date
+            self.session_token = original_token
+            
+            future_date = (datetime.now(timezone.utc) + timedelta(days=1)).isoformat()
+            future_assignment_data = {
+                "classroom_id": classroom_id,
+                "title": f"Future Assignment {datetime.now().strftime('%H%M%S')}",
+                "description": "Assignment available tomorrow",
+                "starter_code": "def future_function():\n    pass",
+                "solution_code": "def future_function():\n    return 'future'",
+                "test_cases": [],
+                "available_date": future_date
+            }
+            
+            # Create assignment with future available_date using direct DB insertion
+            try:
+                from motor.motor_asyncio import AsyncIOMotorClient
+                import asyncio
+                
+                async def create_future_assignment():
+                    client = AsyncIOMotorClient("mongodb://localhost:27017")
+                    db = client["test_database"]
+                    
+                    assignment_id = str(uuid.uuid4())
+                    assignment_doc = {
+                        "id": assignment_id,
+                        "classroom_id": classroom_id,
+                        "title": f"Future Assignment {datetime.now().strftime('%H%M%S')}",
+                        "description": "Assignment available tomorrow",
+                        "starter_code": "def future_function():\n    pass",
+                        "solution_code": "def future_function():\n    return 'future'",
+                        "test_cases": [],
+                        "available_date": future_date,
+                        "due_date": None,
+                        "allow_late_submission": True,
+                        "late_penalty_percent": 0,
+                        "created_at": datetime.now(timezone.utc).isoformat()
+                    }
+                    await db.assignments.insert_one(assignment_doc)
+                    
+                    client.close()
+                    return assignment_id
+                
+                future_assignment_id = asyncio.run(create_future_assignment())
+                print(f"   Created future assignment: {future_assignment_id}")
+                
+                # Switch back to student
+                self.session_token = student["token"]
+                
+                # Try to submit to future assignment (should get 403)
+                submission_data = {
+                    "assignment_id": future_assignment_id,
+                    "code": "def future_function():\n    return 'future'"
+                }
+                
+                response = self.run_test(
+                    "Submit to unavailable assignment (future date) - should get 403",
+                    "POST",
+                    "submissions",
+                    403,
+                    submission_data
+                )
+                
+                # SCENARIO 2: Assignment with past available_date (should work)
+                print("\n   SCENARIO 2: Testing assignment with past available_date...")
+                
+                # Switch back to teacher
+                self.session_token = original_token
+                
+                past_date = (datetime.now(timezone.utc) - timedelta(hours=1)).isoformat()
+                
+                async def create_past_assignment():
+                    client = AsyncIOMotorClient("mongodb://localhost:27017")
+                    db = client["test_database"]
+                    
+                    assignment_id = str(uuid.uuid4())
+                    assignment_doc = {
+                        "id": assignment_id,
+                        "classroom_id": classroom_id,
+                        "title": f"Past Assignment {datetime.now().strftime('%H%M%S')}",
+                        "description": "Assignment available in the past",
+                        "starter_code": "def past_function():\n    pass",
+                        "solution_code": "def past_function():\n    return 'past'",
+                        "test_cases": [],
+                        "available_date": past_date,
+                        "due_date": None,
+                        "allow_late_submission": True,
+                        "late_penalty_percent": 0,
+                        "created_at": datetime.now(timezone.utc).isoformat()
+                    }
+                    await db.assignments.insert_one(assignment_doc)
+                    
+                    client.close()
+                    return assignment_id
+                
+                past_assignment_id = asyncio.run(create_past_assignment())
+                print(f"   Created past assignment: {past_assignment_id}")
+                
+                # Switch back to student
+                self.session_token = student["token"]
+                
+                # Try to submit to past assignment (should work)
+                submission_data = {
+                    "assignment_id": past_assignment_id,
+                    "code": "def past_function():\n    return 'past'"
+                }
+                
+                response = self.run_test(
+                    "Submit to available assignment (past date) - should succeed",
+                    "POST",
+                    "submissions",
+                    200,
+                    submission_data
+                )
+                
+                # SCENARIO 5: No available_date set (should work for backward compatibility)
+                print("\n   SCENARIO 5: Testing assignment with no available_date...")
+                
+                # Switch back to teacher
+                self.session_token = original_token
+                
+                async def create_no_date_assignment():
+                    client = AsyncIOMotorClient("mongodb://localhost:27017")
+                    db = client["test_database"]
+                    
+                    assignment_id = str(uuid.uuid4())
+                    assignment_doc = {
+                        "id": assignment_id,
+                        "classroom_id": classroom_id,
+                        "title": f"No Date Assignment {datetime.now().strftime('%H%M%S')}",
+                        "description": "Assignment with no available_date",
+                        "starter_code": "def no_date_function():\n    pass",
+                        "solution_code": "def no_date_function():\n    return 'no_date'",
+                        "test_cases": [],
+                        "available_date": None,
+                        "due_date": None,
+                        "allow_late_submission": True,
+                        "late_penalty_percent": 0,
+                        "created_at": datetime.now(timezone.utc).isoformat()
+                    }
+                    await db.assignments.insert_one(assignment_doc)
+                    
+                    client.close()
+                    return assignment_id
+                
+                no_date_assignment_id = asyncio.run(create_no_date_assignment())
+                print(f"   Created no-date assignment: {no_date_assignment_id}")
+                
+                # Switch back to student
+                self.session_token = student["token"]
+                
+                # Try to submit to no-date assignment (should work)
+                submission_data = {
+                    "assignment_id": no_date_assignment_id,
+                    "code": "def no_date_function():\n    return 'no_date'"
+                }
+                
+                response = self.run_test(
+                    "Submit to assignment with no available_date - should succeed",
+                    "POST",
+                    "submissions",
+                    200,
+                    submission_data
+                )
+                
+            except Exception as e:
+                print(f"   ❌ Error creating test assignments: {str(e)}")
+        
+        finally:
+            # Switch back to teacher token
+            self.session_token = original_token
+
+    def test_classroom_membership_validation(self, classroom_id):
+        """Test SCENARIO 3: Student not in classroom validation"""
+        print("\n🏫 Testing Classroom Membership Validation...")
+        
+        # Create a second classroom
+        classroom2_data = {
+            "name": f"Test Classroom 2 {datetime.now().strftime('%H%M%S')}"
+        }
+        
+        classroom2 = self.run_test(
+            "Create second classroom",
+            "POST",
+            "classrooms",
+            200,
+            classroom2_data
+        )
+        
+        if not classroom2:
+            print("❌ Cannot test classroom membership without second classroom")
+            return
+        
+        classroom2_id = classroom2.get('id')
+        print(f"   Created second classroom: {classroom2_id}")
+        
+        # Create assignment in classroom2
+        assignment_data = {
+            "classroom_id": classroom2_id,
+            "title": f"Classroom2 Assignment {datetime.now().strftime('%H%M%S')}",
+            "description": "Assignment in classroom 2",
+            "starter_code": "def classroom2_function():\n    pass",
+            "solution_code": "def classroom2_function():\n    return 'classroom2'",
+            "test_cases": []
+        }
+        
+        assignment2 = self.run_test(
+            "Create assignment in classroom 2",
+            "POST",
+            "assignments",
+            200,
+            assignment_data
+        )
+        
+        if not assignment2:
+            print("❌ Cannot test classroom membership without assignment in classroom 2")
+            return
+        
+        assignment2_id = assignment2.get('id')
+        print(f"   Created assignment in classroom 2: {assignment2_id}")
+        
+        # Create student user who is only in classroom 1
+        student = self.create_student_user("membertest")
+        if not student:
+            print("❌ Cannot test classroom membership without student user")
+            return
+        
+        # Add student ONLY to classroom 1 (not classroom 2)
+        if not self.add_student_to_classroom(student["id"], classroom_id):
+            print("❌ Cannot test classroom membership without adding student to classroom 1")
+            return
+        
+        print(f"   Student {student['id']} added to classroom 1 only")
+        
+        # Switch to student token
+        original_token = self.session_token
+        self.session_token = student["token"]
+        
+        try:
+            # SCENARIO 3: Try to submit to assignment in classroom 2 (should get 403)
+            print("\n   SCENARIO 3: Testing student not in classroom...")
+            
+            submission_data = {
+                "assignment_id": assignment2_id,
+                "code": "def classroom2_function():\n    return 'classroom2'"
+            }
+            
+            response = self.run_test(
+                "Submit to assignment in different classroom - should get 403",
+                "POST",
+                "submissions",
+                403,
+                submission_data
+            )
+            
+            # SCENARIO 4: Normal flow - submit to assignment in correct classroom (should work)
+            print("\n   SCENARIO 4: Testing normal flow with valid student...")
+            
+            # Create assignment in classroom 1 where student is enrolled
+            self.session_token = original_token  # Switch to teacher
+            
+            normal_assignment_data = {
+                "classroom_id": classroom_id,
+                "title": f"Normal Assignment {datetime.now().strftime('%H%M%S')}",
+                "description": "Normal assignment for enrolled student",
+                "starter_code": "def normal_function():\n    pass",
+                "solution_code": "def normal_function():\n    return 'normal'",
+                "test_cases": []
+            }
+            
+            normal_assignment = self.run_test(
+                "Create normal assignment in classroom 1",
+                "POST",
+                "assignments",
+                200,
+                normal_assignment_data
+            )
+            
+            if normal_assignment:
+                normal_assignment_id = normal_assignment.get('id')
+                print(f"   Created normal assignment: {normal_assignment_id}")
+                
+                # Switch back to student
+                self.session_token = student["token"]
+                
+                # Submit to assignment in correct classroom (should work)
+                submission_data = {
+                    "assignment_id": normal_assignment_id,
+                    "code": "def normal_function():\n    return 'normal'"
+                }
+                
+                response = self.run_test(
+                    "Submit to assignment in enrolled classroom - should succeed",
+                    "POST",
+                    "submissions",
+                    200,
+                    submission_data
+                )
+                
+                if response:
+                    lives_remaining = response.get('lives_remaining', 0)
+                    print(f"   ✅ Normal submission successful! Lives remaining: {lives_remaining}")
+                    
+                    # Verify lives_remaining = 3 for first submission
+                    if lives_remaining == 3:
+                        self.log_test("Normal flow: First submission has 3 lives remaining", True)
+                    else:
+                        self.log_test("Normal flow: First submission has 3 lives remaining", False, f"Expected 3, got {lives_remaining}")
+        
+        finally:
+            # Switch back to teacher token
+            self.session_token = original_token
+
     def run_all_tests(self):
         """Run all API tests"""
         print("🚀 Starting CodeClass API Tests...")
@@ -713,6 +1049,10 @@ class CodeClassAPITester:
         # Test critical bug fixes
         self.test_403_forbidden_fix(assignment_id, classroom['id'])
         self.test_lives_system(assignment_id, classroom['id'])
+        
+        # Test ADDITIONAL 403 fix - availability date and classroom membership validation
+        self.test_availability_date_validation(classroom['id'])
+        self.test_classroom_membership_validation(classroom['id'])
         
         # Test basic submissions
         self.test_submission_endpoints(assignment_id, classroom['id'])
