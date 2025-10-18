@@ -196,7 +196,10 @@ export default function BattleZone({ classroomId, isTeacher }) {
                       <div className="text-center flex-1">
                         <div className="text-sm text-gray-600 mb-1">{ourTeam}</div>
                         <div className="text-3xl font-bold text-indigo-600">{ourScore}</div>
-                        <div className="text-xs text-gray-500">Total XP</div>
+                        <div className="text-xs text-gray-500">Avg XP/student</div>
+                        <div className="text-xs text-gray-400 mt-1">
+                          ({isChallenger ? battle.challenger_student_count : battle.opponent_student_count} students)
+                        </div>
                       </div>
                       
                       <div className="px-6">
@@ -206,7 +209,10 @@ export default function BattleZone({ classroomId, isTeacher }) {
                       <div className="text-center flex-1">
                         <div className="text-sm text-gray-600 mb-1">{theirTeam}</div>
                         <div className="text-3xl font-bold text-red-600">{theirScore}</div>
-                        <div className="text-xs text-gray-500">Total XP</div>
+                        <div className="text-xs text-gray-500">Avg XP/student</div>
+                        <div className="text-xs text-gray-400 mt-1">
+                          ({isChallenger ? battle.opponent_student_count : battle.challenger_student_count} students)
+                        </div>
                       </div>
                     </div>
 
