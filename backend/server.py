@@ -540,6 +540,9 @@ async def bulk_upload_assignments(request: Request):
                     errors.append(f"Row {row_index + 1}: Missing title or solution_code")
                     continue
                 
+                # Log the row for debugging
+                logging.info(f"Processing row {row_index + 1}: {row.get('title')}")
+                
                 new_assignment = LibraryAssignment(
                     title=row.get("title", ""),
                     description=row.get("description", ""),
@@ -558,7 +561,9 @@ async def bulk_upload_assignments(request: Request):
                 created_count += 1
                 
             except Exception as e:
-                errors.append(f"Row {row_index + 1}: {str(e)}")
+                error_msg = f"Row {row_index + 1} ({row.get('title', 'Unknown')}): {str(e)}"
+                logging.error(error_msg)
+                errors.append(error_msg)
         
         return {
             "success": True,
