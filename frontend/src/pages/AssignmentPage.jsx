@@ -184,7 +184,12 @@ export default function AssignmentPage({ user }) {
         toast.error(`Score: ${response.data.score.toFixed(1)}% - No lives remaining. Assignment locked.`);
       }
       
-      setHasRun(false);
+      // Reset run status for current problem after submission
+      const currentProblemId = getCurrentProblemId();
+      setHasRunPerProblem(prev => ({
+        ...prev,
+        [currentProblemId]: false
+      }));
       fetchSubmissions();
     } catch (error) {
       console.error("Error submitting assignment:", error);
