@@ -476,29 +476,29 @@ export default function AssignmentLibrary({ user }) {
                     </div>
                     <div className="text-xs text-gray-500">
                       <Download className="w-3 h-3 inline mr-1" />
-                      {assignment.times_imported || 0}
+                      {problem.times_imported || 0}
                     </div>
                   </div>
-                  <CardTitle className="text-lg">{assignment.title}</CardTitle>
-                  <CardDescription className="line-clamp-2">{assignment.description}</CardDescription>
+                  <CardTitle className="text-lg">{problem.title}</CardTitle>
+                  <CardDescription className="line-clamp-2">{problem.description}</CardDescription>
                 </CardHeader>
                 <CardContent className="space-y-2">
                   <div className="flex flex-wrap gap-2">
                     <span className="px-2 py-1 bg-indigo-100 text-indigo-700 rounded text-xs font-medium">
-                      {assignment.category}
+                      {problem.category}
                     </span>
-                    {assignment.csta_standard && (
+                    {problem.csta_standard && (
                       <span className="px-2 py-1 bg-purple-100 text-purple-700 rounded text-xs font-medium">
-                        {assignment.csta_standard}
+                        {problem.csta_standard}
                       </span>
                     )}
                   </div>
                   <div className="text-xs text-gray-500 pt-2">
-                    By {assignment.creator_name}
+                    By {problem.creator_name}
                   </div>
                   <Button
-                    data-testid={`import-${assignment.id}`}
-                    onClick={() => navigate(`/library/import/${assignment.id}`)}
+                    data-testid={`import-${problem.id}`}
+                    onClick={() => navigate(`/library/import/${problem.id}`)}
                     className="w-full mt-3 bg-indigo-600 hover:bg-indigo-700"
                     size="sm"
                   >
