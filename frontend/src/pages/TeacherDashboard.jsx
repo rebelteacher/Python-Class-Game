@@ -108,7 +108,7 @@ export default function TeacherDashboard({ user, setUser }) {
         <div className="container mx-auto px-6 py-4 flex justify-between items-center">
           <div className="flex items-center space-x-2">
             <Code2 className="w-7 h-7 text-indigo-600" />
-            <span className="text-xl font-bold text-gray-900">CodeClass</span>
+            <span className="text-xl font-bold text-gray-900">ByteBattles Arena</span>
             <span className="ml-4 px-3 py-1 bg-indigo-100 text-indigo-700 text-sm font-medium rounded-full">
               Teacher
             </span>
