@@ -215,6 +215,19 @@ export default function AssignmentPage({ user }) {
                 </CardContent>
               </Card>
 
+              {assignment.expected_output && (
+                <Card data-testid="expected-output-card" className="border-2 border-green-200 bg-green-50">
+                  <CardHeader>
+                    <CardTitle className="text-lg">Expected Output</CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <pre className="p-3 bg-white rounded border border-green-300 text-gray-800 text-sm font-mono whitespace-pre-wrap">
+                      {assignment.expected_output}
+                    </pre>
+                  </CardContent>
+                </Card>
+              )}
+
               <Card data-testid="test-cases-card">
                 <CardHeader>
                   <CardTitle>Test Cases</CardTitle>
