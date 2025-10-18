@@ -252,7 +252,8 @@ class AssignmentCreate(BaseModel):
 class Submission(BaseModel):
     model_config = ConfigDict(extra="ignore")
     id: str = Field(default_factory=lambda: str(uuid.uuid4()))
-    assignment_id: str
+    assignment_id: str  # Which assignment bundle
+    problem_id: str  # Which specific problem within the assignment
     student_id: str
     code: str
     score: float
@@ -266,6 +267,7 @@ class Submission(BaseModel):
 
 class SubmissionCreate(BaseModel):
     assignment_id: str
+    problem_id: str  # NEW: specific problem being submitted
     code: str
 
 class Battle(BaseModel):
