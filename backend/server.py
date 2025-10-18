@@ -859,7 +859,6 @@ async def submit_assignment(submission: SubmissionCreate, request: Request):
     else:
         lives_remaining = 3
         attempt_number = 1
-        raise HTTPException(status_code=404, detail="Assignment not found")
     
     # Run test cases (if provided)
     test_results = []
