@@ -14,7 +14,7 @@ export default function LandingPage() {
       <nav className="container mx-auto px-6 py-6 flex justify-between items-center">
         <div className="flex items-center space-x-2">
           <Code2 className="w-8 h-8 text-indigo-600" />
-          <span className="text-2xl font-bold text-gray-900">CodeClass</span>
+          <span className="text-2xl font-bold text-gray-900">ByteBattles Arena</span>
         </div>
         <Button data-testid="nav-login-btn" onClick={handleLogin} className="bg-indigo-600 hover:bg-indigo-700 text-white px-6 py-2 rounded-full">
           Login
@@ -24,13 +24,13 @@ export default function LandingPage() {
       <main className="container mx-auto px-6 py-20">
         <div className="max-w-4xl mx-auto text-center">
           <h1 className="text-5xl sm:text-6xl lg:text-7xl font-bold text-gray-900 mb-6">
-            Teaching Code,
+            Where Code
             <br />
-            <span className="text-indigo-600">Made Simple</span>
+            <span className="text-indigo-600">Meets Competition</span>
           </h1>
           
           <p className="text-lg sm:text-xl text-gray-600 mb-10 max-w-2xl mx-auto">
-            A powerful platform for coding teachers. Create classrooms, assign Python coding challenges, and provide AI-powered feedback to your students.
+            The ultimate coding education platform with gamification, team battles, and AI-powered grading. Make learning Python an epic adventure!
           </p>
 
           <Button data-testid="hero-get-started-btn" onClick={handleLogin} className="bg-indigo-600 hover:bg-indigo-700 text-white px-8 py-6 text-lg rounded-full shadow-lg hover:shadow-xl transition-all">
