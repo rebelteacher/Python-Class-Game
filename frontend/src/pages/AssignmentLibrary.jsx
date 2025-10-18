@@ -615,6 +615,123 @@ export default function AssignmentLibrary({ user }) {
           </div>
         )}
 
+        {/* Edit Problem Dialog */}
+        {editingProblem && (
+          <Dialog open={editDialogOpen} onOpenChange={setEditDialogOpen}>
+            <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto">
+              <DialogHeader>
+                <DialogTitle>Edit Problem</DialogTitle>
+                <DialogDescription>
+                  Update the problem details
+                </DialogDescription>
+              </DialogHeader>
+              <form onSubmit={handleEditProblem} className="space-y-4">
+                <div>
+                  <Label htmlFor="edit-title">Title *</Label>
+                  <Input
+                    id="edit-title"
+                    placeholder="e.g., Problem 5: Print Hello World"
+                    value={editingProblem.title}
+                    onChange={(e) => setEditingProblem({ ...editingProblem, title: e.target.value })}
+                    className="mt-1"
+                  />
+                </div>
+
+                <div>
+                  <Label htmlFor="edit-description">Description *</Label>
+                  <Textarea
+                    id="edit-description"
+                    placeholder="Instructions for students..."
+                    value={editingProblem.description}
+                    onChange={(e) => setEditingProblem({ ...editingProblem, description: e.target.value })}
+                    className="mt-1"
+                    rows={3}
+                  />
+                </div>
+
+                <div className="grid grid-cols-3 gap-4">
+                  <div>
+                    <Label htmlFor="edit-category">Category *</Label>
+                    <Input
+                      id="edit-category"
+                      placeholder="e.g., Basics, Loops"
+                      value={editingProblem.category}
+                      onChange={(e) => setEditingProblem({ ...editingProblem, category: e.target.value })}
+                      className="mt-1"
+                    />
+                  </div>
+
+                  <div>
+                    <Label htmlFor="edit-difficulty">Difficulty</Label>
+                    <Select value={editingProblem.difficulty} onValueChange={(val) => setEditingProblem({ ...editingProblem, difficulty: val })}>
+                      <SelectTrigger>
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="Easy">Easy</SelectItem>
+                        <SelectItem value="Medium">Medium</SelectItem>
+                        <SelectItem value="Hard">Hard</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+
+                  <div>
+                    <Label htmlFor="edit-csta">CSTA Standard</Label>
+                    <Input
+                      id="edit-csta"
+                      placeholder="e.g., 3A-AP-16"
+                      value={editingProblem.csta_standard}
+                      onChange={(e) => setEditingProblem({ ...editingProblem, csta_standard: e.target.value })}
+                      className="mt-1"
+                    />
+                  </div>
+                </div>
+
+                <div>
+                  <Label htmlFor="edit-starterCode">Starter Code (Optional)</Label>
+                  <Textarea
+                    id="edit-starterCode"
+                    placeholder="# Starter code for students..."
+                    value={editingProblem.starter_code}
+                    onChange={(e) => setEditingProblem({ ...editingProblem, starter_code: e.target.value })}
+                    className="mt-1 font-mono text-sm"
+                    rows={5}
+                  />
+                </div>
+
+                <div>
+                  <Label htmlFor="edit-solutionCode">Solution Code *</Label>
+                  <Textarea
+                    id="edit-solutionCode"
+                    placeholder="# Your solution code..."
+                    value={editingProblem.solution_code}
+                    onChange={(e) => setEditingProblem({ ...editingProblem, solution_code: e.target.value })}
+                    className="mt-1 font-mono text-sm"
+                    rows={8}
+                  />
+                </div>
+
+                <div>
+                  <Label htmlFor="edit-expectedOutput">Expected Output (Optional)</Label>
+                  <Textarea
+                    id="edit-expectedOutput"
+                    placeholder="e.g., 60"
+                    value={editingProblem.expected_output}
+                    onChange={(e) => setEditingProblem({ ...editingProblem, expected_output: e.target.value })}
+                    className="mt-1 font-mono text-sm"
+                    rows={3}
+                  />
+                  <p className="text-xs text-gray-500 mt-1">What the program should output when run</p>
+                </div>
+
+                <Button type="submit" className="w-full bg-indigo-600 hover:bg-indigo-700">
+                  Update Problem
+                </Button>
+              </form>
+            </DialogContent>
+          </Dialog>
+        )}
+
         {/* Assignment Builder Dialog */}
         <AssignmentBuilder
           open={assignmentBuilderOpen}
