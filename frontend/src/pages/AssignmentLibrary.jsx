@@ -18,8 +18,8 @@ const API = `${BACKEND_URL}/api`;
 
 export default function AssignmentLibrary({ user }) {
   const navigate = useNavigate();
-  const [assignments, setAssignments] = useState([]);
-  const [filteredAssignments, setFilteredAssignments] = useState([]);
+  const [problems, setProblems] = useState([]);
+  const [filteredProblems, setFilteredProblems] = useState([]);
   const [loading, setLoading] = useState(true);
   const [createDialogOpen, setCreateDialogOpen] = useState(false);
   const [bulkUploadDialogOpen, setBulkUploadDialogOpen] = useState(false);
@@ -29,7 +29,12 @@ export default function AssignmentLibrary({ user }) {
   const [categoryFilter, setCategoryFilter] = useState("all");
   const [difficultyFilter, setDifficultyFilter] = useState("all");
   
-  const [newAssignment, setNewAssignment] = useState({
+  // Multi-select mode
+  const [selectionMode, setSelectionMode] = useState(false);
+  const [selectedProblems, setSelectedProblems] = useState([]);
+  const [assignmentBuilderOpen, setAssignmentBuilderOpen] = useState(false);
+  
+  const [newProblem, setNewProblem] = useState({
     title: "",
     description: "",
     starter_code: "",
@@ -41,23 +46,23 @@ export default function AssignmentLibrary({ user }) {
   });
 
   useEffect(() => {
-    fetchAssignments();
+    fetchProblems();
   }, []);
 
   useEffect(() => {
-    filterAssignments();
-  }, [searchTerm, categoryFilter, difficultyFilter, assignments]);
+    filterProblems();
+  }, [searchTerm, categoryFilter, difficultyFilter, problems]);
 
-  const fetchAssignments = async () => {
+  const fetchProblems = async () => {
     try {
-      const response = await axios.get(`${API}/library/assignments`, {
+      const response = await axios.get(`${API}/problems`, {
         withCredentials: true,
       });
-      setAssignments(response.data);
-      setFilteredAssignments(response.data);
+      setProblems(response.data);
+      setFilteredProblems(response.data);
     } catch (error) {
       console.error("Error fetching library:", error);
-      toast.error("Failed to load assignment library");
+      toast.error("Failed to load problem library");
     } finally {
       setLoading(false);
     }
