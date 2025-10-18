@@ -175,8 +175,6 @@ export default function AssignmentLibrary({ user }) {
       setBulkUploadDialogOpen(false);
       setCsvFile(null);
       fetchProblems();
-      setCsvFile(null);
-      fetchAssignments();
     } catch (error) {
       console.error("Error uploading CSV:", error);
       toast.error("Failed to upload CSV");
@@ -185,7 +183,24 @@ export default function AssignmentLibrary({ user }) {
     }
   };
 
-  const categories = [...new Set(assignments.map(a => a.category))].filter(Boolean);
+  // Multi-select handlers
+  const toggleProblemSelection = (problemId) => {
+    setSelectedProblems(prev => 
+      prev.includes(problemId) 
+        ? prev.filter(id => id !== problemId)
+        : [...prev, problemId]
+    );
+  };
+
+  const handleCreateAssignment = () => {
+    if (selectedProblems.length === 0) {
+      toast.error("Please select at least one problem");
+      return;
+    }
+    setAssignmentBuilderOpen(true);
+  };
+
+  const categories = [...new Set(problems.map(p => p.category))].filter(Boolean);
 
   return (
     <div data-testid="assignment-library" className="min-h-screen bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50">
