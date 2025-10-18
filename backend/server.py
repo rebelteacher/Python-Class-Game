@@ -1064,39 +1064,47 @@ async def get_classroom_battles(classroom_id: str, request: Request):
     # Update scores for active battles
     for battle in battles:
         if battle["status"] == "active":
-            # Calculate current scores
+            # Calculate current scores using AVERAGE XP per student
             start_date = datetime.fromisoformat(battle["start_date"])
             
-            # Get XP earned by challenger team during battle
-            challenger_students = await db.classrooms.find_one({"id": battle["challenger_classroom_id"]})
-            challenger_student_ids = challenger_students.get("students", [])
+            # Get challenger team
+            challenger_classroom = await db.classrooms.find_one({"id": battle["challenger_classroom_id"]})
+            challenger_student_ids = challenger_classroom.get("students", [])
             
-            # Get submissions during battle period and sum XP
-            challenger_xp = 0
+            # Calculate average XP for challenger team
+            challenger_total_xp = 0
+            challenger_count = len(challenger_student_ids)
             for student_id in challenger_student_ids:
                 student = await db.users.find_one({"id": student_id})
                 if student:
-                    # This is simplified - in production you'd track XP changes during battle period
-                    challenger_xp += student.get("xp", 0) // len(challenger_student_ids) if challenger_student_ids else 0
+                    challenger_total_xp += student.get("xp", 0)
             
-            # Get opponent team XP
-            opponent_students = await db.classrooms.find_one({"id": battle["opponent_classroom_id"]})
-            opponent_student_ids = opponent_students.get("students", [])
+            challenger_avg_xp = challenger_total_xp // challenger_count if challenger_count > 0 else 0
             
-            opponent_xp = 0
+            # Get opponent team
+            opponent_classroom = await db.classrooms.find_one({"id": battle["opponent_classroom_id"]})
+            opponent_student_ids = opponent_classroom.get("students", [])
+            
+            # Calculate average XP for opponent team
+            opponent_total_xp = 0
+            opponent_count = len(opponent_student_ids)
             for student_id in opponent_student_ids:
                 student = await db.users.find_one({"id": student_id})
                 if student:
-                    opponent_xp += student.get("xp", 0) // len(opponent_student_ids) if opponent_student_ids else 0
+                    opponent_total_xp += student.get("xp", 0)
             
-            battle["challenger_score"] = challenger_xp
-            battle["opponent_score"] = opponent_xp
+            opponent_avg_xp = opponent_total_xp // opponent_count if opponent_count > 0 else 0
+            
+            battle["challenger_score"] = challenger_avg_xp
+            battle["opponent_score"] = opponent_avg_xp
+            battle["challenger_student_count"] = challenger_count
+            battle["opponent_student_count"] = opponent_count
             
             # Check if battle ended
             if datetime.now(timezone.utc) > datetime.fromisoformat(battle["end_date"]):
-                winner_id = battle["challenger_classroom_id"] if challenger_xp > opponent_xp else battle["opponent_classroom_id"]
+                winner_id = battle["challenger_classroom_id"] if challenger_avg_xp > opponent_avg_xp else battle["opponent_classroom_id"]
                 
-                # Award prizes
+                # Award prizes to winning team
                 winner_students = challenger_student_ids if winner_id == battle["challenger_classroom_id"] else opponent_student_ids
                 for student_id in winner_students:
                     await db.users.update_one(
@@ -1114,8 +1122,8 @@ async def get_classroom_battles(classroom_id: str, request: Request):
                         "$set": {
                             "status": "completed",
                             "winner_id": winner_id,
-                            "challenger_score": challenger_xp,
-                            "opponent_score": opponent_xp
+                            "challenger_score": challenger_avg_xp,
+                            "opponent_score": opponent_avg_xp
                         }
                     }
                 )
