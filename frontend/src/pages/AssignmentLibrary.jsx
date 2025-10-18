@@ -213,13 +213,14 @@ export default function AssignmentLibrary({ user }) {
                   <form onSubmit={handleBulkUpload} className="space-y-4">
                     <div>
                       <Label>CSV Format Required:</Label>
-                      <div className="text-xs text-gray-600 mt-2 p-3 bg-gray-50 rounded font-mono">
-                        title,description,starter_code,solution_code,category,difficulty,csta_standard
+                      <div className="text-xs text-gray-600 mt-2 p-3 bg-gray-50 rounded font-mono overflow-x-auto">
+                        title,description,starter_code,solution_code,expected_output,category,difficulty,csta_standard
                       </div>
                       <p className="text-xs text-gray-500 mt-2">
                         • Title and solution_code are required<br/>
-                        • Use quotes for multi-line code: "print('hello')"<br/>
-                        • Difficulty: Easy, Medium, or Hard
+                        • Multi-line code: Use \n or wrap in quotes with actual line breaks<br/>
+                        • Difficulty: Easy, Medium, or Hard<br/>
+                        • Example: "Problem 1","Description here","","print('Hello')\nprint('World')","Hello\nWorld","Basics","Easy","3A-AP-16"
                       </p>
                     </div>
                     
