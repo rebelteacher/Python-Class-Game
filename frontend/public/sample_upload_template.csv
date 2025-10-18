@@ -1,0 +1,28 @@
+title,description,starter_code,solution_code,expected_output,category,difficulty,csta_standard
+"Double Points","Create a variable points set to 30. Multiply it by 2 to double it and print the result.","","points = 30
+result = points * 2
+print(result)","60","Python Math","Easy","5.1.b"
+"Hello World","Write a program that prints Hello World","","print('Hello World')","Hello World","Basics","Easy","3A-AP-16"
+"Add Two Numbers","Ask user for two numbers and print their sum","num1 = int(input())
+num2 = int(input())
+# Your code here","num1 = int(input())
+num2 = int(input())
+result = num1 + num2
+print(result)","(depends on input)","Math","Easy","3A-AP-17"
+"Even or Odd","Check if a number is even or odd","","number = int(input())
+if number % 2 == 0:
+    print('Even')
+else:
+    print('Odd')","Even (for input 4)
+Odd (for input 5)","Conditionals","Medium","3A-AP-15"
+"Loop 1 to 10","Print numbers from 1 to 10 using a loop","","for i in range(1, 11):
+    print(i)","1
+2
+3
+4
+5
+6
+7
+8
+9
+10","Loops","Easy","3A-AP-13"
