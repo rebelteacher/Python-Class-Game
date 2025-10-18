@@ -1,0 +1,179 @@
+<analysis>
+The AI engineer successfully guided the application from initial concept to a feature-rich platform. The development trajectory involved continuous interaction with the user to refine product requirements, starting with basic coding assignments and evolving into a comprehensive gamified learning system. Key architectural changes included shifting from simple assignments to a multi-problem assignment model, integrating AI grading, and implementing complex social features like team battles and leaderboards. Repeated authentication issues and frontend/backend synchronization challenges were recurrent, requiring persistent debugging. The AI demonstrated an iterative approach, fixing bugs and adding features incrementally based on user feedback, including significant refactoring for CSV parsing and UI layout. The current work halted at a  error during assignment submission, indicating an authentication/authorization problem.
+</analysis>
+
+<product_requirements>
+The user, a content creator for teachers who teach coding, requires an application to facilitate coding education.
+**Core Functionality:**
+- **Teacher-managed Classrooms:** Teachers create classrooms and invite students via class codes.
+- **Assignment Creation:** Teachers (or content creator) input assignments with:
+    - Instructions/description
+    - Starter code (optional)
+    - Solution code
+    - Expected output (newly added)
+    - Category, Difficulty, CSTA K-12 CS Standards (for content library)
+- **AI-Powered Grading:** Students submit code; an AI evaluates it, providing a score (including partial credit) and feedback for Python code.
+- **Output Window:** Students should see the output of their code execution.
+- **Authentication:** Google social login for both teachers and students.
+- **Programming Language:** Python only.
+
+**Evolved Features & Enhancements:**
+- **Gamification:**
+    - **Lives System:** Students get 3 lives per assignment; a life is lost on failed submissions (< 70% score). Lockout after 3 failed attempts. Students must run code before submitting.
+    - **XP & Coins:** Students earn XP for passing assignments (bonus for perfect score, first-try, streaks) and coins (per assignment, perfect score, daily login).
+    - **Levels/Ranks:** 9 distinct ranks with associated XP ranges and themed visual styles.
+    - **Virtual Shop:** Students spend coins on dashboard themes, profile badges, custom avatars/borders.
+    - **Leaderboard:** Classroom-specific leaderboard displaying rank, name, XP, problems solved, streaks.
+- **Content Management (Assignment Library):**
+    - **Content Creator Role:** Upload pre-made Python assignments (instructions, starter code, solution code, test cases, PowerPoints, lesson plans, workbooks).
+    - **Teacher Assignment Library:** Teachers browse, filter, search, and import ready-made assignments into their classrooms.
+    - **Create Assignment Form:** Teachers can manually create single assignments.
+    - **Bulk Upload:** Option to upload assignments via CSV.
+    - **Multi-Problem Assignments (Planned Rebuild):** Bundle multiple individual problems from the library into a single assignment.
+- **Scheduling & Assignment Control:**
+    - **Multi-Class Assignment:** Assign problems/assignments to multiple classrooms simultaneously.
+    - **Scheduler:** Set available (start) and due dates/times for assignments.
+    - **Availability:** Assignment titles visible to students before , but inaccessible.
+    - **Late Submissions:** Accepted after due date with a Late badge and optional penalty.
+    - **Teacher Timezone:** Scheduling based on teacher's local timezone.
+    - **Post Now Option:** Immediately make an assignment available.
+    - **Classroom Default Start Times:** Define a default start time per classroom to auto-apply during scheduling.
+- **Teacher Practice Sandbox:** An area for teachers to practice coding assignments before teaching.
+- **Live Demo Mode:** Teachers can run starter code in front of the class.
+- **Team Battles:** Classrooms can challenge each other, with winning based on average XP per student.
+- **UI/UX:** Side-by-side code editor and output window with resizable panels.
+
+**Problem Solved:** The platform aims to simplify coding instruction for teachers, allowing them to leverage pre-made content and AI grading, while engaging students through gamification and competition.
+</product_requirements>
+
+<key_technical_concepts>
+- **FastAPI:** Python web framework for backend API.
+- **React:** JavaScript library for building frontend UI.
+- **MongoDB:** NoSQL database for data storage.
+- **Google OAuth:** User authentication and authorization.
+- **AI-powered Code Evaluation:** Using OpenAI GPT-4o via .
+- **Shadcn UI:** Component library for modern UI.
+- **:** Frontend library for adjustable UI layouts.
+- **:** JavaScript library for robust CSV parsing.
+</key_technical_concepts>
+
+<code_architecture>
+
+**High-Level Architecture:**
+The application follows a full-stack architecture with a React frontend, a FastAPI backend, and a MongoDB database. Communication between frontend and backend is via RESTful API calls.
+
+**Directory Structure:**
+
+
+
+**Key Files and Changes:**
+
+-   **/app/backend/server.py**:
+    -   **Summary:** Main FastAPI application. Defines Pydantic models for data (User, Classroom, Assignment, Submission, etc.), API routes (auth, classrooms, assignments, submissions, gamification, battles, library), and core business logic.
+    -   **Changes:**
+        -   Initial implementation of CRUD for users, classrooms, assignments, submissions.
+        -   Fixed Pydantic/MongoDB ObjectId serialization issues for user sessions.
+        -   Updated submission logic to make test cases optional and rely on AI comparison for grading.
+        -   Added  field to Assignment model.
+        -   Implemented gamification logic: XP/coins calculation, rank progression.
+        -   Added endpoints for leaderboard, shop, and battle management.
+        -   Implemented lives system: tracks  and enforces lockout.
+        -   Added assignment availability checks (, ) and late submission penalties.
+        -   Implemented content library endpoints (add, get all).
+        -   Refactored route order to fix 404 for specific routes (e.g., ).
+        -   Modified battle calculation to use average XP per student.
+        -   Added  field to Assignment model.
+        -   Enhanced logging for debugging CSV uploads.
+
+-   **/app/frontend/src/App.js**:
+    -   **Summary:** Entry point for the React application, setting up global routing and navigation.
+    -   **Changes:** Added routes for , , , , , , .
+
+-   **/app/frontend/src/App.css**:
+    -   **Summary:** Global CSS styles for the application.
+    -   **Changes:** Minor styling adjustments as needed during component creation.
+
+-   **/app/frontend/src/pages/LandingPage.jsx**:
+    -   **Summary:** The initial page users see, likely with login/signup options.
+    -   **Changes:** Created during initial app scaffolding.
+
+-   **/app/frontend/src/pages/TeacherDashboard.jsx**:
+    -   **Summary:** Provides teachers with an overview of their classes and access to features.
+    -   **Changes:** Added imports for  icon, navigation links to Assignment Library, displays classrooms.
+
+-   **/app/frontend/src/pages/StudentDashboard.jsx**:
+    -   **Summary:** Displays student-specific information, assignments, and gamification elements.
+    -   **Changes:** Added imports for  icon, integrated  and  components, added a shop button/dialog.
+
+-   **/app/frontend/src/pages/ClassroomPage.jsx**:
+    -   **Summary:** Details of a specific classroom, including its students and assignments.
+    -   **Changes:** Integrated  component and  component. Fixed  missing in assignment creation request.
+
+-   **/app/frontend/src/pages/AssignmentPage.jsx**:
+    -   **Summary:** The interactive page where students view and submit code, featuring a code editor, output, and assignment details.
+    -   **Changes:**
+        -   Initial implementation of code editor and submission UI.
+        -   Updated to display  and enforce run code before submit.
+        -   Implemented side-by-side layout for code editor and output window using .
+        -   Adjusted layout to make instructions/test cases panel also resizable.
+        -   Modified submission logic to handle optional test cases and display XP/coins earned.
+        -   Integrated  field.
+
+-   **/app/frontend/src/pages/AssignmentLibrary.jsx**:
+    -   **Summary:** Allows teachers to browse, add, and bulk upload assignments to a global library.
+    -   **Changes:**
+        -   Implemented UI for displaying assignment cards, search, and filters.
+        -   Added a form for creating new library assignments with fields like title, description, starter/solution code, category, difficulty, , and .
+        -   Integrated  for robust CSV bulk upload.
+        -   Fixed  error by ensuring filter values are handled correctly.
+        -   Fixed JSX syntax errors.
+
+-   **/app/frontend/src/pages/ImportAssignment.jsx**:
+    -   **Summary:** A dedicated page for importing assignments from the library into specific classrooms, including scheduling and late policies.
+    -   **Changes:**
+        -   Created to handle the import workflow.
+        -   Implemented UI for , , , .
+        -   Added classroom selection checkboxes.
+        -   Fixed date validation bug and multi-checkbox selection issue.
+
+-   **/app/frontend/src/components/RankBadge.jsx**:
+    -   **Summary:** A new component to visually represent a student's rank and XP progression.
+    -   **Changes:** Created to display ranking information.
+
+-   **/app/frontend/src/components/Leaderboard.jsx**:
+    -   **Summary:** A new component to display the classroom's student leaderboard.
+    -   **Changes:** Created to display student rankings.
+
+-   **/app/frontend/src/components/BattleZone.jsx**:
+    -   **Summary:** A new component for displaying and managing team battles.
+    -   **Changes:** Created to implement the team battle feature.
+
+</code_architecture>
+
+<pending_tasks>
+- **Full Option A Rebuild:** Refactor the assignment model to support bundling multiple coding problems into a single assignment with unified scheduling (start/due dates, late policy) across multiple classrooms. This includes updating database models, assignment builder UI, student assignment view, and submission tracking.
+- **Team Battles Enhancements:** Implement weekly champion spotlight and integrate more sport-themed content (badges, rank names, victory animations, custom achievements).
+</pending_tasks>
+
+<current_work>
+Immediately before this summary request, the AI engineer was working on debugging an issue where **assignment submission was failing with a  error**. This occurred after several recent UI/UX enhancements and bug fixes.
+
+**Specific details:**
+-   **User Action:** Attempted to submit an assignment after running incomplete code.
+-   **Observed Behavior:**
+    -   All  were lost immediately, and the assignment became locked after just one run and one submit. (This is a separate bug from the  but was reported concurrently).
+    -   Browser console showed:
+        -   
+        -   
+-   **Previous Context:**
+    -   The AI recently fixed a  error for the  endpoint, which then correctly showed a  for GET requests (confirming POST works).
+    -   Implemented resizable panels for code editor, output, instructions, and test cases in  using . Initially, there were layout errors (panels off-screen, invalid total size), which were subsequently fixed by correcting the default sizes and JSX structure.
+    -   Implemented robust CSV bulk upload functionality using  in  and  after the user reported errors with previous simple parsing.
+    -   Addressed intermittent login authentication failed issues, typically resolved by clearing browser cookies or using a direct login link.
+
+The AI's immediate next step is to investigate the cause of the  error on the  endpoint, which indicates an authorization problem, despite previous checks confirming the route's existence and method allowance.
+</current_work>
+
+<optional_next_step>
+Investigate the  error on the  endpoint to identify and resolve the authorization issue in the backend.
+</optional_next_step>
