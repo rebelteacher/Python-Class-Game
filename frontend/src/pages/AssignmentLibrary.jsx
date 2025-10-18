@@ -160,12 +160,12 @@ export default function AssignmentLibrary({ user }) {
 
       // Upload
       const response = await axios.post(
-        `${API}/library/assignments/bulk-upload`,
+        `${API}/problems/bulk-upload`,
         { csv_data: result.data },
         { withCredentials: true }
       );
 
-      toast.success(`✅ Uploaded ${response.data.created} assignments!`);
+      toast.success(`✅ Uploaded ${response.data.created} problems!`);
       
       if (response.data.errors.length > 0) {
         toast.error(`${response.data.errors.length} rows had errors. Check console for details.`);
@@ -173,6 +173,8 @@ export default function AssignmentLibrary({ user }) {
       }
 
       setBulkUploadDialogOpen(false);
+      setCsvFile(null);
+      fetchProblems();
       setCsvFile(null);
       fetchAssignments();
     } catch (error) {
