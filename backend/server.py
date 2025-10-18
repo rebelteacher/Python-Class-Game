@@ -704,6 +704,42 @@ async def create_assignment(assignment: AssignmentCreate, request: Request):
     
     return {"success": True, "assignment_id": new_assignment.id, "classrooms": len(assignment.classroom_ids)}
 
+@api_router.put("/assignments/{assignment_id}/schedule")
+async def update_assignment_schedule(assignment_id: str, request: Request):
+    """Update assignment scheduling (available_date, due_date, late policy)"""
+    user = await get_current_user(request)
+    
+    if user["role"] != "teacher":
+        raise HTTPException(status_code=403, detail="Only teachers can update assignments")
+    
+    assignment = await db.assignments.find_one({"id": assignment_id})
+    if not assignment:
+        raise HTTPException(status_code=404, detail="Assignment not found")
+    
+    # Verify teacher owns this assignment
+    if assignment.get("teacher_id") != user["id"]:
+        raise HTTPException(status_code=403, detail="Access denied")
+    
+    body = await request.json()
+    
+    # Parse dates if provided
+    update_data = {}
+    if "available_date" in body:
+        update_data["available_date"] = body["available_date"]
+    if "due_date" in body:
+        update_data["due_date"] = body["due_date"]
+    if "allow_late_submission" in body:
+        update_data["allow_late_submission"] = body["allow_late_submission"]
+    if "late_penalty_percent" in body:
+        update_data["late_penalty_percent"] = body["late_penalty_percent"]
+    
+    await db.assignments.update_one(
+        {"id": assignment_id},
+        {"$set": update_data}
+    )
+    
+    return {"success": True, "message": "Assignment schedule updated"}
+
 @api_router.get("/assignments/classroom/{classroom_id}")
 async def get_assignments(classroom_id: str, request: Request):
     """Get all assignments for a classroom"""
