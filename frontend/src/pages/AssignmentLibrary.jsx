@@ -291,8 +291,8 @@ export default function AssignmentLibrary({ user }) {
                       data-testid="lib-title-input"
                       id="title"
                       placeholder="e.g., Problem 5: Print Hello World"
-                      value={newAssignment.title}
-                      onChange={(e) => setNewAssignment({ ...newAssignment, title: e.target.value })}
+                      value={newProblem.title}
+                      onChange={(e) => setNewProblem({ ...newProblem, title: e.target.value })}
                       className="mt-1"
                     />
                   </div>
