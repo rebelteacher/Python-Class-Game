@@ -105,6 +105,7 @@ export default function AssignmentLibrary({ user }) {
         description: "",
         starter_code: "",
         solution_code: "",
+        expected_output: "",
         category: "",
         difficulty: "Easy",
         csta_standard: ""
