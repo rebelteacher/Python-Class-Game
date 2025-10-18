@@ -414,7 +414,7 @@ export default function AssignmentPage({ user }) {
               </CardHeader>
               <CardContent>
                 <pre className="p-4 bg-gray-900 text-gray-100 rounded-lg font-mono text-sm overflow-auto max-h-[500px]">
-                  {assignment.solution_code}
+                  {(assignment.problems && assignment.problems[0]?.solution_code) || assignment.solution_code || "No solution code available"}
                 </pre>
               </CardContent>
               </Card>
