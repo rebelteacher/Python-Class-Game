@@ -97,7 +97,7 @@ export default function AssignmentLibrary({ user }) {
       return;
     }
 
-    try:
+    try {
       await axios.post(
         `${API}/problems`,
         newProblem,
@@ -118,7 +118,7 @@ export default function AssignmentLibrary({ user }) {
       fetchProblems();
     } catch (error) {
       console.error("Error creating problem:", error);
-      toast.error("Failed to create assignment");
+      toast.error("Failed to create problem");
     }
   };
 
