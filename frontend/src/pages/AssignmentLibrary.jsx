@@ -353,6 +353,20 @@ export default function AssignmentLibrary({ user }) {
                     />
                   </div>
 
+                  <div>
+                    <Label htmlFor="expectedOutput">Expected Output (Optional)</Label>
+                    <Textarea
+                      data-testid="lib-expected-output-input"
+                      id="expectedOutput"
+                      placeholder="e.g., 60"
+                      value={newAssignment.expected_output}
+                      onChange={(e) => setNewAssignment({ ...newAssignment, expected_output: e.target.value })}
+                      className="mt-1 font-mono text-sm"
+                      rows={3}
+                    />
+                    <p className="text-xs text-gray-500 mt-1">What the program should output when run</p>
+                  </div>
+
                   <Button data-testid="lib-submit-btn" type="submit" className="w-full bg-indigo-600 hover:bg-indigo-700">
                     Add to Library
                   </Button>
