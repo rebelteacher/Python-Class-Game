@@ -513,6 +513,111 @@ async def get_classroom(classroom_id: str, request: Request):
 
 # ----- Assignment Routes -----
 
+@api_router.post("/library/assignments", response_model=LibraryAssignment)
+async def create_library_assignment(assignment: LibraryAssignmentCreate, request: Request):
+    """Add assignment to library (Teachers only)"""
+    user = await get_current_user(request)
+    
+    if user["role"] != "teacher":
+        raise HTTPException(status_code=403, detail="Only teachers can add to library")
+    
+    new_assignment = LibraryAssignment(
+        **assignment.model_dump(),
+        creator_id=user["id"],
+        creator_name=user["name"]
+    )
+    
+    assignment_dict = new_assignment.model_dump()
+    assignment_dict["created_at"] = assignment_dict["created_at"].isoformat()
+    await db.library_assignments.insert_one(assignment_dict)
+    
+    return new_assignment
+
+@api_router.get("/library/assignments")
+async def get_library_assignments(
+    request: Request,
+    category: Optional[str] = None,
+    difficulty: Optional[str] = None,
+    csta_standard: Optional[str] = None,
+    search: Optional[str] = None
+):
+    """Get all library assignments with optional filters"""
+    await get_current_user(request)
+    
+    # Build query
+    query = {}
+    if category:
+        query["category"] = category
+    if difficulty:
+        query["difficulty"] = difficulty
+    if csta_standard:
+        query["csta_standard"] = {"$regex": csta_standard, "$options": "i"}
+    if search:
+        query["$or"] = [
+            {"title": {"$regex": search, "$options": "i"}},
+            {"description": {"$regex": search, "$options": "i"}}
+        ]
+    
+    assignments = await db.library_assignments.find(query, {"_id": 0}).to_list(1000)
+    return assignments
+
+@api_router.post("/library/assignments/import")
+async def import_library_assignment(import_data: AssignmentImport, request: Request):
+    """Import library assignment to multiple classrooms with scheduling"""
+    user = await get_current_user(request)
+    
+    if user["role"] != "teacher":
+        raise HTTPException(status_code=403, detail="Only teachers can import assignments")
+    
+    # Get library assignment
+    lib_assignment = await db.library_assignments.find_one({"id": import_data.library_assignment_id})
+    if not lib_assignment:
+        raise HTTPException(status_code=404, detail="Library assignment not found")
+    
+    # Verify teacher owns all classrooms
+    for classroom_id in import_data.classroom_ids:
+        classroom = await db.classrooms.find_one({"id": classroom_id})
+        if not classroom or classroom["teacher_id"] != user["id"]:
+            raise HTTPException(status_code=403, detail=f"You don't have access to classroom {classroom_id}")
+    
+    # Parse dates
+    available_date = datetime.fromisoformat(import_data.available_date) if import_data.available_date else None
+    due_date = datetime.fromisoformat(import_data.due_date) if import_data.due_date else None
+    
+    # Create assignment in each classroom
+    created_assignments = []
+    for classroom_id in import_data.classroom_ids:
+        new_assignment = Assignment(
+            classroom_id=classroom_id,
+            title=lib_assignment["title"],
+            description=lib_assignment["description"],
+            starter_code=lib_assignment["starter_code"],
+            solution_code=lib_assignment["solution_code"],
+            test_cases=[],
+            available_date=available_date,
+            due_date=due_date,
+            allow_late_submission=import_data.allow_late_submission,
+            late_penalty_percent=import_data.late_penalty_percent
+        )
+        
+        assignment_dict = new_assignment.model_dump()
+        assignment_dict["created_at"] = assignment_dict["created_at"].isoformat()
+        if assignment_dict["available_date"]:
+            assignment_dict["available_date"] = assignment_dict["available_date"].isoformat()
+        if assignment_dict["due_date"]:
+            assignment_dict["due_date"] = assignment_dict["due_date"].isoformat()
+        
+        await db.assignments.insert_one(assignment_dict)
+        created_assignments.append(new_assignment)
+    
+    # Increment times_imported counter
+    await db.library_assignments.update_one(
+        {"id": import_data.library_assignment_id},
+        {"$inc": {"times_imported": len(import_data.classroom_ids)}}
+    )
+    
+    return {"success": True, "assignments_created": len(created_assignments)}
+
 @api_router.post("/assignments", response_model=Assignment)
 async def create_assignment(assignment: AssignmentCreate, request: Request):
     """Create a new assignment (Teacher only)"""
