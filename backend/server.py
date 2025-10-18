@@ -56,6 +56,7 @@ SHOP_ITEMS = {
         {"id": "speed_demon", "name": "Speed Demon ⚡", "price": 300, "description": "Fast solver"},
         {"id": "perfect_streak", "name": "Perfect Streak 🌟", "price": 500, "description": "5 perfect scores"},
         {"id": "bug_hunter", "name": "Bug Hunter 🐛", "price": 200, "description": "Fixed your code"},
+        {"id": "champion_team", "name": "Champion Team 🏆", "price": 0, "description": "Battle winner (Cannot be purchased)"},
         {"id": "soccer_star", "name": "Soccer Star ⚽", "price": 400, "description": "Sport pride"},
         {"id": "basketball_pro", "name": "Basketball Pro 🏀", "price": 400, "description": "Sport pride"},
         {"id": "football_legend", "name": "Football Legend 🏈", "price": 400, "description": "Sport pride"},
