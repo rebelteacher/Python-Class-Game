@@ -162,6 +162,62 @@ export default function StudentDashboard({ user, setUser }) {
       </nav>
 
       <main className="container mx-auto px-6 py-10">
+        {/* Stats Dashboard */}
+        <div className="grid md:grid-cols-4 gap-6 mb-8">
+          <div className="md:col-span-2">
+            <RankBadge rank={userProfile.rank || "Rookie"} xp={userProfile.xp || 0} />
+          </div>
+          
+          <Card>
+            <CardHeader className="pb-3">
+              <CardTitle className="text-lg flex items-center gap-2">
+                <Zap className="w-5 h-5 text-yellow-500" />
+                Stats
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-2 text-sm">
+              <div className="flex justify-between">
+                <span className="text-gray-600">Problems Solved:</span>
+                <span className="font-semibold">{userProfile.problems_solved || 0}</span>
+              </div>
+              <div className="flex justify-between">
+                <span className="text-gray-600">Perfect Scores:</span>
+                <span className="font-semibold text-yellow-600">⭐ {userProfile.perfect_scores || 0}</span>
+              </div>
+              <div className="flex justify-between">
+                <span className="text-gray-600">Current Streak:</span>
+                <span className="font-semibold text-orange-600">🔥 {userProfile.current_streak || 0}</span>
+              </div>
+              <div className="flex justify-between">
+                <span className="text-gray-600">Best Streak:</span>
+                <span className="font-semibold">{userProfile.best_streak || 0}</span>
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card className="bg-gradient-to-br from-yellow-50 to-orange-50">
+            <CardHeader className="pb-3">
+              <CardTitle className="text-lg flex items-center gap-2">
+                🪙 Coins
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="text-3xl font-bold text-orange-600 mb-3">
+                {userProfile.coins || 0}
+              </div>
+              <Button 
+                data-testid="open-shop-btn"
+                onClick={() => setShopDialogOpen(true)} 
+                className="w-full bg-orange-500 hover:bg-orange-600 gap-2"
+                size="sm"
+              >
+                <ShoppingBag className="w-4 h-4" />
+                Open Shop
+              </Button>
+            </CardContent>
+          </Card>
+        </div>
+
         <div className="flex justify-between items-center mb-8">
           <div>
             <h1 className="text-4xl font-bold text-gray-900 mb-2">My Classes</h1>
