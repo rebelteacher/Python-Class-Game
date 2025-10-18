@@ -514,6 +514,62 @@ async def get_classroom(classroom_id: str, request: Request):
 
 # ----- Assignment Routes -----
 
+@api_router.post("/library/assignments/bulk-upload")
+async def bulk_upload_assignments(request: Request):
+    """Bulk upload assignments from CSV"""
+    user = await get_current_user(request)
+    
+    if user["role"] != "teacher":
+        raise HTTPException(status_code=403, detail="Only teachers can upload to library")
+    
+    try:
+        # Get CSV data from request body
+        body = await request.json()
+        csv_data = body.get("csv_data", [])
+        
+        if not csv_data or len(csv_data) == 0:
+            raise HTTPException(status_code=400, detail="No data provided")
+        
+        created_count = 0
+        errors = []
+        
+        for row_index, row in enumerate(csv_data):
+            try:
+                # Validate required fields
+                if not row.get("title") or not row.get("solution_code"):
+                    errors.append(f"Row {row_index + 1}: Missing title or solution_code")
+                    continue
+                
+                new_assignment = LibraryAssignment(
+                    title=row.get("title", ""),
+                    description=row.get("description", ""),
+                    starter_code=row.get("starter_code", ""),
+                    solution_code=row.get("solution_code", ""),
+                    category=row.get("category", "Uncategorized"),
+                    difficulty=row.get("difficulty", "Easy"),
+                    csta_standard=row.get("csta_standard", ""),
+                    creator_id=user["id"],
+                    creator_name=user["name"]
+                )
+                
+                assignment_dict = new_assignment.model_dump()
+                assignment_dict["created_at"] = assignment_dict["created_at"].isoformat()
+                await db.library_assignments.insert_one(assignment_dict)
+                created_count += 1
+                
+            except Exception as e:
+                errors.append(f"Row {row_index + 1}: {str(e)}")
+        
+        return {
+            "success": True,
+            "created": created_count,
+            "errors": errors if errors else []
+        }
+        
+    except Exception as e:
+        logging.error(f"Bulk upload error: {str(e)}")
+        raise HTTPException(status_code=500, detail=str(e))
+
 @api_router.post("/library/assignments", response_model=LibraryAssignment)
 async def create_library_assignment(assignment: LibraryAssignmentCreate, request: Request):
     """Add assignment to library (Teachers only)"""
