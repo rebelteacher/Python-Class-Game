@@ -498,16 +498,30 @@ export default function AssignmentLibrary({ user }) {
               <Card
                 key={problem.id}
                 data-testid={`library-card-${problem.id}`}
-                className="hover:shadow-lg transition-shadow border-2 border-gray-100"
+                className={`hover:shadow-lg transition-all border-2 ${
+                  selectionMode && selectedProblems.includes(problem.id)
+                    ? 'border-purple-500 bg-purple-50'
+                    : 'border-gray-100'
+                } ${selectionMode ? 'cursor-pointer' : ''}`}
+                onClick={() => selectionMode && toggleProblemSelection(problem.id)}
               >
                 <CardHeader>
                   <div className="flex justify-between items-start mb-2">
-                    <div className={`px-2 py-1 rounded text-xs font-semibold ${
-                      problem.difficulty === "Easy" ? "bg-green-100 text-green-700" :
-                      problem.difficulty === "Medium" ? "bg-yellow-100 text-yellow-700" :
-                      "bg-red-100 text-red-700"
-                    }`}>
-                      {problem.difficulty}
+                    <div className="flex items-center gap-2">
+                      {selectionMode && (
+                        <Checkbox
+                          checked={selectedProblems.includes(problem.id)}
+                          onCheckedChange={() => toggleProblemSelection(problem.id)}
+                          onClick={(e) => e.stopPropagation()}
+                        />
+                      )}
+                      <div className={`px-2 py-1 rounded text-xs font-semibold ${
+                        problem.difficulty === "Easy" ? "bg-green-100 text-green-700" :
+                        problem.difficulty === "Medium" ? "bg-yellow-100 text-yellow-700" :
+                        "bg-red-100 text-red-700"
+                      }`}>
+                        {problem.difficulty}
+                      </div>
                     </div>
                     <div className="text-xs text-gray-500">
                       <Download className="w-3 h-3 inline mr-1" />
