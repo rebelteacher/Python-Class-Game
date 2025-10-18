@@ -229,7 +229,7 @@ export default function AssignmentLibrary({ user }) {
                   <DialogHeader>
                     <DialogTitle>Bulk Upload from CSV</DialogTitle>
                     <DialogDescription>
-                      Upload multiple assignments at once using a CSV file
+                      Upload multiple problems at once using a CSV file
                     </DialogDescription>
                   </DialogHeader>
                   <form onSubmit={handleBulkUpload} className="space-y-4">
