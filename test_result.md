@@ -101,3 +101,87 @@
 #====================================================================================================
 # Testing Data - Main Agent and testing sub agent both should log testing data below this section
 #====================================================================================================
+
+user_problem_statement: |
+  Fix critical bugs in coding education platform:
+  1. 403 Forbidden error on assignment submission (first submission fails)
+  2. Lives system bug - all lives lost immediately after one attempt
+  3. Remove Library button from student dashboard
+  Then proceed with Option A rebuild (multi-problem assignments)
+
+backend:
+  - task: "Fix 403 Forbidden error on first submission"
+    implemented: true
+    working: "NA"
+    file: "backend/server.py"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: true
+    status_history:
+      - working: "NA"
+        agent: "main"
+        comment: "Fixed line 862 - removed incorrect HTTPException that was blocking first-time submissions. The else block now correctly sets lives_remaining=3 and attempt_number=1 without raising an error."
+  
+  - task: "Fix lives system - proper tracking of 3 lives"
+    implemented: true
+    working: "NA"
+    file: "backend/server.py"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: true
+    status_history:
+      - working: "NA"
+        agent: "main"
+        comment: "Lives tracking logic was already correct. The bug was caused by line 862 which prevented first submissions. Now fixed - lives should properly deduct only on failed submissions (<70% score)."
+
+frontend:
+  - task: "Remove Library button from student dashboard"
+    implemented: true
+    working: "NA"
+    file: "frontend/src/pages/StudentDashboard.jsx"
+    stuck_count: 0
+    priority: "medium"
+    needs_retesting: true
+    status_history:
+      - working: "NA"
+        agent: "main"
+        comment: "Removed Library navigation button (lines 152-155) from student dashboard navbar. Students no longer have access to assignment library."
+
+metadata:
+  created_by: "main_agent"
+  version: "1.0"
+  test_sequence: 1
+  run_ui: false
+
+test_plan:
+  current_focus:
+    - "Fix 403 Forbidden error on first submission"
+    - "Fix lives system - proper tracking of 3 lives"
+    - "Remove Library button from student dashboard"
+  stuck_tasks: []
+  test_all: false
+  test_priority: "high_first"
+
+agent_communication:
+  - agent: "main"
+    message: |
+      Fixed critical backend bugs and removed student library access.
+      
+      BACKEND FIXES:
+      1. 403 Error: Removed incorrect HTTPException at line 862 that was preventing first-time submissions
+      2. Lives System: Logic was correct, bug was caused by the same line 862 issue
+      
+      FRONTEND FIX:
+      3. Removed Library button from student dashboard navigation
+      
+      Please test the following scenarios:
+      - First-time assignment submission (should work without 403 error)
+      - Lives tracking: Submit code with <70% score 3 times, verify lockout after 3rd failed attempt
+      - Verify successful submission (>=70%) does NOT deduct a life
+      - Confirm Library button is removed from student dashboard
+      
+      Test with:
+      - Student login
+      - Join a classroom
+      - Attempt an assignment multiple times with intentionally wrong code
+      - Verify lives counter decrements correctly
