@@ -218,6 +218,37 @@ export default function StudentDashboard({ user, setUser }) {
           </Card>
         </div>
 
+        {/* Leaderboard Section */}
+        {classrooms.length > 0 && (
+          <Card className="mb-8">
+            <CardHeader>
+              <CardTitle className="text-2xl flex items-center gap-2">
+                <Trophy className="w-6 h-6 text-yellow-500" />
+                Leaderboard
+              </CardTitle>
+              <CardDescription>
+                See how you rank in your classrooms
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <Tabs defaultValue={classrooms[0]?.id || ""}>
+                <TabsList className="mb-4">
+                  {classrooms.map((classroom) => (
+                    <TabsTrigger key={classroom.id} value={classroom.id}>
+                      {classroom.name}
+                    </TabsTrigger>
+                  ))}
+                </TabsList>
+                {classrooms.map((classroom) => (
+                  <TabsContent key={classroom.id} value={classroom.id}>
+                    <Leaderboard classroomId={classroom.id} currentUserId={user.id} />
+                  </TabsContent>
+                ))}
+              </Tabs>
+            </CardContent>
+          </Card>
+        )}
+
         <div className="flex justify-between items-center mb-8">
           <div>
             <h1 className="text-4xl font-bold text-gray-900 mb-2">My Classes</h1>
