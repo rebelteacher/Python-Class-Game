@@ -404,6 +404,34 @@ export default function AssignmentLibrary({ user }) {
                     </div>
                   </div>
 
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <Label htmlFor="problemType">Problem Type</Label>
+                      <Select value={newProblem.problem_type} onValueChange={(val) => setNewProblem({ ...newProblem, problem_type: val })}>
+                        <SelectTrigger>
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="Class Practice">Class Practice</SelectItem>
+                          <SelectItem value="Paired Programming">Paired Programming</SelectItem>
+                          <SelectItem value="Independent Practice">Independent Practice</SelectItem>
+                          <SelectItem value="Debugging">Debugging</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+
+                    <div>
+                      <Label htmlFor="resourcesLink">Resources Link (Optional)</Label>
+                      <Input
+                        id="resourcesLink"
+                        placeholder="https://drive.google.com/..."
+                        value={newProblem.resources_link}
+                        onChange={(e) => setNewProblem({ ...newProblem, resources_link: e.target.value })}
+                        className="mt-1"
+                      />
+                    </div>
+                  </div>
+
                   <div>
                     <Label htmlFor="starterCode">Starter Code (Optional)</Label>
                     <Textarea
