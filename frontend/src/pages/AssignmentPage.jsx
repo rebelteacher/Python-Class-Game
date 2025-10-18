@@ -253,7 +253,7 @@ export default function AssignmentPage({ user }) {
                   <CardDescription>Your code will be tested against these cases</CardDescription>
                 </CardHeader>
                 <CardContent className="space-y-3">
-                  {assignment.test_cases?.map((testCase, index) => (
+                  {(assignment.test_cases || (assignment.problems && assignment.problems[0]?.test_cases) || []).map((testCase, index) => (
                     <div key={testCase.id} data-testid={`test-case-display-${index}`} className="p-3 bg-gray-50 rounded-lg border border-gray-200">
                       <div className="font-semibold text-sm text-gray-900 mb-2">
                         Test {index + 1}: {testCase.description}
