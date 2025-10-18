@@ -192,39 +192,25 @@ class TestCase(BaseModel):
     expected_output: str
     description: str
 
-class Assignment(BaseModel):
-    model_config = ConfigDict(extra="ignore")
-    id: str = Field(default_factory=lambda: str(uuid.uuid4()))
-    classroom_id: str
-    title: str
-    description: str
-    starter_code: str
-    solution_code: str
-    test_cases: List[TestCase]
-    available_date: Optional[datetime] = None  # When students can access
-    due_date: Optional[datetime] = None  # Submission deadline
-    allow_late_submission: bool = True
-    late_penalty_percent: int = 0  # 0-100% penalty for late work
-    created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
-
-class LibraryAssignment(BaseModel):
+# Problem model (formerly LibraryAssignment) - individual coding problems in library
+class Problem(BaseModel):
     model_config = ConfigDict(extra="ignore")
     id: str = Field(default_factory=lambda: str(uuid.uuid4()))
     title: str
     description: str
     starter_code: str
     solution_code: str
-    expected_output: str = ""  # NEW: What the output should be
+    expected_output: str = ""
     category: str  # "Basics", "Loops", "Functions", etc.
     difficulty: str  # "Easy", "Medium", "Hard"
     csta_standard: str  # CSTA K-12 CS Standards
-    creator_id: str  # User who created it
+    creator_id: str
     creator_name: str
-    is_approved: bool = True  # For future moderation
+    is_approved: bool = True
     times_imported: int = 0
     created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
 
-class LibraryAssignmentCreate(BaseModel):
+class ProblemCreate(BaseModel):
     title: str
     description: str
     starter_code: str = ""
@@ -234,21 +220,34 @@ class LibraryAssignmentCreate(BaseModel):
     difficulty: str
     csta_standard: str = ""
 
-class AssignmentImport(BaseModel):
-    library_assignment_id: str
+# Assignment model - bundle of multiple problems with unified scheduling
+class Assignment(BaseModel):
+    model_config = ConfigDict(extra="ignore")
+    id: str = Field(default_factory=lambda: str(uuid.uuid4()))
+    title: str  # e.g., "Week 1 - Variables & Loops"
+    description: str  # e.g., "Complete all 5 problems to master the basics"
+    teacher_id: str
+    problem_ids: List[str]  # References to Problem documents
+    classroom_ids: List[str]  # Can be assigned to multiple classrooms
+    available_date: Optional[datetime] = None
+    due_date: Optional[datetime] = None
+    allow_late_submission: bool = True
+    late_penalty_percent: int = 0
+    completion_bonus_xp: int = 100  # Bonus for completing all problems
+    completion_bonus_coins: int = 50  # Bonus coins for completing all
+    created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+
+class AssignmentCreate(BaseModel):
+    title: str
+    description: str
+    problem_ids: List[str]  # Multiple problems from library
     classroom_ids: List[str]  # Multiple classrooms
     available_date: Optional[str] = None  # ISO format datetime
     due_date: Optional[str] = None
     allow_late_submission: bool = True
     late_penalty_percent: int = 0
-
-class AssignmentCreate(BaseModel):
-    classroom_id: str
-    title: str
-    description: str
-    starter_code: str
-    solution_code: str
-    test_cases: List[TestCase] = Field(default_factory=list)  # Optional - empty list if not provided
+    completion_bonus_xp: int = 100
+    completion_bonus_coins: int = 50
 
 class Submission(BaseModel):
     model_config = ConfigDict(extra="ignore")
