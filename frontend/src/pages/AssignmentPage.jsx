@@ -383,11 +383,11 @@ export default function AssignmentPage({ user }) {
                   {assignment.solution_code}
                 </pre>
               </CardContent>
-            </Card>
-          )}
+              </Card>
+            )}
 
-          {isTeacher && submissions.length > 0 && (
-            <Card data-testid="teacher-submissions-card">
+            {isTeacher && submissions.length > 0 && (
+              <Card data-testid="teacher-submissions-card">
               <CardHeader>
                 <CardTitle>Student Submissions</CardTitle>
                 <CardDescription>{submissions.length} submission(s)</CardDescription>
