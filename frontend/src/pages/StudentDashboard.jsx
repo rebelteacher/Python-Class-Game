@@ -19,7 +19,10 @@ export default function StudentDashboard({ user, setUser }) {
   const [classrooms, setClassrooms] = useState([]);
   const [loading, setLoading] = useState(true);
   const [joinDialogOpen, setJoinDialogOpen] = useState(false);
+  const [shopDialogOpen, setShopDialogOpen] = useState(false);
   const [classCode, setClassCode] = useState("");
+  const [shopItems, setShopItems] = useState({ themes: [], badges: [] });
+  const [userProfile, setUserProfile] = useState(user);
   const navigate = useNavigate();
 
   useEffect(() => {
