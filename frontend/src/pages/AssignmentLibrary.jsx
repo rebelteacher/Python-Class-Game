@@ -242,12 +242,12 @@ export default function AssignmentLibrary({ user }) {
               </Dialog>
 
               <Dialog open={createDialogOpen} onOpenChange={setCreateDialogOpen}>
-              <DialogTrigger asChild>
-                <Button data-testid="add-to-library-btn" className="bg-indigo-600 hover:bg-indigo-700 gap-2">
-                  <Plus className="w-5 h-5" />
-                  Add to Library
-                </Button>
-              </DialogTrigger>
+                <DialogTrigger asChild>
+                  <Button data-testid="add-to-library-btn" className="bg-indigo-600 hover:bg-indigo-700 gap-2">
+                    <Plus className="w-5 h-5" />
+                    Add to Library
+                  </Button>
+                </DialogTrigger>
               <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto" data-testid="create-library-dialog">
                 <DialogHeader>
                   <DialogTitle>Add Assignment to Library</DialogTitle>
