@@ -22,8 +22,8 @@ export default function AssignmentLibrary({ user }) {
   const [loading, setLoading] = useState(true);
   const [createDialogOpen, setCreateDialogOpen] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
-  const [categoryFilter, setCategoryFilter] = useState("");
-  const [difficultyFilter, setDifficultyFilter] = useState("");
+  const [categoryFilter, setCategoryFilter] = useState("all");
+  const [difficultyFilter, setDifficultyFilter] = useState("all");
   
   const [newAssignment, setNewAssignment] = useState({
     title: "",
