@@ -961,7 +961,7 @@ async def submit_assignment(submission: SubmissionCreate, request: Request):
         base_score = (passed_tests / total_tests) * 100
     else:
         # No test cases - compare outputs directly
-        solution_result = run_python_code(assignment["solution_code"], "")
+        solution_result = run_python_code(problem["solution_code"], "")
         student_result = run_python_code(submission.code, "")
         
         solution_output = solution_result["output"].strip() if solution_result["success"] else ""
