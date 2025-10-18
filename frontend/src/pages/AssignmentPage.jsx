@@ -25,11 +25,22 @@ export default function AssignmentPage({ user }) {
   const [hasRun, setHasRun] = useState(false);
   const [livesRemaining, setLivesRemaining] = useState(3);
   const [isLockedOut, setIsLockedOut] = useState(false);
+  const [currentProblemIndex, setCurrentProblemIndex] = useState(0);
 
   useEffect(() => {
     fetchAssignment();
     fetchSubmissions();
   }, [assignmentId]);
+
+  useEffect(() => {
+    // Update code when switching problems
+    if (assignment && assignment.problems && assignment.problems[currentProblemIndex]) {
+      const currentProblem = assignment.problems[currentProblemIndex];
+      setCode(currentProblem.starter_code || "# Write your code here\n");
+      setHasRun(false);
+      setOutput("");
+    }
+  }, [currentProblemIndex, assignment]);
 
   const fetchAssignment = async () => {
     try {
