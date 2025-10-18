@@ -127,39 +127,36 @@ export default function AssignmentLibrary({ user }) {
 
     try {
       const text = await csvFile.text();
-      const lines = text.split('\n').filter(line => line.trim());
       
-      if (lines.length < 2) {
-        toast.error("CSV file is empty or invalid");
-        setUploading(false);
-        return;
+      // Use PapaParse for proper CSV parsing
+      const result = Papa.parse(text, {
+        header: true,
+        skipEmptyLines: true,
+        transformHeader: (header) => header.trim().toLowerCase()
+      });
+
+      if (result.errors.length > 0) {
+        console.error("CSV parsing errors:", result.errors);
       }
 
-      // Parse CSV
-      const headers = lines[0].split(',').map(h => h.trim().toLowerCase());
-      const data = [];
-
-      for (let i = 1; i < lines.length; i++) {
-        const values = lines[i].split(',');
-        const row = {};
-        headers.forEach((header, index) => {
-          row[header] = values[index] ? values[index].trim() : "";
-        });
-        data.push(row);
+      if (result.data.length === 0) {
+        toast.error("CSV file is empty");
+        setUploading(false);
+        return;
       }
 
       // Upload
       const response = await axios.post(
         `${API}/library/assignments/bulk-upload`,
-        { csv_data: data },
+        { csv_data: result.data },
         { withCredentials: true }
       );
 
       toast.success(`✅ Uploaded ${response.data.created} assignments!`);
       
       if (response.data.errors.length > 0) {
-        toast.warning(`${response.data.errors.length} rows had errors`);
-        console.log("Errors:", response.data.errors);
+        toast.error(`${response.data.errors.length} rows had errors. Check console for details.`);
+        console.log("Upload errors:", response.data.errors);
       }
 
       setBulkUploadDialogOpen(false);
