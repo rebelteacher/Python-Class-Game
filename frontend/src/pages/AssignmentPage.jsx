@@ -22,7 +22,7 @@ export default function AssignmentPage({ user }) {
   const [running, setRunning] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [submissions, setSubmissions] = useState([]);
-  const [hasRun, setHasRun] = useState(false);
+  const [hasRunPerProblem, setHasRunPerProblem] = useState({}); // Track run status per problem
   const [livesRemaining, setLivesRemaining] = useState(3);
   const [isLockedOut, setIsLockedOut] = useState(false);
   const [currentProblemIndex, setCurrentProblemIndex] = useState(0);
@@ -37,10 +37,19 @@ export default function AssignmentPage({ user }) {
     if (assignment && assignment.problems && assignment.problems[currentProblemIndex]) {
       const currentProblem = assignment.problems[currentProblemIndex];
       setCode(currentProblem.starter_code || "# Write your code here\n");
-      setHasRun(false);
       setOutput("");
     }
   }, [currentProblemIndex, assignment]);
+
+  // Get current problem's run status
+  const getCurrentProblemId = () => {
+    if (assignment?.problems && assignment.problems[currentProblemIndex]) {
+      return assignment.problems[currentProblemIndex].id;
+    }
+    return assignmentId; // Fallback for old single-problem assignments
+  };
+
+  const hasRun = hasRunPerProblem[getCurrentProblemId()] || false;
 
   const fetchAssignment = async () => {
     try {
