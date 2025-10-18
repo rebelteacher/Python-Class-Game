@@ -68,44 +68,44 @@ export default function AssignmentLibrary({ user }) {
     }
   };
 
-  const filterAssignments = () => {
-    let filtered = [...assignments];
+  const filterProblems = () => {
+    let filtered = [...problems];
 
     if (searchTerm) {
-      filtered = filtered.filter(a => 
-        a.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        a.description.toLowerCase().includes(searchTerm.toLowerCase())
+      filtered = filtered.filter(p => 
+        p.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        p.description.toLowerCase().includes(searchTerm.toLowerCase())
       );
     }
 
-    if (categoryFilter) {
-      filtered = filtered.filter(a => a.category === categoryFilter);
+    if (categoryFilter && categoryFilter !== "all") {
+      filtered = filtered.filter(p => p.category === categoryFilter);
     }
 
-    if (difficultyFilter) {
-      filtered = filtered.filter(a => a.difficulty === difficultyFilter);
+    if (difficultyFilter && difficultyFilter !== "all") {
+      filtered = filtered.filter(p => p.difficulty === difficultyFilter);
     }
 
-    setFilteredAssignments(filtered);
+    setFilteredProblems(filtered);
   };
 
-  const handleCreateAssignment = async (e) => {
+  const handleCreateProblem = async (e) => {
     e.preventDefault();
     
-    if (!newAssignment.title.trim() || !newAssignment.solution_code.trim()) {
+    if (!newProblem.title.trim() || !newProblem.solution_code.trim()) {
       toast.error("Please fill in title and solution code");
       return;
     }
 
-    try {
+    try:
       await axios.post(
-        `${API}/library/assignments`,
-        newAssignment,
+        `${API}/problems`,
+        newProblem,
         { withCredentials: true }
       );
-      toast.success("Assignment added to library!");
+      toast.success("Problem added to library!");
       setCreateDialogOpen(false);
-      setNewAssignment({
+      setNewProblem({
         title: "",
         description: "",
         starter_code: "",
@@ -115,9 +115,9 @@ export default function AssignmentLibrary({ user }) {
         difficulty: "Easy",
         csta_standard: ""
       });
-      fetchAssignments();
+      fetchProblems();
     } catch (error) {
-      console.error("Error creating assignment:", error);
+      console.error("Error creating problem:", error);
       toast.error("Failed to create assignment");
     }
   };
