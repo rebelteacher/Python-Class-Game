@@ -245,9 +245,9 @@ export default function AssignmentLibrary({ user }) {
       <nav className="bg-white shadow-sm border-b border-gray-200">
         <div className="container mx-auto px-6 py-4 flex justify-between items-center">
           <div className="flex items-center space-x-4">
-            <Button onClick={() => navigate(-1)} variant="ghost" size="sm">
+            <Button onClick={() => navigate("/teacher/dashboard")} variant="ghost" size="sm">
               <ArrowLeft className="w-4 h-4 mr-2" />
-              Back
+              Back to Dashboard
             </Button>
             <div className="flex items-center space-x-2">
               <BookOpen className="w-7 h-7 text-indigo-600" />
