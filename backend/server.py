@@ -999,12 +999,12 @@ async def submit_assignment(submission: SubmissionCreate, request: Request):
         prompt = f"""
 Evaluate this Python code submission:
 
-Assignment: {assignment['title']}
-Description: {assignment['description']}
+Problem: {problem.get('title', assignment.get('title', 'Coding Problem'))}
+Description: {problem.get('description', assignment.get('description', ''))}
 
 Solution Code:
 ```python
-{assignment['solution_code']}
+{problem['solution_code']}
 ```
 
 Student Code:
