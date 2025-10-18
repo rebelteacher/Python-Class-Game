@@ -678,6 +678,27 @@ async def get_assignment(assignment_id: str, request: Request):
     if user["role"] == "student":
         if user["id"] not in classroom.get("students", []):
             raise HTTPException(status_code=403, detail="Access denied")
+        
+        # Check if assignment is available
+        now = datetime.now(timezone.utc)
+        available_date = datetime.fromisoformat(assignment["available_date"]) if assignment.get("available_date") else None
+        
+        if available_date and now < available_date:
+            # Assignment not yet available - return limited info
+            return {
+                "id": assignment["id"],
+                "title": assignment["title"],
+                "classroom_id": assignment["classroom_id"],
+                "is_locked": True,
+                "available_date": assignment["available_date"],
+                "message": "This assignment is not yet available"
+            }
+        
+        # Check if past due
+        due_date = datetime.fromisoformat(assignment["due_date"]) if assignment.get("due_date") else None
+        assignment["is_late"] = due_date and now > due_date
+        assignment["is_locked"] = False
+        
         # Hide solution code from students
         assignment["solution_code"] = "[Hidden]"
     
