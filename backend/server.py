@@ -1043,7 +1043,8 @@ Format your response as JSON:
         test_results=test_results,
         attempt_number=attempt_number,
         lives_remaining=lives_remaining,
-        is_passing=is_passing
+        is_passing=is_passing,
+        is_late=is_late_submission
     )
     
     submission_dict = new_submission.model_dump()
