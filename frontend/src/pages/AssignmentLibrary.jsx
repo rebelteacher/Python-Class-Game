@@ -218,7 +218,21 @@ export default function AssignmentLibrary({ user }) {
           </div>
           {user.role === "teacher" && (
             <div className="flex gap-2">
-              <Dialog open={bulkUploadDialogOpen} onOpenChange={setBulkUploadDialogOpen}>
+              {!selectionMode ? (
+                <>
+                  <Button 
+                    onClick={() => {
+                      setSelectionMode(true);
+                      setSelectedProblems([]);
+                    }}
+                    variant="outline" 
+                    className="gap-2 bg-purple-50 border-purple-300 hover:bg-purple-100"
+                  >
+                    <Plus className="w-5 h-5" />
+                    Create Assignment
+                  </Button>
+
+                  <Dialog open={bulkUploadDialogOpen} onOpenChange={setBulkUploadDialogOpen}>
                 <DialogTrigger asChild>
                   <Button data-testid="bulk-upload-btn" variant="outline" className="gap-2">
                     <Download className="w-5 h-5" />
