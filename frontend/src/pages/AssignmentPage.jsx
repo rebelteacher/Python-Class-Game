@@ -414,6 +414,30 @@ export default function AssignmentPage({ user }) {
                       {!hasRun && !isLockedOut && (
                         <p className="text-xs text-amber-600">⚠️ You must run your code before submitting</p>
                       )}
+                      
+                      {/* Problem Navigation Buttons */}
+                      {assignment.problems && assignment.problems.length > 1 && (
+                        <div className="flex gap-2 mt-3 pt-3 border-t">
+                          <Button
+                            onClick={() => setCurrentProblemIndex(Math.max(0, currentProblemIndex - 1))}
+                            disabled={currentProblemIndex === 0}
+                            variant="outline"
+                            size="sm"
+                            className="flex-1"
+                          >
+                            ← Previous
+                          </Button>
+                          <Button
+                            onClick={() => setCurrentProblemIndex(Math.min(assignment.problems.length - 1, currentProblemIndex + 1))}
+                            disabled={currentProblemIndex === assignment.problems.length - 1}
+                            variant="outline"
+                            size="sm"
+                            className="flex-1"
+                          >
+                            Next →
+                          </Button>
+                        </div>
+                      )}
                     </CardTitle>
                   </CardHeader>
                   <CardContent className="p-0">
