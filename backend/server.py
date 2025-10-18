@@ -201,7 +201,44 @@ class Assignment(BaseModel):
     starter_code: str
     solution_code: str
     test_cases: List[TestCase]
+    available_date: Optional[datetime] = None  # When students can access
+    due_date: Optional[datetime] = None  # Submission deadline
+    allow_late_submission: bool = True
+    late_penalty_percent: int = 0  # 0-100% penalty for late work
     created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+
+class LibraryAssignment(BaseModel):
+    model_config = ConfigDict(extra="ignore")
+    id: str = Field(default_factory=lambda: str(uuid.uuid4()))
+    title: str
+    description: str
+    starter_code: str
+    solution_code: str
+    category: str  # "Basics", "Loops", "Functions", etc.
+    difficulty: str  # "Easy", "Medium", "Hard"
+    csta_standard: str  # CSTA K-12 CS Standards
+    creator_id: str  # User who created it
+    creator_name: str
+    is_approved: bool = True  # For future moderation
+    times_imported: int = 0
+    created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+
+class LibraryAssignmentCreate(BaseModel):
+    title: str
+    description: str
+    starter_code: str = ""
+    solution_code: str
+    category: str
+    difficulty: str
+    csta_standard: str = ""
+
+class AssignmentImport(BaseModel):
+    library_assignment_id: str
+    classroom_ids: List[str]  # Multiple classrooms
+    available_date: Optional[str] = None  # ISO format datetime
+    due_date: Optional[str] = None
+    allow_late_submission: bool = True
+    late_penalty_percent: int = 0
 
 class AssignmentCreate(BaseModel):
     classroom_id: str
