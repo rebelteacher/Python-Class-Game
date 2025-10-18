@@ -202,78 +202,83 @@ export default function AssignmentPage({ user }) {
       </nav>
 
       <main className="container mx-auto px-6 py-6">
-        <div className="grid lg:grid-cols-2 gap-6">
+        <PanelGroup direction="horizontal" className="gap-6">
           {/* Left Side: Instructions & Test Cases */}
-          <div className="space-y-6">
-            <Card data-testid="assignment-instructions">
-              <CardHeader>
-                <CardTitle>Instructions</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <p className="text-gray-700 whitespace-pre-wrap">{assignment.description || "No description provided."}</p>
-              </CardContent>
-            </Card>
-
-            <Card data-testid="test-cases-card">
-              <CardHeader>
-                <CardTitle>Test Cases</CardTitle>
-                <CardDescription>Your code will be tested against these cases</CardDescription>
-              </CardHeader>
-              <CardContent className="space-y-3">
-                {assignment.test_cases?.map((testCase, index) => (
-                  <div key={testCase.id} data-testid={`test-case-display-${index}`} className="p-3 bg-gray-50 rounded-lg border border-gray-200">
-                    <div className="font-semibold text-sm text-gray-900 mb-2">
-                      Test {index + 1}: {testCase.description}
-                    </div>
-                    <div className="space-y-1 text-xs">
-                      <div>
-                        <span className="font-medium text-gray-600">Input:</span>
-                        <pre className="mt-1 p-2 bg-white rounded border border-gray-200 text-gray-800">{testCase.input_data || "(no input)"}</pre>
-                      </div>
-                      <div>
-                        <span className="font-medium text-gray-600">Expected Output:</span>
-                        <pre className="mt-1 p-2 bg-white rounded border border-gray-200 text-gray-800">{testCase.expected_output}</pre>
-                      </div>
-                    </div>
-                  </div>
-                ))}
-              </CardContent>
-            </Card>
-
-            {latestSubmission && (
-              <Card data-testid="latest-submission-card" className="border-2 border-indigo-200 bg-indigo-50">
+          <Panel defaultSize={35} minSize={25}>
+            <div className="space-y-6">
+              <Card data-testid="assignment-instructions">
                 <CardHeader>
-                  <CardTitle className="text-lg">Latest Submission</CardTitle>
-                  <CardDescription>
-                    Score: <span className="font-bold text-indigo-600">{latestSubmission.score.toFixed(1)}%</span>
-                  </CardDescription>
+                  <CardTitle>Instructions</CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <div className="mb-3">
-                    <div className="font-semibold text-sm text-gray-900 mb-2">Feedback:</div>
-                    <p className="text-sm text-gray-700">{latestSubmission.feedback}</p>
-                  </div>
-                  <div>
-                    <div className="font-semibold text-sm text-gray-900 mb-2">Test Results:</div>
-                    <div className="space-y-2">
-                      {latestSubmission.test_results?.map((result, index) => (
-                        <div key={index} className="flex items-center gap-2 text-sm">
-                          {result.passed ? (
-                            <CheckCircle className="w-4 h-4 text-green-600" />
-                          ) : (
-                            <XCircle className="w-4 h-4 text-red-600" />
-                          )}
-                          <span className={result.passed ? "text-green-700" : "text-red-700"}>
-                            {result.description}
-                          </span>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
+                  <p className="text-gray-700 whitespace-pre-wrap">{assignment.description || "No description provided."}</p>
                 </CardContent>
               </Card>
-            )}
-          </div>
+
+              <Card data-testid="test-cases-card">
+                <CardHeader>
+                  <CardTitle>Test Cases</CardTitle>
+                  <CardDescription>Your code will be tested against these cases</CardDescription>
+                </CardHeader>
+                <CardContent className="space-y-3">
+                  {assignment.test_cases?.map((testCase, index) => (
+                    <div key={testCase.id} data-testid={`test-case-display-${index}`} className="p-3 bg-gray-50 rounded-lg border border-gray-200">
+                      <div className="font-semibold text-sm text-gray-900 mb-2">
+                        Test {index + 1}: {testCase.description}
+                      </div>
+                      <div className="space-y-1 text-xs">
+                        <div>
+                          <span className="font-medium text-gray-600">Input:</span>
+                          <pre className="mt-1 p-2 bg-white rounded border border-gray-200 text-gray-800">{testCase.input_data || "(no input)"}</pre>
+                        </div>
+                        <div>
+                          <span className="font-medium text-gray-600">Expected Output:</span>
+                          <pre className="mt-1 p-2 bg-white rounded border border-gray-200 text-gray-800">{testCase.expected_output}</pre>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </CardContent>
+              </Card>
+
+              {latestSubmission && (
+                <Card data-testid="latest-submission-card" className="border-2 border-indigo-200 bg-indigo-50">
+                  <CardHeader>
+                    <CardTitle className="text-lg">Latest Submission</CardTitle>
+                    <CardDescription>
+                      Score: <span className="font-bold text-indigo-600">{latestSubmission.score.toFixed(1)}%</span>
+                    </CardDescription>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="mb-3">
+                      <div className="font-semibold text-sm text-gray-900 mb-2">Feedback:</div>
+                      <p className="text-sm text-gray-700">{latestSubmission.feedback}</p>
+                    </div>
+                    <div>
+                      <div className="font-semibold text-sm text-gray-900 mb-2">Test Results:</div>
+                      <div className="space-y-2">
+                        {latestSubmission.test_results?.map((result, index) => (
+                          <div key={index} className="flex items-center gap-2 text-sm">
+                            {result.passed ? (
+                              <CheckCircle className="w-4 h-4 text-green-600" />
+                            ) : (
+                              <XCircle className="w-4 h-4 text-red-600" />
+                            )}
+                            <span className={result.passed ? "text-green-700" : "text-red-700"}>
+                              {result.description}
+                            </span>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+              )}
+            </div>
+          </Panel>
+
+          {/* Resize Handle */}
+          <PanelResizeHandle className="w-2 bg-gray-200 hover:bg-indigo-400 transition-colors rounded-full cursor-col-resize" />
 
           {/* Right Side: Code Editor & Output */}
           {!isTeacher ? (
