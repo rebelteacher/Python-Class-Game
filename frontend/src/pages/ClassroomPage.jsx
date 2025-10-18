@@ -166,6 +166,10 @@ export default function ClassroomPage({ user }) {
               <BookOpen className="w-4 h-4" />
               Assignments
             </TabsTrigger>
+            <TabsTrigger data-testid="battles-tab" value="battles" className="gap-2">
+              <Swords className="w-4 h-4" />
+              Battles
+            </TabsTrigger>
             <TabsTrigger data-testid="leaderboard-tab" value="leaderboard" className="gap-2">
               <Trophy className="w-4 h-4" />
               Leaderboard
@@ -177,6 +181,10 @@ export default function ClassroomPage({ user }) {
               </TabsTrigger>
             )}
           </TabsList>
+
+          <TabsContent value="battles">
+            <BattleZone classroomId={classroomId} isTeacher={isTeacher} />
+          </TabsContent>
 
           <TabsContent value="leaderboard">
             <Leaderboard classroomId={classroomId} currentUserId={user.id} />
