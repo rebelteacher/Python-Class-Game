@@ -706,8 +706,12 @@ class CodeClassAPITester:
         # Test code execution
         self.test_code_execution()
         
-        # Test submissions
-        self.test_submission_endpoints(assignment_id)
+        # Test critical bug fixes
+        self.test_403_forbidden_fix(assignment_id, classroom['id'])
+        self.test_lives_system(assignment_id, classroom['id'])
+        
+        # Test basic submissions
+        self.test_submission_endpoints(assignment_id, classroom['id'])
         
         # Print summary
         print(f"\n📊 Test Summary:")
