@@ -114,6 +114,64 @@ export default function AssignmentLibrary({ user }) {
     }
   };
 
+  const handleBulkUpload = async (e) => {
+    e.preventDefault();
+    
+    if (!csvFile) {
+      toast.error("Please select a CSV file");
+      return;
+    }
+
+    setUploading(true);
+
+    try {
+      const text = await csvFile.text();
+      const lines = text.split('\n').filter(line => line.trim());
+      
+      if (lines.length < 2) {
+        toast.error("CSV file is empty or invalid");
+        setUploading(false);
+        return;
+      }
+
+      // Parse CSV
+      const headers = lines[0].split(',').map(h => h.trim().toLowerCase());
+      const data = [];
+
+      for (let i = 1; i < lines.length; i++) {
+        const values = lines[i].split(',');
+        const row = {};
+        headers.forEach((header, index) => {
+          row[header] = values[index] ? values[index].trim() : "";
+        });
+        data.push(row);
+      }
+
+      // Upload
+      const response = await axios.post(
+        `${API}/library/assignments/bulk-upload`,
+        { csv_data: data },
+        { withCredentials: true }
+      );
+
+      toast.success(`✅ Uploaded ${response.data.created} assignments!`);
+      
+      if (response.data.errors.length > 0) {
+        toast.warning(`${response.data.errors.length} rows had errors`);
+        console.log("Errors:", response.data.errors);
+      }
+
+      setBulkUploadDialogOpen(false);
+      setCsvFile(null);
+      fetchAssignments();
+    } catch (error) {
+      console.error("Error uploading CSV:", error);
+      toast.error("Failed to upload CSV");
+    } finally {
+      setUploading(false);
+    }
+  };
+
   const categories = [...new Set(assignments.map(a => a.category))].filter(Boolean);
 
   return (
