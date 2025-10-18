@@ -189,7 +189,59 @@ export default function AssignmentLibrary({ user }) {
             </div>
           </div>
           {user.role === "teacher" && (
-            <Dialog open={createDialogOpen} onOpenChange={setCreateDialogOpen}>
+            <div className="flex gap-2">
+              <Dialog open={bulkUploadDialogOpen} onOpenChange={setBulkUploadDialogOpen}>
+                <DialogTrigger asChild>
+                  <Button data-testid="bulk-upload-btn" variant="outline" className="gap-2">
+                    <Download className="w-5 h-5" />
+                    Bulk Upload CSV
+                  </Button>
+                </DialogTrigger>
+                <DialogContent data-testid="bulk-upload-dialog">
+                  <DialogHeader>
+                    <DialogTitle>Bulk Upload from CSV</DialogTitle>
+                    <DialogDescription>
+                      Upload multiple assignments at once using a CSV file
+                    </DialogDescription>
+                  </DialogHeader>
+                  <form onSubmit={handleBulkUpload} className="space-y-4">
+                    <div>
+                      <Label>CSV Format Required:</Label>
+                      <div className="text-xs text-gray-600 mt-2 p-3 bg-gray-50 rounded font-mono">
+                        title,description,starter_code,solution_code,category,difficulty,csta_standard
+                      </div>
+                      <p className="text-xs text-gray-500 mt-2">
+                        • Title and solution_code are required<br/>
+                        • Use quotes for multi-line code: "print('hello')"<br/>
+                        • Difficulty: Easy, Medium, or Hard
+                      </p>
+                    </div>
+                    
+                    <div>
+                      <Label htmlFor="csvFile">Select CSV File</Label>
+                      <Input
+                        data-testid="csv-file-input"
+                        id="csvFile"
+                        type="file"
+                        accept=".csv"
+                        onChange={(e) => setCsvFile(e.target.files[0])}
+                        className="mt-1"
+                      />
+                    </div>
+
+                    <Button 
+                      data-testid="upload-csv-btn" 
+                      type="submit" 
+                      disabled={uploading || !csvFile}
+                      className="w-full bg-indigo-600 hover:bg-indigo-700"
+                    >
+                      {uploading ? "Uploading..." : "Upload CSV"}
+                    </Button>
+                  </form>
+                </DialogContent>
+              </Dialog>
+
+              <Dialog open={createDialogOpen} onOpenChange={setCreateDialogOpen}>
               <DialogTrigger asChild>
                 <Button data-testid="add-to-library-btn" className="bg-indigo-600 hover:bg-indigo-700 gap-2">
                   <Plus className="w-5 h-5" />
