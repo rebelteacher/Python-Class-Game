@@ -392,16 +392,50 @@ export default function ClassroomPage({ user }) {
                   <Card
                     data-testid={`assignment-card-${assignment.id}`}
                     key={assignment.id}
-                    className="hover:shadow-lg transition-shadow cursor-pointer border-2 border-gray-100"
-                    onClick={() => navigate(`/assignment/${assignment.id}`)}
+                    className="hover:shadow-lg transition-shadow border-2 border-gray-100"
                   >
                     <CardHeader>
                       <CardTitle className="text-lg">{assignment.title}</CardTitle>
                       <CardDescription className="line-clamp-2">{assignment.description}</CardDescription>
                     </CardHeader>
                     <CardContent>
-                      <div className="text-sm text-gray-600">
-                        {assignment.test_cases?.length || 0} test cases
+                      <div className="text-sm text-gray-600 mb-3">
+                        {assignment.problem_count ? `${assignment.problem_count} problems` : `${assignment.test_cases?.length || 0} test cases`}
+                      </div>
+                      <div className="flex gap-2">
+                        <Button
+                          onClick={() => navigate(`/assignment/${assignment.id}`)}
+                          className="flex-1"
+                          size="sm"
+                        >
+                          View
+                        </Button>
+                        {isTeacher && (
+                          <Button
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              // Parse dates for editing
+                              const availDate = assignment.available_date ? new Date(assignment.available_date) : null;
+                              const dueDate = assignment.due_date ? new Date(assignment.due_date) : null;
+                              
+                              setEditingAssignment({
+                                id: assignment.id,
+                                title: assignment.title,
+                                available_date: availDate ? availDate.toISOString().split('T')[0] : '',
+                                available_time: availDate ? availDate.toISOString().split('T')[1].substring(0, 5) : '00:00',
+                                due_date: dueDate ? dueDate.toISOString().split('T')[0] : '',
+                                due_time: dueDate ? dueDate.toISOString().split('T')[1].substring(0, 5) : '23:59',
+                                allow_late_submission: assignment.allow_late_submission ?? true,
+                                late_penalty_percent: assignment.late_penalty_percent || 0
+                              });
+                              setEditScheduleDialogOpen(true);
+                            }}
+                            variant="outline"
+                            size="sm"
+                          >
+                            <Calendar className="w-4 h-4" />
+                          </Button>
+                        )}
                       </div>
                     </CardContent>
                   </Card>
