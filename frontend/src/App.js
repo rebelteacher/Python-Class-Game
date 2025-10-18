@@ -131,6 +131,15 @@ function App() {
                   </ProtectedRoute>
                 }
               />
+              
+              <Route
+                path="/library"
+                element={
+                  <ProtectedRoute user={user}>
+                    <AssignmentLibrary user={user} />
+                  </ProtectedRoute>
+                }
+              />
             </Routes>
           )}
         </AuthHandler>
