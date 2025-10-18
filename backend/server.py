@@ -861,13 +861,43 @@ async def submit_assignment(submission: SubmissionCreate, request: Request):
     if not assignment:
         raise HTTPException(status_code=404, detail="Assignment not found")
     
-    # Verify student is in the classroom
-    classroom = await db.classrooms.find_one({"id": assignment["classroom_id"]})
-    if not classroom:
-        raise HTTPException(status_code=404, detail="Classroom not found")
+    # Handle both old (classroom_id) and new (classroom_ids) structure
+    if "classroom_ids" in assignment:
+        # New structure: check if student is in any of the classrooms
+        has_access = False
+        for classroom_id in assignment["classroom_ids"]:
+            classroom = await db.classrooms.find_one({"id": classroom_id})
+            if classroom and user["id"] in classroom.get("students", []):
+                has_access = True
+                break
+        if not has_access:
+            raise HTTPException(status_code=403, detail="You are not enrolled in any classroom for this assignment")
+    else:
+        # Old structure: single classroom_id
+        classroom = await db.classrooms.find_one({"id": assignment.get("classroom_id")})
+        if not classroom:
+            raise HTTPException(status_code=404, detail="Classroom not found")
+        if user["id"] not in classroom.get("students", []):
+            raise HTTPException(status_code=403, detail="You are not enrolled in this classroom")
     
-    if user["id"] not in classroom.get("students", []):
-        raise HTTPException(status_code=403, detail="You are not enrolled in this classroom")
+    # Get the problem (handle both old single-problem and new multi-problem structure)
+    if "problem_ids" in assignment and submission.problem_id:
+        # New structure: get specific problem
+        problem = await db.problems.find_one({"id": submission.problem_id})
+        if not problem:
+            raise HTTPException(status_code=404, detail="Problem not found")
+        if submission.problem_id not in assignment["problem_ids"]:
+            raise HTTPException(status_code=400, detail="Problem not part of this assignment")
+    else:
+        # Old structure: problem data is in assignment itself
+        problem = {
+            "id": assignment["id"],
+            "solution_code": assignment.get("solution_code", ""),
+            "title": assignment.get("title", "")
+        }
+        # For backward compatibility, use assignment_id as problem_id
+        if not submission.problem_id:
+            submission.problem_id = assignment["id"]
     
     # Check if assignment is available
     now = datetime.now(timezone.utc)
