@@ -35,6 +35,10 @@ export default function AssignmentLibrary({ user }) {
   const [selectedProblems, setSelectedProblems] = useState([]);
   const [assignmentBuilderOpen, setAssignmentBuilderOpen] = useState(false);
   
+  // Edit mode
+  const [editDialogOpen, setEditDialogOpen] = useState(false);
+  const [editingProblem, setEditingProblem] = useState(null);
+  
   const [newProblem, setNewProblem] = useState({
     title: "",
     description: "",
