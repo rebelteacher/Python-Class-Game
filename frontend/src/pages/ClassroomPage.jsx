@@ -165,6 +165,10 @@ export default function ClassroomPage({ user }) {
               <BookOpen className="w-4 h-4" />
               Assignments
             </TabsTrigger>
+            <TabsTrigger data-testid="leaderboard-tab" value="leaderboard" className="gap-2">
+              <Trophy className="w-4 h-4" />
+              Leaderboard
+            </TabsTrigger>
             {isTeacher && (
               <TabsTrigger data-testid="students-tab" value="students" className="gap-2">
                 <Users className="w-4 h-4" />
@@ -172,6 +176,10 @@ export default function ClassroomPage({ user }) {
               </TabsTrigger>
             )}
           </TabsList>
+
+          <TabsContent value="leaderboard">
+            <Leaderboard classroomId={classroomId} currentUserId={user.id} />
+          </TabsContent>
 
           <TabsContent value="assignments">
             <div className="flex justify-between items-center mb-6">
