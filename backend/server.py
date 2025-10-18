@@ -430,9 +430,9 @@ async def get_available_classrooms(request: Request):
     if user["role"] != "teacher":
         raise HTTPException(status_code=403, detail="Only teachers can view this")
     
-    # Get all classrooms except user's own
+    # Get all classrooms (including user's own for intra-school battles)
     classrooms = await db.classrooms.find(
-        {"teacher_id": {"$ne": user["id"]}},
+        {},
         {"_id": 0, "id": 1, "name": 1, "class_code": 1, "teacher_id": 1}
     ).to_list(1000)
     
