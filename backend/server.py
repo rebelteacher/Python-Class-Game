@@ -837,6 +837,21 @@ async def submit_assignment(submission: SubmissionCreate, request: Request):
     if not assignment:
         raise HTTPException(status_code=404, detail="Assignment not found")
     
+    # Verify student is in the classroom
+    classroom = await db.classrooms.find_one({"id": assignment["classroom_id"]})
+    if not classroom:
+        raise HTTPException(status_code=404, detail="Classroom not found")
+    
+    if user["id"] not in classroom.get("students", []):
+        raise HTTPException(status_code=403, detail="You are not enrolled in this classroom")
+    
+    # Check if assignment is available
+    now = datetime.now(timezone.utc)
+    available_date = datetime.fromisoformat(assignment["available_date"]) if assignment.get("available_date") else None
+    
+    if available_date and now < available_date:
+        raise HTTPException(status_code=403, detail="This assignment is not yet available")
+    
     # Check previous submissions and lives
     previous_submissions = await db.submissions.find(
         {"assignment_id": submission.assignment_id, "student_id": user["id"]},
