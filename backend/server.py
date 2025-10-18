@@ -1040,8 +1040,9 @@ async def create_battle(battle_data: BattleCreate, request: Request):
     if not opponent_classroom:
         raise HTTPException(status_code=404, detail="Opponent classroom not found")
     
-    if opponent_classroom["teacher_id"] == user["id"]:
-        raise HTTPException(status_code=400, detail="Cannot challenge your own classroom")
+    # Prevent a classroom from challenging itself
+    if challenger_classroom["id"] == opponent_classroom["id"]:
+        raise HTTPException(status_code=400, detail="Cannot challenge the same classroom")
     
     # Create battle
     new_battle = Battle(
