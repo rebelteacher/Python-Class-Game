@@ -277,11 +277,10 @@ export default function ImportAssignment({ user }) {
             ) : (
               <div className="space-y-3">
                 {classrooms.map((classroom) => (
-                  <div
+                  <label
                     key={classroom.id}
                     data-testid={`classroom-checkbox-${classroom.id}`}
                     className="flex items-center space-x-3 p-3 rounded-lg border hover:bg-gray-50 cursor-pointer"
-                    onClick={() => toggleClassroom(classroom.id)}
                   >
                     <Checkbox
                       checked={selectedClassrooms.includes(classroom.id)}
@@ -293,7 +292,7 @@ export default function ImportAssignment({ user }) {
                         Code: {classroom.class_code} • {classroom.students?.length || 0} students
                       </div>
                     </div>
-                  </div>
+                  </label>
                 ))}
               </div>
             )}
