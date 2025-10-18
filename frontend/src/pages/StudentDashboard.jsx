@@ -149,6 +149,10 @@ export default function StudentDashboard({ user, setUser }) {
           </div>
           <div className="flex items-center space-x-3">
             <span className="text-gray-700 hidden sm:inline">{user.name}</span>
+            <Button data-testid="library-nav-btn" onClick={() => navigate("/library")} variant="outline" size="sm" className="gap-2">
+              <BookOpen className="w-4 h-4" />
+              Library
+            </Button>
             <Button data-testid="switch-to-teacher-btn" onClick={handleSwitchToTeacher} variant="outline" size="sm" className="gap-2">
               <RefreshCw className="w-4 h-4" />
               Switch to Teacher
