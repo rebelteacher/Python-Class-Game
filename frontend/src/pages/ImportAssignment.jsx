@@ -97,19 +97,23 @@ export default function ImportAssignment({ user }) {
         : null;
 
       await axios.post(
-        `${API}/library/assignments/import`,
+        `${API}/assignments`,
         {
-          library_assignment_id: assignmentId,
+          title: assignment.title,
+          description: assignment.description,
+          problem_ids: [assignmentId], // Single problem for now
           classroom_ids: selectedClassrooms,
           available_date: availableDateTime,
           due_date: dueDateTime,
           allow_late_submission: allowLate,
-          late_penalty_percent: latePenalty
+          late_penalty_percent: latePenalty,
+          completion_bonus_xp: 100,
+          completion_bonus_coins: 50
         },
         { withCredentials: true }
       );
 
-      toast.success(`Assignment imported to ${selectedClassrooms.length} classroom(s)!`);
+      toast.success(`Problem imported to ${selectedClassrooms.length} classroom(s) as an assignment!`);
       navigate(-1);
     } catch (error) {
       console.error("Error importing assignment:", error);
