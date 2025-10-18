@@ -112,27 +112,33 @@ user_problem_statement: |
 backend:
   - task: "Fix 403 Forbidden error on first submission"
     implemented: true
-    working: "NA"
+    working: true
     file: "backend/server.py"
     stuck_count: 0
     priority: "high"
-    needs_retesting: true
+    needs_retesting: false
     status_history:
       - working: "NA"
         agent: "main"
         comment: "Fixed line 862 - removed incorrect HTTPException that was blocking first-time submissions. The else block now correctly sets lives_remaining=3 and attempt_number=1 without raising an error."
+      - working: true
+        agent: "testing"
+        comment: "✅ VERIFIED: First-time submissions now work correctly. Tested with fresh student user - no 403 error, lives_remaining=3, attempt_number=1. Fix is working perfectly."
   
   - task: "Fix lives system - proper tracking of 3 lives"
     implemented: true
-    working: "NA"
+    working: true
     file: "backend/server.py"
     stuck_count: 0
     priority: "high"
-    needs_retesting: true
+    needs_retesting: false
     status_history:
       - working: "NA"
         agent: "main"
         comment: "Lives tracking logic was already correct. The bug was caused by line 862 which prevented first submissions. Now fixed - lives should properly deduct only on failed submissions (<70% score)."
+      - working: true
+        agent: "testing"
+        comment: "✅ VERIFIED: Lives system working correctly. Tested complete scenario: 3 failing submissions (score <70%) properly decremented lives from 3→2→1→0. 4th attempt correctly blocked with 403 error. Passing submissions (≥70%) do NOT deduct lives. All functionality working as expected."
 
 frontend:
   - task: "Remove Library button from student dashboard"
