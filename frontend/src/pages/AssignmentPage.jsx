@@ -232,6 +232,40 @@ export default function AssignmentPage({ user }) {
         </div>
       </nav>
 
+      {/* Multi-Problem Navigation */}
+      {assignment.problems && assignment.problems.length > 1 && (
+        <div className="bg-white border-b">
+          <div className="container mx-auto px-6 py-4">
+            <div className="flex items-center justify-between mb-3">
+              <h3 className="text-sm font-semibold text-gray-700">
+                Problem {currentProblemIndex + 1} of {assignment.problems.length}
+              </h3>
+              <div className="text-sm text-gray-600">
+                Progress: {assignment.problems.filter((p, i) => p.is_completed).length}/{assignment.problems.length} completed
+              </div>
+            </div>
+            <div className="flex gap-2 overflow-x-auto pb-2">
+              {assignment.problems.map((problem, index) => (
+                <button
+                  key={problem.id}
+                  onClick={() => setCurrentProblemIndex(index)}
+                  className={`px-4 py-2 rounded-lg text-sm font-medium whitespace-nowrap transition-colors ${
+                    currentProblemIndex === index
+                      ? 'bg-indigo-600 text-white'
+                      : problem.is_completed
+                      ? 'bg-green-100 text-green-700 hover:bg-green-200'
+                      : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                  }`}
+                >
+                  {problem.is_completed && '✓ '}
+                  {index + 1}. {problem.title}
+                </button>
+              ))}
+            </div>
+          </div>
+        </div>
+      )}
+
       <main className="container mx-auto px-6 py-6">
         <PanelGroup direction="horizontal">
           {/* Left Side: Instructions & Test Cases */}
