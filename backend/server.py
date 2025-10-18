@@ -991,6 +991,160 @@ async def customize_profile(customization: dict, request: Request):
     
     return {"success": True}
 
+# ----- Battle Routes -----
+
+@api_router.post("/battles/challenge")
+async def create_battle(battle_data: BattleCreate, request: Request):
+    """Create a battle challenge between classrooms"""
+    user = await get_current_user(request)
+    
+    if user["role"] != "teacher":
+        raise HTTPException(status_code=403, detail="Only teachers can create battles")
+    
+    # Get challenger's classrooms
+    challenger_classrooms = await db.classrooms.find(
+        {"teacher_id": user["id"]},
+        {"_id": 0}
+    ).to_list(1000)
+    
+    if not challenger_classrooms:
+        raise HTTPException(status_code=400, detail="You need a classroom to challenge")
+    
+    challenger_classroom = challenger_classrooms[0]  # Use first classroom for now
+    
+    # Get opponent classroom
+    opponent_classroom = await db.classrooms.find_one({"id": battle_data.opponent_classroom_id})
+    if not opponent_classroom:
+        raise HTTPException(status_code=404, detail="Opponent classroom not found")
+    
+    if opponent_classroom["teacher_id"] == user["id"]:
+        raise HTTPException(status_code=400, detail="Cannot challenge your own classroom")
+    
+    # Create battle
+    new_battle = Battle(
+        challenger_classroom_id=challenger_classroom["id"],
+        challenger_classroom_name=challenger_classroom["name"],
+        opponent_classroom_id=opponent_classroom["id"],
+        opponent_classroom_name=opponent_classroom["name"],
+        start_date=datetime.now(timezone.utc),
+        end_date=datetime.now(timezone.utc) + timedelta(days=7),
+        status="active"
+    )
+    
+    battle_dict = new_battle.model_dump()
+    battle_dict["start_date"] = battle_dict["start_date"].isoformat()
+    battle_dict["end_date"] = battle_dict["end_date"].isoformat()
+    battle_dict["created_at"] = battle_dict["created_at"].isoformat()
+    await db.battles.insert_one(battle_dict)
+    
+    return new_battle
+
+@api_router.get("/battles/classroom/{classroom_id}")
+async def get_classroom_battles(classroom_id: str, request: Request):
+    """Get all battles for a classroom"""
+    user = await get_current_user(request)
+    
+    # Check access
+    classroom = await db.classrooms.find_one({"id": classroom_id})
+    if not classroom:
+        raise HTTPException(status_code=404, detail="Classroom not found")
+    
+    # Get battles where this classroom is involved
+    battles = await db.battles.find(
+        {
+            "$or": [
+                {"challenger_classroom_id": classroom_id},
+                {"opponent_classroom_id": classroom_id}
+            ]
+        },
+        {"_id": 0}
+    ).to_list(1000)
+    
+    # Update scores for active battles
+    for battle in battles:
+        if battle["status"] == "active":
+            # Calculate current scores
+            start_date = datetime.fromisoformat(battle["start_date"])
+            
+            # Get XP earned by challenger team during battle
+            challenger_students = await db.classrooms.find_one({"id": battle["challenger_classroom_id"]})
+            challenger_student_ids = challenger_students.get("students", [])
+            
+            # Get submissions during battle period and sum XP
+            challenger_xp = 0
+            for student_id in challenger_student_ids:
+                student = await db.users.find_one({"id": student_id})
+                if student:
+                    # This is simplified - in production you'd track XP changes during battle period
+                    challenger_xp += student.get("xp", 0) // len(challenger_student_ids) if challenger_student_ids else 0
+            
+            # Get opponent team XP
+            opponent_students = await db.classrooms.find_one({"id": battle["opponent_classroom_id"]})
+            opponent_student_ids = opponent_students.get("students", [])
+            
+            opponent_xp = 0
+            for student_id in opponent_student_ids:
+                student = await db.users.find_one({"id": student_id})
+                if student:
+                    opponent_xp += student.get("xp", 0) // len(opponent_student_ids) if opponent_student_ids else 0
+            
+            battle["challenger_score"] = challenger_xp
+            battle["opponent_score"] = opponent_xp
+            
+            # Check if battle ended
+            if datetime.now(timezone.utc) > datetime.fromisoformat(battle["end_date"]):
+                winner_id = battle["challenger_classroom_id"] if challenger_xp > opponent_xp else battle["opponent_classroom_id"]
+                
+                # Award prizes
+                winner_students = challenger_student_ids if winner_id == battle["challenger_classroom_id"] else opponent_student_ids
+                for student_id in winner_students:
+                    await db.users.update_one(
+                        {"id": student_id},
+                        {
+                            "$inc": {"coins": 200},
+                            "$addToSet": {"owned_badges": "champion_team"}
+                        }
+                    )
+                
+                # Update battle status
+                await db.battles.update_one(
+                    {"id": battle["id"]},
+                    {
+                        "$set": {
+                            "status": "completed",
+                            "winner_id": winner_id,
+                            "challenger_score": challenger_xp,
+                            "opponent_score": opponent_xp
+                        }
+                    }
+                )
+                battle["status"] = "completed"
+                battle["winner_id"] = winner_id
+    
+    return battles
+
+@api_router.get("/classrooms/available-for-battle")
+async def get_available_classrooms(request: Request):
+    """Get classrooms available to challenge"""
+    user = await get_current_user(request)
+    
+    if user["role"] != "teacher":
+        raise HTTPException(status_code=403, detail="Only teachers can view this")
+    
+    # Get all classrooms except user's own
+    classrooms = await db.classrooms.find(
+        {"teacher_id": {"$ne": user["id"]}},
+        {"_id": 0, "id": 1, "name": 1, "class_code": 1, "teacher_id": 1}
+    ).to_list(1000)
+    
+    # Add teacher names
+    for classroom in classrooms:
+        teacher = await db.users.find_one({"id": classroom["teacher_id"]}, {"_id": 0, "name": 1})
+        if teacher:
+            classroom["teacher_name"] = teacher["name"]
+    
+    return classrooms
+
 # Include the router in the main app
 app.include_router(api_router)
 
