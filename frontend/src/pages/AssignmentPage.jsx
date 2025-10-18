@@ -36,6 +36,7 @@ export default function AssignmentPage({ user }) {
       const response = await axios.get(`${API}/assignments/${assignmentId}`, {
         withCredentials: true,
       });
+      console.log("Assignment data:", response.data); // Debug log
       setAssignment(response.data);
       
       // Handle both old (direct starter_code) and new (problems array) structure
