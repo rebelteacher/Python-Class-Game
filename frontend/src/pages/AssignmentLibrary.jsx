@@ -584,14 +584,30 @@ export default function AssignmentLibrary({ user }) {
                     By {problem.creator_name}
                   </div>
                   {!selectionMode && (
-                    <Button
-                      data-testid={`import-${problem.id}`}
-                      onClick={() => navigate(`/library/import/${problem.id}`)}
-                      className="w-full mt-3 bg-indigo-600 hover:bg-indigo-700"
-                      size="sm"
-                    >
-                      Import to Classroom
-                    </Button>
+                    <div className="flex gap-2">
+                      <Button
+                        data-testid={`edit-${problem.id}`}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setEditingProblem(problem);
+                          setEditDialogOpen(true);
+                        }}
+                        variant="outline"
+                        className="w-full mt-3"
+                        size="sm"
+                      >
+                        <Edit className="w-4 h-4 mr-1" />
+                        Edit
+                      </Button>
+                      <Button
+                        data-testid={`import-${problem.id}`}
+                        onClick={() => navigate(`/library/import/${problem.id}`)}
+                        className="w-full mt-3 bg-indigo-600 hover:bg-indigo-700"
+                        size="sm"
+                      >
+                        Import to Classroom
+                      </Button>
+                    </div>
                   )}
                 </CardContent>
               </Card>
