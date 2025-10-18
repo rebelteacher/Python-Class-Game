@@ -407,6 +407,8 @@ export default function AssignmentPage({ user }) {
               </CardContent>
             </Card>
           )}
+          </div>
+          </Panel>
         </PanelGroup>
       </main>
     </div>
