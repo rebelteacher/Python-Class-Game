@@ -201,9 +201,11 @@ class Problem(BaseModel):
     starter_code: str
     solution_code: str
     expected_output: str = ""
-    category: str  # "Basics", "Loops", "Functions", etc.
+    category: str  # "Lesson 2.2 - String Concatenation"
     difficulty: str  # "Easy", "Medium", "Hard"
     csta_standard: str  # CSTA K-12 CS Standards
+    problem_type: str = "Independent Practice"  # "Class Practice", "Paired Programming", "Independent Practice", "Debugging"
+    resources_link: str = ""  # Link to Google Drive, lesson materials, etc.
     creator_id: str
     creator_name: str
     is_approved: bool = True
@@ -218,6 +220,8 @@ class ProblemCreate(BaseModel):
     expected_output: str = ""
     category: str
     difficulty: str
+    problem_type: str = "Independent Practice"
+    resources_link: str = ""
     csta_standard: str = ""
 
 # Assignment model - bundle of multiple problems with unified scheduling
