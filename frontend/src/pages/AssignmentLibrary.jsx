@@ -561,7 +561,312 @@ export default function AssignmentLibrary({ user }) {
             ))}
           </div>
         )}
+
+        {/* Assignment Builder Dialog */}
+        <AssignmentBuilder
+          open={assignmentBuilderOpen}
+          onOpenChange={setAssignmentBuilderOpen}
+          selectedProblems={selectedProblems}
+          problems={problems}
+          onSuccess={() => {
+            setAssignmentBuilderOpen(false);
+            setSelectionMode(false);
+            setSelectedProblems([]);
+            toast.success("Assignment created successfully!");
+            navigate(-1);
+          }}
+        />
       </main>
     </div>
+  );
+}
+
+// Assignment Builder Component
+function AssignmentBuilder({ open, onOpenChange, selectedProblems, problems, onSuccess }) {
+  const [classrooms, setClassrooms] = useState([]);
+  const [selectedClassrooms, setSelectedClassrooms] = useState([]);
+  const [assignmentTitle, setAssignmentTitle] = useState("");
+  const [assignmentDescription, setAssignmentDescription] = useState("");
+  const [availableDate, setAvailableDate] = useState("");
+  const [availableTime, setAvailableTime] = useState("00:00");
+  const [dueDate, setDueDate] = useState("");
+  const [dueTime, setDueTime] = useState("23:59");
+  const [allowLate, setAllowLate] = useState(true);
+  const [latePenalty, setLatePenalty] = useState(0);
+  const [completionBonusXp, setCompletionBonusXp] = useState(100);
+  const [completionBonusCoins, setCompletionBonusCoins] = useState(50);
+  const [creating, setCreating] = useState(false);
+
+  const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
+  const API = `${BACKEND_URL}/api`;
+
+  useEffect(() => {
+    if (open) {
+      fetchClassrooms();
+    }
+  }, [open]);
+
+  const fetchClassrooms = async () => {
+    try {
+      const response = await axios.get(`${API}/classrooms`, {
+        withCredentials: true,
+      });
+      setClassrooms(response.data);
+    } catch (error) {
+      console.error("Error fetching classrooms:", error);
+    }
+  };
+
+  const toggleClassroom = (classroomId) => {
+    setSelectedClassrooms(prev =>
+      prev.includes(classroomId)
+        ? prev.filter(id => id !== classroomId)
+        : [...prev, classroomId]
+    );
+  };
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+
+    if (!assignmentTitle.trim()) {
+      toast.error("Please enter an assignment title");
+      return;
+    }
+
+    if (selectedClassrooms.length === 0) {
+      toast.error("Please select at least one classroom");
+      return;
+    }
+
+    if (availableDate && dueDate) {
+      const availableDateTime = new Date(`${availableDate}T${availableTime}`);
+      const dueDateTime = new Date(`${dueDate}T${dueTime}`);
+
+      if (dueDateTime <= availableDateTime) {
+        toast.error("Due date must be after available date");
+        return;
+      }
+    }
+
+    setCreating(true);
+
+    try {
+      const availableDateTime = availableDate && availableTime
+        ? `${availableDate}T${availableTime}:00Z`
+        : null;
+
+      const dueDateTime = dueDate && dueTime
+        ? `${dueDate}T${dueTime}:00Z`
+        : null;
+
+      await axios.post(
+        `${API}/assignments`,
+        {
+          title: assignmentTitle,
+          description: assignmentDescription,
+          problem_ids: selectedProblems,
+          classroom_ids: selectedClassrooms,
+          available_date: availableDateTime,
+          due_date: dueDateTime,
+          allow_late_submission: allowLate,
+          late_penalty_percent: parseInt(latePenalty),
+          completion_bonus_xp: parseInt(completionBonusXp),
+          completion_bonus_coins: parseInt(completionBonusCoins)
+        },
+        { withCredentials: true }
+      );
+
+      onSuccess();
+    } catch (error) {
+      console.error("Error creating assignment:", error);
+      toast.error(error.response?.data?.detail || "Failed to create assignment");
+    } finally {
+      setCreating(false);
+    }
+  };
+
+  const selectedProblemsList = problems.filter(p => selectedProblems.includes(p.id));
+
+  return (
+    <Dialog open={open} onOpenChange={onOpenChange}>
+      <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
+        <DialogHeader>
+          <DialogTitle>Create Assignment Bundle</DialogTitle>
+          <DialogDescription>
+            Bundle {selectedProblems.length} problem(s) into a single assignment with unified scheduling
+          </DialogDescription>
+        </DialogHeader>
+
+        <form onSubmit={handleSubmit} className="space-y-6">
+          {/* Selected Problems Preview */}
+          <div>
+            <Label>Selected Problems ({selectedProblems.length})</Label>
+            <div className="mt-2 space-y-2 max-h-40 overflow-y-auto p-3 bg-gray-50 rounded-lg border">
+              {selectedProblemsList.map((problem, index) => (
+                <div key={problem.id} className="text-sm flex items-center gap-2">
+                  <span className="font-semibold text-gray-600">{index + 1}.</span>
+                  <span>{problem.title}</span>
+                  <span className="text-xs text-gray-500">({problem.difficulty})</span>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* Assignment Details */}
+          <div>
+            <Label htmlFor="assignmentTitle">Assignment Title *</Label>
+            <Input
+              id="assignmentTitle"
+              placeholder="e.g., Week 1 - Variables & Loops"
+              value={assignmentTitle}
+              onChange={(e) => setAssignmentTitle(e.target.value)}
+              className="mt-1"
+            />
+          </div>
+
+          <div>
+            <Label htmlFor="assignmentDescription">Description</Label>
+            <Textarea
+              id="assignmentDescription"
+              placeholder="Complete all problems to master the basics..."
+              value={assignmentDescription}
+              onChange={(e) => setAssignmentDescription(e.target.value)}
+              className="mt-1"
+              rows={3}
+            />
+          </div>
+
+          {/* Classroom Selection */}
+          <div>
+            <Label>Assign to Classrooms *</Label>
+            <div className="mt-2 space-y-2 max-h-40 overflow-y-auto p-3 bg-gray-50 rounded-lg border">
+              {classrooms.map((classroom) => (
+                <div key={classroom.id} className="flex items-center space-x-2">
+                  <Checkbox
+                    id={`classroom-${classroom.id}`}
+                    checked={selectedClassrooms.includes(classroom.id)}
+                    onCheckedChange={() => toggleClassroom(classroom.id)}
+                  />
+                  <label
+                    htmlFor={`classroom-${classroom.id}`}
+                    className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 cursor-pointer"
+                  >
+                    {classroom.name} ({classroom.class_code})
+                  </label>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* Scheduling */}
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <Label htmlFor="availableDate">Available Date</Label>
+              <Input
+                id="availableDate"
+                type="date"
+                value={availableDate}
+                onChange={(e) => setAvailableDate(e.target.value)}
+                className="mt-1"
+              />
+            </div>
+            <div>
+              <Label htmlFor="availableTime">Available Time</Label>
+              <Input
+                id="availableTime"
+                type="time"
+                value={availableTime}
+                onChange={(e) => setAvailableTime(e.target.value)}
+                className="mt-1"
+              />
+            </div>
+            <div>
+              <Label htmlFor="dueDate">Due Date</Label>
+              <Input
+                id="dueDate"
+                type="date"
+                value={dueDate}
+                onChange={(e) => setDueDate(e.target.value)}
+                className="mt-1"
+              />
+            </div>
+            <div>
+              <Label htmlFor="dueTime">Due Time</Label>
+              <Input
+                id="dueTime"
+                type="time"
+                value={dueTime}
+                onChange={(e) => setDueTime(e.target.value)}
+                className="mt-1"
+              />
+            </div>
+          </div>
+
+          {/* Late Submission */}
+          <div className="space-y-3">
+            <div className="flex items-center space-x-2">
+              <Checkbox
+                id="allowLate"
+                checked={allowLate}
+                onCheckedChange={setAllowLate}
+              />
+              <label htmlFor="allowLate" className="text-sm font-medium cursor-pointer">
+                Allow late submissions
+              </label>
+            </div>
+            {allowLate && (
+              <div>
+                <Label htmlFor="latePenalty">Late Penalty (%)</Label>
+                <Input
+                  id="latePenalty"
+                  type="number"
+                  min="0"
+                  max="100"
+                  value={latePenalty}
+                  onChange={(e) => setLatePenalty(e.target.value)}
+                  className="mt-1"
+                />
+              </div>
+            )}
+          </div>
+
+          {/* Completion Bonuses */}
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <Label htmlFor="bonusXp">Completion Bonus XP</Label>
+              <Input
+                id="bonusXp"
+                type="number"
+                min="0"
+                value={completionBonusXp}
+                onChange={(e) => setCompletionBonusXp(e.target.value)}
+                className="mt-1"
+              />
+              <p className="text-xs text-gray-500 mt-1">Bonus for completing all problems</p>
+            </div>
+            <div>
+              <Label htmlFor="bonusCoins">Completion Bonus Coins</Label>
+              <Input
+                id="bonusCoins"
+                type="number"
+                min="0"
+                value={completionBonusCoins}
+                onChange={(e) => setCompletionBonusCoins(e.target.value)}
+                className="mt-1"
+              />
+              <p className="text-xs text-gray-500 mt-1">Bonus coins for completing all</p>
+            </div>
+          </div>
+
+          <Button
+            type="submit"
+            disabled={creating}
+            className="w-full bg-purple-600 hover:bg-purple-700"
+          >
+            {creating ? "Creating..." : "Create Assignment"}
+          </Button>
+        </form>
+      </DialogContent>
+    </Dialog>
   );
 }
