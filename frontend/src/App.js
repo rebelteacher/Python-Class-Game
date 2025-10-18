@@ -141,6 +141,15 @@ function App() {
                   </ProtectedRoute>
                 }
               />
+              
+              <Route
+                path="/library/import/:assignmentId"
+                element={
+                  <ProtectedRoute user={user} requiredRole="teacher">
+                    <ImportAssignment user={user} />
+                  </ProtectedRoute>
+                }
+              />
             </Routes>
           )}
         </AuthHandler>
