@@ -356,7 +356,7 @@ export default function AssignmentPage({ user }) {
               </Panel>
 
               {/* Resize Handle */}
-              <PanelResizeHandle className="w-2 bg-gray-200 hover:bg-indigo-400 transition-colors rounded-full cursor-col-resize" />
+              <PanelResizeHandle className="w-2 bg-gray-300 hover:bg-indigo-500 transition-colors cursor-col-resize mx-2" />
 
               {/* Output - Right */}
               <Panel defaultSize={50} minSize={30}>
