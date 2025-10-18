@@ -623,81 +623,63 @@ async def get_problems(
     problems = await db.problems.find(query, {"_id": 0}).to_list(1000)
     return problems
 
-@api_router.post("/library/assignments/import")
-async def import_library_assignment(import_data: AssignmentImport, request: Request):
-    """Import library assignment to multiple classrooms with scheduling"""
-    user = await get_current_user(request)
-    
-    if user["role"] != "teacher":
-        raise HTTPException(status_code=403, detail="Only teachers can import assignments")
-    
-    # Get library assignment
-    lib_assignment = await db.library_assignments.find_one({"id": import_data.library_assignment_id})
-    if not lib_assignment:
-        raise HTTPException(status_code=404, detail="Library assignment not found")
-    
-    # Verify teacher owns all classrooms
-    for classroom_id in import_data.classroom_ids:
-        classroom = await db.classrooms.find_one({"id": classroom_id})
-        if not classroom or classroom["teacher_id"] != user["id"]:
-            raise HTTPException(status_code=403, detail=f"You don't have access to classroom {classroom_id}")
-    
-    # Parse dates
-    available_date = datetime.fromisoformat(import_data.available_date) if import_data.available_date else None
-    due_date = datetime.fromisoformat(import_data.due_date) if import_data.due_date else None
-    
-    # Create assignment in each classroom
-    created_assignments = []
-    for classroom_id in import_data.classroom_ids:
-        new_assignment = Assignment(
-            classroom_id=classroom_id,
-            title=lib_assignment["title"],
-            description=lib_assignment["description"],
-            starter_code=lib_assignment["starter_code"],
-            solution_code=lib_assignment["solution_code"],
-            test_cases=[],
-            available_date=available_date,
-            due_date=due_date,
-            allow_late_submission=import_data.allow_late_submission,
-            late_penalty_percent=import_data.late_penalty_percent
-        )
-        
-        assignment_dict = new_assignment.model_dump()
-        assignment_dict["created_at"] = assignment_dict["created_at"].isoformat()
-        if assignment_dict["available_date"]:
-            assignment_dict["available_date"] = assignment_dict["available_date"].isoformat()
-        if assignment_dict["due_date"]:
-            assignment_dict["due_date"] = assignment_dict["due_date"].isoformat()
-        
-        await db.assignments.insert_one(assignment_dict)
-        created_assignments.append(new_assignment)
-    
-    # Increment times_imported counter
-    await db.library_assignments.update_one(
-        {"id": import_data.library_assignment_id},
-        {"$inc": {"times_imported": len(import_data.classroom_ids)}}
-    )
-    
-    return {"success": True, "assignments_created": len(created_assignments)}
 
-@api_router.post("/assignments", response_model=Assignment)
+@api_router.post("/assignments")
 async def create_assignment(assignment: AssignmentCreate, request: Request):
-    """Create a new assignment (Teacher only)"""
+    """Create a new bundled assignment with multiple problems"""
     user = await get_current_user(request)
     
     if user["role"] != "teacher":
         raise HTTPException(status_code=403, detail="Only teachers can create assignments")
     
-    classroom = await db.classrooms.find_one({"id": assignment.classroom_id})
-    if not classroom or classroom["teacher_id"] != user["id"]:
-        raise HTTPException(status_code=403, detail="Access denied")
+    # Verify teacher owns all classrooms
+    for classroom_id in assignment.classroom_ids:
+        classroom = await db.classrooms.find_one({"id": classroom_id})
+        if not classroom or classroom["teacher_id"] != user["id"]:
+            raise HTTPException(status_code=403, detail=f"You don't have access to classroom {classroom_id}")
     
-    new_assignment = Assignment(**assignment.model_dump())
+    # Verify all problems exist
+    for problem_id in assignment.problem_ids:
+        problem = await db.problems.find_one({"id": problem_id})
+        if not problem:
+            raise HTTPException(status_code=404, detail=f"Problem {problem_id} not found")
+    
+    # Parse dates
+    available_date = datetime.fromisoformat(assignment.available_date) if assignment.available_date else None
+    due_date = datetime.fromisoformat(assignment.due_date) if assignment.due_date else None
+    
+    # Create assignment
+    new_assignment = Assignment(
+        title=assignment.title,
+        description=assignment.description,
+        teacher_id=user["id"],
+        problem_ids=assignment.problem_ids,
+        classroom_ids=assignment.classroom_ids,
+        available_date=available_date,
+        due_date=due_date,
+        allow_late_submission=assignment.allow_late_submission,
+        late_penalty_percent=assignment.late_penalty_percent,
+        completion_bonus_xp=assignment.completion_bonus_xp,
+        completion_bonus_coins=assignment.completion_bonus_coins
+    )
+    
     assignment_dict = new_assignment.model_dump()
     assignment_dict["created_at"] = assignment_dict["created_at"].isoformat()
+    if assignment_dict["available_date"]:
+        assignment_dict["available_date"] = assignment_dict["available_date"].isoformat()
+    if assignment_dict["due_date"]:
+        assignment_dict["due_date"] = assignment_dict["due_date"].isoformat()
+    
     await db.assignments.insert_one(assignment_dict)
     
-    return new_assignment
+    # Increment times_imported counter for each problem
+    for problem_id in assignment.problem_ids:
+        await db.problems.update_one(
+            {"id": problem_id},
+            {"$inc": {"times_imported": len(assignment.classroom_ids)}}
+        )
+    
+    return {"success": True, "assignment_id": new_assignment.id, "classrooms": len(assignment.classroom_ids)}
 
 @api_router.get("/assignments/classroom/{classroom_id}")
 async def get_assignments(classroom_id: str, request: Request):
