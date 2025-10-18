@@ -154,14 +154,25 @@ export default function TeacherDashboard({ user, setUser }) {
               <form onSubmit={handleCreateClassroom} className="space-y-4">
                 <div>
                   <Label htmlFor="className">Classroom Name</Label>
-                  <Input
-                    data-testid="classroom-name-input"
-                    id="className"
-                    placeholder="e.g., Python 101"
-                    value={newClassName}
-                    onChange={(e) => setNewClassName(e.target.value)}
-                    className="mt-1"
-                  />
+                  <div className="flex gap-2 mt-1">
+                    <Input
+                      data-testid="classroom-name-input"
+                      id="className"
+                      placeholder="e.g., Python Pandemonium"
+                      value={newClassName}
+                      onChange={(e) => setNewClassName(e.target.value)}
+                      className="flex-1"
+                    />
+                    <Button
+                      type="button"
+                      variant="outline"
+                      onClick={() => setNewClassName(getRandomSuggestion())}
+                      className="whitespace-nowrap"
+                    >
+                      🎲 Inspire Me
+                    </Button>
+                  </div>
+                  <p className="text-xs text-gray-500 mt-1">Try: {classroomNameSuggestions.slice(0, 3).join(", ")}</p>
                 </div>
                 <Button data-testid="create-classroom-submit-btn" type="submit" className="w-full bg-indigo-600 hover:bg-indigo-700">
                   Create Classroom
