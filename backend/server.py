@@ -1208,9 +1208,19 @@ async def get_submissions(assignment_id: str, request: Request):
         if not assignment:
             raise HTTPException(status_code=404, detail="Assignment not found")
         
-        classroom = await db.classrooms.find_one({"id": assignment["classroom_id"]})
-        if classroom["teacher_id"] != user["id"]:
-            raise HTTPException(status_code=403, detail="Access denied")
+        # Handle both old (classroom_id) and new (classroom_ids) structure
+        teacher_id = assignment.get("teacher_id")
+        if teacher_id:
+            # New structure: assignment has teacher_id directly
+            if teacher_id != user["id"]:
+                raise HTTPException(status_code=403, detail="Access denied")
+        else:
+            # Old structure: check classroom
+            classroom_id = assignment.get("classroom_id")
+            if classroom_id:
+                classroom = await db.classrooms.find_one({"id": classroom_id})
+                if classroom and classroom["teacher_id"] != user["id"]:
+                    raise HTTPException(status_code=403, detail="Access denied")
         
         submissions = await db.submissions.find(
             {"assignment_id": assignment_id},
