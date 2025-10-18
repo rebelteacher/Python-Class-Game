@@ -8,7 +8,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { BookOpen, Plus, LogOut, Code2, RefreshCw, Trophy, ShoppingBag, Zap } from "lucide-react";
+import { Plus, LogOut, Code2, RefreshCw, Trophy, ShoppingBag, Zap } from "lucide-react";
 import RankBadge from "@/components/RankBadge";
 import Leaderboard from "@/components/Leaderboard";
 
