@@ -116,10 +116,16 @@ export default function AssignmentPage({ user }) {
 
     setSubmitting(true);
     try {
+      // Get problem_id: for old structure use assignment_id, for new use first problem's id
+      const problemId = assignment.problems && assignment.problems[0] 
+        ? assignment.problems[0].id 
+        : assignmentId;
+        
       const response = await axios.post(
         `${API}/submissions`,
         {
           assignment_id: assignmentId,
+          problem_id: problemId,
           code: code,
         },
         { withCredentials: true }
