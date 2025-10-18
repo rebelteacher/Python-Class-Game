@@ -906,9 +906,13 @@ async def submit_assignment(submission: SubmissionCreate, request: Request):
     if available_date and now < available_date:
         raise HTTPException(status_code=403, detail="This assignment is not yet available")
     
-    # Check previous submissions and lives
+    # Check previous submissions and lives (for this specific problem)
     previous_submissions = await db.submissions.find(
-        {"assignment_id": submission.assignment_id, "student_id": user["id"]},
+        {
+            "assignment_id": submission.assignment_id,
+            "problem_id": submission.problem_id,
+            "student_id": user["id"]
+        },
         {"_id": 0}
     ).sort("submitted_at", -1).to_list(100)
     
