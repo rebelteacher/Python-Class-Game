@@ -228,6 +228,24 @@ class SubmissionCreate(BaseModel):
     assignment_id: str
     code: str
 
+class Battle(BaseModel):
+    model_config = ConfigDict(extra="ignore")
+    id: str = Field(default_factory=lambda: str(uuid.uuid4()))
+    challenger_classroom_id: str
+    challenger_classroom_name: str
+    opponent_classroom_id: str
+    opponent_classroom_name: str
+    start_date: datetime
+    end_date: datetime
+    status: str  # "pending", "active", "completed"
+    challenger_score: int = 0
+    opponent_score: int = 0
+    winner_id: Optional[str] = None
+    created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+
+class BattleCreate(BaseModel):
+    opponent_classroom_id: str
+
 class CodeExecuteRequest(BaseModel):
     code: str
     test_input: str = ""
