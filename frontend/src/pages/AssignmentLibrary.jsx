@@ -279,9 +279,9 @@ export default function AssignmentLibrary({ user }) {
                 </DialogTrigger>
               <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto" data-testid="create-library-dialog">
                 <DialogHeader>
-                  <DialogTitle>Add Assignment to Library</DialogTitle>
+                  <DialogTitle>Add Problem to Library</DialogTitle>
                   <DialogDescription>
-                    Create a reusable assignment that you or other teachers can import
+                    Create a reusable problem that you can bundle into assignments
                   </DialogDescription>
                 </DialogHeader>
                 <form onSubmit={handleCreateProblem} className="space-y-4">
