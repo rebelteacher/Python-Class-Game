@@ -230,7 +230,9 @@ export default function AssignmentPage({ user }) {
                   <CardTitle>Instructions</CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <p className="text-gray-700 whitespace-pre-wrap">{assignment.description || "No description provided."}</p>
+                  <p className="text-gray-700 whitespace-pre-wrap">
+                    {(assignment.problems && assignment.problems[0]?.description) || assignment.description || "No description provided."}
+                  </p>
                 </CardContent>
               </Card>
 
