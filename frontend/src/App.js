@@ -151,6 +151,15 @@ function App() {
                   </ProtectedRoute>
                 }
               />
+
+              <Route
+                path="/teacher-practice/:problemId"
+                element={
+                  <ProtectedRoute user={user} requiredRole="teacher">
+                    <TeacherPractice user={user} />
+                  </ProtectedRoute>
+                }
+              />
             </Routes>
           )}
         </AuthHandler>
