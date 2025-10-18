@@ -148,6 +148,8 @@ export default function AssignmentLibrary({ user }) {
           expected_output: editingProblem.expected_output,
           category: editingProblem.category,
           difficulty: editingProblem.difficulty,
+          problem_type: editingProblem.problem_type,
+          resources_link: editingProblem.resources_link,
           csta_standard: editingProblem.csta_standard
         },
         { withCredentials: true }
