@@ -120,6 +120,8 @@ export default function AssignmentLibrary({ user }) {
         expected_output: "",
         category: "",
         difficulty: "Easy",
+        problem_type: "Independent Practice",
+        resources_link: "",
         csta_standard: ""
       });
       fetchProblems();
