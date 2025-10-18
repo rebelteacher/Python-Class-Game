@@ -371,9 +371,9 @@ export default function AssignmentPage({ user }) {
                   </CardContent>
                 </Card>
               </Panel>
-            </PanelGroup>
-          ) : (
-            <Card data-testid="teacher-view-card">
+              </PanelGroup>
+            ) : (
+              <Card data-testid="teacher-view-card">
               <CardHeader>
                 <CardTitle>Solution Code</CardTitle>
                 <CardDescription>This is your reference solution</CardDescription>
