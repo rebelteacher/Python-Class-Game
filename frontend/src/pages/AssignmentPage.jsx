@@ -114,12 +114,23 @@ export default function AssignmentPage({ user }) {
       
       const isPassing = response.data.score >= 70;
       const newLivesRemaining = response.data.lives_remaining;
+      const xpEarned = response.data.xp_earned || 0;
+      const coinsEarned = response.data.coins_earned || 0;
+      const rankUp = response.data.rank_up;
+      const newRank = response.data.new_rank;
       
       setLivesRemaining(newLivesRemaining);
       setIsLockedOut(newLivesRemaining <= 0);
       
+      if (rankUp) {
+        toast.success(`🎉 RANK UP! You're now a ${newRank}!`, { duration: 5000 });
+      }
+      
       if (isPassing) {
-        toast.success(`✅ Great job! Score: ${response.data.score.toFixed(1)}%`);
+        toast.success(
+          `✅ Great job! Score: ${response.data.score.toFixed(1)}% | +${xpEarned} XP | +${coinsEarned} 🪙`,
+          { duration: 4000 }
+        );
       } else if (newLivesRemaining > 0) {
         toast.warning(`Score: ${response.data.score.toFixed(1)}% - ${newLivesRemaining} ${newLivesRemaining === 1 ? 'life' : 'lives'} remaining`);
       } else {
