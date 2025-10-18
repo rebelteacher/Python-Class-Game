@@ -353,6 +353,7 @@ export default function AssignmentLibrary({ user }) {
                 </form>
               </DialogContent>
             </Dialog>
+            </div>
           )}
         </div>
       </nav>
