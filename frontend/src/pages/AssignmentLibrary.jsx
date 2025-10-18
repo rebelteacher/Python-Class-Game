@@ -284,7 +284,7 @@ export default function AssignmentLibrary({ user }) {
                     Create a reusable assignment that you or other teachers can import
                   </DialogDescription>
                 </DialogHeader>
-                <form onSubmit={handleCreateAssignment} className="space-y-4">
+                <form onSubmit={handleCreateProblem} className="space-y-4">
                   <div>
                     <Label htmlFor="title">Title *</Label>
                     <Input
@@ -303,8 +303,8 @@ export default function AssignmentLibrary({ user }) {
                       data-testid="lib-description-input"
                       id="description"
                       placeholder="Instructions for students..."
-                      value={newAssignment.description}
-                      onChange={(e) => setNewAssignment({ ...newAssignment, description: e.target.value })}
+                      value={newProblem.description}
+                      onChange={(e) => setNewProblem({ ...newProblem, description: e.target.value })}
                       className="mt-1"
                       rows={3}
                     />
@@ -317,15 +317,15 @@ export default function AssignmentLibrary({ user }) {
                         data-testid="lib-category-input"
                         id="category"
                         placeholder="e.g., Basics, Loops"
-                        value={newAssignment.category}
-                        onChange={(e) => setNewAssignment({ ...newAssignment, category: e.target.value })}
+                        value={newProblem.category}
+                        onChange={(e) => setNewProblem({ ...newProblem, category: e.target.value })}
                         className="mt-1"
                       />
                     </div>
 
                     <div>
                       <Label htmlFor="difficulty">Difficulty</Label>
-                      <Select value={newAssignment.difficulty} onValueChange={(val) => setNewAssignment({ ...newAssignment, difficulty: val })}>
+                      <Select value={newProblem.difficulty} onValueChange={(val) => setNewProblem({ ...newProblem, difficulty: val })}>
                         <SelectTrigger data-testid="lib-difficulty-select">
                           <SelectValue />
                         </SelectTrigger>
@@ -343,8 +343,8 @@ export default function AssignmentLibrary({ user }) {
                         data-testid="lib-csta-input"
                         id="csta"
                         placeholder="e.g., 3A-AP-16"
-                        value={newAssignment.csta_standard}
-                        onChange={(e) => setNewAssignment({ ...newAssignment, csta_standard: e.target.value })}
+                        value={newProblem.csta_standard}
+                        onChange={(e) => setNewProblem({ ...newProblem, csta_standard: e.target.value })}
                         className="mt-1"
                       />
                     </div>
@@ -356,8 +356,8 @@ export default function AssignmentLibrary({ user }) {
                       data-testid="lib-starter-input"
                       id="starterCode"
                       placeholder="# Starter code for students..."
-                      value={newAssignment.starter_code}
-                      onChange={(e) => setNewAssignment({ ...newAssignment, starter_code: e.target.value })}
+                      value={newProblem.starter_code}
+                      onChange={(e) => setNewProblem({ ...newProblem, starter_code: e.target.value })}
                       className="mt-1 font-mono text-sm"
                       rows={5}
                     />
@@ -369,8 +369,8 @@ export default function AssignmentLibrary({ user }) {
                       data-testid="lib-solution-input"
                       id="solutionCode"
                       placeholder="# Your solution code..."
-                      value={newAssignment.solution_code}
-                      onChange={(e) => setNewAssignment({ ...newAssignment, solution_code: e.target.value })}
+                      value={newProblem.solution_code}
+                      onChange={(e) => setNewProblem({ ...newProblem, solution_code: e.target.value })}
                       className="mt-1 font-mono text-sm"
                       rows={8}
                     />
@@ -382,8 +382,8 @@ export default function AssignmentLibrary({ user }) {
                       data-testid="lib-expected-output-input"
                       id="expectedOutput"
                       placeholder="e.g., 60"
-                      value={newAssignment.expected_output}
-                      onChange={(e) => setNewAssignment({ ...newAssignment, expected_output: e.target.value })}
+                      value={newProblem.expected_output}
+                      onChange={(e) => setNewProblem({ ...newProblem, expected_output: e.target.value })}
                       className="mt-1 font-mono text-sm"
                       rows={3}
                     />
