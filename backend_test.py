@@ -341,7 +341,11 @@ class CodeClassAPITester:
 
     def create_student_user(self, suffix=""):
         """Helper method to create a student user"""
-        student_timestamp = str(int(datetime.now().timestamp()) + int(suffix or "1"))
+        base_timestamp = int(datetime.now().timestamp())
+        if suffix and suffix.isdigit():
+            student_timestamp = str(base_timestamp + int(suffix))
+        else:
+            student_timestamp = str(base_timestamp) + (f"-{suffix}" if suffix else "")
         student_id = f"test-student-{student_timestamp}"
         student_token = f"test_student_session_{student_timestamp}"
         
