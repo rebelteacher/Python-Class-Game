@@ -490,7 +490,7 @@ export default function AssignmentPage({ user }) {
                       defaultLanguage="python"
                       value={code}
                       onChange={(value) => setCode(value || "")}
-                      theme="vs-light"
+                      theme={darkMode ? "vs-dark" : "vs-light"}
                       options={{
                         minimap: { enabled: false },
                         fontSize: 14,
