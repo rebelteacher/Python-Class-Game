@@ -26,10 +26,17 @@ export default function AssignmentPage({ user }) {
   const [livesRemaining, setLivesRemaining] = useState(3);
   const [isLockedOut, setIsLockedOut] = useState(false);
   const [currentProblemIndex, setCurrentProblemIndex] = useState(0);
+  const [darkMode, setDarkMode] = useState(false); // Dark mode toggle
 
   useEffect(() => {
     fetchAssignment();
     fetchSubmissions();
+    
+    // Load dark mode preference from localStorage
+    const savedDarkMode = localStorage.getItem('editorDarkMode');
+    if (savedDarkMode === 'true') {
+      setDarkMode(true);
+    }
   }, [assignmentId]);
 
   useEffect(() => {
