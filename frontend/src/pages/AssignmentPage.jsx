@@ -400,20 +400,36 @@ export default function AssignmentPage({ user }) {
                     <CardTitle className="flex flex-col gap-3">
                       <div className="flex justify-between items-center">
                         <span>Code Editor</span>
-                        <div className="flex items-center gap-2 text-sm">
-                          <span className="text-gray-600">Lives:</span>
-                          {isLockedOut ? (
-                            <span className="text-red-600 font-semibold">🚫 Locked</span>
-                          ) : (
-                            <span>
-                              {Array.from({ length: livesRemaining }).map((_, i) => (
-                                <span key={i} className="text-red-500">❤️</span>
-                              ))}
-                              {Array.from({ length: 3 - livesRemaining }).map((_, i) => (
-                                <span key={i} className="text-gray-300">🤍</span>
-                              ))}
-                            </span>
-                          )}
+                        <div className="flex items-center gap-3">
+                          {/* Dark Mode Toggle */}
+                          <Button
+                            onClick={() => {
+                              const newMode = !darkMode;
+                              setDarkMode(newMode);
+                              localStorage.setItem('editorDarkMode', newMode);
+                            }}
+                            variant="outline"
+                            size="sm"
+                            className="gap-2"
+                          >
+                            {darkMode ? '☀️ Light' : '🌙 Dark'}
+                          </Button>
+                          
+                          <div className="flex items-center gap-2 text-sm">
+                            <span className="text-gray-600">Lives:</span>
+                            {isLockedOut ? (
+                              <span className="text-red-600 font-semibold">🚫 Locked</span>
+                            ) : (
+                              <span>
+                                {Array.from({ length: livesRemaining }).map((_, i) => (
+                                  <span key={i} className="text-red-500">❤️</span>
+                                ))}
+                                {Array.from({ length: 3 - livesRemaining }).map((_, i) => (
+                                  <span key={i} className="text-gray-300">🤍</span>
+                                ))}
+                              </span>
+                            )}
+                          </div>
                         </div>
                       </div>
                       <div className="flex gap-2">
