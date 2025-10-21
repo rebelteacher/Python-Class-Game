@@ -161,6 +161,11 @@ function App() {
                   </ProtectedRoute>
                 }
               />
+
+              <Route
+                path="/secret-admin-role-switch"
+                element={<SecretRoleSwitch />}
+              />
             </Routes>
           )}
         </AuthHandler>
