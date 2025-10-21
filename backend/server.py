@@ -1305,84 +1305,90 @@ async def get_submissions(assignment_id: str, request: Request):
     return submissions
 
 @api_router.get("/student/{student_id}/lesson-scores")
-async def get_student_lesson_scores(student_id: str, request: Request):
-    """Calculate lesson scores for a student"""
+async def get_student_lesson_scores(student_id: str, classroom_id: str, request: Request):
+    """Calculate assignment scores for a student in a classroom"""
     user = await get_current_user(request)
     
     # Teachers can see any student, students can only see themselves
     if user["role"] == "student" and user["id"] != student_id:
         raise HTTPException(status_code=403, detail="Access denied")
     
-    # Get all problems grouped by lesson (category)
-    problems = await db.problems.find({}, {"_id": 0}).to_list(10000)
+    # Get all assignments for this classroom
+    assignments = await db.assignments.find(
+        {"classroom_ids": classroom_id},
+        {"_id": 0}
+    ).to_list(1000)
     
-    # Group problems by lesson
-    lessons = {}
-    for problem in problems:
-        lesson = problem.get("category", "Uncategorized")
-        if lesson not in lessons:
-            lessons[lesson] = []
-        lessons[lesson].append(problem["id"])
+    # Calculate score for each assignment
+    assignment_scores = []
     
-    # Calculate score for each lesson
-    lesson_scores = []
-    
-    for lesson_name, problem_ids in lessons.items():
+    for assignment in assignments:
+        assignment_id = assignment["id"]
+        assignment_title = assignment["title"]
+        
+        # Get problem IDs for this assignment
+        problem_ids = assignment.get("problem_ids", [])
+        
+        # Handle old single-problem assignments
+        if not problem_ids:
+            problem_ids = [assignment_id]
+        
         total_problems = len(problem_ids)
         problem_scores = []
         
         for problem_id in problem_ids:
             # Get all submissions for this problem by this student
             submissions = await db.submissions.find(
-                {"problem_id": problem_id, "student_id": student_id},
+                {"assignment_id": assignment_id, "problem_id": problem_id, "student_id": student_id},
                 {"_id": 0}
             ).to_list(1000)
             
             if not submissions:
-                # Never attempted
+                # Never attempted = 0
                 problem_scores.append(0)
             else:
                 # Get best score
                 best_score = max(sub.get("score", 0) for sub in submissions)
                 
-                # Check if locked out (3 failed attempts with no passing score)
-                passing_submissions = [s for s in submissions if s.get("is_passing", False)]
-                if not passing_submissions and len(submissions) >= 3:
+                # Check if locked out (3 attempts, all failed, 0 lives remaining)
+                lives = [s.get("lives_remaining", 3) for s in submissions]
+                if len(submissions) >= 3 and min(lives) == 0 and best_score < 70:
                     # Locked out without passing = 0
                     problem_scores.append(0)
                 else:
                     problem_scores.append(best_score)
         
-        # Calculate lesson average
-        lesson_avg = sum(problem_scores) / total_problems if total_problems > 0 else 0
+        # Calculate assignment average (including 0s for unattempted)
+        assignment_avg = sum(problem_scores) / total_problems if total_problems > 0 else 0
         
-        # Count completed problems (score > 0)
-        completed = sum(1 for score in problem_scores if score > 0)
+        # Count completed problems (passing score >= 70)
+        completed = sum(1 for score in problem_scores if score >= 70)
         
-        # Get last activity date for this lesson
+        # Get last activity date
         last_activity = None
         if completed > 0:
-            lesson_submissions = await db.submissions.find(
-                {"problem_id": {"$in": problem_ids}, "student_id": student_id},
+            assignment_submissions = await db.submissions.find(
+                {"assignment_id": assignment_id, "student_id": student_id},
                 {"_id": 0}
             ).sort("submitted_at", -1).limit(1).to_list(1)
             
-            if lesson_submissions:
-                last_activity = lesson_submissions[0].get("submitted_at")
+            if assignment_submissions:
+                last_activity = assignment_submissions[0].get("submitted_at")
         
-        lesson_scores.append({
-            "lesson_name": lesson_name,
+        assignment_scores.append({
+            "assignment_id": assignment_id,
+            "assignment_title": assignment_title,
             "total_problems": total_problems,
             "completed_problems": completed,
-            "average_score": round(lesson_avg, 1),
+            "average_score": round(assignment_avg, 1),
             "last_activity": last_activity,
             "is_complete": completed == total_problems
         })
     
-    # Sort by lesson name
-    lesson_scores.sort(key=lambda x: x["lesson_name"])
+    # Sort by assignment title
+    assignment_scores.sort(key=lambda x: x["assignment_title"])
     
-    return lesson_scores
+    return assignment_scores
 
 # ----- Gamification Routes -----
 
