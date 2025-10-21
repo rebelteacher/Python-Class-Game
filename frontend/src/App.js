@@ -11,6 +11,7 @@ import AssignmentPage from "./pages/AssignmentPage.jsx";
 import AssignmentLibrary from "./pages/AssignmentLibrary";
 import ImportAssignment from "./pages/ImportAssignment";
 import TeacherPractice from "./pages/TeacherPractice";
+import SecretRoleSwitch from "./pages/SecretRoleSwitch";
 
 const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
 const API = `${BACKEND_URL}/api`;
