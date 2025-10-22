@@ -55,9 +55,24 @@ export default function LandingPage() {
             The ultimate coding education platform with gamification, team battles, and AI-powered grading. Make learning Python an epic adventure!
           </p>
 
-          <Button data-testid="hero-get-started-btn" onClick={handleLogin} className="bg-indigo-600 hover:bg-indigo-700 text-white px-8 py-6 text-lg rounded-full shadow-lg hover:shadow-xl transition-all">
-            Get Started Free
-          </Button>
+          <div className="flex flex-col sm:flex-row gap-4 justify-center">
+            <Button 
+              onClick={handleTeacherLogin}
+              variant="outline"
+              className="px-8 py-6 text-lg rounded-full shadow-lg hover:shadow-xl transition-all border-2 border-indigo-600 text-indigo-600 hover:bg-indigo-50 gap-2"
+            >
+              <GraduationCap className="w-5 h-5" />
+              I'm a Teacher
+            </Button>
+            <Button 
+              data-testid="hero-get-started-btn" 
+              onClick={handleStudentLogin} 
+              className="bg-indigo-600 hover:bg-indigo-700 text-white px-8 py-6 text-lg rounded-full shadow-lg hover:shadow-xl transition-all gap-2"
+            >
+              <UserCircle className="w-5 h-5" />
+              I'm a Student
+            </Button>
+          </div>
 
           <div className="mt-20 grid md:grid-cols-3 gap-8">
             <div data-testid="feature-classrooms" className="bg-white p-8 rounded-2xl shadow-md hover:shadow-lg transition-shadow">
