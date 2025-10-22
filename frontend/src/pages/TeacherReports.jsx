@@ -416,17 +416,135 @@ export default function TeacherReports({ user }) {
             </Card>
 
             {/* Generate Button */}
-            <Button
-              onClick={generateReport}
-              disabled={generating || !selectedClassroom || (reportType === "grades" && selectedAssignments.length === 0)}
-              className="w-full bg-indigo-600 hover:bg-indigo-700"
-              size="lg"
-            >
-              <Download className="w-5 h-5 mr-2" />
-              {generating ? "Generating..." : "Download Report (CSV)"}
-            </Button>
+            <div className="space-y-3">
+              <Button
+                onClick={generateReport}
+                disabled={generating || selectedClassrooms.length === 0 || (reportType === "grades" && selectedAssignments.length === 0)}
+                className="w-full bg-indigo-600 hover:bg-indigo-700"
+                size="lg"
+              >
+                <FileSpreadsheet className="w-5 h-5 mr-2" />
+                {generating ? "Generating..." : "Generate Report"}
+              </Button>
+
+              {reportData && (
+                <Button
+                  onClick={downloadExcel}
+                  className="w-full bg-green-600 hover:bg-green-700"
+                  size="lg"
+                >
+                  <Download className="w-5 h-5 mr-2" />
+                  Download Excel (.xlsx)
+                </Button>
+              )}
+            </div>
           </CardContent>
         </Card>
+
+        {/* Report Preview */}
+        {reportData && reportType === "grades" && (
+          <Card className="mt-6 max-w-6xl mx-auto">
+            <CardHeader>
+              <CardTitle>Report Preview</CardTitle>
+              <CardDescription>
+                {reportData.students.length} student(s) × {reportData.assignments.length} assignment(s)
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="overflow-x-auto">
+                <table className="w-full border-collapse border border-gray-300 text-sm">
+                  <thead>
+                    <tr className="bg-gray-100">
+                      <th className="border border-gray-300 px-4 py-2 text-left font-semibold">
+                        Student Name
+                      </th>
+                      {reportData.assignments.map(assignment => (
+                        <th key={assignment.id} className="border border-gray-300 px-4 py-2 text-center font-semibold">
+                          {assignment.title}
+                        </th>
+                      ))}
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {reportData.students.map(student => (
+                      <tr key={student.student_id} className="hover:bg-gray-50">
+                        <td className="border border-gray-300 px-4 py-2 font-medium">
+                          {student.student_name}
+                        </td>
+                        {reportData.assignments.map(assignment => {
+                          const scoreData = student.scores[assignment.id];
+                          const score = scoreData ? scoreData.average_score : 0;
+                          const bgColor = score >= 90 ? "bg-green-100" : 
+                                        score >= 70 ? "bg-yellow-100" : 
+                                        score > 0 ? "bg-orange-100" : "bg-red-100";
+                          
+                          return (
+                            <td key={assignment.id} className={`border border-gray-300 px-4 py-2 text-center ${bgColor}`}>
+                              {score}
+                            </td>
+                          );
+                        })}
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </CardContent>
+          </Card>
+        )}
+
+        {reportData && reportType === "missing" && (
+          <Card className="mt-6 max-w-4xl mx-auto">
+            <CardHeader>
+              <CardTitle>Report Preview</CardTitle>
+              <CardDescription>
+                {reportData.students.length} student(s) with missing or incomplete assignments
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-6">
+              {reportData.students.length === 0 ? (
+                <div className="text-center py-8 text-gray-500">
+                  <User className="w-12 h-12 mx-auto mb-3 opacity-50" />
+                  <p>All students are up to date!</p>
+                  <p className="text-sm">No missing or incomplete assignments found.</p>
+                </div>
+              ) : (
+                reportData.students.map(student => (
+                  <div key={student.student_id} className="border rounded-lg p-4 bg-gray-50">
+                    <h3 className="font-semibold text-lg mb-1">{student.student_name}</h3>
+                    <p className="text-sm text-gray-600 mb-3">{student.student_email}</p>
+                    
+                    {student.missing_assignments.length > 0 && (
+                      <div className="mb-3">
+                        <h4 className="font-medium text-red-700 mb-2">Missing (Not Started):</h4>
+                        <ul className="list-disc list-inside space-y-1 ml-2">
+                          {student.missing_assignments.map(assignment => (
+                            <li key={assignment.assignment_id} className="text-sm">
+                              {assignment.assignment_title} ({assignment.total_problems} problems)
+                            </li>
+                          ))}
+                        </ul>
+                      </div>
+                    )}
+                    
+                    {student.incomplete_assignments.length > 0 && (
+                      <div>
+                        <h4 className="font-medium text-orange-700 mb-2">Incomplete:</h4>
+                        <ul className="list-disc list-inside space-y-1 ml-2">
+                          {student.incomplete_assignments.map(assignment => (
+                            <li key={assignment.assignment_id} className="text-sm">
+                              {assignment.assignment_title} ({assignment.completed_problems}/{assignment.total_problems} completed)
+                            </li>
+                          ))}
+                        </ul>
+                      </div>
+                    )}
+                  </div>
+                ))
+              )}
+            </CardContent>
+          </Card>
+        )}
       </main>
     </div>
   );
