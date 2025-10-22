@@ -139,6 +139,8 @@ class User(BaseModel):
     name: str
     picture: Optional[str] = None
     role: str  # "teacher" or "student"
+    password: Optional[str] = None  # Hashed password for teacher accounts (optional, for non-OAuth teachers)
+    is_admin: bool = False  # Admin flag for platform management
     xp: int = 0
     coins: int = 0
     rank: str = "Rookie"
