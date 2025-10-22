@@ -1018,6 +1018,581 @@ class CodeClassAPITester:
             # Switch back to teacher token
             self.session_token = original_token
 
+    def create_test_students_with_names(self, classroom_id, count=3):
+        """Create multiple test students with realistic names for sorting tests"""
+        students = []
+        names = [
+            ("Alice", "Brown"),
+            ("Bob", "Anderson"), 
+            ("John", "Smith"),
+            ("Emma", "Davis"),
+            ("Michael", "Wilson")
+        ]
+        
+        for i in range(min(count, len(names))):
+            first_name, last_name = names[i]
+            timestamp = str(int(datetime.now().timestamp()) + i)
+            student_id = f"test-student-{timestamp}"
+            student_token = f"test_student_session_{timestamp}"
+            
+            try:
+                from motor.motor_asyncio import AsyncIOMotorClient
+                import asyncio
+                
+                async def create_named_student():
+                    client = AsyncIOMotorClient("mongodb://localhost:27017")
+                    db = client["test_database"]
+                    
+                    # Create student user with realistic name
+                    user_doc = {
+                        "id": student_id,
+                        "email": f"{first_name.lower()}.{last_name.lower()}.{timestamp}@example.com",
+                        "name": f"{first_name} {last_name}",
+                        "role": "student",
+                        "xp": 0,
+                        "coins": 0,
+                        "rank": "Rookie",
+                        "rank_level": 1,
+                        "problems_solved": 0,
+                        "perfect_scores": 0,
+                        "current_streak": 0,
+                        "best_streak": 0,
+                        "owned_themes": ["default"],
+                        "owned_badges": [],
+                        "active_theme": "default",
+                        "active_badges": [],
+                        "created_at": datetime.now(timezone.utc).isoformat()
+                    }
+                    await db.users.insert_one(user_doc)
+                    
+                    # Create session
+                    session_doc = {
+                        "user_id": student_id,
+                        "session_token": student_token,
+                        "expires_at": datetime.now(timezone.utc) + timedelta(days=7),
+                        "created_at": datetime.now(timezone.utc).isoformat()
+                    }
+                    await db.user_sessions.insert_one(session_doc)
+                    
+                    # Add to classroom
+                    await db.classrooms.update_one(
+                        {"id": classroom_id},
+                        {"$push": {"students": student_id}}
+                    )
+                    
+                    client.close()
+                    return True
+                
+                asyncio.run(create_named_student())
+                students.append({
+                    "id": student_id,
+                    "token": student_token,
+                    "name": f"{first_name} {last_name}",
+                    "first_name": first_name,
+                    "last_name": last_name,
+                    "email": f"{first_name.lower()}.{last_name.lower()}.{timestamp}@example.com"
+                })
+                
+            except Exception as e:
+                print(f"   ❌ Failed to create student {first_name} {last_name}: {str(e)}")
+        
+        return students
+
+    def create_new_assignment_structure(self, classroom_ids, title, problem_count=3):
+        """Create assignment using new multi-problem structure"""
+        try:
+            from motor.motor_asyncio import AsyncIOMotorClient
+            import asyncio
+            
+            async def create_assignment_and_problems():
+                client = AsyncIOMotorClient("mongodb://localhost:27017")
+                db = client["test_database"]
+                
+                # Create problems first
+                problem_ids = []
+                for i in range(problem_count):
+                    problem_id = str(uuid.uuid4())
+                    problem_doc = {
+                        "id": problem_id,
+                        "title": f"Problem {i+1}: Basic Math",
+                        "description": f"Write a function that adds {i+1} to a number",
+                        "starter_code": f"def add_{i+1}(x):\n    # Your code here\n    pass",
+                        "solution_code": f"def add_{i+1}(x):\n    return x + {i+1}\n\nprint(add_{i+1}(5))",
+                        "expected_output": str(5 + i + 1),
+                        "category": "Math",
+                        "difficulty": "Easy",
+                        "csta_standard": "1A-AP-15",
+                        "problem_type": "Independent Practice",
+                        "resources_link": "",
+                        "creator_id": self.user_id,
+                        "creator_name": "Test Teacher",
+                        "is_approved": True,
+                        "times_imported": 0,
+                        "created_at": datetime.now(timezone.utc).isoformat()
+                    }
+                    await db.problems.insert_one(problem_doc)
+                    problem_ids.append(problem_id)
+                
+                # Create assignment
+                assignment_id = str(uuid.uuid4())
+                assignment_doc = {
+                    "id": assignment_id,
+                    "title": title,
+                    "description": f"Complete all {problem_count} problems",
+                    "teacher_id": self.user_id,
+                    "problem_ids": problem_ids,
+                    "classroom_ids": classroom_ids,
+                    "available_date": (datetime.now(timezone.utc) - timedelta(hours=1)).isoformat(),
+                    "due_date": (datetime.now(timezone.utc) + timedelta(days=7)).isoformat(),
+                    "allow_late_submission": True,
+                    "late_penalty_percent": 0,
+                    "completion_bonus_xp": 100,
+                    "completion_bonus_coins": 50,
+                    "created_at": datetime.now(timezone.utc).isoformat()
+                }
+                await db.assignments.insert_one(assignment_doc)
+                
+                client.close()
+                return {"id": assignment_id, "problem_ids": problem_ids}
+            
+            return asyncio.run(create_assignment_and_problems())
+            
+        except Exception as e:
+            print(f"   ❌ Failed to create assignment: {str(e)}")
+            return None
+
+    def create_student_submissions(self, student_id, assignment_id, problem_ids, scores):
+        """Create submissions for a student with specific scores"""
+        try:
+            from motor.motor_asyncio import AsyncIOMotorClient
+            import asyncio
+            
+            async def create_submissions():
+                client = AsyncIOMotorClient("mongodb://localhost:27017")
+                db = client["test_database"]
+                
+                for i, (problem_id, score) in enumerate(zip(problem_ids, scores)):
+                    if score is None:  # No submission
+                        continue
+                    
+                    submission_id = str(uuid.uuid4())
+                    submission_doc = {
+                        "id": submission_id,
+                        "assignment_id": assignment_id,
+                        "problem_id": problem_id,
+                        "student_id": student_id,
+                        "code": f"def add_{i+1}(x):\n    return x + {i+1}",
+                        "score": score,
+                        "feedback": f"Score: {score}%",
+                        "test_results": [],
+                        "attempt_number": 1,
+                        "lives_remaining": 3 if score >= 70 else 2,
+                        "is_passing": score >= 70,
+                        "is_late": False,
+                        "submitted_at": datetime.now(timezone.utc).isoformat()
+                    }
+                    await db.submissions.insert_one(submission_doc)
+                
+                client.close()
+                return True
+            
+            return asyncio.run(create_submissions())
+            
+        except Exception as e:
+            print(f"   ❌ Failed to create submissions: {str(e)}")
+            return False
+
+    def test_teacher_reports_endpoints(self):
+        """Test Teacher Reports endpoints - gradebook and missing reports"""
+        print("\n📊 Testing Teacher Reports Endpoints...")
+        
+        # Create test setup with multiple classrooms and students
+        print("   Setting up test data for reports...")
+        
+        # Create two classrooms
+        classroom1_data = {"name": f"Math Class {datetime.now().strftime('%H%M%S')}"}
+        classroom1 = self.run_test(
+            "Create classroom 1 for reports",
+            "POST",
+            "classrooms",
+            200,
+            classroom1_data
+        )
+        
+        classroom2_data = {"name": f"Science Class {datetime.now().strftime('%H%M%S')}"}
+        classroom2 = self.run_test(
+            "Create classroom 2 for reports",
+            "POST",
+            "classrooms",
+            200,
+            classroom2_data
+        )
+        
+        if not classroom1 or not classroom2:
+            print("❌ Cannot test reports without classrooms")
+            return
+        
+        classroom1_id = classroom1.get('id')
+        classroom2_id = classroom2.get('id')
+        
+        # Create students with realistic names for sorting tests
+        print("   Creating students with realistic names...")
+        students1 = self.create_test_students_with_names(classroom1_id, 3)
+        students2 = self.create_test_students_with_names(classroom2_id, 2)
+        
+        if not students1 or not students2:
+            print("❌ Cannot test reports without students")
+            return
+        
+        # Create assignments using new structure
+        print("   Creating assignments with multiple problems...")
+        assignment1 = self.create_new_assignment_structure(
+            [classroom1_id], 
+            f"Assignment 1 - Math Basics {datetime.now().strftime('%H%M%S')}", 
+            3
+        )
+        assignment2 = self.create_new_assignment_structure(
+            [classroom1_id, classroom2_id], 
+            f"Assignment 2 - Advanced Math {datetime.now().strftime('%H%M%S')}", 
+            2
+        )
+        assignment3 = self.create_new_assignment_structure(
+            [classroom2_id], 
+            f"Assignment 3 - Science {datetime.now().strftime('%H%M%S')}", 
+            4
+        )
+        
+        if not assignment1 or not assignment2 or not assignment3:
+            print("❌ Cannot test reports without assignments")
+            return
+        
+        # Create varied submissions for testing
+        print("   Creating varied student submissions...")
+        
+        # Student 1 (Alice Brown) - Complete assignment 1, partial assignment 2
+        self.create_student_submissions(
+            students1[0]["id"], assignment1["id"], assignment1["problem_ids"], 
+            [85, 92, 78]  # All passing
+        )
+        self.create_student_submissions(
+            students1[0]["id"], assignment2["id"], assignment2["problem_ids"], 
+            [88, None]  # One complete, one missing
+        )
+        
+        # Student 2 (Bob Anderson) - Partial assignment 1, not started assignment 2
+        self.create_student_submissions(
+            students1[1]["id"], assignment1["id"], assignment1["problem_ids"], 
+            [95, 65, None]  # Two attempts, one missing
+        )
+        # No submissions for assignment 2
+        
+        # Student 3 (John Smith) - Complete both assignments
+        self.create_student_submissions(
+            students1[2]["id"], assignment1["id"], assignment1["problem_ids"], 
+            [100, 89, 91]  # All passing
+        )
+        self.create_student_submissions(
+            students1[2]["id"], assignment2["id"], assignment2["problem_ids"], 
+            [87, 93]  # All passing
+        )
+        
+        # Students in classroom 2 - varied completion
+        self.create_student_submissions(
+            students2[0]["id"], assignment2["id"], assignment2["problem_ids"], 
+            [76, 82]  # All passing
+        )
+        self.create_student_submissions(
+            students2[0]["id"], assignment3["id"], assignment3["problem_ids"], 
+            [88, None, None, None]  # One complete, three missing
+        )
+        
+        # Student 2 in classroom 2 - no submissions (all missing)
+        
+        print("   Test data setup complete. Starting report tests...")
+        
+        # Test 1: Gradebook Report - Single classroom, single assignment
+        print("\n   TEST 1: Gradebook Report - Single classroom, single assignment")
+        gradebook_data = {
+            "classroom_ids": [classroom1_id],
+            "assignment_ids": [assignment1["id"]]
+        }
+        
+        gradebook_response = self.run_test(
+            "Gradebook report - single classroom/assignment",
+            "POST",
+            "reports/gradebook",
+            200,
+            gradebook_data
+        )
+        
+        if gradebook_response:
+            students_data = gradebook_response.get("students", [])
+            assignments_data = gradebook_response.get("assignments", [])
+            
+            # Verify structure
+            if len(students_data) == 3:
+                self.log_test("Gradebook has correct number of students", True)
+            else:
+                self.log_test("Gradebook has correct number of students", False, f"Expected 3, got {len(students_data)}")
+            
+            # Verify sorting (should be by last name: Anderson, Brown, Smith)
+            if len(students_data) >= 3:
+                names = [s.get("student_name", "") for s in students_data]
+                expected_order = ["Anderson, Bob", "Brown, Alice", "Smith, John"]
+                if names == expected_order:
+                    self.log_test("Students sorted by last name, first name", True)
+                else:
+                    self.log_test("Students sorted by last name, first name", False, f"Expected {expected_order}, got {names}")
+            
+            # Verify score calculations
+            for student in students_data:
+                student_name = student.get("student_name", "")
+                scores = student.get("scores", {})
+                assignment_score = scores.get(assignment1["id"], {})
+                avg_score = assignment_score.get("average_score", 0)
+                
+                if "Brown, Alice" in student_name:
+                    # Alice: scores [85, 92, 78] -> average = 85
+                    expected_avg = round((85 + 92 + 78) / 3, 1)
+                    if abs(avg_score - expected_avg) < 0.1:
+                        self.log_test(f"Alice Brown score calculation correct", True)
+                    else:
+                        self.log_test(f"Alice Brown score calculation correct", False, f"Expected {expected_avg}, got {avg_score}")
+        
+        # Test 2: Gradebook Report - Multiple classrooms, multiple assignments
+        print("\n   TEST 2: Gradebook Report - Multiple classrooms, multiple assignments")
+        gradebook_data = {
+            "classroom_ids": [classroom1_id, classroom2_id],
+            "assignment_ids": [assignment1["id"], assignment2["id"]]
+        }
+        
+        gradebook_response = self.run_test(
+            "Gradebook report - multiple classrooms/assignments",
+            "POST",
+            "reports/gradebook",
+            200,
+            gradebook_data
+        )
+        
+        if gradebook_response:
+            students_data = gradebook_response.get("students", [])
+            
+            # Should have 5 students total (3 from classroom1 + 2 from classroom2), deduplicated
+            # But students can be in multiple classrooms, so check for deduplication
+            student_ids = [s.get("student_id") for s in students_data]
+            unique_student_ids = list(set(student_ids))
+            
+            if len(student_ids) == len(unique_student_ids):
+                self.log_test("Students deduplicated across classrooms", True)
+            else:
+                self.log_test("Students deduplicated across classrooms", False, f"Found duplicates in {len(student_ids)} vs {len(unique_student_ids)}")
+        
+        # Test 3: Missing Report - Single classroom
+        print("\n   TEST 3: Missing Report - Single classroom")
+        missing_data = {
+            "classroom_ids": [classroom1_id]
+        }
+        
+        missing_response = self.run_test(
+            "Missing report - single classroom",
+            "POST",
+            "reports/missing",
+            200,
+            missing_data
+        )
+        
+        if missing_response:
+            students_data = missing_response.get("students", [])
+            
+            # Should show students with missing/incomplete assignments
+            # Bob Anderson should appear (incomplete assignment 1, missing assignment 2)
+            # Alice Brown should appear (incomplete assignment 2)
+            # John Smith should NOT appear (all complete)
+            
+            student_names = [s.get("student_name", "") for s in students_data]
+            
+            if "Anderson, Bob" in student_names:
+                self.log_test("Missing report includes Bob Anderson (has missing work)", True)
+            else:
+                self.log_test("Missing report includes Bob Anderson (has missing work)", False, "Bob Anderson not found")
+            
+            if "Brown, Alice" in student_names:
+                self.log_test("Missing report includes Alice Brown (has incomplete work)", True)
+            else:
+                self.log_test("Missing report includes Alice Brown (has incomplete work)", False, "Alice Brown not found")
+            
+            if "Smith, John" not in student_names:
+                self.log_test("Missing report excludes John Smith (all complete)", True)
+            else:
+                self.log_test("Missing report excludes John Smith (all complete)", False, "John Smith should not appear")
+        
+        # Test 4: Missing Report - Multiple classrooms
+        print("\n   TEST 4: Missing Report - Multiple classrooms")
+        missing_data = {
+            "classroom_ids": [classroom1_id, classroom2_id]
+        }
+        
+        missing_response = self.run_test(
+            "Missing report - multiple classrooms",
+            "POST",
+            "reports/missing",
+            200,
+            missing_data
+        )
+        
+        if missing_response:
+            students_data = missing_response.get("students", [])
+            
+            # Verify sorting by last name, first name
+            if len(students_data) >= 2:
+                names = [s.get("student_name", "") for s in students_data]
+                # Should be sorted alphabetically by last name
+                sorted_names = sorted(names)
+                if names == sorted_names:
+                    self.log_test("Missing report students sorted by last name", True)
+                else:
+                    self.log_test("Missing report students sorted by last name", False, f"Expected {sorted_names}, got {names}")
+        
+        # Test 5: Authentication - Student trying to access reports (should get 403)
+        print("\n   TEST 5: Authentication - Student access denied")
+        
+        if students1:
+            original_token = self.session_token
+            self.session_token = students1[0]["token"]  # Switch to student
+            
+            try:
+                gradebook_data = {
+                    "classroom_ids": [classroom1_id],
+                    "assignment_ids": [assignment1["id"]]
+                }
+                
+                self.run_test(
+                    "Student access to gradebook report (should be 403)",
+                    "POST",
+                    "reports/gradebook",
+                    403,
+                    gradebook_data
+                )
+                
+                missing_data = {
+                    "classroom_ids": [classroom1_id]
+                }
+                
+                self.run_test(
+                    "Student access to missing report (should be 403)",
+                    "POST",
+                    "reports/missing",
+                    403,
+                    missing_data
+                )
+                
+            finally:
+                self.session_token = original_token
+        
+        # Test 6: Error handling - Missing required fields
+        print("\n   TEST 6: Error handling - Missing required fields")
+        
+        # Gradebook without classroom_ids
+        self.run_test(
+            "Gradebook report without classroom_ids (should be 400)",
+            "POST",
+            "reports/gradebook",
+            400,
+            {"assignment_ids": [assignment1["id"]]}
+        )
+        
+        # Gradebook without assignment_ids
+        self.run_test(
+            "Gradebook report without assignment_ids (should be 400)",
+            "POST",
+            "reports/gradebook",
+            400,
+            {"classroom_ids": [classroom1_id]}
+        )
+        
+        # Missing report without classroom_ids
+        self.run_test(
+            "Missing report without classroom_ids (should be 400)",
+            "POST",
+            "reports/missing",
+            400,
+            {}
+        )
+        
+        # Test 7: Teacher access control - Other teacher's classroom
+        print("\n   TEST 7: Teacher access control - Other teacher's classroom")
+        
+        # Create another teacher
+        timestamp = str(int(datetime.now().timestamp()))
+        other_teacher_id = f"test-teacher-{timestamp}"
+        other_teacher_token = f"test_teacher_session_{timestamp}"
+        
+        try:
+            from motor.motor_asyncio import AsyncIOMotorClient
+            import asyncio
+            
+            async def create_other_teacher():
+                client = AsyncIOMotorClient("mongodb://localhost:27017")
+                db = client["test_database"]
+                
+                # Create teacher user
+                user_doc = {
+                    "id": other_teacher_id,
+                    "email": f"other.teacher.{timestamp}@example.com",
+                    "name": f"Other Teacher {timestamp}",
+                    "role": "teacher",
+                    "created_at": datetime.now(timezone.utc).isoformat()
+                }
+                await db.users.insert_one(user_doc)
+                
+                # Create session
+                session_doc = {
+                    "user_id": other_teacher_id,
+                    "session_token": other_teacher_token,
+                    "expires_at": datetime.now(timezone.utc) + timedelta(days=7),
+                    "created_at": datetime.now(timezone.utc).isoformat()
+                }
+                await db.user_sessions.insert_one(session_doc)
+                
+                client.close()
+                return True
+            
+            if asyncio.run(create_other_teacher()):
+                original_token = self.session_token
+                self.session_token = other_teacher_token
+                
+                try:
+                    gradebook_data = {
+                        "classroom_ids": [classroom1_id],
+                        "assignment_ids": [assignment1["id"]]
+                    }
+                    
+                    self.run_test(
+                        "Other teacher access to classroom (should be 403)",
+                        "POST",
+                        "reports/gradebook",
+                        403,
+                        gradebook_data
+                    )
+                    
+                finally:
+                    self.session_token = original_token
+        
+        except Exception as e:
+            print(f"   ⚠️  Could not test other teacher access: {str(e)}")
+        
+        print("   Teacher Reports endpoint testing complete!")
+        
+        return {
+            "classroom1_id": classroom1_id,
+            "classroom2_id": classroom2_id,
+            "assignment1": assignment1,
+            "assignment2": assignment2,
+            "assignment3": assignment3,
+            "students1": students1,
+            "students2": students2
+        }
+
     def run_all_tests(self):
         """Run all API tests"""
         print("🚀 Starting CodeClass API Tests...")
