@@ -341,7 +341,7 @@ export default function TeacherReports({ user }) {
             </div>
 
             {/* Assignment Selection (only for grades report) */}
-            {reportType === "grades" && selectedClassroom && (
+            {reportType === "grades" && selectedClassrooms.length > 0 && (
               <div>
                 <div className="flex justify-between items-center mb-2">
                   <Label>Select Assignments *</Label>
@@ -354,10 +354,10 @@ export default function TeacherReports({ user }) {
                     </Button>
                   </div>
                 </div>
-                <div className="border rounded-lg p-4 max-h-80 overflow-y-auto space-y-2">
+                <div className="border rounded-lg p-4 max-h-60 overflow-y-auto space-y-2">
                   {assignments.length === 0 ? (
                     <p className="text-sm text-gray-500 text-center py-4">
-                      No assignments found in this classroom
+                      No assignments found in selected classrooms
                     </p>
                   ) : (
                     assignments.map((assignment) => (
