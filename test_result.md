@@ -198,8 +198,6 @@ metadata:
 
 test_plan:
   current_focus:
-    - "Create gradebook report endpoint"
-    - "Create missing/incomplete report endpoint"
     - "Build Teacher Reports UI with gradebook layout"
     - "Implement Excel export functionality"
   stuck_tasks: []
