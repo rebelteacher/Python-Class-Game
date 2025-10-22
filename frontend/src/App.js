@@ -167,6 +167,15 @@ function App() {
                 path="/secret-admin-role-switch"
                 element={<SecretRoleSwitch />}
               />
+
+              <Route
+                path="/teacher-reports"
+                element={
+                  <ProtectedRoute user={user} requiredRole="teacher">
+                    <TeacherReports user={user} />
+                  </ProtectedRoute>
+                }
+              />
             </Routes>
           )}
         </AuthHandler>
