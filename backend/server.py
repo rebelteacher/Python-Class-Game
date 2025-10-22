@@ -1820,6 +1820,147 @@ async def generate_missing_report(report_data: dict, request: Request):
     }
 
 
+# ----- Admin Routes -----
+
+@api_router.post("/admin/invite-codes/generate")
+async def generate_invite_code(request: Request):
+    """Generate a new single-use invite code (admin only)"""
+    user = await get_current_user(request)
+    
+    if not user.get("is_admin"):
+        raise HTTPException(status_code=403, detail="Admin access required")
+    
+    # Generate random 8-character code
+    code = ''.join(random.choices(string.ascii_uppercase + string.digits, k=8))
+    
+    # Ensure uniqueness
+    while await db.invite_codes.find_one({"code": code}):
+        code = ''.join(random.choices(string.ascii_uppercase + string.digits, k=8))
+    
+    invite_code = {
+        "id": str(uuid.uuid4()),
+        "code": code,
+        "created_by_admin_id": user["id"],
+        "used_by_teacher_id": None,
+        "is_active": True,
+        "created_at": datetime.now(timezone.utc),
+        "used_at": None
+    }
+    
+    await db.invite_codes.insert_one(invite_code)
+    
+    return {
+        "id": invite_code["id"],
+        "code": code,
+        "created_at": invite_code["created_at"],
+        "is_active": True
+    }
+
+@api_router.get("/admin/invite-codes")
+async def get_invite_codes(request: Request):
+    """Get all invite codes (admin only)"""
+    user = await get_current_user(request)
+    
+    if not user.get("is_admin"):
+        raise HTTPException(status_code=403, detail="Admin access required")
+    
+    codes = await db.invite_codes.find({}, {"_id": 0}).sort("created_at", -1).to_list(1000)
+    
+    # Enrich with teacher names
+    for code in codes:
+        if code.get("used_by_teacher_id"):
+            teacher = await db.users.find_one(
+                {"id": code["used_by_teacher_id"]},
+                {"_id": 0, "name": 1, "email": 1}
+            )
+            if teacher:
+                code["used_by_name"] = teacher.get("name")
+                code["used_by_email"] = teacher.get("email")
+    
+    return codes
+
+@api_router.get("/admin/stats")
+async def get_admin_stats(request: Request):
+    """Get platform statistics (admin only)"""
+    user = await get_current_user(request)
+    
+    if not user.get("is_admin"):
+        raise HTTPException(status_code=403, detail="Admin access required")
+    
+    # Count users
+    total_teachers = await db.users.count_documents({"role": "teacher"})
+    total_students = await db.users.count_documents({"role": "student"})
+    
+    # Count classrooms
+    total_classrooms = await db.classrooms.count_documents({})
+    
+    # Count assignments
+    total_assignments = await db.assignments.count_documents({})
+    
+    # Count submissions
+    total_submissions = await db.submissions.count_documents({})
+    
+    # Active users (last 7 days)
+    seven_days_ago = datetime.now(timezone.utc) - timedelta(days=7)
+    active_users = await db.sessions.count_documents({
+        "created_at": {"$gte": seven_days_ago}
+    })
+    
+    return {
+        "total_teachers": total_teachers,
+        "total_students": total_students,
+        "total_classrooms": total_classrooms,
+        "total_assignments": total_assignments,
+        "total_submissions": total_submissions,
+        "active_users_7d": active_users
+    }
+
+@api_router.get("/admin/teachers")
+async def get_all_teachers(request: Request):
+    """Get all teachers with stats (admin only)"""
+    user = await get_current_user(request)
+    
+    if not user.get("is_admin"):
+        raise HTTPException(status_code=403, detail="Admin access required")
+    
+    teachers = await db.users.find({"role": "teacher"}, {"_id": 0, "password": 0}).to_list(1000)
+    
+    # Enrich with stats
+    for teacher in teachers:
+        # Count classrooms
+        teacher["classroom_count"] = await db.classrooms.count_documents({"teacher_id": teacher["id"]})
+        
+        # Count assignments created
+        teacher["assignment_count"] = await db.assignments.count_documents({"teacher_id": teacher["id"]})
+    
+    # Sort by join date (newest first)
+    teachers.sort(key=lambda t: t.get("created_at", datetime.min), reverse=True)
+    
+    return teachers
+
+@api_router.put("/admin/teachers/{teacher_id}/toggle-active")
+async def toggle_teacher_active(teacher_id: str, request: Request):
+    """Activate/deactivate a teacher account (admin only)"""
+    user = await get_current_user(request)
+    
+    if not user.get("is_admin"):
+        raise HTTPException(status_code=403, detail="Admin access required")
+    
+    teacher = await db.users.find_one({"id": teacher_id, "role": "teacher"})
+    if not teacher:
+        raise HTTPException(status_code=404, detail="Teacher not found")
+    
+    # Toggle is_active field (add if doesn't exist)
+    new_status = not teacher.get("is_active", True)
+    
+    await db.users.update_one(
+        {"id": teacher_id},
+        {"$set": {"is_active": new_status}}
+    )
+    
+    return {"success": True, "is_active": new_status}
+
+
 # ----- Gamification Routes -----
 
 @api_router.get("/leaderboard/classroom/{classroom_id}")
