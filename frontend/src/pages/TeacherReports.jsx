@@ -112,8 +112,8 @@ export default function TeacherReports({ user }) {
   };
 
   const generateReport = async () => {
-    if (!selectedClassroom) {
-      toast.error("Please select a classroom");
+    if (selectedClassrooms.length === 0) {
+      toast.error("Please select at least one classroom");
       return;
     }
 
@@ -123,37 +123,131 @@ export default function TeacherReports({ user }) {
     }
 
     setGenerating(true);
+    setReportData(null);
 
     try {
+      const endpoint = reportType === "grades" ? "/reports/gradebook" : "/reports/missing";
+      const payload = {
+        classroom_ids: selectedClassrooms,
+        ...(reportType === "grades" && { assignment_ids: selectedAssignments })
+      };
+
       const response = await axios.post(
-        `${API}/reports/generate`,
-        {
-          classroom_id: selectedClassroom,
-          assignment_ids: selectedAssignments,
-          report_type: reportType
-        },
-        {
-          withCredentials: true,
-          responseType: 'blob'
-        }
+        `${API}${endpoint}`,
+        payload,
+        { withCredentials: true }
       );
 
-      // Create download link
-      const url = window.URL.createObjectURL(new Blob([response.data]));
-      const link = document.createElement('a');
-      link.href = url;
-      link.setAttribute('download', `${reportType}_report_${new Date().toISOString().split('T')[0]}.csv`);
-      document.body.appendChild(link);
-      link.click();
-      link.remove();
-
-      toast.success("Report downloaded!");
+      setReportData(response.data);
+      toast.success("Report generated! Click Download to save as Excel.");
     } catch (error) {
       console.error("Error generating report:", error);
-      toast.error("Failed to generate report");
+      toast.error(error.response?.data?.detail || "Failed to generate report");
     } finally {
       setGenerating(false);
     }
+  };
+
+  const downloadExcel = () => {
+    if (!reportData) return;
+
+    if (reportType === "grades") {
+      downloadGradebookExcel();
+    } else {
+      downloadMissingExcel();
+    }
+  };
+
+  const downloadGradebookExcel = () => {
+    // Create gradebook-style spreadsheet
+    const worksheetData = [];
+    
+    // Header row: "Student Name" | Assignment 1 | Assignment 2 | ...
+    const headerRow = ["Student Name"];
+    reportData.assignments.forEach(assignment => {
+      headerRow.push(assignment.title);
+    });
+    worksheetData.push(headerRow);
+
+    // Data rows: each student with their scores
+    reportData.students.forEach(student => {
+      const row = [student.student_name];
+      
+      reportData.assignments.forEach(assignment => {
+        const scoreData = student.scores[assignment.id];
+        if (scoreData) {
+          row.push(scoreData.average_score);
+        } else {
+          row.push(0);
+        }
+      });
+      
+      worksheetData.push(row);
+    });
+
+    // Create workbook and worksheet
+    const wb = XLSX.utils.book_new();
+    const ws = XLSX.utils.aoa_to_sheet(worksheetData);
+    
+    // Set column widths
+    const colWidths = [{ wch: 25 }]; // Student name column
+    reportData.assignments.forEach(() => colWidths.push({ wch: 15 }));
+    ws['!cols'] = colWidths;
+
+    XLSX.utils.book_append_sheet(wb, ws, "Gradebook");
+
+    // Download
+    const fileName = `Gradebook_${new Date().toISOString().split('T')[0]}.xlsx`;
+    XLSX.writeFile(wb, fileName);
+    toast.success("Excel file downloaded!");
+  };
+
+  const downloadMissingExcel = () => {
+    // Create missing/incomplete assignments report
+    const worksheetData = [];
+    
+    // Header
+    worksheetData.push(["Missing & Incomplete Assignments Report"]);
+    worksheetData.push([`Generated: ${new Date().toLocaleString()}`]);
+    worksheetData.push([]);
+
+    reportData.students.forEach(student => {
+      worksheetData.push([student.student_name, student.student_email]);
+      worksheetData.push([]);
+
+      if (student.missing_assignments.length > 0) {
+        worksheetData.push(["Missing Assignments (Not Started):"]);
+        student.missing_assignments.forEach(assignment => {
+          worksheetData.push(["", assignment.assignment_title, `${assignment.total_problems} problems`]);
+        });
+        worksheetData.push([]);
+      }
+
+      if (student.incomplete_assignments.length > 0) {
+        worksheetData.push(["Incomplete Assignments:"]);
+        student.incomplete_assignments.forEach(assignment => {
+          worksheetData.push(["", assignment.assignment_title, `${assignment.completed_problems}/${assignment.total_problems} completed`]);
+        });
+        worksheetData.push([]);
+      }
+
+      worksheetData.push([]);
+      worksheetData.push(["---"]);
+      worksheetData.push([]);
+    });
+
+    // Create workbook
+    const wb = XLSX.utils.book_new();
+    const ws = XLSX.utils.aoa_to_sheet(worksheetData);
+    
+    ws['!cols'] = [{ wch: 30 }, { wch: 40 }, { wch: 20 }];
+
+    XLSX.utils.book_append_sheet(wb, ws, "Missing Report");
+
+    // Download
+    const fileName = `Missing_Report_${new Date().toISOString().split('T')[0]}.xlsx`;
+    XLSX.writeFile(wb, fileName);
+    toast.success("Excel file downloaded!");
   };
 
   if (loading) {
