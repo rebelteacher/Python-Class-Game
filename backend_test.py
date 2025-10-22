@@ -1632,8 +1632,33 @@ class CodeClassAPITester:
         # Test basic submissions
         self.test_submission_endpoints(assignment_id, classroom['id'])
         
+        # Test Teacher Reports endpoints
+        self.test_teacher_reports_endpoints()
+        
         # Print summary
         print(f"\n📊 Test Summary:")
+        print(f"   Total tests: {self.tests_run}")
+        print(f"   Passed: {self.tests_passed}")
+        print(f"   Failed: {self.tests_run - self.tests_passed}")
+        print(f"   Success rate: {(self.tests_passed/self.tests_run)*100:.1f}%")
+        
+        return self.tests_passed == self.tests_run
+
+    def run_teacher_reports_tests_only(self):
+        """Run only Teacher Reports tests"""
+        print("🚀 Starting Teacher Reports API Tests...")
+        print(f"Testing against: {self.base_url}")
+        
+        # Setup test user
+        if not self.setup_test_user():
+            print("❌ Cannot proceed without test user setup")
+            return False
+        
+        # Test Teacher Reports endpoints
+        self.test_teacher_reports_endpoints()
+        
+        # Print summary
+        print(f"\n📊 Teacher Reports Test Summary:")
         print(f"   Total tests: {self.tests_run}")
         print(f"   Passed: {self.tests_passed}")
         print(f"   Failed: {self.tests_run - self.tests_passed}")
