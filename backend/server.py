@@ -1512,7 +1512,7 @@ async def generate_gradebook_report(report_data: dict, request: Request):
             
             student_row["scores"][assignment_id] = {
                 "average_score": round(assignment_avg, 1),
-                "completion_date": completion_date.isoformat() if completion_date else None,
+                "completion_date": completion_date if completion_date else None,
                 "completed_problems": sum(1 for s in problem_scores if s >= 70),
                 "total_problems": total_problems
             }
