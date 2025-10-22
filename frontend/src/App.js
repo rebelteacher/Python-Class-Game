@@ -4,6 +4,8 @@ import { BrowserRouter, Routes, Route, Navigate, useNavigate, useLocation } from
 import axios from "axios";
 import { Toaster, toast } from "sonner";
 import LandingPage from "./pages/LandingPage";
+import TeacherLogin from "./pages/TeacherLogin";
+import TeacherSignup from "./pages/TeacherSignup";
 import TeacherDashboard from "./pages/TeacherDashboard";
 import StudentDashboard from "./pages/StudentDashboard";
 import ClassroomPage from "./pages/ClassroomPage";
@@ -13,6 +15,7 @@ import ImportAssignment from "./pages/ImportAssignment";
 import TeacherPractice from "./pages/TeacherPractice";
 import SecretRoleSwitch from "./pages/SecretRoleSwitch";
 import TeacherReports from "./pages/TeacherReports";
+import AdminDashboard from "./pages/AdminDashboard";
 
 const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
 const API = `${BACKEND_URL}/api`;
