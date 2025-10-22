@@ -53,15 +53,46 @@ export default function TeacherReports({ user }) {
 
   const fetchAssignments = async () => {
     try {
-      const response = await axios.get(`${API}/assignments/classroom/${selectedClassroom}`, {
-        withCredentials: true,
-      });
-      setAssignments(response.data);
+      // Fetch assignments from all selected classrooms
+      const allAssignments = [];
+      const assignmentIds = new Set();
+      
+      for (const classroomId of selectedClassrooms) {
+        const response = await axios.get(`${API}/assignments/classroom/${classroomId}`, {
+          withCredentials: true,
+        });
+        
+        // Deduplicate assignments that appear in multiple classrooms
+        response.data.forEach(assignment => {
+          if (!assignmentIds.has(assignment.id)) {
+            assignmentIds.add(assignment.id);
+            allAssignments.push(assignment);
+          }
+        });
+      }
+      
+      setAssignments(allAssignments);
       setSelectedAssignments([]); // Reset selection
     } catch (error) {
       console.error("Error fetching assignments:", error);
       toast.error("Failed to load assignments");
     }
+  };
+
+  const toggleClassroom = (classroomId) => {
+    setSelectedClassrooms(prev =>
+      prev.includes(classroomId)
+        ? prev.filter(id => id !== classroomId)
+        : [...prev, classroomId]
+    );
+  };
+
+  const selectAllClassrooms = () => {
+    setSelectedClassrooms(classrooms.map(c => c.id));
+  };
+
+  const deselectAllClassrooms = () => {
+    setSelectedClassrooms([]);
   };
 
   const toggleAssignment = (assignmentId) => {
