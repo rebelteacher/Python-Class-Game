@@ -136,20 +136,53 @@ backend:
         comment: "Created POST /api/reports/missing endpoint that accepts classroom_ids. Returns list of students with their missing (not started) and incomplete assignments. Students sorted by last name/first name."
 
 frontend:
-  - task: "Remove Library button from student dashboard"
+  - task: "Add Teacher Reports route"
     implemented: true
     working: "NA"
-    file: "frontend/src/pages/StudentDashboard.jsx"
+    file: "frontend/src/App.js"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: true
+    status_history:
+      - working: "NA"
+        agent: "main"
+        comment: "Added /teacher-reports route in App.js with TeacherReports component, protected for teachers only."
+  
+  - task: "Add Reports button to Teacher Dashboard"
+    implemented: true
+    working: "NA"
+    file: "frontend/src/pages/TeacherDashboard.jsx"
     stuck_count: 0
     priority: "medium"
     needs_retesting: true
     status_history:
       - working: "NA"
         agent: "main"
-        comment: "Removed Library navigation button (lines 152-155) from student dashboard navbar. Students no longer have access to assignment library."
+        comment: "Added Reports navigation button with FileSpreadsheet icon in teacher dashboard navbar."
+  
+  - task: "Build Teacher Reports UI with gradebook layout"
+    implemented: true
+    working: "NA"
+    file: "frontend/src/pages/TeacherReports.jsx"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: true
+    status_history:
       - working: "NA"
-        agent: "testing"
-        comment: "Frontend testing not performed as per system limitations. Main agent should verify UI changes manually or request user confirmation."
+        agent: "main"
+        comment: "Implemented complete Teacher Reports page with: multi-classroom selection, assignment selection (for gradebook), report type toggle (grades/missing), gradebook-style table preview (assignments across top, students down side), missing/incomplete preview cards, Excel export using xlsx library. Color-coded cells in gradebook (green ≥90, yellow ≥70, orange >0, red =0)."
+  
+  - task: "Implement Excel export functionality"
+    implemented: true
+    working: "NA"
+    file: "frontend/src/pages/TeacherReports.jsx"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: true
+    status_history:
+      - working: "NA"
+        agent: "main"
+        comment: "Installed xlsx library (v0.18.5). Implemented downloadGradebookExcel() for gradebook format (student names in column A, assignments across top) and downloadMissingExcel() for missing/incomplete reports with formatted sections per student."
 
 metadata:
   created_by: "main_agent"
