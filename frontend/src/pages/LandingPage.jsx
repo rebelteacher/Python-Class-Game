@@ -1,12 +1,19 @@
-import { Code2, Users, BookOpen, CheckCircle } from "lucide-react";
+import { useNavigate } from "react-router-dom";
+import { Code2, Users, BookOpen, CheckCircle, GraduationCap, UserCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
-const REDIRECT_URL = window.location.origin + "/teacher/dashboard";
+const REDIRECT_URL = window.location.origin + "/student/dashboard";
 const AUTH_URL = `https://auth.emergentagent.com/?redirect=${encodeURIComponent(REDIRECT_URL)}`;
 
 export default function LandingPage() {
-  const handleLogin = () => {
+  const navigate = useNavigate();
+  
+  const handleStudentLogin = () => {
     window.location.href = AUTH_URL;
+  };
+
+  const handleTeacherLogin = () => {
+    navigate("/teacher-login");
   };
 
   return (
@@ -16,9 +23,24 @@ export default function LandingPage() {
           <Code2 className="w-8 h-8 text-indigo-600" />
           <span className="text-2xl font-bold text-gray-900">ByteBattles Arena</span>
         </div>
-        <Button data-testid="nav-login-btn" onClick={handleLogin} className="bg-indigo-600 hover:bg-indigo-700 text-white px-6 py-2 rounded-full">
-          Login
-        </Button>
+        <div className="flex items-center space-x-3">
+          <Button 
+            onClick={handleTeacherLogin} 
+            variant="outline"
+            className="gap-2 border-indigo-600 text-indigo-600 hover:bg-indigo-50"
+          >
+            <GraduationCap className="w-4 h-4" />
+            Teacher Login
+          </Button>
+          <Button 
+            data-testid="nav-login-btn" 
+            onClick={handleStudentLogin} 
+            className="bg-indigo-600 hover:bg-indigo-700 text-white gap-2"
+          >
+            <UserCircle className="w-4 h-4" />
+            Student Login
+          </Button>
+        </div>
       </nav>
 
       <main className="container mx-auto px-6 py-20">
