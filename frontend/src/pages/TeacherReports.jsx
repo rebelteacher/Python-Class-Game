@@ -29,10 +29,13 @@ export default function TeacherReports({ user }) {
   }, []);
 
   useEffect(() => {
-    if (selectedClassroom) {
+    if (selectedClassrooms.length > 0) {
       fetchAssignments();
+    } else {
+      setAssignments([]);
+      setSelectedAssignments([]);
     }
-  }, [selectedClassroom]);
+  }, [selectedClassrooms]);
 
   const fetchClassrooms = async () => {
     try {
