@@ -103,11 +103,12 @@
 #====================================================================================================
 
 user_problem_statement: |
-  Fix critical bugs in coding education platform:
-  1. 403 Forbidden error on assignment submission (first submission fails)
-  2. Lives system bug - all lives lost immediately after one attempt
-  3. Remove Library button from student dashboard
-  Then proceed with Option A rebuild (multi-problem assignments)
+  Build Teacher Reports page for ByteBattles Arena:
+  1. Gradebook-style report with assignments across top, students down side (sorted by last name, first name)
+  2. Excel (.xlsx) export format (not CSV)
+  3. Multi-classroom selection support
+  4. Missing/Incomplete assignments report (separate view for individual students)
+  5. Integration with existing assignment scoring logic
 
 backend:
   - task: "Fix 403 Forbidden error on first submission"
