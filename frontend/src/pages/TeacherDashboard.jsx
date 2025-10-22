@@ -115,6 +115,12 @@ export default function TeacherDashboard({ user, setUser }) {
           </div>
           <div className="flex items-center space-x-3">
             <span className="text-gray-700 hidden sm:inline">{user.name}</span>
+            {user.is_admin && (
+              <Button data-testid="admin-nav-btn" onClick={() => navigate("/admin-dashboard")} variant="outline" size="sm" className="gap-2 border-purple-600 text-purple-600 hover:bg-purple-50">
+                <Shield className="w-4 h-4" />
+                Admin
+              </Button>
+            )}
             <Button data-testid="library-nav-btn" onClick={() => navigate("/library")} variant="outline" size="sm" className="gap-2">
               <BookOpen className="w-4 h-4" />
               Library
