@@ -14,6 +14,7 @@ import random
 import subprocess
 import tempfile
 import json
+import bcrypt
 from emergentintegrations.llm.chat import LlmChat, UserMessage
 
 ROOT_DIR = Path(__file__).parent
