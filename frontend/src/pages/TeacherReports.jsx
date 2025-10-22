@@ -16,12 +16,13 @@ const API = `${BACKEND_URL}/api`;
 export default function TeacherReports({ user }) {
   const navigate = useNavigate();
   const [classrooms, setClassrooms] = useState([]);
-  const [selectedClassroom, setSelectedClassroom] = useState("");
+  const [selectedClassrooms, setSelectedClassrooms] = useState([]);
   const [assignments, setAssignments] = useState([]);
   const [selectedAssignments, setSelectedAssignments] = useState([]);
   const [reportType, setReportType] = useState("grades"); // "grades" or "missing"
   const [loading, setLoading] = useState(true);
   const [generating, setGenerating] = useState(false);
+  const [reportData, setReportData] = useState(null);
 
   useEffect(() => {
     fetchClassrooms();
