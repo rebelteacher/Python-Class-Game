@@ -299,21 +299,45 @@ export default function TeacherReports({ user }) {
               </Select>
             </div>
 
-            {/* Classroom Selection */}
+            {/* Classroom Selection - Multi-select */}
             <div>
-              <Label>Classroom *</Label>
-              <Select value={selectedClassroom} onValueChange={setSelectedClassroom}>
-                <SelectTrigger className="mt-1">
-                  <SelectValue placeholder="Select a classroom" />
-                </SelectTrigger>
-                <SelectContent>
-                  {classrooms.map((classroom) => (
-                    <SelectItem key={classroom.id} value={classroom.id}>
-                      {classroom.name}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+              <div className="flex justify-between items-center mb-2">
+                <Label>Select Classrooms *</Label>
+                <div className="flex gap-2">
+                  <Button onClick={selectAllClassrooms} variant="outline" size="sm">
+                    Select All
+                  </Button>
+                  <Button onClick={deselectAllClassrooms} variant="outline" size="sm">
+                    Clear All
+                  </Button>
+                </div>
+              </div>
+              <div className="border rounded-lg p-4 max-h-60 overflow-y-auto space-y-2">
+                {classrooms.length === 0 ? (
+                  <p className="text-sm text-gray-500 text-center py-4">
+                    No classrooms found
+                  </p>
+                ) : (
+                  classrooms.map((classroom) => (
+                    <div key={classroom.id} className="flex items-center space-x-2">
+                      <Checkbox
+                        id={`classroom-${classroom.id}`}
+                        checked={selectedClassrooms.includes(classroom.id)}
+                        onCheckedChange={() => toggleClassroom(classroom.id)}
+                      />
+                      <label
+                        htmlFor={`classroom-${classroom.id}`}
+                        className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 cursor-pointer"
+                      >
+                        {classroom.name}
+                      </label>
+                    </div>
+                  ))
+                )}
+              </div>
+              <p className="text-xs text-gray-500 mt-2">
+                {selectedClassrooms.length} classroom(s) selected
+              </p>
             </div>
 
             {/* Assignment Selection (only for grades report) */}
