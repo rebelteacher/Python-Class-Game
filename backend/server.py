@@ -399,7 +399,8 @@ async def get_me(request: Request):
         "email": user["email"],
         "name": user["name"],
         "picture": user.get("picture"),
-        "role": user["role"]
+        "role": user["role"],
+        "is_admin": user.get("is_admin", False)
     }
 
 @api_router.post("/auth/teacher-login")
