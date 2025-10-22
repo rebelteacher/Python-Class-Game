@@ -402,6 +402,154 @@ async def get_me(request: Request):
         "role": user["role"]
     }
 
+@api_router.post("/auth/teacher-login")
+async def teacher_login(login_data: TeacherLoginRequest):
+    """Teacher login with email and password"""
+    try:
+        # Find user by email
+        user = await db.users.find_one({"email": login_data.email}, {"_id": 0})
+        
+        if not user:
+            raise HTTPException(status_code=401, detail="Invalid email or password")
+        
+        if user.get("role") != "teacher":
+            raise HTTPException(status_code=403, detail="This login is for teachers only")
+        
+        if not user.get("password"):
+            raise HTTPException(status_code=401, detail="This account uses Google login. Please use the student/Google login option.")
+        
+        # Verify password
+        password_match = bcrypt.checkpw(
+            login_data.password.encode('utf-8'),
+            user["password"].encode('utf-8')
+        )
+        
+        if not password_match:
+            raise HTTPException(status_code=401, detail="Invalid email or password")
+        
+        # Create session
+        session_token = str(uuid.uuid4())
+        expires_at = datetime.now(timezone.utc) + timedelta(days=7)
+        
+        session = {
+            "user_id": user["id"],
+            "session_token": session_token,
+            "expires_at": expires_at,
+            "created_at": datetime.now(timezone.utc)
+        }
+        
+        await db.sessions.insert_one(session)
+        
+        return {
+            "id": user["id"],
+            "email": user["email"],
+            "name": user["name"],
+            "picture": user.get("picture"),
+            "session_token": session_token,
+            "role": user["role"],
+            "is_admin": user.get("is_admin", False)
+        }
+    except HTTPException:
+        raise
+    except Exception as e:
+        logging.error(f"Teacher login error: {str(e)}")
+        raise HTTPException(status_code=500, detail="Login failed")
+
+@api_router.post("/auth/teacher-signup")
+async def teacher_signup(signup_data: TeacherSignupRequest):
+    """Teacher signup with invite code"""
+    try:
+        # Validate invite code
+        invite_code = await db.invite_codes.find_one(
+            {"code": signup_data.invite_code, "is_active": True},
+            {"_id": 0}
+        )
+        
+        if not invite_code:
+            raise HTTPException(status_code=400, detail="Invalid or expired invite code")
+        
+        if invite_code.get("used_by_teacher_id"):
+            raise HTTPException(status_code=400, detail="This invite code has already been used")
+        
+        # Check if email already exists
+        existing_user = await db.users.find_one({"email": signup_data.email})
+        if existing_user:
+            raise HTTPException(status_code=400, detail="Email already registered")
+        
+        # Hash password
+        hashed_password = bcrypt.hashpw(
+            signup_data.password.encode('utf-8'),
+            bcrypt.gensalt()
+        ).decode('utf-8')
+        
+        # Create teacher user
+        user_id = str(uuid.uuid4())
+        new_user = {
+            "id": user_id,
+            "email": signup_data.email,
+            "name": signup_data.name,
+            "picture": None,
+            "role": "teacher",
+            "password": hashed_password,
+            "is_admin": False,
+            "xp": 0,
+            "coins": 0,
+            "rank": "Rookie",
+            "rank_level": 1,
+            "problems_solved": 0,
+            "perfect_scores": 0,
+            "current_streak": 0,
+            "best_streak": 0,
+            "owned_themes": ["default"],
+            "owned_badges": [],
+            "active_theme": "default",
+            "active_badges": [],
+            "created_at": datetime.now(timezone.utc)
+        }
+        
+        await db.users.insert_one(new_user)
+        
+        # Mark invite code as used
+        await db.invite_codes.update_one(
+            {"id": invite_code["id"]},
+            {
+                "$set": {
+                    "used_by_teacher_id": user_id,
+                    "used_at": datetime.now(timezone.utc),
+                    "is_active": False
+                }
+            }
+        )
+        
+        # Create session
+        session_token = str(uuid.uuid4())
+        expires_at = datetime.now(timezone.utc) + timedelta(days=7)
+        
+        session = {
+            "user_id": user_id,
+            "session_token": session_token,
+            "expires_at": expires_at,
+            "created_at": datetime.now(timezone.utc)
+        }
+        
+        await db.sessions.insert_one(session)
+        
+        return {
+            "id": user_id,
+            "email": signup_data.email,
+            "name": signup_data.name,
+            "picture": None,
+            "session_token": session_token,
+            "role": "teacher",
+            "is_admin": False
+        }
+    except HTTPException:
+        raise
+    except Exception as e:
+        logging.error(f"Teacher signup error: {str(e)}")
+        raise HTTPException(status_code=500, detail="Signup failed")
+
+
 @api_router.post("/auth/switch-role")
 async def switch_role(request: Request):
     """Switch between teacher and student roles"""
