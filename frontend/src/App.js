@@ -179,6 +179,18 @@ function App() {
                   </ProtectedRoute>
                 }
               />
+
+              <Route path="/teacher-login" element={<TeacherLogin />} />
+              <Route path="/teacher-signup" element={<TeacherSignup />} />
+
+              <Route
+                path="/admin-dashboard"
+                element={
+                  <ProtectedRoute user={user} requiredRole="teacher">
+                    <AdminDashboard user={user} />
+                  </ProtectedRoute>
+                }
+              />
             </Routes>
           )}
         </AuthHandler>
