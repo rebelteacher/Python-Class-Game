@@ -173,6 +173,28 @@ class SessionDataResponse(BaseModel):
     session_token: str
     role: str
 
+
+# Teacher authentication models
+class TeacherLoginRequest(BaseModel):
+    email: str
+    password: str
+
+class TeacherSignupRequest(BaseModel):
+    name: str
+    email: str
+    password: str
+    invite_code: str
+
+class InviteCode(BaseModel):
+    model_config = ConfigDict(extra="ignore")
+    id: str = Field(default_factory=lambda: str(uuid.uuid4()))
+    code: str  # The actual invite code string
+    created_by_admin_id: str
+    used_by_teacher_id: Optional[str] = None
+    is_active: bool = True
+    created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+    used_at: Optional[datetime] = None
+
 class Classroom(BaseModel):
     model_config = ConfigDict(extra="ignore")
     id: str = Field(default_factory=lambda: str(uuid.uuid4()))
