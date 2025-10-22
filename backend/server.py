@@ -1390,6 +1390,263 @@ async def get_student_lesson_scores(student_id: str, classroom_id: str, request:
     
     return assignment_scores
 
+@api_router.post("/reports/gradebook")
+async def generate_gradebook_report(report_data: dict, request: Request):
+    """Generate gradebook-style report with assignments across top, students down side"""
+    user = await get_current_user(request)
+    
+    if user["role"] != "teacher":
+        raise HTTPException(status_code=403, detail="Teachers only")
+    
+    classroom_ids = report_data.get("classroom_ids", [])
+    assignment_ids = report_data.get("assignment_ids", [])
+    
+    if not classroom_ids:
+        raise HTTPException(status_code=400, detail="At least one classroom required")
+    
+    if not assignment_ids:
+        raise HTTPException(status_code=400, detail="At least one assignment required")
+    
+    # Verify teacher owns these classrooms
+    for classroom_id in classroom_ids:
+        classroom = await db.classrooms.find_one({"id": classroom_id}, {"_id": 0})
+        if not classroom or classroom.get("teacher_id") != user["id"]:
+            raise HTTPException(status_code=403, detail=f"Access denied to classroom {classroom_id}")
+    
+    # Get all students from selected classrooms
+    all_students = set()
+    for classroom_id in classroom_ids:
+        classroom = await db.classrooms.find_one({"id": classroom_id}, {"_id": 0})
+        if classroom:
+            all_students.update(classroom.get("students", []))
+    
+    # Get student details with names
+    students_data = []
+    for student_id in all_students:
+        student = await db.users.find_one({"id": student_id}, {"_id": 0})
+        if student:
+            # Parse name to sort by last name
+            name = student.get("name", "Unknown")
+            name_parts = name.split()
+            if len(name_parts) >= 2:
+                # Assume "First Last" format
+                first_name = " ".join(name_parts[:-1])
+                last_name = name_parts[-1]
+                display_name = f"{last_name}, {first_name}"
+            else:
+                first_name = name
+                last_name = ""
+                display_name = name
+            
+            students_data.append({
+                "id": student_id,
+                "name": student.get("name", "Unknown"),
+                "display_name": display_name,
+                "last_name": last_name,
+                "first_name": first_name,
+                "email": student.get("email", "")
+            })
+    
+    # Sort by last name, then first name
+    students_data.sort(key=lambda x: (x["last_name"].lower(), x["first_name"].lower()))
+    
+    # Get assignment details
+    assignments_data = []
+    for assignment_id in assignment_ids:
+        assignment = await db.assignments.find_one({"id": assignment_id}, {"_id": 0})
+        if assignment:
+            assignments_data.append({
+                "id": assignment["id"],
+                "title": assignment["title"],
+                "problem_ids": assignment.get("problem_ids", [])
+            })
+    
+    # Build gradebook data
+    gradebook = []
+    for student in students_data:
+        student_row = {
+            "student_id": student["id"],
+            "student_name": student["display_name"],
+            "student_email": student["email"],
+            "scores": {}
+        }
+        
+        for assignment in assignments_data:
+            assignment_id = assignment["id"]
+            problem_ids = assignment["problem_ids"]
+            
+            if not problem_ids:
+                problem_ids = [assignment_id]
+            
+            total_problems = len(problem_ids)
+            problem_scores = []
+            completion_date = None
+            
+            for problem_id in problem_ids:
+                # Get all submissions for this problem by this student
+                submissions = await db.submissions.find(
+                    {"assignment_id": assignment_id, "problem_id": problem_id, "student_id": student["id"]},
+                    {"_id": 0}
+                ).to_list(1000)
+                
+                if not submissions:
+                    problem_scores.append(0)
+                else:
+                    best_score = max(sub.get("score", 0) for sub in submissions)
+                    lives = [s.get("lives_remaining", 3) for s in submissions]
+                    
+                    if len(submissions) >= 3 and min(lives) == 0 and best_score < 70:
+                        problem_scores.append(0)
+                    else:
+                        problem_scores.append(best_score)
+                    
+                    # Track most recent completion date
+                    for sub in submissions:
+                        if sub.get("score", 0) >= 70:
+                            sub_date = sub.get("submitted_at")
+                            if sub_date and (not completion_date or sub_date > completion_date):
+                                completion_date = sub_date
+            
+            # Calculate assignment average
+            assignment_avg = sum(problem_scores) / total_problems if total_problems > 0 else 0
+            
+            student_row["scores"][assignment_id] = {
+                "average_score": round(assignment_avg, 1),
+                "completion_date": completion_date.isoformat() if completion_date else None,
+                "completed_problems": sum(1 for s in problem_scores if s >= 70),
+                "total_problems": total_problems
+            }
+        
+        gradebook.append(student_row)
+    
+    return {
+        "students": gradebook,
+        "assignments": assignments_data
+    }
+
+@api_router.post("/reports/missing")
+async def generate_missing_report(report_data: dict, request: Request):
+    """Generate missing/incomplete assignments report per student"""
+    user = await get_current_user(request)
+    
+    if user["role"] != "teacher":
+        raise HTTPException(status_code=403, detail="Teachers only")
+    
+    classroom_ids = report_data.get("classroom_ids", [])
+    
+    if not classroom_ids:
+        raise HTTPException(status_code=400, detail="At least one classroom required")
+    
+    # Verify teacher owns these classrooms
+    for classroom_id in classroom_ids:
+        classroom = await db.classrooms.find_one({"id": classroom_id}, {"_id": 0})
+        if not classroom or classroom.get("teacher_id") != user["id"]:
+            raise HTTPException(status_code=403, detail=f"Access denied to classroom {classroom_id}")
+    
+    # Get all students from selected classrooms
+    all_students = set()
+    all_assignments = []
+    
+    for classroom_id in classroom_ids:
+        classroom = await db.classrooms.find_one({"id": classroom_id}, {"_id": 0})
+        if classroom:
+            all_students.update(classroom.get("students", []))
+        
+        # Get all assignments for this classroom
+        assignments = await db.assignments.find(
+            {"classroom_ids": classroom_id},
+            {"_id": 0}
+        ).to_list(1000)
+        
+        for assignment in assignments:
+            if assignment["id"] not in [a["id"] for a in all_assignments]:
+                all_assignments.append(assignment)
+    
+    # Get student details
+    students_data = []
+    for student_id in all_students:
+        student = await db.users.find_one({"id": student_id}, {"_id": 0})
+        if student:
+            name = student.get("name", "Unknown")
+            name_parts = name.split()
+            if len(name_parts) >= 2:
+                first_name = " ".join(name_parts[:-1])
+                last_name = name_parts[-1]
+                display_name = f"{last_name}, {first_name}"
+            else:
+                first_name = name
+                last_name = ""
+                display_name = name
+            
+            students_data.append({
+                "id": student_id,
+                "name": student.get("name", "Unknown"),
+                "display_name": display_name,
+                "last_name": last_name,
+                "first_name": first_name,
+                "email": student.get("email", "")
+            })
+    
+    # Sort by last name, then first name
+    students_data.sort(key=lambda x: (x["last_name"].lower(), x["first_name"].lower()))
+    
+    # Build missing report for each student
+    report = []
+    for student in students_data:
+        missing_assignments = []
+        incomplete_assignments = []
+        
+        for assignment in all_assignments:
+            assignment_id = assignment["id"]
+            problem_ids = assignment.get("problem_ids", [])
+            
+            if not problem_ids:
+                problem_ids = [assignment_id]
+            
+            total_problems = len(problem_ids)
+            completed_problems = 0
+            attempted = False
+            
+            for problem_id in problem_ids:
+                submissions = await db.submissions.find(
+                    {"assignment_id": assignment_id, "problem_id": problem_id, "student_id": student["id"]},
+                    {"_id": 0}
+                ).to_list(1000)
+                
+                if submissions:
+                    attempted = True
+                    best_score = max(sub.get("score", 0) for sub in submissions)
+                    if best_score >= 70:
+                        completed_problems += 1
+            
+            if not attempted:
+                missing_assignments.append({
+                    "assignment_id": assignment_id,
+                    "assignment_title": assignment["title"],
+                    "total_problems": total_problems
+                })
+            elif completed_problems < total_problems:
+                incomplete_assignments.append({
+                    "assignment_id": assignment_id,
+                    "assignment_title": assignment["title"],
+                    "completed_problems": completed_problems,
+                    "total_problems": total_problems
+                })
+        
+        if missing_assignments or incomplete_assignments:
+            report.append({
+                "student_id": student["id"],
+                "student_name": student["display_name"],
+                "student_email": student["email"],
+                "missing_assignments": missing_assignments,
+                "incomplete_assignments": incomplete_assignments
+            })
+    
+    return {
+        "students": report
+    }
+
+
 # ----- Gamification Routes -----
 
 @api_router.get("/leaderboard/classroom/{classroom_id}")
