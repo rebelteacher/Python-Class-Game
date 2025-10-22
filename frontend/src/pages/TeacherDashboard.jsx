@@ -119,6 +119,10 @@ export default function TeacherDashboard({ user, setUser }) {
               <BookOpen className="w-4 h-4" />
               Library
             </Button>
+            <Button data-testid="reports-nav-btn" onClick={() => navigate("/teacher-reports")} variant="outline" size="sm" className="gap-2">
+              <FileSpreadsheet className="w-4 h-4" />
+              Reports
+            </Button>
             <Button data-testid="switch-role-btn" onClick={handleSwitchToStudent} variant="outline" size="sm" className="gap-2">
               <RefreshCw className="w-4 h-4" />
               Switch to Student
