@@ -192,9 +192,10 @@ metadata:
 
 test_plan:
   current_focus:
-    - "Fix 403 Forbidden error on first submission"
-    - "Fix lives system - proper tracking of 3 lives"
-    - "Remove Library button from student dashboard"
+    - "Create gradebook report endpoint"
+    - "Create missing/incomplete report endpoint"
+    - "Build Teacher Reports UI with gradebook layout"
+    - "Implement Excel export functionality"
   stuck_tasks: []
   test_all: false
   test_priority: "high_first"
