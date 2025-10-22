@@ -111,44 +111,29 @@ user_problem_statement: |
   5. Integration with existing assignment scoring logic
 
 backend:
-  - task: "Fix 403 Forbidden error on first submission"
+  - task: "Create gradebook report endpoint"
     implemented: true
-    working: true
-    file: "backend/server.py"
-    stuck_count: 1
-    priority: "high"
-    needs_retesting: false
-    status_history:
-      - working: "NA"
-        agent: "main"
-        comment: "Fixed line 862 - removed incorrect HTTPException that was blocking first-time submissions. The else block now correctly sets lives_remaining=3 and attempt_number=1 without raising an error."
-      - working: true
-        agent: "testing"
-        comment: "✅ VERIFIED: First-time submissions now work correctly. Tested with fresh student user - no 403 error, lives_remaining=3, attempt_number=1. Fix is working perfectly."
-      - working: false
-        agent: "user"
-        comment: "User reports submission still fails with 403 error in real usage despite passing tests"
-      - working: "NA"
-        agent: "main"
-        comment: "Troubleshoot agent identified root cause: submission endpoint missing availability date validation (lines 747-751 in assignment detail). Added classroom membership check and available_date validation after line 838. This was causing intermittent 403s when students tried to submit before assignment's available_date."
-      - working: true
-        agent: "testing"
-        comment: "✅ COMPREHENSIVE TESTING COMPLETED - ADDITIONAL 403 FIX VERIFIED: All 5 test scenarios passed (39/39 tests - 100% success). Scenario 1: Future assignment blocks with 403 ✅. Scenario 2: Past assignment allows submission ✅. Scenario 3: Non-enrolled student blocked with 403 ✅. Scenario 4: Normal flow works perfectly ✅. Scenario 5: No available_date works (backward compatibility) ✅. The additional validation fixes (classroom membership + availability date) are working correctly and resolve the intermittent 403 errors."
-  
-  - task: "Fix lives system - proper tracking of 3 lives"
-    implemented: true
-    working: true
+    working: "NA"
     file: "backend/server.py"
     stuck_count: 0
     priority: "high"
-    needs_retesting: false
+    needs_retesting: true
     status_history:
       - working: "NA"
         agent: "main"
-        comment: "Lives tracking logic was already correct. The bug was caused by line 862 which prevented first submissions. Now fixed - lives should properly deduct only on failed submissions (<70% score)."
-      - working: true
-        agent: "testing"
-        comment: "✅ VERIFIED: Lives system working correctly. Tested complete scenario: 3 failing submissions (score <70%) properly decremented lives from 3→2→1→0. 4th attempt correctly blocked with 403 error. Passing submissions (≥70%) do NOT deduct lives. All functionality working as expected."
+        comment: "Created POST /api/reports/gradebook endpoint that accepts classroom_ids and assignment_ids. Returns structured data with students sorted by last name/first name, scores for each assignment (average of best attempts, 0 for unattempted/locked), and completion dates. Uses existing lesson-scores logic."
+  
+  - task: "Create missing/incomplete report endpoint"
+    implemented: true
+    working: "NA"
+    file: "backend/server.py"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: true
+    status_history:
+      - working: "NA"
+        agent: "main"
+        comment: "Created POST /api/reports/missing endpoint that accepts classroom_ids. Returns list of students with their missing (not started) and incomplete assignments. Students sorted by last name/first name."
 
 frontend:
   - task: "Remove Library button from student dashboard"
