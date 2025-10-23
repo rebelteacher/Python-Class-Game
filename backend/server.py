@@ -1962,6 +1962,47 @@ async def toggle_teacher_active(teacher_id: str, request: Request):
     return {"success": True, "is_active": new_status}
 
 
+
+@api_router.post("/admin/emergency-fix-account")
+async def emergency_fix_account(fix_data: dict):
+    """Emergency endpoint to fix admin account without authentication"""
+    email = fix_data.get("email")
+    secret_key = fix_data.get("secret_key")
+    
+    # Verify secret key (change this if needed)
+    if secret_key != "BYTEBATTLES2024":
+        raise HTTPException(status_code=403, detail="Invalid secret key")
+    
+    # Only allow fixing the main admin account
+    if email != "astapp@spanola.net":
+        raise HTTPException(status_code=403, detail="This emergency fix is only for the main admin account")
+    
+    # Find and update the account
+    user = await db.users.find_one({"email": email})
+    if not user:
+        raise HTTPException(status_code=404, detail="Account not found")
+    
+    # Hash password
+    hashed_password = bcrypt.hashpw(
+        "AlisaFaith$14".encode('utf-8'),
+        bcrypt.gensalt()
+    ).decode('utf-8')
+    
+    # Update to teacher/admin
+    await db.users.update_one(
+        {"email": email},
+        {
+            "$set": {
+                "role": "teacher",
+                "is_admin": True,
+                "password": hashed_password
+            }
+        }
+    )
+    
+    return {"success": True, "message": "Account restored to teacher/admin status"}
+
+
 # ----- Gamification Routes -----
 
 @api_router.get("/leaderboard/classroom/{classroom_id}")
