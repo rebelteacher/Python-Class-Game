@@ -37,7 +37,9 @@ export default function TeacherLogin() {
       document.cookie = `session_token=${response.data.session_token}; path=/; max-age=${7 * 24 * 60 * 60}; secure; samesite=none`;
       
       toast.success("Login successful!");
-      navigate("/teacher/dashboard");
+      
+      // Force reload to let App.js detect the new session
+      window.location.href = "/teacher/dashboard";
     } catch (error) {
       console.error("Login error:", error);
       toast.error(error.response?.data?.detail || "Login failed");
