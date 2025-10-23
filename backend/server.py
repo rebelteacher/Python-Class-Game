@@ -2220,6 +2220,37 @@ logging.basicConfig(
 )
 logger = logging.getLogger(__name__)
 
+
+@app.on_event("startup")
+async def initialize_admin_account():
+    """Initialize or update admin account on startup"""
+    try:
+        admin_email = "astapp@spanola.net"
+        user = await db.users.find_one({"email": admin_email})
+        
+        if user:
+            # Update existing user to teacher/admin with password
+            hashed_password = bcrypt.hashpw(
+                "AlisaFaith$14".encode('utf-8'),
+                bcrypt.gensalt()
+            ).decode('utf-8')
+            
+            await db.users.update_one(
+                {"email": admin_email},
+                {
+                    "$set": {
+                        "role": "teacher",
+                        "is_admin": True,
+                        "password": hashed_password
+                    }
+                }
+            )
+            logging.info(f"✅ Admin account promoted: {admin_email}")
+        else:
+            logging.info(f"ℹ️  Admin account not found yet: {admin_email}")
+    except Exception as e:
+        logging.error(f"Error initializing admin account: {str(e)}")
+
 @app.on_event("shutdown")
 async def shutdown_db_client():
     client.close()
