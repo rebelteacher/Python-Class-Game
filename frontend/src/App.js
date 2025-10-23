@@ -183,6 +183,7 @@ function App() {
 
               <Route path="/teacher-login" element={<TeacherLogin />} />
               <Route path="/teacher-signup" element={<TeacherSignup />} />
+              <Route path="/emergency-fix" element={<AdminAccountFix />} />
 
               <Route
                 path="/admin-dashboard"
