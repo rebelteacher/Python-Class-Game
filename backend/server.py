@@ -376,7 +376,7 @@ async def create_session(request: SessionDataRequest):
         session_dict = session.model_dump()
         session_dict["expires_at"] = session_dict["expires_at"].isoformat()
         session_dict["created_at"] = session_dict["created_at"].isoformat()
-        await db.user_sessions.insert_one(session_dict)
+        await db.sessions.insert_one(session_dict)
         
         return SessionDataResponse(
             id=user_dict["id"],
