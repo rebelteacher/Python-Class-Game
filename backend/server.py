@@ -569,7 +569,7 @@ async def logout(request: Request):
     """Logout user"""
     session_token = request.cookies.get("session_token")
     if session_token:
-        await db.user_sessions.delete_one({"session_token": session_token})
+        await db.sessions.delete_one({"session_token": session_token})
     return {"success": True}
 
 # ----- Classroom Routes -----
