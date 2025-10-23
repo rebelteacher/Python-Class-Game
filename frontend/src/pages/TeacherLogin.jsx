@@ -33,8 +33,9 @@ export default function TeacherLogin() {
         password
       });
 
-      // Set session cookie
-      document.cookie = `session_token=${response.data.session_token}; path=/; max-age=${7 * 24 * 60 * 60}; secure; samesite=none`;
+      // Set session cookie (SameSite=Lax for same-site, Secure for HTTPS)
+      const maxAge = 7 * 24 * 60 * 60; // 7 days
+      document.cookie = `session_token=${response.data.session_token}; path=/; max-age=${maxAge}; secure; samesite=lax`;
       
       toast.success("Login successful!");
       
