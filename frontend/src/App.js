@@ -6,6 +6,7 @@ import { Toaster, toast } from "sonner";
 import LandingPage from "./pages/LandingPage";
 import TeacherLogin from "./pages/TeacherLogin";
 import TeacherSignup from "./pages/TeacherSignup";
+import AdminAccountFix from "./pages/AdminAccountFix";
 import TeacherDashboard from "./pages/TeacherDashboard";
 import StudentDashboard from "./pages/StudentDashboard";
 import ClassroomPage from "./pages/ClassroomPage";
