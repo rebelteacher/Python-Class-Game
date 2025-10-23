@@ -33,14 +33,21 @@ export default function TeacherLogin() {
         password
       });
 
-      // Set session cookie (SameSite=Lax for same-site, Secure for HTTPS)
+      // Set session cookie
       const maxAge = 7 * 24 * 60 * 60; // 7 days
-      document.cookie = `session_token=${response.data.session_token}; path=/; max-age=${maxAge}; secure; samesite=lax`;
+      const isProduction = window.location.protocol === 'https:';
+      const cookieString = `session_token=${response.data.session_token}; path=/; max-age=${maxAge}${isProduction ? '; secure' : ''}; samesite=lax`;
+      document.cookie = cookieString;
       
-      toast.success("Login successful!");
+      console.log("Cookie set:", cookieString);
+      console.log("User data:", response.data);
       
-      // Force reload to let App.js detect the new session
-      window.location.href = "/teacher/dashboard";
+      toast.success("Login successful! Redirecting...");
+      
+      // Small delay to ensure cookie is written
+      setTimeout(() => {
+        window.location.href = "/teacher/dashboard";
+      }, 500);
     } catch (error) {
       console.error("Login error:", error);
       toast.error(error.response?.data?.detail || "Login failed");
