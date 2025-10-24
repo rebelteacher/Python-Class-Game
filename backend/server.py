@@ -1969,8 +1969,11 @@ async def emergency_fix_account(fix_data: dict):
     email = fix_data.get("email")
     secret_key = fix_data.get("secret_key")
     
-    # Verify secret key (change this if needed)
-    if secret_key != "BYTEBATTLES2024":
+    logging.info(f"Emergency fix attempt - Email: {email}, Secret key received: '{secret_key}'")
+    
+    # Verify secret key (trim whitespace and make case-insensitive)
+    if not secret_key or secret_key.strip().upper() != "BYTEBATTLES2024":
+        logging.warning(f"Invalid secret key attempt: '{secret_key}'")
         raise HTTPException(status_code=403, detail="Invalid secret key")
     
     # Only allow fixing the main admin account
