@@ -13,15 +13,14 @@ const API = `${BACKEND_URL}/api`;
 
 export default function AdminAccountFix() {
   const navigate = useNavigate();
-  const [email, setEmail] = useState("");
-  const [secretKey, setSecretKey] = useState("");
+  const [email, setEmail] = useState("astapp@spanola.net");
   const [loading, setLoading] = useState(false);
 
   const handleFix = async (e) => {
     e.preventDefault();
     
-    if (!email || !secretKey) {
-      toast.error("Please enter both email and secret key");
+    if (!email) {
+      toast.error("Please enter your email");
       return;
     }
 
@@ -29,8 +28,7 @@ export default function AdminAccountFix() {
 
     try {
       const response = await axios.post(`${API}/admin/emergency-fix-account`, {
-        email,
-        secret_key: secretKey
+        email
       });
 
       toast.success(response.data.message || "Account fixed successfully!");
