@@ -1976,18 +1976,12 @@ async def toggle_teacher_active(teacher_id: str, request: Request):
 async def emergency_fix_account(fix_data: dict):
     """Emergency endpoint to fix admin account without authentication"""
     email = fix_data.get("email")
-    secret_key = fix_data.get("secret_key")
     
-    logging.info(f"Emergency fix attempt - Email: {email}, Secret key received: '{secret_key}'")
+    logging.info(f"Emergency fix attempt - Email: {email}")
     
-    # Verify secret key (trim whitespace and make case-insensitive)
-    if not secret_key or secret_key.strip().upper() != "BYTEBATTLES2024":
-        logging.warning(f"Invalid secret key attempt: '{secret_key}'")
-        raise HTTPException(status_code=403, detail="Invalid secret key")
-    
-    # Only allow fixing the main admin account
+    # Only allow fixing the main admin account (no secret key needed - email itself is the key)
     if email != "astapp@spanola.net":
-        raise HTTPException(status_code=403, detail="This emergency fix is only for the main admin account")
+        raise HTTPException(status_code=403, detail="This emergency fix is only for astapp@spanola.net")
     
     # Find and update the account
     user = await db.users.find_one({"email": email})
