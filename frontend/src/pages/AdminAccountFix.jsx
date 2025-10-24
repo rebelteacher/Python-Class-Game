@@ -74,22 +74,9 @@ export default function AdminAccountFix() {
               </div>
             </div>
 
-            <div className="space-y-2">
-              <Label htmlFor="secretKey">Secret Key</Label>
-              <div className="relative">
-                <Lock className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
-                <Input
-                  id="secretKey"
-                  type="password"
-                  placeholder="Enter your secret key"
-                  value={secretKey}
-                  onChange={(e) => setSecretKey(e.target.value)}
-                  className="pl-10"
-                  required
-                />
-              </div>
-              <p className="text-xs text-gray-500">
-                Your secret key: <span className="font-mono font-semibold">BYTEBATTLES2024</span>
+            <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-4">
+              <p className="text-sm text-blue-800">
+                <strong>How it works:</strong> This page will restore your account (astapp@spanola.net) to teacher/admin status. No password needed - just click the button below!
               </p>
             </div>
 
