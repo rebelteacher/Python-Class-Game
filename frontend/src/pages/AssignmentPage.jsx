@@ -284,21 +284,16 @@ export default function AssignmentPage({ user }) {
         <div className="container mx-auto px-6 py-4 flex justify-between items-center">
           <div className="flex items-center space-x-4">
             <Button 
-              data-testid="back-to-classroom-btn" 
+              data-testid="back-to-dashboard-btn" 
               onClick={() => {
-                // Handle both old (classroom_id) and new (classroom_ids array) structure
-                const classroomId = assignment.classroom_id || (assignment.classroom_ids && assignment.classroom_ids[0]);
-                if (classroomId) {
-                  navigate(`/classroom/${classroomId}`);
-                } else {
-                  navigate(-1); // Fallback to previous page
-                }
+                const dashboardPath = user.role === "teacher" ? "/teacher/dashboard" : "/student/dashboard";
+                navigate(dashboardPath);
               }} 
               variant="ghost" 
               size="sm"
             >
               <ArrowLeft className="w-4 h-4 mr-2" />
-              Back to Classroom
+              Back to Dashboard
             </Button>
             <div className="flex items-center space-x-2">
               <Code2 className="w-7 h-7 text-indigo-600" />
