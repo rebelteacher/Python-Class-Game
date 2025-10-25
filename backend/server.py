@@ -703,6 +703,105 @@ async def get_classroom(classroom_id: str, request: Request):
     classroom["student_details"] = students
     return classroom
 
+
+
+@api_router.delete("/classrooms/{classroom_id}")
+async def delete_classroom(classroom_id: str, request: Request):
+    """Permanently delete a classroom and all associated data"""
+    user = await get_current_user(request)
+    
+    if user["role"] != "teacher":
+        raise HTTPException(status_code=403, detail="Only teachers can delete classrooms")
+    
+    classroom = await db.classrooms.find_one({"id": classroom_id})
+    if not classroom:
+        raise HTTPException(status_code=404, detail="Classroom not found")
+    
+    if classroom["teacher_id"] != user["id"]:
+        raise HTTPException(status_code=403, detail="You can only delete your own classrooms")
+    
+    # Delete all assignments associated with this classroom
+    await db.assignments.delete_many({"classroom_ids": classroom_id})
+    
+    # Delete all submissions from students in this classroom
+    student_ids = classroom.get("students", [])
+    for student_id in student_ids:
+        await db.submissions.delete_many({"student_id": student_id})
+    
+    # Delete the classroom
+    await db.classrooms.delete_one({"id": classroom_id})
+    
+    return {"success": True, "message": "Classroom and all associated data deleted"}
+
+@api_router.put("/classrooms/{classroom_id}/archive")
+async def archive_classroom(classroom_id: str, request: Request):
+    """Archive a classroom (hide but keep all data)"""
+    user = await get_current_user(request)
+    
+    if user["role"] != "teacher":
+        raise HTTPException(status_code=403, detail="Only teachers can archive classrooms")
+    
+    classroom = await db.classrooms.find_one({"id": classroom_id})
+    if not classroom:
+        raise HTTPException(status_code=404, detail="Classroom not found")
+    
+    if classroom["teacher_id"] != user["id"]:
+        raise HTTPException(status_code=403, detail="You can only archive your own classrooms")
+    
+    # Mark as archived
+    await db.classrooms.update_one(
+        {"id": classroom_id},
+        {"$set": {"is_archived": True}}
+    )
+    
+    return {"success": True, "message": "Classroom archived"}
+
+@api_router.put("/classrooms/{classroom_id}/unarchive")
+async def unarchive_classroom(classroom_id: str, request: Request):
+    """Unarchive a classroom"""
+    user = await get_current_user(request)
+    
+    if user["role"] != "teacher":
+        raise HTTPException(status_code=403, detail="Only teachers can unarchive classrooms")
+    
+    classroom = await db.classrooms.find_one({"id": classroom_id})
+    if not classroom:
+        raise HTTPException(status_code=404, detail="Classroom not found")
+    
+    if classroom["teacher_id"] != user["id"]:
+        raise HTTPException(status_code=403, detail="You can only unarchive your own classrooms")
+    
+    # Mark as not archived
+    await db.classrooms.update_one(
+        {"id": classroom_id},
+        {"$set": {"is_archived": False}}
+    )
+    
+    return {"success": True, "message": "Classroom unarchived"}
+
+@api_router.delete("/classrooms/{classroom_id}/students/{student_id}")
+async def remove_student_from_classroom(classroom_id: str, student_id: str, request: Request):
+    """Remove a student from a classroom"""
+    user = await get_current_user(request)
+    
+    if user["role"] != "teacher":
+        raise HTTPException(status_code=403, detail="Only teachers can remove students")
+    
+    classroom = await db.classrooms.find_one({"id": classroom_id})
+    if not classroom:
+        raise HTTPException(status_code=404, detail="Classroom not found")
+    
+    if classroom["teacher_id"] != user["id"]:
+        raise HTTPException(status_code=403, detail="You can only remove students from your own classrooms")
+    
+    # Remove student from classroom
+    await db.classrooms.update_one(
+        {"id": classroom_id},
+        {"$pull": {"students": student_id}}
+    )
+    
+    return {"success": True, "message": "Student removed from classroom"}
+
 # ----- Assignment Routes -----
 
 @api_router.post("/problems/bulk-upload")
