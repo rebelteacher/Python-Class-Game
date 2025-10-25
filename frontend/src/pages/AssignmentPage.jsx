@@ -86,14 +86,6 @@ export default function AssignmentPage({ user }) {
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [code]);
 
-  // Get current problem's run status
-  const getCurrentProblemId_OLD = () => {
-    if (assignment?.problems && assignment.problems[currentProblemIndex]) {
-      return assignment.problems[currentProblemIndex].id;
-    }
-    return assignmentId; // Fallback for old single-problem assignments
-  };
-
   const hasRun = hasRunPerProblem[getCurrentProblemId()] || false;
 
   const fetchAssignment = async () => {
