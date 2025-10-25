@@ -82,8 +82,7 @@ export default function AssignmentPage({ user }) {
         }));
       }
     }
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [code]);
+  }, [code, assignment]);
 
   const hasRun = hasRunPerProblem[getCurrentProblemId()] || false;
 
