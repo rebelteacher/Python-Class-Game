@@ -586,12 +586,12 @@ export default function AssignmentPage({ user }) {
                         <Button 
                           data-testid="submit-code-btn" 
                           onClick={handleSubmit} 
-                          disabled={submitting || (livesPerProblem[getCurrentProblemId()] || 3) <= 0 || !hasRun}
+                          disabled={submitting || (livesPerProblem[getCurrentProblemId()] || 3) <= 0 || !hasRun || problemsFinal[getCurrentProblemId()]}
                           className="bg-indigo-600 hover:bg-indigo-700 gap-2 flex-1"
                           size="sm"
                         >
                           <Send className="w-4 h-4" />
-                          {submitting ? "Submitting..." : (livesPerProblem[getCurrentProblemId()] || 3) <= 0 ? "Locked" : !hasRun ? "Run First" : "Submit"}
+                          {submitting ? "Submitting..." : problemsFinal[getCurrentProblemId()] ? "Done" : (livesPerProblem[getCurrentProblemId()] || 3) <= 0 ? "Locked" : !hasRun ? "Run First" : "Submit"}
                         </Button>
                       </div>
                       {!hasRun && (livesPerProblem[getCurrentProblemId()] || 3) > 0 && (
