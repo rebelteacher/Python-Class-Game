@@ -318,32 +318,6 @@ export default function AssignmentPage({ user }) {
     }
   };
 
-          { duration: 4000 }
-        );
-      } else if (newLivesRemaining > 0) {
-        toast.warning(`Score: ${response.data.score.toFixed(1)}% - ${newLivesRemaining} ${newLivesRemaining === 1 ? 'life' : 'lives'} remaining for this problem`);
-      } else {
-        toast.error(`Score: ${response.data.score.toFixed(1)}% - No lives remaining for THIS problem. Move to the next one!`);
-      }
-      
-      // Reset run status for current problem after submission
-      setHasRunPerProblem(prev => ({
-        ...prev,
-        [problemId]: false
-      }));
-      fetchSubmissions();
-    } catch (error) {
-      console.error("Error submitting assignment:", error);
-      if (error.response?.status === 403) {
-        toast.error(error.response.data.detail || "Submission not allowed");
-      } else {
-        toast.error("Failed to submit assignment");
-      }
-    } finally {
-      setSubmitting(false);
-    }
-  };
-
   if (loading) {
     return (
       <div data-testid="assignment-loading" className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 to-indigo-50">
