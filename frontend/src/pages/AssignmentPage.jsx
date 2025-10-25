@@ -41,13 +41,34 @@ export default function AssignmentPage({ user }) {
   }, [assignmentId]);
 
   useEffect(() => {
-    // Update code when switching problems
+    // Save current code before switching
     if (assignment && assignment.problems && assignment.problems[currentProblemIndex]) {
+      const currentProblemId = getCurrentProblemId();
+      
+      // Load saved code for this problem, or use starter code if none saved
+      const savedCode = savedCodePerProblem[currentProblemId];
       const currentProblem = assignment.problems[currentProblemIndex];
-      setCode(currentProblem.starter_code || "# Write your code here\n");
+      
+      if (savedCode) {
+        setCode(savedCode);
+      } else {
+        setCode(currentProblem.starter_code || "# Write your code here\n");
+      }
+      
       setOutput("");
     }
   }, [currentProblemIndex, assignment]);
+  
+  // Auto-save code as students type
+  useEffect(() => {
+    if (assignment && code) {
+      const currentProblemId = getCurrentProblemId();
+      setSavedCodePerProblem(prev => ({
+        ...prev,
+        [currentProblemId]: code
+      }));
+    }
+  }, [code]);
 
   // Get current problem's run status
   const getCurrentProblemId = () => {
