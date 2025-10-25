@@ -186,7 +186,11 @@ export default function AssignmentPage({ user }) {
       setOutput(response.data.output || response.data.error || "No output");
     } catch (error) {
       console.error("Error running code:", error);
-      setOutput("Error running code: " + error.message);
+      const errorMsg = error.response?.status === 502 
+        ? "Server timeout - your code might have an infinite loop or is taking too long. Please check your code and try again."
+        : error.response?.data?.error || error.message || "Failed to run code";
+      setOutput("❌ Error: " + errorMsg);
+      toast.error("Code execution failed");
     } finally {
       setRunning(false);
     }
