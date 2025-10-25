@@ -18,13 +18,14 @@ export default function AssignmentPage({ user }) {
   const [assignment, setAssignment] = useState(null);
   const [loading, setLoading] = useState(true);
   const [code, setCode] = useState("");
+  const [savedCodePerProblem, setSavedCodePerProblem] = useState({}); // Save code for each problem
   const [output, setOutput] = useState("");
   const [running, setRunning] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [submissions, setSubmissions] = useState([]);
   const [hasRunPerProblem, setHasRunPerProblem] = useState({}); // Track run status per problem
-  const [livesRemaining, setLivesRemaining] = useState(3);
-  const [isLockedOut, setIsLockedOut] = useState(false);
+  const [livesPerProblem, setLivesPerProblem] = useState({}); // Track lives for each problem separately
+  const [problemStatuses, setProblemStatuses] = useState({}); // Track completion status (score) per problem
   const [currentProblemIndex, setCurrentProblemIndex] = useState(0);
   const [darkMode, setDarkMode] = useState(false); // Dark mode toggle
 
