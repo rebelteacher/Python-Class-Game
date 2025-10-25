@@ -27,10 +27,11 @@ export default function StudentDashboard({ user, setUser }) {
   const location = useLocation();
 
   useEffect(() => {
+    // Always refetch data when dashboard mounts or location changes
     fetchClassrooms();
     fetchShopItems();
     fetchUserProfile();
-  }, [location.state?.refresh]); // Refetch when navigating back from assignment
+  }, [location.key]); // location.key changes on every navigation
 
   const fetchUserProfile = async () => {
     try {
