@@ -203,6 +203,7 @@ class Classroom(BaseModel):
     name: str
     class_code: str
     students: List[str] = Field(default_factory=list)
+    is_archived: bool = False
     created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
 
 class ClassroomCreate(BaseModel):
