@@ -105,7 +105,12 @@ export default function AssignmentPage({ user }) {
 
   const fetchSubmissions = async () => {
     try {
-      const response = await axios.get(`${API}/submissions/assignment/${assignmentId}`, {
+      // If we have a classroom_id from navigation, pass it to filter submissions
+      const url = classroomIdFromNav 
+        ? `${API}/submissions/assignment/${assignmentId}?classroom_id=${classroomIdFromNav}`
+        : `${API}/submissions/assignment/${assignmentId}`;
+      
+      const response = await axios.get(url, {
         withCredentials: true,
       });
       setSubmissions(response.data);
