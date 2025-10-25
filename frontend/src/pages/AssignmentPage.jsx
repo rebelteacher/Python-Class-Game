@@ -15,6 +15,8 @@ const API = `${BACKEND_URL}/api`;
 export default function AssignmentPage({ user }) {
   const { assignmentId } = useParams();
   const navigate = useNavigate();
+  const location = useLocation();
+  const classroomIdFromNav = location.state?.classroomId; // Get classroom_id if passed from navigation
   const [assignment, setAssignment] = useState(null);
   const [loading, setLoading] = useState(true);
   const [code, setCode] = useState("");
