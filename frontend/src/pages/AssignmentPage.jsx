@@ -108,18 +108,36 @@ export default function AssignmentPage({ user }) {
       });
       setSubmissions(response.data);
       
-      // Calculate lives remaining for students
-      if (user.role === "student") {
-        if (response.data.length === 0) {
-          // No submissions yet - start with 3 lives
-          setLivesRemaining(3);
-          setIsLockedOut(false);
-        } else {
-          const lastSubmission = response.data[response.data.length - 1];
-          const lives = lastSubmission.lives_remaining !== undefined ? lastSubmission.lives_remaining : 3;
-          setLivesRemaining(lives);
-          setIsLockedOut(lives <= 0);
-        }
+      // Calculate lives remaining and status PER PROBLEM for students
+      if (user.role === "student" && assignment && assignment.problems) {
+        const livesMap = {};
+        const statusMap = {};
+        
+        // Initialize all problems with 3 lives and no status
+        assignment.problems.forEach(problem => {
+          livesMap[problem.id] = 3;
+          statusMap[problem.id] = null; // null = not attempted
+        });
+        
+        // Update based on submissions
+        response.data.forEach(submission => {
+          const problemId = submission.problem_id;
+          
+          // Track lives for this specific problem
+          if (submission.lives_remaining !== undefined) {
+            livesMap[problemId] = submission.lives_remaining;
+          }
+          
+          // Track best score for this problem
+          const currentBestScore = statusMap[problemId];
+          const newScore = submission.score || 0;
+          if (currentBestScore === null || newScore > currentBestScore) {
+            statusMap[problemId] = newScore;
+          }
+        });
+        
+        setLivesPerProblem(livesMap);
+        setProblemStatuses(statusMap);
       }
     } catch (error) {
       console.error("Error fetching submissions:", error);
