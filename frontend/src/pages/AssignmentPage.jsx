@@ -410,8 +410,25 @@ export default function AssignmentPage({ user }) {
               <h3 className="text-sm font-semibold text-gray-700">
                 Problem {currentProblemIndex + 1} of {assignment.problems.length}
               </h3>
-              <div className="text-sm text-gray-600">
-                Progress: {Object.values(problemsFinal).filter(isDone => isDone).length}/{assignment.problems.length} done
+              <div className="flex items-center gap-4">
+                <div className="text-sm text-gray-600">
+                  Progress: {Object.values(problemsFinal).filter(isDone => isDone).length}/{assignment.problems.length} done
+                </div>
+                {user.role === "student" && (
+                  <div className="text-sm font-semibold">
+                    Final Grade: {(() => {
+                      const scores = assignment.problems.map(p => problemStatuses[p.id] || 0);
+                      const totalProblems = assignment.problems.length;
+                      const averageScore = totalProblems > 0 
+                        ? scores.reduce((sum, score) => sum + score, 0) / totalProblems 
+                        : 0;
+                      const gradeColor = averageScore >= 90 ? "text-green-600" :
+                                        averageScore >= 70 ? "text-yellow-600" :
+                                        averageScore > 0 ? "text-orange-600" : "text-gray-500";
+                      return <span className={gradeColor}>{averageScore.toFixed(1)}%</span>;
+                    })()}
+                  </div>
+                )}
               </div>
             </div>
             <div className="flex gap-2 overflow-x-auto pb-2">
