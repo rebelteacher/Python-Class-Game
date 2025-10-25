@@ -317,26 +317,53 @@ export default function AssignmentPage({ user }) {
                 Problem {currentProblemIndex + 1} of {assignment.problems.length}
               </h3>
               <div className="text-sm text-gray-600">
-                Progress: {assignment.problems.filter((p, i) => p.is_completed).length}/{assignment.problems.length} completed
+                Progress: {Object.values(problemStatuses).filter(score => score && score >= 70).length}/{assignment.problems.length} completed
               </div>
             </div>
             <div className="flex gap-2 overflow-x-auto pb-2">
-              {assignment.problems.map((problem, index) => (
-                <button
-                  key={problem.id}
-                  onClick={() => setCurrentProblemIndex(index)}
-                  className={`px-4 py-2 rounded-lg text-sm font-medium whitespace-nowrap transition-colors ${
-                    currentProblemIndex === index
-                      ? 'bg-indigo-600 text-white'
-                      : problem.is_completed
-                      ? 'bg-green-100 text-green-700 hover:bg-green-200'
-                      : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-                  }`}
-                >
-                  {problem.is_completed && '✓ '}
-                  {index + 1}. {problem.title}
-                </button>
-              ))}
+              {assignment.problems.map((problem, index) => {
+                const problemScore = problemStatuses[problem.id];
+                const problemLives = livesPerProblem[problem.id] || 3;
+                
+                // Determine color based on score
+                let colorClass = 'bg-gray-100 text-gray-700 hover:bg-gray-200'; // Not attempted
+                if (problemScore !== null && problemScore !== undefined) {
+                  if (problemScore === 100) {
+                    colorClass = 'bg-green-500 text-white hover:bg-green-600'; // Perfect
+                  } else if (problemScore >= 70) {
+                    colorClass = 'bg-yellow-400 text-gray-900 hover:bg-yellow-500'; // Passing
+                  } else {
+                    colorClass = 'bg-red-400 text-white hover:bg-red-500'; // Failed
+                  }
+                }
+                
+                // Locked out?
+                const isLocked = problemLives <= 0;
+                if (isLocked) {
+                  colorClass = 'bg-gray-300 text-gray-500 cursor-not-allowed';
+                }
+                
+                // Current problem highlight
+                if (currentProblemIndex === index && !isLocked) {
+                  colorClass = 'bg-indigo-600 text-white border-2 border-indigo-800';
+                }
+                
+                return (
+                  <button
+                    key={problem.id}
+                    onClick={() => !isLocked && setCurrentProblemIndex(index)}
+                    disabled={isLocked}
+                    className={`px-4 py-2 rounded-lg text-sm font-medium whitespace-nowrap transition-colors ${colorClass}`}
+                  >
+                    {problemScore === 100 && '✓ '}
+                    {isLocked && '🔒 '}
+                    {index + 1}. {problem.title}
+                    {problemScore !== null && problemScore !== undefined && (
+                      <span className="ml-1 text-xs">({problemScore.toFixed(0)}%)</span>
+                    )}
+                  </button>
+                );
+              })}
             </div>
           </div>
         </div>
