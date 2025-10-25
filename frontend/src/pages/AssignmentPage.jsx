@@ -486,19 +486,27 @@ export default function AssignmentPage({ user }) {
                           </Button>
                           
                           <div className="flex items-center gap-2 text-sm">
-                            <span className="text-gray-600">Lives:</span>
-                            {isLockedOut ? (
-                              <span className="text-red-600 font-semibold">🚫 Locked</span>
-                            ) : (
-                              <span>
-                                {Array.from({ length: livesRemaining }).map((_, i) => (
-                                  <span key={i} className="text-red-500">❤️</span>
-                                ))}
-                                {Array.from({ length: 3 - livesRemaining }).map((_, i) => (
-                                  <span key={i} className="text-gray-300">🤍</span>
-                                ))}
-                              </span>
-                            )}
+                            <span className="text-gray-600">Lives (this problem):</span>
+                            {(() => {
+                              const currentProblemId = getCurrentProblemId();
+                              const currentLives = livesPerProblem[currentProblemId] || 3;
+                              const isProblemLocked = currentLives <= 0;
+                              
+                              if (isProblemLocked) {
+                                return <span className="text-red-600 font-semibold">🚫 Locked</span>;
+                              }
+                              
+                              return (
+                                <span>
+                                  {Array.from({ length: currentLives }).map((_, i) => (
+                                    <span key={i} className="text-red-500">❤️</span>
+                                  ))}
+                                  {Array.from({ length: 3 - currentLives }).map((_, i) => (
+                                    <span key={i} className="text-gray-300">🤍</span>
+                                  ))}
+                                </span>
+                              );
+                            })()}
                           </div>
                         </div>
                       </div>
