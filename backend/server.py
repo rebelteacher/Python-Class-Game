@@ -394,15 +394,29 @@ async def create_session(request: SessionDataRequest):
 
 @api_router.get("/auth/me")
 async def get_me(request: Request):
-    """Get current user info"""
+    """Get current user info with fresh stats from database"""
     user = await get_current_user(request)
+    
+    # Return full user profile including stats (always fresh from database)
     return {
         "id": user["id"],
         "email": user["email"],
         "name": user["name"],
         "picture": user.get("picture"),
         "role": user["role"],
-        "is_admin": user.get("is_admin", False)
+        "is_admin": user.get("is_admin", False),
+        "xp": user.get("xp", 0),
+        "coins": user.get("coins", 0),
+        "rank": user.get("rank", "Rookie"),
+        "rank_level": user.get("rank_level", 1),
+        "problems_solved": user.get("problems_solved", 0),
+        "perfect_scores": user.get("perfect_scores", 0),
+        "current_streak": user.get("current_streak", 0),
+        "best_streak": user.get("best_streak", 0),
+        "owned_themes": user.get("owned_themes", ["default"]),
+        "owned_badges": user.get("owned_badges", []),
+        "active_theme": user.get("active_theme", "default"),
+        "active_badges": user.get("active_badges", [])
     }
 
 @api_router.post("/auth/teacher-login")
