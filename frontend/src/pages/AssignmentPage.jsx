@@ -206,6 +206,12 @@ export default function AssignmentPage({ user }) {
       ? assignment.problems[currentProblemIndex].id 
       : assignmentId;
     
+    // Check if marked as final/done
+    if (problemsFinal[problemId]) {
+      toast.error("This problem is marked as done. You cannot submit again!");
+      return;
+    }
+    
     const currentProblemLives = livesPerProblem[problemId] || 3;
     if (currentProblemLives <= 0) {
       toast.error("You've used all 3 lives on THIS problem. Try the next one!");
