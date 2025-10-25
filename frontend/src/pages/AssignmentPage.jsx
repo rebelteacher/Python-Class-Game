@@ -440,6 +440,29 @@ export default function AssignmentPage({ user }) {
                   <p className="text-gray-700 whitespace-pre-wrap">
                     {(assignment.problems && assignment.problems[currentProblemIndex]?.description) || assignment.description || "No description provided."}
                   </p>
+                  
+                  {/* Teacher Solution Button */}
+                  {user.role === "teacher" && (
+                    <div className="mt-4 pt-4 border-t">
+                      <Button
+                        onClick={() => {
+                          const problem = assignment.problems ? assignment.problems[currentProblemIndex] : assignment;
+                          if (problem.solution_code) {
+                            setCode(problem.solution_code);
+                            toast.success("Solution code loaded!");
+                          } else {
+                            toast.info("No solution code available for this problem");
+                          }
+                        }}
+                        variant="outline"
+                        className="w-full gap-2 border-green-600 text-green-700 hover:bg-green-50"
+                        size="sm"
+                      >
+                        <Code2 className="w-4 h-4" />
+                        Show Solution Code
+                      </Button>
+                    </div>
+                  )}
                 </CardContent>
               </Card>
 
