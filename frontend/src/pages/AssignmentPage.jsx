@@ -64,17 +64,19 @@ export default function AssignmentPage({ user }) {
   }, [assignmentId]);
 
   useEffect(() => {
-    // Load saved code when switching problems
+    // Load saved code when switching problems or when savedCodePerProblem updates
     if (assignment && assignment.problems && assignment.problems[currentProblemIndex]) {
       const currentProblemId = getCurrentProblemId();
       
-      // Load saved code for this problem, or use starter code if none saved
+      // Check for saved code in the state (which is loaded from localStorage)
       const savedCode = savedCodePerProblem[currentProblemId];
       const currentProblem = assignment.problems[currentProblemIndex];
       
-      if (savedCode) {
+      if (savedCode && savedCode.trim() !== "" && savedCode !== currentProblem.starter_code) {
+        // Load saved code
         setCode(savedCode);
       } else {
+        // Load starter code
         setCode(currentProblem.starter_code || "# Write your code here\n");
       }
       
