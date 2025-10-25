@@ -292,6 +292,7 @@ class Submission(BaseModel):
     lives_remaining: int = 3
     is_passing: bool = False
     is_late: bool = False
+    is_final: bool = False  # Student marked this as their final submission
     submitted_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
 
 class SubmissionCreate(BaseModel):
