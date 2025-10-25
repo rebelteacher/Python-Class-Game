@@ -24,12 +24,13 @@ export default function StudentDashboard({ user, setUser }) {
   const [shopItems, setShopItems] = useState({ themes: [], badges: [] });
   const [userProfile, setUserProfile] = useState(user);
   const navigate = useNavigate();
+  const location = useLocation();
 
   useEffect(() => {
     fetchClassrooms();
     fetchShopItems();
     fetchUserProfile();
-  }, []);
+  }, [location.state?.refresh]); // Refetch when navigating back from assignment
 
   const fetchUserProfile = async () => {
     try {
