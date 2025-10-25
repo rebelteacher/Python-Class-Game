@@ -28,8 +28,10 @@ export default function AssignmentPage({ user }) {
   const [hasRunPerProblem, setHasRunPerProblem] = useState({}); // Track run status per problem
   const [livesPerProblem, setLivesPerProblem] = useState({}); // Track lives for each problem separately
   const [problemStatuses, setProblemStatuses] = useState({}); // Track completion status (score) per problem
+  const [problemsFinal, setProblemsFinal] = useState({}); // Track which problems are marked as done/final
   const [currentProblemIndex, setCurrentProblemIndex] = useState(0);
   const [darkMode, setDarkMode] = useState(false); // Dark mode toggle
+  const [markingFinal, setMarkingFinal] = useState(false);
 
   useEffect(() => {
     fetchAssignment();
