@@ -250,6 +250,44 @@ export default function AssignmentPage({ user }) {
       if (isPassing) {
         toast.success(
           `✅ Great job! Score: ${response.data.score.toFixed(1)}% | +${xpEarned} XP | +${coinsEarned} 🪙`,
+
+
+  const handleMarkFinal = async () => {
+    const problemId = getCurrentProblemId();
+    
+    // Get the most recent submission for this problem
+    const problemSubmissions = submissions.filter(sub => sub.problem_id === problemId);
+    if (problemSubmissions.length === 0) {
+      toast.error("You must submit at least once before marking as done");
+      return;
+    }
+    
+    // Get latest submission
+    const latestSubmission = problemSubmissions[problemSubmissions.length - 1];
+    
+    setMarkingFinal(true);
+    try {
+      await axios.post(
+        `${API}/submissions/${latestSubmission.id}/mark-final`,
+        {},
+        { withCredentials: true }
+      );
+      
+      // Update local state
+      setProblemsFinal(prev => ({
+        ...prev,
+        [problemId]: true
+      }));
+      
+      toast.success("Problem marked as done! You can no longer submit to this problem.");
+    } catch (error) {
+      console.error("Error marking final:", error);
+      toast.error(error.response?.data?.detail || "Failed to mark as done");
+    } finally {
+      setMarkingFinal(false);
+    }
+  };
+
           { duration: 4000 }
         );
       } else if (newLivesRemaining > 0) {
