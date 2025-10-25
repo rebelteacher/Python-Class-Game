@@ -446,8 +446,15 @@ export default function AssignmentPage({ user }) {
                         onClick={() => {
                           const problem = assignment.problems ? assignment.problems[currentProblemIndex] : assignment;
                           if (problem.solution_code) {
-                            setCode(problem.solution_code);
-                            toast.success("Solution code loaded!");
+                            if (code === problem.solution_code) {
+                              // Hide solution - load starter code
+                              setCode(problem.starter_code || "# Write your code here\n");
+                              toast.info("Solution hidden");
+                            } else {
+                              // Show solution
+                              setCode(problem.solution_code);
+                              toast.success("Solution code loaded!");
+                            }
                           } else {
                             toast.info("No solution code available for this problem");
                           }
@@ -457,7 +464,10 @@ export default function AssignmentPage({ user }) {
                         size="sm"
                       >
                         <Code2 className="w-4 h-4" />
-                        Show Solution Code
+                        {(() => {
+                          const problem = assignment.problems ? assignment.problems[currentProblemIndex] : assignment;
+                          return code === problem?.solution_code ? "Hide Solution" : "Show Solution Code";
+                        })()}
                       </Button>
                     </div>
                   )}
