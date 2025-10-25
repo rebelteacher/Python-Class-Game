@@ -404,7 +404,9 @@ export default function ClassroomPage({ user }) {
                       </div>
                       <div className="flex gap-2">
                         <Button
-                          onClick={() => navigate(`/assignment/${assignment.id}`)}
+                          onClick={() => navigate(`/assignment/${assignment.id}`, { 
+                            state: { classroomId: classroomId } 
+                          })}
                           className="flex-1"
                           size="sm"
                         >
