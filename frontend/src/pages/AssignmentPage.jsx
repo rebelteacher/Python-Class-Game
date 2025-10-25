@@ -121,11 +121,13 @@ export default function AssignmentPage({ user }) {
       if (user.role === "student" && assignment && assignment.problems) {
         const livesMap = {};
         const statusMap = {};
+        const finalMap = {};
         
         // Initialize all problems with 3 lives and no status
         assignment.problems.forEach(problem => {
           livesMap[problem.id] = 3;
           statusMap[problem.id] = null; // null = not attempted
+          finalMap[problem.id] = false;
         });
         
         // Update based on submissions
@@ -143,10 +145,16 @@ export default function AssignmentPage({ user }) {
           if (currentBestScore === null || newScore > currentBestScore) {
             statusMap[problemId] = newScore;
           }
+          
+          // Track if marked as final
+          if (submission.is_final) {
+            finalMap[problemId] = true;
+          }
         });
         
         setLivesPerProblem(livesMap);
         setProblemStatuses(statusMap);
+        setProblemsFinal(finalMap);
       }
     } catch (error) {
       console.error("Error fetching submissions:", error);
