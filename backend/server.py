@@ -1496,6 +1496,41 @@ async def get_submissions(assignment_id: str, request: Request, classroom_id: st
     
     return submissions
 
+
+
+@api_router.post("/submissions/{submission_id}/mark-final")
+async def mark_submission_final(submission_id: str, request: Request):
+    """Mark a submission as the student's final submission for this problem"""
+    user = await get_current_user(request)
+    
+    if user["role"] != "student":
+        raise HTTPException(status_code=403, detail="Only students can mark submissions as final")
+    
+    submission = await db.submissions.find_one({"id": submission_id}, {"_id": 0})
+    if not submission:
+        raise HTTPException(status_code=404, detail="Submission not found")
+    
+    if submission["student_id"] != user["id"]:
+        raise HTTPException(status_code=403, detail="You can only mark your own submissions")
+    
+    # Update this submission and mark all others for this problem as not final
+    await db.submissions.update_many(
+        {
+            "assignment_id": submission["assignment_id"],
+            "problem_id": submission["problem_id"],
+            "student_id": user["id"]
+        },
+        {"$set": {"is_final": False}}
+    )
+    
+    # Mark this one as final
+    await db.submissions.update_one(
+        {"id": submission_id},
+        {"$set": {"is_final": True}}
+    )
+    
+    return {"success": True, "message": "Submission marked as final"}
+
 @api_router.get("/student/{student_id}/lesson-scores")
 async def get_student_lesson_scores(student_id: str, classroom_id: str, request: Request):
     """Calculate assignment scores for a student in a classroom"""
