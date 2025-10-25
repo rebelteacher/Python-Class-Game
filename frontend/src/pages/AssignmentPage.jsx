@@ -608,7 +608,7 @@ export default function AssignmentPage({ user }) {
                         <Button 
                           data-testid="run-code-btn" 
                           onClick={handleRunCode} 
-                          disabled={running || isLockedOut}
+                          disabled={running}
                           variant="outline" 
                           size="sm"
                           className="gap-2 flex-1"
