@@ -378,7 +378,8 @@ export default function AssignmentPage({ user }) {
               data-testid="back-to-dashboard-btn" 
               onClick={() => {
                 const dashboardPath = user.role === "teacher" ? "/teacher/dashboard" : "/student/dashboard";
-                navigate(dashboardPath);
+                // Use replace to force a fresh load of the dashboard
+                navigate(dashboardPath, { replace: true, state: { refresh: Date.now() } });
               }} 
               variant="ghost" 
               size="sm"
