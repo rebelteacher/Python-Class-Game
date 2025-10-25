@@ -595,6 +595,34 @@ export default function AssignmentPage({ user }) {
                         <p className="text-xs text-red-600">🚫 This problem is locked. Try the next one!</p>
                       )}
                       
+                      {/* Mark as Done Button - Placed separately to avoid accidental clicks */}
+                      {user.role === "student" && !problemsFinal[getCurrentProblemId()] && submissions.filter(s => s.problem_id === getCurrentProblemId()).length > 0 && (
+                        <div className="mt-4 pt-4 border-t">
+                          <Button
+                            onClick={handleMarkFinal}
+                            disabled={markingFinal}
+                            variant="outline"
+                            className="w-full border-green-500 text-green-700 hover:bg-green-50"
+                            size="sm"
+                          >
+                            <CheckCircle className="w-4 h-4 mr-2" />
+                            {markingFinal ? "Marking..." : "Mark as Done (Final Submission)"}
+                          </Button>
+                          <p className="text-xs text-gray-500 mt-2 text-center">
+                            ⚠️ Warning: Once marked as done, you cannot submit again to this problem!
+                          </p>
+                        </div>
+                      )}
+                      
+                      {problemsFinal[getCurrentProblemId()] && (
+                        <div className="mt-4 pt-4 border-t">
+                          <div className="flex items-center justify-center gap-2 text-green-700 font-semibold">
+                            <CheckCircle className="w-5 h-5" />
+                            This problem is marked as done!
+                          </div>
+                        </div>
+                      )}
+                      
                       {/* Problem Navigation Buttons */}
                       {assignment.problems && assignment.problems.length > 1 && (
                         <div className="flex gap-2 mt-3 pt-3 border-t">
