@@ -33,6 +33,14 @@ export default function AssignmentPage({ user }) {
   const [darkMode, setDarkMode] = useState(false); // Dark mode toggle
   const [markingFinal, setMarkingFinal] = useState(false);
 
+  // Get current problem's ID
+  const getCurrentProblemId = () => {
+    if (assignment && assignment.problems && assignment.problems[currentProblemIndex]) {
+      return assignment.problems[currentProblemIndex].id;
+    }
+    return assignmentId; // Fallback for old single-problem structure
+  };
+
   useEffect(() => {
     fetchAssignment();
     fetchSubmissions();
@@ -45,7 +53,7 @@ export default function AssignmentPage({ user }) {
   }, [assignmentId]);
 
   useEffect(() => {
-    // Save current code before switching
+    // Load saved code when switching problems
     if (assignment && assignment.problems && assignment.problems[currentProblemIndex]) {
       const currentProblemId = getCurrentProblemId();
       
@@ -61,21 +69,25 @@ export default function AssignmentPage({ user }) {
       
       setOutput("");
     }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [currentProblemIndex, assignment]);
   
   // Auto-save code as students type
   useEffect(() => {
     if (assignment && code) {
       const currentProblemId = getCurrentProblemId();
-      setSavedCodePerProblem(prev => ({
-        ...prev,
-        [currentProblemId]: code
-      }));
+      if (currentProblemId) {
+        setSavedCodePerProblem(prev => ({
+          ...prev,
+          [currentProblemId]: code
+        }));
+      }
     }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [code]);
 
   // Get current problem's run status
-  const getCurrentProblemId = () => {
+  const getCurrentProblemId_OLD = () => {
     if (assignment?.problems && assignment.problems[currentProblemIndex]) {
       return assignment.problems[currentProblemIndex].id;
     }
