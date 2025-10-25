@@ -1192,10 +1192,18 @@ def run_python_code(code: str, test_input: str = "", timeout: int = 5) -> dict:
 @api_router.post("/code/execute", response_model=CodeExecuteResponse)
 async def execute_code(execute_req: CodeExecuteRequest, request: Request):
     """Execute Python code"""
-    await get_current_user(request)  # Ensure authenticated
-    
-    result = run_python_code(execute_req.code, execute_req.test_input)
-    return CodeExecuteResponse(**result)
+    try:
+        await get_current_user(request)  # Ensure authenticated
+        
+        result = run_python_code(execute_req.code, execute_req.test_input, timeout=10)
+        return CodeExecuteResponse(**result)
+    except Exception as e:
+        logging.error(f"Code execution error: {str(e)}")
+        return CodeExecuteResponse(
+            output="",
+            error=f"Execution failed: {str(e)}",
+            success=False
+        )
 
 # ----- Submission Routes -----
 
