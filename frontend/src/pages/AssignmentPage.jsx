@@ -178,24 +178,25 @@ export default function AssignmentPage({ user }) {
       toast.error("Please run your code first before submitting!");
       return;
     }
-    
-    if (isLockedOut) {
-      toast.error("You've used all 3 lives on this assignment. No more submissions allowed.");
-      return;
-    }
 
     if (!code.trim()) {
       toast.error("Please write some code before submitting");
       return;
     }
 
+    // Check if THIS PROBLEM is locked out
+    const problemId = assignment.problems && assignment.problems[currentProblemIndex] 
+      ? assignment.problems[currentProblemIndex].id 
+      : assignmentId;
+    
+    const currentProblemLives = livesPerProblem[problemId] || 3;
+    if (currentProblemLives <= 0) {
+      toast.error("You've used all 3 lives on THIS problem. Try the next one!");
+      return;
+    }
+
     setSubmitting(true);
     try {
-      // Get problem_id: for old structure use assignment_id, for new use current problem's id
-      const problemId = assignment.problems && assignment.problems[currentProblemIndex] 
-        ? assignment.problems[currentProblemIndex].id 
-        : assignmentId;
-        
       const response = await axios.post(
         `${API}/submissions`,
         {
@@ -213,8 +214,17 @@ export default function AssignmentPage({ user }) {
       const rankUp = response.data.rank_up;
       const newRank = response.data.new_rank;
       
-      setLivesRemaining(newLivesRemaining);
-      setIsLockedOut(newLivesRemaining <= 0);
+      // Update lives for THIS problem only
+      setLivesPerProblem(prev => ({
+        ...prev,
+        [problemId]: newLivesRemaining
+      }));
+      
+      // Update status for THIS problem
+      setProblemStatuses(prev => ({
+        ...prev,
+        [problemId]: response.data.score
+      }));
       
       if (rankUp) {
         toast.success(`🎉 RANK UP! You're now a ${newRank}!`, { duration: 5000 });
@@ -226,23 +236,21 @@ export default function AssignmentPage({ user }) {
           { duration: 4000 }
         );
       } else if (newLivesRemaining > 0) {
-        toast.warning(`Score: ${response.data.score.toFixed(1)}% - ${newLivesRemaining} ${newLivesRemaining === 1 ? 'life' : 'lives'} remaining`);
+        toast.warning(`Score: ${response.data.score.toFixed(1)}% - ${newLivesRemaining} ${newLivesRemaining === 1 ? 'life' : 'lives'} remaining for this problem`);
       } else {
-        toast.error(`Score: ${response.data.score.toFixed(1)}% - No lives remaining. Assignment locked.`);
+        toast.error(`Score: ${response.data.score.toFixed(1)}% - No lives remaining for THIS problem. Move to the next one!`);
       }
       
       // Reset run status for current problem after submission
-      const currentProblemId = getCurrentProblemId();
       setHasRunPerProblem(prev => ({
         ...prev,
-        [currentProblemId]: false
+        [problemId]: false
       }));
       fetchSubmissions();
     } catch (error) {
       console.error("Error submitting assignment:", error);
       if (error.response?.status === 403) {
         toast.error(error.response.data.detail || "Submission not allowed");
-        setIsLockedOut(true);
       } else {
         toast.error("Failed to submit assignment");
       }
