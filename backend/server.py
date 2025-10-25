@@ -1444,8 +1444,8 @@ Format your response as JSON:
     return response_dict
 
 @api_router.get("/submissions/assignment/{assignment_id}")
-async def get_submissions(assignment_id: str, request: Request):
-    """Get all submissions for an assignment"""
+async def get_submissions(assignment_id: str, request: Request, classroom_id: str = None):
+    """Get all submissions for an assignment, optionally filtered by classroom"""
     user = await get_current_user(request)
     
     if user["role"] == "teacher":
@@ -1462,16 +1462,24 @@ async def get_submissions(assignment_id: str, request: Request):
                 raise HTTPException(status_code=403, detail="Access denied")
         else:
             # Old structure: check classroom
-            classroom_id = assignment.get("classroom_id")
-            if classroom_id:
-                classroom = await db.classrooms.find_one({"id": classroom_id})
+            classroom_id_from_assignment = assignment.get("classroom_id")
+            if classroom_id_from_assignment:
+                classroom = await db.classrooms.find_one({"id": classroom_id_from_assignment})
                 if classroom and classroom["teacher_id"] != user["id"]:
                     raise HTTPException(status_code=403, detail="Access denied")
         
+        # Get submissions
         submissions = await db.submissions.find(
             {"assignment_id": assignment_id},
             {"_id": 0}
         ).to_list(1000)
+        
+        # Filter by classroom if specified
+        if classroom_id:
+            classroom = await db.classrooms.find_one({"id": classroom_id}, {"_id": 0})
+            if classroom:
+                classroom_students = set(classroom.get("students", []))
+                submissions = [sub for sub in submissions if sub["student_id"] in classroom_students]
         
         # Add student names
         for sub in submissions:
