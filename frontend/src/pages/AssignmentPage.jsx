@@ -71,18 +71,31 @@ export default function AssignmentPage({ user }) {
     }
   }, [currentProblemIndex, assignment, savedCodePerProblem]);
   
-  // Auto-save code as students type
+  // Auto-save code to localStorage (debounced to prevent flickering)
   useEffect(() => {
-    if (assignment && code) {
-      const currentProblemId = getCurrentProblemId();
-      if (currentProblemId) {
-        setSavedCodePerProblem(prev => ({
+    if (!assignment || !code) return;
+    
+    const currentProblemId = getCurrentProblemId();
+    if (!currentProblemId) return;
+    
+    // Debounce: wait 1 second after typing stops before saving
+    const timeoutId = setTimeout(() => {
+      // Save to state
+      setSavedCodePerProblem(prev => {
+        const newState = {
           ...prev,
           [currentProblemId]: code
-        }));
-      }
-    }
-  }, [code, assignment]);
+        };
+        
+        // Also save to localStorage for persistence across refreshes
+        localStorage.setItem(`saved_code_${assignmentId}`, JSON.stringify(newState));
+        
+        return newState;
+      });
+    }, 1000);
+    
+    return () => clearTimeout(timeoutId);
+  }, [code, assignment, assignmentId]);
 
   const hasRun = hasRunPerProblem[getCurrentProblemId()] || false;
 
