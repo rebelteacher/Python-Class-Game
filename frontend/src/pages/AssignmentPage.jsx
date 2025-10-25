@@ -50,6 +50,17 @@ export default function AssignmentPage({ user }) {
     if (savedDarkMode === 'true') {
       setDarkMode(true);
     }
+    
+    // Load saved code from localStorage
+    const savedCodeData = localStorage.getItem(`saved_code_${assignmentId}`);
+    if (savedCodeData) {
+      try {
+        const parsedData = JSON.parse(savedCodeData);
+        setSavedCodePerProblem(parsedData);
+      } catch (e) {
+        console.error("Error loading saved code:", e);
+      }
+    }
   }, [assignmentId]);
 
   useEffect(() => {
