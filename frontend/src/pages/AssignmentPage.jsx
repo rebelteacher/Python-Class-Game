@@ -42,8 +42,8 @@ export default function AssignmentPage({ user }) {
   };
 
   useEffect(() => {
+    // Fetch assignment data
     fetchAssignment();
-    fetchSubmissions();
     
     // Load dark mode preference from localStorage
     const savedDarkMode = localStorage.getItem('editorDarkMode');
@@ -62,6 +62,13 @@ export default function AssignmentPage({ user }) {
       }
     }
   }, [assignmentId]);
+  
+  // Fetch submissions whenever assignment or navigation changes
+  useEffect(() => {
+    if (assignment) {
+      fetchSubmissions();
+    }
+  }, [assignment, classroomIdFromNav]);
 
   useEffect(() => {
     // Load saved code when switching problems or when savedCodePerProblem updates
