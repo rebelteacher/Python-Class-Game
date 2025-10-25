@@ -69,8 +69,7 @@ export default function AssignmentPage({ user }) {
       
       setOutput("");
     }
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [currentProblemIndex, assignment]);
+  }, [currentProblemIndex, assignment, savedCodePerProblem]);
   
   // Auto-save code as students type
   useEffect(() => {
