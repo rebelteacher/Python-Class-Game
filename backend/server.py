@@ -611,18 +611,21 @@ async def create_classroom(classroom: ClassroomCreate, request: Request):
     return new_classroom
 
 @api_router.get("/classrooms")
-async def get_classrooms(request: Request):
+async def get_classrooms(request: Request, include_archived: bool = False):
     """Get all classrooms for current user"""
     user = await get_current_user(request)
     
     if user["role"] == "teacher":
-        classrooms = await db.classrooms.find(
-            {"teacher_id": user["id"]},
-            {"_id": 0}
-        ).to_list(1000)
+        # By default, exclude archived classrooms for teachers
+        query = {"teacher_id": user["id"]}
+        if not include_archived:
+            query["is_archived"] = {"$ne": True}
+        
+        classrooms = await db.classrooms.find(query, {"_id": 0}).to_list(1000)
     else:
+        # Students see active classrooms they're enrolled in
         classrooms = await db.classrooms.find(
-            {"students": user["id"]},
+            {"students": user["id"], "is_archived": {"$ne": True}},
             {"_id": 0}
         ).to_list(1000)
     
