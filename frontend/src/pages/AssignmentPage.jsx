@@ -716,17 +716,88 @@ export default function AssignmentPage({ user }) {
               </Panel>
               </PanelGroup>
             ) : (
-              <Card data-testid="teacher-view-card">
-              <CardHeader>
-                <CardTitle>Solution Code</CardTitle>
-                <CardDescription>This is your reference solution</CardDescription>
-              </CardHeader>
-              <CardContent>
-                <pre className="p-4 bg-gray-900 text-gray-100 rounded-lg font-mono text-sm overflow-auto max-h-[500px]">
-                  {(assignment.problems && assignment.problems[0]?.solution_code) || assignment.solution_code || "No solution code available"}
-                </pre>
-              </CardContent>
-              </Card>
+              // Teacher Demo/Sandbox Mode - Interactive coding without submissions
+              <PanelGroup direction="horizontal">
+                {/* Code Editor - Left */}
+                <Panel defaultSize={50} minSize={30}>
+                <Card data-testid="teacher-sandbox-card" className="h-full">
+                  <CardHeader>
+                    <CardTitle className="flex flex-col gap-3">
+                      <div className="flex justify-between items-center">
+                        <span>Live Demo / Sandbox</span>
+                        <div className="flex items-center gap-3">
+                          {/* Dark Mode Toggle */}
+                          <Button
+                            onClick={() => {
+                              const newMode = !darkMode;
+                              setDarkMode(newMode);
+                              localStorage.setItem(`darkMode_${assignmentId}`, newMode);
+                            }}
+                            variant="outline"
+                            size="sm"
+                            className="gap-2"
+                          >
+                            {darkMode ? '☀️ Light' : '🌙 Dark'}
+                          </Button>
+                          
+                          <span className="text-sm text-green-600 font-semibold">
+                            🎓 Teacher Mode
+                          </span>
+                        </div>
+                      </div>
+                      <div className="flex gap-2">
+                        <Button 
+                          data-testid="teacher-run-code-btn" 
+                          onClick={handleRunCode} 
+                          disabled={running}
+                          variant="outline" 
+                          size="sm"
+                          className="gap-2 flex-1"
+                        >
+                          <Play className="w-4 h-4" />
+                          {running ? "Running..." : "Run Code"}
+                        </Button>
+                      </div>
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent className="h-[calc(100%-120px)]">
+                    <Editor
+                      height="100%"
+                      defaultLanguage="python"
+                      value={code}
+                      onChange={(value) => setCode(value || "")}
+                      theme={darkMode ? "vs-dark" : "light"}
+                      options={{
+                        minimap: { enabled: false },
+                        fontSize: 14,
+                        lineNumbers: "on",
+                        scrollBeyondLastLine: false,
+                        automaticLayout: true,
+                      }}
+                    />
+                  </CardContent>
+                </Card>
+                </Panel>
+
+                <PanelResizeHandle className="w-2 bg-gray-300 hover:bg-indigo-500 transition-colors cursor-col-resize mx-2" />
+
+                {/* Output - Right */}
+                <Panel defaultSize={50} minSize={30}>
+                <Card className="h-full">
+                  <CardHeader>
+                    <CardTitle className="flex justify-between items-center">
+                      <span>Output</span>
+                      <span className="text-xs text-gray-500 font-normal">Demo mode - not graded</span>
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <pre className={`p-4 ${darkMode ? 'bg-gray-900 text-green-400' : 'bg-gray-100 text-gray-900'} rounded-lg font-mono text-sm h-[600px] overflow-auto`}>
+                      {output || "Run your code to see output here..."}
+                    </pre>
+                  </CardContent>
+                </Card>
+                </Panel>
+              </PanelGroup>
             )}
 
             {isTeacher && submissions.length > 0 && (
