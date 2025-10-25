@@ -403,7 +403,7 @@ export default function AssignmentPage({ user }) {
                 Problem {currentProblemIndex + 1} of {assignment.problems.length}
               </h3>
               <div className="text-sm text-gray-600">
-                Progress: {Object.values(problemStatuses).filter(score => score && score >= 70).length}/{assignment.problems.length} completed
+                Progress: {Object.values(problemsFinal).filter(isDone => isDone).length}/{assignment.problems.length} done
               </div>
             </div>
             <div className="flex gap-2 overflow-x-auto pb-2">
