@@ -175,7 +175,6 @@ metadata:
 
 test_plan:
   current_focus:
-    - "Create PDF notes API endpoints"
     - "Create NotesLibrary page component"
     - "Add Notes route and navigation"
   stuck_tasks: []
