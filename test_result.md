@@ -103,13 +103,15 @@
 #====================================================================================================
 
 user_problem_statement: |
-  Implement PDF Notes Library with hybrid private/shared approach:
-  1. Teachers can upload PDF resources (max 25MB)
-  2. Organize by chapter and category
-  3. Toggle to share notes with community or keep private
-  4. Filter by "My Notes", "Community", or "All"
-  5. PDF viewer for viewing notes in-browser
-  6. Support for monetization strategy (shared library adds value to paid tier)
+  Implement Multiple Choice Testing Platform:
+  1. Question Bank with CRUD operations for MC questions
+  2. Bulk CSV upload for questions
+  3. Organize questions by chapter and lesson
+  4. Test Builder for teachers to assemble tests from question bank
+  5. Test assignment to classrooms
+  6. Student test taking with randomized questions/answers
+  7. Score-only display (no answer review after submission)
+  8. Printable test score reports by classroom
 
 backend:
   - task: "Create PDF Note model and database schema"
