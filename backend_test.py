@@ -2914,6 +2914,39 @@ startxref
         
         return self.tests_passed == self.tests_run
 
+    def run_mc_question_tests_only(self):
+        """Run only MC Question tests"""
+        print("🚀 Starting MC Question API Tests...")
+        print(f"Testing against: {self.base_url}")
+        
+        # Setup test user
+        if not self.setup_test_user():
+            print("❌ Cannot proceed without test user setup")
+            return False
+        
+        # Test MC Question endpoints
+        self.test_mc_question_endpoints()
+        
+        # Print summary
+        print(f"\n📊 MC Question Test Summary:")
+        print(f"   Total tests: {self.tests_run}")
+        print(f"   Passed: {self.tests_passed}")
+        print(f"   Failed: {self.tests_run - self.tests_passed}")
+        print(f"   Success rate: {(self.tests_passed/self.tests_run)*100:.1f}%")
+        
+        return self.tests_passed == self.tests_run
+
+def main():
+    import sys
+    if len(sys.argv) > 1 and sys.argv[1] == "mc-questions":
+        tester = CodeClassAPITester()
+        success = tester.run_mc_question_tests_only()
+        return 0 if success else 1
+    else:
+        tester = CodeClassAPITester()
+        success = tester.run_all_tests()
+        return 0 if success else 1
+
 def main():
     tester = CodeClassAPITester()
     success = tester.run_all_tests()
