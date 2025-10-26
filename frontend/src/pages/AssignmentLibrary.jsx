@@ -202,10 +202,25 @@ export default function AssignmentLibrary({ user }) {
         return;
       }
 
+      // Filter out empty rows (rows where title or solution_code is missing)
+      const validRows = result.data.filter(row => {
+        const hasTitle = row.title && row.title.trim() !== '';
+        const hasSolution = row.solution_code && row.solution_code.trim() !== '';
+        return hasTitle && hasSolution;
+      });
+
+      console.log(`Total rows: ${result.data.length}, Valid rows: ${validRows.length}`);
+
+      if (validRows.length === 0) {
+        toast.error("No valid rows found. Make sure 'title' and 'solution_code' columns have data.");
+        setUploading(false);
+        return;
+      }
+
       // Upload
       const response = await axios.post(
         `${API}/problems/bulk-upload`,
-        { csv_data: result.data },
+        { csv_data: validRows },
         { withCredentials: true }
       );
 
