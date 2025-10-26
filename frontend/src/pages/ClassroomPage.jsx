@@ -538,29 +538,42 @@ export default function ClassroomPage({ user }) {
                                               View
                                             </Button>
                                             {isTeacher && (
-                                              <Button
-                                                onClick={(e) => {
-                                                  e.stopPropagation();
-                                                  const availDate = assignment.available_date ? new Date(assignment.available_date) : null;
-                                                  const dueDate = assignment.due_date ? new Date(assignment.due_date) : null;
-                                                  
-                                                  setEditingAssignment({
-                                                    id: assignment.id,
-                                                    title: assignment.title,
-                                                    available_date: availDate ? availDate.toISOString().split('T')[0] : '',
-                                                    available_time: availDate ? availDate.toISOString().split('T')[1].substring(0, 5) : '00:00',
-                                                    due_date: dueDate ? dueDate.toISOString().split('T')[0] : '',
-                                                    due_time: dueDate ? dueDate.toISOString().split('T')[1].substring(0, 5) : '23:59',
-                                                    allow_late_submission: assignment.allow_late_submission ?? true,
-                                                    late_penalty_percent: assignment.late_penalty_percent || 0
-                                                  });
-                                                  setEditScheduleDialogOpen(true);
-                                                }}
-                                                variant="outline"
-                                                size="sm"
-                                              >
-                                                <Calendar className="w-4 h-4" />
-                                              </Button>
+                                              <>
+                                                <Button
+                                                  onClick={(e) => {
+                                                    e.stopPropagation();
+                                                    const availDate = assignment.available_date ? new Date(assignment.available_date) : null;
+                                                    const dueDate = assignment.due_date ? new Date(assignment.due_date) : null;
+                                                    
+                                                    setEditingAssignment({
+                                                      id: assignment.id,
+                                                      title: assignment.title,
+                                                      available_date: availDate ? availDate.toISOString().split('T')[0] : '',
+                                                      available_time: availDate ? availDate.toISOString().split('T')[1].substring(0, 5) : '00:00',
+                                                      due_date: dueDate ? dueDate.toISOString().split('T')[0] : '',
+                                                      due_time: dueDate ? dueDate.toISOString().split('T')[1].substring(0, 5) : '23:59',
+                                                      allow_late_submission: assignment.allow_late_submission ?? true,
+                                                      late_penalty_percent: assignment.late_penalty_percent || 0
+                                                    });
+                                                    setEditScheduleDialogOpen(true);
+                                                  }}
+                                                  variant="outline"
+                                                  size="sm"
+                                                >
+                                                  <Calendar className="w-4 h-4" />
+                                                </Button>
+                                                <Button
+                                                  onClick={(e) => {
+                                                    e.stopPropagation();
+                                                    handleDeleteAssignment(assignment.id, assignment.title);
+                                                  }}
+                                                  variant="outline"
+                                                  size="sm"
+                                                  className="text-red-600 hover:text-red-700 hover:bg-red-50"
+                                                >
+                                                  <Trash2 className="w-4 h-4" />
+                                                </Button>
+                                              </>
                                             )}
                                           </div>
                                         </CardContent>
