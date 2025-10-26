@@ -95,6 +95,10 @@ export default function AssignmentLibrary({ user }) {
       filtered = filtered.filter(p => p.difficulty === difficultyFilter);
     }
 
+    if (chapterFilter && chapterFilter !== "all") {
+      filtered = filtered.filter(p => p.chapter === chapterFilter);
+    }
+
     setFilteredProblems(filtered);
   };
 
