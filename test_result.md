@@ -168,11 +168,14 @@ metadata:
   run_ui: false
 
 test_plan:
-  current_focus: []
+  current_focus:
+    - "Create PDF notes API endpoints"
+    - "Create NotesLibrary page component"
+    - "Add Notes route and navigation"
   stuck_tasks: []
   test_all: false
   test_priority: "high_first"
-  testing_complete: true
+  testing_complete: false
 
 agent_communication:
   - agent: "main"
