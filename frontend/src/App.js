@@ -13,6 +13,7 @@ import ClassroomPage from "./pages/ClassroomPage";
 import AssignmentPage from "./pages/AssignmentPage.jsx";
 import AssignmentLibrary from "./pages/AssignmentLibrary";
 import NotesLibrary from "./pages/NotesLibrary";
+import QuestionBank from "./pages/QuestionBank";
 import ImportAssignment from "./pages/ImportAssignment";
 import TeacherPractice from "./pages/TeacherPractice";
 import SecretRoleSwitch from "./pages/SecretRoleSwitch";
