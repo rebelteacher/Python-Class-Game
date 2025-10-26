@@ -137,65 +137,29 @@ backend:
         comment: "Implemented 5 endpoints: POST /api/notes (upload with 25MB limit), GET /api/notes (list with filters: mine/shared/all, chapter, category, search), GET /api/notes/{id} (get note with file data), PUT /api/notes/{id} (update metadata/sharing), DELETE /api/notes/{id} (delete own notes). Access control: only teachers can upload/update/delete, shared notes visible to all teachers."
 
 frontend:
-  - task: "Add chapter field to problem creation form (freeform text input)"
+  - task: "Create NotesLibrary page component"
     implemented: true
-    working: true
-    file: "frontend/src/pages/AssignmentLibrary.jsx"
+    working: "NA"
+    file: "frontend/src/pages/NotesLibrary.jsx"
     stuck_count: 0
     priority: "high"
-    needs_retesting: false
+    needs_retesting: true
     status_history:
       - working: "NA"
         agent: "main"
-        comment: "Changed chapter input from dropdown (hardcoded 20 chapters) to freeform text Input field. Teachers can now enter any chapter name (e.g., 'Chapter 1', 'Unit 2', 'Module A'). Added placeholder text and helper text."
-      - working: true
-        agent: "testing"
-        comment: "✅ VERIFIED: Chapter input field correctly implemented as freeform text input with data-testid='lib-chapter-input'. Placeholder text shows 'e.g., Chapter 1, Unit 2, Module A' and includes helpful description 'Organize problems by chapter/unit'. Field is properly integrated into problem creation form and sends chapter data to backend API."
+        comment: "Created complete NotesLibrary component with: PDF upload form (file picker, title, description, chapter, category, share toggle), three filter tabs (All/Mine/Community), search and filter UI, notes grid display with chapter/shared badges, PDF viewer dialog using iframe, delete/share toggle buttons for own notes. Supports base64 PDF encoding for upload."
   
-  - task: "Display chapter badges on problem cards"
+  - task: "Add Notes route and navigation"
     implemented: true
-    working: true
-    file: "frontend/src/pages/AssignmentLibrary.jsx"
+    working: "NA"
+    file: "frontend/src/App.js, frontend/src/pages/TeacherDashboard.jsx"
     stuck_count: 0
     priority: "high"
-    needs_retesting: false
+    needs_retesting: true
     status_history:
       - working: "NA"
         agent: "main"
-        comment: "Added chapter badge display on problem cards with book emoji (📚) in blue styling. Shows above category badge when chapter exists."
-      - working: true
-        agent: "testing"
-        comment: "✅ VERIFIED: Chapter badges correctly implemented with book emoji (📚) and blue styling (bg-blue-100 text-blue-700). Badge displays conditionally when problem.chapter exists, positioned above category badge. Format: '📚 {problem.chapter}' with proper spacing and styling."
-  
-  - task: "Update chapter filter to show actual chapters from problems"
-    implemented: true
-    working: true
-    file: "frontend/src/pages/AssignmentLibrary.jsx"
-    stuck_count: 0
-    priority: "high"
-    needs_retesting: false
-    status_history:
-      - working: "NA"
-        agent: "main"
-        comment: "Extracted unique chapters from existing problems (like categories). Updated filter dropdown to dynamically show actual chapters instead of hardcoded 1-20. Chapters are sorted alphabetically."
-      - working: true
-        agent: "testing"
-        comment: "✅ VERIFIED: Chapter filter correctly implemented with data-testid='filter-chapter'. Dynamically extracts unique chapters using [...new Set(problems.map(p => p.chapter))].filter(Boolean).sort(). Shows 'All Chapters' option plus actual chapters from problems. Filter logic properly implemented in filterProblems() function."
-  
-  - task: "Add chapter field to problem edit form"
-    implemented: true
-    working: true
-    file: "frontend/src/pages/AssignmentLibrary.jsx"
-    stuck_count: 0
-    priority: "high"
-    needs_retesting: false
-    status_history:
-      - working: "NA"
-        agent: "main"
-        comment: "Added chapter field to edit dialog with freeform text input. Updated handleEditProblem to include chapter in PUT request. Layout adjusted to 3 columns (category, chapter, difficulty)."
-      - working: true
-        agent: "testing"
-        comment: "✅ VERIFIED: Chapter field correctly added to edit form with id='edit-chapter'. Freeform text input with placeholder 'e.g., Chapter 1'. Properly integrated into 3-column layout (category, chapter, difficulty). handleEditProblem function includes chapter field in PUT request to backend API."
+        comment: "Added /notes route (teacher-only) in App.js. Added 'Notes' button with FileText icon to Teacher Dashboard navbar between Library and Reports buttons."
 
 metadata:
   created_by: "main_agent"
