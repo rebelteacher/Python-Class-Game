@@ -908,6 +908,7 @@ async def get_problems(
     request: Request,
     category: Optional[str] = None,
     difficulty: Optional[str] = None,
+    chapter: Optional[str] = None,
     csta_standard: Optional[str] = None,
     search: Optional[str] = None
 ):
