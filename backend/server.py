@@ -336,6 +336,78 @@ class CodeExecuteResponse(BaseModel):
     error: Optional[str] = None
     success: bool
 
+# Multiple Choice Testing Models
+class MCQuestion(BaseModel):
+    model_config = ConfigDict(extra="ignore")
+    id: str = Field(default_factory=lambda: str(uuid.uuid4()))
+    question_text: str
+    choice_a: str
+    choice_b: str
+    choice_c: str
+    choice_d: str
+    correct_answer: str  # "A", "B", "C", or "D"
+    chapter: str = ""
+    lesson: str = ""
+    difficulty: str = "Easy"  # "Easy", "Medium", "Hard"
+    creator_id: str
+    creator_name: str
+    created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+
+class MCQuestionCreate(BaseModel):
+    question_text: str
+    choice_a: str
+    choice_b: str
+    choice_c: str
+    choice_d: str
+    correct_answer: str
+    chapter: str = ""
+    lesson: str = ""
+    difficulty: str = "Easy"
+
+class MCTest(BaseModel):
+    model_config = ConfigDict(extra="ignore")
+    id: str = Field(default_factory=lambda: str(uuid.uuid4()))
+    title: str
+    description: str = ""
+    chapter: str = ""
+    lesson: str = ""
+    teacher_id: str
+    question_pool_ids: List[str]  # All available questions for this test
+    num_questions: int  # How many questions each student gets (random selection)
+    time_limit_minutes: int = 0  # 0 = no time limit
+    classroom_ids: List[str]
+    available_date: Optional[datetime] = None
+    due_date: Optional[datetime] = None
+    created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+
+class MCTestCreate(BaseModel):
+    title: str
+    description: str = ""
+    chapter: str = ""
+    lesson: str = ""
+    question_pool_ids: List[str]
+    num_questions: int
+    time_limit_minutes: int = 0
+    classroom_ids: List[str]
+    available_date: Optional[str] = None
+    due_date: Optional[str] = None
+
+class MCTestAttempt(BaseModel):
+    model_config = ConfigDict(extra="ignore")
+    id: str = Field(default_factory=lambda: str(uuid.uuid4()))
+    test_id: str
+    student_id: str
+    randomized_question_ids: List[str]  # Specific questions this student got
+    randomized_choices: dict  # {question_id: shuffled order like ["C", "A", "D", "B"]}
+    student_answers: dict  # {question_id: selected_answer}
+    score: float  # Percentage
+    submitted_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+    is_complete: bool = False
+
+class MCTestSubmission(BaseModel):
+    test_id: str
+    answers: dict  # {question_id: selected_answer}
+
 # PDF Note model for library resources
 class PDFNote(BaseModel):
     model_config = ConfigDict(extra="ignore")
