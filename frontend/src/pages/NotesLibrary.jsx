@@ -169,6 +169,11 @@ export default function NotesLibrary({ user }) {
       const response = await axios.get(`${API}/notes/${note.id}`, {
         withCredentials: true
       });
+      console.log("Note data received:", {
+        hasFileData: !!response.data.file_data,
+        fileDataLength: response.data.file_data?.length,
+        keys: Object.keys(response.data)
+      });
       setSelectedNote(response.data);
       setViewDialogOpen(true);
     } catch (error) {
