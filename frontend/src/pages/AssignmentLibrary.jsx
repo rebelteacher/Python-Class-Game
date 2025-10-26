@@ -36,6 +36,10 @@ export default function AssignmentLibrary({ user }) {
   const [selectedProblems, setSelectedProblems] = useState([]);
   const [assignmentBuilderOpen, setAssignmentBuilderOpen] = useState(false);
   
+  // Folder view
+  const [viewMode, setViewMode] = useState("folders"); // "folders" or "grid"
+  const [expandedChapters, setExpandedChapters] = useState(new Set());
+  
   // Edit mode
   const [editDialogOpen, setEditDialogOpen] = useState(false);
   const [editingProblem, setEditingProblem] = useState(null);
