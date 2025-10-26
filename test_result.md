@@ -131,15 +131,18 @@ backend:
   
   - task: "Create MC Question bulk upload endpoint"
     implemented: true
-    working: "NA"
+    working: true
     file: "backend/server.py"
     stuck_count: 0
     priority: "high"
-    needs_retesting: true
+    needs_retesting: false
     status_history:
       - working: "NA"
         agent: "main"
         comment: "Implemented POST /api/mc-questions/bulk-upload endpoint. Accepts CSV data with question_text, choice_a-d, correct_answer, chapter, lesson, difficulty fields. Returns count of created questions and any errors. Teacher-only access."
+      - working: true
+        agent: "testing"
+        comment: "BULK UPLOAD TESTING COMPLETED - All tests passed. ✅ POST /api/mc-questions/bulk-upload: Successfully creates multiple questions from CSV data. ✅ Accepts sample data with all required fields (question_text, choice_a-d, correct_answer, chapter, lesson, difficulty). ✅ Returns correct created count and error tracking. ✅ Handles invalid data properly - creates valid questions and tracks errors for invalid ones. ✅ Teacher-only access enforced (403 for students). ✅ All created questions persist in database and appear in question list. Bulk upload functionality working perfectly."
   
   - task: "Create MC Test model and endpoints"
     implemented: true
