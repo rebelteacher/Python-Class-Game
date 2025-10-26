@@ -159,6 +159,10 @@ export default function StudentDashboard({ user, setUser }) {
           </div>
           <div className="flex items-center space-x-3">
             <span className="text-gray-700 hidden sm:inline">{user.name}</span>
+            <Button onClick={() => navigate("/notes")} variant="outline" size="sm" className="gap-2">
+              <FileText className="w-4 h-4" />
+              Notes
+            </Button>
             <Button data-testid="logout-btn" onClick={handleLogout} variant="ghost" size="sm" className="gap-2">
               <LogOut className="w-4 h-4" />
               Logout
