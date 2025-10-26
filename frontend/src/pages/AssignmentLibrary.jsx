@@ -132,6 +132,7 @@ export default function AssignmentLibrary({ user }) {
         category: "",
         difficulty: "Easy",
         chapter: "",
+        lesson: "",
         problem_type: "Independent Practice",
         resources_link: "",
         csta_standard: ""
