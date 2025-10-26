@@ -248,13 +248,50 @@ export default function QuestionBank({ user }) {
               <span className="text-xl font-bold text-gray-900">Question Bank</span>
             </div>
           </div>
-          <Dialog open={createDialogOpen} onOpenChange={setCreateDialogOpen}>
-            <DialogTrigger asChild>
-              <Button className="bg-indigo-600 hover:bg-indigo-700">
-                <Plus className="w-4 h-4 mr-2" />
-                Create Question
-              </Button>
-            </DialogTrigger>
+          <div className="flex gap-2">
+            <Dialog open={bulkUploadDialogOpen} onOpenChange={setBulkUploadDialogOpen}>
+              <DialogTrigger asChild>
+                <Button variant="outline">
+                  <Upload className="w-4 h-4 mr-2" />
+                  Bulk Upload CSV
+                </Button>
+              </DialogTrigger>
+              <DialogContent>
+                <DialogHeader>
+                  <DialogTitle>Bulk Upload Questions</DialogTitle>
+                  <DialogDescription>Upload a CSV file with your questions</DialogDescription>
+                </DialogHeader>
+                <div className="space-y-4">
+                  <div>
+                    <Label>CSV Format:</Label>
+                    <pre className="text-xs bg-gray-100 p-2 rounded mt-2 overflow-x-auto">
+question_text,choice_a,choice_b,choice_c,choice_d,correct_answer,chapter,lesson,difficulty
+What is 2+2?,3,4,5,6,B,Chapter 1,Lesson 1,Easy
+                    </pre>
+                  </div>
+                  <div>
+                    <Label htmlFor="csv-upload">Select CSV File</Label>
+                    <Input
+                      id="csv-upload"
+                      type="file"
+                      accept=".csv"
+                      onChange={handleBulkUpload}
+                      disabled={uploading}
+                      className="mt-1"
+                    />
+                  </div>
+                  {uploading && <p className="text-sm text-gray-600">Uploading...</p>}
+                </div>
+              </DialogContent>
+            </Dialog>
+            
+            <Dialog open={createDialogOpen} onOpenChange={setCreateDialogOpen}>
+              <DialogTrigger asChild>
+                <Button className="bg-indigo-600 hover:bg-indigo-700">
+                  <Plus className="w-4 h-4 mr-2" />
+                  Create Question
+                </Button>
+              </DialogTrigger>
             <DialogContent className="max-w-2xl">
               <DialogHeader>
                 <DialogTitle>Create Multiple Choice Question</DialogTitle>
