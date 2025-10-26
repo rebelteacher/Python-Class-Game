@@ -112,20 +112,29 @@ user_problem_statement: |
   6. Support for monetization strategy (shared library adds value to paid tier)
 
 backend:
-  - task: "Add chapter field to Problem model"
+  - task: "Create PDF Note model and database schema"
     implemented: true
-    working: true
+    working: "NA"
     file: "backend/server.py"
     stuck_count: 0
     priority: "high"
-    needs_retesting: false
+    needs_retesting: true
     status_history:
-      - working: true
+      - working: "NA"
         agent: "main"
-        comment: "Chapter field already exists in Problem model (line 232). Backend supports chapter filtering in get_problems endpoint."
-      - working: true
-        agent: "testing"
-        comment: "COMPREHENSIVE BACKEND TESTING COMPLETED - ALL CHAPTER ORGANIZATION ENDPOINTS WORKING PERFECTLY. Tested: 1) POST /api/problems with chapter field - creates problems with custom chapters like 'Chapter 1: Basics', 'Unit 2: Control Flow', 'Module A: Functions'. 2) POST /api/problems with empty chapter - handles empty chapter field correctly. 3) GET /api/problems?chapter=X - filtering works perfectly, returns only problems matching specified chapter. 4) PUT /api/problems/{id} - chapter field updates successfully and persists in database. 5) Combined filters (chapter + difficulty) work correctly. 6) Authentication enforced - only teachers can create/update problems. All 26 tests passed (100% success rate). Chapter organization backend is fully functional."
+        comment: "Added PDFNote model with fields: id, title, description, chapter, category, file_data (base64), file_size, creator_id, creator_name, is_shared, tags, created_at. Also created PDFNoteCreate and PDFNoteUpdate models."
+  
+  - task: "Create PDF notes API endpoints"
+    implemented: true
+    working: "NA"
+    file: "backend/server.py"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: true
+    status_history:
+      - working: "NA"
+        agent: "main"
+        comment: "Implemented 5 endpoints: POST /api/notes (upload with 25MB limit), GET /api/notes (list with filters: mine/shared/all, chapter, category, search), GET /api/notes/{id} (get note with file data), PUT /api/notes/{id} (update metadata/sharing), DELETE /api/notes/{id} (delete own notes). Access control: only teachers can upload/update/delete, shared notes visible to all teachers."
 
 frontend:
   - task: "Add chapter field to problem creation form (freeform text input)"
