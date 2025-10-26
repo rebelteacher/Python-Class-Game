@@ -2572,9 +2572,15 @@ async def get_note_detail(note_id: str, request: Request):
     if not note:
         raise HTTPException(status_code=404, detail="Note not found")
     
-    # Check access: owner or shared
-    if note["creator_id"] != user["id"] and not note["is_shared"]:
-        raise HTTPException(status_code=403, detail="You don't have access to this note")
+    # Access control based on role and resource type
+    if user["role"] == "student":
+        # Students can only access student resources
+        if note["resource_type"] != "student_resource":
+            raise HTTPException(status_code=403, detail="You don't have access to this resource")
+    elif user["role"] == "teacher":
+        # Teachers can access: own notes OR shared notes OR student resources
+        if note["creator_id"] != user["id"] and not note["is_shared"] and note["resource_type"] == "teacher_resource":
+            raise HTTPException(status_code=403, detail="You don't have access to this note")
     
     return note
 
