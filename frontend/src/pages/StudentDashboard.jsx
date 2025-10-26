@@ -23,6 +23,8 @@ export default function StudentDashboard({ user, setUser }) {
   const [classCode, setClassCode] = useState("");
   const [shopItems, setShopItems] = useState({ themes: [], badges: [] });
   const [userProfile, setUserProfile] = useState(user);
+  const [expandedChapters, setExpandedChapters] = useState(new Set());
+  const [expandedLessons, setExpandedLessons] = useState(new Set());
   const navigate = useNavigate();
   const location = useLocation();
 
