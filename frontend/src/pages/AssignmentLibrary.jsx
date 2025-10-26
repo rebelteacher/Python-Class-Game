@@ -209,11 +209,16 @@ export default function AssignmentLibrary({ user }) {
         { withCredentials: true }
       );
 
-      toast.success(`✅ Uploaded ${response.data.created} problems!`);
+      if (response.data.created > 0) {
+        toast.success(`✅ Successfully uploaded ${response.data.created} problems!`);
+      }
       
-      if (response.data.errors.length > 0) {
-        toast.error(`${response.data.errors.length} rows had errors. Check console for details.`);
-        console.log("Upload errors:", response.data.errors);
+      if (response.data.errors && response.data.errors.length > 0) {
+        toast.error(`⚠️ ${response.data.errors.length} rows had errors. Check console for details.`);
+        console.error("Upload errors:", response.data.errors);
+        // Show first few errors in alert for easy viewing
+        const firstErrors = response.data.errors.slice(0, 3).join('\n');
+        alert(`Upload Errors:\n\n${firstErrors}\n\n${response.data.errors.length > 3 ? '...and more. Check console for full list.' : ''}`);
       }
 
       setBulkUploadDialogOpen(false);
