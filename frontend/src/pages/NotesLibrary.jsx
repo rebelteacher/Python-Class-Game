@@ -243,7 +243,7 @@ export default function NotesLibrary({ user }) {
       <nav className="bg-white shadow-sm border-b border-gray-200">
         <div className="container mx-auto px-6 py-4 flex justify-between items-center">
           <div className="flex items-center space-x-4">
-            <Button onClick={() => navigate("/teacher/dashboard")} variant="ghost" size="sm">
+            <Button onClick={() => navigate(user.role === "teacher" ? "/teacher/dashboard" : "/student/dashboard")} variant="ghost" size="sm">
               <ArrowLeft className="w-4 h-4 mr-2" />
               Back to Dashboard
             </Button>
