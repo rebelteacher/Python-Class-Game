@@ -40,6 +40,49 @@ export default function ClassroomPage({ user }) {
     fetchAssignments();
   }, [classroomId]);
 
+  const toggleChapter = (chapter) => {
+    setExpandedChapters(prev => {
+      const newSet = new Set(prev);
+      if (newSet.has(chapter)) {
+        newSet.delete(chapter);
+      } else {
+        newSet.add(chapter);
+      }
+      return newSet;
+    });
+  };
+
+  const toggleLesson = (lessonKey) => {
+    setExpandedLessons(prev => {
+      const newSet = new Set(prev);
+      if (newSet.has(lessonKey)) {
+        newSet.delete(lessonKey);
+      } else {
+        newSet.add(lessonKey);
+      }
+      return newSet;
+    });
+  };
+
+  const organizeAssignments = () => {
+    const organized = {};
+    assignments.forEach(assignment => {
+      const chapter = assignment.chapter || "Uncategorized";
+      const lesson = assignment.lesson || "General";
+      
+      if (!organized[chapter]) {
+        organized[chapter] = {};
+      }
+      if (!organized[chapter][lesson]) {
+        organized[chapter][lesson] = [];
+      }
+      organized[chapter][lesson].push(assignment);
+    });
+    return organized;
+  };
+
+  const organizedAssignments = organizeAssignments();
+
   const fetchClassroom = async () => {
     try {
       const response = await axios.get(`${API}/classrooms/${classroomId}`, {
