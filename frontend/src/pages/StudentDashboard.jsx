@@ -349,44 +349,128 @@ export default function StudentDashboard({ user, setUser }) {
           </Dialog>
         </div>
 
+        {/* Assignments - Folder View */}
         {loading ? (
-          <div data-testid="classrooms-loading" className="text-center py-20">
-            <div className="text-gray-500">Loading classrooms...</div>
-          </div>
+          <div className="text-center py-20 text-gray-600">Loading assignments...</div>
         ) : classrooms.length === 0 ? (
-          <div data-testid="no-classrooms" className="text-center py-20">
+          <div className="text-center py-20">
             <BookOpen className="w-16 h-16 text-gray-400 mx-auto mb-4" />
             <h3 className="text-xl font-semibold text-gray-700 mb-2">No classrooms yet</h3>
-            <p className="text-gray-500 mb-6">Join a classroom using the class code from your teacher</p>
-            <Button data-testid="join-first-classroom-btn" onClick={() => setJoinDialogOpen(true)} className="bg-teal-600 hover:bg-teal-700">
+            <p className="text-gray-500 mb-6">Join a class to start coding!</p>
+            <Button onClick={() => setJoinDialogOpen(true)} className="bg-teal-600 hover:bg-teal-700">
               <Plus className="w-4 h-4 mr-2" />
-              Join Classroom
+              Join Class
             </Button>
           </div>
+        ) : Object.keys(organizedAssignments).length === 0 ? (
+          <div className="text-center py-20">
+            <BookOpen className="w-16 h-16 text-gray-400 mx-auto mb-4" />
+            <h3 className="text-xl font-semibold text-gray-700 mb-2">No assignments yet</h3>
+            <p className="text-gray-500">Your teacher will assign work soon</p>
+          </div>
         ) : (
-          <div data-testid="classrooms-grid" className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {classrooms.map((classroom) => (
-              <Card
-                data-testid={`classroom-card-${classroom.id}`}
-                key={classroom.id}
-                className="hover:shadow-lg transition-shadow cursor-pointer border-2 border-gray-100"
-                onClick={() => navigate(`/classroom/${classroom.id}`)}
-              >
-                <CardHeader>
-                  <CardTitle className="text-xl">{classroom.name}</CardTitle>
-                  <CardDescription>
-                    <span className="inline-block px-3 py-1 bg-teal-100 text-teal-700 rounded-full text-sm font-mono font-semibold">
-                      {classroom.class_code}
+          <div className="space-y-4">
+            {Object.keys(organizedAssignments).sort().map((chapter) => {
+              const isChapterExpanded = expandedChapters.has(chapter);
+              const lessons = organizedAssignments[chapter];
+              
+              return (
+                <div key={chapter} className="border rounded-lg bg-white shadow-sm">
+                  {/* Chapter Folder */}
+                  <div
+                    className="flex items-center gap-3 p-4 cursor-pointer hover:bg-gray-50 transition-colors"
+                    onClick={() => toggleChapter(chapter)}
+                  >
+                    {isChapterExpanded ? (
+                      <ChevronDown className="w-5 h-5 text-gray-600" />
+                    ) : (
+                      <ChevronRight className="w-5 h-5 text-gray-600" />
+                    )}
+                    {isChapterExpanded ? (
+                      <FolderOpen className="w-6 h-6 text-blue-500" />
+                    ) : (
+                      <Folder className="w-6 h-6 text-blue-500" />
+                    )}
+                    <h3 className="text-lg font-semibold text-gray-900">{chapter}</h3>
+                    <span className="ml-auto text-sm text-gray-500 bg-gray-100 px-3 py-1 rounded-full">
+                      {Object.keys(lessons).length} lesson{Object.keys(lessons).length !== 1 ? 's' : ''}
                     </span>
-                  </CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <div className="text-gray-600 text-sm">
-                    Click to view assignments
                   </div>
-                </CardContent>
-              </Card>
-            ))}
+
+                  {/* Lessons in Chapter */}
+                  {isChapterExpanded && (
+                    <div className="pl-8 pr-4 pb-4 space-y-3">
+                      {Object.keys(lessons).sort().map((lesson) => {
+                        const lessonKey = `${chapter}-${lesson}`;
+                        const isLessonExpanded = expandedLessons.has(lessonKey);
+                        const assignments = lessons[lesson];
+                        
+                        return (
+                          <div key={lessonKey} className="border rounded-lg bg-gray-50">
+                            {/* Lesson Folder */}
+                            <div
+                              className="flex items-center gap-3 p-3 cursor-pointer hover:bg-gray-100 transition-colors rounded-lg"
+                              onClick={() => toggleLesson(lessonKey)}
+                            >
+                              {isLessonExpanded ? (
+                                <ChevronDown className="w-4 h-4 text-gray-600" />
+                              ) : (
+                                <ChevronRight className="w-4 h-4 text-gray-600" />
+                              )}
+                              {isLessonExpanded ? (
+                                <FolderOpen className="w-5 h-5 text-teal-500" />
+                              ) : (
+                                <Folder className="w-5 h-5 text-teal-500" />
+                              )}
+                              <h4 className="text-md font-medium text-gray-800">{lesson}</h4>
+                              <span className="ml-auto text-xs text-gray-500 bg-white px-2 py-1 rounded-full">
+                                {assignments.length} assignment{assignments.length !== 1 ? 's' : ''}
+                              </span>
+                            </div>
+
+                            {/* Assignments in Lesson */}
+                            {isLessonExpanded && (
+                              <div className="p-3 pt-0 space-y-2">
+                                {assignments.map((assignment) => (
+                                  <Card
+                                    key={assignment.id}
+                                    data-testid={`assignment-card-${assignment.id}`}
+                                    className="hover:shadow-md transition-shadow cursor-pointer border-2 border-gray-200 hover:border-teal-300"
+                                    onClick={() => navigate(`/assignment/${assignment.id}`)}
+                                  >
+                                    <CardHeader className="pb-3">
+                                      <div className="flex justify-between items-start">
+                                        <CardTitle className="text-base">{assignment.title}</CardTitle>
+                                        <span className="text-xs text-gray-500 bg-white px-2 py-1 rounded border">
+                                          {assignment.classroom_name}
+                                        </span>
+                                      </div>
+                                      <CardDescription className="text-sm">{assignment.description}</CardDescription>
+                                    </CardHeader>
+                                    <CardContent className="pt-0">
+                                      <div className="flex items-center justify-between text-sm">
+                                        <span className="text-gray-600">
+                                          {assignment.problem_ids?.length || 0} problems
+                                        </span>
+                                        {assignment.due_date && (
+                                          <span className="text-orange-600 font-medium">
+                                            Due: {new Date(assignment.due_date).toLocaleDateString()}
+                                          </span>
+                                        )}
+                                      </div>
+                                    </CardContent>
+                                  </Card>
+                                ))}
+                              </div>
+                            )}
+                          </div>
+                        );
+                      })}
+                    </div>
+                  )}
+                </div>
+              );
+            })}
           </div>
         )}
 
