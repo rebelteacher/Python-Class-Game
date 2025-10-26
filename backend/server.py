@@ -920,6 +920,8 @@ async def get_problems(
         query["category"] = category
     if difficulty:
         query["difficulty"] = difficulty
+    if chapter:
+        query["chapter"] = chapter
     if csta_standard:
         query["csta_standard"] = {"$regex": csta_standard, "$options": "i"}
     if search:
