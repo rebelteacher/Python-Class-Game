@@ -889,6 +889,7 @@ export default function AssignmentLibrary({ user }) {
                     />
                   </div>
 
+                <div className="grid grid-cols-3 gap-4">
                   <div>
                     <Label htmlFor="edit-chapter">Chapter (Optional)</Label>
                     <Input
@@ -896,6 +897,17 @@ export default function AssignmentLibrary({ user }) {
                       placeholder="e.g., Chapter 1"
                       value={editingProblem.chapter || ""}
                       onChange={(e) => setEditingProblem({ ...editingProblem, chapter: e.target.value })}
+                      className="mt-1"
+                    />
+                  </div>
+
+                  <div>
+                    <Label htmlFor="edit-lesson">Lesson (Optional)</Label>
+                    <Input
+                      id="edit-lesson"
+                      placeholder="e.g., Lesson 1"
+                      value={editingProblem.lesson || ""}
+                      onChange={(e) => setEditingProblem({ ...editingProblem, lesson: e.target.value })}
                       className="mt-1"
                     />
                   </div>
