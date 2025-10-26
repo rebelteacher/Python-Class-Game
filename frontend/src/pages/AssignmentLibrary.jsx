@@ -966,7 +966,6 @@ export default function AssignmentLibrary({ user }) {
                     />
                   </div>
 
-                <div className="grid grid-cols-3 gap-4">
                   <div>
                     <Label htmlFor="edit-chapter">Chapter (Optional)</Label>
                     <Input
@@ -988,7 +987,9 @@ export default function AssignmentLibrary({ user }) {
                       className="mt-1"
                     />
                   </div>
+                </div>
 
+                <div className="grid grid-cols-2 gap-4">
                   <div>
                     <Label htmlFor="edit-difficulty">Difficulty</Label>
                     <Select value={editingProblem.difficulty} onValueChange={(val) => setEditingProblem({ ...editingProblem, difficulty: val })}>
