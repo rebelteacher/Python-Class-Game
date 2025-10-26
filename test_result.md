@@ -180,8 +180,10 @@ metadata:
 
 test_plan:
   current_focus:
-    - "Build Teacher Reports UI with gradebook layout"
-    - "Implement Excel export functionality"
+    - "Add chapter field to problem creation form (freeform text input)"
+    - "Display chapter badges on problem cards"
+    - "Update chapter filter to show actual chapters from problems"
+    - "Add chapter field to problem edit form"
   stuck_tasks: []
   test_all: false
   test_priority: "high_first"
