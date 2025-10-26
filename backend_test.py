@@ -2947,10 +2947,5 @@ def main():
         success = tester.run_all_tests()
         return 0 if success else 1
 
-def main():
-    tester = CodeClassAPITester()
-    success = tester.run_all_tests()
-    return 0 if success else 1
-
 if __name__ == "__main__":
     sys.exit(main())
