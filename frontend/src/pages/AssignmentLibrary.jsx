@@ -987,6 +987,8 @@ function AssignmentBuilder({ open, onOpenChange, selectedProblems, problems, onS
         {
           title: assignmentTitle,
           description: assignmentDescription,
+          chapter: chapter,
+          lesson: lesson,
           problem_ids: selectedProblems,
           classroom_ids: selectedClassrooms,
           available_date: availableDateTime,
