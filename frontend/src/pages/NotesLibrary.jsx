@@ -373,14 +373,24 @@ export default function NotesLibrary({ user }) {
       </nav>
 
       <main className="container mx-auto px-6 py-10">
-        {/* Filter Tabs */}
-        <Tabs value={filterType} onValueChange={setFilterType} className="mb-6">
-          <TabsList className="grid w-full max-w-md grid-cols-3">
-            <TabsTrigger value="all">All Notes</TabsTrigger>
-            <TabsTrigger value="mine">My Notes</TabsTrigger>
-            <TabsTrigger value="shared">Community</TabsTrigger>
-          </TabsList>
-        </Tabs>
+        {/* Filter Tabs - Teachers Only */}
+        {user.role === "teacher" && (
+          <Tabs value={filterType} onValueChange={setFilterType} className="mb-6">
+            <TabsList className="grid w-full max-w-md grid-cols-3">
+              <TabsTrigger value="all">All Notes</TabsTrigger>
+              <TabsTrigger value="mine">My Notes</TabsTrigger>
+              <TabsTrigger value="shared">Community</TabsTrigger>
+            </TabsList>
+          </Tabs>
+        )}
+        
+        {/* Student View Header */}
+        {user.role === "student" && (
+          <div className="mb-6">
+            <h2 className="text-2xl font-bold text-gray-900">Study Resources</h2>
+            <p className="text-gray-600">Access study guides and reference materials from your teachers</p>
+          </div>
+        )}
 
         {/* Search and Filters */}
         <div className="mb-8 space-y-4">
