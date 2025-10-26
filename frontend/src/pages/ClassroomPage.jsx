@@ -25,6 +25,8 @@ export default function ClassroomPage({ user }) {
   const [createDialogOpen, setCreateDialogOpen] = useState(false);
   const [editScheduleDialogOpen, setEditScheduleDialogOpen] = useState(false);
   const [editingAssignment, setEditingAssignment] = useState(null);
+  const [expandedChapters, setExpandedChapters] = useState(new Set());
+  const [expandedLessons, setExpandedLessons] = useState(new Set());
   const [newAssignment, setNewAssignment] = useState({
     title: "",
     description: "",
