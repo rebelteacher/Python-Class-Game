@@ -1,0 +1,4 @@
+question_text,choice_a,choice_b,choice_c,choice_d,correct_answer,chapter,lesson,difficulty
+What is 2+2?,2,3,4,5,C,Chapter 1: Basics,Lesson 1: Addition,Easy
+Which programming language is known as the 'language of the web'?,Python,JavaScript,Java,C++,B,Chapter 2: Web Development,Lesson 1: Introduction,Easy
+What does HTML stand for?,Hyperlinks and Text Markup Language,Home Tool Markup Language,Hyper Text Markup Language,None of the above,C,Chapter 2: Web Development,Lesson 2: HTML Basics,Easy
