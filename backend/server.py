@@ -330,6 +330,40 @@ class CodeExecuteResponse(BaseModel):
     error: Optional[str] = None
     success: bool
 
+# PDF Note model for library resources
+class PDFNote(BaseModel):
+    model_config = ConfigDict(extra="ignore")
+    id: str = Field(default_factory=lambda: str(uuid.uuid4()))
+    title: str
+    description: str = ""
+    chapter: str = ""  # Link to problem chapters
+    category: str = ""  # e.g., "Lesson Notes", "Study Guide", "Reference"
+    file_data: str  # Base64 encoded PDF data
+    file_size: int  # Size in bytes
+    creator_id: str
+    creator_name: str
+    is_shared: bool = False  # Share with community
+    tags: List[str] = Field(default_factory=list)  # For searchability
+    created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+
+class PDFNoteCreate(BaseModel):
+    title: str
+    description: str = ""
+    chapter: str = ""
+    category: str = ""
+    file_data: str  # Base64 encoded PDF
+    file_size: int
+    is_shared: bool = False
+    tags: List[str] = Field(default_factory=list)
+
+class PDFNoteUpdate(BaseModel):
+    title: Optional[str] = None
+    description: Optional[str] = None
+    chapter: Optional[str] = None
+    category: Optional[str] = None
+    is_shared: Optional[bool] = None
+    tags: Optional[List[str]] = None
+
 # ----- Auth Routes -----
 
 # Add your routes to the router instead of directly to app
