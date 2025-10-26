@@ -146,7 +146,7 @@ class CodeClassAPITester:
             role: "teacher",
             created_at: new Date()
         }});
-        db.user_sessions.insertOne({{
+        db.sessions.insertOne({{
             user_id: "{self.user_id}",
             session_token: "{self.session_token}",
             expires_at: new Date(Date.now() + 7*24*60*60*1000),
