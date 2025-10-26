@@ -114,35 +114,53 @@ user_problem_statement: |
   8. Printable test score reports by classroom
 
 backend:
-  - task: "Create PDF Note model and database schema"
+  - task: "Create MC Question model and CRUD endpoints"
     implemented: true
-    working: true
+    working: "NA"
     file: "backend/server.py"
     stuck_count: 0
     priority: "high"
-    needs_retesting: false
+    needs_retesting: true
     status_history:
       - working: "NA"
         agent: "main"
-        comment: "Added PDFNote model with fields: id, title, description, chapter, category, file_data (base64), file_size, creator_id, creator_name, is_shared, tags, created_at. Also created PDFNoteCreate and PDFNoteUpdate models."
-      - working: true
-        agent: "testing"
-        comment: "✅ PDF Note model and database schema working perfectly. Successfully tested note creation, storage, and retrieval. All fields properly validated and stored in MongoDB pdf_notes collection. Base64 PDF encoding/decoding working correctly."
+        comment: "Added MCQuestion model with fields: id, question_text, choice_a, choice_b, choice_c, choice_d, correct_answer, chapter, lesson, difficulty, creator_id, created_at. Implemented CRUD endpoints: POST /api/mc-questions (create), GET /api/mc-questions (list all), GET /api/mc-questions/{id} (get one), PUT /api/mc-questions/{id} (update), DELETE /api/mc-questions/{id} (delete). Teacher-only access enforced."
   
-  - task: "Create PDF notes API endpoints"
+  - task: "Create MC Question bulk upload endpoint"
     implemented: true
-    working: true
+    working: "NA"
     file: "backend/server.py"
     stuck_count: 0
     priority: "high"
-    needs_retesting: false
+    needs_retesting: true
     status_history:
       - working: "NA"
         agent: "main"
-        comment: "Implemented 5 endpoints: POST /api/notes (upload with 25MB limit), GET /api/notes (list with filters: mine/shared/all, chapter, category, search), GET /api/notes/{id} (get note with file data), PUT /api/notes/{id} (update metadata/sharing), DELETE /api/notes/{id} (delete own notes). Access control: only teachers can upload/update/delete, shared notes visible to all teachers."
-      - working: true
-        agent: "testing"
-        comment: "✅ ALL PDF NOTES API ENDPOINTS FULLY FUNCTIONAL (25/25 tests passed - 100% success rate). Comprehensive testing completed: 1) POST /api/notes - Upload working with proper validation (25MB limit enforced, teacher-only access). 2) GET /api/notes - All filters working (mine/shared/all, chapter filtering). 3) GET /api/notes/{id} - Note details with file_data retrieval working. 4) PUT /api/notes/{id} - Metadata updates and sharing toggle working. 5) DELETE /api/notes/{id} - Deletion with proper ownership validation. Access control perfect: students blocked (403), teachers can only modify own notes, shared notes visible to all. File size validation working (400 error for >25MB). Backend logs confirm all endpoints responding correctly."
+        comment: "Implemented POST /api/mc-questions/bulk-upload endpoint. Accepts CSV data with question_text, choice_a-d, correct_answer, chapter, lesson, difficulty fields. Returns count of created questions and any errors. Teacher-only access."
+  
+  - task: "Create MC Test model and endpoints"
+    implemented: true
+    working: "NA"
+    file: "backend/server.py"
+    stuck_count: 0
+    priority: "medium"
+    needs_retesting: true
+    status_history:
+      - working: "NA"
+        agent: "main"
+        comment: "Added MCTest model with fields: id, title, description, question_ids (list), creator_id, created_at. Implemented endpoints: POST /api/mc-tests (create test), GET /api/mc-tests (list all), GET /api/mc-tests/{id} (get test with questions). Teacher-only access."
+  
+  - task: "Create MC Take model and endpoints"
+    implemented: true
+    working: "NA"
+    file: "backend/server.py"
+    stuck_count: 0
+    priority: "medium"
+    needs_retesting: true
+    status_history:
+      - working: "NA"
+        agent: "main"
+        comment: "Added MCTake model with fields: id, test_id, student_id, student_name, answers (dict), score, total_questions, submitted_at. Implemented endpoints: POST /api/mc-takes/start (start test), POST /api/mc-takes/{take_id}/submit (submit answers and get score). Students can only see their own takes."
 
 frontend:
   - task: "Create NotesLibrary page component"
