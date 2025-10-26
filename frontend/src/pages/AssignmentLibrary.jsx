@@ -574,6 +574,20 @@ export default function AssignmentLibrary({ user }) {
                 <SelectItem value="Hard">Hard</SelectItem>
               </SelectContent>
             </Select>
+
+            <Select value={chapterFilter} onValueChange={setChapterFilter}>
+              <SelectTrigger className="w-40" data-testid="filter-chapter">
+                <SelectValue placeholder="All Chapters" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">All Chapters</SelectItem>
+                {[...Array(20)].map((_, i) => (
+                  <SelectItem key={i + 1} value={`Chapter ${i + 1}`}>
+                    Chapter {i + 1}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
           </div>
 
           <div className="text-sm text-gray-600">
