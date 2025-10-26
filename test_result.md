@@ -220,220 +220,50 @@ test_plan:
 agent_communication:
   - agent: "main"
     message: |
-      CHAPTER ORGANIZATION IMPLEMENTATION COMPLETE - READY FOR TESTING
+      MC TESTING PLATFORM - PHASE 1 (QUESTION BANK) IMPLEMENTATION COMPLETE - READY FOR TESTING
       
       BACKEND:
-      - Chapter field already exists in Problem model and filtering works
-      
-      FRONTEND CHANGES:
-      1. Create Form: Changed chapter input from hardcoded dropdown (1-20) to freeform text Input
-         - Teachers can enter any chapter name (Chapter 1, Unit 2, Module A, etc.)
-         - Added placeholder and helper text
-      
-      2. Problem Cards: Added chapter badge display
-         - Blue badge with book emoji (📚) shows when chapter exists
-         - Positioned above category badge
-      
-      3. Chapter Filter: Now shows actual chapters from existing problems
-         - Dynamically extracts unique chapters (like categories)
-         - Sorted alphabetically
-         - Replaces hardcoded 1-20 dropdown
-      
-      4. Edit Form: Added chapter field to problem edit dialog
-         - Freeform text input
-         - Included in PUT request to update endpoint
-         - Layout adjusted to 3 columns (category, chapter, difficulty)
-      
-      Please test the following scenarios:
-      - Create new problem with custom chapter name (e.g., "Unit 3: Loops")
-      - Verify chapter badge displays on problem card
-      - Use chapter filter to filter problems by chapter
-      - Edit existing problem to add/change chapter
-      - Verify chapter filter updates when new chapters are added
-      - Test with various chapter naming conventions
-  
-  - agent: "testing"
-    message: |
-      CHAPTER ORGANIZATION BACKEND TESTING COMPLETE - ALL TESTS PASSED ✅
-      
-      COMPREHENSIVE TEST RESULTS (26/26 tests passed - 100% success rate):
-      
-      ✅ BACKEND ENDPOINTS FULLY FUNCTIONAL:
-      1. POST /api/problems - Creates problems with chapter field correctly
-         - Tested with "Chapter 1: Basics", "Unit 2: Control Flow", "Module A: Functions"
-         - Handles empty chapter field properly
-         - All chapter values persist correctly in database
-      
-      2. GET /api/problems?chapter=X - Chapter filtering works perfectly
-         - Returns only problems matching specified chapter
-         - Handles non-existent chapters (returns empty array)
-         - Combined filters (chapter + difficulty) work correctly
-      
-      3. PUT /api/problems/{id} - Chapter updates work flawlessly
-         - Successfully updates chapter field
-         - Changes persist in database
-         - Updated problems appear in filtered results
-      
-      4. Authentication & Authorization - Properly enforced
-         - Only teachers can create/update problems (403 for students)
-         - All endpoints require valid authentication
-      
-      ✅ BACKEND CHAPTER ORGANIZATION IS PRODUCTION READY
-      
-      RECOMMENDATION: Main agent should now focus on frontend testing or mark this feature as complete and ready for user testing.
-  
-  - agent: "main"
-    message: |
-      PDF NOTES LIBRARY IMPLEMENTATION COMPLETE - READY FOR TESTING
-      
-      BACKEND:
-      1. PDFNote model with fields: title, description, chapter, category, file_data (base64), file_size, creator, is_shared, tags
-      2. API endpoints implemented:
-         - POST /api/notes - Upload PDF (max 25MB, teachers only)
-         - GET /api/notes?filter=mine|shared|all - List notes with filters
-         - GET /api/notes/{id} - Get note with file data (PDF viewer)
-         - PUT /api/notes/{id} - Update metadata/sharing status
-         - DELETE /api/notes/{id} - Delete own notes
-      3. Access control: Teachers can upload/edit/delete, shared notes visible to all
+      1. MCQuestion model with fields: question_text, choice_a-d, correct_answer, chapter, lesson, difficulty, creator_id
+      2. MC Question CRUD endpoints:
+         - POST /api/mc-questions - Create new question
+         - GET /api/mc-questions - List all questions
+         - GET /api/mc-questions/{id} - Get single question
+         - PUT /api/mc-questions/{id} - Update question
+         - DELETE /api/mc-questions/{id} - Delete question
+         - POST /api/mc-questions/bulk-upload - Bulk upload from CSV
+      3. MCTest model for test creation (title, description, question_ids)
+      4. MCTake model for student test submissions (test_id, student_id, answers, score)
+      5. All endpoints have teacher-only access control
       
       FRONTEND:
-      1. NotesLibrary.jsx page created with:
-         - PDF upload form with drag-drop file picker
-         - Title, description, chapter, category fields
-         - "Share with community" toggle switch
-         - Three filter tabs: All Notes, My Notes, Community
-         - Search and chapter/category filters
-         - Notes grid with badges (chapter, shared status)
-         - PDF viewer dialog (iframe-based)
-         - Delete and share toggle buttons for own notes
+      1. QuestionBank.jsx page created with:
+         - Create question form with all fields
+         - Bulk CSV upload dialog with format example
+         - 3-level folder structure (Chapter > Lesson > Questions)
+         - Question cards with full details and correct answer
+         - Edit and delete functionality
+         - Organized view matching problem library style
       
       2. Navigation:
-         - Added /notes route (teacher-only)
-         - Added "Notes" button to Teacher Dashboard navbar
+         - Added /teacher/question-bank route (teacher-only)
+         - Added "Question Bank" button to Teacher Dashboard
       
-      FEATURES:
-      - Hybrid private/shared library model
-      - 25MB file size limit
-      - Base64 PDF encoding
-      - Community sharing for monetization strategy
-      - Chapter-based organization matching problem library
+      3. CSV Template:
+         - Created mc_question_upload_template.csv with proper format
+         - Includes example questions
       
-      Please test the following scenarios:
+      TESTING PRIORITY:
+      Focus on Phase 1 (Question Bank functionality):
       - Login as teacher
-      - Upload a PDF note with chapter/category
-      - Toggle sharing on/off
-      - Filter by My Notes vs Community
-      - View PDF in browser
-      - Search and filter notes
-      - Delete own notes
-      - Verify non-owners cannot delete shared notes
-  
-  - agent: "testing"
-    message: |
-      PDF NOTES LIBRARY BACKEND TESTING COMPLETE - ALL TESTS PASSED ✅
+      - Create individual MC question with all fields
+      - View questions organized by chapter/lesson folders
+      - Edit existing question
+      - Delete question
+      - Test bulk CSV upload with the template file
+      - Verify all questions appear correctly in folder structure
+      - Verify teacher-only access control
       
-      COMPREHENSIVE TEST RESULTS (25/25 tests passed - 100% success rate):
-      
-      ✅ BACKEND API ENDPOINTS FULLY FUNCTIONAL:
-      
-      1. POST /api/notes - PDF Upload Working Perfectly
-         - Successfully uploads PDF notes with all metadata (title, description, chapter, category, tags)
-         - Base64 PDF encoding/decoding working correctly
-         - 25MB file size limit properly enforced (400 error for oversized files)
-         - Teacher-only access control working (403 for students)
-         - Both private and shared notes creation working
-      
-      2. GET /api/notes - All Filtering Options Working
-         - filter=all: Returns user's own notes + shared community notes
-         - filter=mine: Returns only notes created by current user
-         - filter=shared: Returns only notes with is_shared=true
-         - chapter filtering: Correctly filters by chapter name
-         - Proper sorting by created_at (newest first)
-         - File_data excluded from list view for performance
-      
-      3. GET /api/notes/{id} - Note Detail Retrieval Perfect
-         - Returns complete note data including file_data for PDF viewing
-         - Access control working: owner or shared notes only
-         - 404 error for non-existent notes
-         - All metadata fields properly returned
-      
-      4. PUT /api/notes/{id} - Update Operations Working
-         - Sharing toggle (is_shared) updates correctly
-         - Metadata updates (title, description, chapter, category, tags) working
-         - Teacher-only access enforced (403 for students)
-         - Ownership validation: users can only update their own notes (403 for others)
-      
-      5. DELETE /api/notes/{id} - Deletion with Proper Security
-         - Successfully deletes own notes (200 response)
-         - Proper ownership validation (403 for other teachers' notes)
-         - Teacher-only access (403 for students)
-         - Note properly removed from database (404 on subsequent access)
-      
-      ✅ ACCESS CONTROL & SECURITY PERFECT:
-      - Students cannot upload, update, or delete notes (403 Forbidden)
-      - Teachers can only modify/delete their own notes
-      - Shared notes visible to all teachers for viewing
-      - File size validation prevents oversized uploads
-      - Proper authentication required for all endpoints
-      
-      ✅ DATA INTEGRITY & PERFORMANCE:
-      - Base64 PDF encoding working correctly
-      - MongoDB storage in pdf_notes collection functioning
-      - File_data excluded from list views for performance
-      - All metadata fields properly validated and stored
-      - Chapter organization matching problem library structure
-      
-      BACKEND PDF NOTES LIBRARY IS PRODUCTION READY
-      
-      RECOMMENDATION: Main agent should now focus on frontend testing or mark backend as complete and ready for user testing.
-  
-  - agent: "testing"
-    message: |
-      PDF NOTES LIBRARY FRONTEND TESTING COMPLETE - ALL COMPONENTS VERIFIED ✅
-      
-      COMPREHENSIVE FRONTEND TESTING RESULTS:
-      
-      ✅ COMPONENT IMPLEMENTATION ANALYSIS:
-      1. NotesLibrary.jsx - Complete implementation verified
-         - All required UI components properly implemented using shadcn/ui
-         - Upload PDF dialog with comprehensive form (title, description, chapter, category, file input, share toggle)
-         - Three filter tabs system (All Notes, My Notes, Community) with proper state management
-         - Search functionality with real-time filtering
-         - Chapter and category dropdown filters with dynamic options
-         - Notes grid display with proper card layout and badges
-         - PDF viewer dialog using iframe for in-browser viewing
-         - Action buttons (View, Share toggle, Delete) with proper permissions
-         - Proper error handling and toast notifications
-      
-      ✅ NAVIGATION & ROUTING VERIFICATION:
-      2. App.js & TeacherDashboard.jsx - Route and navigation working
-         - /notes route properly configured with teacher-only protection
-         - Notes button correctly positioned in TeacherDashboard navbar
-         - Proper authentication guards redirect unauthenticated users
-         - Back to Dashboard navigation implemented
-      
-      ✅ AUTHENTICATION & SECURITY:
-      - Teacher-only access properly enforced (redirects to landing page when not authenticated)
-      - Route protection working as designed
-      - Authentication system requires valid teacher credentials or invite codes
-      
-      ✅ UI/UX COMPONENTS VERIFIED:
-      - Consistent use of shadcn/ui components throughout
-      - Proper responsive design with Tailwind CSS
-      - Professional styling matching application theme
-      - All form validations implemented
-      - File size validation (25MB limit)
-      - PDF type validation
-      - Toast notifications for user feedback
-      
-      ✅ FEATURE COMPLETENESS:
-      - Hybrid private/shared library model implemented
-      - Chapter-based organization matching problem library
-      - Community sharing for monetization strategy
-      - Base64 PDF encoding for file handling
-      - Proper metadata management
-      - Filter and search capabilities
-      
-      FRONTEND PDF NOTES LIBRARY IS PRODUCTION READY
-      
-      NOTE: Full end-to-end testing requires valid teacher authentication credentials. All component implementations verified through code analysis and UI structure testing. The authentication system is working correctly by preventing unauthorized access.
+      NEXT PHASES (Not yet implemented, for context only):
+      - Phase 2: Test Builder and classroom test assignment
+      - Phase 3: Student test taking with randomization
+      - Phase 4: Printable test score reports
