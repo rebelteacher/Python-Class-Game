@@ -338,11 +338,12 @@ class PDFNote(BaseModel):
     description: str = ""
     chapter: str = ""  # Link to problem chapters
     category: str = ""  # e.g., "Lesson Notes", "Study Guide", "Reference"
+    resource_type: str = "student_resource"  # "teacher_resource" or "student_resource"
     file_data: str  # Base64 encoded PDF data
     file_size: int  # Size in bytes
     creator_id: str
     creator_name: str
-    is_shared: bool = False  # Share with community
+    is_shared: bool = False  # Share with community (teacher-to-teacher)
     tags: List[str] = Field(default_factory=list)  # For searchability
     created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
 
@@ -351,6 +352,7 @@ class PDFNoteCreate(BaseModel):
     description: str = ""
     chapter: str = ""
     category: str = ""
+    resource_type: str = "student_resource"  # "teacher_resource" or "student_resource"
     file_data: str  # Base64 encoded PDF
     file_size: int
     is_shared: bool = False
@@ -361,6 +363,7 @@ class PDFNoteUpdate(BaseModel):
     description: Optional[str] = None
     chapter: Optional[str] = None
     category: Optional[str] = None
+    resource_type: Optional[str] = None
     is_shared: Optional[bool] = None
     tags: Optional[List[str]] = None
 
