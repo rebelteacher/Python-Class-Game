@@ -493,7 +493,12 @@ export default function NotesLibrary({ user }) {
 
       {/* View PDF Dialog */}
       {selectedNote && (
-        <Dialog open={viewDialogOpen} onOpenChange={setViewDialogOpen}>
+        <Dialog open={viewDialogOpen} onOpenChange={(open) => {
+          setViewDialogOpen(open);
+          if (!open && selectedNote.pdfBlobUrl) {
+            URL.revokeObjectURL(selectedNote.pdfBlobUrl);
+          }
+        }}>
           <DialogContent className="max-w-4xl max-h-[90vh]">
             <DialogHeader>
               <DialogTitle>{selectedNote.title}</DialogTitle>
@@ -504,7 +509,7 @@ export default function NotesLibrary({ user }) {
                 <Button
                   onClick={() => {
                     const link = document.createElement('a');
-                    link.href = `data:application/pdf;base64,${selectedNote.file_data}`;
+                    link.href = selectedNote.pdfBlobUrl || `data:application/pdf;base64,${selectedNote.file_data}`;
                     link.download = `${selectedNote.title}.pdf`;
                     link.click();
                   }}
@@ -515,30 +520,43 @@ export default function NotesLibrary({ user }) {
                   Download PDF
                 </Button>
               </div>
-              <div className="border rounded-lg overflow-hidden" style={{ height: "60vh" }}>
-                <object
-                  data={`data:application/pdf;base64,${selectedNote.file_data}`}
-                  type="application/pdf"
-                  className="w-full h-full"
-                >
-                  <div className="p-8 text-center space-y-4">
-                    <p className="text-gray-600">
-                      Unable to display PDF in browser. Please download to view.
-                    </p>
-                    <Button
-                      onClick={() => {
-                        const link = document.createElement('a');
-                        link.href = `data:application/pdf;base64,${selectedNote.file_data}`;
-                        link.download = `${selectedNote.title}.pdf`;
-                        link.click();
-                      }}
-                      className="bg-indigo-600 hover:bg-indigo-700"
-                    >
-                      <Download className="w-4 h-4 mr-2" />
-                      Download PDF
-                    </Button>
+              <div className="border rounded-lg overflow-hidden bg-gray-100" style={{ height: "60vh" }}>
+                {selectedNote.pdfBlobUrl ? (
+                  <embed
+                    src={selectedNote.pdfBlobUrl}
+                    type="application/pdf"
+                    className="w-full h-full"
+                  />
+                ) : selectedNote.file_data ? (
+                  <object
+                    data={`data:application/pdf;base64,${selectedNote.file_data}`}
+                    type="application/pdf"
+                    className="w-full h-full"
+                  >
+                    <div className="p-8 text-center space-y-4 flex flex-col items-center justify-center h-full">
+                      <FileText className="w-16 h-16 text-gray-400" />
+                      <p className="text-gray-600">
+                        Unable to display PDF in browser. Please download to view.
+                      </p>
+                      <Button
+                        onClick={() => {
+                          const link = document.createElement('a');
+                          link.href = `data:application/pdf;base64,${selectedNote.file_data}`;
+                          link.download = `${selectedNote.title}.pdf`;
+                          link.click();
+                        }}
+                        className="bg-indigo-600 hover:bg-indigo-700"
+                      >
+                        <Download className="w-4 h-4 mr-2" />
+                        Download PDF
+                      </Button>
+                    </div>
+                  </object>
+                ) : (
+                  <div className="p-8 text-center text-gray-500 flex items-center justify-center h-full">
+                    No PDF data available
                   </div>
-                </object>
+                )}
               </div>
             </div>
           </DialogContent>
