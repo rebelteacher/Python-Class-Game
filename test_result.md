@@ -163,35 +163,41 @@ backend:
         comment: "Added MCTake model with fields: id, test_id, student_id, student_name, answers (dict), score, total_questions, submitted_at. Implemented endpoints: POST /api/mc-takes/start (start test), POST /api/mc-takes/{take_id}/submit (submit answers and get score). Students can only see their own takes."
 
 frontend:
-  - task: "Create NotesLibrary page component"
+  - task: "Create QuestionBank page component"
     implemented: true
-    working: true
-    file: "frontend/src/pages/NotesLibrary.jsx"
+    working: "NA"
+    file: "frontend/src/pages/QuestionBank.jsx"
     stuck_count: 0
     priority: "high"
-    needs_retesting: false
+    needs_retesting: true
     status_history:
       - working: "NA"
         agent: "main"
-        comment: "Created complete NotesLibrary component with: PDF upload form (file picker, title, description, chapter, category, share toggle), three filter tabs (All/Mine/Community), search and filter UI, notes grid display with chapter/shared badges, PDF viewer dialog using iframe, delete/share toggle buttons for own notes. Supports base64 PDF encoding for upload."
-      - working: true
-        agent: "testing"
-        comment: "✅ NotesLibrary component implementation verified through code analysis and UI structure testing. All core components properly implemented: 1) Complete page layout with proper navigation (Back to Dashboard button, Notes Library title). 2) Upload PDF dialog with all required fields (title, description, chapter, category, file input, share toggle). 3) Filter tabs system (All Notes, My Notes, Community). 4) Search and filter functionality (search input, chapter dropdown, category dropdown). 5) Notes grid display with proper card structure. 6) PDF viewer dialog with iframe implementation. 7) Proper authentication protection (teacher-only access). 8) All UI components use shadcn/ui components consistently. Component structure matches requirements perfectly."
+        comment: "Created complete QuestionBank component with: MC question creation form (question text, 4 choices, correct answer selection, chapter, lesson, difficulty), bulk CSV upload dialog with template example, 3-level folder structure (Chapter > Lesson > Questions), question cards showing all choices and correct answer, edit/delete functionality for questions. Organized questions by chapter and lesson with expandable folders."
   
-  - task: "Add Notes route and navigation"
+  - task: "Add Question Bank route and navigation"
     implemented: true
-    working: true
+    working: "NA"
     file: "frontend/src/App.js, frontend/src/pages/TeacherDashboard.jsx"
     stuck_count: 0
     priority: "high"
-    needs_retesting: false
+    needs_retesting: true
     status_history:
       - working: "NA"
         agent: "main"
-        comment: "Added /notes route (teacher-only) in App.js. Added 'Notes' button with FileText icon to Teacher Dashboard navbar between Library and Reports buttons."
-      - working: true
-        agent: "testing"
-        comment: "✅ Notes route and navigation implementation verified. 1) Route properly configured in App.js with teacher-only protection using ProtectedRoute component. 2) Notes button correctly added to TeacherDashboard navbar with FileText icon, positioned between Library and Reports buttons as specified. 3) Navigation properly redirects unauthenticated users to landing page (expected behavior). 4) Route structure follows existing patterns in the application. All navigation components working as designed."
+        comment: "Added /teacher/question-bank route (teacher-only) in App.js. Added 'Question Bank' button with FileQuestion icon to Teacher Dashboard navbar."
+  
+  - task: "Create CSV template file for bulk upload"
+    implemented: true
+    working: "NA"
+    file: "mc_question_upload_template.csv"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: true
+    status_history:
+      - working: "NA"
+        agent: "main"
+        comment: "Created mc_question_upload_template.csv at /app/ with headers: question_text,choice_a,choice_b,choice_c,choice_d,correct_answer,chapter,lesson,difficulty. Included 3 example questions demonstrating proper CSV format."
 
 metadata:
   created_by: "main_agent"
