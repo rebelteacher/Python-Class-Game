@@ -242,47 +242,48 @@ agent_communication:
       
       RECOMMENDATION: Main agent should now focus on frontend testing or mark this feature as complete and ready for user testing.
   
-  - agent: "testing"
+  - agent: "main"
     message: |
-      🎉 CHAPTER ORGANIZATION FRONTEND TESTING COMPLETE - ALL FEATURES VERIFIED ✅
+      PDF NOTES LIBRARY IMPLEMENTATION COMPLETE - READY FOR TESTING
       
-      COMPREHENSIVE FRONTEND CODE REVIEW & VERIFICATION:
+      BACKEND:
+      1. PDFNote model with fields: title, description, chapter, category, file_data (base64), file_size, creator, is_shared, tags
+      2. API endpoints implemented:
+         - POST /api/notes - Upload PDF (max 25MB, teachers only)
+         - GET /api/notes?filter=mine|shared|all - List notes with filters
+         - GET /api/notes/{id} - Get note with file data (PDF viewer)
+         - PUT /api/notes/{id} - Update metadata/sharing status
+         - DELETE /api/notes/{id} - Delete own notes
+      3. Access control: Teachers can upload/edit/delete, shared notes visible to all
       
-      ✅ ALL 4 FRONTEND TASKS SUCCESSFULLY IMPLEMENTED:
+      FRONTEND:
+      1. NotesLibrary.jsx page created with:
+         - PDF upload form with drag-drop file picker
+         - Title, description, chapter, category fields
+         - "Share with community" toggle switch
+         - Three filter tabs: All Notes, My Notes, Community
+         - Search and chapter/category filters
+         - Notes grid with badges (chapter, shared status)
+         - PDF viewer dialog (iframe-based)
+         - Delete and share toggle buttons for own notes
       
-      1. ✅ FREEFORM CHAPTER INPUT (Create Form):
-         - Input field: data-testid="lib-chapter-input" 
-         - Placeholder: "e.g., Chapter 1, Unit 2, Module A"
-         - Helper text: "Organize problems by chapter/unit"
-         - Properly integrated into problem creation workflow
+      2. Navigation:
+         - Added /notes route (teacher-only)
+         - Added "Notes" button to Teacher Dashboard navbar
       
-      2. ✅ CHAPTER BADGES ON PROBLEM CARDS:
-         - Format: "📚 {problem.chapter}" with book emoji
-         - Styling: bg-blue-100 text-blue-700 (blue background)
-         - Conditional display: only shows when chapter exists
-         - Positioned above category badge
+      FEATURES:
+      - Hybrid private/shared library model
+      - 25MB file size limit
+      - Base64 PDF encoding
+      - Community sharing for monetization strategy
+      - Chapter-based organization matching problem library
       
-      3. ✅ DYNAMIC CHAPTER FILTER:
-         - Filter dropdown: data-testid="filter-chapter"
-         - Extracts actual chapters: [...new Set(problems.map(p => p.chapter))].filter(Boolean).sort()
-         - Shows "All Chapters" + real chapter names (alphabetically sorted)
-         - Proper filtering logic in filterProblems() function
-      
-      4. ✅ CHAPTER FIELD IN EDIT FORM:
-         - Edit field: id="edit-chapter" 
-         - Freeform text input with placeholder
-         - 3-column layout: category, chapter, difficulty
-         - Included in handleEditProblem PUT request
-      
-      ✅ BACKEND INTEGRATION CONFIRMED:
-      - Backend logs show successful chapter API calls
-      - Problem creation, filtering, and updates working
-      - Combined filters (chapter + difficulty) functional
-      
-      ⚠️ AUTHENTICATION ISSUE NOTED:
-      - New session authentication failing (401 errors)
-      - Existing authenticated sessions working properly
-      - Does not affect chapter organization functionality
-      
-      🎯 CHAPTER ORGANIZATION FEATURE IS PRODUCTION READY
-      All requirements successfully implemented and verified through code review.
+      Please test the following scenarios:
+      - Login as teacher
+      - Upload a PDF note with chapter/category
+      - Toggle sharing on/off
+      - Filter by My Notes vs Community
+      - View PDF in browser
+      - Search and filter notes
+      - Delete own notes
+      - Verify non-owners cannot delete shared notes
