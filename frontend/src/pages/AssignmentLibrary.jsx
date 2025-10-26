@@ -772,6 +772,17 @@ export default function AssignmentLibrary({ user }) {
                   </div>
 
                   <div>
+                    <Label htmlFor="edit-chapter">Chapter (Optional)</Label>
+                    <Input
+                      id="edit-chapter"
+                      placeholder="e.g., Chapter 1"
+                      value={editingProblem.chapter || ""}
+                      onChange={(e) => setEditingProblem({ ...editingProblem, chapter: e.target.value })}
+                      className="mt-1"
+                    />
+                  </div>
+
+                  <div>
                     <Label htmlFor="edit-difficulty">Difficulty</Label>
                     <Select value={editingProblem.difficulty} onValueChange={(val) => setEditingProblem({ ...editingProblem, difficulty: val })}>
                       <SelectTrigger>
@@ -784,7 +795,9 @@ export default function AssignmentLibrary({ user }) {
                       </SelectContent>
                     </Select>
                   </div>
+                </div>
 
+                <div className="grid grid-cols-2 gap-4">
                   <div>
                     <Label htmlFor="edit-csta">CSTA Standard</Label>
                     <Input
@@ -795,9 +808,7 @@ export default function AssignmentLibrary({ user }) {
                       className="mt-1"
                     />
                   </div>
-                </div>
 
-                <div className="grid grid-cols-2 gap-4">
                   <div>
                     <Label htmlFor="edit-problemType">Problem Type</Label>
                     <Select value={editingProblem.problem_type} onValueChange={(val) => setEditingProblem({ ...editingProblem, problem_type: val })}>
@@ -812,17 +823,17 @@ export default function AssignmentLibrary({ user }) {
                       </SelectContent>
                     </Select>
                   </div>
+                </div>
 
-                  <div>
-                    <Label htmlFor="edit-resourcesLink">Resources Link (Optional)</Label>
-                    <Input
-                      id="edit-resourcesLink"
-                      placeholder="https://drive.google.com/..."
-                      value={editingProblem.resources_link}
-                      onChange={(e) => setEditingProblem({ ...editingProblem, resources_link: e.target.value })}
-                      className="mt-1"
-                    />
-                  </div>
+                <div>
+                  <Label htmlFor="edit-resourcesLink">Resources Link (Optional)</Label>
+                  <Input
+                    id="edit-resourcesLink"
+                    placeholder="https://drive.google.com/..."
+                    value={editingProblem.resources_link}
+                    onChange={(e) => setEditingProblem({ ...editingProblem, resources_link: e.target.value })}
+                    className="mt-1"
+                  />
                 </div>
 
                 <div>
