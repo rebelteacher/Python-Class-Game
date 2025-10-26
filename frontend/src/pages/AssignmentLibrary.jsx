@@ -291,21 +291,57 @@ export default function AssignmentLibrary({ user }) {
     });
   };
 
-  const groupProblemsByChapter = () => {
+  const [expandedLessons, setExpandedLessons] = useState(new Set());
+  const [expandedProblemTypes, setExpandedProblemTypes] = useState(new Set());
+
+  const toggleLesson = (lessonKey) => {
+    setExpandedLessons(prev => {
+      const newSet = new Set(prev);
+      if (newSet.has(lessonKey)) {
+        newSet.delete(lessonKey);
+      } else {
+        newSet.add(lessonKey);
+      }
+      return newSet;
+    });
+  };
+
+  const toggleProblemType = (typeKey) => {
+    setExpandedProblemTypes(prev => {
+      const newSet = new Set(prev);
+      if (newSet.has(typeKey)) {
+        newSet.delete(typeKey);
+      } else {
+        newSet.add(typeKey);
+      }
+      return newSet;
+    });
+  };
+
+  const groupProblemsByChapterLessonType = () => {
     const grouped = {};
     filteredProblems.forEach(problem => {
       const chapter = problem.chapter || "Uncategorized";
+      const lesson = problem.lesson || "General";
+      const problemType = problem.problem_type || "Independent Practice";
+      
       if (!grouped[chapter]) {
-        grouped[chapter] = [];
+        grouped[chapter] = {};
       }
-      grouped[chapter].push(problem);
+      if (!grouped[chapter][lesson]) {
+        grouped[chapter][lesson] = {};
+      }
+      if (!grouped[chapter][lesson][problemType]) {
+        grouped[chapter][lesson][problemType] = [];
+      }
+      grouped[chapter][lesson][problemType].push(problem);
     });
     return grouped;
   };
 
   const categories = [...new Set(problems.map(p => p.category))].filter(Boolean);
   const chapters = [...new Set(problems.map(p => p.chapter))].filter(Boolean).sort();
-  const groupedProblems = groupProblemsByChapter();
+  const groupedProblems = groupProblemsByChapterLessonType();
 
   return (
     <div data-testid="assignment-library" className="min-h-screen bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50">
