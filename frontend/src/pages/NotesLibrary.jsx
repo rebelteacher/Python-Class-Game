@@ -135,7 +135,7 @@ export default function NotesLibrary({ user }) {
           file_size: newNote.file.size
         };
 
-        try:
+        try {
           await axios.post(`${API}/notes`, payload, {
             withCredentials: true
           });
