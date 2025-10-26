@@ -66,6 +66,7 @@ export default function ClassroomPage({ user }) {
 
   const organizeAssignments = () => {
     const organized = {};
+    console.log("📊 Organizing assignments:", assignments);
     assignments.forEach(assignment => {
       const chapter = assignment.chapter || "Uncategorized";
       const lesson = assignment.lesson || "General";
@@ -78,10 +79,12 @@ export default function ClassroomPage({ user }) {
       }
       organized[chapter][lesson].push(assignment);
     });
+    console.log("📁 Organized result:", organized);
     return organized;
   };
 
   const organizedAssignments = organizeAssignments();
+  console.log("🎯 Final organizedAssignments:", organizedAssignments);
 
   const fetchClassroom = async () => {
     try {
