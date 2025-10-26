@@ -394,7 +394,7 @@ export default function AssignmentLibrary({ user }) {
                     />
                   </div>
 
-                  <div className="grid grid-cols-3 gap-4">
+                  <div className="grid grid-cols-2 gap-4 mb-4">
                     <div>
                       <Label htmlFor="category">Category *</Label>
                       <Input
@@ -407,6 +407,25 @@ export default function AssignmentLibrary({ user }) {
                       />
                     </div>
 
+                    <div>
+                      <Label htmlFor="chapter">Chapter</Label>
+                      <Select value={newProblem.chapter || ""} onValueChange={(val) => setNewProblem({ ...newProblem, chapter: val })}>
+                        <SelectTrigger data-testid="lib-chapter-select">
+                          <SelectValue placeholder="Select chapter..." />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="">No Chapter</SelectItem>
+                          {[...Array(20)].map((_, i) => (
+                            <SelectItem key={i + 1} value={`Chapter ${i + 1}`}>
+                              Chapter {i + 1}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-2 gap-4">
                     <div>
                       <Label htmlFor="difficulty">Difficulty</Label>
                       <Select value={newProblem.difficulty} onValueChange={(val) => setNewProblem({ ...newProblem, difficulty: val })}>
