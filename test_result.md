@@ -111,7 +111,7 @@ user_problem_statement: |
   5. Organize problems by chapter to reduce dropdown clutter
 
 backend:
-  - task: "Create gradebook report endpoint"
+  - task: "Add chapter field to Problem model"
     implemented: true
     working: true
     file: "backend/server.py"
@@ -119,27 +119,9 @@ backend:
     priority: "high"
     needs_retesting: false
     status_history:
-      - working: "NA"
-        agent: "main"
-        comment: "Created POST /api/reports/gradebook endpoint that accepts classroom_ids and assignment_ids. Returns structured data with students sorted by last name/first name, scores for each assignment (average of best attempts, 0 for unattempted/locked), and completion dates. Uses existing lesson-scores logic."
       - working: true
-        agent: "testing"
-        comment: "✅ COMPREHENSIVE TESTING COMPLETED - Gradebook endpoint working perfectly. Fixed critical bug: completion_date was already a string from database but code was calling .isoformat() on it. All test scenarios passed: single/multiple classrooms, single/multiple assignments, student sorting by last name/first name, score calculations (average of best attempts), authentication (403 for students), authorization (403 for other teachers), error handling (400 for missing fields). Response structure correct with students array and assignments array. Deduplication across classrooms working. Score calculation matches existing lesson-scores logic."
-  
-  - task: "Create missing/incomplete report endpoint"
-    implemented: true
-    working: true
-    file: "backend/server.py"
-    stuck_count: 0
-    priority: "high"
-    needs_retesting: false
-    status_history:
-      - working: "NA"
         agent: "main"
-        comment: "Created POST /api/reports/missing endpoint that accepts classroom_ids. Returns list of students with their missing (not started) and incomplete assignments. Students sorted by last name/first name."
-      - working: true
-        agent: "testing"
-        comment: "✅ COMPREHENSIVE TESTING COMPLETED - Missing report endpoint working perfectly. All test scenarios passed: single/multiple classrooms, student sorting by last name/first name, correctly identifies missing assignments (not started) vs incomplete assignments (some problems done), excludes students with all assignments complete, authentication (403 for students), authorization (403 for other teachers), error handling (400 for missing classroom_ids). Response structure correct with students array containing missing_assignments and incomplete_assignments arrays."
+        comment: "Chapter field already exists in Problem model (line 232). Backend supports chapter filtering in get_problems endpoint."
 
 frontend:
   - task: "Add Teacher Reports route"
