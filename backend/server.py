@@ -2510,17 +2510,22 @@ async def get_notes(
     
     query = {}
     
-    # Filter by ownership/sharing
-    if filter == "mine":
-        query["creator_id"] = user["id"]
-    elif filter == "shared":
-        query["is_shared"] = True
-    elif filter == "all":
-        # Show user's own notes + shared notes
-        query["$or"] = [
-            {"creator_id": user["id"]},
-            {"is_shared": True}
-        ]
+    # Role-based filtering
+    if user["role"] == "student":
+        # Students only see student resources
+        query["resource_type"] = "student_resource"
+    elif user["role"] == "teacher":
+        # Filter by ownership/sharing for teachers
+        if filter == "mine":
+            query["creator_id"] = user["id"]
+        elif filter == "shared":
+            query["is_shared"] = True
+        elif filter == "all":
+            # Show user's own notes + shared notes
+            query["$or"] = [
+                {"creator_id": user["id"]},
+                {"is_shared": True}
+            ]
     
     # Additional filters
     if chapter:
@@ -2528,11 +2533,26 @@ async def get_notes(
     if category:
         query["category"] = category
     if search:
-        query["$or"] = [
-            {"title": {"$regex": search, "$options": "i"}},
-            {"description": {"$regex": search, "$options": "i"}},
-            {"tags": {"$in": [search]}}
-        ]
+        # Preserve existing $or if it exists, otherwise create new one
+        if "$or" in query:
+            # For complex queries, use $and to combine conditions
+            existing_or = query.pop("$or")
+            query["$and"] = [
+                {"$or": existing_or},
+                {
+                    "$or": [
+                        {"title": {"$regex": search, "$options": "i"}},
+                        {"description": {"$regex": search, "$options": "i"}},
+                        {"tags": {"$in": [search]}}
+                    ]
+                }
+            ]
+        else:
+            query["$or"] = [
+                {"title": {"$regex": search, "$options": "i"}},
+                {"description": {"$regex": search, "$options": "i"}},
+                {"tags": {"$in": [search]}}
+            ]
     
     notes = await db.pdf_notes.find(query, {"_id": 0, "file_data": 0}).to_list(length=None)
     
