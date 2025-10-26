@@ -271,6 +271,7 @@ export default function AssignmentLibrary({ user }) {
   };
 
   const categories = [...new Set(problems.map(p => p.category))].filter(Boolean);
+  const chapters = [...new Set(problems.map(p => p.chapter))].filter(Boolean).sort();
 
   return (
     <div data-testid="assignment-library" className="min-h-screen bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50">
