@@ -524,21 +524,29 @@ export default function NotesLibrary({ user }) {
               <DialogDescription>{selectedNote.description}</DialogDescription>
             </DialogHeader>
             <div className="space-y-4">
-              <div className="flex gap-2">
-                <Button
-                  onClick={() => {
-                    const link = document.createElement('a');
-                    link.href = selectedNote.pdfBlobUrl || `data:application/pdf;base64,${selectedNote.file_data}`;
-                    link.download = `${selectedNote.title}.pdf`;
-                    link.click();
-                  }}
-                  variant="outline"
-                  className="gap-2"
-                >
-                  <Download className="w-4 h-4" />
-                  Download PDF
-                </Button>
-              </div>
+              {/* Only show download button for Student Resources */}
+              {selectedNote.resource_type === "student_resource" && (
+                <div className="flex gap-2">
+                  <Button
+                    onClick={() => {
+                      const link = document.createElement('a');
+                      link.href = selectedNote.pdfBlobUrl || `data:application/pdf;base64,${selectedNote.file_data}`;
+                      link.download = `${selectedNote.title}.pdf`;
+                      link.click();
+                    }}
+                    variant="outline"
+                    className="gap-2"
+                  >
+                    <Download className="w-4 h-4" />
+                    Download PDF
+                  </Button>
+                </div>
+              )}
+              {selectedNote.resource_type === "teacher_resource" && (
+                <div className="p-2 bg-amber-50 border border-amber-200 rounded text-sm text-amber-800">
+                  ℹ️ Teacher resources are view-only and cannot be downloaded.
+                </div>
+              )}
               <div className="border rounded-lg overflow-hidden bg-gray-100" style={{ height: "60vh" }}>
                 {selectedNote.pdfBlobUrl ? (
                   <embed
