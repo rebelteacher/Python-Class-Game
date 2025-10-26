@@ -103,12 +103,12 @@
 #====================================================================================================
 
 user_problem_statement: |
-  Build Teacher Reports page for ByteBattles Arena:
-  1. Gradebook-style report with assignments across top, students down side (sorted by last name, first name)
-  2. Excel (.xlsx) export format (not CSV)
-  3. Multi-classroom selection support
-  4. Missing/Incomplete assignments report (separate view for individual students)
-  5. Integration with existing assignment scoring logic
+  Implement chapter-based organization for the problem library:
+  1. Add freeform chapter field to problem creation form
+  2. Display chapters on problem cards in library
+  3. Add chapter filter that shows actual chapters from existing problems
+  4. Include chapter field in problem edit form
+  5. Organize problems by chapter to reduce dropdown clutter
 
 backend:
   - task: "Create gradebook report endpoint"
