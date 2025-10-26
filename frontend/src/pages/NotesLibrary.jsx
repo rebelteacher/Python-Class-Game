@@ -37,6 +37,7 @@ export default function NotesLibrary({ user }) {
     description: "",
     chapter: "",
     category: "",
+    resource_type: "student_resource",
     is_shared: false,
     tags: [],
     file: null
