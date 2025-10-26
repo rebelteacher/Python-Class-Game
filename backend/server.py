@@ -685,6 +685,14 @@ async def get_classrooms(request: Request, include_archived: bool = False):
             {"students": user["id"], "is_archived": {"$ne": True}},
             {"_id": 0}
         ).to_list(1000)
+        
+        # For students, fetch and include assignments
+        for classroom in classrooms:
+            assignments = await db.assignments.find(
+                {"classroom_ids": classroom["id"]},
+                {"_id": 0}
+            ).to_list(1000)
+            classroom["assignments"] = assignments
     
     return classrooms
 
