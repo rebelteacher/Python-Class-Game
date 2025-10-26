@@ -597,9 +597,9 @@ export default function AssignmentLibrary({ user }) {
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="all">All Chapters</SelectItem>
-                {[...Array(20)].map((_, i) => (
-                  <SelectItem key={i + 1} value={`Chapter ${i + 1}`}>
-                    Chapter {i + 1}
+                {chapters.map((chapter) => (
+                  <SelectItem key={chapter} value={chapter}>
+                    {chapter}
                   </SelectItem>
                 ))}
               </SelectContent>
