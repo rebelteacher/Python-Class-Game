@@ -476,12 +476,47 @@ export default function NotesLibrary({ user }) {
               <DialogTitle>{selectedNote.title}</DialogTitle>
               <DialogDescription>{selectedNote.description}</DialogDescription>
             </DialogHeader>
-            <div className="overflow-auto" style={{ height: "70vh" }}>
-              <iframe
-                src={`data:application/pdf;base64,${selectedNote.file_data}`}
-                className="w-full h-full"
-                title={selectedNote.title}
-              />
+            <div className="space-y-4">
+              <div className="flex gap-2">
+                <Button
+                  onClick={() => {
+                    const link = document.createElement('a');
+                    link.href = `data:application/pdf;base64,${selectedNote.file_data}`;
+                    link.download = `${selectedNote.title}.pdf`;
+                    link.click();
+                  }}
+                  variant="outline"
+                  className="gap-2"
+                >
+                  <Download className="w-4 h-4" />
+                  Download PDF
+                </Button>
+              </div>
+              <div className="border rounded-lg overflow-hidden" style={{ height: "60vh" }}>
+                <object
+                  data={`data:application/pdf;base64,${selectedNote.file_data}`}
+                  type="application/pdf"
+                  className="w-full h-full"
+                >
+                  <div className="p-8 text-center space-y-4">
+                    <p className="text-gray-600">
+                      Unable to display PDF in browser. Please download to view.
+                    </p>
+                    <Button
+                      onClick={() => {
+                        const link = document.createElement('a');
+                        link.href = `data:application/pdf;base64,${selectedNote.file_data}`;
+                        link.download = `${selectedNote.title}.pdf`;
+                        link.click();
+                      }}
+                      className="bg-indigo-600 hover:bg-indigo-700"
+                    >
+                      <Download className="w-4 h-4 mr-2" />
+                      Download PDF
+                    </Button>
+                  </div>
+                </object>
+              </div>
             </div>
           </DialogContent>
         </Dialog>
