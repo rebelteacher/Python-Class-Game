@@ -148,6 +148,54 @@ export default function StudentDashboard({ user, setUser }) {
     }
   };
 
+  const toggleChapter = (chapter) => {
+    setExpandedChapters(prev => {
+      const newSet = new Set(prev);
+      if (newSet.has(chapter)) {
+        newSet.delete(chapter);
+      } else {
+        newSet.add(chapter);
+      }
+      return newSet;
+    });
+  };
+
+  const toggleLesson = (chapterLesson) => {
+    setExpandedLessons(prev => {
+      const newSet = new Set(prev);
+      if (newSet.has(chapterLesson)) {
+        newSet.delete(chapterLesson);
+      } else {
+        newSet.add(chapterLesson);
+      }
+      return newSet;
+    });
+  };
+
+  const organizeAssignments = () => {
+    const organized = {};
+    classrooms.forEach(classroom => {
+      classroom.assignments?.forEach(assignment => {
+        const chapter = assignment.chapter || "Uncategorized";
+        const lesson = assignment.lesson || "General";
+        
+        if (!organized[chapter]) {
+          organized[chapter] = {};
+        }
+        if (!organized[chapter][lesson]) {
+          organized[chapter][lesson] = [];
+        }
+        organized[chapter][lesson].push({
+          ...assignment,
+          classroom_name: classroom.name
+        });
+      });
+    });
+    return organized;
+  };
+
+  const organizedAssignments = organizeAssignments();
+
   return (
     <div data-testid="student-dashboard" className="min-h-screen bg-gradient-to-br from-green-50 via-teal-50 to-blue-50">
       <nav className="bg-white shadow-sm border-b border-gray-200">
