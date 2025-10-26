@@ -1061,6 +1061,31 @@ function AssignmentBuilder({ open, onOpenChange, selectedProblems, problems, onS
             />
           </div>
 
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <Label htmlFor="chapter">Chapter</Label>
+              <Input
+                id="chapter"
+                placeholder="e.g., Chapter 1"
+                value={chapter}
+                onChange={(e) => setChapter(e.target.value)}
+                className="mt-1"
+              />
+              <p className="text-xs text-gray-500 mt-1">For organizing student assignments</p>
+            </div>
+            <div>
+              <Label htmlFor="lesson">Lesson</Label>
+              <Input
+                id="lesson"
+                placeholder="e.g., Lesson 1"
+                value={lesson}
+                onChange={(e) => setLesson(e.target.value)}
+                className="mt-1"
+              />
+              <p className="text-xs text-gray-500 mt-1">Sub-folder under chapter</p>
+            </div>
+          </div>
+
           {/* Classroom Selection */}
           <div>
             <Label>Assign to Classrooms *</Label>
