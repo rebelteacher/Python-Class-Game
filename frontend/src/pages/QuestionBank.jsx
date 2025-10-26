@@ -137,6 +137,60 @@ export default function QuestionBank({ user }) {
     }
   };
 
+  const handleBulkUpload = async (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+
+    setUploading(true);
+
+    try {
+      const text = await file.text();
+      const lines = text.split('\n').filter(line => line.trim());
+      
+      if (lines.length < 2) {
+        toast.error("CSV file is empty or invalid");
+        setUploading(false);
+        return;
+      }
+
+      // Parse CSV
+      const headers = lines[0].split(',').map(h => h.trim());
+      const questions = [];
+
+      for (let i = 1; i < lines.length; i++) {
+        const values = lines[i].split(',').map(v => v.trim());
+        const question = {};
+        
+        headers.forEach((header, index) => {
+          question[header] = values[index] || "";
+        });
+        
+        questions.push(question);
+      }
+
+      // Upload to backend
+      const response = await axios.post(
+        `${API}/mc-questions/bulk-upload`,
+        { questions },
+        { withCredentials: true }
+      );
+
+      toast.success(`Created ${response.data.created} questions!`);
+      if (response.data.errors.length > 0) {
+        console.error("Upload errors:", response.data.errors);
+        toast.error(`${response.data.errors.length} questions failed - check console`);
+      }
+      
+      setBulkUploadDialogOpen(false);
+      fetchQuestions();
+    } catch (error) {
+      console.error("Error uploading CSV:", error);
+      toast.error("Failed to upload CSV");
+    } finally {
+      setUploading(false);
+    }
+  };
+
   const toggleChapter = (chapter) => {
     setExpandedChapters(prev => {
       const newSet = new Set(prev);
