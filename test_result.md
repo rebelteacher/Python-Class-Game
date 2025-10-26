@@ -124,53 +124,53 @@ backend:
         comment: "Chapter field already exists in Problem model (line 232). Backend supports chapter filtering in get_problems endpoint."
 
 frontend:
-  - task: "Add Teacher Reports route"
+  - task: "Add chapter field to problem creation form (freeform text input)"
     implemented: true
     working: "NA"
-    file: "frontend/src/App.js"
+    file: "frontend/src/pages/AssignmentLibrary.jsx"
     stuck_count: 0
     priority: "high"
     needs_retesting: true
     status_history:
       - working: "NA"
         agent: "main"
-        comment: "Added /teacher-reports route in App.js with TeacherReports component, protected for teachers only."
+        comment: "Changed chapter input from dropdown (hardcoded 20 chapters) to freeform text Input field. Teachers can now enter any chapter name (e.g., 'Chapter 1', 'Unit 2', 'Module A'). Added placeholder text and helper text."
   
-  - task: "Add Reports button to Teacher Dashboard"
+  - task: "Display chapter badges on problem cards"
     implemented: true
     working: "NA"
-    file: "frontend/src/pages/TeacherDashboard.jsx"
-    stuck_count: 0
-    priority: "medium"
-    needs_retesting: true
-    status_history:
-      - working: "NA"
-        agent: "main"
-        comment: "Added Reports navigation button with FileSpreadsheet icon in teacher dashboard navbar."
-  
-  - task: "Build Teacher Reports UI with gradebook layout"
-    implemented: true
-    working: "NA"
-    file: "frontend/src/pages/TeacherReports.jsx"
+    file: "frontend/src/pages/AssignmentLibrary.jsx"
     stuck_count: 0
     priority: "high"
     needs_retesting: true
     status_history:
       - working: "NA"
         agent: "main"
-        comment: "Implemented complete Teacher Reports page with: multi-classroom selection, assignment selection (for gradebook), report type toggle (grades/missing), gradebook-style table preview (assignments across top, students down side), missing/incomplete preview cards, Excel export using xlsx library. Color-coded cells in gradebook (green ≥90, yellow ≥70, orange >0, red =0)."
+        comment: "Added chapter badge display on problem cards with book emoji (📚) in blue styling. Shows above category badge when chapter exists."
   
-  - task: "Implement Excel export functionality"
+  - task: "Update chapter filter to show actual chapters from problems"
     implemented: true
     working: "NA"
-    file: "frontend/src/pages/TeacherReports.jsx"
+    file: "frontend/src/pages/AssignmentLibrary.jsx"
     stuck_count: 0
     priority: "high"
     needs_retesting: true
     status_history:
       - working: "NA"
         agent: "main"
-        comment: "Installed xlsx library (v0.18.5). Implemented downloadGradebookExcel() for gradebook format (student names in column A, assignments across top) and downloadMissingExcel() for missing/incomplete reports with formatted sections per student."
+        comment: "Extracted unique chapters from existing problems (like categories). Updated filter dropdown to dynamically show actual chapters instead of hardcoded 1-20. Chapters are sorted alphabetically."
+  
+  - task: "Add chapter field to problem edit form"
+    implemented: true
+    working: "NA"
+    file: "frontend/src/pages/AssignmentLibrary.jsx"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: true
+    status_history:
+      - working: "NA"
+        agent: "main"
+        comment: "Added chapter field to edit dialog with freeform text input. Updated handleEditProblem to include chapter in PUT request. Layout adjusted to 3 columns (category, chapter, difficulty)."
 
 metadata:
   created_by: "main_agent"
