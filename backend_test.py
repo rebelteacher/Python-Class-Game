@@ -2321,6 +2321,517 @@ startxref
         
         return note_id
 
+    def test_mc_question_endpoints(self):
+        """Test Multiple Choice Question endpoints"""
+        print("\n🎯 Testing MC Question Endpoints...")
+        
+        # Test data for MC questions
+        sample_question_data = {
+            "question_text": "What is 2+2?",
+            "choice_a": "2",
+            "choice_b": "3", 
+            "choice_c": "4",
+            "choice_d": "5",
+            "correct_answer": "C",
+            "chapter": "Chapter 1",
+            "lesson": "Lesson 1",
+            "difficulty": "Easy"
+        }
+        
+        minimal_question_data = {
+            "question_text": "What is Python?",
+            "choice_a": "A snake",
+            "choice_b": "A programming language",
+            "choice_c": "A movie", 
+            "choice_d": "A food",
+            "correct_answer": "B"
+        }
+        
+        # Test 1: Create MC Question with all fields
+        print("\n   TEST 1: Create MC Question with all fields")
+        question1 = self.run_test(
+            "Create MC question with all fields",
+            "POST",
+            "mc-questions",
+            200,
+            sample_question_data
+        )
+        
+        if not question1:
+            print("❌ Cannot continue MC question tests without created question")
+            return None
+        
+        question1_id = question1.get('id')
+        print(f"   Created question: {question1_id}")
+        
+        # Test 2: Create MC Question with minimal data (only required fields)
+        print("\n   TEST 2: Create MC Question with minimal data")
+        question2 = self.run_test(
+            "Create MC question with minimal data",
+            "POST", 
+            "mc-questions",
+            200,
+            minimal_question_data
+        )
+        
+        question2_id = question2.get('id') if question2 else None
+        
+        # Test 3: Create MC Question with custom chapter/lesson names
+        print("\n   TEST 3: Create MC Question with custom chapter/lesson")
+        custom_question_data = {
+            "question_text": "Which programming concept allows code reuse?",
+            "choice_a": "Variables",
+            "choice_b": "Functions", 
+            "choice_c": "Comments",
+            "choice_d": "Print statements",
+            "correct_answer": "B",
+            "chapter": "Advanced Programming",
+            "lesson": "Code Organization",
+            "difficulty": "Medium"
+        }
+        
+        question3 = self.run_test(
+            "Create MC question with custom chapter/lesson",
+            "POST",
+            "mc-questions", 
+            200,
+            custom_question_data
+        )
+        
+        question3_id = question3.get('id') if question3 else None
+        
+        # Test 4: Test teacher-only access (403 for students)
+        print("\n   TEST 4: Test teacher-only access control")
+        
+        # Create a student user to test access control
+        student = self.create_student_user("mctest")
+        if student:
+            original_token = self.session_token
+            self.session_token = student["token"]
+            
+            try:
+                # Student should get 403 when trying to create question
+                self.run_test(
+                    "Student create MC question (should be 403)",
+                    "POST",
+                    "mc-questions",
+                    403,
+                    sample_question_data
+                )
+                
+                # Student should get 403 when trying to list questions
+                self.run_test(
+                    "Student list MC questions (should be 403)",
+                    "GET", 
+                    "mc-questions",
+                    403
+                )
+                
+            finally:
+                self.session_token = original_token
+        
+        # Test 5: Test authentication required (401 for unauthenticated)
+        print("\n   TEST 5: Test authentication required")
+        original_token = self.session_token
+        self.session_token = None
+        
+        try:
+            self.run_test(
+                "Unauthenticated create MC question (should be 401)",
+                "POST",
+                "mc-questions", 
+                401,
+                sample_question_data
+            )
+            
+            self.run_test(
+                "Unauthenticated list MC questions (should be 401)",
+                "GET",
+                "mc-questions",
+                401
+            )
+            
+        finally:
+            self.session_token = original_token
+        
+        # Test 6: List all MC questions
+        print("\n   TEST 6: List all MC questions")
+        questions_list = self.run_test(
+            "List all MC questions",
+            "GET",
+            "mc-questions", 
+            200
+        )
+        
+        if questions_list:
+            print(f"   Found {len(questions_list)} questions")
+            
+            # Verify all created questions are in the list
+            question_ids = [q.get('id') for q in questions_list]
+            
+            if question1_id in question_ids:
+                self.log_test("Question 1 appears in list", True)
+            else:
+                self.log_test("Question 1 appears in list", False, "Question 1 not found in list")
+            
+            # Verify question fields are returned
+            if questions_list and len(questions_list) > 0:
+                first_question = questions_list[0]
+                required_fields = ['id', 'question_text', 'choice_a', 'choice_b', 'choice_c', 'choice_d', 'correct_answer']
+                
+                missing_fields = [field for field in required_fields if field not in first_question]
+                if not missing_fields:
+                    self.log_test("All required fields present in question response", True)
+                else:
+                    self.log_test("All required fields present in question response", False, f"Missing: {missing_fields}")
+        
+        # Test 7: Test GET single question by ID (this endpoint doesn't exist - should get 404)
+        print("\n   TEST 7: Test GET single question by ID (endpoint missing)")
+        if question1_id:
+            self.run_test(
+                "Get single question by ID (endpoint not implemented - should be 404)",
+                "GET",
+                f"mc-questions/{question1_id}",
+                404
+            )
+        
+        # Test 8: Update existing question
+        print("\n   TEST 8: Update existing question")
+        if question1_id:
+            updated_question_data = {
+                "question_text": "What is 2+2? (Updated)",
+                "choice_a": "1",
+                "choice_b": "3",
+                "choice_c": "4", 
+                "choice_d": "6",
+                "correct_answer": "C",
+                "chapter": "Chapter 1 - Updated",
+                "lesson": "Lesson 1 - Updated", 
+                "difficulty": "Medium"
+            }
+            
+            # Test updating question_text
+            self.run_test(
+                "Update question text",
+                "PUT",
+                f"mc-questions/{question1_id}",
+                200,
+                updated_question_data
+            )
+            
+            # Test updating choices and correct_answer
+            choice_update_data = {
+                "question_text": "What is 2+2? (Updated)",
+                "choice_a": "Zero",
+                "choice_b": "Two", 
+                "choice_c": "Four",
+                "choice_d": "Eight",
+                "correct_answer": "C",
+                "chapter": "Chapter 1 - Updated",
+                "lesson": "Lesson 1 - Updated",
+                "difficulty": "Medium"
+            }
+            
+            self.run_test(
+                "Update choices and correct answer",
+                "PUT",
+                f"mc-questions/{question1_id}",
+                200,
+                choice_update_data
+            )
+            
+            # Test updating chapter/lesson/difficulty
+            metadata_update_data = {
+                "question_text": "What is 2+2? (Updated)",
+                "choice_a": "Zero",
+                "choice_b": "Two",
+                "choice_c": "Four", 
+                "choice_d": "Eight",
+                "correct_answer": "C",
+                "chapter": "Advanced Math",
+                "lesson": "Basic Operations",
+                "difficulty": "Hard"
+            }
+            
+            self.run_test(
+                "Update chapter/lesson/difficulty",
+                "PUT",
+                f"mc-questions/{question1_id}",
+                200,
+                metadata_update_data
+            )
+        
+        # Test 9: Test update access control (only creator can update)
+        print("\n   TEST 9: Test update access control")
+        if question1_id:
+            # Create another teacher to test access control
+            timestamp = str(int(datetime.now().timestamp()))
+            other_teacher_id = f"test-teacher-{timestamp}"
+            other_teacher_token = f"test_teacher_session_{timestamp}"
+            
+            try:
+                from motor.motor_asyncio import AsyncIOMotorClient
+                import asyncio
+                
+                async def create_other_teacher():
+                    client = AsyncIOMotorClient("mongodb://localhost:27017")
+                    db = client["test_database"]
+                    
+                    # Create teacher user
+                    user_doc = {
+                        "id": other_teacher_id,
+                        "email": f"other.teacher.{timestamp}@example.com",
+                        "name": f"Other Teacher {timestamp}",
+                        "role": "teacher",
+                        "created_at": datetime.now(timezone.utc).isoformat()
+                    }
+                    await db.users.insert_one(user_doc)
+                    
+                    # Create session
+                    session_doc = {
+                        "user_id": other_teacher_id,
+                        "session_token": other_teacher_token,
+                        "expires_at": datetime.now(timezone.utc) + timedelta(days=7),
+                        "created_at": datetime.now(timezone.utc).isoformat()
+                    }
+                    await db.sessions.insert_one(session_doc)
+                    
+                    client.close()
+                    return True
+                
+                if asyncio.run(create_other_teacher()):
+                    original_token = self.session_token
+                    self.session_token = other_teacher_token
+                    
+                    try:
+                        # Other teacher should get 403 when trying to update
+                        self.run_test(
+                            "Other teacher update question (should be 403)",
+                            "PUT",
+                            f"mc-questions/{question1_id}",
+                            403,
+                            updated_question_data
+                        )
+                        
+                    finally:
+                        self.session_token = original_token
+                        
+            except Exception as e:
+                print(f"   ⚠️  Could not test other teacher access: {str(e)}")
+        
+        # Test 10: Test update with non-existent ID (404)
+        print("\n   TEST 10: Test update with non-existent ID")
+        fake_id = str(uuid.uuid4())
+        self.run_test(
+            "Update non-existent question (should be 404)",
+            "PUT",
+            f"mc-questions/{fake_id}",
+            404,
+            updated_question_data
+        )
+        
+        # Test 11: Delete question
+        print("\n   TEST 11: Delete question")
+        if question2_id:
+            self.run_test(
+                "Delete question",
+                "DELETE",
+                f"mc-questions/{question2_id}",
+                200
+            )
+            
+            # Verify question is removed by trying to update it
+            self.run_test(
+                "Verify question deleted (should be 404)",
+                "PUT",
+                f"mc-questions/{question2_id}",
+                404,
+                sample_question_data
+            )
+        
+        # Test 12: Test delete access control (only creator can delete)
+        print("\n   TEST 12: Test delete access control")
+        if question3_id:
+            # Use the other teacher created earlier
+            try:
+                original_token = self.session_token
+                self.session_token = other_teacher_token
+                
+                try:
+                    # Other teacher should get 403 when trying to delete
+                    self.run_test(
+                        "Other teacher delete question (should be 403)",
+                        "DELETE",
+                        f"mc-questions/{question3_id}",
+                        403
+                    )
+                    
+                finally:
+                    self.session_token = original_token
+                    
+            except Exception as e:
+                print(f"   ⚠️  Could not test other teacher delete access: {str(e)}")
+        
+        # Test 13: Test delete with non-existent ID (404)
+        print("\n   TEST 13: Test delete with non-existent ID")
+        fake_id = str(uuid.uuid4())
+        self.run_test(
+            "Delete non-existent question (should be 404)",
+            "DELETE",
+            f"mc-questions/{fake_id}",
+            404
+        )
+        
+        # Test 14: Bulk upload questions
+        print("\n   TEST 14: Bulk upload questions")
+        bulk_questions_data = {
+            "questions": [
+                {
+                    "question_text": "What is 2+2?",
+                    "choice_a": "2",
+                    "choice_b": "3",
+                    "choice_c": "4",
+                    "choice_d": "5",
+                    "correct_answer": "C",
+                    "chapter": "Chapter 1",
+                    "lesson": "Lesson 1",
+                    "difficulty": "Easy"
+                },
+                {
+                    "question_text": "What is Python?",
+                    "choice_a": "A snake",
+                    "choice_b": "A programming language",
+                    "choice_c": "A movie",
+                    "choice_d": "A food",
+                    "correct_answer": "B",
+                    "chapter": "Chapter 2",
+                    "lesson": "Lesson 1", 
+                    "difficulty": "Medium"
+                }
+            ]
+        }
+        
+        bulk_result = self.run_test(
+            "Bulk upload questions",
+            "POST",
+            "mc-questions/bulk-upload",
+            200,
+            bulk_questions_data
+        )
+        
+        if bulk_result:
+            created_count = bulk_result.get('created', 0)
+            errors = bulk_result.get('errors', [])
+            
+            print(f"   Created {created_count} questions")
+            if errors:
+                print(f"   Errors: {errors}")
+            
+            # Verify created count
+            if created_count == 2:
+                self.log_test("Bulk upload created correct number of questions", True)
+            else:
+                self.log_test("Bulk upload created correct number of questions", False, f"Expected 2, got {created_count}")
+            
+            # Verify no errors
+            if len(errors) == 0:
+                self.log_test("Bulk upload completed without errors", True)
+            else:
+                self.log_test("Bulk upload completed without errors", False, f"Got {len(errors)} errors")
+        
+        # Test 15: Bulk upload with invalid data
+        print("\n   TEST 15: Bulk upload with invalid data")
+        invalid_bulk_data = {
+            "questions": [
+                {
+                    "question_text": "Valid question?",
+                    "choice_a": "A",
+                    "choice_b": "B", 
+                    "choice_c": "C",
+                    "choice_d": "D",
+                    "correct_answer": "A",
+                    "chapter": "Test",
+                    "lesson": "Test",
+                    "difficulty": "Easy"
+                },
+                {
+                    # Missing required fields
+                    "question_text": "Invalid question?",
+                    "choice_a": "A"
+                    # Missing choice_b, choice_c, choice_d, correct_answer
+                }
+            ]
+        }
+        
+        invalid_bulk_result = self.run_test(
+            "Bulk upload with invalid data",
+            "POST",
+            "mc-questions/bulk-upload",
+            200,
+            invalid_bulk_data
+        )
+        
+        if invalid_bulk_result:
+            created_count = invalid_bulk_result.get('created', 0)
+            errors = invalid_bulk_result.get('errors', [])
+            
+            # Should create 1 valid question and have 1 error
+            if created_count == 1:
+                self.log_test("Bulk upload created valid questions only", True)
+            else:
+                self.log_test("Bulk upload created valid questions only", False, f"Expected 1, got {created_count}")
+            
+            if len(errors) == 1:
+                self.log_test("Bulk upload tracked invalid questions as errors", True)
+            else:
+                self.log_test("Bulk upload tracked invalid questions as errors", False, f"Expected 1 error, got {len(errors)}")
+        
+        # Test 16: Bulk upload teacher-only access
+        print("\n   TEST 16: Bulk upload teacher-only access")
+        if student:
+            original_token = self.session_token
+            self.session_token = student["token"]
+            
+            try:
+                self.run_test(
+                    "Student bulk upload (should be 403)",
+                    "POST",
+                    "mc-questions/bulk-upload",
+                    403,
+                    bulk_questions_data
+                )
+                
+            finally:
+                self.session_token = original_token
+        
+        # Test 17: Verify all questions persist in database
+        print("\n   TEST 17: Verify questions persist in database")
+        final_questions_list = self.run_test(
+            "List all questions after bulk upload",
+            "GET",
+            "mc-questions",
+            200
+        )
+        
+        if final_questions_list:
+            total_questions = len(final_questions_list)
+            print(f"   Total questions in database: {total_questions}")
+            
+            # Should have at least the questions we created
+            if total_questions >= 3:  # At least the bulk upload questions + some individual ones
+                self.log_test("Questions persist in database", True)
+            else:
+                self.log_test("Questions persist in database", False, f"Expected at least 3, got {total_questions}")
+        
+        print("   MC Question endpoint testing complete!")
+        
+        return {
+            "question1_id": question1_id,
+            "question2_id": question2_id, 
+            "question3_id": question3_id,
+            "total_questions": len(final_questions_list) if final_questions_list else 0
+        }
+
     def run_all_tests(self):
         """Run all API tests"""
         print("🚀 Starting CodeClass API Tests...")
