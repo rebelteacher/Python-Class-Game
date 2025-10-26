@@ -249,6 +249,7 @@ class ProblemCreate(BaseModel):
     category: str
     difficulty: str
     chapter: str = ""
+    lesson: str = ""
     problem_type: str = "Independent Practice"
     resources_link: str = ""
     csta_standard: str = ""
