@@ -29,6 +29,7 @@ export default function AssignmentLibrary({ user }) {
   const [searchTerm, setSearchTerm] = useState("");
   const [categoryFilter, setCategoryFilter] = useState("all");
   const [difficultyFilter, setDifficultyFilter] = useState("all");
+  const [chapterFilter, setChapterFilter] = useState("all");
   
   // Multi-select mode
   const [selectionMode, setSelectionMode] = useState(false);
