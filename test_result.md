@@ -103,12 +103,13 @@
 #====================================================================================================
 
 user_problem_statement: |
-  Implement chapter-based organization for the problem library:
-  1. Add freeform chapter field to problem creation form
-  2. Display chapters on problem cards in library
-  3. Add chapter filter that shows actual chapters from existing problems
-  4. Include chapter field in problem edit form
-  5. Organize problems by chapter to reduce dropdown clutter
+  Implement PDF Notes Library with hybrid private/shared approach:
+  1. Teachers can upload PDF resources (max 25MB)
+  2. Organize by chapter and category
+  3. Toggle to share notes with community or keep private
+  4. Filter by "My Notes", "Community", or "All"
+  5. PDF viewer for viewing notes in-browser
+  6. Support for monetization strategy (shared library adds value to paid tier)
 
 backend:
   - task: "Add chapter field to Problem model"
