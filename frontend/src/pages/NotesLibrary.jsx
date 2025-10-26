@@ -174,6 +174,24 @@ export default function NotesLibrary({ user }) {
         fileDataLength: response.data.file_data?.length,
         keys: Object.keys(response.data)
       });
+      
+      // Convert base64 to blob for better browser compatibility
+      if (response.data.file_data) {
+        try {
+          const byteCharacters = atob(response.data.file_data);
+          const byteNumbers = new Array(byteCharacters.length);
+          for (let i = 0; i < byteCharacters.length; i++) {
+            byteNumbers[i] = byteCharacters.charCodeAt(i);
+          }
+          const byteArray = new Uint8Array(byteNumbers);
+          const blob = new Blob([byteArray], { type: 'application/pdf' });
+          const blobUrl = URL.createObjectURL(blob);
+          response.data.pdfBlobUrl = blobUrl;
+        } catch (e) {
+          console.error("Error creating blob URL:", e);
+        }
+      }
+      
       setSelectedNote(response.data);
       setViewDialogOpen(true);
     } catch (error) {
