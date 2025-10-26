@@ -201,16 +201,21 @@ frontend:
 
 metadata:
   created_by: "main_agent"
-  version: "2.1"
-  test_sequence: 4
+  version: "3.0"
+  test_sequence: 5
   run_ui: false
 
 test_plan:
-  current_focus: []
+  current_focus:
+    - "Create MC Question model and CRUD endpoints"
+    - "Create MC Question bulk upload endpoint"
+    - "Create QuestionBank page component"
+    - "Add Question Bank route and navigation"
+    - "Create CSV template file for bulk upload"
   stuck_tasks: []
   test_all: false
   test_priority: "high_first"
-  testing_complete: true
+  testing_complete: false
 
 agent_communication:
   - agent: "main"
