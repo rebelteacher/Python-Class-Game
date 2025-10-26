@@ -2457,6 +2457,152 @@ async def get_classroom_battles(classroom_id: str, request: Request):
     
     return battles
 
+
+# ----- PDF Notes Routes -----
+
+@api_router.post("/notes")
+async def create_note(note: PDFNoteCreate, request: Request):
+    """Upload a new PDF note"""
+    user = await get_current_user(request)
+    
+    if user["role"] != "teacher":
+        raise HTTPException(status_code=403, detail="Only teachers can upload notes")
+    
+    # Validate file size (25MB limit)
+    if note.file_size > 25 * 1024 * 1024:
+        raise HTTPException(status_code=400, detail="File size exceeds 25MB limit")
+    
+    # Create note document
+    pdf_note = PDFNote(
+        title=note.title,
+        description=note.description,
+        chapter=note.chapter,
+        category=note.category,
+        file_data=note.file_data,
+        file_size=note.file_size,
+        creator_id=user["id"],
+        creator_name=user["name"],
+        is_shared=note.is_shared,
+        tags=note.tags
+    )
+    
+    note_dict = pdf_note.model_dump()
+    note_dict["created_at"] = note_dict["created_at"].isoformat()
+    
+    await db.pdf_notes.insert_one(note_dict)
+    
+    return {"id": pdf_note.id, "message": "Note uploaded successfully"}
+
+
+@api_router.get("/notes")
+async def get_notes(
+    request: Request,
+    filter: Optional[str] = "all",  # "mine", "shared", "all"
+    chapter: Optional[str] = None,
+    category: Optional[str] = None,
+    search: Optional[str] = None
+):
+    """Get PDF notes with filters"""
+    user = await get_current_user(request)
+    
+    query = {}
+    
+    # Filter by ownership/sharing
+    if filter == "mine":
+        query["creator_id"] = user["id"]
+    elif filter == "shared":
+        query["is_shared"] = True
+    elif filter == "all":
+        # Show user's own notes + shared notes
+        query["$or"] = [
+            {"creator_id": user["id"]},
+            {"is_shared": True}
+        ]
+    
+    # Additional filters
+    if chapter:
+        query["chapter"] = chapter
+    if category:
+        query["category"] = category
+    if search:
+        query["$or"] = [
+            {"title": {"$regex": search, "$options": "i"}},
+            {"description": {"$regex": search, "$options": "i"}},
+            {"tags": {"$in": [search]}}
+        ]
+    
+    notes = await db.pdf_notes.find(query, {"_id": 0, "file_data": 0}).to_list(length=None)
+    
+    # Sort by created_at descending
+    notes.sort(key=lambda x: x.get("created_at", ""), reverse=True)
+    
+    return notes
+
+
+@api_router.get("/notes/{note_id}")
+async def get_note_detail(note_id: str, request: Request):
+    """Get specific note details including file data"""
+    user = await get_current_user(request)
+    
+    note = await db.pdf_notes.find_one({"id": note_id}, {"_id": 0})
+    
+    if not note:
+        raise HTTPException(status_code=404, detail="Note not found")
+    
+    # Check access: owner or shared
+    if note["creator_id"] != user["id"] and not note["is_shared"]:
+        raise HTTPException(status_code=403, detail="You don't have access to this note")
+    
+    return note
+
+
+@api_router.put("/notes/{note_id}")
+async def update_note(note_id: str, update: PDFNoteUpdate, request: Request):
+    """Update note metadata"""
+    user = await get_current_user(request)
+    
+    if user["role"] != "teacher":
+        raise HTTPException(status_code=403, detail="Only teachers can update notes")
+    
+    # Check ownership
+    note = await db.pdf_notes.find_one({"id": note_id})
+    if not note:
+        raise HTTPException(status_code=404, detail="Note not found")
+    
+    if note["creator_id"] != user["id"]:
+        raise HTTPException(status_code=403, detail="You can only update your own notes")
+    
+    # Build update dict
+    update_dict = {k: v for k, v in update.model_dump().items() if v is not None}
+    
+    if update_dict:
+        await db.pdf_notes.update_one({"id": note_id}, {"$set": update_dict})
+    
+    updated_note = await db.pdf_notes.find_one({"id": note_id}, {"_id": 0, "file_data": 0})
+    return updated_note
+
+
+@api_router.delete("/notes/{note_id}")
+async def delete_note(note_id: str, request: Request):
+    """Delete a note"""
+    user = await get_current_user(request)
+    
+    if user["role"] != "teacher":
+        raise HTTPException(status_code=403, detail="Only teachers can delete notes")
+    
+    # Check ownership
+    note = await db.pdf_notes.find_one({"id": note_id})
+    if not note:
+        raise HTTPException(status_code=404, detail="Note not found")
+    
+    if note["creator_id"] != user["id"]:
+        raise HTTPException(status_code=403, detail="You can only delete your own notes")
+    
+    await db.pdf_notes.delete_one({"id": note_id})
+    
+    return {"message": "Note deleted successfully"}
+
+
 # Include the router in the main app
 app.include_router(api_router)
 
