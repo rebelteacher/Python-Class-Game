@@ -151,6 +151,15 @@ function App() {
               />
               
               <Route
+                path="/notes"
+                element={
+                  <ProtectedRoute user={user} requiredRole="teacher">
+                    <NotesLibrary user={user} />
+                  </ProtectedRoute>
+                }
+              />
+              
+              <Route
                 path="/library/import/:assignmentId"
                 element={
                   <ProtectedRoute user={user} requiredRole="teacher">
