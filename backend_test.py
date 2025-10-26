@@ -1947,6 +1947,9 @@ class CodeClassAPITester:
         # Test code execution
         self.test_code_execution()
         
+        # Test chapter organization feature
+        self.test_chapter_organization_endpoints()
+        
         # Test critical bug fixes
         self.test_403_forbidden_fix(assignment_id, classroom['id'])
         self.test_lives_system(assignment_id, classroom['id'])
