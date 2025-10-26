@@ -314,6 +314,22 @@ export default function NotesLibrary({ user }) {
                   </div>
 
                   <div>
+                    <Label htmlFor="resourceType">Resource Type *</Label>
+                    <Select value={newNote.resource_type} onValueChange={(val) => setNewNote({ ...newNote, resource_type: val })}>
+                      <SelectTrigger id="resourceType" className="mt-1">
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="student_resource">Student Resource (Study Guides, References)</SelectItem>
+                        <SelectItem value="teacher_resource">Teacher Resource (Answer Keys, Solutions)</SelectItem>
+                      </SelectContent>
+                    </Select>
+                    <p className="text-xs text-gray-500 mt-1">
+                      Student resources can be downloaded. Teacher resources are view-only.
+                    </p>
+                  </div>
+
+                  <div>
                     <Label htmlFor="pdfFile">PDF File *</Label>
                     <Input
                       id="pdfFile"
