@@ -2352,6 +2352,9 @@ startxref
         # Test chapter organization feature
         self.test_chapter_organization_endpoints()
         
+        # Test PDF Notes Library
+        self.test_pdf_notes_endpoints()
+        
         # Test critical bug fixes
         self.test_403_forbidden_fix(assignment_id, classroom['id'])
         self.test_lives_system(assignment_id, classroom['id'])
