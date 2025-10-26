@@ -258,6 +258,8 @@ class Assignment(BaseModel):
     id: str = Field(default_factory=lambda: str(uuid.uuid4()))
     title: str  # e.g., "Week 1 - Variables & Loops"
     description: str  # e.g., "Complete all 5 problems to master the basics"
+    chapter: str = ""  # e.g., "Chapter 1"
+    lesson: str = ""  # e.g., "Lesson 1"
     teacher_id: str
     problem_ids: List[str]  # References to Problem documents
     classroom_ids: List[str]  # Can be assigned to multiple classrooms
@@ -272,6 +274,8 @@ class Assignment(BaseModel):
 class AssignmentCreate(BaseModel):
     title: str
     description: str
+    chapter: str = ""
+    lesson: str = ""
     problem_ids: List[str]  # Multiple problems from library
     classroom_ids: List[str]  # Multiple classrooms
     available_date: Optional[str] = None  # ISO format datetime
