@@ -1593,6 +1593,332 @@ class CodeClassAPITester:
             "students2": students2
         }
 
+    def test_chapter_organization_endpoints(self):
+        """Test chapter organization feature for problem library"""
+        print("\n📚 Testing Chapter Organization Endpoints...")
+        
+        # Test data for chapter organization
+        test_problems = []
+        
+        # Test 1: Create problem with chapter field
+        print("\n   TEST 1: Create problem with chapter field")
+        problem_with_chapter = {
+            "title": f"Chapter Test Problem 1 - {datetime.now().strftime('%H%M%S')}",
+            "description": "A problem to test chapter organization",
+            "starter_code": "def solve_problem():\n    # Your code here\n    pass",
+            "solution_code": "def solve_problem():\n    return 'Chapter 1 solution'",
+            "expected_output": "Chapter 1 solution",
+            "category": "Lesson 1.1 - Introduction",
+            "difficulty": "Easy",
+            "chapter": "Chapter 1: Basics",
+            "csta_standard": "1A-AP-15",
+            "problem_type": "Independent Practice",
+            "resources_link": ""
+        }
+        
+        problem1 = self.run_test(
+            "Create problem with chapter 'Chapter 1: Basics'",
+            "POST",
+            "problems",
+            200,
+            problem_with_chapter
+        )
+        
+        if problem1:
+            test_problems.append(problem1)
+            chapter = problem1.get('chapter', '')
+            if chapter == "Chapter 1: Basics":
+                self.log_test("Problem created with correct chapter field", True)
+            else:
+                self.log_test("Problem created with correct chapter field", False, f"Expected 'Chapter 1: Basics', got '{chapter}'")
+        
+        # Test 2: Create problem without chapter (empty string)
+        print("\n   TEST 2: Create problem without chapter field")
+        problem_without_chapter = {
+            "title": f"No Chapter Problem - {datetime.now().strftime('%H%M%S')}",
+            "description": "A problem without chapter",
+            "starter_code": "def no_chapter():\n    pass",
+            "solution_code": "def no_chapter():\n    return 'no chapter'",
+            "expected_output": "no chapter",
+            "category": "Lesson 2.1 - Variables",
+            "difficulty": "Medium",
+            "chapter": "",  # Empty chapter
+            "csta_standard": "1A-AP-15",
+            "problem_type": "Class Practice",
+            "resources_link": ""
+        }
+        
+        problem2 = self.run_test(
+            "Create problem with empty chapter field",
+            "POST",
+            "problems",
+            200,
+            problem_without_chapter
+        )
+        
+        if problem2:
+            test_problems.append(problem2)
+            chapter = problem2.get('chapter', '')
+            if chapter == "":
+                self.log_test("Problem created with empty chapter field", True)
+            else:
+                self.log_test("Problem created with empty chapter field", False, f"Expected empty string, got '{chapter}'")
+        
+        # Test 3: Create more problems with different chapters for filtering tests
+        print("\n   TEST 3: Create additional problems with various chapters")
+        additional_problems = [
+            {
+                "title": f"Unit Test Problem - {datetime.now().strftime('%H%M%S')}",
+                "description": "Problem for Unit 2",
+                "starter_code": "def unit_test():\n    pass",
+                "solution_code": "def unit_test():\n    return 'unit 2'",
+                "expected_output": "unit 2",
+                "category": "Lesson 2.2 - Loops",
+                "difficulty": "Hard",
+                "chapter": "Unit 2: Control Flow",
+                "csta_standard": "1A-AP-15",
+                "problem_type": "Independent Practice"
+            },
+            {
+                "title": f"Module Problem - {datetime.now().strftime('%H%M%S')}",
+                "description": "Problem for Module A",
+                "starter_code": "def module_test():\n    pass",
+                "solution_code": "def module_test():\n    return 'module a'",
+                "expected_output": "module a",
+                "category": "Lesson 3.1 - Functions",
+                "difficulty": "Easy",
+                "chapter": "Module A: Functions",
+                "csta_standard": "1A-AP-15",
+                "problem_type": "Paired Programming"
+            },
+            {
+                "title": f"Another Chapter 1 Problem - {datetime.now().strftime('%H%M%S')}",
+                "description": "Another problem for Chapter 1",
+                "starter_code": "def another_basic():\n    pass",
+                "solution_code": "def another_basic():\n    return 'basic 2'",
+                "expected_output": "basic 2",
+                "category": "Lesson 1.2 - Variables",
+                "difficulty": "Medium",
+                "chapter": "Chapter 1: Basics",
+                "csta_standard": "1A-AP-15",
+                "problem_type": "Debugging"
+            }
+        ]
+        
+        for i, problem_data in enumerate(additional_problems):
+            problem = self.run_test(
+                f"Create additional problem {i+1}",
+                "POST",
+                "problems",
+                200,
+                problem_data
+            )
+            if problem:
+                test_problems.append(problem)
+        
+        # Test 4: Get all problems (verify chapter values are returned)
+        print("\n   TEST 4: Get all problems with chapter values")
+        all_problems = self.run_test(
+            "Get all problems",
+            "GET",
+            "problems",
+            200
+        )
+        
+        if all_problems and isinstance(all_problems, list):
+            # Check that our test problems are included with correct chapters
+            our_problem_ids = [p.get('id') for p in test_problems if p]
+            found_problems = [p for p in all_problems if p.get('id') in our_problem_ids]
+            
+            if len(found_problems) >= len([p for p in test_problems if p]):
+                self.log_test("All created problems found in GET /problems", True)
+                
+                # Verify chapter fields are present and correct
+                chapter_correct = True
+                for problem in found_problems:
+                    if 'chapter' not in problem:
+                        chapter_correct = False
+                        break
+                
+                if chapter_correct:
+                    self.log_test("All problems have chapter field in response", True)
+                else:
+                    self.log_test("All problems have chapter field in response", False, "Some problems missing chapter field")
+            else:
+                self.log_test("All created problems found in GET /problems", False, f"Expected {len(test_problems)}, found {len(found_problems)}")
+        
+        # Test 5: Filter problems by chapter
+        print("\n   TEST 5: Filter problems by chapter")
+        
+        # Filter by "Chapter 1: Basics"
+        chapter1_problems = self.run_test(
+            "Filter problems by 'Chapter 1: Basics'",
+            "GET",
+            "problems?chapter=Chapter 1: Basics",
+            200
+        )
+        
+        if chapter1_problems and isinstance(chapter1_problems, list):
+            # Should find at least 2 problems with "Chapter 1: Basics"
+            chapter1_count = len([p for p in chapter1_problems if p.get('chapter') == 'Chapter 1: Basics'])
+            if chapter1_count >= 2:
+                self.log_test("Chapter filter returns correct problems for 'Chapter 1: Basics'", True)
+            else:
+                self.log_test("Chapter filter returns correct problems for 'Chapter 1: Basics'", False, f"Expected at least 2, got {chapter1_count}")
+            
+            # Verify all returned problems have the correct chapter
+            all_correct_chapter = all(p.get('chapter') == 'Chapter 1: Basics' for p in chapter1_problems)
+            if all_correct_chapter:
+                self.log_test("All filtered problems have correct chapter", True)
+            else:
+                self.log_test("All filtered problems have correct chapter", False, "Some problems have wrong chapter")
+        
+        # Filter by "Unit 2: Control Flow"
+        unit2_problems = self.run_test(
+            "Filter problems by 'Unit 2: Control Flow'",
+            "GET",
+            "problems?chapter=Unit 2: Control Flow",
+            200
+        )
+        
+        if unit2_problems and isinstance(unit2_problems, list):
+            unit2_count = len([p for p in unit2_problems if p.get('chapter') == 'Unit 2: Control Flow'])
+            if unit2_count >= 1:
+                self.log_test("Chapter filter returns problems for 'Unit 2: Control Flow'", True)
+            else:
+                self.log_test("Chapter filter returns problems for 'Unit 2: Control Flow'", False, f"Expected at least 1, got {unit2_count}")
+        
+        # Filter by non-existent chapter
+        nonexistent_problems = self.run_test(
+            "Filter problems by non-existent chapter",
+            "GET",
+            "problems?chapter=Non-existent Chapter",
+            200
+        )
+        
+        if nonexistent_problems and isinstance(nonexistent_problems, list):
+            if len(nonexistent_problems) == 0:
+                self.log_test("Filter by non-existent chapter returns empty list", True)
+            else:
+                self.log_test("Filter by non-existent chapter returns empty list", False, f"Expected 0, got {len(nonexistent_problems)}")
+        
+        # Test 6: Update problem chapter
+        print("\n   TEST 6: Update problem chapter")
+        
+        if test_problems and test_problems[0]:
+            problem_id = test_problems[0].get('id')
+            
+            # Update the first problem's chapter
+            updated_problem_data = {
+                "title": test_problems[0].get('title'),
+                "description": test_problems[0].get('description'),
+                "starter_code": test_problems[0].get('starter_code'),
+                "solution_code": test_problems[0].get('solution_code'),
+                "expected_output": test_problems[0].get('expected_output'),
+                "category": test_problems[0].get('category'),
+                "difficulty": test_problems[0].get('difficulty'),
+                "chapter": "Updated Chapter: Advanced Topics",  # New chapter
+                "csta_standard": test_problems[0].get('csta_standard'),
+                "problem_type": test_problems[0].get('problem_type'),
+                "resources_link": test_problems[0].get('resources_link', "")
+            }
+            
+            updated_problem = self.run_test(
+                "Update problem chapter field",
+                "PUT",
+                f"problems/{problem_id}",
+                200,
+                updated_problem_data
+            )
+            
+            if updated_problem:
+                new_chapter = updated_problem.get('chapter', '')
+                if new_chapter == "Updated Chapter: Advanced Topics":
+                    self.log_test("Problem chapter updated successfully", True)
+                else:
+                    self.log_test("Problem chapter updated successfully", False, f"Expected 'Updated Chapter: Advanced Topics', got '{new_chapter}'")
+                
+                # Verify the update persisted by fetching the problem again
+                verify_problem = self.run_test(
+                    "Verify updated problem chapter persisted",
+                    "GET",
+                    f"problems?chapter=Updated Chapter: Advanced Topics",
+                    200
+                )
+                
+                if verify_problem and isinstance(verify_problem, list):
+                    found_updated = any(p.get('id') == problem_id for p in verify_problem)
+                    if found_updated:
+                        self.log_test("Updated chapter persisted in database", True)
+                    else:
+                        self.log_test("Updated chapter persisted in database", False, "Updated problem not found with new chapter")
+        
+        # Test 7: Combined filters (chapter + other filters)
+        print("\n   TEST 7: Combined filters (chapter + difficulty)")
+        
+        combined_filter_problems = self.run_test(
+            "Filter by chapter and difficulty",
+            "GET",
+            "problems?chapter=Chapter 1: Basics&difficulty=Easy",
+            200
+        )
+        
+        if combined_filter_problems and isinstance(combined_filter_problems, list):
+            # Verify all returned problems match both filters
+            all_match = all(
+                p.get('chapter') == 'Chapter 1: Basics' and p.get('difficulty') == 'Easy'
+                for p in combined_filter_problems
+            )
+            if all_match:
+                self.log_test("Combined chapter and difficulty filter works correctly", True)
+            else:
+                self.log_test("Combined chapter and difficulty filter works correctly", False, "Some problems don't match both filters")
+        
+        # Test 8: Authentication - Only teachers can create/update problems
+        print("\n   TEST 8: Authentication - Student cannot create/update problems")
+        
+        # Create a student user for testing
+        student = self.create_student_user("chaptertest")
+        if student:
+            original_token = self.session_token
+            self.session_token = student["token"]
+            
+            try:
+                # Try to create problem as student (should get 403)
+                student_problem_data = {
+                    "title": "Student Problem",
+                    "description": "Student trying to create problem",
+                    "starter_code": "pass",
+                    "solution_code": "return 'student'",
+                    "category": "Test",
+                    "difficulty": "Easy",
+                    "chapter": "Student Chapter"
+                }
+                
+                self.run_test(
+                    "Student create problem (should be 403)",
+                    "POST",
+                    "problems",
+                    403,
+                    student_problem_data
+                )
+                
+                # Try to update problem as student (should get 403)
+                if test_problems and test_problems[0]:
+                    problem_id = test_problems[0].get('id')
+                    self.run_test(
+                        "Student update problem (should be 403)",
+                        "PUT",
+                        f"problems/{problem_id}",
+                        403,
+                        student_problem_data
+                    )
+                
+            finally:
+                self.session_token = original_token
+        
+        print("   ✅ Chapter organization tests completed")
+
     def run_all_tests(self):
         """Run all API tests"""
         print("🚀 Starting CodeClass API Tests...")
