@@ -2747,6 +2747,348 @@ async def delete_note(note_id: str, request: Request):
     return {"message": "Note deleted successfully"}
 
 
+# ----- Multiple Choice Testing Routes -----
+
+@api_router.post("/mc-questions")
+async def create_mc_question(question: MCQuestionCreate, request: Request):
+    """Create a multiple choice question"""
+    user = await get_current_user(request)
+    
+    if user["role"] != "teacher":
+        raise HTTPException(status_code=403, detail="Only teachers can create questions")
+    
+    mc_question = MCQuestion(
+        question_text=question.question_text,
+        choice_a=question.choice_a,
+        choice_b=question.choice_b,
+        choice_c=question.choice_c,
+        choice_d=question.choice_d,
+        correct_answer=question.correct_answer.upper(),
+        chapter=question.chapter,
+        lesson=question.lesson,
+        difficulty=question.difficulty,
+        creator_id=user["id"],
+        creator_name=user["name"]
+    )
+    
+    question_dict = mc_question.model_dump()
+    question_dict["created_at"] = question_dict["created_at"].isoformat()
+    
+    await db.mc_questions.insert_one(question_dict)
+    
+    return {"id": mc_question.id, "message": "Question created successfully"}
+
+
+@api_router.get("/mc-questions")
+async def get_mc_questions(
+    request: Request,
+    chapter: Optional[str] = None,
+    lesson: Optional[str] = None,
+    difficulty: Optional[str] = None
+):
+    """Get all MC questions for current teacher"""
+    user = await get_current_user(request)
+    
+    if user["role"] != "teacher":
+        raise HTTPException(status_code=403, detail="Only teachers can access questions")
+    
+    query = {"creator_id": user["id"]}
+    
+    if chapter:
+        query["chapter"] = chapter
+    if lesson:
+        query["lesson"] = lesson
+    if difficulty:
+        query["difficulty"] = difficulty
+    
+    questions = await db.mc_questions.find(query, {"_id": 0}).to_list(length=None)
+    
+    return questions
+
+
+@api_router.put("/mc-questions/{question_id}")
+async def update_mc_question(question_id: str, question: MCQuestionCreate, request: Request):
+    """Update an MC question"""
+    user = await get_current_user(request)
+    
+    if user["role"] != "teacher":
+        raise HTTPException(status_code=403, detail="Only teachers can update questions")
+    
+    existing = await db.mc_questions.find_one({"id": question_id})
+    if not existing:
+        raise HTTPException(status_code=404, detail="Question not found")
+    
+    if existing["creator_id"] != user["id"]:
+        raise HTTPException(status_code=403, detail="Access denied")
+    
+    await db.mc_questions.update_one(
+        {"id": question_id},
+        {"$set": question.model_dump()}
+    )
+    
+    return {"message": "Question updated successfully"}
+
+
+@api_router.delete("/mc-questions/{question_id}")
+async def delete_mc_question(question_id: str, request: Request):
+    """Delete an MC question"""
+    user = await get_current_user(request)
+    
+    if user["role"] != "teacher":
+        raise HTTPException(status_code=403, detail="Only teachers can delete questions")
+    
+    existing = await db.mc_questions.find_one({"id": question_id})
+    if not existing:
+        raise HTTPException(status_code=404, detail="Question not found")
+    
+    if existing["creator_id"] != user["id"]:
+        raise HTTPException(status_code=403, detail="Access denied")
+    
+    await db.mc_questions.delete_one({"id": question_id})
+    
+    return {"message": "Question deleted successfully"}
+
+
+@api_router.post("/mc-tests")
+async def create_mc_test(test: MCTestCreate, request: Request):
+    """Create and assign a multiple choice test"""
+    user = await get_current_user(request)
+    
+    if user["role"] != "teacher":
+        raise HTTPException(status_code=403, detail="Only teachers can create tests")
+    
+    # Validate that teacher owns all questions
+    for q_id in test.question_pool_ids:
+        question = await db.mc_questions.find_one({"id": q_id})
+        if not question or question["creator_id"] != user["id"]:
+            raise HTTPException(status_code=400, detail=f"Invalid question ID: {q_id}")
+    
+    # Validate num_questions <= pool size
+    if test.num_questions > len(test.question_pool_ids):
+        raise HTTPException(status_code=400, detail="Number of questions exceeds pool size")
+    
+    # Parse dates
+    available_date = None
+    due_date = None
+    if test.available_date:
+        available_date = datetime.fromisoformat(test.available_date.replace('Z', '+00:00'))
+    if test.due_date:
+        due_date = datetime.fromisoformat(test.due_date.replace('Z', '+00:00'))
+    
+    mc_test = MCTest(
+        title=test.title,
+        description=test.description,
+        chapter=test.chapter,
+        lesson=test.lesson,
+        teacher_id=user["id"],
+        question_pool_ids=test.question_pool_ids,
+        num_questions=test.num_questions,
+        time_limit_minutes=test.time_limit_minutes,
+        classroom_ids=test.classroom_ids,
+        available_date=available_date,
+        due_date=due_date
+    )
+    
+    test_dict = mc_test.model_dump()
+    test_dict["created_at"] = test_dict["created_at"].isoformat()
+    if test_dict.get("available_date"):
+        test_dict["available_date"] = test_dict["available_date"].isoformat()
+    if test_dict.get("due_date"):
+        test_dict["due_date"] = test_dict["due_date"].isoformat()
+    
+    await db.mc_tests.insert_one(test_dict)
+    
+    return {"id": mc_test.id, "message": "Test created successfully"}
+
+
+@api_router.get("/mc-tests/classroom/{classroom_id}")
+async def get_classroom_tests(classroom_id: str, request: Request):
+    """Get all tests for a classroom"""
+    user = await get_current_user(request)
+    
+    # Verify classroom access
+    classroom = await db.classrooms.find_one({"id": classroom_id})
+    if not classroom:
+        raise HTTPException(status_code=404, detail="Classroom not found")
+    
+    if user["role"] == "teacher":
+        if classroom["teacher_id"] != user["id"]:
+            raise HTTPException(status_code=403, detail="Access denied")
+    else:
+        if user["id"] not in classroom.get("students", []):
+            raise HTTPException(status_code=403, detail="Access denied")
+    
+    tests = await db.mc_tests.find(
+        {"classroom_ids": classroom_id},
+        {"_id": 0}
+    ).to_list(length=None)
+    
+    return tests
+
+
+@api_router.get("/mc-tests/{test_id}/start")
+async def start_mc_test(test_id: str, request: Request):
+    """Start a test - get randomized questions"""
+    user = await get_current_user(request)
+    
+    if user["role"] != "student":
+        raise HTTPException(status_code=403, detail="Only students can take tests")
+    
+    # Get test
+    test = await db.mc_tests.find_one({"id": test_id})
+    if not test:
+        raise HTTPException(status_code=404, detail="Test not found")
+    
+    # Check if already completed
+    existing_attempt = await db.mc_test_attempts.find_one({
+        "test_id": test_id,
+        "student_id": user["id"],
+        "is_complete": True
+    })
+    if existing_attempt:
+        raise HTTPException(status_code=400, detail="Test already completed")
+    
+    # Randomly select questions
+    import random
+    selected_question_ids = random.sample(test["question_pool_ids"], test["num_questions"])
+    
+    # Get full question data and randomize choices
+    questions_data = []
+    randomized_choices = {}
+    
+    for q_id in selected_question_ids:
+        question = await db.mc_questions.find_one({"id": q_id}, {"_id": 0})
+        if question:
+            # Randomize answer order
+            choices = ["A", "B", "C", "D"]
+            random.shuffle(choices)
+            randomized_choices[q_id] = choices
+            
+            # Remap choices for display
+            choice_map = {
+                choices[0]: question["choice_a"],
+                choices[1]: question["choice_b"],
+                choices[2]: question["choice_c"],
+                choices[3]: question["choice_d"]
+            }
+            
+            questions_data.append({
+                "id": q_id,
+                "question_text": question["question_text"],
+                "choices": choice_map,
+                "choice_order": choices
+            })
+    
+    # Create attempt record
+    attempt = MCTestAttempt(
+        test_id=test_id,
+        student_id=user["id"],
+        randomized_question_ids=selected_question_ids,
+        randomized_choices=randomized_choices,
+        student_answers={},
+        score=0.0,
+        is_complete=False
+    )
+    
+    attempt_dict = attempt.model_dump()
+    attempt_dict["submitted_at"] = attempt_dict["submitted_at"].isoformat()
+    
+    await db.mc_test_attempts.insert_one(attempt_dict)
+    
+    return {
+        "attempt_id": attempt.id,
+        "test_title": test["title"],
+        "test_description": test["description"],
+        "time_limit_minutes": test["time_limit_minutes"],
+        "num_questions": len(questions_data),
+        "questions": questions_data
+    }
+
+
+@api_router.post("/mc-tests/{test_id}/submit")
+async def submit_mc_test(test_id: str, submission: MCTestSubmission, request: Request):
+    """Submit test answers and get score"""
+    user = await get_current_user(request)
+    
+    if user["role"] != "student":
+        raise HTTPException(status_code=403, detail="Only students can submit tests")
+    
+    # Get the attempt
+    attempt = await db.mc_test_attempts.find_one({
+        "test_id": test_id,
+        "student_id": user["id"],
+        "is_complete": False
+    })
+    
+    if not attempt:
+        raise HTTPException(status_code=404, detail="Test attempt not found or already completed")
+    
+    # Grade the test
+    correct_count = 0
+    total_questions = len(attempt["randomized_question_ids"])
+    
+    for q_id in attempt["randomized_question_ids"]:
+        question = await db.mc_questions.find_one({"id": q_id})
+        if question:
+            student_answer = submission.answers.get(q_id, "")
+            if student_answer == question["correct_answer"]:
+                correct_count += 1
+    
+    score = (correct_count / total_questions * 100) if total_questions > 0 else 0
+    
+    # Update attempt
+    await db.mc_test_attempts.update_one(
+        {"id": attempt["id"]},
+        {
+            "$set": {
+                "student_answers": submission.answers,
+                "score": score,
+                "is_complete": True,
+                "submitted_at": datetime.now(timezone.utc).isoformat()
+            }
+        }
+    )
+    
+    return {
+        "score": round(score, 1),
+        "message": "Test submitted successfully"
+    }
+
+
+@api_router.get("/mc-tests/{test_id}/results")
+async def get_test_results(test_id: str, request: Request):
+    """Get test results for teacher or student"""
+    user = await get_current_user(request)
+    
+    test = await db.mc_tests.find_one({"id": test_id})
+    if not test:
+        raise HTTPException(status_code=404, detail="Test not found")
+    
+    if user["role"] == "teacher":
+        # Teacher gets all student results
+        if test["teacher_id"] != user["id"]:
+            raise HTTPException(status_code=403, detail="Access denied")
+        
+        attempts = await db.mc_test_attempts.find(
+            {"test_id": test_id, "is_complete": True},
+            {"_id": 0}
+        ).to_list(length=None)
+        
+        return {"results": attempts}
+    else:
+        # Student gets only their result
+        attempt = await db.mc_test_attempts.find_one({
+            "test_id": test_id,
+            "student_id": user["id"],
+            "is_complete": True
+        }, {"_id": 0})
+        
+        if not attempt:
+            return {"score": None, "message": "Test not completed"}
+        
+        return {"score": attempt["score"]}
+
+
 # Include the router in the main app
 app.include_router(api_router)
 
