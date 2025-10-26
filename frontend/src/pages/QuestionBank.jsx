@@ -24,6 +24,8 @@ export default function QuestionBank({ user }) {
   const [editingQuestion, setEditingQuestion] = useState(null);
   const [expandedChapters, setExpandedChapters] = useState(new Set());
   const [expandedLessons, setExpandedLessons] = useState(new Set());
+  const [bulkUploadDialogOpen, setBulkUploadDialogOpen] = useState(false);
+  const [uploading, setUploading] = useState(false);
   
   const [newQuestion, setNewQuestion] = useState({
     question_text: "",
