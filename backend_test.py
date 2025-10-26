@@ -2880,6 +2880,9 @@ startxref
         # Test Teacher Reports endpoints
         self.test_teacher_reports_endpoints()
         
+        # Test MC Question endpoints
+        self.test_mc_question_endpoints()
+        
         # Print summary
         print(f"\n📊 Test Summary:")
         print(f"   Total tests: {self.tests_run}")
