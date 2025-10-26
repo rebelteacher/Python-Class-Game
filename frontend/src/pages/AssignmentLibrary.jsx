@@ -908,6 +908,8 @@ function AssignmentBuilder({ open, onOpenChange, selectedProblems, problems, onS
   const [selectedClassrooms, setSelectedClassrooms] = useState([]);
   const [assignmentTitle, setAssignmentTitle] = useState("");
   const [assignmentDescription, setAssignmentDescription] = useState("");
+  const [chapter, setChapter] = useState("");
+  const [lesson, setLesson] = useState("");
   const [availableDate, setAvailableDate] = useState("");
   const [availableTime, setAvailableTime] = useState("00:00");
   const [dueDate, setDueDate] = useState("");
