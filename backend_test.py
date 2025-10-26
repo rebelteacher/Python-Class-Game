@@ -110,7 +110,7 @@ class CodeClassAPITester:
                     "expires_at": datetime.now(timezone.utc) + timedelta(days=7),
                     "created_at": datetime.now(timezone.utc).isoformat()
                 }
-                await db.user_sessions.insert_one(session_doc)
+                await db.sessions.insert_one(session_doc)
                 
                 client.close()
                 return True
@@ -386,7 +386,7 @@ class CodeClassAPITester:
                     "expires_at": datetime.now(timezone.utc) + timedelta(days=7),
                     "created_at": datetime.now(timezone.utc).isoformat()
                 }
-                await db.user_sessions.insert_one(session_doc)
+                await db.sessions.insert_one(session_doc)
                 
                 client.close()
                 return True
@@ -1072,7 +1072,7 @@ class CodeClassAPITester:
                         "expires_at": datetime.now(timezone.utc) + timedelta(days=7),
                         "created_at": datetime.now(timezone.utc).isoformat()
                     }
-                    await db.user_sessions.insert_one(session_doc)
+                    await db.sessions.insert_one(session_doc)
                     
                     # Add to classroom
                     await db.classrooms.update_one(
@@ -1552,7 +1552,7 @@ class CodeClassAPITester:
                     "expires_at": datetime.now(timezone.utc) + timedelta(days=7),
                     "created_at": datetime.now(timezone.utc).isoformat()
                 }
-                await db.user_sessions.insert_one(session_doc)
+                await db.sessions.insert_one(session_doc)
                 
                 client.close()
                 return True
