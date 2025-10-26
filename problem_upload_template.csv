@@ -1,0 +1,10 @@
+title,description,starter_code,solution_code,expected_output,category,difficulty,chapter,lesson,problem_type,csta_standard,resources_link
+Hello World,Print Hello World to the console,# Write your code here,print('Hello World'),Hello World,Basics,Easy,Chapter 1,Lesson 1,Class Practice,3A-AP-16,
+Variables Practice,Create and print variables,# Define variables here,name = 'Alice'
+print(name),Alice,Variables,Easy,Chapter 1,Lesson 2,Independent Practice,3A-AP-13,
+Loop Example,Use a for loop to print numbers 1-5,# Write a for loop,for i in range(1 6):
+    print(i),"1
+2
+3
+4
+5",Loops,Medium,Chapter 2,Lesson 1,Paired Programming,3A-AP-15,https://drive.google.com/example
