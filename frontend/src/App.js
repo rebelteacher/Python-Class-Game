@@ -153,7 +153,7 @@ function App() {
               <Route
                 path="/notes"
                 element={
-                  <ProtectedRoute user={user} requiredRole="teacher">
+                  <ProtectedRoute user={user}>
                     <NotesLibrary user={user} />
                   </ProtectedRoute>
                 }
