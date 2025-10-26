@@ -409,20 +409,16 @@ export default function AssignmentLibrary({ user }) {
                     </div>
 
                     <div>
-                      <Label htmlFor="chapter">Chapter</Label>
-                      <Select value={newProblem.chapter || ""} onValueChange={(val) => setNewProblem({ ...newProblem, chapter: val })}>
-                        <SelectTrigger data-testid="lib-chapter-select">
-                          <SelectValue placeholder="Select chapter..." />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="">No Chapter</SelectItem>
-                          {[...Array(20)].map((_, i) => (
-                            <SelectItem key={i + 1} value={`Chapter ${i + 1}`}>
-                              Chapter {i + 1}
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
+                      <Label htmlFor="chapter">Chapter (Optional)</Label>
+                      <Input
+                        data-testid="lib-chapter-input"
+                        id="chapter"
+                        placeholder="e.g., Chapter 1, Unit 2, Module A"
+                        value={newProblem.chapter}
+                        onChange={(e) => setNewProblem({ ...newProblem, chapter: e.target.value })}
+                        className="mt-1"
+                      />
+                      <p className="text-xs text-gray-500 mt-1">Organize problems by chapter/unit</p>
                     </div>
                   </div>
 
