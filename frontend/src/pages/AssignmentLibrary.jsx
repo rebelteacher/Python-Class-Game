@@ -164,6 +164,7 @@ export default function AssignmentLibrary({ user }) {
           category: editingProblem.category,
           difficulty: editingProblem.difficulty,
           chapter: editingProblem.chapter || "",
+          lesson: editingProblem.lesson || "",
           problem_type: editingProblem.problem_type,
           resources_link: editingProblem.resources_link,
           csta_standard: editingProblem.csta_standard
