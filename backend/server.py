@@ -1101,6 +1101,30 @@ async def update_assignment_schedule(assignment_id: str, request: Request):
     
     return {"success": True, "message": "Assignment schedule updated"}
 
+@api_router.delete("/assignments/{assignment_id}")
+async def delete_assignment(assignment_id: str, request: Request):
+    """Delete an assignment"""
+    user = await get_current_user(request)
+    
+    if user["role"] != "teacher":
+        raise HTTPException(status_code=403, detail="Only teachers can delete assignments")
+    
+    assignment = await db.assignments.find_one({"id": assignment_id})
+    if not assignment:
+        raise HTTPException(status_code=404, detail="Assignment not found")
+    
+    # Verify teacher owns this assignment
+    if assignment.get("teacher_id") != user["id"]:
+        raise HTTPException(status_code=403, detail="Access denied")
+    
+    # Delete the assignment
+    await db.assignments.delete_one({"id": assignment_id})
+    
+    # Also delete all submissions for this assignment
+    await db.submissions.delete_many({"assignment_id": assignment_id})
+    
+    return {"success": True, "message": "Assignment deleted"}
+
 @api_router.get("/assignments/classroom/{classroom_id}")
 async def get_assignments(classroom_id: str, request: Request):
     """Get all assignments for a classroom"""
