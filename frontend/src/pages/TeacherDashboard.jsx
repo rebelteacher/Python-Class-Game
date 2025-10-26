@@ -125,6 +125,10 @@ export default function TeacherDashboard({ user, setUser }) {
               <BookOpen className="w-4 h-4" />
               Library
             </Button>
+            <Button onClick={() => navigate("/question-bank")} variant="outline" size="sm" className="gap-2">
+              <FileQuestion className="w-4 h-4" />
+              Question Bank
+            </Button>
             <Button onClick={() => navigate("/notes")} variant="outline" size="sm" className="gap-2">
               <FileText className="w-4 h-4" />
               Notes
