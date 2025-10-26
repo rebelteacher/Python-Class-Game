@@ -642,7 +642,7 @@ export default function AssignmentLibrary({ user }) {
           </div>
         </div>
 
-        {/* Problem Grid */}
+        {/* Problem Display - Folder View */}
         {loading ? (
           <div className="text-center py-20 text-gray-600">Loading library...</div>
         ) : filteredProblems.length === 0 ? (
@@ -652,107 +652,142 @@ export default function AssignmentLibrary({ user }) {
             <p className="text-gray-500">Try adjusting your filters or add a new problem</p>
           </div>
         ) : (
-          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {filteredProblems.map((problem) => (
-              <Card
-                key={problem.id}
-                data-testid={`library-card-${problem.id}`}
-                className={`hover:shadow-lg transition-all border-2 ${
-                  selectionMode && selectedProblems.includes(problem.id)
-                    ? 'border-purple-500 bg-purple-50'
-                    : 'border-gray-100'
-                } ${selectionMode ? 'cursor-pointer' : ''}`}
-                onClick={() => selectionMode && toggleProblemSelection(problem.id)}
-              >
-                <CardHeader>
-                  <div className="flex justify-between items-start mb-2">
-                    <div className="flex items-center gap-2">
-                      {selectionMode && (
-                        <Checkbox
-                          checked={selectedProblems.includes(problem.id)}
-                          onCheckedChange={() => toggleProblemSelection(problem.id)}
-                          onClick={(e) => e.stopPropagation()}
-                        />
-                      )}
-                      <div className={`px-2 py-1 rounded text-xs font-semibold ${
-                        problem.difficulty === "Easy" ? "bg-green-100 text-green-700" :
-                        problem.difficulty === "Medium" ? "bg-yellow-100 text-yellow-700" :
-                        "bg-red-100 text-red-700"
-                      }`}>
-                        {problem.difficulty}
-                      </div>
-                    </div>
-                    <div className="text-xs text-gray-500">
-                      <Download className="w-3 h-3 inline mr-1" />
-                      {problem.times_imported || 0}
-                    </div>
-                  </div>
-                  <CardTitle className="text-lg">{problem.title}</CardTitle>
-                  <CardDescription className="line-clamp-2">{problem.description}</CardDescription>
-                </CardHeader>
-                <CardContent className="space-y-2">
-                  <div className="flex flex-wrap gap-2">
-                    {problem.chapter && (
-                      <span className="px-2 py-1 bg-blue-100 text-blue-700 rounded text-xs font-medium">
-                        📚 {problem.chapter}
-                      </span>
+          <div className="space-y-4">
+            {Object.keys(groupedProblems).sort().map((chapter) => {
+              const isExpanded = expandedChapters.has(chapter);
+              const chapterProblems = groupedProblems[chapter];
+              
+              return (
+                <div key={chapter} className="border rounded-lg bg-white shadow-sm">
+                  {/* Folder Header */}
+                  <div
+                    className="flex items-center gap-3 p-4 cursor-pointer hover:bg-gray-50 transition-colors"
+                    onClick={() => toggleChapter(chapter)}
+                  >
+                    {isExpanded ? (
+                      <ChevronDown className="w-5 h-5 text-gray-600" />
+                    ) : (
+                      <ChevronRight className="w-5 h-5 text-gray-600" />
                     )}
-                    <span className="px-2 py-1 bg-indigo-100 text-indigo-700 rounded text-xs font-medium">
-                      {problem.category}
+                    {isExpanded ? (
+                      <FolderOpen className="w-6 h-6 text-blue-500" />
+                    ) : (
+                      <Folder className="w-6 h-6 text-blue-500" />
+                    )}
+                    <h3 className="text-lg font-semibold text-gray-900">{chapter}</h3>
+                    <span className="ml-auto text-sm text-gray-500 bg-gray-100 px-3 py-1 rounded-full">
+                      {chapterProblems.length} problem{chapterProblems.length !== 1 ? 's' : ''}
                     </span>
-                    {problem.csta_standard && (
-                      <span className="px-2 py-1 bg-purple-100 text-purple-700 rounded text-xs font-medium">
-                        {problem.csta_standard}
-                      </span>
-                    )}
                   </div>
-                  <div className="text-xs text-gray-500 pt-2">
-                    By {problem.creator_name}
-                  </div>
-                  {!selectionMode && (
-                    <div className="space-y-2 mt-3">
-                      <div className="flex gap-2">
-                        <Button
-                          data-testid={`edit-${problem.id}`}
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            setEditingProblem(problem);
-                            setEditDialogOpen(true);
-                          }}
-                          variant="outline"
-                          className="flex-1"
-                          size="sm"
+
+                  {/* Folder Contents */}
+                  {isExpanded && (
+                    <div className="p-4 pt-0 grid md:grid-cols-2 lg:grid-cols-3 gap-4">
+                      {chapterProblems.map((problem) => (
+                        <Card
+                          key={problem.id}
+                          data-testid={`library-card-${problem.id}`}
+                          className={`hover:shadow-lg transition-all border-2 ${
+                            selectionMode && selectedProblems.includes(problem.id)
+                              ? 'border-purple-500 bg-purple-50'
+                              : 'border-gray-100'
+                          } ${selectionMode ? 'cursor-pointer' : ''}`}
+                          onClick={() => selectionMode && toggleProblemSelection(problem.id)}
                         >
-                          <Edit className="w-4 h-4 mr-1" />
-                          Edit
-                        </Button>
-                        <Button
-                          data-testid={`practice-${problem.id}`}
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            navigate(`/teacher-practice/${problem.id}`);
-                          }}
-                          variant="outline"
-                          className="flex-1 bg-green-50 border-green-300 hover:bg-green-100"
-                          size="sm"
-                        >
-                          <Code2 className="w-4 h-4 mr-1" />
-                          Practice
-                        </Button>
-                      </div>
-                      <Button
-                        data-testid={`import-${problem.id}`}
-                        onClick={() => navigate(`/library/import/${problem.id}`)}
-                        className="w-full bg-indigo-600 hover:bg-indigo-700"
-                        size="sm"
-                      >
-                        Import to Classroom
-                      </Button>
+                          <CardHeader>
+                            <div className="flex justify-between items-start mb-2">
+                              <div className="flex items-center gap-2">
+                                {selectionMode && (
+                                  <Checkbox
+                                    checked={selectedProblems.includes(problem.id)}
+                                    onCheckedChange={() => toggleProblemSelection(problem.id)}
+                                    onClick={(e) => e.stopPropagation()}
+                                  />
+                                )}
+                                <div className={`px-2 py-1 rounded text-xs font-semibold ${
+                                  problem.difficulty === "Easy" ? "bg-green-100 text-green-700" :
+                                  problem.difficulty === "Medium" ? "bg-yellow-100 text-yellow-700" :
+                                  "bg-red-100 text-red-700"
+                                }`}>
+                                  {problem.difficulty}
+                                </div>
+                              </div>
+                              <div className="text-xs text-gray-500">
+                                <Download className="w-3 h-3 inline mr-1" />
+                                {problem.times_imported || 0}
+                              </div>
+                            </div>
+                            <CardTitle className="text-lg">{problem.title}</CardTitle>
+                            <CardDescription className="line-clamp-2">{problem.description}</CardDescription>
+                          </CardHeader>
+                          <CardContent className="space-y-2">
+                            <div className="flex flex-wrap gap-2">
+                              {problem.chapter && (
+                                <span className="px-2 py-1 bg-blue-100 text-blue-700 rounded text-xs font-medium">
+                                  📚 {problem.chapter}
+                                </span>
+                              )}
+                              <span className="px-2 py-1 bg-indigo-100 text-indigo-700 rounded text-xs font-medium">
+                                {problem.category}
+                              </span>
+                              {problem.csta_standard && (
+                                <span className="px-2 py-1 bg-purple-100 text-purple-700 rounded text-xs font-medium">
+                                  {problem.csta_standard}
+                                </span>
+                              )}
+                            </div>
+                            <div className="text-xs text-gray-500 pt-2">
+                              By {problem.creator_name}
+                            </div>
+                            {!selectionMode && (
+                              <div className="space-y-2 mt-3">
+                                <div className="flex gap-2">
+                                  <Button
+                                    data-testid={`edit-${problem.id}`}
+                                    onClick={(e) => {
+                                      e.stopPropagation();
+                                      setEditingProblem(problem);
+                                      setEditDialogOpen(true);
+                                    }}
+                                    variant="outline"
+                                    className="flex-1"
+                                    size="sm"
+                                  >
+                                    <Edit className="w-4 h-4 mr-1" />
+                                    Edit
+                                  </Button>
+                                  <Button
+                                    data-testid={`practice-${problem.id}`}
+                                    onClick={(e) => {
+                                      e.stopPropagation();
+                                      navigate(`/teacher-practice/${problem.id}`);
+                                    }}
+                                    variant="outline"
+                                    className="flex-1 bg-green-50 border-green-300 hover:bg-green-100"
+                                    size="sm"
+                                  >
+                                    <Code2 className="w-4 h-4 mr-1" />
+                                    Practice
+                                  </Button>
+                                </div>
+                                <Button
+                                  data-testid={`import-${problem.id}`}
+                                  onClick={() => navigate(`/library/import/${problem.id}`)}
+                                  className="w-full bg-indigo-600 hover:bg-indigo-700"
+                                  size="sm"
+                                >
+                                  Import to Classroom
+                                </Button>
+                              </div>
+                            )}
+                          </CardContent>
+                        </Card>
+                      ))}
                     </div>
                   )}
-                </CardContent>
-              </Card>
-            ))}
+                </div>
+              );
+            })}
           </div>
         )}
 
