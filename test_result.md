@@ -194,14 +194,11 @@ metadata:
   run_ui: false
 
 test_plan:
-  current_focus:
-    - "Add chapter field to problem creation form (freeform text input)"
-    - "Display chapter badges on problem cards"
-    - "Update chapter filter to show actual chapters from problems"
-    - "Add chapter field to problem edit form"
+  current_focus: []
   stuck_tasks: []
   test_all: false
   test_priority: "high_first"
+  testing_complete: true
 
 agent_communication:
   - agent: "main"
