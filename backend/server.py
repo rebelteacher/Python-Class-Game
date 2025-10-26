@@ -229,6 +229,7 @@ class Problem(BaseModel):
     expected_output: str = ""
     category: str  # "Lesson 2.2 - String Concatenation"
     difficulty: str  # "Easy", "Medium", "Hard"
+    chapter: str = ""  # "Chapter 1", "Chapter 2", etc. for organization
     csta_standard: str  # CSTA K-12 CS Standards
     problem_type: str = "Independent Practice"  # "Class Practice", "Paired Programming", "Independent Practice", "Debugging"
     resources_link: str = ""  # Link to Google Drive, lesson materials, etc.
