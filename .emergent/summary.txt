@@ -1,25 +1,25 @@
 <analysis>
-The AI engineer, Byte, took over the ByteBattles Arena app and significantly expanded its functionality. Initial work focused on implementing the Teacher Reports page, handling gradebook-style exports, multi-classroom selection, and student score calculations. Subsequently, a major authentication system for teachers was built, including email/password login, an invite code system, and an Admin Dashboard for usage monitoring. This involved extensive debugging of deployment, database synchronization, and session management issues across local and production environments. Following this, critical student experience bugs were addressed: code persistence, per-problem lives, visual feedback for problem completion, XP/coins updates, and back button navigation. Finally, CSV upload validation was improved, and the current task involves implementing chapter-based organization for the problem library.
+The AI engineer successfully transitioned into the ByteBattles Arena codebase, initially focusing on resolving UI and data inconsistencies for existing features, particularly regarding problem organization. Key challenges involved persistent browser caching and ensuring frontend updates were reflected, often necessitating frontend service restarts or redeployment. The engineer systematically addressed user requests: implementing freeform chapter organization, a hybrid teacher/student PDF notes library with access controls, a robust 3-level folder structure (Chapter > Lesson > Problem Type) across teacher problem library, teacher classroom view, and student assignment views, and assignment deletion. Crucially, a backend issue preventing student assignments from loading was identified and fixed. The current phase involves building a multiple-choice testing platform, with the backend and initial frontend (Question Bank, including bulk upload capability) now implemented.
 </analysis>
 
 <product_requirements>
-The ByteBattles Arena app is an educational platform for teachers to manage coding education. Key features include teacher-managed classrooms, assignment creation (instructions, code, output, category, difficulty), AI-powered Python grading, and Google social login. Evolved features include a gamified lives system, XP/Coins, ranks, and a student leaderboard. Content management focuses on a global problem library, bulk uploads, multi-problem assignments, and teacher editing. Teacher tools include a practice sandbox and a reports page for exporting student scores, completion dates, and tracking missing/incomplete assignments. Security involves removing student-side teacher options. Most recently, the user requested teacher-specific username/password login, an invite code system, and an admin dashboard for monitoring. Student-side issues include code persistence, per-problem lives, visual problem completion status, accurate XP/coins, and a working navigation. Library organization via chapters is also a new requirement.
+The ByteBattles Arena is an educational platform for coding, featuring teacher-managed classrooms, AI-graded assignments, Google social login, gamified XP/Coins/ranks, and student leaderboards. Core content management includes a global problem library, bulk uploads, and multi-problem assignments. Teacher tools encompass a practice sandbox, reports (exportable grades, missing assignments), and a teacher-specific login with invite codes and an Admin Dashboard. Student experience improvements included code persistence, per-problem lives, visual completion feedback, and accurate XP/coins. Recent work involved evolving chapter-based problem organization, a hybrid PDF notes library for teachers and students with distinct access/download rules, and nested folder structures for problems and assignments. The latest request is for a multiple-choice testing platform with random question/answer selection, score-only display, and no post-submission review for students.
 </product_requirements>
 
 <key_technical_concepts>
-- **FastAPI:** Python web framework for backend APIs.
-- **React:** JavaScript library for frontend UI.
-- **MongoDB:** NoSQL database.
-- **Google OAuth:** User authentication.
-- **:** Password hashing library.
-- **:** Library for Excel export.
-- **UUIDs:** Used for all IDs.
-- **CORS Middleware:** For cross-origin requests.
+-   **FastAPI:** Python web framework for backend APIs.
+-   **React:** JavaScript library for frontend UI.
+-   **MongoDB:** NoSQL database, storing data in JSON-like documents.
+-   **Google OAuth:** User authentication.
+-   **:** Password hashing for teacher accounts.
+-   **:** Library for Excel export of teacher reports.
+-   **UUIDs:** Universally unique identifiers for all IDs.
+-   **CORS Middleware:** Handles cross-origin resource sharing.
 </key_technical_concepts>
 
 <code_architecture>
 **High-Level Architecture:**
-The application uses a React frontend, a FastAPI backend, and a MongoDB database. Frontend and backend communicate via RESTful API calls.
+The application follows a standard MERN-like stack: React for the frontend, FastAPI for the backend API, and MongoDB as the database. Frontend and backend communicate exclusively via RESTful API calls, using environment variables for URL configuration.
 
 **Directory Structure:**
 
@@ -28,61 +28,61 @@ The application uses a React frontend, a FastAPI backend, and a MongoDB database
 **Key Files and Changes:**
 
 -   **/app/backend/server.py**:
-    -   **Summary:** Defines models (, , , , ), API routes, and handles user authentication, code execution, and data management.
+    -   **Summary:** Core of the backend, defining Pydantic models (Problem, Assignment, Submission, User, InviteCode, PDFNote, MCQuestion, MCTest, MCTake) and all API routes.
     -   **Changes:**
-        *   **Teacher Reports:** Added  and  endpoints.
-        *   **Teacher Auth:**  model updated with  (hashed), , and  fields. Added  model. Created  and  endpoints. Added admin endpoints for invite code and user management (, , ). Modified  to fetch full user data.
-        *   **Deployment Fixes:** Added startup event to auto-promote admin accounts (). Consolidated session collection name from  to .
-        *   **Student Experience:** Modified  to accept  for filtering. Added  field to  model and  endpoint. Updated  model to include . Added chapter filtering to .
-        *   **Admin Fixes:** Protected  endpoint. Simplified  to operate on a specific email.
-        *   **Error Handling:** Improved code execution error handling and increased timeout in .
+        *   **Problem Organization:**  and  models updated with  and  fields.  endpoint updated to accept these.
+        *   **Assignment Organization:**  model updated with  and  fields.
+        *   **PDF Notes Library:** Added  model with  (Teacher/Student), , , . Implemented , ,  endpoints, including filtering logic for student access and ensuring  is saved.
+        *   **Assignment Deletion:** Added .
+        *   **Student Assignment Fetching:** Modified  to eagerly load assignments for students.
+        *   **MC Testing Platform:** Added , ,  models. Implemented API endpoints for  (CRUD, bulk upload),  (create, list, get), and  (start, submit).
 -   **/app/frontend/src/App.js**:
-    -   **Summary:** React app entry point, routing.
-    -   **Changes:** Added routes for , , , , and . Updated  logic to correctly use environment variables and check for user session.
--   **/app/frontend/src/pages/LandingPage.jsx**:
-    -   **Summary:** Initial user view.
-    -   **Changes:** Reworked to include a toggle for Student Login (Google OAuth) and Teacher Login (email/password).
--   **/app/frontend/src/pages/TeacherDashboard.jsx**:
-    -   **Summary:** Teacher's class overview.
-    -   **Changes:** Added Reports button and an Admin button (visible only to admin users). Began work on adding delete/archive options for classrooms.
--   **/app/frontend/src/pages/StudentDashboard.jsx**:
-    -   **Summary:** Student's assignment/progress view.
-    -   **Changes:** Updated  dependency to  to ensure fresh user profile data (XP, Coins) on navigation.
--   **/app/frontend/src/pages/AssignmentPage.jsx**:
-    -   **Summary:** Student's interactive coding environment.
+    -   **Summary:** Manages main application routing and global state.
     -   **Changes:**
-        *   **Code Persistence:** Implemented auto-saving of code to  per problem and loading saved code on problem switch.
-        *   **Lives:** Reworked lives system to be per-problem (3 lives), locking only the specific problem when exhausted.
-        *   **Visual Feedback:** Added color-coded tabs (Green/Yellow/Red) based on score and completion status.
-        *   **Navigation:** Added Back to Dashboard and Back to Classroom buttons.
-        *   **Done Button:** Added a Done button to mark problems as final, disabling further submissions.
-        *   **Progress:** Progress bar now tracks problems marked as done.
-        *   **Teacher Sandbox:** Reworked teacher view to be an interactive sandbox with Show/Hide Solution toggle, allowing teachers to run code live.
-        *   **Final Grade:** Added Final Grade display, calculating average score with unattempted problems as zero.
-        *   **Bug Fixes:** Corrected  reference,  dependencies, and frontend error handling for code execution.
+        *   **PDF Notes:** Added route  (accessible by both teacher and student).
+        *   **MC Question Bank:** Added route .
+-   **/app/frontend/src/pages/TeacherDashboard.jsx**:
+    -   **Summary:** Teacher's primary dashboard, showing classrooms and navigation.
+    -   **Changes:** Added Notes button (linking to ) and Question Bank button (linking to ).
+-   **/app/frontend/src/pages/StudentDashboard.jsx**:
+    -   **Summary:** Student's primary dashboard, showing assignments and progress.
+    -   **Changes:**
+        *   **Assignment Folders:** Implemented nested folder structure (Chapter > Lesson > Assignment) for student assignments, requiring significant logic to fetch and organize assignments by classroom.
+        *   **Notes Access:** Added Notes button linking to .
 -   **/app/frontend/src/pages/AssignmentLibrary.jsx**:
-    -   **Summary:** Teacher's problem creation/management.
-    -   **Changes:** Improved CSV upload error reporting and validation. Started adding  field to problem creation form and a chapter filter for library view.
--   **/app/frontend/src/pages/TeacherReports.jsx**:
-    -   **Summary:** New page for generating teacher reports.
-    -   **Changes:** Initial UI for selecting classrooms, displaying a gradebook-style report, and exporting to .
--   **/app/frontend/src/pages/TeacherLogin.jsx**:
-    -   **Summary:** New page for teacher email/password login.
-    -   **Changes:** Implemented login form, handles API calls, sets session cookie. Debugged redirection logic and cookie handling.
--   **/app/frontend/src/pages/TeacherSignup.jsx**:
-    -   **Summary:** New page for teacher self-registration with an invite code.
-    -   **Changes:** Implemented signup form with invite code validation.
--   **/app/frontend/src/pages/AdminDashboard.jsx**:
-    -   **Summary:** New page for admin features.
-    -   **Changes:** Implemented UI for displaying stats (total teachers/students, classrooms, assignments, submissions), teacher management (activate/deactivate), invite code generation and management, and displaying a support contact email.
--   **/app/frontend/src/pages/AdminAccountFix.jsx**:
-    -   **Summary:** New hidden page for emergency account role promotion.
-    -   **Changes:** UI for email submission to trigger the backend account fix, initially with a secret key, then simplified to specific email.
+    -   **Summary:** Teacher's interface for creating and managing problems and assignments.
+    -   **Changes:**
+        *   **Chapter Organization:** Updated problem creation/edit forms to use freeform text input for  and . Implemented 3-level folder structure (Chapter > Lesson > Problem Type) for problem display.
+        *   **Assignment Creation:** Added  and  fields to the assignment creation form.
+-   **/app/frontend/src/pages/ClassroomPage.jsx**:
+    -   **Summary:** Teacher's view of a specific classroom, showing assignments and students.
+    -   **Changes:**
+        *   **Assignment Folders:** Implemented 3-level folder structure (Chapter > Lesson > Assignment) for assignments within the classroom view.
+        *   **Assignment Deletion:** Added a Delete button (trash icon) to assignment cards with a confirmation dialog.
+-   **/app/frontend/src/pages/NotesLibrary.jsx**:
+    -   **Summary:** New page for teachers to manage PDF notes and for students to view student resources.
+    -   **Changes:**
+        *   **PDF Upload/View:** Implemented file upload (Base64 encoding) and a PDF viewer using / tags with  and a download fallback.
+        *   **Resource Type:** Added UI for selecting  (Teacher/Student Resource) during upload.
+        *   **Conditional Download:** Hides download button for Teacher Resources.
+        *   **Student View:** Conditionally hides teacher-specific features (upload, filters) and shows only Student Resources for students.
+-   **/app/frontend/src/pages/QuestionBank.jsx**:
+    -   **Summary:** New page for teachers to create and manage multiple-choice questions.
+    -   **Changes:** Initial setup for displaying questions and a form for creating new MC questions. Bulk upload UI and handler implemented.
+-   **/app/problem_upload_template.csv**:
+    -   **Summary:** New file. Example CSV template for bulk uploading problems.
+    -   **Changes:** Created to include new fields like , , and .
 </code_architecture>
 
 <pending_tasks>
--   **Complete Chapter Organization:** Finish frontend UI for chapter filtering and problem creation in AssignmentLibrary.
--   **Delete/Archive Class and Remove Student:** Complete UI for delete/archive classroom functionality and removing students from classes on TeacherDashboard.
+-   **Tab Switching Detection:** Implement tracking when students switch tabs during tests, with per-assignment Allow Library Access setting.
+-   **Drag-and-Drop Folders:** Implement drag-and-drop functionality for reorganizing problems in the teacher library.
+-   **MC Testing Platform - Frontend Completion:**
+    -   Test Builder page (for teachers to assemble tests).
+    -   Tests tab within classrooms (alongside Assignments).
+    -   Test Taking page (student view).
+    -   Navigation buttons (adding “Tests” to student menus).
+-   **Delete/Archive Class and Remove Student:** Complete UI for delete/archive classroom functionality and removing students from classes on TeacherDashboard (deprioritized by user).
 -   **AI problem variation feature:** Implement anti-cheat mechanism for generating unique problem versions.
 -   **Team Battles Enhancements:** Implement weekly champion spotlight and sport-themed content.
 -   **Monetization Strategy:** Implement freemium tier and/or DonorsChoose integration.
@@ -90,9 +90,13 @@ The application uses a React frontend, a FastAPI backend, and a MongoDB database
 </pending_tasks>
 
 <current_work>
-Immediately before this summary request, the AI engineer was working on implementing Phase 1: simple chapter organization for the problem library. This involved adding a  field to the  model in , updating the  and  backend endpoints to handle this new field and filtering. On the frontend, the  page was being updated to include  in its state, modify filter logic to include chapters, and add a chapter dropdown to the filter section and the problem creation form. The work is currently focused on the frontend UI integration.
+Immediately before this summary request, the AI engineer was working on implementing the **Multiple Choice Testing Platform**. The backend models (, , ) and API endpoints (for questions, tests, and taking tests) were successfully created and integrated.
+
+On the frontend, the **Question Bank page ()** was created, along with its route and navigation button on the Teacher Dashboard. The latest task involves adding a **bulk CSV upload feature for multiple-choice questions**.
+
+The backend endpoint  has been added and the backend restarted. On the frontend, the necessary state management and  function have been added to . The UI for the CSV upload button has also been integrated into the page. The AI engineer is currently in the process of creating the  file.
 </current_work>
 
 <optional_next_step>
-Complete adding the chapter field to the create problem form in .
+Create the  file with the expected headers, then prompt the user to test the bulk upload functionality.
 </optional_next_step>
