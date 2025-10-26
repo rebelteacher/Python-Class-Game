@@ -2779,6 +2779,60 @@ async def create_mc_question(question: MCQuestionCreate, request: Request):
     return {"id": mc_question.id, "message": "Question created successfully"}
 
 
+@api_router.post("/mc-questions/bulk-upload")
+async def bulk_upload_questions(data: dict, request: Request):
+    """Bulk upload questions from CSV"""
+    user = await get_current_user(request)
+    
+    if user["role"] != "teacher":
+        raise HTTPException(status_code=403, detail="Only teachers can upload questions")
+    
+    questions_data = data.get("questions", [])
+    if not questions_data:
+        raise HTTPException(status_code=400, detail="No questions provided")
+    
+    created_count = 0
+    errors = []
+    
+    for idx, row in enumerate(questions_data):
+        try:
+            # Validate required fields
+            if not all([row.get("question_text"), row.get("choice_a"), row.get("choice_b"), 
+                       row.get("choice_c"), row.get("choice_d"), row.get("correct_answer")]):
+                errors.append(f"Row {idx + 1}: Missing required fields")
+                continue
+            
+            # Create question
+            mc_question = MCQuestion(
+                question_text=row.get("question_text", ""),
+                choice_a=row.get("choice_a", ""),
+                choice_b=row.get("choice_b", ""),
+                choice_c=row.get("choice_c", ""),
+                choice_d=row.get("choice_d", ""),
+                correct_answer=row.get("correct_answer", "A").upper(),
+                chapter=row.get("chapter", ""),
+                lesson=row.get("lesson", ""),
+                difficulty=row.get("difficulty", "Easy"),
+                creator_id=user["id"],
+                creator_name=user["name"]
+            )
+            
+            question_dict = mc_question.model_dump()
+            question_dict["created_at"] = question_dict["created_at"].isoformat()
+            
+            await db.mc_questions.insert_one(question_dict)
+            created_count += 1
+            
+        except Exception as e:
+            errors.append(f"Row {idx + 1}: {str(e)}")
+    
+    return {
+        "created": created_count,
+        "errors": errors,
+        "message": f"Created {created_count} questions" + (f" with {len(errors)} errors" if errors else "")
+    }
+
+
 @api_router.get("/mc-questions")
 async def get_mc_questions(
     request: Request,
