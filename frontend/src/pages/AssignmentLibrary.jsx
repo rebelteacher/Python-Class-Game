@@ -60,7 +60,7 @@ export default function AssignmentLibrary({ user }) {
 
   useEffect(() => {
     filterProblems();
-  }, [searchTerm, categoryFilter, difficultyFilter, problems]);
+  }, [searchTerm, categoryFilter, difficultyFilter, chapterFilter, problems]);
 
   const fetchProblems = async () => {
     try {
