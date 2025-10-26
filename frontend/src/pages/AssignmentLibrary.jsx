@@ -483,12 +483,25 @@ export default function AssignmentLibrary({ user }) {
                       <Input
                         data-testid="lib-chapter-input"
                         id="chapter"
-                        placeholder="e.g., Chapter 1, Unit 2, Module A"
+                        placeholder="e.g., Chapter 1"
                         value={newProblem.chapter}
                         onChange={(e) => setNewProblem({ ...newProblem, chapter: e.target.value })}
                         className="mt-1"
                       />
-                      <p className="text-xs text-gray-500 mt-1">Organize problems by chapter/unit</p>
+                      <p className="text-xs text-gray-500 mt-1">Organize problems by chapter</p>
+                    </div>
+
+                    <div>
+                      <Label htmlFor="lesson">Lesson (Optional)</Label>
+                      <Input
+                        data-testid="lib-lesson-input"
+                        id="lesson"
+                        placeholder="e.g., Lesson 1"
+                        value={newProblem.lesson}
+                        onChange={(e) => setNewProblem({ ...newProblem, lesson: e.target.value })}
+                        className="mt-1"
+                      />
+                      <p className="text-xs text-gray-500 mt-1">Sub-folder under chapter</p>
                     </div>
                   </div>
 
