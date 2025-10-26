@@ -128,13 +128,14 @@ export default function NotesLibrary({ user }) {
           description: newNote.description,
           chapter: newNote.chapter,
           category: newNote.category,
+          resource_type: newNote.resource_type,
           is_shared: newNote.is_shared,
           tags: newNote.tags,
           file_data: base64,
           file_size: newNote.file.size
         };
 
-        try {
+        try:
           await axios.post(`${API}/notes`, payload, {
             withCredentials: true
           });
@@ -145,6 +146,7 @@ export default function NotesLibrary({ user }) {
             description: "",
             chapter: "",
             category: "",
+            resource_type: "student_resource",
             is_shared: false,
             tags: [],
             file: null
