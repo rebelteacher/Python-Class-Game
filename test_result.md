@@ -191,162 +191,34 @@ test_plan:
 agent_communication:
   - agent: "main"
     message: |
-      Fixed critical backend bugs and removed student library access.
+      CHAPTER ORGANIZATION IMPLEMENTATION COMPLETE - READY FOR TESTING
       
-      BACKEND FIXES:
-      1. 403 Error: Removed incorrect HTTPException at line 862 that was preventing first-time submissions
-      2. Lives System: Logic was correct, bug was caused by the same line 862 issue
+      BACKEND:
+      - Chapter field already exists in Problem model and filtering works
       
-      FRONTEND FIX:
-      3. Removed Library button from student dashboard navigation
+      FRONTEND CHANGES:
+      1. Create Form: Changed chapter input from hardcoded dropdown (1-20) to freeform text Input
+         - Teachers can enter any chapter name (Chapter 1, Unit 2, Module A, etc.)
+         - Added placeholder and helper text
       
-      Please test the following scenarios:
-      - First-time assignment submission (should work without 403 error)
-      - Lives tracking: Submit code with <70% score 3 times, verify lockout after 3rd failed attempt
-      - Verify successful submission (>=70%) does NOT deduct a life
-      - Confirm Library button is removed from student dashboard
+      2. Problem Cards: Added chapter badge display
+         - Blue badge with book emoji (📚) shows when chapter exists
+         - Positioned above category badge
       
-      Test with:
-      - Student login
-      - Join a classroom
-      - Attempt an assignment multiple times with intentionally wrong code
-      - Verify lives counter decrements correctly
-  - agent: "testing"
-    message: |
-      ✅ COMPREHENSIVE BACKEND TESTING COMPLETED - ALL CRITICAL FIXES VERIFIED
+      3. Chapter Filter: Now shows actual chapters from existing problems
+         - Dynamically extracts unique chapters (like categories)
+         - Sorted alphabetically
+         - Replaces hardcoded 1-20 dropdown
       
-      BACKEND TEST RESULTS (30/30 tests passed - 100% success rate):
-      
-      🔒 403 FORBIDDEN ERROR FIX - ✅ WORKING
-      - First-time submissions now work perfectly (no 403 error)
-      - Lives correctly set to 3 on first attempt
-      - Attempt number correctly set to 1
-      
-      ❤️ LIVES SYSTEM - ✅ WORKING PERFECTLY
-      - Failing submissions (<70% score) properly deduct lives: 3→2→1→0
-      - 4th attempt correctly blocked with 403 error and message
-      - Passing submissions (≥70% score) do NOT deduct lives
-      - Lives tracking is accurate and consistent
-      
-      📤 SUBMISSION SYSTEM - ✅ WORKING
-      - Assignment submissions work end-to-end
-      - XP and coins awarded correctly for passing submissions
-      - AI evaluation providing proper scores and feedback
-      - Teacher can view all submissions, students see only their own
-      
-      🔧 API ENDPOINTS - ✅ ALL WORKING
-      - Authentication, classrooms, assignments, code execution all functional
-      - Proper error handling and status codes
-      - Database operations working correctly
-      
-      ⚠️ FRONTEND: Library button removal not tested (system limitations)
-      
-      RECOMMENDATION: All critical backend bugs are fixed and verified. Main agent should summarize and finish the task.
-  - agent: "user"
-    message: "User reports submission still fails - 403 error persists despite passing backend tests"
-  - agent: "troubleshoot"
-    message: |
-      ROOT CAUSE: Submission endpoint missing availability date validation causing intermittent 403s
-      - Assignment detail endpoint validates available_date (lines 747-751)
-      - Submission endpoint lacked this check
-      - Mixed 200/403 responses due to timing-based race condition
-      FIX: Add classroom membership + available_date validation in submission endpoint
-  - agent: "main"
-    message: |
-      ADDITIONAL FIX APPLIED - Submission endpoint now validates:
-      1. Student is enrolled in assignment's classroom
-      2. Assignment available_date has been reached
-      3. Prevents submissions to unavailable or unauthorized assignments
-      
-      Changes made after line 838 in server.py:
-      - Added classroom lookup and student membership verification
-      - Added available_date check matching assignment detail endpoint
-      - Raises 403 with clear error messages
-      
-      Please retest submission flow with various scenarios:
-      - Assignment with available_date in future (should block with clear message)
-      - Assignment with available_date in past (should allow)
-      - Student not in classroom (should block)
-      - Normal submission flow (should work)
-  - agent: "main"
-    message: |
-      TEACHER REPORTS IMPLEMENTATION COMPLETE - READY FOR TESTING
-      
-      BACKEND ENDPOINTS:
-      1. POST /api/reports/gradebook - Generates gradebook data
-         - Accepts: classroom_ids[], assignment_ids[]
-         - Returns: Students sorted by last name/first name, scores per assignment
-         - Score calculation: Average of best attempts (0 for unattempted/locked)
-         - Includes completion dates
-      
-      2. POST /api/reports/missing - Generates missing/incomplete report
-         - Accepts: classroom_ids[]
-         - Returns: Students with missing (not started) and incomplete assignments
-         - Sorted by last name/first name
-      
-      FRONTEND FEATURES:
-      1. Multi-classroom selection with checkboxes
-      2. Assignment selection for gradebook reports
-      3. Report type toggle (Grades vs Missing/Incomplete)
-      4. Live preview table:
-         - Gradebook: Assignments across top, students down side
-         - Color-coded scores (green/yellow/orange/red)
-         - Missing: Individual student cards with lists
-      5. Excel export (.xlsx format) using xlsx library
-      
-      NAVIGATION:
-      - Added /teacher-reports route (teachers only)
-      - Added Reports button in Teacher Dashboard navbar
+      4. Edit Form: Added chapter field to problem edit dialog
+         - Freeform text input
+         - Included in PUT request to update endpoint
+         - Layout adjusted to 3 columns (category, chapter, difficulty)
       
       Please test the following scenarios:
-      - Create teacher account and classrooms with students
-      - Create assignments and have students submit work
-      - Navigate to Reports page
-      - Select multiple classrooms
-      - Generate gradebook report (select assignments)
-      - Verify table layout (assignments horizontal, students vertical, sorted by last name)
-      - Download Excel file and verify format
-      - Generate missing/incomplete report
-      - Verify student list with missing/incomplete assignments
-      - Download Excel file for missing report
-  - agent: "testing"
-    message: |
-      ✅ TEACHER REPORTS BACKEND TESTING COMPLETED - ALL ENDPOINTS WORKING PERFECTLY
-      
-      COMPREHENSIVE TEST RESULTS (20/20 tests passed - 100% success rate after bug fix):
-      
-      📊 GRADEBOOK REPORT ENDPOINT (/api/reports/gradebook) - ✅ WORKING
-      - Single classroom, single assignment: ✅ Working
-      - Multiple classrooms, multiple assignments: ✅ Working  
-      - Student deduplication across classrooms: ✅ Working
-      - Student sorting by last name, first name: ✅ Working (Anderson, Brown, Smith)
-      - Score calculations: ✅ Working (average of best attempts, 0 for unattempted/locked)
-      - Completion dates: ✅ Working (tracks most recent passing submission)
-      - Authentication: ✅ Working (403 for students)
-      - Authorization: ✅ Working (403 for other teachers' classrooms)
-      - Error handling: ✅ Working (400 for missing classroom_ids/assignment_ids)
-      
-      📋 MISSING REPORT ENDPOINT (/api/reports/missing) - ✅ WORKING
-      - Single classroom: ✅ Working
-      - Multiple classrooms: ✅ Working
-      - Student sorting by last name, first name: ✅ Working
-      - Missing assignments detection: ✅ Working (not started assignments)
-      - Incomplete assignments detection: ✅ Working (some problems done)
-      - Excludes complete students: ✅ Working (students with all assignments done)
-      - Authentication: ✅ Working (403 for students)
-      - Authorization: ✅ Working (403 for other teachers' classrooms)
-      - Error handling: ✅ Working (400 for missing classroom_ids)
-      
-      🔧 BUG FIXED DURING TESTING:
-      - Fixed completion_date.isoformat() error in gradebook endpoint (line 1515)
-      - Issue: completion_date was already string from database, but code called .isoformat()
-      - Solution: Removed .isoformat() call since date is already in ISO format
-      
-      📈 TEST COVERAGE:
-      - Created realistic test data: 3 students with names (Alice Brown, Bob Anderson, John Smith)
-      - Created multiple assignments with varied completion states
-      - Tested all authentication and authorization scenarios
-      - Verified response structure matches expected format
-      - Confirmed integration with existing lesson-scores logic
-      
-      RECOMMENDATION: Backend endpoints are fully functional and ready for frontend integration. Main agent should focus on frontend testing or summarize completion.
+      - Create new problem with custom chapter name (e.g., "Unit 3: Loops")
+      - Verify chapter badge displays on problem card
+      - Use chapter filter to filter problems by chapter
+      - Edit existing problem to add/change chapter
+      - Verify chapter filter updates when new chapters are added
+      - Test with various chapter naming conventions
