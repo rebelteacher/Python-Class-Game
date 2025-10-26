@@ -1,0 +1,4 @@
+question_text,choice_a,choice_b,choice_c,choice_d,correct_answer,chapter,lesson,difficulty
+What is 2+2?,3,4,5,6,B,Chapter 1,Lesson 1,Easy
+What color is the sky?,Red,Blue,Green,Yellow,B,Chapter 1,Lesson 1,Easy
+Which is a programming language?,HTML,Python,CSS,XML,B,Chapter 2,Lesson 1,Medium
