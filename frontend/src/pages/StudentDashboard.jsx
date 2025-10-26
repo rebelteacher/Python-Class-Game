@@ -174,7 +174,9 @@ export default function StudentDashboard({ user, setUser }) {
 
   const organizeAssignments = () => {
     const organized = {};
+    console.log("Organizing assignments, classrooms:", classrooms);
     classrooms.forEach(classroom => {
+      console.log(`Classroom ${classroom.name} has assignments:`, classroom.assignments);
       classroom.assignments?.forEach(assignment => {
         const chapter = assignment.chapter || "Uncategorized";
         const lesson = assignment.lesson || "General";
@@ -191,6 +193,7 @@ export default function StudentDashboard({ user, setUser }) {
         });
       });
     });
+    console.log("Organized assignments:", organized);
     return organized;
   };
 
