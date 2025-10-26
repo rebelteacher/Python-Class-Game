@@ -83,12 +83,22 @@ export default function StudentDashboard({ user, setUser }) {
 
   const fetchClassrooms = async () => {
     try {
+      console.log("📡 Fetching classrooms...");
       const response = await axios.get(`${API}/classrooms`, {
         withCredentials: true,
       });
+      console.log("✅ Classrooms received:", response.data);
+      console.log("Number of classrooms:", response.data.length);
+      if (response.data.length > 0) {
+        console.log("First classroom:", response.data[0]);
+        console.log("First classroom has assignments?", !!response.data[0].assignments);
+        if (response.data[0].assignments) {
+          console.log("Number of assignments:", response.data[0].assignments.length);
+        }
+      }
       setClassrooms(response.data);
     } catch (error) {
-      console.error("Error fetching classrooms:", error);
+      console.error("❌ Error fetching classrooms:", error);
       toast.error("Failed to load classrooms");
     } finally {
       setLoading(false);
