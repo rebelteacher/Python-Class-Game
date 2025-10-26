@@ -2523,6 +2523,7 @@ async def create_note(note: PDFNoteCreate, request: Request):
         description=note.description,
         chapter=note.chapter,
         category=note.category,
+        resource_type=note.resource_type,
         file_data=note.file_data,
         file_size=note.file_size,
         creator_id=user["id"],
