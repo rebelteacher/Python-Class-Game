@@ -158,6 +158,49 @@ export default function ClassroomPage({ user }) {
       const availableDateTime = editingAssignment.available_date && editingAssignment.available_time
         ? `${editingAssignment.available_date}T${editingAssignment.available_time}:00Z`
         : null;
+      const dueDateTime = editingAssignment.due_date && editingAssignment.due_time
+        ? `${editingAssignment.due_date}T${editingAssignment.due_time}:00Z`
+        : null;
+      
+      await axios.put(
+        `${API}/assignments/${editingAssignment.id}/schedule`,
+        {
+          available_date: availableDateTime,
+          due_date: dueDateTime,
+          allow_late_submission: editingAssignment.allow_late_submission,
+          late_penalty_percent: parseInt(editingAssignment.late_penalty_percent)
+        },
+        { withCredentials: true }
+      );
+      
+      toast.success("Schedule updated!");
+      setEditScheduleDialogOpen(false);
+      setEditingAssignment(null);
+      fetchAssignments();
+    } catch (error) {
+      console.error("Error updating schedule:", error);
+      toast.error("Failed to update schedule");
+    }
+  };
+
+  const handleDeleteAssignment = async (assignmentId, assignmentTitle) => {
+    if (!window.confirm(`Are you sure you want to delete "${assignmentTitle}"? This will also delete all student submissions.`)) {
+      return;
+    }
+
+    try {
+      await axios.delete(`${API}/assignments/${assignmentId}`, {
+        withCredentials: true
+      });
+      toast.success("Assignment deleted");
+      fetchAssignments();
+    } catch (error) {
+      console.error("Error deleting assignment:", error);
+      toast.error("Failed to delete assignment");
+    }
+  };
+
+  const handleUpdateScheduleOld = async (e) => {
 
       const dueDateTime = editingAssignment.due_date && editingAssignment.due_time
         ? `${editingAssignment.due_date}T${editingAssignment.due_time}:00Z`
