@@ -432,61 +432,131 @@ export default function ClassroomPage({ user }) {
                 )}
               </div>
             ) : (
-              <div data-testid="assignments-list" className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-                {assignments.map((assignment) => (
-                  <Card
-                    data-testid={`assignment-card-${assignment.id}`}
-                    key={assignment.id}
-                    className="hover:shadow-lg transition-shadow border-2 border-gray-100"
-                  >
-                    <CardHeader>
-                      <CardTitle className="text-lg">{assignment.title}</CardTitle>
-                      <CardDescription className="line-clamp-2">{assignment.description}</CardDescription>
-                    </CardHeader>
-                    <CardContent>
-                      <div className="text-sm text-gray-600 mb-3">
-                        {assignment.problem_count ? `${assignment.problem_count} problems` : `${assignment.test_cases?.length || 0} test cases`}
-                      </div>
-                      <div className="flex gap-2">
-                        <Button
-                          onClick={() => navigate(`/assignment/${assignment.id}`, { 
-                            state: { classroomId: classroomId } 
-                          })}
-                          className="flex-1"
-                          size="sm"
-                        >
-                          View
-                        </Button>
-                        {isTeacher && (
-                          <Button
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              // Parse dates for editing
-                              const availDate = assignment.available_date ? new Date(assignment.available_date) : null;
-                              const dueDate = assignment.due_date ? new Date(assignment.due_date) : null;
-                              
-                              setEditingAssignment({
-                                id: assignment.id,
-                                title: assignment.title,
-                                available_date: availDate ? availDate.toISOString().split('T')[0] : '',
-                                available_time: availDate ? availDate.toISOString().split('T')[1].substring(0, 5) : '00:00',
-                                due_date: dueDate ? dueDate.toISOString().split('T')[0] : '',
-                                due_time: dueDate ? dueDate.toISOString().split('T')[1].substring(0, 5) : '23:59',
-                                allow_late_submission: assignment.allow_late_submission ?? true,
-                                late_penalty_percent: assignment.late_penalty_percent || 0
-                              });
-                              setEditScheduleDialogOpen(true);
-                            }}
-                            variant="outline"
-                            size="sm"
-                          >
-                            <Calendar className="w-4 h-4" />
-                          </Button>
+              <div className="space-y-4">
+                {Object.keys(organizedAssignments).sort().map((chapter) => {
+                  const isChapterExpanded = expandedChapters.has(chapter);
+                  const lessons = organizedAssignments[chapter];
+                  
+                  return (
+                    <div key={chapter} className="border rounded-lg bg-white shadow-sm">
+                      {/* Chapter Folder */}
+                      <div
+                        className="flex items-center gap-3 p-4 cursor-pointer hover:bg-gray-50 transition-colors"
+                        onClick={() => toggleChapter(chapter)}
+                      >
+                        {isChapterExpanded ? (
+                          <ChevronDown className="w-5 h-5 text-gray-600" />
+                        ) : (
+                          <ChevronRight className="w-5 h-5 text-gray-600" />
                         )}
+                        {isChapterExpanded ? (
+                          <FolderOpen className="w-6 h-6 text-blue-500" />
+                        ) : (
+                          <Folder className="w-6 h-6 text-blue-500" />
+                        )}
+                        <h3 className="text-lg font-semibold text-gray-900">{chapter}</h3>
+                        <span className="ml-auto text-sm text-gray-500 bg-gray-100 px-3 py-1 rounded-full">
+                          {Object.keys(lessons).length} lesson{Object.keys(lessons).length !== 1 ? 's' : ''}
+                        </span>
                       </div>
-                    </CardContent>
-                  </Card>
-                ))}
+
+                      {/* Lessons in Chapter */}
+                      {isChapterExpanded && (
+                        <div className="pl-8 pr-4 pb-4 space-y-3">
+                          {Object.keys(lessons).sort().map((lesson) => {
+                            const lessonKey = `${chapter}-${lesson}`;
+                            const isLessonExpanded = expandedLessons.has(lessonKey);
+                            const lessonAssignments = lessons[lesson];
+                            
+                            return (
+                              <div key={lessonKey} className="border rounded-lg bg-gray-50">
+                                {/* Lesson Folder */}
+                                <div
+                                  className="flex items-center gap-3 p-3 cursor-pointer hover:bg-gray-100 transition-colors rounded-lg"
+                                  onClick={() => toggleLesson(lessonKey)}
+                                >
+                                  {isLessonExpanded ? (
+                                    <ChevronDown className="w-4 h-4 text-gray-600" />
+                                  ) : (
+                                    <ChevronRight className="w-4 h-4 text-gray-600" />
+                                  )}
+                                  {isLessonExpanded ? (
+                                    <FolderOpen className="w-5 h-5 text-teal-500" />
+                                  ) : (
+                                    <Folder className="w-5 h-5 text-teal-500" />
+                                  )}
+                                  <h4 className="text-md font-medium text-gray-800">{lesson}</h4>
+                                  <span className="ml-auto text-xs text-gray-500 bg-white px-2 py-1 rounded-full">
+                                    {lessonAssignments.length} assignment{lessonAssignments.length !== 1 ? 's' : ''}
+                                  </span>
+                                </div>
+
+                                {/* Assignments in Lesson */}
+                                {isLessonExpanded && (
+                                  <div className="p-3 pt-0 grid md:grid-cols-2 gap-4">
+                                    {lessonAssignments.map((assignment) => (
+                                      <Card
+                                        data-testid={`assignment-card-${assignment.id}`}
+                                        key={assignment.id}
+                                        className="hover:shadow-lg transition-shadow border-2 border-gray-100"
+                                      >
+                                        <CardHeader>
+                                          <CardTitle className="text-lg">{assignment.title}</CardTitle>
+                                          <CardDescription className="line-clamp-2">{assignment.description}</CardDescription>
+                                        </CardHeader>
+                                        <CardContent>
+                                          <div className="text-sm text-gray-600 mb-3">
+                                            {assignment.problem_count ? `${assignment.problem_count} problems` : `${assignment.test_cases?.length || 0} test cases`}
+                                          </div>
+                                          <div className="flex gap-2">
+                                            <Button
+                                              onClick={() => navigate(`/assignment/${assignment.id}`, { 
+                                                state: { classroomId: classroomId } 
+                                              })}
+                                              className="flex-1"
+                                              size="sm"
+                                            >
+                                              View
+                                            </Button>
+                                            {isTeacher && (
+                                              <Button
+                                                onClick={(e) => {
+                                                  e.stopPropagation();
+                                                  const availDate = assignment.available_date ? new Date(assignment.available_date) : null;
+                                                  const dueDate = assignment.due_date ? new Date(assignment.due_date) : null;
+                                                  
+                                                  setEditingAssignment({
+                                                    id: assignment.id,
+                                                    title: assignment.title,
+                                                    available_date: availDate ? availDate.toISOString().split('T')[0] : '',
+                                                    available_time: availDate ? availDate.toISOString().split('T')[1].substring(0, 5) : '00:00',
+                                                    due_date: dueDate ? dueDate.toISOString().split('T')[0] : '',
+                                                    due_time: dueDate ? dueDate.toISOString().split('T')[1].substring(0, 5) : '23:59',
+                                                    allow_late_submission: assignment.allow_late_submission ?? true,
+                                                    late_penalty_percent: assignment.late_penalty_percent || 0
+                                                  });
+                                                  setEditScheduleDialogOpen(true);
+                                                }}
+                                                variant="outline"
+                                                size="sm"
+                                              >
+                                                <Calendar className="w-4 h-4" />
+                                              </Button>
+                                            )}
+                                          </div>
+                                        </CardContent>
+                                      </Card>
+                                    ))}
+                                  </div>
+                                )}
+                              </div>
+                            );
+                          })}
+                        </div>
+                      )}
+                    </div>
+                  );
+                })}
               </div>
             )}
           </TabsContent>
