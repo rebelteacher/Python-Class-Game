@@ -909,7 +909,11 @@ async def bulk_upload_problems(request: Request):
                     expected_output=row.get("expected_output", ""),
                     category=row.get("category", "Uncategorized"),
                     difficulty=row.get("difficulty", "Easy"),
+                    chapter=row.get("chapter", ""),
+                    lesson=row.get("lesson", ""),
+                    problem_type=row.get("problem_type", "Independent Practice"),
                     csta_standard=row.get("csta_standard", ""),
+                    resources_link=row.get("resources_link", ""),
                     creator_id=user["id"],
                     creator_name=user["name"]
                 )
