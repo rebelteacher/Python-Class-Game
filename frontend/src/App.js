@@ -161,6 +161,15 @@ function App() {
               />
               
               <Route
+                path="/question-bank"
+                element={
+                  <ProtectedRoute user={user} requiredRole="teacher">
+                    <QuestionBank user={user} />
+                  </ProtectedRoute>
+                }
+              />
+              
+              <Route
                 path="/library/import/:assignmentId"
                 element={
                   <ProtectedRoute user={user} requiredRole="teacher">
