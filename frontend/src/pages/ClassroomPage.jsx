@@ -279,6 +279,10 @@ export default function ClassroomPage({ user }) {
               <BookOpen className="w-4 h-4" />
               Assignments
             </TabsTrigger>
+            <TabsTrigger data-testid="tests-tab" value="tests" className="gap-2">
+              <FileQuestion className="w-4 h-4" />
+              Tests
+            </TabsTrigger>
             <TabsTrigger data-testid="battles-tab" value="battles" className="gap-2">
               <Swords className="w-4 h-4" />
               Battles
