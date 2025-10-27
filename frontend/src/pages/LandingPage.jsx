@@ -3,7 +3,8 @@ import { Code2, Users, BookOpen, CheckCircle, GraduationCap, UserCircle } from "
 import { Button } from "@/components/ui/button";
 
 const REDIRECT_URL = window.location.origin + "/student/dashboard";
-const AUTH_URL = `https://auth.emergentagent.com/?redirect=${encodeURIComponent(REDIRECT_URL)}`;
+const AUTH_BASE_URL = process.env.REACT_APP_AUTH_URL || "https://auth.emergentagent.com";
+const AUTH_URL = `${AUTH_BASE_URL}/?redirect=${encodeURIComponent(REDIRECT_URL)}`;
 
 export default function LandingPage() {
   const navigate = useNavigate();
