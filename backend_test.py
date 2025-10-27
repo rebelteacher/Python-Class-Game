@@ -3279,6 +3279,9 @@ startxref
         # Test MC Question endpoints
         self.test_mc_question_endpoints()
         
+        # Test MC Test endpoints (Phase 2)
+        self.test_mc_test_endpoints()
+        
         # Print summary
         print(f"\n📊 Test Summary:")
         print(f"   Total tests: {self.tests_run}")
