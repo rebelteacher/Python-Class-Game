@@ -299,6 +299,116 @@ export default function ClassroomPage({ user }) {
             )}
           </TabsList>
 
+          <TabsContent value="tests">
+            <div className="flex justify-between items-center mb-6">
+              <h2 className="text-2xl font-bold text-gray-900">Tests</h2>
+            </div>
+
+            {tests.length === 0 ? (
+              <div className="text-center py-20">
+                <FileQuestion className="w-16 h-16 text-gray-400 mx-auto mb-4" />
+                <h3 className="text-xl font-semibold text-gray-700 mb-2">No tests assigned yet</h3>
+                <p className="text-gray-500 mb-6">
+                  {isTeacher 
+                    ? "Use the Test Builder to create and assign tests to this classroom"
+                    : "Tests will appear here when your teacher assigns them"}
+                </p>
+                {isTeacher && (
+                  <Button onClick={() => navigate("/test-builder")} className="bg-indigo-600 hover:bg-indigo-700">
+                    <Plus className="w-4 h-4 mr-2" />
+                    Create Test
+                  </Button>
+                )}
+              </div>
+            ) : (
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                {tests.map((test) => {
+                  const now = new Date();
+                  const availableDate = test.available_date ? new Date(test.available_date) : null;
+                  const dueDate = test.due_date ? new Date(test.due_date) : null;
+                  
+                  const isScheduled = availableDate && now < availableDate;
+                  const isClosed = dueDate && now > dueDate;
+                  const isAvailable = !isScheduled && !isClosed;
+
+                  // Students shouldn't see scheduled tests
+                  if (!isTeacher && isScheduled) return null;
+
+                  return (
+                    <Card key={test.id} className="hover:shadow-lg transition-shadow">
+                      <CardHeader>
+                        <div className="flex justify-between items-start">
+                          <CardTitle className="text-lg">{test.title}</CardTitle>
+                          {isScheduled && (
+                            <span className="px-2 py-1 bg-yellow-100 text-yellow-700 text-xs rounded">
+                              Scheduled
+                            </span>
+                          )}
+                          {isAvailable && (
+                            <span className="px-2 py-1 bg-green-100 text-green-700 text-xs rounded">
+                              Available
+                            </span>
+                          )}
+                          {isClosed && (
+                            <span className="px-2 py-1 bg-gray-100 text-gray-700 text-xs rounded">
+                              Closed
+                            </span>
+                          )}
+                        </div>
+                        <CardDescription>{test.description || "No description"}</CardDescription>
+                      </CardHeader>
+                      <CardContent>
+                        <div className="space-y-2 text-sm text-gray-600">
+                          <div className="flex items-center gap-2">
+                            <FileQuestion className="w-4 h-4" />
+                            <span>{test.num_questions} questions (from pool of {test.question_pool_ids?.length || 0})</span>
+                          </div>
+                          {test.time_limit_minutes > 0 && (
+                            <div className="flex items-center gap-2">
+                              <Calendar className="w-4 h-4" />
+                              <span>{test.time_limit_minutes} minute time limit</span>
+                            </div>
+                          )}
+                          {availableDate && (
+                            <div className="flex items-center gap-2">
+                              <Calendar className="w-4 h-4" />
+                              <span>Available: {availableDate.toLocaleString()}</span>
+                            </div>
+                          )}
+                          {dueDate && (
+                            <div className="flex items-center gap-2">
+                              <Calendar className="w-4 h-4" />
+                              <span>Due: {dueDate.toLocaleString()}</span>
+                            </div>
+                          )}
+                        </div>
+                        <div className="mt-4 flex gap-2">
+                          {!isTeacher && isAvailable && (
+                            <Button 
+                              onClick={() => navigate(`/test/${test.id}`)}
+                              className="w-full bg-indigo-600 hover:bg-indigo-700"
+                            >
+                              Start Test
+                            </Button>
+                          )}
+                          {isTeacher && (
+                            <Button
+                              onClick={() => navigate(`/test/${test.id}/results`)}
+                              variant="outline"
+                              className="w-full"
+                            >
+                              View Results
+                            </Button>
+                          )}
+                        </div>
+                      </CardContent>
+                    </Card>
+                  );
+                })}
+              </div>
+            )}
+          </TabsContent>
+
           <TabsContent value="battles">
             <BattleZone classroomId={classroomId} isTeacher={isTeacher} />
           </TabsContent>
