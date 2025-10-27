@@ -400,6 +400,7 @@ What is 2+2?,3,4,5,6,B,Chapter 1,Lesson 1,Easy
               </form>
             </DialogContent>
           </Dialog>
+          </div>
         </div>
       </nav>
 
