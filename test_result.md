@@ -239,16 +239,14 @@ metadata:
 
 test_plan:
   current_focus:
-    - "Create MC Question model and CRUD endpoints"
-    - "Create MC Question bulk upload endpoint"
-    - "Create QuestionBank page component"
-    - "Add Question Bank route and navigation"
-    - "Create CSV template file for bulk upload"
+    - "Create MC Test model and endpoints"
+    - "Create TestBuilder page component"
+    - "Add Tests tab to ClassroomPage"
+    - "Add TestBuilder route and navigation"
   stuck_tasks: []
   test_all: false
   test_priority: "high_first"
-  testing_complete: true
-  backend_testing_complete: true
+  testing_complete: false
 
 agent_communication:
   - agent: "main"
