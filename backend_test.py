@@ -3359,10 +3359,15 @@ startxref
 
 def main():
     import sys
-    if len(sys.argv) > 1 and sys.argv[1] == "mc-questions":
-        tester = CodeClassAPITester()
-        success = tester.run_mc_question_tests_only()
-        return 0 if success else 1
+    if len(sys.argv) > 1:
+        if sys.argv[1] == "mc-questions":
+            tester = CodeClassAPITester()
+            success = tester.run_mc_question_tests_only()
+            return 0 if success else 1
+        elif sys.argv[1] == "mc-tests":
+            tester = CodeClassAPITester()
+            success = tester.run_mc_test_tests_only()
+            return 0 if success else 1
     else:
         tester = CodeClassAPITester()
         success = tester.run_all_tests()
