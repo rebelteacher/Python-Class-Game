@@ -3335,6 +3335,28 @@ startxref
         
         return self.tests_passed == self.tests_run
 
+    def run_mc_test_tests_only(self):
+        """Run only MC Test tests (Phase 2)"""
+        print("🚀 Starting MC Test API Tests (Phase 2)...")
+        print(f"Testing against: {self.base_url}")
+        
+        # Setup test user
+        if not self.setup_test_user():
+            print("❌ Cannot proceed without test user setup")
+            return False
+        
+        # Test MC Test endpoints
+        self.test_mc_test_endpoints()
+        
+        # Print summary
+        print(f"\n📊 MC Test Test Summary:")
+        print(f"   Total tests: {self.tests_run}")
+        print(f"   Passed: {self.tests_passed}")
+        print(f"   Failed: {self.tests_run - self.tests_passed}")
+        print(f"   Success rate: {(self.tests_passed/self.tests_run)*100:.1f}%")
+        
+        return self.tests_passed == self.tests_run
+
 def main():
     import sys
     if len(sys.argv) > 1 and sys.argv[1] == "mc-questions":
