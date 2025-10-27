@@ -3052,24 +3052,25 @@ async def start_mc_test(test_id: str, request: Request):
     for q_id in selected_question_ids:
         question = await db.mc_questions.find_one({"id": q_id}, {"_id": 0})
         if question:
-            # Randomize answer order
-            choices = ["A", "B", "C", "D"]
-            random.shuffle(choices)
-            randomized_choices[q_id] = choices
+            # Create list of choices with their original letters
+            all_choices = [
+                {"letter": "A", "text": question["choice_a"]},
+                {"letter": "B", "text": question["choice_b"]},
+                {"letter": "C", "text": question["choice_c"]},
+                {"letter": "D", "text": question["choice_d"]}
+            ]
             
-            # Remap choices for display
-            choice_map = {
-                choices[0]: question["choice_a"],
-                choices[1]: question["choice_b"],
-                choices[2]: question["choice_c"],
-                choices[3]: question["choice_d"]
-            }
+            # Shuffle the choices
+            random.shuffle(all_choices)
             
+            # Store which original letter is at each position for grading
+            randomized_choices[q_id] = [choice["letter"] for choice in all_choices]
+            
+            # Send just the text in randomized order
             questions_data.append({
                 "id": q_id,
                 "question_text": question["question_text"],
-                "choices": choice_map,
-                "choice_order": choices
+                "choices": [choice["text"] for choice in all_choices]  # Just array of text
             })
     
     # Create attempt record
