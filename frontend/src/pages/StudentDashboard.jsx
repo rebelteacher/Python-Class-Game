@@ -17,6 +17,7 @@ const API = `${BACKEND_URL}/api`;
 
 export default function StudentDashboard({ user, setUser }) {
   const [classrooms, setClassrooms] = useState([]);
+  const [availableTests, setAvailableTests] = useState([]);
   const [loading, setLoading] = useState(true);
   const [joinDialogOpen, setJoinDialogOpen] = useState(false);
   const [shopDialogOpen, setShopDialogOpen] = useState(false);
