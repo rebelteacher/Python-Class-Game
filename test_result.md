@@ -220,17 +220,41 @@ frontend:
         agent: "main"
         comment: "Added Tests tab to ClassroomPage alongside Assignments tab. Fetches tests for classroom. Displays test cards with status badges (Scheduled/Available/Closed based on dates), question count, time limit, available/due dates. Shows 'Start Test' button for students (only if available), 'View Results' button for teachers. Empty state with link to Test Builder. Students only see available tests (not scheduled ones)."
   
-  - task: "Add TestBuilder route and navigation"
+  - task: "Create TestTaking page component"
     implemented: true
     working: "NA"
-    file: "frontend/src/App.js, frontend/src/pages/TeacherDashboard.jsx"
+    file: "frontend/src/pages/TestTaking.jsx"
     stuck_count: 0
     priority: "high"
     needs_retesting: true
     status_history:
       - working: "NA"
         agent: "main"
-        comment: "Added /test-builder route (teacher-only) in App.js. Added 'Test Builder' button to Teacher Dashboard navbar next to Question Bank button."
+        comment: "Created complete TestTaking component with: Start test flow (calls GET /api/mc-tests/{id}/start), question display with randomized choices (radio buttons), countdown timer with auto-submit when time expires, unanswered question warnings, submit functionality (POST /api/mc-tests/{id}/submit), score-only results screen (no answer review, with motivational messages), back to dashboard navigation. Timer shows in header with color coding (green>5min, yellow>1min, red<1min). Instructions banner. Progress indicator showing answered/total questions."
+  
+  - task: "Update StudentDashboard with tests"
+    implemented: true
+    working: "NA"
+    file: "frontend/src/pages/StudentDashboard.jsx"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: true
+    status_history:
+      - working: "NA"
+        agent: "main"
+        comment: "Added 'Available Tests' section to StudentDashboard. Fetches tests from all enrolled classrooms. Displays test cards with: title, classroom name, status badge (Available/Overdue), question count, time limit, due date. 'Start Test' button (disabled if overdue). Shows only available tests (backend filters scheduled ones). Tests section appears above assignments section."
+  
+  - task: "Add TestTaking route"
+    implemented: true
+    working: "NA"
+    file: "frontend/src/App.js"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: true
+    status_history:
+      - working: "NA"
+        agent: "main"
+        comment: "Added /test/:testId route (student-only) in App.js for test taking page."
 
 metadata:
   created_by: "main_agent"
