@@ -15,6 +15,7 @@ import AssignmentLibrary from "./pages/AssignmentLibrary";
 import NotesLibrary from "./pages/NotesLibrary";
 import QuestionBank from "./pages/QuestionBank";
 import TestBuilder from "./pages/TestBuilder";
+import TestTaking from "./pages/TestTaking";
 import ImportAssignment from "./pages/ImportAssignment";
 import TeacherPractice from "./pages/TeacherPractice";
 import SecretRoleSwitch from "./pages/SecretRoleSwitch";
