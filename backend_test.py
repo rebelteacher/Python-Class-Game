@@ -3112,7 +3112,7 @@ startxref
             "Create test with invalid question_id (should fail)",
             "POST",
             "mc-tests",
-            404,  # Should fail with 404 or 400
+            400,  # Should fail with 400 (validation error)
             invalid_test_data
         )
         
