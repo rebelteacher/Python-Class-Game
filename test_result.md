@@ -242,7 +242,6 @@ metadata:
 
 test_plan:
   current_focus:
-    - "Create MC Test model and endpoints"
     - "Create TestBuilder page component"
     - "Add Tests tab to ClassroomPage"
     - "Add TestBuilder route and navigation"
