@@ -2922,13 +2922,19 @@ async def create_mc_test(test: MCTestCreate, request: Request):
     if test.num_questions > len(test.question_pool_ids):
         raise HTTPException(status_code=400, detail="Number of questions exceeds pool size")
     
-    # Parse dates
+    # Parse dates (assume input is Central Time, store as UTC)
+    central = pytz.timezone('America/Chicago')
     available_date = None
     due_date = None
     if test.available_date:
-        available_date = datetime.fromisoformat(test.available_date.replace('Z', '+00:00'))
+        # Parse as naive datetime, localize to Central, convert to UTC
+        naive_dt = datetime.fromisoformat(test.available_date.replace('Z', ''))
+        central_dt = central.localize(naive_dt)
+        available_date = central_dt.astimezone(timezone.utc)
     if test.due_date:
-        due_date = datetime.fromisoformat(test.due_date.replace('Z', '+00:00'))
+        naive_dt = datetime.fromisoformat(test.due_date.replace('Z', ''))
+        central_dt = central.localize(naive_dt)
+        due_date = central_dt.astimezone(timezone.utc)
     
     mc_test = MCTest(
         title=test.title,
