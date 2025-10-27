@@ -149,12 +149,12 @@ backend:
     working: "NA"
     file: "backend/server.py"
     stuck_count: 0
-    priority: "medium"
+    priority: "high"
     needs_retesting: true
     status_history:
       - working: "NA"
         agent: "main"
-        comment: "Added MCTest model with fields: id, title, description, question_ids (list), creator_id, created_at. Implemented endpoints: POST /api/mc-tests (create test), GET /api/mc-tests (list all), GET /api/mc-tests/{id} (get test with questions). Teacher-only access."
+        comment: "Added MCTest model with fields: id, title, description, chapter, lesson, teacher_id, question_pool_ids, num_questions, time_limit_minutes, classroom_ids, available_date, due_date. Implemented endpoints: POST /api/mc-tests (create test with scheduler), GET /api/mc-tests (list teacher's tests), GET /api/mc-tests/classroom/{id} (get classroom tests with student availability filtering), GET /api/mc-tests/{test_id}/start (start test for student), POST /api/mc-tests/{test_id}/submit (submit test), GET /api/mc-tests/{test_id}/results (get results). Scheduler uses Central Time (America/Chicago) for inputs, stores as UTC. Students only see tests past available_date."
   
   - task: "Create MC Take model and endpoints"
     implemented: true
