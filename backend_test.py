@@ -2909,8 +2909,8 @@ startxref
         future_central = datetime.now() + timedelta(hours=2)
         future_central_str = future_central.strftime("%Y-%m-%dT%H:%M:%S")
         
-        # Past date (available test)  
-        past_central = datetime.now() - timedelta(hours=1)
+        # Past date (available test) - use 8 hours ago to account for timezone conversion
+        past_central = datetime.now() - timedelta(hours=8)
         past_central_str = past_central.strftime("%Y-%m-%dT%H:%M:%S")
         
         # Due date
