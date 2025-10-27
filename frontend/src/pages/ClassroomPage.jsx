@@ -114,6 +114,18 @@ export default function ClassroomPage({ user }) {
     }
   };
 
+  const fetchTests = async () => {
+    try {
+      const response = await axios.get(`${API}/mc-tests/classroom/${classroomId}`, {
+        withCredentials: true,
+      });
+      setTests(response.data);
+    } catch (error) {
+      console.error("Error fetching tests:", error);
+      toast.error("Failed to load tests");
+    }
+  };
+
   const handleCreateAssignment = async (e) => {
     e.preventDefault();
     
