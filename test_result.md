@@ -266,9 +266,10 @@ metadata:
 
 test_plan:
   current_focus:
-    - "Create TestBuilder page component"
-    - "Add Tests tab to ClassroomPage"
-    - "Add TestBuilder route and navigation"
+    - "Create MC Take model and endpoints"
+    - "Create TestTaking page component"
+    - "Update StudentDashboard with tests"
+    - "Add TestTaking route"
   stuck_tasks: []
   test_all: false
   test_priority: "high_first"
