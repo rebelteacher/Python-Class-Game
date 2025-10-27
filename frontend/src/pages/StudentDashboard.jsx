@@ -107,6 +107,32 @@ export default function StudentDashboard({ user, setUser }) {
     }
   };
 
+  const fetchTests = async () => {
+    try {
+      const response = await axios.get(`${API}/classrooms`, {
+        withCredentials: true,
+      });
+      
+      // Fetch tests from all classrooms
+      const allTests = [];
+      for (const classroom of response.data) {
+        try {
+          const testsRes = await axios.get(`${API}/mc-tests/classroom/${classroom.id}`, {
+            withCredentials: true
+          });
+          testsRes.data.forEach(test => {
+            allTests.push({ ...test, classroom_name: classroom.name, classroom_id: classroom.id });
+          });
+        } catch (err) {
+          console.error(`Error fetching tests for classroom ${classroom.id}:`, err);
+        }
+      }
+      setAvailableTests(allTests);
+    } catch (error) {
+      console.error("Error fetching tests:", error);
+    }
+  };
+
   const handleJoinClassroom = async (e) => {
     e.preventDefault();
     if (!classCode.trim()) {
