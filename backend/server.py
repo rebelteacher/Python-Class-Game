@@ -3120,42 +3120,43 @@ async def submit_mc_test(test_id: str, submission: MCTestSubmission, request: Re
     correct_count = 0
     total_questions = len(attempt["randomized_question_ids"])
     
-    print(f"🔍 DEBUG: Grading test for student {user['id']}")
-    print(f"📊 Total questions: {total_questions}")
+    logging.info(f"🔍 DEBUG: Grading test for student {user['id']}")
+    logging.info(f"📊 Total questions: {total_questions}")
+    logging.info(f"📝 Submission answers: {submission.answers}")
     
     for q_id in attempt["randomized_question_ids"]:
         question = await db.mc_questions.find_one({"id": q_id})
         if question:
             student_answer = submission.answers.get(q_id, "")
-            print(f"\n📝 Question ID: {q_id}")
-            print(f"   Student answer (raw): {student_answer} (type: {type(student_answer)})")
+            logging.info(f"\n📝 Question ID: {q_id}")
+            logging.info(f"   Student answer (raw): '{student_answer}' (type: {type(student_answer).__name__})")
             
             # Student answer is now a position index (0, 1, 2, 3) as a string
             # Get the randomized choice order for this question
             randomized_order = attempt["randomized_choices"].get(q_id, ["A", "B", "C", "D"])
-            print(f"   Randomized order: {randomized_order}")
-            print(f"   Original correct answer: {question['correct_answer']}")
+            logging.info(f"   Randomized order: {randomized_order}")
+            logging.info(f"   Original correct answer: {question['correct_answer']}")
             
             # Convert student's position to the actual original letter
             try:
                 position = int(student_answer)
-                print(f"   Position (converted): {position}")
+                logging.info(f"   Position (converted): {position}")
                 if 0 <= position < len(randomized_order):
                     actual_original_letter = randomized_order[position]
-                    print(f"   Actual original letter at position {position}: {actual_original_letter}")
+                    logging.info(f"   Actual original letter at position {position}: {actual_original_letter}")
                     
                     if actual_original_letter == question["correct_answer"]:
                         correct_count += 1
-                        print(f"   ✅ CORRECT! {actual_original_letter} == {question['correct_answer']}")
+                        logging.info(f"   ✅ CORRECT! {actual_original_letter} == {question['correct_answer']}")
                     else:
-                        print(f"   ❌ WRONG! {actual_original_letter} != {question['correct_answer']}")
+                        logging.info(f"   ❌ WRONG! {actual_original_letter} != {question['correct_answer']}")
                 else:
-                    print(f"   ⚠️ Position {position} out of range")
+                    logging.info(f"   ⚠️ Position {position} out of range")
             except (ValueError, TypeError) as e:
-                print(f"   ⚠️ Error converting answer: {e}")
+                logging.info(f"   ⚠️ Error converting answer: {e}")
     
     score = (correct_count / total_questions * 100) if total_questions > 0 else 0
-    print(f"\n🎯 Final score: {correct_count}/{total_questions} = {score}%")
+    logging.info(f"\n🎯 Final score: {correct_count}/{total_questions} = {score}%")
     
     score = (correct_count / total_questions * 100) if total_questions > 0 else 0
     
