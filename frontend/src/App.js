@@ -181,6 +181,15 @@ function App() {
               />
               
               <Route
+                path="/test/:testId"
+                element={
+                  <ProtectedRoute user={user} requiredRole="student">
+                    <TestTaking user={user} />
+                  </ProtectedRoute>
+                }
+              />
+              
+              <Route
                 path="/library/import/:assignmentId"
                 element={
                   <ProtectedRoute user={user} requiredRole="teacher">
