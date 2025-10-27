@@ -2251,7 +2251,7 @@ async def get_admin_stats(request: Request):
             active_users = await db.sessions.count_documents({
                 "created_at": {"$gte": seven_days_ago}
             })
-        except:
+        except Exception:
             # Fallback if sessions collection doesn't exist
             active_users = 0
         
