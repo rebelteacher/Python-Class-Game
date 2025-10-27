@@ -39,6 +39,7 @@ export default function ClassroomPage({ user }) {
   useEffect(() => {
     fetchClassroom();
     fetchAssignments();
+    fetchTests();
   }, [classroomId]);
 
   const toggleChapter = (chapter) => {
