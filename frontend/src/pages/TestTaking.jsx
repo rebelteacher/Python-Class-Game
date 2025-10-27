@@ -246,14 +246,14 @@ export default function TestTaking({ user }) {
                 </CardTitle>
               </CardHeader>
               <CardContent>
-                <p className="text-gray-900 mb-4 text-base">{question.question_text}</p>
+                <p className="text-gray-900 mb-4 text-base font-medium">{question.question_text}</p>
                 
                 <RadioGroup 
                   value={answers[question.id]} 
                   onValueChange={(value) => setAnswers({ ...answers, [question.id]: value })}
                 >
-                  {question.choice_order.map((choiceLetter, idx) => (
-                    <div key={idx} className="flex items-center space-x-3 p-3 rounded-lg hover:bg-gray-50 transition-colors">
+                  {question.choices.map((choiceText, idx) => (
+                    <div key={idx} className="flex items-center space-x-3 p-3 rounded-lg hover:bg-gray-50 transition-colors border border-gray-200">
                       <RadioGroupItem 
                         value={idx.toString()} 
                         id={`${question.id}-${idx}`}
@@ -262,7 +262,7 @@ export default function TestTaking({ user }) {
                         htmlFor={`${question.id}-${idx}`}
                         className="flex-1 cursor-pointer text-base"
                       >
-                        {question.choices[choiceLetter]}
+                        {choiceText}
                       </Label>
                     </div>
                   ))}
