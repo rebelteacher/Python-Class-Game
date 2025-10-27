@@ -100,6 +100,7 @@ export default function TestTaking({ user }) {
       }
     }
 
+    console.log("🔍 Submitting answers:", answers);
     setSubmitting(true);
 
     try {
@@ -112,6 +113,7 @@ export default function TestTaking({ user }) {
         { withCredentials: true }
       );
       
+      console.log("✅ Submission response:", response.data);
       setScore(response.data.score);
       setSubmitted(true);
       
