@@ -193,17 +193,41 @@ frontend:
         agent: "main"
         comment: "Added /teacher/question-bank route (teacher-only) in App.js. Added 'Question Bank' button with FileQuestion icon to Teacher Dashboard navbar."
   
-  - task: "Create CSV template file for bulk upload"
+  - task: "Create TestBuilder page component"
     implemented: true
     working: "NA"
-    file: "mc_question_upload_template.csv"
+    file: "frontend/src/pages/TestBuilder.jsx"
     stuck_count: 0
     priority: "high"
     needs_retesting: true
     status_history:
       - working: "NA"
         agent: "main"
-        comment: "Created mc_question_upload_template.csv at /app/ with headers: question_text,choice_a,choice_b,choice_c,choice_d,correct_answer,chapter,lesson,difficulty. Included 3 example questions demonstrating proper CSV format."
+        comment: "Created complete TestBuilder component with: Test configuration form (title, description, chapter, lesson, num_questions, time_limit, available_date, due_date, classroom selection), 3-panel layout (config, question browser, selected pool), question bank browser with chapter/lesson folders and checkboxes, selected questions preview panel with remove option, Central Time datetime pickers for scheduler, classroom multi-select with checkboxes. Creates tests and assigns to selected classrooms."
+  
+  - task: "Add Tests tab to ClassroomPage"
+    implemented: true
+    working: "NA"
+    file: "frontend/src/pages/ClassroomPage.jsx"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: true
+    status_history:
+      - working: "NA"
+        agent: "main"
+        comment: "Added Tests tab to ClassroomPage alongside Assignments tab. Fetches tests for classroom. Displays test cards with status badges (Scheduled/Available/Closed based on dates), question count, time limit, available/due dates. Shows 'Start Test' button for students (only if available), 'View Results' button for teachers. Empty state with link to Test Builder. Students only see available tests (not scheduled ones)."
+  
+  - task: "Add TestBuilder route and navigation"
+    implemented: true
+    working: "NA"
+    file: "frontend/src/App.js, frontend/src/pages/TeacherDashboard.jsx"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: true
+    status_history:
+      - working: "NA"
+        agent: "main"
+        comment: "Added /test-builder route (teacher-only) in App.js. Added 'Test Builder' button to Teacher Dashboard navbar next to Question Bank button."
 
 metadata:
   created_by: "main_agent"
