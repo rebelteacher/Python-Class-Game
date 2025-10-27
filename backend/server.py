@@ -2269,8 +2269,19 @@ async def get_all_teachers(request: Request):
         # Count assignments created
         teacher["assignment_count"] = await db.assignments.count_documents({"teacher_id": teacher["id"]})
     
-    # Sort by join date (newest first)
-    teachers.sort(key=lambda t: t.get("created_at", datetime.min), reverse=True)
+    # Sort by join date (newest first) - handle both datetime and string formats
+    def get_created_at(teacher):
+        created = teacher.get("created_at")
+        if created:
+            if isinstance(created, str):
+                try:
+                    return datetime.fromisoformat(created.replace('Z', '+00:00'))
+                except:
+                    return datetime.min
+            return created
+        return datetime.min
+    
+    teachers.sort(key=get_created_at, reverse=True)
     
     return teachers
 
