@@ -33,6 +33,7 @@ export default function StudentDashboard({ user, setUser }) {
     // Always refetch data when dashboard mounts or location changes
     console.log("Dashboard: Fetching fresh data...");
     fetchClassrooms();
+    fetchTests();
     fetchShopItems();
     fetchUserProfile();
   }, [location.key]); // location.key changes on every navigation
