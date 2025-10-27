@@ -146,15 +146,18 @@ backend:
   
   - task: "Create MC Test model and endpoints"
     implemented: true
-    working: "NA"
+    working: true
     file: "backend/server.py"
     stuck_count: 0
     priority: "high"
-    needs_retesting: true
+    needs_retesting: false
     status_history:
       - working: "NA"
         agent: "main"
         comment: "Added MCTest model with fields: id, title, description, chapter, lesson, teacher_id, question_pool_ids, num_questions, time_limit_minutes, classroom_ids, available_date, due_date. Implemented endpoints: POST /api/mc-tests (create test with scheduler), GET /api/mc-tests (list teacher's tests), GET /api/mc-tests/classroom/{id} (get classroom tests with student availability filtering), GET /api/mc-tests/{test_id}/start (start test for student), POST /api/mc-tests/{test_id}/submit (submit test), GET /api/mc-tests/{test_id}/results (get results). Scheduler uses Central Time (America/Chicago) for inputs, stores as UTC. Students only see tests past available_date."
+      - working: true
+        agent: "testing"
+        comment: "COMPREHENSIVE MC TEST BACKEND TESTING COMPLETED - 22/22 tests passed (100% success rate). ✅ POST /api/mc-tests: Creates tests with full configuration including Central Time scheduling, validates question ownership, enforces num_questions <= pool size, teacher-only access. ✅ GET /api/mc-tests: Lists all teacher's tests correctly. ✅ GET /api/mc-tests/classroom/{id}: Teacher sees ALL tests regardless of available_date, Student sees only available tests (past available_date or null). ✅ Timezone conversion: Central Time input correctly converted to UTC storage. ✅ Access control: Teacher-only creation (403 for students), proper classroom access validation. ✅ Validation: Invalid question_id fails (400), num_questions > pool size fails (400). ✅ Scheduler functionality: Students cannot see scheduled tests (future available_date), can see available tests (past available_date), can see tests with no dates. All Phase 2 Test Builder & Distribution endpoints working perfectly."
   
   - task: "Create MC Take model and endpoints"
     implemented: true
