@@ -2904,7 +2904,6 @@ startxref
         print("\n   TEST 1: POST /api/mc-tests - Create test with full configuration")
         
         # Test with Central Time dates
-        from datetime import datetime, timezone, timedelta
         
         # Future date (scheduled test)
         future_central = datetime.now() + timedelta(hours=2)
