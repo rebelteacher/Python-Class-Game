@@ -251,7 +251,76 @@ test_plan:
 agent_communication:
   - agent: "main"
     message: |
-      MC TESTING PLATFORM - PHASE 1 (QUESTION BANK) IMPLEMENTATION COMPLETE - READY FOR TESTING
+      MC TESTING PLATFORM - PHASE 2 (TEST BUILDER & DISTRIBUTION) IMPLEMENTATION COMPLETE - READY FOR TESTING
+      
+      BACKEND UPDATES:
+      1. MCTest model already had most fields needed (available_date, due_date, time_limit_minutes, classroom_ids)
+      2. Added pytz timezone handling for Central Time (America/Chicago)
+      3. Updated create_mc_test endpoint to convert Central Time input to UTC storage
+      4. Added GET /api/mc-tests endpoint to list all teacher's tests
+      5. Updated get_classroom_tests endpoint to filter tests by availability for students
+         - Teachers see all tests with their status
+         - Students only see tests past available_date (not scheduled ones)
+      6. All existing endpoints working: start test, submit test, get results
+      
+      FRONTEND - TEST BUILDER:
+      1. Created TestBuilder.jsx with 3-panel layout:
+         - Left: Test configuration form (title, description, chapter, lesson, num_questions, time_limit, date/time scheduler, classroom selection)
+         - Middle: Question bank browser with chapter/lesson folder navigation and checkboxes
+         - Right: Selected questions pool preview with remove buttons
+      2. Datetime-local inputs for Central Time scheduling (available_from, due_date)
+      3. Classroom multi-select with checkboxes
+      4. Validation for required fields and pool size
+      5. Creates test and navigates back to dashboard on success
+      
+      FRONTEND - CLASSROOM TESTS TAB:
+      1. Added "Tests" tab to ClassroomPage between Assignments and Battles
+      2. Fetches and displays tests assigned to classroom
+      3. Test cards show:
+         - Title, description
+         - Status badges: Scheduled (yellow), Available (green), Closed (gray)
+         - Question count and pool size
+         - Time limit (if set)
+         - Available from and due dates (formatted)
+         - Action buttons: "Start Test" (students, if available), "View Results" (teachers)
+      4. Empty state with link to Test Builder for teachers
+      5. Students only see available tests (filtered out scheduled ones on frontend too)
+      
+      NAVIGATION:
+      1. Added /test-builder route (teacher-only)
+      2. Added "Test Builder" button to Teacher Dashboard navbar
+      
+      SCHEDULER FEATURES:
+      - Available From: Test becomes visible to students at this date/time (Central)
+      - Due Date: Optional deadline (Central)
+      - Tests stored in UTC, converted to/from Central for display
+      - Students cannot see tests before available_date
+      - Status indicators show test state (Scheduled/Available/Closed)
+      
+      TESTING PRIORITY - PHASE 2:
+      Backend:
+      - Test POST /api/mc-tests with scheduler dates (Central Time input)
+      - Test GET /api/mc-tests (list teacher's tests)
+      - Test GET /api/mc-tests/classroom/{id} for both teacher and student
+      - Verify student sees only available tests
+      - Verify timezone conversion (Central to UTC)
+      
+      Frontend:
+      - Login as teacher
+      - Navigate to Test Builder
+      - Create test with questions from bank
+      - Set available_date in future (should show as "Scheduled")
+      - Set available_date in past (should show as "Available")
+      - Assign to classroom
+      - View classroom -> Tests tab
+      - Verify test appears with correct status
+      - Login as student, verify scheduled tests don't appear
+      - Verify available tests show "Start Test" button
+      
+      NEXT PHASE (Phase 3 - Not yet implemented):
+      - Student test taking page with randomization
+      - Countdown timer for timed tests
+      - Submit and score display (score only, no review)
       
       BACKEND:
       1. MCQuestion model with fields: question_text, choice_a-d, correct_answer, chapter, lesson, difficulty, creator_id
