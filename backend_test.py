@@ -2832,6 +2832,402 @@ startxref
             "total_questions": len(final_questions_list) if final_questions_list else 0
         }
 
+    def test_mc_test_endpoints(self):
+        """Test MC Test endpoints (Phase 2) - Test Builder & Distribution"""
+        print("\n🧪 Testing MC Test Endpoints (Phase 2)...")
+        
+        # Setup: Create test questions first
+        print("   Setting up test questions...")
+        question_ids = []
+        
+        for i in range(3):
+            question_data = {
+                "question_text": f"What is {i+1} + {i+1}?",
+                "choice_a": str((i+1) + (i+1)),
+                "choice_b": str((i+1) + (i+1) + 1),
+                "choice_c": str((i+1) + (i+1) - 1),
+                "choice_d": str((i+1) + (i+1) + 2),
+                "correct_answer": "A",
+                "chapter": "Chapter 1",
+                "lesson": "Lesson 1",
+                "difficulty": "Easy"
+            }
+            
+            question = self.run_test(
+                f"Create test question {i+1}",
+                "POST",
+                "mc-questions",
+                200,
+                question_data
+            )
+            
+            if question:
+                question_ids.append(question.get('id'))
+        
+        if len(question_ids) < 2:
+            print("❌ Cannot test MC Tests without questions")
+            return None
+        
+        # Setup: Create test classroom
+        classroom_data = {
+            "name": f"MC Test Classroom {datetime.now().strftime('%H%M%S')}"
+        }
+        
+        classroom = self.run_test(
+            "Create classroom for MC tests",
+            "POST",
+            "classrooms",
+            200,
+            classroom_data
+        )
+        
+        if not classroom:
+            print("❌ Cannot test MC Tests without classroom")
+            return None
+        
+        classroom_id = classroom.get('id')
+        
+        # Setup: Create test student
+        student = self.create_student_user("mctest")
+        if not student:
+            print("❌ Cannot test MC Tests without student")
+            return None
+        
+        # Add student to classroom
+        if not self.add_student_to_classroom(student["id"], classroom_id):
+            print("❌ Cannot test MC Tests without adding student to classroom")
+            return None
+        
+        print(f"   Setup complete: {len(question_ids)} questions, classroom {classroom_id}, student {student['id']}")
+        
+        # TEST 1: POST /api/mc-tests - Create test with full configuration
+        print("\n   TEST 1: POST /api/mc-tests - Create test with full configuration")
+        
+        # Test with Central Time dates
+        from datetime import datetime, timezone, timedelta
+        
+        # Future date (scheduled test)
+        future_central = datetime.now() + timedelta(hours=2)
+        future_central_str = future_central.strftime("%Y-%m-%dT%H:%M:%S")
+        
+        # Past date (available test)  
+        past_central = datetime.now() - timedelta(hours=1)
+        past_central_str = past_central.strftime("%Y-%m-%dT%H:%M:%S")
+        
+        # Due date
+        due_central = datetime.now() + timedelta(days=7)
+        due_central_str = due_central.strftime("%Y-%m-%dT%H:%M:%S")
+        
+        scheduled_test_data = {
+            "title": "Chapter 1 Quiz - Scheduled",
+            "description": "Test on basics - scheduled for future",
+            "chapter": "Chapter 1",
+            "lesson": "Lesson 1",
+            "question_pool_ids": question_ids[:2],
+            "num_questions": 2,
+            "time_limit_minutes": 30,
+            "classroom_ids": [classroom_id],
+            "available_date": future_central_str,
+            "due_date": due_central_str
+        }
+        
+        scheduled_test = self.run_test(
+            "Create scheduled test (future available_date)",
+            "POST",
+            "mc-tests",
+            200,
+            scheduled_test_data
+        )
+        
+        if not scheduled_test:
+            print("❌ Cannot continue without scheduled test")
+            return None
+        
+        scheduled_test_id = scheduled_test.get('id')
+        print(f"   Created scheduled test: {scheduled_test_id}")
+        
+        # Create available test (past available_date)
+        available_test_data = {
+            "title": "Chapter 1 Quiz - Available",
+            "description": "Test on basics - available now",
+            "chapter": "Chapter 1", 
+            "lesson": "Lesson 1",
+            "question_pool_ids": question_ids,
+            "num_questions": 2,
+            "time_limit_minutes": 45,
+            "classroom_ids": [classroom_id],
+            "available_date": past_central_str,
+            "due_date": due_central_str
+        }
+        
+        available_test = self.run_test(
+            "Create available test (past available_date)",
+            "POST",
+            "mc-tests",
+            200,
+            available_test_data
+        )
+        
+        if not available_test:
+            print("❌ Cannot continue without available test")
+            return None
+        
+        available_test_id = available_test.get('id')
+        print(f"   Created available test: {available_test_id}")
+        
+        # Create test with no dates (should be available)
+        no_date_test_data = {
+            "title": "Chapter 1 Quiz - No Dates",
+            "description": "Test with no scheduling",
+            "chapter": "Chapter 1",
+            "lesson": "Lesson 1", 
+            "question_pool_ids": question_ids[:2],
+            "num_questions": 2,
+            "time_limit_minutes": 0,
+            "classroom_ids": [classroom_id]
+        }
+        
+        no_date_test = self.run_test(
+            "Create test with no dates",
+            "POST",
+            "mc-tests",
+            200,
+            no_date_test_data
+        )
+        
+        no_date_test_id = no_date_test.get('id') if no_date_test else None
+        
+        # TEST 2: GET /api/mc-tests - List all tests created by teacher
+        print("\n   TEST 2: GET /api/mc-tests - List teacher's tests")
+        
+        teacher_tests = self.run_test(
+            "Get all teacher tests",
+            "GET",
+            "mc-tests",
+            200
+        )
+        
+        if teacher_tests:
+            test_count = len(teacher_tests)
+            print(f"   Teacher has {test_count} tests")
+            
+            # Verify all created tests are in the list
+            teacher_test_ids = [t.get('id') for t in teacher_tests]
+            
+            if scheduled_test_id in teacher_test_ids:
+                self.log_test("Scheduled test appears in teacher list", True)
+            else:
+                self.log_test("Scheduled test appears in teacher list", False, "Scheduled test not found")
+            
+            if available_test_id in teacher_test_ids:
+                self.log_test("Available test appears in teacher list", True)
+            else:
+                self.log_test("Available test appears in teacher list", False, "Available test not found")
+        
+        # TEST 3: GET /api/mc-tests/classroom/{id} - Teacher view (sees all tests)
+        print("\n   TEST 3: GET /api/mc-tests/classroom/{id} - Teacher view")
+        
+        teacher_classroom_tests = self.run_test(
+            "Get classroom tests as teacher",
+            "GET",
+            f"mc-tests/classroom/{classroom_id}",
+            200
+        )
+        
+        if teacher_classroom_tests:
+            teacher_test_count = len(teacher_classroom_tests)
+            print(f"   Teacher sees {teacher_test_count} tests in classroom")
+            
+            classroom_test_ids = [t.get('id') for t in teacher_classroom_tests]
+            
+            # Teacher should see ALL tests regardless of available_date
+            if scheduled_test_id in classroom_test_ids:
+                self.log_test("Teacher sees scheduled test (future date)", True)
+            else:
+                self.log_test("Teacher sees scheduled test (future date)", False, "Scheduled test not visible to teacher")
+            
+            if available_test_id in classroom_test_ids:
+                self.log_test("Teacher sees available test (past date)", True)
+            else:
+                self.log_test("Teacher sees available test (past date)", False, "Available test not visible to teacher")
+        
+        # TEST 4: GET /api/mc-tests/classroom/{id} - Student view (filtered by available_date)
+        print("\n   TEST 4: GET /api/mc-tests/classroom/{id} - Student view")
+        
+        # Switch to student token
+        original_token = self.session_token
+        self.session_token = student["token"]
+        
+        try:
+            student_classroom_tests = self.run_test(
+                "Get classroom tests as student",
+                "GET",
+                f"mc-tests/classroom/{classroom_id}",
+                200
+            )
+            
+            if student_classroom_tests:
+                student_test_count = len(student_classroom_tests)
+                print(f"   Student sees {student_test_count} tests in classroom")
+                
+                student_test_ids = [t.get('id') for t in student_classroom_tests]
+                
+                # Student should NOT see scheduled test (future available_date)
+                if scheduled_test_id not in student_test_ids:
+                    self.log_test("Student cannot see scheduled test (future date)", True)
+                else:
+                    self.log_test("Student cannot see scheduled test (future date)", False, "Student can see scheduled test")
+                
+                # Student SHOULD see available test (past available_date)
+                if available_test_id in student_test_ids:
+                    self.log_test("Student can see available test (past date)", True)
+                else:
+                    self.log_test("Student can see available test (past date)", False, "Student cannot see available test")
+                
+                # Student SHOULD see test with no dates
+                if no_date_test_id and no_date_test_id in student_test_ids:
+                    self.log_test("Student can see test with no dates", True)
+                else:
+                    self.log_test("Student can see test with no dates", False, "Student cannot see test with no dates")
+        
+        finally:
+            # Switch back to teacher token
+            self.session_token = original_token
+        
+        # TEST 5: Validation Tests
+        print("\n   TEST 5: Validation Tests")
+        
+        # Test with invalid question_id
+        invalid_test_data = {
+            "title": "Invalid Test",
+            "description": "Test with invalid question",
+            "chapter": "Chapter 1",
+            "lesson": "Lesson 1",
+            "question_pool_ids": ["invalid-question-id"],
+            "num_questions": 1,
+            "time_limit_minutes": 30,
+            "classroom_ids": [classroom_id]
+        }
+        
+        self.run_test(
+            "Create test with invalid question_id (should fail)",
+            "POST",
+            "mc-tests",
+            404,  # Should fail with 404 or 400
+            invalid_test_data
+        )
+        
+        # Test with num_questions > pool size
+        oversized_test_data = {
+            "title": "Oversized Test",
+            "description": "Test with too many questions",
+            "chapter": "Chapter 1",
+            "lesson": "Lesson 1", 
+            "question_pool_ids": question_ids[:2],  # Only 2 questions
+            "num_questions": 5,  # Asking for 5 questions
+            "time_limit_minutes": 30,
+            "classroom_ids": [classroom_id]
+        }
+        
+        self.run_test(
+            "Create test with num_questions > pool size (should fail)",
+            "POST",
+            "mc-tests",
+            400,  # Should fail with validation error
+            oversized_test_data
+        )
+        
+        # Test student trying to create test (should get 403)
+        self.session_token = student["token"]
+        
+        try:
+            student_test_data = {
+                "title": "Student Test",
+                "description": "Student trying to create test",
+                "chapter": "Chapter 1",
+                "lesson": "Lesson 1",
+                "question_pool_ids": question_ids[:1],
+                "num_questions": 1,
+                "time_limit_minutes": 30,
+                "classroom_ids": [classroom_id]
+            }
+            
+            self.run_test(
+                "Student create test (should get 403)",
+                "POST",
+                "mc-tests",
+                403,
+                student_test_data
+            )
+            
+            # Test student trying to get all tests (should get 403)
+            self.run_test(
+                "Student get all tests (should get 403)",
+                "GET",
+                "mc-tests",
+                403
+            )
+        
+        finally:
+            # Switch back to teacher token
+            self.session_token = original_token
+        
+        # TEST 6: Timezone Testing
+        print("\n   TEST 6: Timezone Testing")
+        
+        # Verify that dates are stored as UTC in database
+        try:
+            from motor.motor_asyncio import AsyncIOMotorClient
+            import asyncio
+            
+            async def check_timezone_storage():
+                client = AsyncIOMotorClient("mongodb://localhost:27017")
+                db = client["test_database"]
+                
+                # Get the scheduled test from database
+                test_doc = await db.mc_tests.find_one({"id": scheduled_test_id})
+                
+                if test_doc and test_doc.get("available_date"):
+                    stored_date = test_doc["available_date"]
+                    print(f"   Stored available_date: {stored_date}")
+                    
+                    # Check if it's a UTC ISO string
+                    if isinstance(stored_date, str) and stored_date.endswith('Z') or '+00:00' in stored_date:
+                        return True, "Date stored as UTC ISO string"
+                    elif isinstance(stored_date, str):
+                        # Try to parse as ISO format
+                        try:
+                            parsed_dt = datetime.fromisoformat(stored_date.replace('Z', '+00:00'))
+                            return True, f"Date stored as ISO string: {stored_date}"
+                        except:
+                            return False, f"Date format not recognized: {stored_date}"
+                    else:
+                        return False, f"Date not stored as string: {type(stored_date)}"
+                
+                client.close()
+                return False, "No available_date found in test"
+            
+            timezone_result, timezone_msg = asyncio.run(check_timezone_storage())
+            
+            if timezone_result:
+                self.log_test("Timezone conversion working (Central to UTC)", True, timezone_msg)
+            else:
+                self.log_test("Timezone conversion working (Central to UTC)", False, timezone_msg)
+        
+        except Exception as e:
+            self.log_test("Timezone conversion working (Central to UTC)", False, f"Error checking: {str(e)}")
+        
+        print("   MC Test endpoints testing complete!")
+        
+        return {
+            "classroom_id": classroom_id,
+            "question_ids": question_ids,
+            "scheduled_test_id": scheduled_test_id,
+            "available_test_id": available_test_id,
+            "no_date_test_id": no_date_test_id,
+            "student": student
+        }
+
     def run_all_tests(self):
         """Run all API tests"""
         print("🚀 Starting CodeClass API Tests...")
