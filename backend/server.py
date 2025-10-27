@@ -2262,36 +2262,39 @@ async def get_admin_stats(request: Request):
 @api_router.get("/admin/teachers")
 async def get_all_teachers(request: Request):
     """Get all teachers with stats (admin only)"""
-    user = await get_current_user(request)
-    
-    if not user.get("is_admin"):
-        raise HTTPException(status_code=403, detail="Admin access required")
-    
-    teachers = await db.users.find({"role": "teacher"}, {"_id": 0, "password": 0}).to_list(1000)
-    
-    # Enrich with stats
-    for teacher in teachers:
-        # Count classrooms
-        teacher["classroom_count"] = await db.classrooms.count_documents({"teacher_id": teacher["id"]})
+    try:
+        user = await get_current_user(request)
         
-        # Count assignments created
-        teacher["assignment_count"] = await db.assignments.count_documents({"teacher_id": teacher["id"]})
-    
-    # Sort by join date (newest first) - handle both datetime and string formats
-    def get_created_at(teacher):
-        created = teacher.get("created_at")
-        if created:
-            if isinstance(created, str):
-                try:
-                    return datetime.fromisoformat(created.replace('Z', '+00:00'))
-                except:
-                    return datetime.min
-            return created
-        return datetime.min
-    
-    teachers.sort(key=get_created_at, reverse=True)
-    
-    return teachers
+        if not user.get("is_admin"):
+            raise HTTPException(status_code=403, detail="Admin access required")
+        
+        teachers = await db.users.find({"role": "teacher"}, {"_id": 0, "password": 0}).to_list(1000)
+        
+        # Enrich with stats
+        for teacher in teachers:
+            try:
+                # Count classrooms
+                teacher["classroom_count"] = await db.classrooms.count_documents({"teacher_id": teacher["id"]})
+                
+                # Count assignments created
+                teacher["assignment_count"] = await db.assignments.count_documents({"teacher_id": teacher["id"]})
+            except Exception as e:
+                logging.error(f"Error enriching teacher {teacher.get('id')}: {e}")
+                teacher["classroom_count"] = 0
+                teacher["assignment_count"] = 0
+        
+        # Sort by email to avoid datetime issues
+        teachers.sort(key=lambda t: t.get("email", ""), reverse=False)
+        
+        return teachers
+    except HTTPException:
+        raise
+    except Exception as e:
+        logging.error(f"ERROR in get_all_teachers: {str(e)}")
+        logging.error(f"ERROR type: {type(e).__name__}")
+        import traceback
+        logging.error(f"Traceback: {traceback.format_exc()}")
+        raise HTTPException(status_code=500, detail=f"Internal server error: {str(e)}")
 
 @api_router.put("/admin/teachers/{teacher_id}/toggle-active")
 async def toggle_teacher_active(teacher_id: str, request: Request):
