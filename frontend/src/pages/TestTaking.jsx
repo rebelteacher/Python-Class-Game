@@ -250,24 +250,20 @@ export default function TestTaking({ user }) {
                   value={answers[question.id]} 
                   onValueChange={(value) => setAnswers({ ...answers, [question.id]: value })}
                 >
-                  {question.choice_order.map((choiceLetter, idx) => {
-                    const displayLetter = String.fromCharCode(65 + idx); // A, B, C, D based on position
-                    return (
-                      <div key={choiceLetter} className="flex items-center space-x-3 p-3 rounded-lg hover:bg-gray-50 transition-colors">
-                        <RadioGroupItem 
-                          value={displayLetter} 
-                          id={`${question.id}-${displayLetter}`}
-                        />
-                        <Label 
-                          htmlFor={`${question.id}-${displayLetter}`}
-                          className="flex-1 cursor-pointer text-base"
-                        >
-                          <span className="font-semibold mr-2">{displayLetter}.</span>
-                          {question.choices[choiceLetter]}
-                        </Label>
-                      </div>
-                    );
-                  })}
+                  {question.choice_order.map((choiceLetter, idx) => (
+                    <div key={idx} className="flex items-center space-x-3 p-3 rounded-lg hover:bg-gray-50 transition-colors">
+                      <RadioGroupItem 
+                        value={idx.toString()} 
+                        id={`${question.id}-${idx}`}
+                      />
+                      <Label 
+                        htmlFor={`${question.id}-${idx}`}
+                        className="flex-1 cursor-pointer text-base"
+                      >
+                        {question.choices[choiceLetter]}
+                      </Label>
+                    </div>
+                  ))}
                 </RadioGroup>
               </CardContent>
             </Card>
