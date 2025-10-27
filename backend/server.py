@@ -458,8 +458,9 @@ async def create_session(request: SessionDataRequest):
     """Exchange session_id for user data and session_token"""
     try:
         import requests
+        oauth_session_url = os.environ.get('OAUTH_SESSION_URL', 'https://demobackend.emergentagent.com/auth/v1/env/oauth/session-data')
         response = requests.get(
-            "https://demobackend.emergentagent.com/auth/v1/env/oauth/session-data",
+            oauth_session_url,
             headers={"X-Session-ID": request.session_id}
         )
         
