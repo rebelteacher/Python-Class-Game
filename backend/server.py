@@ -2991,14 +2991,30 @@ async def get_classroom_tests(classroom_id: str, request: Request):
     if user["role"] == "teacher":
         if classroom["teacher_id"] != user["id"]:
             raise HTTPException(status_code=403, detail="Access denied")
+        # Teachers see all tests
+        tests = await db.mc_tests.find(
+            {"classroom_ids": classroom_id},
+            {"_id": 0}
+        ).to_list(length=None)
     else:
         if user["id"] not in classroom.get("students", []):
             raise HTTPException(status_code=403, detail="Access denied")
-    
-    tests = await db.mc_tests.find(
-        {"classroom_ids": classroom_id},
-        {"_id": 0}
-    ).to_list(length=None)
+        # Students only see available tests (based on available_date)
+        now_utc = datetime.now(timezone.utc)
+        all_tests = await db.mc_tests.find(
+            {"classroom_ids": classroom_id},
+            {"_id": 0}
+        ).to_list(length=None)
+        
+        tests = []
+        for test in all_tests:
+            # Include test if no available_date or if it's past the available_date
+            if not test.get("available_date"):
+                tests.append(test)
+            else:
+                available_dt = datetime.fromisoformat(test["available_date"])
+                if now_utc >= available_dt:
+                    tests.append(test)
     
     return tests
 
