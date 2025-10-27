@@ -20,6 +20,7 @@ import ImportAssignment from "./pages/ImportAssignment";
 import TeacherPractice from "./pages/TeacherPractice";
 import SecretRoleSwitch from "./pages/SecretRoleSwitch";
 import TeacherReports from "./pages/TeacherReports";
+import TestReports from "./pages/TestReports";
 import AdminDashboard from "./pages/AdminDashboard";
 
 const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
