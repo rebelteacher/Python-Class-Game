@@ -2955,6 +2955,22 @@ async def create_mc_test(test: MCTestCreate, request: Request):
     return {"id": mc_test.id, "message": "Test created successfully"}
 
 
+@api_router.get("/mc-tests")
+async def get_all_mc_tests(request: Request):
+    """Get all tests created by the teacher"""
+    user = await get_current_user(request)
+    
+    if user["role"] != "teacher":
+        raise HTTPException(status_code=403, detail="Only teachers can view tests")
+    
+    tests = await db.mc_tests.find(
+        {"teacher_id": user["id"]},
+        {"_id": 0}
+    ).to_list(length=None)
+    
+    return tests
+
+
 @api_router.get("/mc-tests/classroom/{classroom_id}")
 async def get_classroom_tests(classroom_id: str, request: Request):
     """Get all tests for a classroom"""
