@@ -222,6 +222,15 @@ function App() {
                 }
               />
 
+              <Route
+                path="/test-reports"
+                element={
+                  <ProtectedRoute user={user} requiredRole="teacher">
+                    <TestReports user={user} />
+                  </ProtectedRoute>
+                }
+              />
+
               <Route path="/teacher-login" element={<TeacherLogin />} />
               <Route path="/teacher-signup" element={<TeacherSignup />} />
               <Route path="/emergency-fix" element={<AdminAccountFix />} />
