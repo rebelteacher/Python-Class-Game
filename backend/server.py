@@ -2195,25 +2195,33 @@ async def generate_invite_code(request: Request):
 @api_router.get("/admin/invite-codes")
 async def get_invite_codes(request: Request):
     """Get all invite codes (admin only)"""
-    user = await get_current_user(request)
-    
-    if not user.get("is_admin"):
-        raise HTTPException(status_code=403, detail="Admin access required")
-    
-    codes = await db.invite_codes.find({}, {"_id": 0}).sort("created_at", -1).to_list(1000)
-    
-    # Enrich with teacher names
-    for code in codes:
-        if code.get("used_by_teacher_id"):
-            teacher = await db.users.find_one(
-                {"id": code["used_by_teacher_id"]},
-                {"_id": 0, "name": 1, "email": 1}
-            )
-            if teacher:
-                code["used_by_name"] = teacher.get("name")
-                code["used_by_email"] = teacher.get("email")
-    
-    return codes
+    try:
+        user = await get_current_user(request)
+        
+        if not user.get("is_admin"):
+            raise HTTPException(status_code=403, detail="Admin access required")
+        
+        codes = await db.invite_codes.find({}, {"_id": 0}).sort("created_at", -1).to_list(1000)
+        
+        # Enrich with teacher names
+        for code in codes:
+            if code.get("used_by_teacher_id"):
+                teacher = await db.users.find_one(
+                    {"id": code["used_by_teacher_id"]},
+                    {"_id": 0, "name": 1, "email": 1}
+                )
+                if teacher:
+                    code["used_by_name"] = teacher.get("name")
+                    code["used_by_email"] = teacher.get("email")
+        
+        return codes
+    except HTTPException:
+        raise
+    except Exception as e:
+        logging.error(f"ERROR in get_invite_codes: {str(e)}")
+        import traceback
+        logging.error(f"Traceback: {traceback.format_exc()}")
+        raise HTTPException(status_code=500, detail=f"Internal server error: {str(e)}")
 
 @api_router.get("/admin/stats")
 async def get_admin_stats(request: Request):
