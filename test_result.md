@@ -256,6 +256,30 @@ frontend:
         agent: "main"
         comment: "Added /test/:testId route (student-only) in App.js for test taking page."
 
+  - task: "Create TestReports page component"
+    implemented: true
+    working: "NA"
+    file: "frontend/src/pages/TestReports.jsx"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: true
+    status_history:
+      - working: "NA"
+        agent: "main"
+        comment: "Created complete TestReports page with: Classroom and test dropdowns for filtering, fetches test results from GET /api/mc-tests/{test_id}/results, displays statistics cards (average score, highest, lowest, completion rate), student scores table sorted by score (name, score, date taken), color-coded scores (green>90, blue>80, yellow>70, red<70), print functionality with print-specific CSS, Excel export using xlsx library (results sheet + statistics sheet), matches existing TeacherReports pattern."
+  
+  - task: "Add TestReports route and navigation"
+    implemented: true
+    working: "NA"
+    file: "frontend/src/App.js, frontend/src/pages/TeacherDashboard.jsx"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: true
+    status_history:
+      - working: "NA"
+        agent: "main"
+        comment: "Added /test-reports route (teacher-only) in App.js. Added 'Test Reports' button to Teacher Dashboard navbar next to existing Reports button."
+
 metadata:
   created_by: "main_agent"
   version: "4.0"
