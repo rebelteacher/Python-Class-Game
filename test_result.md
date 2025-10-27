@@ -164,12 +164,12 @@ backend:
     working: "NA"
     file: "backend/server.py"
     stuck_count: 0
-    priority: "medium"
+    priority: "high"
     needs_retesting: true
     status_history:
       - working: "NA"
         agent: "main"
-        comment: "Added MCTake model with fields: id, test_id, student_id, student_name, answers (dict), score, total_questions, submitted_at. Implemented endpoints: POST /api/mc-takes/start (start test), POST /api/mc-takes/{take_id}/submit (submit answers and get score). Students can only see their own takes."
+        comment: "Endpoints already implemented: GET /api/mc-tests/{test_id}/start (creates attempt, returns randomized questions with shuffled choices), POST /api/mc-tests/{test_id}/submit (grades test, returns score only), GET /api/mc-tests/{test_id}/results (returns score for student, all attempts for teacher). MCTestAttempt model stores randomized_question_ids and randomized_choices for each student."
 
 frontend:
   - task: "Create QuestionBank page component"
