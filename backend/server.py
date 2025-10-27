@@ -2223,33 +2223,41 @@ async def get_admin_stats(request: Request):
     if not user.get("is_admin"):
         raise HTTPException(status_code=403, detail="Admin access required")
     
-    # Count users
-    total_teachers = await db.users.count_documents({"role": "teacher"})
-    total_students = await db.users.count_documents({"role": "student"})
-    
-    # Count classrooms
-    total_classrooms = await db.classrooms.count_documents({})
-    
-    # Count assignments
-    total_assignments = await db.assignments.count_documents({})
-    
-    # Count submissions
-    total_submissions = await db.submissions.count_documents({})
-    
-    # Active users (last 7 days)
-    seven_days_ago = datetime.now(timezone.utc) - timedelta(days=7)
-    active_users = await db.sessions.count_documents({
-        "created_at": {"$gte": seven_days_ago}
-    })
-    
-    return {
-        "total_teachers": total_teachers,
-        "total_students": total_students,
-        "total_classrooms": total_classrooms,
-        "total_assignments": total_assignments,
-        "total_submissions": total_submissions,
-        "active_users_7d": active_users
-    }
+    try:
+        # Count users
+        total_teachers = await db.users.count_documents({"role": "teacher"})
+        total_students = await db.users.count_documents({"role": "student"})
+        
+        # Count classrooms
+        total_classrooms = await db.classrooms.count_documents({})
+        
+        # Count assignments
+        total_assignments = await db.assignments.count_documents({})
+        
+        # Count submissions
+        total_submissions = await db.submissions.count_documents({})
+        
+        # Active users (last 7 days) - use a safe approach
+        seven_days_ago = datetime.now(timezone.utc) - timedelta(days=7)
+        try:
+            active_users = await db.sessions.count_documents({
+                "created_at": {"$gte": seven_days_ago}
+            })
+        except:
+            # Fallback if sessions collection doesn't exist
+            active_users = 0
+        
+        return {
+            "total_teachers": total_teachers,
+            "total_students": total_students,
+            "total_classrooms": total_classrooms,
+            "total_assignments": total_assignments,
+            "total_submissions": total_submissions,
+            "active_users_7d": active_users
+        }
+    except Exception as e:
+        logging.error(f"Error fetching admin stats: {e}")
+        raise HTTPException(status_code=500, detail=f"Failed to fetch stats: {str(e)}")
 
 @api_router.get("/admin/teachers")
 async def get_all_teachers(request: Request):
