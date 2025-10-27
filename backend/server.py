@@ -3126,18 +3126,19 @@ async def submit_mc_test(test_id: str, submission: MCTestSubmission, request: Re
             student_answer = submission.answers.get(q_id, "")
             
             # Get the randomized choice order for this question
+            # randomized_choices is like ["C", "A", "D", "B"]
+            # If student selected "A" (position 0), they chose the original letter at position 0
             randomized_order = attempt["randomized_choices"].get(q_id, ["A", "B", "C", "D"])
             
-            # Map student's selected position to original answer letter
-            # Student selected from randomized_order, need to find which original letter it maps to
-            if student_answer in randomized_order:
-                position = randomized_order.index(student_answer)
-                # Position 0 = A, 1 = B, 2 = C, 3 = D
-                original_letters = ["A", "B", "C", "D"]
-                original_answer = original_letters[position]
-                
-                if original_answer == question["correct_answer"]:
-                    correct_count += 1
+            # Student's answer "A", "B", "C", "D" corresponds to position 0, 1, 2, 3
+            # Find which original letter they actually selected
+            if student_answer in ["A", "B", "C", "D"]:
+                position = ord(student_answer) - ord("A")  # A=0, B=1, C=2, D=3
+                if position < len(randomized_order):
+                    actual_original_letter = randomized_order[position]
+                    
+                    if actual_original_letter == question["correct_answer"]:
+                        correct_count += 1
     
     score = (correct_count / total_questions * 100) if total_questions > 0 else 0
     
