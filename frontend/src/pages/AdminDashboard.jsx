@@ -258,53 +258,79 @@ export default function AdminDashboard({ user }) {
                     <thead className="bg-gray-50">
                       <tr>
                         <th className="text-left p-3 text-sm font-semibold">Code</th>
+                        <th className="text-left p-3 text-sm font-semibold">Signup Link</th>
                         <th className="text-left p-3 text-sm font-semibold">Status</th>
                         <th className="text-left p-3 text-sm font-semibold">Used By</th>
                         <th className="text-left p-3 text-sm font-semibold">Created</th>
-                        <th className="text-left p-3 text-sm font-semibold">Action</th>
+                        <th className="text-left p-3 text-sm font-semibold">Actions</th>
                       </tr>
                     </thead>
                     <tbody>
-                      {inviteCodes.map((code) => (
-                        <tr key={code.id} className="border-t hover:bg-gray-50">
-                          <td className="p-3">
-                            <span className="font-mono font-semibold">{code.code}</span>
-                          </td>
-                          <td className="p-3">
-                            {code.is_active ? (
-                              <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
-                                Available
-                              </span>
-                            ) : (
-                              <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-800">
-                                Used
-                              </span>
-                            )}
-                          </td>
-                          <td className="p-3 text-sm">
-                            {code.used_by_name ? (
-                              <div>
-                                <div className="font-medium">{code.used_by_name}</div>
-                                <div className="text-xs text-gray-500">{code.used_by_email}</div>
+                      {inviteCodes.map((code) => {
+                        const signupLink = `${window.location.origin}/teacher-signup?code=${code.code}`;
+                        return (
+                          <tr key={code.id} className="border-t hover:bg-gray-50">
+                            <td className="p-3">
+                              <span className="font-mono font-semibold">{code.code}</span>
+                            </td>
+                            <td className="p-3">
+                              <div className="flex items-center gap-2">
+                                <a 
+                                  href={signupLink}
+                                  target="_blank"
+                                  rel="noopener noreferrer"
+                                  className="text-xs text-blue-600 hover:text-blue-800 underline max-w-xs truncate block"
+                                  title={signupLink}
+                                >
+                                  {signupLink}
+                                </a>
+                                <Button
+                                  onClick={() => copyToClipboard(signupLink)}
+                                  variant="ghost"
+                                  size="sm"
+                                  title="Copy signup link"
+                                >
+                                  <Copy className="w-3 h-3" />
+                                </Button>
                               </div>
-                            ) : (
-                              <span className="text-gray-400">-</span>
-                            )}
-                          </td>
-                          <td className="p-3 text-sm text-gray-600">
-                            {new Date(code.created_at).toLocaleDateString()}
-                          </td>
-                          <td className="p-3">
-                            <Button
-                              onClick={() => copyToClipboard(code.code)}
-                              variant="ghost"
-                              size="sm"
-                            >
-                              <Copy className="w-4 h-4" />
-                            </Button>
-                          </td>
-                        </tr>
-                      ))}
+                            </td>
+                            <td className="p-3">
+                              {code.is_active ? (
+                                <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                                  Available
+                                </span>
+                              ) : (
+                                <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-800">
+                                  Used
+                                </span>
+                              )}
+                            </td>
+                            <td className="p-3 text-sm">
+                              {code.used_by_name ? (
+                                <div>
+                                  <div className="font-medium">{code.used_by_name}</div>
+                                  <div className="text-xs text-gray-500">{code.used_by_email}</div>
+                                </div>
+                              ) : (
+                                <span className="text-gray-400">-</span>
+                              )}
+                            </td>
+                            <td className="p-3 text-sm text-gray-600">
+                              {new Date(code.created_at).toLocaleDateString()}
+                            </td>
+                            <td className="p-3">
+                              <Button
+                                onClick={() => copyToClipboard(code.code)}
+                                variant="ghost"
+                                size="sm"
+                                title="Copy code only"
+                              >
+                                <Key className="w-4 h-4" />
+                              </Button>
+                            </td>
+                          </tr>
+                        );
+                      })}
                     </tbody>
                   </table>
                 </div>
