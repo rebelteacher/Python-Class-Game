@@ -895,6 +895,19 @@ export default function AssignmentLibrary({ user }) {
                                                         Edit
                                                       </Button>
                                                       <Button
+                                                        data-testid={`delete-${problem.id}`}
+                                                        onClick={(e) => {
+                                                          e.stopPropagation();
+                                                          handleDeleteProblem(problem.id, problem.title);
+                                                        }}
+                                                        variant="outline"
+                                                        className="flex-1 border-red-300 text-red-600 hover:bg-red-50"
+                                                        size="sm"
+                                                      >
+                                                        <Trash2 className="w-4 h-4 mr-1" />
+                                                        Delete
+                                                      </Button>
+                                                      <Button
                                                         data-testid={`practice-${problem.id}`}
                                                         onClick={(e) => {
                                                           e.stopPropagation();
