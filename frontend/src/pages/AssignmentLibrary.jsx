@@ -341,7 +341,7 @@ export default function AssignmentLibrary({ user }) {
     const grouped = {};
     filteredProblems.forEach(problem => {
       const chapter = problem.chapter || "Uncategorized";
-      const lesson = problem.lesson || "General";
+      const lesson = problem.lesson || "Lesson 1";
       const problemType = problem.problem_type || "Independent Practice";
       
       if (!grouped[chapter]) {
