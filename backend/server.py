@@ -1086,6 +1086,33 @@ async def update_problem(problem_id: str, problem: ProblemCreate, request: Reque
     return updated_problem
 
 
+@api_router.delete("/problems/{problem_id}")
+async def delete_problem(problem_id: str, request: Request):
+    """Delete a problem from the library"""
+    user = await get_current_user(request)
+    
+    if user["role"] != "teacher":
+        raise HTTPException(status_code=403, detail="Only teachers can delete library problems")
+    
+    # Check if problem exists
+    existing = await db.problems.find_one({"id": problem_id})
+    if not existing:
+        raise HTTPException(status_code=404, detail="Problem not found")
+    
+    # Check if problem is used in any assignments
+    assignments_using_problem = await db.assignments.find_one({"problem_ids": problem_id})
+    if assignments_using_problem:
+        raise HTTPException(
+            status_code=400, 
+            detail="Cannot delete problem: it is used in one or more assignments. Please remove it from assignments first."
+        )
+    
+    # Delete the problem
+    await db.problems.delete_one({"id": problem_id})
+    
+    return {"message": "Problem deleted successfully"}
+
+
 @api_router.post("/assignments")
 async def create_assignment(assignment: AssignmentCreate, request: Request):
     """Create a new bundled assignment with multiple problems"""
