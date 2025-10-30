@@ -217,7 +217,7 @@ export default function StudentDashboard({ user, setUser }) {
       console.log(`Classroom ${classroom.name} has assignments:`, classroom.assignments);
       classroom.assignments?.forEach(assignment => {
         const chapter = assignment.chapter || "Uncategorized";
-        const lesson = assignment.lesson || "General";
+        const lesson = assignment.lesson || "Lesson 1";
         
         if (!organized[chapter]) {
           organized[chapter] = {};
