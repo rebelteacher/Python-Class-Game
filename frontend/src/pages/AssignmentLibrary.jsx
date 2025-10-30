@@ -196,7 +196,8 @@ export default function AssignmentLibrary({ user }) {
       fetchProblems();
     } catch (error) {
       console.error("Error deleting problem:", error);
-      toast.error("Failed to delete problem");
+      const errorMessage = error.response?.data?.detail || error.message || "Failed to delete problem";
+      toast.error(errorMessage);
     }
   };
 
