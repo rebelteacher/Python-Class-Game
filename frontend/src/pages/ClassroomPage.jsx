@@ -71,7 +71,7 @@ export default function ClassroomPage({ user }) {
     console.log("📊 Organizing assignments:", assignments);
     assignments.forEach(assignment => {
       const chapter = assignment.chapter || "Uncategorized";
-      const lesson = assignment.lesson || "General";
+      const lesson = assignment.lesson || "Lesson 1";
       
       if (!organized[chapter]) {
         organized[chapter] = {};
