@@ -219,7 +219,7 @@ export default function QuestionBank({ user }) {
     const organized = {};
     questions.forEach(question => {
       const chapter = question.chapter || "Uncategorized";
-      const lesson = question.lesson || "General";
+      const lesson = question.lesson || "Lesson 1";
       
       if (!organized[chapter]) {
         organized[chapter] = {};
