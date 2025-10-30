@@ -181,6 +181,25 @@ export default function AssignmentLibrary({ user }) {
     }
   };
 
+  const handleDeleteProblem = async (problemId, problemTitle) => {
+    const confirmed = window.confirm(
+      `Are you sure you want to delete "${problemTitle}"? This action cannot be undone.`
+    );
+    
+    if (!confirmed) return;
+
+    try {
+      await axios.delete(`${API}/problems/${problemId}`, {
+        withCredentials: true
+      });
+      toast.success("Problem deleted successfully!");
+      fetchProblems();
+    } catch (error) {
+      console.error("Error deleting problem:", error);
+      toast.error("Failed to delete problem");
+    }
+  };
+
   const handleBulkUpload = async (e) => {
     e.preventDefault();
     
