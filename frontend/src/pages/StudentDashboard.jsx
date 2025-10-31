@@ -242,8 +242,30 @@ export default function StudentDashboard({ user, setUser, refreshUser }) {
 
   const organizedAssignments = organizeAssignments();
 
+  // Get active background style
+  const getBackgroundStyle = () => {
+    const activeBackground = userProfile.active_background;
+    if (!activeBackground) return {};
+    
+    const backgroundItem = shopItems.backgrounds?.find(bg => bg.id === activeBackground);
+    if (!backgroundItem) return {};
+    
+    return {
+      background: backgroundItem.preview
+    };
+  };
+
   return (
-    <div data-testid="student-dashboard" className="min-h-screen bg-gradient-to-br from-green-50 via-teal-50 to-blue-50">
+    <div 
+      data-testid="student-dashboard" 
+      className="min-h-screen"
+      style={getBackgroundStyle()}
+    >
+      {/* Animated Pet */}
+      {userProfile.active_pet && (
+        <AnimatedPet petId={userProfile.active_pet} shopItems={shopItems} />
+      )}
+      
       <nav className="bg-white shadow-sm border-b border-gray-200">
         <div className="container mx-auto px-6 py-4 flex justify-between items-center">
           <div className="flex items-center space-x-2">
