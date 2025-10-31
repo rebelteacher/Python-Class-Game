@@ -2468,7 +2468,17 @@ async def purchase_item(item_data: dict, request: Request):
         raise HTTPException(status_code=400, detail="Not enough coins")
     
     # Check if already owned
-    owned_field = "owned_themes" if item_type == "themes" else "owned_badges"
+    owned_field_map = {
+        "themes": "owned_themes",
+        "badges": "owned_badges",
+        "backgrounds": "owned_backgrounds",
+        "pets": "owned_pets",
+        "profile_frames": "owned_profile_frames"
+    }
+    owned_field = owned_field_map.get(item_type)
+    if not owned_field:
+        raise HTTPException(status_code=400, detail="Invalid item type")
+        
     if item_id in user.get(owned_field, []):
         raise HTTPException(status_code=400, detail="Already owned")
     
