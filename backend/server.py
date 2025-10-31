@@ -63,6 +63,23 @@ SHOP_ITEMS = {
         {"id": "basketball_pro", "name": "Basketball Pro 🏀", "price": 400, "description": "Sport pride"},
         {"id": "football_legend", "name": "Football Legend 🏈", "price": 400, "description": "Sport pride"},
         {"id": "baseball_champ", "name": "Baseball Champ ⚾", "price": 400, "description": "Sport pride"},
+    ],
+    "backgrounds": [
+        {"id": "sunset_gradient", "name": "Sunset Gradient 🌅", "price": 100, "preview": "linear-gradient(135deg, #ff6b6b 0%, #feca57 50%, #ff9ff3 100%)"},
+        {"id": "ocean_wave", "name": "Ocean Wave 🌊", "price": 150, "preview": "linear-gradient(135deg, #667eea 0%, #764ba2 100%)"},
+        {"id": "galaxy_space", "name": "Galaxy Space 🌌", "price": 200, "preview": "linear-gradient(135deg, #1e3c72 0%, #2a5298 50%, #7e22ce 100%)"},
+        {"id": "forest_green", "name": "Forest Green 🌲", "price": 150, "preview": "linear-gradient(135deg, #134e5e 0%, #71b280 100%)"},
+        {"id": "purple_dreams", "name": "Purple Dreams 💜", "price": 200, "preview": "linear-gradient(135deg, #c471ed 0%, #f64f59 100%)"},
+    ],
+    "pets": [
+        {"id": "floating_cat", "name": "Floating Cat 🐱", "price": 300, "icon": "🐱", "animation": "float"},
+        {"id": "flying_bird", "name": "Flying Bird 🐦", "price": 250, "icon": "🐦", "animation": "fly"},
+        {"id": "swimming_fish", "name": "Swimming Fish 🐟", "price": 250, "icon": "🐟", "animation": "swim"},
+    ],
+    "profile_frames": [
+        {"id": "gold_border", "name": "Gold Border ✨", "price": 150, "style": "3px solid #FFD700"},
+        {"id": "rainbow_glow", "name": "Rainbow Glow 🌈", "price": 200, "style": "3px solid transparent", "gradient": "linear-gradient(45deg, #ff0000, #ff7f00, #ffff00, #00ff00, #0000ff, #4b0082, #9400d3)"},
+        {"id": "star_frame", "name": "Star Frame ⭐", "price": 250, "style": "4px dashed #FFD700"},
     ]
 }
 
