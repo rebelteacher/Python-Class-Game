@@ -75,7 +75,12 @@ export default function StudentDashboard({ user, setUser, refreshUser }) {
         { withCredentials: true }
       );
       toast.success("Item purchased!");
-      fetchUserProfile();
+      
+      // Refresh both local profile and parent user state
+      await fetchUserProfile();
+      if (refreshUser) {
+        await refreshUser();
+      }
       fetchShopItems();
     } catch (error) {
       console.error("Error purchasing:", error);
