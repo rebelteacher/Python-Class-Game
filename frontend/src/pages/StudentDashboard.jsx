@@ -677,6 +677,9 @@ export default function StudentDashboard({ user, setUser, refreshUser }) {
               <TabsList className="mb-4">
                 <TabsTrigger value="themes">Themes</TabsTrigger>
                 <TabsTrigger value="badges">Badges</TabsTrigger>
+                <TabsTrigger value="backgrounds">Backgrounds</TabsTrigger>
+                <TabsTrigger value="pets">Pets</TabsTrigger>
+                <TabsTrigger value="frames">Frames</TabsTrigger>
               </TabsList>
 
               <TabsContent value="themes">
