@@ -12,6 +12,61 @@ import { BookOpen, Plus, LogOut, Code2, Trophy, ShoppingBag, Zap, FileText, Fold
 import RankBadge from "@/components/RankBadge";
 import Leaderboard from "@/components/Leaderboard";
 
+// Animated Pet Component
+const AnimatedPet = ({ petId, shopItems }) => {
+  const petItem = shopItems.pets?.find(p => p.id === petId);
+  if (!petItem) return null;
+
+  const getAnimationClass = () => {
+    switch (petItem.animation) {
+      case "float":
+        return "animate-float";
+      case "fly":
+        return "animate-fly";
+      case "swim":
+        return "animate-swim";
+      default:
+        return "animate-bounce";
+    }
+  };
+
+  return (
+    <>
+      <style>{`
+        @keyframes float {
+          0%, 100% { transform: translateY(0px); }
+          50% { transform: translateY(-20px); }
+        }
+        @keyframes fly {
+          0% { transform: translateX(-100px); }
+          100% { transform: translateX(calc(100vw + 100px)); }
+        }
+        @keyframes swim {
+          0%, 100% { transform: translate(0, 0); }
+          25% { transform: translate(30px, -10px); }
+          50% { transform: translate(60px, 0); }
+          75% { transform: translate(30px, 10px); }
+        }
+        .animate-float {
+          animation: float 3s ease-in-out infinite;
+        }
+        .animate-fly {
+          animation: fly 15s linear infinite;
+        }
+        .animate-swim {
+          animation: swim 8s ease-in-out infinite;
+        }
+      `}</style>
+      <div 
+        className={`fixed bottom-20 right-20 text-6xl ${getAnimationClass()} pointer-events-none z-50`}
+        style={{ userSelect: 'none' }}
+      >
+        {petItem.icon}
+      </div>
+    </>
+  );
+};
+
 const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
 const API = `${BACKEND_URL}/api`;
 
