@@ -15,7 +15,7 @@ import Leaderboard from "@/components/Leaderboard";
 const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
 const API = `${BACKEND_URL}/api`;
 
-export default function StudentDashboard({ user, setUser }) {
+export default function StudentDashboard({ user, setUser, refreshUser }) {
   const [classrooms, setClassrooms] = useState([]);
   const [availableTests, setAvailableTests] = useState([]);
   const [loading, setLoading] = useState(true);
