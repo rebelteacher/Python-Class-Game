@@ -299,10 +299,12 @@ export default function StudentDashboard({ user, setUser, refreshUser }) {
 
   // Get active background style
   const getBackgroundStyle = () => {
+    if (!userProfile || !shopItems.backgrounds) return {};
+    
     const activeBackground = userProfile.active_background;
     if (!activeBackground) return {};
     
-    const backgroundItem = shopItems.backgrounds?.find(bg => bg.id === activeBackground);
+    const backgroundItem = shopItems.backgrounds.find(bg => bg.id === activeBackground);
     if (!backgroundItem) return {};
     
     return {
@@ -313,11 +315,11 @@ export default function StudentDashboard({ user, setUser, refreshUser }) {
   return (
     <div 
       data-testid="student-dashboard" 
-      className="min-h-screen"
+      className="min-h-screen bg-gradient-to-br from-green-50 via-teal-50 to-blue-50"
       style={getBackgroundStyle()}
     >
       {/* Animated Pet */}
-      {userProfile.active_pet && (
+      {userProfile?.active_pet && shopItems?.pets && (
         <AnimatedPet petId={userProfile.active_pet} shopItems={shopItems} />
       )}
       
