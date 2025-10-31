@@ -96,7 +96,7 @@ function AuthHandler({ children }) {
     );
   }
 
-  return children({ user, setUser });
+  return children({ user, setUser, refreshUser });
 }
 
 function ProtectedRoute({ children, user, requiredRole }) {
