@@ -117,7 +117,7 @@ function App() {
       <Toaster position="top-right" richColors />
       <BrowserRouter>
         <AuthHandler>
-          {({ user, setUser }) => (
+          {({ user, setUser, refreshUser }) => (
             <Routes>
               <Route path="/" element={user ? <Navigate to={user.role === "teacher" ? "/teacher/dashboard" : "/student/dashboard"} replace /> : <LandingPage />} />
               
