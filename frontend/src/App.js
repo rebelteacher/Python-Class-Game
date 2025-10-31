@@ -134,7 +134,7 @@ function App() {
                 path="/student/dashboard"
                 element={
                   <ProtectedRoute user={user} requiredRole="student">
-                    <StudentDashboard user={user} setUser={setUser} />
+                    <StudentDashboard user={user} setUser={setUser} refreshUser={refreshUser} />
                   </ProtectedRoute>
                 }
               />
