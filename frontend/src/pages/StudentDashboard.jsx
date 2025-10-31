@@ -740,6 +740,180 @@ export default function StudentDashboard({ user, setUser, refreshUser }) {
                   })}
                 </div>
               </TabsContent>
+
+              <TabsContent value="backgrounds">
+                <div className="grid md:grid-cols-2 gap-4">
+                  {shopItems.backgrounds?.map((item) => {
+                    const isOwned = userProfile.owned_backgrounds?.includes(item.id);
+                    const isActive = userProfile.active_background === item.id;
+                    return (
+                      <Card key={item.id} className={isActive ? "border-2 border-green-500" : ""}>
+                        <CardHeader>
+                          <CardTitle className="text-lg">{item.name}</CardTitle>
+                        </CardHeader>
+                        <CardContent>
+                          <div 
+                            className="w-full h-24 rounded-lg mb-3"
+                            style={{ background: item.preview }}
+                          />
+                          <div className="flex items-center justify-between">
+                            <span className="text-2xl font-bold text-indigo-600">{item.price} 🪙</span>
+                            <div className="flex gap-2">
+                              {isOwned ? (
+                                <Button
+                                  onClick={async () => {
+                                    try {
+                                      await axios.post(
+                                        `${API}/profile/customize`,
+                                        { active_background: isActive ? "" : item.id },
+                                        { withCredentials: true }
+                                      );
+                                      await fetchUserProfile();
+                                      if (refreshUser) await refreshUser();
+                                      toast.success(isActive ? "Background removed" : "Background equipped!");
+                                    } catch (error) {
+                                      toast.error("Failed to equip");
+                                    }
+                                  }}
+                                  size="sm"
+                                  variant={isActive ? "outline" : "default"}
+                                >
+                                  {isActive ? "Unequip" : "Equip"}
+                                </Button>
+                              ) : (
+                                <Button
+                                  onClick={() => handlePurchase("backgrounds", item.id)}
+                                  disabled={(userProfile.coins || 0) < item.price}
+                                  size="sm"
+                                >
+                                  Buy
+                                </Button>
+                              )}
+                            </div>
+                          </div>
+                        </CardContent>
+                      </Card>
+                    );
+                  })}
+                </div>
+              </TabsContent>
+
+              <TabsContent value="pets">
+                <div className="grid md:grid-cols-2 gap-4">
+                  {shopItems.pets?.map((item) => {
+                    const isOwned = userProfile.owned_pets?.includes(item.id);
+                    const isActive = userProfile.active_pet === item.id;
+                    return (
+                      <Card key={item.id} className={isActive ? "border-2 border-green-500" : ""}>
+                        <CardHeader>
+                          <CardTitle className="text-lg">{item.name}</CardTitle>
+                        </CardHeader>
+                        <CardContent>
+                          <div className="text-6xl text-center mb-3">
+                            {item.icon}
+                          </div>
+                          <div className="flex items-center justify-between">
+                            <span className="text-2xl font-bold text-indigo-600">{item.price} 🪙</span>
+                            <div className="flex gap-2">
+                              {isOwned ? (
+                                <Button
+                                  onClick={async () => {
+                                    try {
+                                      await axios.post(
+                                        `${API}/profile/customize`,
+                                        { active_pet: isActive ? "" : item.id },
+                                        { withCredentials: true }
+                                      );
+                                      await fetchUserProfile();
+                                      if (refreshUser) await refreshUser();
+                                      toast.success(isActive ? "Pet removed" : "Pet equipped!");
+                                    } catch (error) {
+                                      toast.error("Failed to equip");
+                                    }
+                                  }}
+                                  size="sm"
+                                  variant={isActive ? "outline" : "default"}
+                                >
+                                  {isActive ? "Unequip" : "Equip"}
+                                </Button>
+                              ) : (
+                                <Button
+                                  onClick={() => handlePurchase("pets", item.id)}
+                                  disabled={(userProfile.coins || 0) < item.price}
+                                  size="sm"
+                                >
+                                  Buy
+                                </Button>
+                              )}
+                            </div>
+                          </div>
+                        </CardContent>
+                      </Card>
+                    );
+                  })}
+                </div>
+              </TabsContent>
+
+              <TabsContent value="frames">
+                <div className="grid md:grid-cols-2 gap-4">
+                  {shopItems.profile_frames?.map((item) => {
+                    const isOwned = userProfile.owned_profile_frames?.includes(item.id);
+                    const isActive = userProfile.active_profile_frame === item.id;
+                    return (
+                      <Card key={item.id} className={isActive ? "border-2 border-green-500" : ""}>
+                        <CardHeader>
+                          <CardTitle className="text-lg">{item.name}</CardTitle>
+                        </CardHeader>
+                        <CardContent>
+                          <div className="flex justify-center mb-3">
+                            <div 
+                              className="w-24 h-24 rounded-full bg-gray-200 flex items-center justify-center text-3xl"
+                              style={{ border: item.style, backgroundImage: item.gradient ? item.gradient : undefined }}
+                            >
+                              👤
+                            </div>
+                          </div>
+                          <div className="flex items-center justify-between">
+                            <span className="text-2xl font-bold text-indigo-600">{item.price} 🪙</span>
+                            <div className="flex gap-2">
+                              {isOwned ? (
+                                <Button
+                                  onClick={async () => {
+                                    try {
+                                      await axios.post(
+                                        `${API}/profile/customize`,
+                                        { active_profile_frame: isActive ? "" : item.id },
+                                        { withCredentials: true }
+                                      );
+                                      await fetchUserProfile();
+                                      if (refreshUser) await refreshUser();
+                                      toast.success(isActive ? "Frame removed" : "Frame equipped!");
+                                    } catch (error) {
+                                      toast.error("Failed to equip");
+                                    }
+                                  }}
+                                  size="sm"
+                                  variant={isActive ? "outline" : "default"}
+                                >
+                                  {isActive ? "Unequip" : "Equip"}
+                                </Button>
+                              ) : (
+                                <Button
+                                  onClick={() => handlePurchase("profile_frames", item.id)}
+                                  disabled={(userProfile.coins || 0) < item.price}
+                                  size="sm"
+                                >
+                                  Buy
+                                </Button>
+                              )}
+                            </div>
+                          </div>
+                        </CardContent>
+                      </Card>
+                    );
+                  })}
+                </div>
+              </TabsContent>
             </Tabs>
           </DialogContent>
         </Dialog>
