@@ -2495,7 +2495,7 @@ async def purchase_item(item_data: dict, request: Request):
 
 @api_router.post("/profile/customize")
 async def customize_profile(customization: dict, request: Request):
-    """Customize user profile (active theme/badges)"""
+    """Customize user profile (active theme/badges/background/pet/frame)"""
     user = await get_current_user(request)
     
     updates = {}
@@ -2510,6 +2510,21 @@ async def customize_profile(customization: dict, request: Request):
         # Verify all badges are owned (max 3)
         if len(badges) <= 3 and all(b in user.get("owned_badges", []) for b in badges):
             updates["active_badges"] = badges
+    
+    if "active_background" in customization:
+        background_id = customization["active_background"]
+        if background_id in user.get("owned_backgrounds", []) or background_id == "":
+            updates["active_background"] = background_id
+    
+    if "active_pet" in customization:
+        pet_id = customization["active_pet"]
+        if pet_id in user.get("owned_pets", []) or pet_id == "":
+            updates["active_pet"] = pet_id
+    
+    if "active_profile_frame" in customization:
+        frame_id = customization["active_profile_frame"]
+        if frame_id in user.get("owned_profile_frames", []) or frame_id == "":
+            updates["active_profile_frame"] = frame_id
     
     if updates:
         await db.users.update_one(
