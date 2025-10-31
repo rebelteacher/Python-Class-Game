@@ -76,6 +76,18 @@ function AuthHandler({ children }) {
     handleAuth();
   }, [navigate]);
 
+  // Function to refresh user data (for updates like purchases)
+  const refreshUser = async () => {
+    try {
+      const response = await axios.get(`${API}/auth/me`, {
+        withCredentials: true,
+      });
+      setUser(response.data);
+    } catch (error) {
+      console.error("Error refreshing user:", error);
+    }
+  };
+
   if (loading) {
     return (
       <div data-testid="loading-screen" className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 to-indigo-50">
