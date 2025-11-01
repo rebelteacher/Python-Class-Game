@@ -214,39 +214,61 @@ export default function TeacherDashboard({ user, setUser }) {
           </div>
         ) : classrooms.length === 0 ? (
           <div data-testid="no-classrooms" className="text-center py-20">
-            <Users className="w-16 h-16 text-gray-400 mx-auto mb-4" />
+            <Users className="w-16 h-16 text-teal-400 mx-auto mb-4" />
             <h3 className="text-xl font-semibold text-gray-700 mb-2">No classrooms yet</h3>
             <p className="text-gray-500 mb-6">Create your first classroom to get started</p>
-            <Button data-testid="create-first-classroom-btn" onClick={() => setCreateDialogOpen(true)} className="bg-indigo-600 hover:bg-indigo-700">
+            <Button data-testid="create-first-classroom-btn" onClick={() => setCreateDialogOpen(true)} className="bg-gradient-to-r from-orange-500 to-pink-500 hover:from-orange-600 hover:to-pink-600 shadow-lg">
               <Plus className="w-4 h-4 mr-2" />
               Create Classroom
             </Button>
           </div>
         ) : (
           <div data-testid="classrooms-grid" className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {classrooms.map((classroom) => (
-              <Card
-                data-testid={`classroom-card-${classroom.id}`}
-                key={classroom.id}
-                className="hover:shadow-lg transition-shadow cursor-pointer border-2 border-gray-100"
-                onClick={() => navigate(`/classroom/${classroom.id}`)}
-              >
-                <CardHeader>
-                  <CardTitle className="text-xl">{classroom.name}</CardTitle>
-                  <CardDescription>
-                    <span className="inline-block px-3 py-1 bg-indigo-100 text-indigo-700 rounded-full text-sm font-mono font-semibold">
-                      {classroom.class_code}
-                    </span>
-                  </CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <div className="flex items-center text-gray-600">
-                    <Users className="w-4 h-4 mr-2" />
-                    <span>{classroom.students?.length || 0} students</span>
-                  </div>
-                </CardContent>
-              </Card>
-            ))}
+            {classrooms.map((classroom, index) => {
+              // Rotate through vibrant colors for each classroom card
+              const colors = [
+                'from-teal-500 to-cyan-500',
+                'from-orange-500 to-pink-500', 
+                'from-purple-500 to-pink-500',
+                'from-blue-500 to-teal-500',
+                'from-pink-500 to-rose-500',
+                'from-cyan-500 to-blue-500'
+              ];
+              const borderColors = [
+                'border-teal-200 hover:border-teal-400',
+                'border-orange-200 hover:border-orange-400',
+                'border-purple-200 hover:border-purple-400',
+                'border-blue-200 hover:border-blue-400',
+                'border-pink-200 hover:border-pink-400',
+                'border-cyan-200 hover:border-cyan-400'
+              ];
+              const gradientClass = colors[index % colors.length];
+              const borderClass = borderColors[index % borderColors.length];
+              
+              return (
+                <Card
+                  data-testid={`classroom-card-${classroom.id}`}
+                  key={classroom.id}
+                  className={`hover:shadow-2xl transition-all cursor-pointer border-2 ${borderClass} transform hover:-translate-y-1`}
+                  onClick={() => navigate(`/classroom/${classroom.id}`)}
+                >
+                  <CardHeader className={`bg-gradient-to-r ${gradientClass} text-white rounded-t-lg`}>
+                    <CardTitle className="text-xl">{classroom.name}</CardTitle>
+                    <CardDescription className="text-white/90">
+                      <span className="inline-block px-3 py-1 bg-white/20 backdrop-blur-sm text-white rounded-full text-sm font-mono font-semibold border border-white/30">
+                        {classroom.class_code}
+                      </span>
+                    </CardDescription>
+                  </CardHeader>
+                  <CardContent className="pt-4">
+                    <div className="flex items-center text-gray-700 font-medium">
+                      <Users className="w-4 h-4 mr-2 text-teal-600" />
+                      <span>{classroom.students?.length || 0} students</span>
+                    </div>
+                  </CardContent>
+                </Card>
+              );
+            })}
           </div>
         )}
       </main>
