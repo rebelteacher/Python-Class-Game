@@ -302,8 +302,7 @@ metadata:
 
 test_plan:
   current_focus:
-    - "Create TestReports page component"
-    - "Add TestReports route and navigation"
+    - "Create AdminAddCoins page and integration"
   stuck_tasks: []
   test_all: false
   test_priority: "high_first"
