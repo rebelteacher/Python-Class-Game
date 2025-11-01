@@ -288,8 +288,15 @@ class Assignment(BaseModel):
     chapter: str = ""  # e.g., "Chapter 1"
     lesson: str = ""  # e.g., "Lesson 1"
     teacher_id: str
-    problem_ids: List[str]  # References to Problem documents
+    # For library-based assignments
+    problem_ids: List[str] = []  # References to Problem documents (empty for standalone)
     classroom_ids: List[str]  # Can be assigned to multiple classrooms
+    # For standalone assignments
+    starter_code: str = ""
+    solution_code: str = ""
+    expected_output: str = ""
+    test_cases: List[dict] = []  # For custom test cases
+    # Scheduling and rewards
     available_date: Optional[datetime] = None
     due_date: Optional[datetime] = None
     allow_late_submission: bool = True
