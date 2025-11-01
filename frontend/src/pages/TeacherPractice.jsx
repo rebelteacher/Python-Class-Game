@@ -22,6 +22,7 @@ export default function TeacherPractice({ user }) {
   const [running, setRunning] = useState(false);
   const [notes, setNotes] = useState("");
   const [savingNotes, setSavingNotes] = useState(false);
+  const [testInput, setTestInput] = useState("");
 
   useEffect(() => {
     fetchProblem();
