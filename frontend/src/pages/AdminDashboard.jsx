@@ -193,6 +193,30 @@ export default function AdminDashboard({ user }) {
           </Card>
         </div>
 
+        {/* Admin Tools */}
+        <Card className="mb-8">
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <Coins className="w-5 h-5" />
+              Admin Tools
+            </CardTitle>
+            <CardDescription>
+              Student account management and support tools
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <div className="flex flex-wrap gap-4">
+              <Button
+                onClick={() => navigate("/admin-add-coins")}
+                className="bg-green-600 hover:bg-green-700"
+              >
+                <Coins className="w-4 h-4 mr-2" />
+                Add Coins to Student
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
+
         {/* Support Contact */}
         <Card className="mb-8">
           <CardHeader>
