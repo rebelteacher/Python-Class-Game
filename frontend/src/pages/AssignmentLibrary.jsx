@@ -920,6 +920,22 @@ export default function AssignmentLibrary({ user }) {
                                                   <div className="space-y-2 mt-3">
                                                     <div className="flex gap-2">
                                                       <Button
+                                                        data-testid={`move-${problem.id}`}
+                                                        onClick={(e) => {
+                                                          e.stopPropagation();
+                                                          setMovingProblem(problem);
+                                                          setMoveToChapter(problem.chapter || "");
+                                                          setMoveToLesson(problem.lesson || "");
+                                                          setMoveDialogOpen(true);
+                                                        }}
+                                                        variant="outline"
+                                                        className="flex-1"
+                                                        size="sm"
+                                                      >
+                                                        <FolderInput className="w-4 h-4 mr-1" />
+                                                        Move
+                                                      </Button>
+                                                      <Button
                                                         data-testid={`edit-${problem.id}`}
                                                         onClick={(e) => {
                                                           e.stopPropagation();
@@ -946,20 +962,20 @@ export default function AssignmentLibrary({ user }) {
                                                         <Trash2 className="w-4 h-4 mr-1" />
                                                         Delete
                                                       </Button>
-                                                      <Button
-                                                        data-testid={`practice-${problem.id}`}
-                                                        onClick={(e) => {
-                                                          e.stopPropagation();
-                                                          navigate(`/teacher-practice/${problem.id}`);
-                                                        }}
-                                                        variant="outline"
-                                                        className="flex-1 bg-green-50 border-green-300 hover:bg-green-100"
-                                                        size="sm"
-                                                      >
-                                                        <Code2 className="w-4 h-4 mr-1" />
-                                                        Practice
-                                                      </Button>
                                                     </div>
+                                                    <Button
+                                                      data-testid={`practice-${problem.id}`}
+                                                      onClick={(e) => {
+                                                        e.stopPropagation();
+                                                        navigate(`/teacher-practice/${problem.id}`);
+                                                      }}
+                                                      variant="outline"
+                                                      className="w-full bg-green-50 border-green-300 hover:bg-green-100"
+                                                      size="sm"
+                                                    >
+                                                      <Code2 className="w-4 h-4 mr-1" />
+                                                      Practice
+                                                    </Button>
                                                     <Button
                                                       data-testid={`import-${problem.id}`}
                                                       onClick={() => navigate(`/library/import/${problem.id}`)}
