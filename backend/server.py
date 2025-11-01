@@ -1641,7 +1641,7 @@ async def submit_assignment(submission: SubmissionCreate, request: Request):
     if total_tests > 0 and len(assignment.get("test_cases", [])) > 0:
         # Traditional test case prompt
         prompt = f"""
-Evaluate this Python code submission:
+Evaluate this Python code submission consistently and objectively:
 
 Problem: {problem.get('title', assignment.get('title', 'Coding Problem'))}
 Description: {problem.get('description', assignment.get('description', ''))}
@@ -1663,22 +1663,28 @@ Test Results:
 Test Details:
 {json.dumps(test_results, indent=2)}
 
-Provide:
-1. A final score (0-100) considering:
-   - Test results ({base_score}% baseline)
-   - Code quality and style
-   - Partial credit for attempts that failed tests
-   - Logic and approach
+EVALUATION CRITERIA:
+1. Start with the base score ({base_score}%) from test results
+2. Award partial credit for:
+   - Correct logic even if output format is slightly off
+   - Proper use of Python syntax and best practices
+   - Close attempts that show understanding
+3. Deduct points for:
+   - Incorrect logic or approach
+   - Syntax errors or poor code quality
+   - Missing key functionality
 
-2. Constructive feedback (2-3 sentences) on:
-   - What worked well
-   - Areas for improvement
-   - Hints for failed test cases
+IMPORTANT: 
+- Be consistent: Same code = same score
+- Focus on correctness and logic, not style preferences
+- If output matches but formatting differs slightly, give full credit
+- Don't penalize for extra/missing whitespace, quotes, or escape characters if the content is correct
+- Provide specific, actionable feedback
 
 Format your response as JSON:
 {{
   "score": <number 0-100>,
-  "feedback": "<your feedback here>"
+  "feedback": "<2-3 sentences with specific guidance>"
 }}
 """
     else:
