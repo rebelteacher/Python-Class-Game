@@ -141,6 +141,38 @@ export default function QuestionBank({ user }) {
     }
   };
 
+  const handleMoveQuestion = async () => {
+    if (!movingQuestion) return;
+    
+    if (!moveToChapter.trim() || !moveToLesson.trim()) {
+      toast.error("Please select both chapter and lesson");
+      return;
+    }
+
+    try {
+      await axios.put(
+        `${API}/mc-questions/${movingQuestion.id}/move`,
+        {
+          chapter: moveToChapter,
+          lesson: moveToLesson,
+          order: 0
+        },
+        { withCredentials: true }
+      );
+      
+      toast.success(`Question moved to ${moveToChapter} > ${moveToLesson}`);
+      setMoveDialogOpen(false);
+      setMovingQuestion(null);
+      setMoveToChapter("");
+      setMoveToLesson("");
+      fetchQuestions();
+    } catch (error) {
+      console.error("Error moving question:", error);
+      toast.error("Failed to move question");
+    }
+  };
+
+
   const handleBulkUpload = async (e) => {
     const file = e.target.files[0];
     if (!file) return;
