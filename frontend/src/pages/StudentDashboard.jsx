@@ -129,6 +129,8 @@ export default function StudentDashboard({ user, setUser, refreshUser }) {
         { type: itemType, item_id: itemId },
         { withCredentials: true }
       );
+      
+      console.log("Purchase successful, refreshing user data...");
       toast.success("Item purchased!");
       
       // Refresh both local profile and parent user state
@@ -137,6 +139,8 @@ export default function StudentDashboard({ user, setUser, refreshUser }) {
         await refreshUser();
       }
       fetchShopItems();
+      
+      console.log("User data refreshed after purchase");
     } catch (error) {
       console.error("Error purchasing:", error);
       toast.error(error.response?.data?.detail || "Purchase failed");
