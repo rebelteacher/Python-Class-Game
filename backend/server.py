@@ -374,6 +374,7 @@ class MCQuestion(BaseModel):
     chapter: str = ""
     lesson: str = ""
     difficulty: str = "Easy"  # "Easy", "Medium", "Hard"
+    order: int = 0  # Position within lesson for drag-and-drop ordering
     creator_id: str
     creator_name: str
     created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
