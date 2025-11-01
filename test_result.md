@@ -797,6 +797,76 @@ agent_communication:
       - Test empty states (no results, no tests, no classroom)
 
   - agent: "testing"
+
+  - agent: "main"
+    message: |
+      GOOGLE DRIVE-STYLE MOVE FEATURE - IMPLEMENTATION COMPLETE - READY FOR TESTING
+      
+      USER REQUESTED CHANGE: Instead of drag-and-drop, implemented Google Drive-style "Move" button approach (safer, simpler)
+      
+      BACKEND UPDATES:
+      1. Added `order` field to Problem model (for future ordering within lessons)
+      2. Added `order` field to MCQuestion model (for future ordering within lessons)
+      3. Created PUT /api/problems/{id}/move endpoint:
+         - Accepts chapter, lesson, order in request body
+         - Updates problem location
+         - Teacher-only access
+      4. Created PUT /api/mc-questions/{id}/move endpoint:
+         - Accepts chapter, lesson, order in request body
+         - Updates question location
+         - Teacher-only access with creator validation
+      
+      FRONTEND - ASSIGNMENT LIBRARY:
+      1. Added FolderInput icon import
+      2. Added Move button to problem cards (first button in action row)
+      3. Created Move modal with:
+         - Chapter input field (prefilled with current)
+         - Lesson input field (prefilled with current)
+         - Cancel and "Move Here" buttons
+      4. Move handler calls backend endpoint and refreshes problems list
+      5. Toast notifications for success/error
+      
+      FRONTEND - QUESTION BANK:
+      1. Added FolderInput icon import
+      2. Added Move button to question cards (first button before Edit)
+      3. Created Move modal (same design as Assignment Library)
+      4. Move handler calls backend endpoint and refreshes questions list
+      5. Toast notifications for success/error
+      
+      USER EXPERIENCE:
+      1. Teacher clicks "Move" button on any problem/question card
+      2. Modal opens showing current chapter/lesson (prefilled)
+      3. Teacher edits chapter/lesson to new destination
+      4. Teacher clicks "Move Here"
+      5. Item moves instantly with confirmation toast
+      6. Page refreshes to show new organization
+      
+      ADVANTAGES OVER DRAG-AND-DROP:
+      - Much simpler implementation (no complex state management)
+      - No risk of accidental drops in wrong places
+      - Works perfectly on mobile/tablet devices
+      - Clear, intentional user actions
+      - Familiar pattern (like Google Drive)
+      
+      TESTING PRIORITY:
+      Backend:
+      - Test PUT /api/problems/{id}/move with valid chapter/lesson
+      - Test PUT /api/mc-questions/{id}/move with valid chapter/lesson
+      - Test teacher-only access control
+      - Test creator validation for MC questions
+      - Verify problem/question actually moves in database
+      
+      Frontend:
+      - Login as teacher
+      - Navigate to Assignment Library
+      - Click Move on a problem card
+      - Verify modal opens with prefilled chapter/lesson
+      - Change to new chapter/lesson
+      - Click "Move Here"
+      - Verify success toast appears
+      - Verify problem appears in new location
+      - Repeat for Question Bank
+
     message: |
       ADMINADDCOINS BACKEND TESTING COMPLETE ✅
       
