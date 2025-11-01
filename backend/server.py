@@ -1407,6 +1407,29 @@ async def get_assignment(assignment_id: str, request: Request):
 
 # ----- Code Execution -----
 
+def normalize_output(output: str) -> str:
+    """Normalize output for consistent comparison"""
+    if not output:
+        return ""
+    
+    # Normalize line endings
+    output = output.replace('\r\n', '\n').replace('\r', '\n')
+    
+    # Strip leading/trailing whitespace from each line
+    lines = [line.rstrip() for line in output.split('\n')]
+    
+    # Remove trailing empty lines
+    while lines and not lines[-1]:
+        lines.pop()
+    
+    # Remove leading empty lines
+    while lines and not lines[0]:
+        lines.pop(0)
+    
+    # Join back and ensure consistent spacing
+    return '\n'.join(lines)
+
+
 def run_python_code(code: str, test_input: str = "", timeout: int = 5) -> dict:
     """Execute Python code safely with test input"""
     try:
