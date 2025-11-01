@@ -103,13 +103,13 @@ export default function TeacherDashboard({ user, setUser }) {
   };
 
   return (
-    <div data-testid="teacher-dashboard" className="min-h-screen bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50">
-      <nav className="bg-white shadow-sm border-b border-gray-200">
+    <div data-testid="teacher-dashboard" className="min-h-screen bg-gradient-to-br from-teal-50 via-orange-50 to-pink-50">
+      <nav className="bg-gradient-to-r from-teal-600 via-cyan-600 to-blue-600 shadow-lg">
         <div className="container mx-auto px-6 py-4 flex justify-between items-center">
           <div className="flex items-center space-x-2">
-            <Code2 className="w-7 h-7 text-indigo-600" />
-            <span className="text-xl font-bold text-gray-900">ByteBattles Arena</span>
-            <span className="ml-4 px-3 py-1 bg-indigo-100 text-indigo-700 text-sm font-medium rounded-full">
+            <Code2 className="w-7 h-7 text-white" />
+            <span className="text-xl font-bold text-white">ByteBattles Arena</span>
+            <span className="ml-4 px-3 py-1 bg-white/20 backdrop-blur-sm text-white text-sm font-medium rounded-full border border-white/30">
               Teacher
             </span>
           </div>
