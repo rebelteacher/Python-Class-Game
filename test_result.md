@@ -280,6 +280,18 @@ frontend:
         agent: "main"
         comment: "Added /test-reports route (teacher-only) in App.js. Added 'Test Reports' button to Teacher Dashboard navbar next to existing Reports button."
 
+  - task: "Create AdminAddCoins page and integration"
+    implemented: true
+    working: "NA"
+    file: "frontend/src/pages/AdminAddCoins.jsx, frontend/src/App.js, frontend/src/pages/AdminDashboard.jsx"
+    stuck_count: 0
+    priority: "medium"
+    needs_retesting: true
+    status_history:
+      - working: "NA"
+        agent: "main"
+        comment: "Created dedicated AdminAddCoins page with form for adding coins to student accounts. Added /admin-add-coins route (teacher-only, admin check in backend). Added 'Admin Tools' card section to AdminDashboard with navigation button. Uses existing POST /api/admin/fix-student-account endpoint."
+
 metadata:
   created_by: "main_agent"
   version: "4.0"
