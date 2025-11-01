@@ -2243,6 +2243,44 @@ async def generate_invite_code(request: Request):
         "is_active": True
     }
 
+@api_router.post("/admin/fix-student-account")
+async def fix_student_account(data: dict, request: Request):
+    """Fix student account - refund coins and add purchased items (admin only)"""
+    user = await get_current_user(request)
+    
+    if not user.get("is_admin"):
+        raise HTTPException(status_code=403, detail="Admin access required")
+    
+    student_email = data.get("student_email")
+    coins_to_add = data.get("coins_to_add", 0)
+    items_to_add = data.get("items", {})  # {"backgrounds": ["id1"], "pets": ["id2"]}
+    
+    student = await db.users.find_one({"email": student_email})
+    if not student:
+        raise HTTPException(status_code=404, detail="Student not found")
+    
+    updates = {}
+    if coins_to_add > 0:
+        updates["$inc"] = {"coins": coins_to_add}
+    
+    if items_to_add:
+        push_updates = {}
+        if "backgrounds" in items_to_add:
+            push_updates["owned_backgrounds"] = {"$each": items_to_add["backgrounds"]}
+        if "pets" in items_to_add:
+            push_updates["owned_pets"] = {"$each": items_to_add["pets"]}
+        if "profile_frames" in items_to_add:
+            push_updates["owned_profile_frames"] = {"$each": items_to_add["profile_frames"]}
+        
+        if push_updates:
+            updates["$push"] = push_updates
+    
+    if updates:
+        await db.users.update_one({"email": student_email}, updates)
+    
+    return {"success": True, "message": "Account fixed"}
+
+
 @api_router.get("/admin/invite-codes")
 async def get_invite_codes(request: Request):
     """Get all invite codes (admin only)"""
