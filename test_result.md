@@ -298,6 +298,20 @@ frontend:
         agent: "testing"
         comment: "COMPREHENSIVE ADMINADDCOINS FRONTEND TESTING COMPLETE ✅ - All functionality working perfectly. ✅ Navigation Flow: Admin login → Admin Dashboard → Admin Tools card → 'Add Coins to Student' button → /admin-add-coins page navigation working flawlessly. ✅ UI Elements: All form elements present and functional (email input with type=email validation, coins input with default 500, submit button, back button, warning note about page refresh). ✅ Form Validation: Empty email prevented submission, invalid email format handled correctly. ✅ Form Submission: Successfully added coins to student account (verified 300 coins added, form reset after success indicating proper completion). ✅ Error Handling: Non-existent student email properly handled with appropriate error response. ✅ Back Navigation: Back button correctly returns to Admin Dashboard. ✅ Route Protection: /admin-add-coins route properly accessible with admin session. ✅ End-to-End Verification: Student dashboard correctly displays updated coin balance (900 coins) after admin added coins, confirming complete functionality. All AdminAddCoins frontend features working perfectly with clean UI and proper user experience."
 
+
+  - task: "Implement drag-and-drop organization for problems and MC questions"
+    implemented: true
+    working: "NA"
+    file: "backend/server.py, frontend/src/pages/AssignmentLibrary.jsx, frontend/src/pages/QuestionBank.jsx"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: true
+    status_history:
+      - working: "NA"
+        agent: "main"
+        comment: "Added drag-and-drop functionality for reorganizing content. Backend: Added 'order' field to Problem and MCQuestion models. Created PUT /api/problems/{id}/move and PUT /api/mc-questions/{id}/move endpoints. Frontend: Installed @dnd-kit library (core, sortable, utilities). Implementing drag-and-drop UI in both AssignmentLibrary and QuestionBank pages. Features: Drag problems/questions between chapters/lessons, reorder within same lesson, drag entire cards (no handle), visual feedback with drop zones."
+
+
 metadata:
   created_by: "main_agent"
   version: "4.1"
