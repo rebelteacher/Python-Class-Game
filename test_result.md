@@ -321,7 +321,8 @@ metadata:
   backend_test_completion: "2024-12-28"
 
 test_plan:
-  current_focus: []
+  current_focus:
+    - "Implement drag-and-drop organization for problems and MC questions"
   stuck_tasks: []
   test_all: false
   test_priority: "high_first"
