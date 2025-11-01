@@ -3281,6 +3281,9 @@ startxref
         # Test MC Test endpoints (Phase 2)
         self.test_mc_test_endpoints()
         
+        # Test AdminAddCoins endpoints
+        self.test_admin_add_coins_endpoints()
+        
         # Print summary
         print(f"\n📊 Test Summary:")
         print(f"   Total tests: {self.tests_run}")
