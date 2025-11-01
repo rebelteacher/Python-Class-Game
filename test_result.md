@@ -323,6 +323,20 @@ frontend:
         comment: "Improved grading system for more consistent evaluation. Added normalize_output() function to handle whitespace, line endings, and formatting differences. Updated AI evaluation with temperature=0 for deterministic results. Clarified AI prompt to focus on correctness over formatting, ignore minor whitespace/quote/escape character differences, and provide consistent scoring. Partial credit system remains intact."
 
         agent: "main"
+
+
+  - task: "Add test input field to Teacher Practice sandbox"
+    implemented: true
+    working: "NA"
+    file: "frontend/src/pages/TeacherPractice.jsx"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: true
+    status_history:
+      - working: "NA"
+        agent: "main"
+        comment: "Added test input field to Teacher Practice page so teachers can test code that uses input() functions. Added state for testInput, textarea for entering input data, and passes it to the code execution endpoint. UI shows input field above output window with clear labeling."
+
         comment: "Implemented Google Drive-style 'Move' button feature (better than drag-and-drop). Backend: Added 'order' field to Problem and MCQuestion models. Created PUT /api/problems/{id}/move and PUT /api/mc-questions/{id}/move endpoints. Frontend: Added Move button (FolderInput icon) to each problem/question card. Created Move modal with chapter/lesson input fields. User clicks Move → enters destination → clicks Move Here → item moves instantly with toast confirmation. Applied to both AssignmentLibrary and QuestionBank pages. This approach is simpler, safer, and avoids accidental drops in wrong places."
       - working: true
         agent: "testing"
