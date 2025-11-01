@@ -3092,6 +3092,41 @@ async def delete_mc_question(question_id: str, request: Request):
     return {"message": "Question deleted successfully"}
 
 
+@api_router.put("/mc-questions/{question_id}/move")
+async def move_mc_question(question_id: str, data: dict, request: Request):
+    """Move an MC question to a different chapter/lesson and update order"""
+    user = await get_current_user(request)
+    
+    if user["role"] != "teacher":
+        raise HTTPException(status_code=403, detail="Only teachers can move questions")
+    
+    # Get the question
+    question = await db.mc_questions.find_one({"id": question_id})
+    if not question:
+        raise HTTPException(status_code=404, detail="Question not found")
+    
+    if question["creator_id"] != user["id"]:
+        raise HTTPException(status_code=403, detail="Access denied")
+    
+    # Extract new location and order
+    new_chapter = data.get("chapter", question.get("chapter", ""))
+    new_lesson = data.get("lesson", question.get("lesson", ""))
+    new_order = data.get("order", 0)
+    
+    # Update the question
+    await db.mc_questions.update_one(
+        {"id": question_id},
+        {"$set": {
+            "chapter": new_chapter,
+            "lesson": new_lesson,
+            "order": new_order
+        }}
+    )
+    
+    return {"success": True, "message": "Question moved successfully"}
+
+
+
 @api_router.post("/mc-tests")
 async def create_mc_test(test: MCTestCreate, request: Request):
     """Create and assign a multiple choice test"""
