@@ -44,6 +44,12 @@ export default function AssignmentLibrary({ user }) {
   const [editDialogOpen, setEditDialogOpen] = useState(false);
   const [editingProblem, setEditingProblem] = useState(null);
   
+  // Move mode
+  const [moveDialogOpen, setMoveDialogOpen] = useState(false);
+  const [movingProblem, setMovingProblem] = useState(null);
+  const [moveToChapter, setMoveToChapter] = useState("");
+  const [moveToLesson, setMoveToLesson] = useState("");
+  
   const [newProblem, setNewProblem] = useState({
     title: "",
     description: "",
