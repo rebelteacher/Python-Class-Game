@@ -256,6 +256,15 @@ function App() {
                   </ProtectedRoute>
                 }
               />
+
+              <Route
+                path="/admin-add-coins"
+                element={
+                  <ProtectedRoute user={user} requiredRole="teacher">
+                    <AdminAddCoins user={user} />
+                  </ProtectedRoute>
+                }
+              />
             </Routes>
           )}
         </AuthHandler>
