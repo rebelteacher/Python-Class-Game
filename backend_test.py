@@ -3227,6 +3227,358 @@ startxref
             "student": student
         }
 
+    def test_admin_add_coins_endpoints(self):
+        """Test AdminAddCoins backend functionality"""
+        print("\n💰 Testing AdminAddCoins Backend Functionality...")
+        
+        # First, create an admin user for testing
+        admin_user = self.create_admin_user()
+        if not admin_user:
+            print("❌ Cannot test AdminAddCoins without admin user")
+            return
+        
+        # Create a student user to add coins to
+        student = self.create_student_user("coinstest")
+        if not student:
+            print("❌ Cannot test AdminAddCoins without student user")
+            return
+        
+        print(f"   Created admin user: {admin_user['id']}")
+        print(f"   Created student user: {student['id']} ({student['email']})")
+        
+        # Get initial student coins
+        initial_coins = self.get_student_coins(student["id"])
+        print(f"   Initial student coins: {initial_coins}")
+        
+        # Switch to admin token
+        original_token = self.session_token
+        self.session_token = admin_user["token"]
+        
+        try:
+            # Test 1: Add coins to student account (admin user)
+            print("\n   TEST 1: Add coins with admin user")
+            add_coins_data = {
+                "student_email": student["email"],
+                "coins_to_add": 500,
+                "items": {}
+            }
+            
+            response = self.run_test(
+                "Admin add coins to student account",
+                "POST",
+                "admin/fix-student-account",
+                200,
+                add_coins_data
+            )
+            
+            if response and response.get("success"):
+                # Verify coins were added
+                new_coins = self.get_student_coins(student["id"])
+                expected_coins = initial_coins + 500
+                
+                if new_coins == expected_coins:
+                    self.log_test("Coins correctly added to student account", True)
+                    print(f"   ✅ Student coins updated: {initial_coins} → {new_coins}")
+                else:
+                    self.log_test("Coins correctly added to student account", False, 
+                                f"Expected {expected_coins}, got {new_coins}")
+            
+            # Test 2: Add different coin amounts
+            print("\n   TEST 2: Add different coin amounts")
+            for amount in [100, 1000]:
+                before_coins = self.get_student_coins(student["id"])
+                
+                add_coins_data = {
+                    "student_email": student["email"],
+                    "coins_to_add": amount,
+                    "items": {}
+                }
+                
+                response = self.run_test(
+                    f"Add {amount} coins to student",
+                    "POST",
+                    "admin/fix-student-account",
+                    200,
+                    add_coins_data
+                )
+                
+                if response and response.get("success"):
+                    after_coins = self.get_student_coins(student["id"])
+                    expected_coins = before_coins + amount
+                    
+                    if after_coins == expected_coins:
+                        self.log_test(f"Add {amount} coins successful", True)
+                    else:
+                        self.log_test(f"Add {amount} coins successful", False,
+                                    f"Expected {expected_coins}, got {after_coins}")
+            
+            # Test 3: Test with items (backgrounds, pets, frames)
+            print("\n   TEST 3: Add coins with items")
+            add_coins_with_items_data = {
+                "student_email": student["email"],
+                "coins_to_add": 200,
+                "items": {
+                    "backgrounds": ["sunset_gradient", "ocean_wave"],
+                    "pets": ["floating_cat"],
+                    "profile_frames": ["gold_border"]
+                }
+            }
+            
+            self.run_test(
+                "Add coins with items to student",
+                "POST",
+                "admin/fix-student-account",
+                200,
+                add_coins_with_items_data
+            )
+            
+            # Test 4: Error handling - Non-existent student email
+            print("\n   TEST 4: Error handling - Non-existent student")
+            invalid_email_data = {
+                "student_email": "nonexistent@example.com",
+                "coins_to_add": 500,
+                "items": {}
+            }
+            
+            self.run_test(
+                "Add coins to non-existent student (should return 404)",
+                "POST",
+                "admin/fix-student-account",
+                404,
+                invalid_email_data
+            )
+            
+            # Test 5: Error handling - Missing required fields
+            print("\n   TEST 5: Error handling - Missing fields")
+            
+            # Missing student_email
+            missing_email_data = {
+                "coins_to_add": 500,
+                "items": {}
+            }
+            
+            # This should work but find no student (None email)
+            self.run_test(
+                "Add coins without student_email",
+                "POST",
+                "admin/fix-student-account",
+                404,  # Should return 404 when student not found
+                missing_email_data
+            )
+            
+        finally:
+            # Switch back to original token
+            self.session_token = original_token
+        
+        # Test 6: Access control - Non-admin user should get 403
+        print("\n   TEST 6: Access control - Non-admin user")
+        
+        # Create regular teacher user
+        teacher = self.create_teacher_user("teachertest")
+        if teacher:
+            self.session_token = teacher["token"]
+            
+            try:
+                add_coins_data = {
+                    "student_email": student["email"],
+                    "coins_to_add": 500,
+                    "items": {}
+                }
+                
+                self.run_test(
+                    "Non-admin teacher access (should return 403)",
+                    "POST",
+                    "admin/fix-student-account",
+                    403,
+                    add_coins_data
+                )
+                
+            finally:
+                self.session_token = original_token
+        
+        # Test 7: Access control - Student user should get 403
+        print("\n   TEST 7: Access control - Student user")
+        
+        self.session_token = student["token"]
+        
+        try:
+            add_coins_data = {
+                "student_email": student["email"],
+                "coins_to_add": 500,
+                "items": {}
+            }
+            
+            self.run_test(
+                "Student user access (should return 403)",
+                "POST",
+                "admin/fix-student-account",
+                403,
+                add_coins_data
+            )
+            
+        finally:
+            self.session_token = original_token
+        
+        # Test 8: Access control - Unauthenticated user should get 401
+        print("\n   TEST 8: Access control - Unauthenticated user")
+        
+        self.session_token = None
+        
+        try:
+            add_coins_data = {
+                "student_email": student["email"],
+                "coins_to_add": 500,
+                "items": {}
+            }
+            
+            self.run_test(
+                "Unauthenticated access (should return 401)",
+                "POST",
+                "admin/fix-student-account",
+                401,
+                add_coins_data
+            )
+            
+        finally:
+            self.session_token = original_token
+
+    def create_admin_user(self):
+        """Create an admin user for testing"""
+        timestamp = str(int(datetime.now().timestamp()))
+        admin_id = f"test-admin-{timestamp}"
+        admin_token = f"test_admin_session_{timestamp}"
+        
+        try:
+            from motor.motor_asyncio import AsyncIOMotorClient
+            import asyncio
+            
+            async def create_admin_data():
+                client = AsyncIOMotorClient("mongodb://localhost:27017")
+                db = client["test_database"]
+                
+                # Create admin user
+                user_doc = {
+                    "id": admin_id,
+                    "email": f"test.admin.{timestamp}@example.com",
+                    "name": f"Test Admin {timestamp}",
+                    "role": "teacher",
+                    "is_admin": True,  # This is the key field
+                    "xp": 0,
+                    "coins": 0,
+                    "rank": "Rookie",
+                    "rank_level": 1,
+                    "problems_solved": 0,
+                    "perfect_scores": 0,
+                    "current_streak": 0,
+                    "best_streak": 0,
+                    "owned_themes": ["default"],
+                    "owned_badges": [],
+                    "active_theme": "default",
+                    "active_badges": [],
+                    "created_at": datetime.now(timezone.utc).isoformat()
+                }
+                await db.users.insert_one(user_doc)
+                
+                # Create session
+                session_doc = {
+                    "user_id": admin_id,
+                    "session_token": admin_token,
+                    "expires_at": datetime.now(timezone.utc) + timedelta(days=7),
+                    "created_at": datetime.now(timezone.utc).isoformat()
+                }
+                await db.sessions.insert_one(session_doc)
+                
+                client.close()
+                return True
+            
+            # Run async function
+            asyncio.run(create_admin_data())
+            return {"id": admin_id, "token": admin_token, "email": f"test.admin.{timestamp}@example.com"}
+            
+        except Exception as e:
+            print(f"   ❌ Failed to create admin user: {str(e)}")
+            return None
+
+    def create_teacher_user(self, suffix=""):
+        """Create a regular teacher user (non-admin) for testing"""
+        timestamp = str(int(datetime.now().timestamp()))
+        if suffix:
+            timestamp += f"-{suffix}"
+        teacher_id = f"test-teacher-{timestamp}"
+        teacher_token = f"test_teacher_session_{timestamp}"
+        
+        try:
+            from motor.motor_asyncio import AsyncIOMotorClient
+            import asyncio
+            
+            async def create_teacher_data():
+                client = AsyncIOMotorClient("mongodb://localhost:27017")
+                db = client["test_database"]
+                
+                # Create teacher user (non-admin)
+                user_doc = {
+                    "id": teacher_id,
+                    "email": f"test.teacher.{timestamp}@example.com",
+                    "name": f"Test Teacher {timestamp}",
+                    "role": "teacher",
+                    "is_admin": False,  # Regular teacher, not admin
+                    "xp": 0,
+                    "coins": 0,
+                    "rank": "Rookie",
+                    "rank_level": 1,
+                    "problems_solved": 0,
+                    "perfect_scores": 0,
+                    "current_streak": 0,
+                    "best_streak": 0,
+                    "owned_themes": ["default"],
+                    "owned_badges": [],
+                    "active_theme": "default",
+                    "active_badges": [],
+                    "created_at": datetime.now(timezone.utc).isoformat()
+                }
+                await db.users.insert_one(user_doc)
+                
+                # Create session
+                session_doc = {
+                    "user_id": teacher_id,
+                    "session_token": teacher_token,
+                    "expires_at": datetime.now(timezone.utc) + timedelta(days=7),
+                    "created_at": datetime.now(timezone.utc).isoformat()
+                }
+                await db.sessions.insert_one(session_doc)
+                
+                client.close()
+                return True
+            
+            # Run async function
+            asyncio.run(create_teacher_data())
+            return {"id": teacher_id, "token": teacher_token, "email": f"test.teacher.{timestamp}@example.com"}
+            
+        except Exception as e:
+            print(f"   ❌ Failed to create teacher user: {str(e)}")
+            return None
+
+    def get_student_coins(self, student_id):
+        """Get current coin count for a student"""
+        try:
+            from motor.motor_asyncio import AsyncIOMotorClient
+            import asyncio
+            
+            async def get_coins():
+                client = AsyncIOMotorClient("mongodb://localhost:27017")
+                db = client["test_database"]
+                
+                student = await db.users.find_one({"id": student_id}, {"coins": 1})
+                client.close()
+                
+                return student.get("coins", 0) if student else 0
+            
+            return asyncio.run(get_coins())
+            
+        except Exception as e:
+            print(f"   ❌ Failed to get student coins: {str(e)}")
+            return 0
+
     def run_all_tests(self):
         """Run all API tests"""
         print("🚀 Starting CodeClass API Tests...")
