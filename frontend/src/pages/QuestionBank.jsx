@@ -10,7 +10,7 @@ import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, Di
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
-import { ArrowLeft, Plus, Edit, Trash2, FileQuestion, Folder, FolderOpen, ChevronRight, ChevronDown, Upload } from "lucide-react";
+import { ArrowLeft, Plus, Edit, Trash2, FileQuestion, Folder, FolderOpen, ChevronRight, ChevronDown, Upload, FolderInput } from "lucide-react";
 
 const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
 const API = `${BACKEND_URL}/api`;
