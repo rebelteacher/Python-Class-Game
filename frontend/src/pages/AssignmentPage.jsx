@@ -32,6 +32,7 @@ export default function AssignmentPage({ user }) {
   const [currentProblemIndex, setCurrentProblemIndex] = useState(0);
   const [darkMode, setDarkMode] = useState(false); // Dark mode toggle
   const [markingFinal, setMarkingFinal] = useState(false);
+  const [testInput, setTestInput] = useState(""); // For input() functions
 
   // Get current problem's ID
   const getCurrentProblemId = () => {
