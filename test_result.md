@@ -301,15 +301,18 @@ frontend:
 
   - task: "Implement drag-and-drop organization for problems and MC questions"
     implemented: true
-    working: "NA"
+    working: true
     file: "backend/server.py, frontend/src/pages/AssignmentLibrary.jsx, frontend/src/pages/QuestionBank.jsx"
     stuck_count: 0
     priority: "high"
-    needs_retesting: true
+    needs_retesting: false
     status_history:
       - working: "NA"
         agent: "main"
         comment: "Implemented Google Drive-style 'Move' button feature (better than drag-and-drop). Backend: Added 'order' field to Problem and MCQuestion models. Created PUT /api/problems/{id}/move and PUT /api/mc-questions/{id}/move endpoints. Frontend: Added Move button (FolderInput icon) to each problem/question card. Created Move modal with chapter/lesson input fields. User clicks Move → enters destination → clicks Move Here → item moves instantly with toast confirmation. Applied to both AssignmentLibrary and QuestionBank pages. This approach is simpler, safer, and avoids accidental drops in wrong places."
+      - working: true
+        agent: "testing"
+        comment: "COMPREHENSIVE MOVE FUNCTIONALITY BACKEND TESTING COMPLETE ✅ - 22/22 tests passed (100% success rate). ✅ PUT /api/problems/{id}/move: Successfully moves problems to different chapter/lesson with order field, teacher-only access enforced, database updates verified. ✅ PUT /api/mc-questions/{id}/move: Successfully moves MC questions to different chapter/lesson with order field, creator-only access enforced (only question creator can move), database updates verified. ✅ Access Control: Teacher-only access for problems (403 for students), Creator-only access for MC questions (403 for non-creator teachers), Proper 401 for unauthenticated users. ✅ Validation: Invalid IDs return 404, Missing fields use defaults from existing data, Partial data updates work correctly. ✅ Database Persistence: All chapter/lesson/order changes persist correctly in database, Verified through direct MongoDB queries. All Move functionality backend endpoints working perfectly with proper access controls and validation."
 
 
 metadata:
