@@ -304,8 +304,7 @@ metadata:
   backend_test_completion: "2024-12-28"
 
 test_plan:
-  current_focus:
-    - "Create AdminAddCoins page and integration"
+  current_focus: []
   stuck_tasks: []
   test_all: false
   test_priority: "high_first"
