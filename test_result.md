@@ -294,7 +294,7 @@ frontend:
 
 metadata:
   created_by: "main_agent"
-  version: "4.0"
+  version: "4.1"
   test_sequence: 6
   run_ui: false
   last_tested_by: "testing_agent"
