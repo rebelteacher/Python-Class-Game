@@ -170,8 +170,14 @@ class User(BaseModel):
     best_streak: int = 0
     owned_themes: List[str] = Field(default_factory=lambda: ["default"])
     owned_badges: List[str] = Field(default_factory=list)
+    owned_backgrounds: List[str] = Field(default_factory=list)
+    owned_pets: List[str] = Field(default_factory=list)
+    owned_profile_frames: List[str] = Field(default_factory=list)
     active_theme: str = "default"
     active_badges: List[str] = Field(default_factory=list)
+    active_background: str = ""
+    active_pet: str = ""
+    active_profile_frame: str = ""
     created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
 
 class UserSession(BaseModel):
