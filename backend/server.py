@@ -560,7 +560,13 @@ async def get_me(request: Request):
         "owned_themes": user.get("owned_themes", ["default"]),
         "owned_badges": user.get("owned_badges", []),
         "active_theme": user.get("active_theme", "default"),
-        "active_badges": user.get("active_badges", [])
+        "active_badges": user.get("active_badges", []),
+        "owned_backgrounds": user.get("owned_backgrounds", []),
+        "owned_pets": user.get("owned_pets", []),
+        "owned_profile_frames": user.get("owned_profile_frames", []),
+        "active_background": user.get("active_background"),
+        "active_pet": user.get("active_pet"),
+        "active_profile_frame": user.get("active_profile_frame")
     }
 
 @api_router.post("/auth/teacher-login")
