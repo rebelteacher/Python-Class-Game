@@ -207,6 +207,38 @@ export default function AssignmentLibrary({ user }) {
     }
   };
 
+  const handleMoveProblem = async () => {
+    if (!movingProblem) return;
+    
+    if (!moveToChapter.trim() || !moveToLesson.trim()) {
+      toast.error("Please enter both chapter and lesson");
+      return;
+    }
+
+    try {
+      await axios.put(
+        `${API}/problems/${movingProblem.id}/move`,
+        {
+          chapter: moveToChapter,
+          lesson: moveToLesson,
+          order: 0
+        },
+        { withCredentials: true }
+      );
+      
+      toast.success(`Problem moved to ${moveToChapter} > ${moveToLesson}`);
+      setMoveDialogOpen(false);
+      setMovingProblem(null);
+      setMoveToChapter("");
+      setMoveToLesson("");
+      fetchProblems();
+    } catch (error) {
+      console.error("Error moving problem:", error);
+      toast.error("Failed to move problem");
+    }
+  };
+
+
   const handleBulkUpload = async (e) => {
     e.preventDefault();
     
