@@ -165,7 +165,7 @@ export default function TeacherDashboard({ user, setUser }) {
           </div>
           <Dialog open={createDialogOpen} onOpenChange={setCreateDialogOpen}>
             <DialogTrigger asChild>
-              <Button data-testid="create-classroom-btn" className="bg-indigo-600 hover:bg-indigo-700 gap-2">
+              <Button data-testid="create-classroom-btn" className="bg-gradient-to-r from-orange-500 to-pink-500 hover:from-orange-600 hover:to-pink-600 gap-2 shadow-lg">
                 <Plus className="w-5 h-5" />
                 Create Classroom
               </Button>
