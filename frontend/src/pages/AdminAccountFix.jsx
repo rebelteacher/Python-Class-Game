@@ -47,6 +47,36 @@ export default function AdminAccountFix() {
     }
   };
 
+  const handleAddCoins = async (e) => {
+    e.preventDefault();
+    
+    if (!studentEmail) {
+      toast.error("Please enter student email");
+      return;
+    }
+
+    setLoadingCoins(true);
+
+    try {
+      const response = await axios.post(`${API}/admin/fix-student-account`, {
+        student_email: studentEmail,
+        coins_to_add: parseInt(coinsToAdd),
+        items: {}
+      }, {
+        withCredentials: true
+      });
+
+      toast.success(`Successfully added ${coinsToAdd} coins to ${studentEmail}!`);
+      setStudentEmail("");
+      setCoinsToAdd(500);
+    } catch (error) {
+      console.error("Add coins error:", error);
+      toast.error(error.response?.data?.detail || "Failed to add coins");
+    } finally {
+      setLoadingCoins(false);
+    }
+  };
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-purple-50 via-indigo-50 to-blue-50 flex items-center justify-center p-6">
       <Card className="w-full max-w-md border-purple-200">
