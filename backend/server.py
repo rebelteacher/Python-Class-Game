@@ -1186,19 +1186,27 @@ async def move_problem(problem_id: str, data: dict, request: Request):
 
 @api_router.post("/assignments")
 async def create_assignment(assignment: AssignmentCreate, request: Request):
-    """Create a new bundled assignment with multiple problems"""
+    """Create a new assignment (library-based with multiple problems OR standalone with test cases)"""
     user = await get_current_user(request)
     
     if user["role"] != "teacher":
         raise HTTPException(status_code=403, detail="Only teachers can create assignments")
     
+    # Handle classroom_id or classroom_ids
+    classroom_ids = assignment.classroom_ids if assignment.classroom_ids else []
+    if assignment.classroom_id:
+        classroom_ids.append(assignment.classroom_id)
+    
+    if not classroom_ids:
+        raise HTTPException(status_code=400, detail="At least one classroom is required")
+    
     # Verify teacher owns all classrooms
-    for classroom_id in assignment.classroom_ids:
+    for classroom_id in classroom_ids:
         classroom = await db.classrooms.find_one({"id": classroom_id})
         if not classroom or classroom["teacher_id"] != user["id"]:
             raise HTTPException(status_code=403, detail=f"You don't have access to classroom {classroom_id}")
     
-    # Verify all problems exist
+    # Verify all problems exist (for library-based assignments)
     for problem_id in assignment.problem_ids:
         problem = await db.problems.find_one({"id": problem_id})
         if not problem:
@@ -1214,7 +1222,11 @@ async def create_assignment(assignment: AssignmentCreate, request: Request):
         description=assignment.description,
         teacher_id=user["id"],
         problem_ids=assignment.problem_ids,
-        classroom_ids=assignment.classroom_ids,
+        classroom_ids=classroom_ids,
+        starter_code=assignment.starter_code,
+        solution_code=assignment.solution_code,
+        expected_output=assignment.expected_output,
+        test_cases=assignment.test_cases,
         available_date=available_date,
         due_date=due_date,
         allow_late_submission=assignment.allow_late_submission,
@@ -1232,7 +1244,7 @@ async def create_assignment(assignment: AssignmentCreate, request: Request):
     
     await db.assignments.insert_one(assignment_dict)
     
-    # Increment times_imported counter for each problem
+    # Increment times_imported counter for each problem (library-based only)
     for problem_id in assignment.problem_ids:
         await db.problems.update_one(
             {"id": problem_id},
