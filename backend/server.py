@@ -258,6 +258,7 @@ class Problem(BaseModel):
     csta_standard: str  # CSTA K-12 CS Standards
     problem_type: str = "Independent Practice"  # "Class Practice", "Paired Programming", "Independent Practice", "Debugging"
     resources_link: str = ""  # Link to Google Drive, lesson materials, etc.
+    order: int = 0  # Position within lesson for drag-and-drop ordering
     creator_id: str
     creator_name: str
     is_approved: bool = True
