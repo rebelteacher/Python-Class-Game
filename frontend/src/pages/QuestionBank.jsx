@@ -539,6 +539,20 @@ What is 2+2?,3,4,5,6,B,Chapter 1,Lesson 1,Easy
                                       <div className="flex gap-2">
                                         <Button
                                           onClick={() => {
+                                            setMovingQuestion(question);
+                                            setMoveToChapter(question.chapter || "");
+                                            setMoveToLesson(question.lesson || "");
+                                            setMoveDialogOpen(true);
+                                          }}
+                                          variant="outline"
+                                          size="sm"
+                                          className="flex-1"
+                                        >
+                                          <FolderInput className="w-4 h-4 mr-1" />
+                                          Move
+                                        </Button>
+                                        <Button
+                                          onClick={() => {
                                             setEditingQuestion(question);
                                             setEditDialogOpen(true);
                                           }}
