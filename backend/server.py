@@ -1138,6 +1138,38 @@ async def delete_problem(problem_id: str, request: Request):
     return {"message": "Problem deleted successfully"}
 
 
+@api_router.put("/problems/{problem_id}/move")
+async def move_problem(problem_id: str, data: dict, request: Request):
+    """Move a problem to a different chapter/lesson and update order"""
+    user = await get_current_user(request)
+    
+    if user["role"] != "teacher":
+        raise HTTPException(status_code=403, detail="Only teachers can move problems")
+    
+    # Get the problem
+    problem = await db.problems.find_one({"id": problem_id})
+    if not problem:
+        raise HTTPException(status_code=404, detail="Problem not found")
+    
+    # Extract new location and order
+    new_chapter = data.get("chapter", problem.get("chapter", ""))
+    new_lesson = data.get("lesson", problem.get("lesson", ""))
+    new_order = data.get("order", 0)
+    
+    # Update the problem
+    await db.problems.update_one(
+        {"id": problem_id},
+        {"$set": {
+            "chapter": new_chapter,
+            "lesson": new_lesson,
+            "order": new_order
+        }}
+    )
+    
+    return {"success": True, "message": "Problem moved successfully"}
+
+
+
 @api_router.post("/assignments")
 async def create_assignment(assignment: AssignmentCreate, request: Request):
     """Create a new bundled assignment with multiple problems"""
