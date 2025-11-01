@@ -1190,6 +1190,49 @@ export default function AssignmentLibrary({ user }) {
             navigate(-1);
           }}
         />
+
+        {/* Move Dialog */}
+        {movingProblem && (
+          <Dialog open={moveDialogOpen} onOpenChange={setMoveDialogOpen}>
+            <DialogContent>
+              <DialogHeader>
+                <DialogTitle>Move Problem</DialogTitle>
+                <DialogDescription>
+                  Move "{movingProblem.title}" to a different location
+                </DialogDescription>
+              </DialogHeader>
+              <div className="space-y-4">
+                <div>
+                  <Label>Chapter</Label>
+                  <Input
+                    placeholder="e.g., Chapter 1"
+                    value={moveToChapter}
+                    onChange={(e) => setMoveToChapter(e.target.value)}
+                    className="mt-1"
+                  />
+                </div>
+                <div>
+                  <Label>Lesson</Label>
+                  <Input
+                    placeholder="e.g., Lesson 1"
+                    value={moveToLesson}
+                    onChange={(e) => setMoveToLesson(e.target.value)}
+                    className="mt-1"
+                  />
+                </div>
+                <div className="flex gap-2">
+                  <Button onClick={() => setMoveDialogOpen(false)} variant="outline" className="flex-1">
+                    Cancel
+                  </Button>
+                  <Button onClick={handleMoveProblem} className="flex-1 bg-indigo-600 hover:bg-indigo-700">
+                    <FolderInput className="w-4 h-4 mr-2" />
+                    Move Here
+                  </Button>
+                </div>
+              </div>
+            </DialogContent>
+          </Dialog>
+        )}
       </main>
     </div>
   );
