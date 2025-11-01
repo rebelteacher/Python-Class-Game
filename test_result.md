@@ -659,6 +659,68 @@ agent_communication:
       
       🎉 ALL 4 PHASES OF MC TESTING PLATFORM COMPLETE!
       
+
+  - agent: "main"
+    message: |
+      ADMIN ADD COINS FEATURE - IMPLEMENTATION COMPLETE - READY FOR TESTING
+      
+      FRONTEND - ADMIN ADD COINS PAGE:
+      1. Created dedicated AdminAddCoins.jsx page:
+         - Clean, centered card layout with green theme
+         - Form with student email input (required, type email)
+         - Coins amount input (default 500, min 1)
+         - Loading state during submission
+         - Success/error toast notifications
+         - Back button to Admin Dashboard
+         - Warning note about needing page refresh
+      
+      2. Integration:
+         - Calls POST /api/admin/fix-student-account endpoint
+         - Passes student_email, coins_to_add, items (empty object)
+         - Uses existing backend endpoint (already implemented)
+         - Admin-only access enforced by backend
+      
+      3. Navigation:
+         - Added /admin-add-coins route in App.js (teacher-only, admin verified in backend)
+         - Added "Admin Tools" card section to AdminDashboard
+         - Card contains "Add Coins to Student" button with Coins icon
+         - Button navigates to new page
+      
+      BACKEND (Already exists):
+      - POST /api/admin/fix-student-account endpoint working
+      - Admin access check in place
+      - Updates student coins using $inc operator
+      - Can also add items (backgrounds, pets, frames) if needed
+      - Returns success message
+      
+      TESTING PRIORITY:
+      Backend:
+      - Test POST /api/admin/fix-student-account with admin user
+      - Test with valid student email
+      - Test with invalid student email (should return 404)
+      - Test without admin access (should return 403)
+      - Verify coins are added to student account
+      
+      Frontend:
+      - Login as admin user
+      - Navigate to Admin Dashboard
+      - Verify "Admin Tools" card is visible
+      - Click "Add Coins to Student" button
+      - Verify AdminAddCoins page loads
+      - Test form validation (email required)
+      - Submit with valid student email
+      - Verify success toast appears
+      - Verify coins are added to student account (check student dashboard)
+      - Test error handling (invalid email)
+      
+      USER FLOW:
+      1. Admin clicks "Add Coins to Student" from Admin Dashboard
+      2. Enters student email and coin amount
+      3. Submits form
+      4. Success message appears
+      5. Student refreshes their page to see updated coins
+      
+      This resolves the issue where students lost coins due to Google OAuth user persistence bug.
       TESTING PRIORITY - PHASE 4:
       Frontend:
       - Login as teacher
