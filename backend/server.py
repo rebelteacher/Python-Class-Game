@@ -1585,8 +1585,8 @@ async def submit_assignment(submission: SubmissionCreate, request: Request):
         # Traditional test case evaluation
         for test_case in assignment["test_cases"]:
             result = run_python_code(submission.code, test_case["input_data"])
-            expected = test_case["expected_output"].strip()
-            actual = result["output"].strip() if result["success"] else ""
+            expected = normalize_output(test_case["expected_output"])
+            actual = normalize_output(result["output"]) if result["success"] else ""
             
             passed = result["success"] and actual == expected
             if passed:
