@@ -308,6 +308,20 @@ frontend:
     needs_retesting: false
     status_history:
       - working: "NA"
+
+
+  - task: "Improve grading consistency and output comparison"
+    implemented: true
+    working: "NA"
+    file: "backend/server.py"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: true
+    status_history:
+      - working: "NA"
+        agent: "main"
+        comment: "Improved grading system for more consistent evaluation. Added normalize_output() function to handle whitespace, line endings, and formatting differences. Updated AI evaluation with temperature=0 for deterministic results. Clarified AI prompt to focus on correctness over formatting, ignore minor whitespace/quote/escape character differences, and provide consistent scoring. Partial credit system remains intact."
+
         agent: "main"
         comment: "Implemented Google Drive-style 'Move' button feature (better than drag-and-drop). Backend: Added 'order' field to Problem and MCQuestion models. Created PUT /api/problems/{id}/move and PUT /api/mc-questions/{id}/move endpoints. Frontend: Added Move button (FolderInput icon) to each problem/question card. Created Move modal with chapter/lesson input fields. User clicks Move → enters destination → clicks Move Here → item moves instantly with toast confirmation. Applied to both AssignmentLibrary and QuestionBank pages. This approach is simpler, safer, and avoids accidental drops in wrong places."
       - working: true
