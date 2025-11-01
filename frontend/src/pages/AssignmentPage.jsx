@@ -766,18 +766,40 @@ export default function AssignmentPage({ user }) {
               {/* Resize Handle */}
               <PanelResizeHandle className="w-2 bg-gray-300 hover:bg-indigo-500 transition-colors cursor-col-resize mx-2" />
 
-              {/* Output - Right */}
+              {/* Test Input & Output - Right */}
               <Panel defaultSize={50} minSize={30}>
-                <Card data-testid="output-card" className="h-full">
-                  <CardHeader>
-                    <CardTitle className="text-lg">Output</CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <pre className="p-4 bg-gray-900 text-green-400 rounded-lg font-mono text-sm h-[600px] overflow-auto">
-                      {output || "Run your code to see output here..."}
-                    </pre>
-                  </CardContent>
-                </Card>
+                <div className="h-full flex flex-col gap-3">
+                  {/* Test Input Section */}
+                  <Card>
+                    <CardHeader className="pb-3">
+                      <CardTitle className="text-sm">Test Input (Optional)</CardTitle>
+                      <CardDescription className="text-xs">
+                        Enter input data for input() functions before running. Leave empty if no input needed.
+                      </CardDescription>
+                    </CardHeader>
+                    <CardContent>
+                      <Textarea
+                        placeholder="Enter input data here (e.g., blue)"
+                        value={testInput}
+                        onChange={(e) => setTestInput(e.target.value)}
+                        rows={2}
+                        className="font-mono text-sm"
+                      />
+                    </CardContent>
+                  </Card>
+
+                  {/* Output Section */}
+                  <Card data-testid="output-card" className="flex-1 flex flex-col">
+                    <CardHeader className="pb-3">
+                      <CardTitle className="text-lg">Output</CardTitle>
+                    </CardHeader>
+                    <CardContent className="flex-1 overflow-auto">
+                      <pre className="p-4 bg-gray-900 text-green-400 rounded-lg font-mono text-sm min-h-[400px] whitespace-pre-wrap">
+                        {output || "Run your code to see output here..."}
+                      </pre>
+                    </CardContent>
+                  </Card>
+                </div>
               </Panel>
               </PanelGroup>
             ) : (
