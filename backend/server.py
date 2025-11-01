@@ -1607,8 +1607,8 @@ async def submit_assignment(submission: SubmissionCreate, request: Request):
         solution_result = run_python_code(problem["solution_code"], "")
         student_result = run_python_code(submission.code, "")
         
-        solution_output = solution_result["output"].strip() if solution_result["success"] else ""
-        student_output = student_result["output"].strip() if student_result["success"] else ""
+        solution_output = normalize_output(solution_result["output"]) if solution_result["success"] else ""
+        student_output = normalize_output(student_result["output"]) if student_result["success"] else ""
         
         # Basic comparison
         if student_result["success"] and student_output == solution_output:
