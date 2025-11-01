@@ -213,7 +213,7 @@ export default function AssignmentPage({ user }) {
         `${API}/code/execute`,
         {
           code: code,
-          test_input: "",
+          test_input: testInput,
         },
         { withCredentials: true }
       );
