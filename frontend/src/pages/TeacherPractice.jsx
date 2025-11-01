@@ -65,7 +65,7 @@ export default function TeacherPractice({ user }) {
         `${API}/code/execute`,
         {
           code: code,
-          test_input: "",
+          test_input: testInput,
         },
         { withCredentials: true }
       );
