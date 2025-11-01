@@ -114,42 +114,42 @@ export default function TeacherDashboard({ user, setUser }) {
             </span>
           </div>
           <div className="flex items-center space-x-3">
-            <span className="text-gray-700 hidden sm:inline">{user.name}</span>
+            <span className="text-white font-medium hidden sm:inline">{user.name}</span>
             {user.is_admin && (
-              <Button data-testid="admin-nav-btn" onClick={() => navigate("/admin-dashboard")} variant="outline" size="sm" className="gap-2 border-purple-600 text-purple-600 hover:bg-purple-50">
+              <Button data-testid="admin-nav-btn" onClick={() => navigate("/admin-dashboard")} variant="outline" size="sm" className="gap-2 border-white/30 text-white hover:bg-white/20 bg-white/10">
                 <Shield className="w-4 h-4" />
                 Admin
               </Button>
             )}
-            <Button data-testid="library-nav-btn" onClick={() => navigate("/library")} variant="outline" size="sm" className="gap-2">
+            <Button data-testid="library-nav-btn" onClick={() => navigate("/library")} variant="outline" size="sm" className="gap-2 border-white/30 text-white hover:bg-white/20 bg-white/10">
               <BookOpen className="w-4 h-4" />
               Library
             </Button>
-            <Button onClick={() => navigate("/question-bank")} variant="outline" size="sm" className="gap-2">
+            <Button onClick={() => navigate("/question-bank")} variant="outline" size="sm" className="gap-2 border-white/30 text-white hover:bg-white/20 bg-white/10">
               <FileQuestion className="w-4 h-4" />
               Question Bank
             </Button>
-            <Button onClick={() => navigate("/test-builder")} variant="outline" size="sm" className="gap-2">
+            <Button onClick={() => navigate("/test-builder")} variant="outline" size="sm" className="gap-2 border-white/30 text-white hover:bg-white/20 bg-white/10">
               <FileQuestion className="w-4 h-4" />
               Test Builder
             </Button>
-            <Button onClick={() => navigate("/notes")} variant="outline" size="sm" className="gap-2">
+            <Button onClick={() => navigate("/notes")} variant="outline" size="sm" className="gap-2 border-white/30 text-white hover:bg-white/20 bg-white/10">
               <FileText className="w-4 h-4" />
               Notes
             </Button>
-            <Button data-testid="reports-nav-btn" onClick={() => navigate("/teacher-reports")} variant="outline" size="sm" className="gap-2">
+            <Button data-testid="reports-nav-btn" onClick={() => navigate("/teacher-reports")} variant="outline" size="sm" className="gap-2 border-white/30 text-white hover:bg-white/20 bg-white/10">
               <FileSpreadsheet className="w-4 h-4" />
               Reports
             </Button>
-            <Button onClick={() => navigate("/test-reports")} variant="outline" size="sm" className="gap-2">
+            <Button onClick={() => navigate("/test-reports")} variant="outline" size="sm" className="gap-2 border-white/30 text-white hover:bg-white/20 bg-white/10">
               <FileSpreadsheet className="w-4 h-4" />
               Test Reports
             </Button>
-            <Button data-testid="switch-role-btn" onClick={handleSwitchToStudent} variant="outline" size="sm" className="gap-2">
+            <Button data-testid="switch-role-btn" onClick={handleSwitchToStudent} variant="outline" size="sm" className="gap-2 border-white/30 text-white hover:bg-white/20 bg-white/10">
               <RefreshCw className="w-4 h-4" />
               Switch to Student
             </Button>
-            <Button data-testid="logout-btn" onClick={handleLogout} variant="ghost" size="sm" className="gap-2">
+            <Button data-testid="logout-btn" onClick={handleLogout} variant="ghost" size="sm" className="gap-2 text-white hover:bg-white/20">
               <LogOut className="w-4 h-4" />
               Logout
             </Button>
