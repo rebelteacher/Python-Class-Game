@@ -134,6 +134,58 @@ export default function AdminAccountFix() {
           </form>
         </CardContent>
       </Card>
+
+      {/* Add Coins Card */}
+      <Card className="w-full max-w-md border-green-200 mt-6">
+        <CardHeader className="space-y-1">
+          <div className="flex items-center space-x-2">
+            <Zap className="w-6 h-6 text-green-600" />
+            <CardTitle className="text-2xl font-bold">Add Coins to Student</CardTitle>
+          </div>
+          <CardDescription>
+            Refund or bonus coins for students (Admin only)
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <form onSubmit={handleAddCoins} className="space-y-4">
+            <div className="space-y-2">
+              <Label htmlFor="studentEmail">Student Email</Label>
+              <div className="relative">
+                <Mail className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
+                <Input
+                  id="studentEmail"
+                  type="email"
+                  placeholder="student@gmail.com"
+                  value={studentEmail}
+                  onChange={(e) => setStudentEmail(e.target.value)}
+                  className="pl-10"
+                  required
+                />
+              </div>
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="coins">Coins to Add</Label>
+              <Input
+                id="coins"
+                type="number"
+                min="1"
+                value={coinsToAdd}
+                onChange={(e) => setCoinsToAdd(e.target.value)}
+                required
+              />
+            </div>
+
+            <Button
+              type="submit"
+              className="w-full bg-green-600 hover:bg-green-700"
+              disabled={loadingCoins}
+            >
+              {loadingCoins ? "Adding coins..." : "Add Coins"}
+            </Button>
+          </form>
+        </CardContent>
+      </Card>
     </div>
   );
 }
