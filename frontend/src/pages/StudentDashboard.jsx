@@ -105,6 +105,7 @@ export default function StudentDashboard({ user, setUser, refreshUser }) {
       const response = await axios.get(`${API}/auth/me`, {
         withCredentials: true,
       });
+      console.log("Fetched user profile:", response.data);
       setUserProfile(response.data);
     } catch (error) {
       console.error("Error fetching profile:", error);
