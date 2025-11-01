@@ -200,7 +200,7 @@ export default function TeacherDashboard({ user, setUser }) {
                   </div>
                   <p className="text-xs text-gray-500 mt-1">Try: {classroomNameSuggestions.slice(0, 3).join(", ")}</p>
                 </div>
-                <Button data-testid="create-classroom-submit-btn" type="submit" className="w-full bg-indigo-600 hover:bg-indigo-700">
+                <Button data-testid="create-classroom-submit-btn" type="submit" className="w-full bg-gradient-to-r from-teal-500 to-cyan-500 hover:from-teal-600 hover:to-cyan-600">
                   Create Classroom
                 </Button>
               </form>
