@@ -303,8 +303,16 @@ class AssignmentCreate(BaseModel):
     description: str
     chapter: str = ""
     lesson: str = ""
-    problem_ids: List[str]  # Multiple problems from library
-    classroom_ids: List[str]  # Multiple classrooms
+    # For library-based assignments
+    problem_ids: List[str] = []  # Multiple problems from library (optional for standalone)
+    classroom_ids: List[str] = []  # Multiple classrooms (optional, can use classroom_id)
+    classroom_id: Optional[str] = None  # Single classroom (for standalone assignments)
+    # For standalone assignments
+    starter_code: str = ""
+    solution_code: str = ""
+    expected_output: str = ""
+    test_cases: List[dict] = []  # For standalone assignments with test cases
+    # Scheduling and rewards
     available_date: Optional[str] = None  # ISO format datetime
     due_date: Optional[str] = None
     allow_late_submission: bool = True
