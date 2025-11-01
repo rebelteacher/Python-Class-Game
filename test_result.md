@@ -309,7 +309,7 @@ frontend:
     status_history:
       - working: "NA"
         agent: "main"
-        comment: "Added drag-and-drop functionality for reorganizing content. Backend: Added 'order' field to Problem and MCQuestion models. Created PUT /api/problems/{id}/move and PUT /api/mc-questions/{id}/move endpoints. Frontend: Installed @dnd-kit library (core, sortable, utilities). Implementing drag-and-drop UI in both AssignmentLibrary and QuestionBank pages. Features: Drag problems/questions between chapters/lessons, reorder within same lesson, drag entire cards (no handle), visual feedback with drop zones."
+        comment: "Implemented Google Drive-style 'Move' button feature (better than drag-and-drop). Backend: Added 'order' field to Problem and MCQuestion models. Created PUT /api/problems/{id}/move and PUT /api/mc-questions/{id}/move endpoints. Frontend: Added Move button (FolderInput icon) to each problem/question card. Created Move modal with chapter/lesson input fields. User clicks Move → enters destination → clicks Move Here → item moves instantly with toast confirmation. Applied to both AssignmentLibrary and QuestionBank pages. This approach is simpler, safer, and avoids accidental drops in wrong places."
 
 
 metadata:
