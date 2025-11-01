@@ -14,7 +14,10 @@ const API = `${BACKEND_URL}/api`;
 export default function AdminAccountFix() {
   const navigate = useNavigate();
   const [email, setEmail] = useState("astapp@spanola.net");
+  const [studentEmail, setStudentEmail] = useState("");
+  const [coinsToAdd, setCoinsToAdd] = useState(500);
   const [loading, setLoading] = useState(false);
+  const [loadingCoins, setLoadingCoins] = useState(false);
 
   const handleFix = async (e) => {
     e.preventDefault();
