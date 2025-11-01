@@ -2449,49 +2449,59 @@ async def get_shop_items(request: Request):
 @api_router.post("/shop/purchase")
 async def purchase_item(item_data: dict, request: Request):
     """Purchase an item from shop"""
-    user = await get_current_user(request)
-    
-    item_type = item_data.get("type")  # "themes" or "badges"
-    item_id = item_data.get("item_id")
-    
-    if item_type not in SHOP_ITEMS:
-        raise HTTPException(status_code=400, detail="Invalid item type")
-    
-    # Find item
-    item = next((i for i in SHOP_ITEMS[item_type] if i["id"] == item_id), None)
-    if not item:
-        raise HTTPException(status_code=404, detail="Item not found")
-    
-    # Check if user has enough coins
-    user_coins = user.get("coins", 0)
-    if user_coins < item["price"]:
-        raise HTTPException(status_code=400, detail="Not enough coins")
-    
-    # Check if already owned
-    owned_field_map = {
-        "themes": "owned_themes",
-        "badges": "owned_badges",
-        "backgrounds": "owned_backgrounds",
-        "pets": "owned_pets",
-        "profile_frames": "owned_profile_frames"
-    }
-    owned_field = owned_field_map.get(item_type)
-    if not owned_field:
-        raise HTTPException(status_code=400, detail="Invalid item type")
+    try:
+        user = await get_current_user(request)
         
-    if item_id in user.get(owned_field, []):
-        raise HTTPException(status_code=400, detail="Already owned")
-    
-    # Purchase item
-    await db.users.update_one(
-        {"id": user["id"]},
-        {
-            "$inc": {"coins": -item["price"]},
-            "$push": {owned_field: item_id}
+        item_type = item_data.get("type")
+        item_id = item_data.get("item_id")
+        
+        logging.info(f"Purchase attempt: user={user['id']}, type={item_type}, item={item_id}")
+        
+        if item_type not in SHOP_ITEMS:
+            raise HTTPException(status_code=400, detail=f"Invalid item type: {item_type}")
+        
+        # Find item
+        item = next((i for i in SHOP_ITEMS[item_type] if i["id"] == item_id), None)
+        if not item:
+            raise HTTPException(status_code=404, detail="Item not found")
+        
+        # Check if user has enough coins
+        user_coins = user.get("coins", 0)
+        if user_coins < item["price"]:
+            raise HTTPException(status_code=400, detail="Not enough coins")
+        
+        # Check if already owned
+        owned_field_map = {
+            "themes": "owned_themes",
+            "badges": "owned_badges",
+            "backgrounds": "owned_backgrounds",
+            "pets": "owned_pets",
+            "profile_frames": "owned_profile_frames"
         }
-    )
-    
-    return {"success": True, "item": item, "remaining_coins": user_coins - item["price"]}
+        owned_field = owned_field_map.get(item_type)
+        if not owned_field:
+            raise HTTPException(status_code=400, detail=f"Unknown item type mapping: {item_type}")
+            
+        if item_id in user.get(owned_field, []):
+            raise HTTPException(status_code=400, detail="Already owned")
+        
+        # Purchase item
+        await db.users.update_one(
+            {"id": user["id"]},
+            {
+                "$inc": {"coins": -item["price"]},
+                "$push": {owned_field: item_id}
+            }
+        )
+        
+        logging.info(f"Purchase successful: user={user['id']}, item={item_id}, remaining_coins={user_coins - item['price']}")
+        
+        return {"success": True, "item": item, "remaining_coins": user_coins - item["price"]}
+    except HTTPException:
+        raise
+    except Exception as e:
+        logging.error(f"Purchase error: {str(e)}")
+        raise HTTPException(status_code=500, detail=str(e))
 
 @api_router.post("/profile/customize")
 async def customize_profile(customization: dict, request: Request):
