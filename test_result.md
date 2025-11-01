@@ -901,3 +901,42 @@ agent_communication:
       AdminAddCoins backend functionality is FULLY OPERATIONAL and ready for production.
       All endpoints working correctly with proper security, validation, and database integration.
       The feature successfully resolves the issue where students lost coins due to Google OAuth user persistence bug.
+
+  - agent: "testing"
+    message: |
+      MOVE FUNCTIONALITY BACKEND TESTING COMPLETE ✅
+      
+      COMPREHENSIVE TESTING RESULTS - ALL TESTS PASSED:
+      📊 Overall Success Rate: 100% (22/22 tests passed)
+      
+      ✅ CORE FUNCTIONALITY VERIFIED:
+      1. PUT /api/problems/{id}/move - Successfully moves problems to different chapter/lesson with order field
+      2. PUT /api/mc-questions/{id}/move - Successfully moves MC questions to different chapter/lesson with order field
+      3. Database updates verified - All chapter/lesson/order changes persist correctly in MongoDB
+      4. Partial updates working - Missing fields use existing values as defaults
+      
+      ✅ ACCESS CONTROL WORKING:
+      - Problems: Teacher-only access enforced (403 for students) ✅
+      - MC Questions: Creator-only access enforced (403 for non-creator teachers) ✅
+      - Unauthenticated users get 401 Unauthorized ✅
+      - Other teachers can move problems but not MC questions they didn't create ✅
+      
+      ✅ VALIDATION & ERROR HANDLING:
+      - Invalid problem/question IDs return 404 Not Found ✅
+      - Empty request data uses existing values as defaults ✅
+      - Partial data updates work correctly (e.g., chapter only) ✅
+      - All database changes verified through direct MongoDB queries ✅
+      
+      ✅ COMPREHENSIVE TEST SCENARIOS:
+      - Basic move operations for both problems and MC questions ✅
+      - Access control testing (student, teacher, creator permissions) ✅
+      - Invalid ID handling (404 errors) ✅
+      - Missing/partial field handling (defaults) ✅
+      - Unauthenticated access (401 errors) ✅
+      - Database persistence verification ✅
+      
+      🎯 RECOMMENDATION FOR MAIN AGENT:
+      Move functionality backend is FULLY FUNCTIONAL and ready for production use.
+      All endpoints working correctly with proper access controls, validation, and database persistence.
+      The Google Drive-style move feature successfully allows teachers to reorganize problems and MC questions by chapter/lesson.
+      Backend testing complete - ready to summarize and finish.
