@@ -1690,7 +1690,7 @@ Format your response as JSON:
     else:
         # Simple comparison prompt
         prompt = f"""
-Evaluate this Python code submission:
+Evaluate this Python code submission consistently and objectively:
 
 Problem: {problem.get('title', assignment.get('title', 'Coding Problem'))}
 Description: {problem.get('description', assignment.get('description', ''))}
@@ -1708,22 +1708,29 @@ Student Code:
 Expected Output: {test_results[0]['expected']}
 Student Output: {test_results[0]['actual']}
 
-Provide:
-1. A final score (0-100) considering:
-   - Does the output match? (baseline: {base_score}%)
-   - Code quality and correctness
-   - Partial credit if output is close or logic is correct
-   - Syntax and Python best practices
+EVALUATION CRITERIA:
+1. Start with base score: {base_score}%
+2. Award full credit if:
+   - Output content matches (ignore minor formatting differences)
+   - Logic is correct and produces the right result
+3. Award partial credit for:
+   - Correct approach but minor output differences
+   - Proper Python syntax and logic
+   - Close attempts showing understanding
+4. Deduct points for:
+   - Incorrect logic or completely wrong output
+   - Syntax errors or broken code
 
-2. Constructive feedback (2-3 sentences) on:
-   - What worked well or what's correct
-   - What needs improvement
-   - Specific guidance to fix the code
+IMPORTANT:
+- Be consistent: Same code = same score
+- Don't penalize for whitespace, quotes, or escape characters if content is correct
+- Focus on whether the student solved the problem correctly
+- Provide specific, actionable feedback
 
 Format your response as JSON:
 {{
   "score": <number 0-100>,
-  "feedback": "<your feedback here>"
+  "feedback": "<2-3 sentences with specific guidance>"
 }}
 """
     
