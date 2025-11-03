@@ -1624,42 +1624,56 @@ async def submit_assignment(submission: SubmissionCreate, request: Request):
                 if passed:
                     passed_tests += 1
             
-            test_results.append({
-                "test_id": test_case["id"],
-                "description": test_case["description"],
-                "passed": passed,
-                "expected": expected,
-                "actual": actual,
-                "error": result.get("error")
-            })
+                test_results.append({
+                    "test_id": test_case.get("id", "test"),
+                    "description": test_case.get("description", "Test case"),
+                    "passed": passed,
+                    "expected": expected,
+                    "actual": actual,
+                    "error": result.get("error")
+                })
         
-        base_score = (passed_tests / total_tests) * 100
-    else:
-        # No test cases - compare outputs directly
-        solution_result = run_python_code(problem["solution_code"], "")
-        student_result = run_python_code(submission.code, "")
-        
-        solution_output = normalize_output(solution_result["output"]) if solution_result["success"] else ""
-        student_output = normalize_output(student_result["output"]) if student_result["success"] else ""
-        
-        # Basic comparison
-        if student_result["success"] and student_output == solution_output:
-            base_score = 100
-            passed_tests = 1
-            total_tests = 1
+            base_score = (passed_tests / total_tests) * 100
         else:
-            base_score = 50 if student_result["success"] else 0
-            passed_tests = 0
-            total_tests = 1
-        
-        test_results.append({
-            "test_id": "output_comparison",
-            "description": "Compare output to solution",
-            "passed": student_output == solution_output,
-            "expected": solution_output,
-            "actual": student_output,
-            "error": student_result.get("error")
-        })
+            # No test cases - compare outputs directly
+            solution_result = run_python_code(problem.get("solution_code", ""), "")
+            student_result = run_python_code(submission.code, "")
+            
+            solution_output = normalize_output(solution_result["output"]) if solution_result["success"] else ""
+            student_output = normalize_output(student_result["output"]) if student_result["success"] else ""
+            
+            # Basic comparison
+            if student_result["success"] and student_output == solution_output:
+                base_score = 100
+                passed_tests = 1
+                total_tests = 1
+            else:
+                base_score = 50 if student_result["success"] else 0
+                passed_tests = 0
+                total_tests = 1
+            
+            test_results.append({
+                "test_id": "output_comparison",
+                "description": "Compare output to solution",
+                "passed": student_output == solution_output,
+                "expected": solution_output,
+                "actual": student_output,
+                "error": student_result.get("error")
+            })
+    except Exception as e:
+        logging.error(f"Error during test evaluation: {str(e)}")
+        # Fallback: give partial credit and basic feedback
+        base_score = 50
+        passed_tests = 0
+        total_tests = 1
+        test_results = [{
+            "test_id": "evaluation_error",
+            "description": "Error during evaluation",
+            "passed": False,
+            "expected": "N/A",
+            "actual": "Evaluation error occurred",
+            "error": str(e)
+        }]
     
     # AI Evaluation for partial credit and feedback
     llm_key = os.environ.get("EMERGENT_LLM_KEY")
