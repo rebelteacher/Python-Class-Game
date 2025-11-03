@@ -1612,16 +1612,17 @@ async def submit_assignment(submission: SubmissionCreate, request: Request):
     total_tests = len(assignment.get("test_cases", []))
     passed_tests = 0
     
-    if total_tests > 0:
-        # Traditional test case evaluation
-        for test_case in assignment["test_cases"]:
-            result = run_python_code(submission.code, test_case["input_data"])
-            expected = normalize_output(test_case["expected_output"])
-            actual = normalize_output(result["output"]) if result["success"] else ""
-            
-            passed = result["success"] and actual == expected
-            if passed:
-                passed_tests += 1
+    try:
+        if total_tests > 0:
+            # Traditional test case evaluation
+            for test_case in assignment["test_cases"]:
+                result = run_python_code(submission.code, test_case.get("input_data", ""))
+                expected = normalize_output(test_case.get("expected_output", ""))
+                actual = normalize_output(result["output"]) if result["success"] else ""
+                
+                passed = result["success"] and actual == expected
+                if passed:
+                    passed_tests += 1
             
             test_results.append({
                 "test_id": test_case["id"],
