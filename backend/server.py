@@ -1680,8 +1680,7 @@ async def submit_assignment(submission: SubmissionCreate, request: Request):
     chat = LlmChat(
         api_key=llm_key,
         session_id=f"submission_{submission.assignment_id}_{user['id']}",
-        system_message="You are a coding instructor evaluating student Python code submissions. Provide constructive feedback and award partial credit. Be consistent in your evaluations - the same code should receive the same score.",
-        temperature=0  # Make evaluation deterministic and consistent
+        system_message="You are a coding instructor evaluating student Python code submissions. Provide constructive feedback and award partial credit. Be consistent in your evaluations - the same code should receive the same score."
     ).with_model("openai", "gpt-4o")
     
     if total_tests > 0 and len(assignment.get("test_cases", [])) > 0:
