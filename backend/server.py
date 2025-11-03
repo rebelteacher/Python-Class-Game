@@ -1571,7 +1571,11 @@ async def submit_assignment(submission: SubmissionCreate, request: Request):
     
     # Check if assignment is available
     now = datetime.now(timezone.utc)
-    available_date = datetime.fromisoformat(assignment["available_date"]) if assignment.get("available_date") else None
+    try:
+        available_date = datetime.fromisoformat(assignment["available_date"]) if assignment.get("available_date") else None
+    except (ValueError, TypeError) as e:
+        logging.warning(f"Invalid available_date format: {assignment.get('available_date')}")
+        available_date = None
     
     if available_date and now < available_date:
         raise HTTPException(status_code=403, detail="This assignment is not yet available")
