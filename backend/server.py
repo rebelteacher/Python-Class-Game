@@ -3655,7 +3655,7 @@ async def calculate_competition_standings(competition_id: str, competition: dict
     end_date = datetime.fromisoformat(competition["end_date"])
     
     for classroom_id in competition["classroom_ids"]:
-        classroom = await db.classrooms.find_one({"id": classroom_id})
+        classroom = await db.classrooms.find_one({"id": classroom_id}, {"_id": 0})
         if not classroom:
             continue
         
