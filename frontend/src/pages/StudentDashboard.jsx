@@ -626,20 +626,6 @@ export default function StudentDashboard({ user, setUser, refreshUser }) {
                   Challenge Classmate
                 </Button>
               </DialogTrigger>
-
-        <div className="flex justify-between items-center mb-8">
-          <div>
-            <h1 className="text-4xl font-bold text-gray-900 mb-2">My Classes</h1>
-            <p className="text-gray-600">View your classrooms and assignments</p>
-          </div>
-          <div className="flex gap-3">
-            <Dialog open={joinDialogOpen} onOpenChange={setJoinDialogOpen}>
-              <DialogTrigger asChild>
-                <Button data-testid="join-classroom-btn" className="bg-teal-600 hover:bg-teal-700 gap-2">
-                  <Plus className="w-5 h-5" />
-                  Join Classroom
-                </Button>
-              </DialogTrigger>
               <DialogContent>
                 <DialogHeader>
                   <DialogTitle>⚔️ Throw Down the Gauntlet!</DialogTitle>
@@ -698,6 +684,22 @@ export default function StudentDashboard({ user, setUser, refreshUser }) {
                 </div>
               </DialogContent>
             </Dialog>
+          </CardContent>
+        </Card>
+
+        <div className="flex justify-between items-center mb-8">
+          <div>
+            <h1 className="text-4xl font-bold text-gray-900 mb-2">My Classes</h1>
+            <p className="text-gray-600">View your classrooms and assignments</p>
+          </div>
+          <div className="flex gap-3">
+            <Dialog open={joinDialogOpen} onOpenChange={setJoinDialogOpen}>
+              <DialogTrigger asChild>
+                <Button data-testid="join-classroom-btn" className="bg-teal-600 hover:bg-teal-700 gap-2">
+                  <Plus className="w-5 h-5" />
+                  Join Classroom
+                </Button>
+              </DialogTrigger>
             
             <Dialog open={joinDialogOpen} onOpenChange={setJoinDialogOpen}>
               <DialogTrigger asChild>
