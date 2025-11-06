@@ -93,6 +93,7 @@ export default function StudentDashboard({ user, setUser, refreshUser }) {
     console.log("Dashboard: Fetching fresh data...");
     fetchClassrooms();
     fetchTests();
+    fetchCompetitions();
     fetchShopItems();
     fetchUserProfile();
   }, [location.key]); // location.key changes on every navigation
