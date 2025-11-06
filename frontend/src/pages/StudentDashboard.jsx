@@ -408,8 +408,8 @@ export default function StudentDashboard({ user, setUser, refreshUser }) {
           </Card>
         </div>
 
-        {/* Leaderboard Section - Temporarily disabled for debugging */}
-        {/* {classrooms.length > 0 && (
+        {/* Leaderboard Section */}
+        {classrooms.length > 0 && (
           <Card className="mb-8">
             <CardHeader>
               <CardTitle className="text-2xl flex items-center gap-2">
@@ -437,7 +437,7 @@ export default function StudentDashboard({ user, setUser, refreshUser }) {
               </Tabs>
             </CardContent>
           </Card>
-        )} */}
+        )}
 
         <div className="flex justify-between items-center mb-8">
           <div>
