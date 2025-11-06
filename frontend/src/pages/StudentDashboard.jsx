@@ -784,8 +784,9 @@ export default function StudentDashboard({ user, setUser, refreshUser }) {
                 <div className="grid md:grid-cols-2 gap-4">
                   {shopItems.badges?.map((item) => {
                     const isOwned = userProfile.owned_badges?.includes(item.id);
+                    const isEquipped = userProfile.active_badges?.includes(item.id);
                     return (
-                      <Card key={item.id} data-testid={`shop-badge-${item.id}`}>
+                      <Card key={item.id} data-testid={`shop-badge-${item.id}`} className={isEquipped ? "border-2 border-green-500" : ""}>
                         <CardHeader>
                           <CardTitle className="text-lg">{item.name}</CardTitle>
                           <CardDescription>{item.description}</CardDescription>
@@ -793,13 +794,33 @@ export default function StudentDashboard({ user, setUser, refreshUser }) {
                         <CardContent>
                           <div className="flex justify-between items-center">
                             <span className="font-semibold text-lg">🪙 {item.price}</span>
-                            <Button
-                              onClick={() => handlePurchase("badges", item.id)}
-                              disabled={isOwned || (userProfile.coins || 0) < item.price}
-                              size="sm"
-                            >
-                              {isOwned ? "Owned" : "Buy"}
-                            </Button>
+                            {isOwned ? (
+                              <Button
+                                onClick={() => {
+                                  if (isEquipped) {
+                                    // Unequip badge
+                                    const newBadges = (userProfile.active_badges || []).filter(b => b !== item.id);
+                                    handleCustomize("active_badges", newBadges);
+                                  } else {
+                                    // Equip badge (add to array)
+                                    const newBadges = [...(userProfile.active_badges || []), item.id];
+                                    handleCustomize("active_badges", newBadges);
+                                  }
+                                }}
+                                size="sm"
+                                className={isEquipped ? "bg-red-600 hover:bg-red-700" : ""}
+                              >
+                                {isEquipped ? "Unequip" : "Equip"}
+                              </Button>
+                            ) : (
+                              <Button
+                                onClick={() => handlePurchase("badges", item.id)}
+                                disabled={(userProfile.coins || 0) < item.price}
+                                size="sm"
+                              >
+                                Buy
+                              </Button>
+                            )}
                           </div>
                         </CardContent>
                       </Card>
