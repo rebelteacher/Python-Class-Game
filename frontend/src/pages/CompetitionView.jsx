@@ -4,7 +4,7 @@ import { Trophy, Medal, Award, TrendingUp, Users, Calendar, ArrowLeft, Crown, St
 import { Button } from '../components/ui/button';
 import { Card, CardHeader, CardTitle, CardContent } from '../components/ui/card';
 
-const BACKEND_URL = import.meta.env.REACT_APP_BACKEND_URL || process.env.REACT_APP_BACKEND_URL;
+const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
 
 function CompetitionView() {
   const { competitionId } = useParams();
