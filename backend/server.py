@@ -3592,6 +3592,325 @@ async def get_test_results(test_id: str, request: Request):
         return {"score": attempt["score"]}
 
 
+# ==================== STUDENT CHALLENGES ====================
+
+@api_router.post("/challenges")
+async def create_challenge(challenge_data: ChallengeCreate, request: Request):
+    """Create a new student-to-student challenge"""
+    user = await get_current_user(request)
+    
+    if user["role"] != "student":
+        raise HTTPException(status_code=403, detail="Only students can create challenges")
+    
+    # Get challenger and challenged user details
+    challenger = await db.users.find_one({"id": user["id"]}, {"_id": 0})
+    challenged = await db.users.find_one({"id": challenge_data.challenged_id}, {"_id": 0})
+    
+    if not challenged:
+        raise HTTPException(status_code=404, detail="Challenged student not found")
+    
+    if challenged["id"] == user["id"]:
+        raise HTTPException(status_code=400, detail="Cannot challenge yourself")
+    
+    # Verify both students are in the same classroom
+    classroom = await db.classrooms.find_one({"id": challenge_data.classroom_id}, {"_id": 0})
+    if not classroom:
+        raise HTTPException(status_code=404, detail="Classroom not found")
+    
+    if user["id"] not in classroom.get("students", []) or challenged["id"] not in classroom.get("students", []):
+        raise HTTPException(status_code=403, detail="Both students must be in the same classroom")
+    
+    # Get a random problem from challenge pool
+    challenge_problems = await db.challenge_problems.find({}, {"_id": 0}).to_list(length=None)
+    if not challenge_problems:
+        raise HTTPException(status_code=400, detail="No challenge problems available. Please contact your teacher.")
+    
+    import random
+    problem = random.choice(challenge_problems)
+    
+    # Create challenge
+    new_challenge = Challenge(
+        challenger_id=user["id"],
+        challenger_name=challenger["name"],
+        challenged_id=challenged["id"],
+        challenged_name=challenged["name"],
+        classroom_id=challenge_data.classroom_id,
+        problem_id=problem["id"]
+    )
+    
+    challenge_dict = new_challenge.model_dump()
+    challenge_dict["created_at"] = challenge_dict["created_at"].isoformat()
+    
+    await db.challenges.insert_one(challenge_dict)
+    
+    return {"success": True, "challenge_id": new_challenge.id}
+
+
+@api_router.get("/challenges")
+async def get_challenges(request: Request):
+    """Get all challenges for the current user"""
+    user = await get_current_user(request)
+    
+    if user["role"] != "student":
+        raise HTTPException(status_code=403, detail="Only students can view challenges")
+    
+    # Get challenges where user is challenger or challenged
+    challenges = await db.challenges.find({
+        "$or": [
+            {"challenger_id": user["id"]},
+            {"challenged_id": user["id"]}
+        ]
+    }, {"_id": 0}).sort("created_at", -1).to_list(length=None)
+    
+    return challenges
+
+
+@api_router.post("/challenges/{challenge_id}/accept")
+async def accept_challenge(challenge_id: str, request: Request):
+    """Accept a challenge"""
+    user = await get_current_user(request)
+    
+    challenge = await db.challenges.find_one({"id": challenge_id}, {"_id": 0})
+    if not challenge:
+        raise HTTPException(status_code=404, detail="Challenge not found")
+    
+    if challenge["challenged_id"] != user["id"]:
+        raise HTTPException(status_code=403, detail="Only the challenged student can accept")
+    
+    if challenge["status"] != "pending":
+        raise HTTPException(status_code=400, detail="Challenge already responded to")
+    
+    await db.challenges.update_one(
+        {"id": challenge_id},
+        {"$set": {
+            "status": "accepted",
+            "accepted_at": datetime.now(timezone.utc).isoformat()
+        }}
+    )
+    
+    return {"success": True}
+
+
+@api_router.post("/challenges/{challenge_id}/decline")
+async def decline_challenge(challenge_id: str, request: Request):
+    """Decline a challenge (🐔)"""
+    user = await get_current_user(request)
+    
+    challenge = await db.challenges.find_one({"id": challenge_id}, {"_id": 0})
+    if not challenge:
+        raise HTTPException(status_code=404, detail="Challenge not found")
+    
+    if challenge["challenged_id"] != user["id"]:
+        raise HTTPException(status_code=403, detail="Only the challenged student can decline")
+    
+    if challenge["status"] != "pending":
+        raise HTTPException(status_code=400, detail="Challenge already responded to")
+    
+    await db.challenges.update_one(
+        {"id": challenge_id},
+        {"$set": {"status": "declined"}}
+    )
+    
+    return {"success": True, "chicken": "🐔"}
+
+
+@api_router.get("/challenges/{challenge_id}/start")
+async def start_challenge(challenge_id: str, request: Request):
+    """Start a challenge and get the problem"""
+    user = await get_current_user(request)
+    
+    challenge = await db.challenges.find_one({"id": challenge_id}, {"_id": 0})
+    if not challenge:
+        raise HTTPException(status_code=404, detail="Challenge not found")
+    
+    if user["id"] not in [challenge["challenger_id"], challenge["challenged_id"]]:
+        raise HTTPException(status_code=403, detail="Not a participant in this challenge")
+    
+    if challenge["status"] != "accepted":
+        raise HTTPException(status_code=400, detail="Challenge must be accepted first")
+    
+    # Get the problem
+    problem = await db.challenge_problems.find_one({"id": challenge["problem_id"]}, {"_id": 0})
+    if not problem:
+        raise HTTPException(status_code=404, detail="Challenge problem not found")
+    
+    # Mark as in progress
+    await db.challenges.update_one(
+        {"id": challenge_id},
+        {"$set": {"status": "in_progress"}}
+    )
+    
+    return {
+        "challenge": challenge,
+        "problem": {
+            "id": problem["id"],
+            "title": problem["title"],
+            "description": problem["description"],
+            "starter_code": problem["starter_code"]
+        }
+    }
+
+
+@api_router.post("/challenges/{challenge_id}/submit")
+async def submit_challenge(challenge_id: str, submission_data: dict, request: Request):
+    """Submit solution to a challenge"""
+    user = await get_current_user(request)
+    
+    challenge = await db.challenges.find_one({"id": challenge_id}, {"_id": 0})
+    if not challenge:
+        raise HTTPException(status_code=404, detail="Challenge not found")
+    
+    if user["id"] not in [challenge["challenger_id"], challenge["challenged_id"]]:
+        raise HTTPException(status_code=403, detail="Not a participant in this challenge")
+    
+    # Get the problem
+    problem = await db.challenge_problems.find_one({"id": challenge["problem_id"]}, {"_id": 0})
+    if not problem:
+        raise HTTPException(status_code=404, detail="Challenge problem not found")
+    
+    # Run test cases
+    code = submission_data.get("code", "")
+    completion_time = submission_data.get("time", 0)  # Time in seconds
+    
+    test_results = []
+    passed_tests = 0
+    total_tests = len(problem.get("test_cases", []))
+    
+    for test_case in problem["test_cases"]:
+        result = run_python_code(code, test_case.get("input_data", ""))
+        expected = normalize_output(test_case.get("expected_output", ""))
+        actual = normalize_output(result.get("output", ""))
+        passed = expected == actual and result.get("error") is None
+        
+        if passed:
+            passed_tests += 1
+        
+        test_results.append({
+            "input": test_case.get("input_data", ""),
+            "expected": expected,
+            "actual": actual,
+            "passed": passed
+        })
+    
+    score = int((passed_tests / total_tests * 100)) if total_tests > 0 else 0
+    
+    # Update challenge with score
+    is_challenger = user["id"] == challenge["challenger_id"]
+    update_data = {
+        "challenger_score" if is_challenger else "challenged_score": score,
+        "challenger_time" if is_challenger else "challenged_time": completion_time
+    }
+    
+    await db.challenges.update_one({"id": challenge_id}, {"$set": update_data})
+    
+    # Check if both have submitted to determine winner
+    updated_challenge = await db.challenges.find_one({"id": challenge_id}, {"_id": 0})
+    if updated_challenge["challenger_score"] is not None and updated_challenge["challenged_score"] is not None:
+        # Both submitted, determine winner
+        c_score = updated_challenge["challenger_score"]
+        d_score = updated_challenge["challenged_score"]
+        c_time = updated_challenge["challenger_time"] or 999999
+        d_time = updated_challenge["challenged_time"] or 999999
+        
+        if c_score > d_score:
+            winner_id = updated_challenge["challenger_id"]
+        elif d_score > c_score:
+            winner_id = updated_challenge["challenged_id"]
+        else:
+            # Tie on score, use time as tiebreaker
+            winner_id = updated_challenge["challenger_id"] if c_time < d_time else updated_challenge["challenged_id"]
+        
+        await db.challenges.update_one(
+            {"id": challenge_id},
+            {"$set": {
+                "status": "completed",
+                "winner_id": winner_id,
+                "completed_at": datetime.now(timezone.utc).isoformat()
+            }}
+        )
+    
+    return {
+        "score": score,
+        "passed_tests": passed_tests,
+        "total_tests": total_tests,
+        "test_results": test_results,
+        "completion_time": completion_time
+    }
+
+
+@api_router.get("/challenges/{challenge_id}/results")
+async def get_challenge_results(challenge_id: str, request: Request):
+    """Get challenge results"""
+    user = await get_current_user(request)
+    
+    challenge = await db.challenges.find_one({"id": challenge_id}, {"_id": 0})
+    if not challenge:
+        raise HTTPException(status_code=404, detail="Challenge not found")
+    
+    if user["id"] not in [challenge["challenger_id"], challenge["challenged_id"]]:
+        raise HTTPException(status_code=403, detail="Not a participant in this challenge")
+    
+    return challenge
+
+
+# ==================== CHALLENGE POOL MANAGEMENT ====================
+
+@api_router.post("/challenge-problems")
+async def create_challenge_problem(problem_data: dict, request: Request):
+    """Create a new challenge problem (teacher only)"""
+    user = await get_current_user(request)
+    
+    if user["role"] != "teacher":
+        raise HTTPException(status_code=403, detail="Only teachers can create challenge problems")
+    
+    new_problem = ChallengeProblem(
+        title=problem_data["title"],
+        description=problem_data["description"],
+        starter_code=problem_data.get("starter_code", ""),
+        solution_code=problem_data["solution_code"],
+        test_cases=problem_data["test_cases"],
+        difficulty=problem_data.get("difficulty", "medium"),
+        chapter=problem_data.get("chapter", ""),
+        lesson=problem_data.get("lesson", ""),
+        created_by=user["id"]
+    )
+    
+    problem_dict = new_problem.model_dump()
+    problem_dict["created_at"] = problem_dict["created_at"].isoformat()
+    
+    await db.challenge_problems.insert_one(problem_dict)
+    
+    return {"success": True, "problem_id": new_problem.id}
+
+
+@api_router.get("/challenge-problems")
+async def get_challenge_problems(request: Request):
+    """Get all challenge problems (teacher only)"""
+    user = await get_current_user(request)
+    
+    if user["role"] != "teacher":
+        raise HTTPException(status_code=403, detail="Only teachers can view challenge problems")
+    
+    problems = await db.challenge_problems.find({}, {"_id": 0}).to_list(length=None)
+    return problems
+
+
+@api_router.delete("/challenge-problems/{problem_id}")
+async def delete_challenge_problem(problem_id: str, request: Request):
+    """Delete a challenge problem (teacher only)"""
+    user = await get_current_user(request)
+    
+    if user["role"] != "teacher":
+        raise HTTPException(status_code=403, detail="Only teachers can delete challenge problems")
+    
+    result = await db.challenge_problems.delete_one({"id": problem_id})
+    
+    if result.deleted_count == 0:
+        raise HTTPException(status_code=404, detail="Challenge problem not found")
+    
+    return {"success": True}
+
+
 # ==================== COMPETITIONS ====================
 
 @api_router.post("/competitions")
