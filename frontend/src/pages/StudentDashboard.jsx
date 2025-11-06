@@ -607,6 +607,26 @@ export default function StudentDashboard({ user, setUser, refreshUser }) {
           </Card>
         )}
 
+        {/* Challenge Section */}
+        <Card className="mb-8 bg-gradient-to-r from-orange-50 to-red-50 border-2 border-orange-200">
+          <CardHeader>
+            <CardTitle className="text-2xl flex items-center gap-2">
+              <Trophy className="w-6 h-6 text-orange-600" />
+              ⚔️ Battle Arena
+            </CardTitle>
+            <CardDescription>
+              Challenge your classmates to 1-on-1 coding duels
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <Dialog open={challengeDialogOpen} onOpenChange={setChallengeDialogOpen}>
+              <DialogTrigger asChild>
+                <Button className="w-full bg-gradient-to-r from-orange-600 to-red-600 hover:from-orange-700 hover:to-red-700 gap-2">
+                  <Trophy className="w-5 h-5" />
+                  Challenge Classmate
+                </Button>
+              </DialogTrigger>
+
         <div className="flex justify-between items-center mb-8">
           <div>
             <h1 className="text-4xl font-bold text-gray-900 mb-2">My Classes</h1>
