@@ -700,14 +700,6 @@ export default function StudentDashboard({ user, setUser, refreshUser }) {
                   Join Classroom
                 </Button>
               </DialogTrigger>
-            
-            <Dialog open={joinDialogOpen} onOpenChange={setJoinDialogOpen}>
-              <DialogTrigger asChild>
-                <Button data-testid="join-classroom-btn" className="bg-teal-600 hover:bg-teal-700 gap-2">
-                  <Plus className="w-5 h-5" />
-                  Join Classroom
-                </Button>
-              </DialogTrigger>
             <DialogContent data-testid="join-classroom-dialog">
               <DialogHeader>
                 <DialogTitle>Join Classroom</DialogTitle>
