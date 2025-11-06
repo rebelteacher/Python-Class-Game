@@ -3632,7 +3632,7 @@ async def get_competition(competition_id: str, request: Request):
     """Get specific competition with live standings"""
     user = await get_current_user(request)
     
-    competition = await db.competitions.find_one({"id": competition_id})
+    competition = await db.competitions.find_one({"id": competition_id}, {"_id": 0})
     if not competition:
         raise HTTPException(status_code=404, detail="Competition not found")
     
