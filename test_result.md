@@ -339,18 +339,18 @@ frontend:
   
   - task: "Class vs Class Competitions Backend"
     implemented: true
-    working: "NA"
+    working: true
     file: "backend/server.py"
     stuck_count: 0
     priority: "high"
-    needs_retesting: true
+    needs_retesting: false
     status_history:
       - working: "NA"
         agent: "main"
         comment: "Implemented Class vs Class Competitions backend. Added Competition and CompetitionCreate models. Created endpoints: POST /api/competitions (create competition with classroom selection, date range, min problems), GET /api/competitions (list competitions filtered by user role), GET /api/competitions/{id} (get competition with live standings). Added calculate_competition_standings helper function that calculates: problems_solved and xp_gained per classroom, identifies Class Captain (most problems) and MVC (most XP) for each classroom, ranks classrooms by problems_solved then xp_gained. Status auto-updates based on start/end dates (upcoming/active/completed). Fixed syntax errors (removed orphaned code and wrong model fields)."
       - working: true
         agent: "testing"
-        comment: "COMPREHENSIVE MOVE FUNCTIONALITY BACKEND TESTING COMPLETE ✅ - 22/22 tests passed (100% success rate). ✅ PUT /api/problems/{id}/move: Successfully moves problems to different chapter/lesson with order field, teacher-only access enforced, database updates verified. ✅ PUT /api/mc-questions/{id}/move: Successfully moves MC questions to different chapter/lesson with order field, creator-only access enforced (only question creator can move), database updates verified. ✅ Access Control: Teacher-only access for problems (403 for students), Creator-only access for MC questions (403 for non-creator teachers), Proper 401 for unauthenticated users. ✅ Validation: Invalid IDs return 404, Missing fields use defaults from existing data, Partial data updates work correctly. ✅ Database Persistence: All chapter/lesson/order changes persist correctly in database, Verified through direct MongoDB queries. All Move functionality backend endpoints working perfectly with proper access controls and validation."
+        comment: "COMPREHENSIVE CLASS VS CLASS COMPETITIONS BACKEND TESTING COMPLETE ✅ - 28/28 tests passed (100% success rate). ✅ POST /api/competitions: Successfully creates competitions with valid data, classroom selection, date range parsing (ISO format), min problems requirement, status determination (upcoming/active/completed based on dates). ✅ Teacher-only access enforced (403 for students). ✅ Classroom ownership validation working (403 for unowned classrooms). ✅ GET /api/competitions: Teachers see competitions they created, Students see competitions their classrooms participate in, Classroom names included in response. ✅ GET /api/competitions/{id}: Returns competition with live standings calculation, Standings include all required fields (classroom_id, classroom_name, problems_solved, xp_gained, captain, mvc, eligible_students, rank). ✅ Live standings calculation: Correctly counts problems solved during competition period, Calculates XP gained as tiebreaker, Identifies Class Captain (most problems) and MVC (most XP) per classroom, Sorts by problems_solved DESC then xp_gained DESC, Assigns ranks correctly, Filters eligible students by min_problems_required. ✅ Error handling: 404 for non-existent competitions, Proper date parsing and timezone handling. All Class vs Class Competitions backend endpoints working perfectly with comprehensive standings calculation and access controls."
 
 
 metadata:
