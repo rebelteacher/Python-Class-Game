@@ -3692,8 +3692,8 @@ async def calculate_competition_standings(competition_id: str, competition: dict
             captain_id = max(student_stats, key=lambda x: student_stats[x]["problems"])
             mvc_id = max(student_stats, key=lambda x: student_stats[x]["xp"])
             
-            captain_user = await db.users.find_one({"id": captain_id})
-            mvc_user = await db.users.find_one({"id": mvc_id})
+            captain_user = await db.users.find_one({"id": captain_id}, {"_id": 0})
+            mvc_user = await db.users.find_one({"id": mvc_id}, {"_id": 0})
             
             if captain_user:
                 captain = {
