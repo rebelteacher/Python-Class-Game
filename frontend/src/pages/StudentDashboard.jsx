@@ -54,7 +54,7 @@ const AnimatedPet = ({ petId, shopItems }) => {
           animation: float 3s ease-in-out infinite;
         }
         .animate-fly {
-          animation: fly 15s linear infinite;
+          animation: fly 4s ease-in-out infinite;
         }
         .animate-swim {
           animation: swim 8s ease-in-out infinite;
