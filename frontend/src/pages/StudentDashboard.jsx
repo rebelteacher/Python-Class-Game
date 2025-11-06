@@ -143,6 +143,24 @@ export default function StudentDashboard({ user, setUser, refreshUser }) {
         await refreshUser();
       }
       fetchShopItems();
+
+
+  const handleCustomize = async (field, value) => {
+    try {
+      await axios.post(
+        `${API}/profile/customize`,
+        { [field]: value },
+        { withCredentials: true }
+      );
+      await fetchUserProfile();
+      if (refreshUser) await refreshUser();
+      toast.success("Item equipped!");
+    } catch (error) {
+      console.error("Error customizing:", error);
+      toast.error("Failed to equip item");
+    }
+  };
+
       
       console.log("User data refreshed after purchase");
     } catch (error) {
