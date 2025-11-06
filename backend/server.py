@@ -495,13 +495,6 @@ class CompetitionCreate(BaseModel):
     end_date: str  # ISO format
     min_problems_required: int = 10
 
-    file_size: int  # Size in bytes
-    creator_id: str
-    creator_name: str
-    is_shared: bool = False  # Share with community (teacher-to-teacher)
-    tags: List[str] = Field(default_factory=list)  # For searchability
-    created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
-
 class PDFNoteCreate(BaseModel):
     title: str
     description: str = ""
