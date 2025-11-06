@@ -296,6 +296,24 @@ function App() {
                   </ProtectedRoute>
                 }
               />
+
+              <Route
+                path="/student/challenge/:challengeId/arena"
+                element={
+                  <ProtectedRoute user={user} requiredRole="student">
+                    <ChallengeArena user={user} />
+                  </ProtectedRoute>
+                }
+              />
+
+              <Route
+                path="/student/challenge/:challengeId/results"
+                element={
+                  <ProtectedRoute user={user} requiredRole="student">
+                    <ChallengeResults user={user} />
+                  </ProtectedRoute>
+                }
+              />
             </Routes>
           )}
         </AuthHandler>
