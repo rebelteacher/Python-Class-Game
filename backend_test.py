@@ -286,7 +286,7 @@ class CodeClassAPITester:
             print("❌ Cannot continue assignment tests without created assignment")
             return None
         
-        assignment_id = assignment.get('id')
+        assignment_id = assignment.get('assignment_id')
         print(f"   Created assignment: {assignment_id}")
         
         # Get assignments for classroom
