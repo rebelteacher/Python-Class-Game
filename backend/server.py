@@ -3612,12 +3612,12 @@ async def get_competitions(request: Request):
     
     if user["role"] == "teacher":
         # Teachers see competitions they created
-        competitions = await db.competitions.find({"teacher_id": user["id"]}).to_list(length=None)
+        competitions = await db.competitions.find({"teacher_id": user["id"]}, {"_id": 0}).to_list(length=None)
     else:
         # Students see competitions their classrooms are in
         user_classrooms = await db.classrooms.find({"students": user["id"]}).to_list(length=None)
         classroom_ids = [c["id"] for c in user_classrooms]
-        competitions = await db.competitions.find({"classroom_ids": {"$in": classroom_ids}}).to_list(length=None)
+        competitions = await db.competitions.find({"classroom_ids": {"$in": classroom_ids}}, {"_id": 0}).to_list(length=None)
     
     # Add classroom names
     for comp in competitions:
