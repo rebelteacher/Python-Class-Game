@@ -38,8 +38,11 @@ const AnimatedPet = ({ petId, shopItems }) => {
           50% { transform: translateY(-20px); }
         }
         @keyframes fly {
-          0% { transform: translateX(-100px); }
-          100% { transform: translateX(calc(100vw + 100px)); }
+          0% { transform: translateX(0px) translateY(0px); }
+          25% { transform: translateX(50px) translateY(-15px); }
+          50% { transform: translateX(0px) translateY(0px); }
+          75% { transform: translateX(-50px) translateY(-15px); }
+          100% { transform: translateX(0px) translateY(0px); }
         }
         @keyframes swim {
           0%, 100% { transform: translate(0, 0); }
