@@ -462,6 +462,39 @@ class PDFNote(BaseModel):
     category: str = ""  # e.g., "Lesson Notes", "Study Guide", "Reference"
     resource_type: str = "student_resource"  # "teacher_resource" or "student_resource"
     file_data: str  # Base64 encoded PDF data
+
+
+# Competition Models
+class Competition(BaseModel):
+    model_config = ConfigDict(extra="ignore")
+    id: str = Field(default_factory=lambda: str(uuid.uuid4()))
+    title: str  # "Week 1 Challenge"
+    description: str = ""
+    type: str = "class_vs_class"  # Future: "tournament", "team_battle"
+    teacher_id: str  # Creator
+    classroom_ids: List[str]  # Participating classes
+    start_date: datetime
+    end_date: datetime
+    status: str = "upcoming"  # "upcoming", "active", "completed"
+    min_problems_required: int = 10  # Minimum problems per student
+    # Metrics
+    primary_metric: str = "problems_solved"
+    tiebreaker_metric: str = "xp_gained"
+    # Results (populated after completion)
+    winning_classroom_id: Optional[str] = None
+    class_captains: dict = {}  # {classroom_id: {student_id, student_name, problems_solved}}
+    mvcs: dict = {}  # {classroom_id: {student_id, student_name, xp_gained}}
+    final_standings: List[dict] = []  # [{classroom_id, classroom_name, score, rank}]
+    created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+
+class CompetitionCreate(BaseModel):
+    title: str
+    description: str = ""
+    classroom_ids: List[str]
+    start_date: str  # ISO format
+    end_date: str  # ISO format
+    min_problems_required: int = 10
+
     file_size: int  # Size in bytes
     creator_id: str
     creator_name: str
