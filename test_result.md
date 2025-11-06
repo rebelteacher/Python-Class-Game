@@ -336,8 +336,18 @@ frontend:
       - working: "NA"
         agent: "main"
         comment: "Added test input field to Teacher Practice page so teachers can test code that uses input() functions. Added state for testInput, textarea for entering input data, and passes it to the code execution endpoint. UI shows input field above output window with clear labeling."
-
-        comment: "Implemented Google Drive-style 'Move' button feature (better than drag-and-drop). Backend: Added 'order' field to Problem and MCQuestion models. Created PUT /api/problems/{id}/move and PUT /api/mc-questions/{id}/move endpoints. Frontend: Added Move button (FolderInput icon) to each problem/question card. Created Move modal with chapter/lesson input fields. User clicks Move → enters destination → clicks Move Here → item moves instantly with toast confirmation. Applied to both AssignmentLibrary and QuestionBank pages. This approach is simpler, safer, and avoids accidental drops in wrong places."
+  
+  - task: "Class vs Class Competitions Backend"
+    implemented: true
+    working: "NA"
+    file: "backend/server.py"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: true
+    status_history:
+      - working: "NA"
+        agent: "main"
+        comment: "Implemented Class vs Class Competitions backend. Added Competition and CompetitionCreate models. Created endpoints: POST /api/competitions (create competition with classroom selection, date range, min problems), GET /api/competitions (list competitions filtered by user role), GET /api/competitions/{id} (get competition with live standings). Added calculate_competition_standings helper function that calculates: problems_solved and xp_gained per classroom, identifies Class Captain (most problems) and MVC (most XP) for each classroom, ranks classrooms by problems_solved then xp_gained. Status auto-updates based on start/end dates (upcoming/active/completed). Fixed syntax errors (removed orphaned code and wrong model fields)."
       - working: true
         agent: "testing"
         comment: "COMPREHENSIVE MOVE FUNCTIONALITY BACKEND TESTING COMPLETE ✅ - 22/22 tests passed (100% success rate). ✅ PUT /api/problems/{id}/move: Successfully moves problems to different chapter/lesson with order field, teacher-only access enforced, database updates verified. ✅ PUT /api/mc-questions/{id}/move: Successfully moves MC questions to different chapter/lesson with order field, creator-only access enforced (only question creator can move), database updates verified. ✅ Access Control: Teacher-only access for problems (403 for students), Creator-only access for MC questions (403 for non-creator teachers), Proper 401 for unauthenticated users. ✅ Validation: Invalid IDs return 404, Missing fields use defaults from existing data, Partial data updates work correctly. ✅ Database Persistence: All chapter/lesson/order changes persist correctly in database, Verified through direct MongoDB queries. All Move functionality backend endpoints working perfectly with proper access controls and validation."
