@@ -3621,7 +3621,7 @@ async def get_competitions(request: Request):
     
     # Add classroom names
     for comp in competitions:
-        classrooms = await db.classrooms.find({"id": {"$in": comp["classroom_ids"]}}).to_list(length=None)
+        classrooms = await db.classrooms.find({"id": {"$in": comp["classroom_ids"]}}, {"_id": 0}).to_list(length=None)
         comp["classrooms"] = [{"id": c["id"], "name": c["name"]} for c in classrooms]
     
     return competitions
