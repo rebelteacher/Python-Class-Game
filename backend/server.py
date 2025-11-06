@@ -3554,6 +3554,180 @@ async def get_test_results(test_id: str, request: Request):
         return {"score": attempt["score"]}
 
 
+# ==================== COMPETITIONS ====================
+
+@api_router.post("/competitions")
+async def create_competition(comp: CompetitionCreate, request: Request):
+    """Create a new class vs class competition"""
+    user = await get_current_user(request)
+    
+    if user["role"] != "teacher":
+        raise HTTPException(status_code=403, detail="Only teachers can create competitions")
+    
+    # Verify teacher owns all classrooms
+    for classroom_id in comp.classroom_ids:
+        classroom = await db.classrooms.find_one({"id": classroom_id})
+        if not classroom or classroom["teacher_id"] != user["id"]:
+            raise HTTPException(status_code=403, detail=f"You don't have access to classroom {classroom_id}")
+    
+    # Parse dates
+    start_date = datetime.fromisoformat(comp.start_date)
+    end_date = datetime.fromisoformat(comp.end_date)
+    
+    # Determine initial status
+    now = datetime.now(timezone.utc)
+    if now >= start_date and now <= end_date:
+        status = "active"
+    elif now < start_date:
+        status = "upcoming"
+    else:
+        status = "completed"
+    
+    # Create competition
+    new_comp = Competition(
+        title=comp.title,
+        description=comp.description,
+        teacher_id=user["id"],
+        classroom_ids=comp.classroom_ids,
+        start_date=start_date,
+        end_date=end_date,
+        status=status,
+        min_problems_required=comp.min_problems_required
+    )
+    
+    comp_dict = new_comp.model_dump()
+    comp_dict["created_at"] = comp_dict["created_at"].isoformat()
+    comp_dict["start_date"] = comp_dict["start_date"].isoformat()
+    comp_dict["end_date"] = comp_dict["end_date"].isoformat()
+    
+    await db.competitions.insert_one(comp_dict)
+    
+    return {"success": True, "competition_id": new_comp.id}
+
+
+@api_router.get("/competitions")
+async def get_competitions(request: Request):
+    """Get all competitions (filters by user's classrooms for students)"""
+    user = await get_current_user(request)
+    
+    if user["role"] == "teacher":
+        # Teachers see competitions they created
+        competitions = await db.competitions.find({"teacher_id": user["id"]}).to_list(length=None)
+    else:
+        # Students see competitions their classrooms are in
+        user_classrooms = await db.classrooms.find({"students": user["id"]}).to_list(length=None)
+        classroom_ids = [c["id"] for c in user_classrooms]
+        competitions = await db.competitions.find({"classroom_ids": {"$in": classroom_ids}}).to_list(length=None)
+    
+    # Add classroom names
+    for comp in competitions:
+        classrooms = await db.classrooms.find({"id": {"$in": comp["classroom_ids"]}}).to_list(length=None)
+        comp["classrooms"] = [{"id": c["id"], "name": c["name"]} for c in classrooms]
+    
+    return competitions
+
+
+@api_router.get("/competitions/{competition_id}")
+async def get_competition(competition_id: str, request: Request):
+    """Get specific competition with live standings"""
+    user = await get_current_user(request)
+    
+    competition = await db.competitions.find_one({"id": competition_id})
+    if not competition:
+        raise HTTPException(status_code=404, detail="Competition not found")
+    
+    # Calculate live standings
+    standings = await calculate_competition_standings(competition_id, competition)
+    competition["live_standings"] = standings
+    
+    # Add classroom names
+    classrooms = await db.classrooms.find({"id": {"$in": competition["classroom_ids"]}}).to_list(length=None)
+    competition["classrooms"] = [{"id": c["id"], "name": c["name"]} for c in classrooms]
+    
+    return competition
+
+
+async def calculate_competition_standings(competition_id: str, competition: dict):
+    """Calculate live standings for a competition"""
+    standings = []
+    
+    start_date = datetime.fromisoformat(competition["start_date"])
+    end_date = datetime.fromisoformat(competition["end_date"])
+    
+    for classroom_id in competition["classroom_ids"]:
+        classroom = await db.classrooms.find_one({"id": classroom_id})
+        if not classroom:
+            continue
+        
+        # Get all students in classroom
+        student_ids = classroom.get("students", [])
+        
+        # Count problems solved during competition period
+        submissions = await db.submissions.find({
+            "student_id": {"$in": student_ids},
+            "submitted_at": {
+                "$gte": start_date.isoformat(),
+                "$lte": end_date.isoformat()
+            },
+            "is_final": True
+        }).to_list(length=None)
+        
+        problems_solved = len(submissions)
+        
+        # Calculate XP gained (tiebreaker)
+        xp_gained = sum(s.get("score", 0) for s in submissions)
+        
+        # Find Class Captain (most problems) and MVC (most XP)
+        student_stats = {}
+        for sub in submissions:
+            sid = sub["student_id"]
+            if sid not in student_stats:
+                student_stats[sid] = {"problems": 0, "xp": 0}
+            student_stats[sid]["problems"] += 1
+            student_stats[sid]["xp"] += sub.get("score", 0)
+        
+        captain = None
+        mvc = None
+        if student_stats:
+            captain_id = max(student_stats, key=lambda x: student_stats[x]["problems"])
+            mvc_id = max(student_stats, key=lambda x: student_stats[x]["xp"])
+            
+            captain_user = await db.users.find_one({"id": captain_id})
+            mvc_user = await db.users.find_one({"id": mvc_id})
+            
+            if captain_user:
+                captain = {
+                    "student_id": captain_id,
+                    "student_name": captain_user["name"],
+                    "problems_solved": student_stats[captain_id]["problems"]
+                }
+            if mvc_user:
+                mvc = {
+                    "student_id": mvc_id,
+                    "student_name": mvc_user["name"],
+                    "xp_gained": student_stats[mvc_id]["xp"]
+                }
+        
+        standings.append({
+            "classroom_id": classroom_id,
+            "classroom_name": classroom["name"],
+            "problems_solved": problems_solved,
+            "xp_gained": xp_gained,
+            "captain": captain,
+            "mvc": mvc,
+            "eligible_students": len([sid for sid, stats in student_stats.items() if stats["problems"] >= competition.get("min_problems_required", 10)])
+        })
+    
+    # Sort by problems_solved (primary), then xp_gained (tiebreaker)
+    standings.sort(key=lambda x: (x["problems_solved"], x["xp_gained"]), reverse=True)
+    
+    # Add ranks
+    for i, standing in enumerate(standings):
+        standing["rank"] = i + 1
+    
+    return standings
+
+
 # Include the router in the main app
 app.include_router(api_router)
 
