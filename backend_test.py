@@ -984,7 +984,7 @@ class CodeClassAPITester:
             )
             
             if normal_assignment:
-                normal_assignment_id = normal_assignment.get('id')
+                normal_assignment_id = normal_assignment.get('assignment_id')
                 print(f"   Created normal assignment: {normal_assignment_id}")
                 
                 # Switch back to student
