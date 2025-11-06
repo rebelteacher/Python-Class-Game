@@ -75,6 +75,9 @@ SHOP_ITEMS = {
         {"id": "floating_cat", "name": "Floating Cat 🐱", "price": 300, "icon": "🐱", "animation": "float"},
         {"id": "flying_bird", "name": "Flying Bird 🐦", "price": 250, "icon": "🐦", "animation": "fly"},
         {"id": "swimming_fish", "name": "Swimming Fish 🐟", "price": 250, "icon": "🐟", "animation": "swim"},
+        {"id": "snappy_alligator", "name": "Snappy Alligator 🐊", "price": 400, "icon": "🐊", "animation": "swim"},
+        {"id": "speedy_shark", "name": "Speedy Shark 🦈", "price": 450, "icon": "🦈", "animation": "swim"},
+        {"id": "peaceful_panda", "name": "Peaceful Panda 🐼", "price": 350, "icon": "🐼", "animation": "float"},
     ],
     "profile_frames": [
         {"id": "gold_border", "name": "Gold Border ✨", "price": 150, "style": "3px solid #FFD700"},
