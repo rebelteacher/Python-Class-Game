@@ -290,6 +290,15 @@ function App() {
               />
 
               <Route
+                path="/teacher/challenge-pool"
+                element={
+                  <ProtectedRoute user={user} requiredRole="teacher">
+                    <ChallengePool user={user} />
+                  </ProtectedRoute>
+                }
+              />
+
+              <Route
                 path="/student/competition/:competitionId"
                 element={
                   <ProtectedRoute user={user} requiredRole="student">
