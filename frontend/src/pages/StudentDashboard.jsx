@@ -321,19 +321,24 @@ export default function StudentDashboard({ user, setUser, refreshUser }) {
 
   const organizedAssignments = organizeAssignments();
 
-  // Get active background style
   const getBackgroundStyle = () => {
-    if (!userProfile || !shopItems.backgrounds) return {};
-    
-    const activeBackground = userProfile.active_background;
-    if (!activeBackground) return {};
-    
-    const backgroundItem = shopItems.backgrounds.find(bg => bg.id === activeBackground);
-    if (!backgroundItem) return {};
-    
-    return {
-      background: backgroundItem.preview
-    };
+    if (userProfile?.active_background && shopItems?.backgrounds) {
+      const bg = shopItems.backgrounds.find(b => b.id === userProfile.active_background);
+      if (bg) {
+        return { backgroundImage: bg.preview };
+      }
+    }
+    return {};
+  };
+
+  const getThemeNavColor = () => {
+    if (userProfile?.active_theme && shopItems?.themes) {
+      const theme = shopItems.themes.find(t => t.id === userProfile.active_theme);
+      if (theme && theme.id !== "default") {
+        return theme.color;
+      }
+    }
+    return null; // Return null for default/no theme
   };
 
   return (
