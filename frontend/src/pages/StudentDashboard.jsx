@@ -696,6 +696,7 @@ export default function StudentDashboard({ user, setUser, refreshUser }) {
                 <div className="grid md:grid-cols-2 gap-4">
                   {shopItems.themes?.map((item) => {
                     const isOwned = userProfile.owned_themes?.includes(item.id);
+                    const isActive = userProfile.active_theme === item.id;
                     return (
                       <Card key={item.id} data-testid={`shop-theme-${item.id}`}>
                         <CardHeader>
@@ -708,13 +709,24 @@ export default function StudentDashboard({ user, setUser, refreshUser }) {
                           />
                           <div className="flex justify-between items-center">
                             <span className="font-semibold text-lg">🪙 {item.price}</span>
-                            <Button
-                              onClick={() => handlePurchase("themes", item.id)}
-                              disabled={isOwned || (userProfile.coins || 0) < item.price}
-                              size="sm"
-                            >
-                              {isOwned ? "Owned" : "Buy"}
-                            </Button>
+                            {isOwned ? (
+                              <Button
+                                onClick={() => handleCustomize("active_theme", item.id)}
+                                disabled={isActive}
+                                size="sm"
+                                className={isActive ? "bg-green-600" : ""}
+                              >
+                                {isActive ? "Equipped ✓" : "Equip"}
+                              </Button>
+                            ) : (
+                              <Button
+                                onClick={() => handlePurchase("themes", item.id)}
+                                disabled={(userProfile.coins || 0) < item.price}
+                                size="sm"
+                              >
+                                Buy
+                              </Button>
+                            )}
                           </div>
                         </CardContent>
                       </Card>
