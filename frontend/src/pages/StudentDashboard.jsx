@@ -77,14 +77,20 @@ export default function StudentDashboard({ user, setUser, refreshUser }) {
   const [classrooms, setClassrooms] = useState([]);
   const [availableTests, setAvailableTests] = useState([]);
   const [competitions, setCompetitions] = useState([]);
+  const [challenges, setChallenges] = useState([]);
+  const [pendingChallenges, setPendingChallenges] = useState([]);
   const [loading, setLoading] = useState(true);
   const [joinDialogOpen, setJoinDialogOpen] = useState(false);
   const [shopDialogOpen, setShopDialogOpen] = useState(false);
+  const [challengeDialogOpen, setChallengeDialogOpen] = useState(false);
+  const [showChicken, setShowChicken] = useState(false);
   const [classCode, setClassCode] = useState("");
   const [shopItems, setShopItems] = useState({ themes: [], badges: [] });
   const [userProfile, setUserProfile] = useState(user);
   const [expandedChapters, setExpandedChapters] = useState(new Set());
   const [expandedLessons, setExpandedLessons] = useState(new Set());
+  const [selectedClassroom, setSelectedClassroom] = useState("");
+  const [selectedOpponent, setSelectedOpponent] = useState("");
   const navigate = useNavigate();
   const location = useLocation();
 
