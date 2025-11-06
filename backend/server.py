@@ -3593,6 +3593,18 @@ async def initialize_admin_account():
                 "AlisaFaith$14".encode('utf-8'),
                 bcrypt.gensalt()
             ).decode('utf-8')
+            
+            await db.users.update_one(
+                {"email": admin_email},
+                {"$set": {
+                    "role": "teacher",
+                    "is_admin": True,
+                    "password": hashed_password
+                }}
+            )
+            logger.info(f"✅ Admin account promoted: {admin_email}")
+    except Exception as e:
+        logger.error(f"Error initializing admin account: {str(e)}")
 
 
 # ==================== COMPETITIONS ====================
