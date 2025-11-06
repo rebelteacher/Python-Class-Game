@@ -60,7 +60,14 @@ function CompetitionManagement() {
   };
 
   const handleCreateCompetition = async () => {
+    console.log('=== Create Competition Clicked ===');
+    console.log('Title:', title);
+    console.log('Selected Classrooms:', selectedClassrooms);
+    console.log('Start Date:', startDate);
+    console.log('End Date:', endDate);
+    
     if (!title || selectedClassrooms.length < 2 || !startDate || !endDate) {
+      console.log('Validation failed!');
       toast({
         title: "Missing fields",
         description: "Please fill all required fields and select at least 2 classrooms",
@@ -69,23 +76,32 @@ function CompetitionManagement() {
       return;
     }
 
+    console.log('Validation passed, creating competition...');
     setLoading(true);
     try {
+      const payload = {
+        title,
+        description,
+        classroom_ids: selectedClassrooms,
+        start_date: new Date(startDate).toISOString(),
+        end_date: new Date(endDate).toISOString(),
+        min_problems_required: minProblems
+      };
+      console.log('Payload:', payload);
+      console.log('Backend URL:', BACKEND_URL);
+      
       const response = await fetch(`${BACKEND_URL}/api/competitions`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         credentials: 'include',
-        body: JSON.stringify({
-          title,
-          description,
-          classroom_ids: selectedClassrooms,
-          start_date: new Date(startDate).toISOString(),
-          end_date: new Date(endDate).toISOString(),
-          min_problems_required: minProblems
-        })
+        body: JSON.stringify(payload)
       });
 
+      console.log('Response status:', response.status);
+      
       if (response.ok) {
+        const data = await response.json();
+        console.log('Success:', data);
         toast({
           title: "Competition created!",
           description: "Your competition has been created successfully"
@@ -101,6 +117,7 @@ function CompetitionManagement() {
         fetchCompetitions();
       } else {
         const error = await response.json();
+        console.log('Error response:', error);
         toast({
           title: "Failed to create",
           description: error.detail || "Something went wrong",
@@ -108,9 +125,10 @@ function CompetitionManagement() {
         });
       }
     } catch (error) {
+      console.error('Exception:', error);
       toast({
         title: "Error",
-        description: "Failed to create competition",
+        description: `Failed to create competition: ${error.message}`,
         variant: "destructive"
       });
     } finally {
