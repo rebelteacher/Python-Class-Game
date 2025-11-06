@@ -3566,7 +3566,7 @@ async def create_competition(comp: CompetitionCreate, request: Request):
     
     # Verify teacher owns all classrooms
     for classroom_id in comp.classroom_ids:
-        classroom = await db.classrooms.find_one({"id": classroom_id})
+        classroom = await db.classrooms.find_one({"id": classroom_id}, {"_id": 0})
         if not classroom or classroom["teacher_id"] != user["id"]:
             raise HTTPException(status_code=403, detail=f"You don't have access to classroom {classroom_id}")
     
