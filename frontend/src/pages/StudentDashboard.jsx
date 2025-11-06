@@ -712,7 +712,59 @@ export default function StudentDashboard({ user, setUser, refreshUser }) {
               </form>
             </DialogContent>
           </Dialog>
+          </div>
         </div>
+
+        {/* Chicken Animation */}
+        {showChicken && (
+          <div className="fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 z-50 animate-bounce">
+            <div className="text-9xl">🐔</div>
+            <p className="text-center text-2xl font-bold text-red-600 mt-4">CHICKEN!</p>
+          </div>
+        )}
+
+        {/* Pending Challenge Notifications */}
+        {pendingChallenges.length > 0 && (
+          <div className="mb-8">
+            <h2 className="text-2xl font-bold text-red-600 mb-4 flex items-center gap-2 animate-pulse">
+              <Trophy className="w-6 h-6" />
+              ⚔️ Incoming Challenges!
+            </h2>
+            <div className="grid gap-4">
+              {pendingChallenges.map(challenge => (
+                <Card key={challenge.id} className="border-2 border-red-400 bg-red-50">
+                  <CardContent className="py-4">
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <p className="text-lg font-bold text-red-900">
+                          {challenge.challenger_name} has challenged you to a duel!
+                        </p>
+                        <p className="text-sm text-red-700">
+                          5-minute coding battle • Random problem
+                        </p>
+                      </div>
+                      <div className="flex gap-2">
+                        <Button
+                          onClick={() => handleAcceptChallenge(challenge.id)}
+                          className="bg-green-600 hover:bg-green-700"
+                        >
+                          Accept ⚔️
+                        </Button>
+                        <Button
+                          onClick={() => handleDeclineChallenge(challenge.id)}
+                          variant="outline"
+                          className="border-red-300 text-red-700 hover:bg-red-100"
+                        >
+                          Decline 🐔
+                        </Button>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+          </div>
+        )}
 
         {/* Active Competitions Section */}
         {competitions.length > 0 && (
