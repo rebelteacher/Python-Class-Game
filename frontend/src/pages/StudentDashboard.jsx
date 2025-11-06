@@ -612,13 +612,80 @@ export default function StudentDashboard({ user, setUser, refreshUser }) {
             <h1 className="text-4xl font-bold text-gray-900 mb-2">My Classes</h1>
             <p className="text-gray-600">View your classrooms and assignments</p>
           </div>
-          <Dialog open={joinDialogOpen} onOpenChange={setJoinDialogOpen}>
-            <DialogTrigger asChild>
-              <Button data-testid="join-classroom-btn" className="bg-teal-600 hover:bg-teal-700 gap-2">
-                <Plus className="w-5 h-5" />
-                Join Classroom
-              </Button>
-            </DialogTrigger>
+          <div className="flex gap-3">
+            <Dialog open={challengeDialogOpen} onOpenChange={setChallengeDialogOpen}>
+              <DialogTrigger asChild>
+                <Button className="bg-gradient-to-r from-orange-600 to-red-600 hover:from-orange-700 hover:to-red-700 gap-2">
+                  <Trophy className="w-5 h-5" />
+                  Challenge Classmate
+                </Button>
+              </DialogTrigger>
+              <DialogContent>
+                <DialogHeader>
+                  <DialogTitle>⚔️ Throw Down the Gauntlet!</DialogTitle>
+                  <DialogDescription>
+                    Challenge a classmate to a coding duel
+                  </DialogDescription>
+                </DialogHeader>
+                <div className="space-y-4">
+                  <div>
+                    <Label>Select Classroom</Label>
+                    <select
+                      value={selectedClassroom}
+                      onChange={(e) => {
+                        setSelectedClassroom(e.target.value);
+                        setSelectedOpponent("");
+                      }}
+                      className="w-full mt-1 p-2 border rounded"
+                    >
+                      <option value="">Choose a classroom...</option>
+                      {classrooms.map(classroom => (
+                        <option key={classroom.id} value={classroom.id}>
+                          {classroom.name}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                  
+                  {selectedClassroom && (
+                    <div>
+                      <Label>Select Opponent</Label>
+                      <select
+                        value={selectedOpponent}
+                        onChange={(e) => setSelectedOpponent(e.target.value)}
+                        className="w-full mt-1 p-2 border rounded"
+                      >
+                        <option value="">Choose your opponent...</option>
+                        {classrooms
+                          .find(c => c.id === selectedClassroom)
+                          ?.students?.filter(s => s.id !== userProfile?.id)
+                          .map(student => (
+                            <option key={student.id} value={student.id}>
+                              {student.name}
+                            </option>
+                          ))}
+                      </select>
+                    </div>
+                  )}
+                  
+                  <Button
+                    onClick={handleChallengeCreate}
+                    disabled={!selectedClassroom || !selectedOpponent}
+                    className="w-full bg-gradient-to-r from-orange-600 to-red-600"
+                  >
+                    Send Challenge ⚔️
+                  </Button>
+                </div>
+              </DialogContent>
+            </Dialog>
+            
+            <Dialog open={joinDialogOpen} onOpenChange={setJoinDialogOpen}>
+              <DialogTrigger asChild>
+                <Button data-testid="join-classroom-btn" className="bg-teal-600 hover:bg-teal-700 gap-2">
+                  <Plus className="w-5 h-5" />
+                  Join Classroom
+                </Button>
+              </DialogTrigger>
             <DialogContent data-testid="join-classroom-dialog">
               <DialogHeader>
                 <DialogTitle>Join Classroom</DialogTitle>
