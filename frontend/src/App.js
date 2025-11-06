@@ -27,6 +27,7 @@ import CompetitionManagement from "./pages/CompetitionManagement";
 import CompetitionView from "./pages/CompetitionView";
 import ChallengeArena from "./pages/ChallengeArena";
 import ChallengeResults from "./pages/ChallengeResults";
+import ChallengePool from "./pages/ChallengePool";
 
 const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
 const API = `${BACKEND_URL}/api`;
