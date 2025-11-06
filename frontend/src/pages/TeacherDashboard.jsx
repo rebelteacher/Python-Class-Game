@@ -145,6 +145,10 @@ export default function TeacherDashboard({ user, setUser }) {
               <FileSpreadsheet className="w-4 h-4" />
               Test Reports
             </Button>
+            <Button onClick={() => navigate("/teacher/competitions")} variant="outline" size="sm" className="gap-2 border-white/30 text-white hover:bg-white/20 bg-white/10">
+              <Trophy className="w-4 h-4" />
+              Competitions
+            </Button>
             <Button data-testid="switch-role-btn" onClick={handleSwitchToStudent} variant="outline" size="sm" className="gap-2 border-white/30 text-white hover:bg-white/20 bg-white/10">
               <RefreshCw className="w-4 h-4" />
               Switch to Student
