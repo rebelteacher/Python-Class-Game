@@ -58,7 +58,14 @@ function ChallengePool() {
   };
 
   const handleCreate = async () => {
+    console.log('=== Create Challenge Problem ===');
+    console.log('Title:', title);
+    console.log('Description:', description);
+    console.log('Solution Code:', solutionCode);
+    console.log('Test Cases:', testCases);
+    
     if (!title || !description || !solutionCode || testCases.length === 0) {
+      console.log('Validation failed: Missing fields');
       toast({
         title: "Missing fields",
         description: "Please fill all required fields and add at least one test case",
@@ -67,21 +74,42 @@ function ChallengePool() {
       return;
     }
 
+    // Check if all test cases have expected output
+    const invalidTestCase = testCases.find(tc => !tc.expected_output);
+    if (invalidTestCase) {
+      console.log('Validation failed: Test case missing expected output');
+      toast({
+        title: "Invalid test case",
+        description: "All test cases must have an expected output",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    console.log('Validation passed, creating problem...');
+
     try {
+      const payload = {
+        title,
+        description,
+        starter_code: starterCode,
+        solution_code: solutionCode,
+        test_cases: testCases
+      };
+      console.log('Payload:', payload);
+
       const response = await fetch(`${BACKEND_URL}/api/challenge-problems`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         credentials: 'include',
-        body: JSON.stringify({
-          title,
-          description,
-          starter_code: starterCode,
-          solution_code: solutionCode,
-          test_cases: testCases
-        })
+        body: JSON.stringify(payload)
       });
 
+      console.log('Response status:', response.status);
+
       if (response.ok) {
+        const data = await response.json();
+        console.log('Success:', data);
         toast({
           title: "Problem added!",
           description: "Challenge problem has been added to the pool"
@@ -95,16 +123,19 @@ function ChallengePool() {
         setTestCases([{ input_data: '', expected_output: '' }]);
         fetchProblems();
       } else {
+        const error = await response.json();
+        console.log('Error response:', error);
         toast({
           title: "Failed",
-          description: "Could not add problem",
+          description: error.detail || "Could not add problem",
           variant: "destructive"
         });
       }
     } catch (error) {
+      console.error('Exception:', error);
       toast({
         title: "Error",
-        description: "Failed to add problem",
+        description: `Failed to add problem: ${error.message}`,
         variant: "destructive"
       });
     }
