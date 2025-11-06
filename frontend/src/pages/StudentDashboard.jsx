@@ -254,6 +254,22 @@ export default function StudentDashboard({ user, setUser, refreshUser }) {
     }
   };
 
+  const handleCustomize = async (field, value) => {
+    try {
+      await axios.post(
+        `${API}/profile/customize`,
+        { [field]: value },
+        { withCredentials: true }
+      );
+      await fetchUserProfile();
+      if (refreshUser) await refreshUser();
+      toast.success("Item equipped!");
+    } catch (error) {
+      console.error("Error customizing:", error);
+      toast.error("Failed to equip item");
+    }
+  };
+
   const toggleChapter = (chapter) => {
     setExpandedChapters(prev => {
       const newSet = new Set(prev);
