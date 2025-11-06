@@ -841,6 +841,69 @@ agent_communication:
 
   - agent: "main"
     message: |
+      CLASS VS CLASS COMPETITIONS - BACKEND IMPLEMENTATION COMPLETE - READY FOR TESTING
+      
+      BACKEND IMPLEMENTATION:
+      1. Competition Model:
+         - Core fields: title, description, teacher_id, classroom_ids, start_date, end_date
+         - Status tracking: "upcoming", "active", "completed" (auto-updates based on dates)
+         - Metrics: primary_metric (problems_solved), tiebreaker_metric (xp_gained)
+         - Min problems requirement: Minimum problems per student to count as "eligible"
+         - Results tracking: winning_classroom_id, class_captains, mvcs, final_standings
+      
+      2. Endpoints Implemented:
+         - POST /api/competitions: Create new competition
+           * Teacher-only access
+           * Validates teacher owns all selected classrooms
+           * Parses ISO date strings to datetime objects
+           * Auto-determines initial status based on dates
+         
+         - GET /api/competitions: List all competitions
+           * Teachers see competitions they created
+           * Students see competitions their classrooms are participating in
+           * Includes classroom names and details
+         
+         - GET /api/competitions/{id}: Get specific competition with live standings
+           * Calculates real-time standings based on submissions during competition period
+           * Returns sorted standings with ranks
+      
+      3. Live Standings Calculation (calculate_competition_standings):
+         - For each classroom in competition:
+           * Counts problems solved by students during competition date range
+           * Calculates total XP gained (tiebreaker metric)
+           * Identifies Class Captain: Student with most problems solved
+           * Identifies MVC (Most Valuable Coder): Student with most XP gained
+           * Counts eligible students (met min_problems_required)
+         - Sorts classrooms by: problems_solved DESC, then xp_gained DESC
+         - Assigns ranks to each classroom
+      
+      4. Competition Flow:
+         - Teacher creates competition with 2+ classrooms, date range, min problems
+         - Status: "upcoming" → "active" → "completed" (based on dates)
+         - Live standings update in real-time as students solve problems
+         - Class Captain and MVC are crowned for each classroom
+         - Final standings show classroom rankings
+      
+      TESTING PRIORITY - COMPETITIONS BACKEND:
+      Backend endpoints to test:
+      - POST /api/competitions with valid classrooms, dates, min problems
+      - Verify teacher-only access (403 for students)
+      - Verify classroom ownership validation
+      - Test date parsing and status determination
+      - GET /api/competitions as teacher (should see their competitions)
+      - GET /api/competitions as student (should see competitions their classes are in)
+      - GET /api/competitions/{id} with live standings calculation
+      - Verify standings are calculated correctly based on submissions
+      - Verify Class Captain and MVC identification
+      - Verify classroom ranking by problems_solved then xp_gained
+      
+      NEXT PHASE (Not yet implemented):
+      - Frontend: Competition creation UI for teachers
+      - Frontend: Competition view/standings page for students and teachers
+      - Frontend: Display Class Captain and MVC badges on student profiles
+  
+  - agent: "main"
+    message: |
       GOOGLE DRIVE-STYLE MOVE FEATURE - IMPLEMENTATION COMPLETE - READY FOR TESTING
       
       USER REQUESTED CHANGE: Instead of drag-and-drop, implemented Google Drive-style "Move" button approach (safer, simpler)
