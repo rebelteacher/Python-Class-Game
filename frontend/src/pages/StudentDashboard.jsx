@@ -221,6 +221,19 @@ export default function StudentDashboard({ user, setUser, refreshUser }) {
     }
   };
 
+  const fetchCompetitions = async () => {
+    try {
+      const response = await axios.get(`${API}/competitions`, {
+        withCredentials: true,
+      });
+      // Filter to show only active and upcoming competitions
+      const activeComps = response.data.filter(c => c.status === 'active' || c.status === 'upcoming');
+      setCompetitions(activeComps);
+    } catch (error) {
+      console.error("Error fetching competitions:", error);
+    }
+  };
+
   const handleJoinClassroom = async (e) => {
     e.preventDefault();
     if (!classCode.trim()) {
