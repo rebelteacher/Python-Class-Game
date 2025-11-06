@@ -404,6 +404,34 @@ export default function StudentDashboard({ user, setUser, refreshUser }) {
         <div className="grid md:grid-cols-4 gap-6 mb-8">
           <div className="md:col-span-2">
             <RankBadge rank={userProfile.rank || "Rookie"} xp={userProfile.xp || 0} />
+            
+            {/* Active Badges Display */}
+            {userProfile?.active_badges && userProfile.active_badges.length > 0 && (
+              <Card className="mt-4">
+                <CardHeader className="pb-3">
+                  <CardTitle className="text-sm flex items-center gap-2">
+                    <Award className="w-4 h-4 text-yellow-500" />
+                    Equipped Badges
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="flex flex-wrap gap-2">
+                    {userProfile.active_badges.map(badgeId => {
+                      const badge = shopItems.badges?.find(b => b.id === badgeId);
+                      return badge ? (
+                        <div 
+                          key={badgeId} 
+                          className="px-3 py-1 bg-gradient-to-r from-yellow-400 to-orange-500 text-white rounded-full text-xs font-semibold shadow-md"
+                          title={badge.description}
+                        >
+                          {badge.name}
+                        </div>
+                      ) : null;
+                    })}
+                  </div>
+                </CardContent>
+              </Card>
+            )}
           </div>
           
           <Card>
