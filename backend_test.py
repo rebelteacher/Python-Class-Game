@@ -3996,6 +3996,496 @@ startxref
             "mc_question_id": mc_question_id
         }
 
+    def test_competitions_endpoints(self):
+        """Test Class vs Class Competitions endpoints"""
+        print("\n🏆 Testing Class vs Class Competitions Endpoints...")
+        
+        # Create test classrooms for competitions
+        classroom1_data = {"name": f"Competition Class 1 {datetime.now().strftime('%H%M%S')}"}
+        classroom1 = self.run_test(
+            "Create classroom 1 for competition",
+            "POST",
+            "classrooms",
+            200,
+            classroom1_data
+        )
+        
+        classroom2_data = {"name": f"Competition Class 2 {datetime.now().strftime('%H%M%S')}"}
+        classroom2 = self.run_test(
+            "Create classroom 2 for competition",
+            "POST",
+            "classrooms",
+            200,
+            classroom2_data
+        )
+        
+        if not classroom1 or not classroom2:
+            print("❌ Cannot test competitions without classrooms")
+            return
+        
+        classroom1_id = classroom1.get('id')
+        classroom2_id = classroom2.get('id')
+        
+        # Create students and add them to classrooms
+        print("   Creating students for competition testing...")
+        students1 = self.create_test_students_with_names(classroom1_id, 3)
+        students2 = self.create_test_students_with_names(classroom2_id, 2)
+        
+        if not students1 or not students2:
+            print("❌ Cannot test competitions without students")
+            return
+        
+        # Test 1: Create competition with valid data
+        print("\n   TEST 1: Create competition with valid data")
+        
+        # Use dates that make sense for testing
+        start_date = (datetime.now(timezone.utc) - timedelta(hours=1)).isoformat()  # Started 1 hour ago
+        end_date = (datetime.now(timezone.utc) + timedelta(days=1)).isoformat()    # Ends tomorrow
+        
+        competition_data = {
+            "title": f"Math Challenge {datetime.now().strftime('%H%M%S')}",
+            "description": "A friendly competition between classes",
+            "classroom_ids": [classroom1_id, classroom2_id],
+            "start_date": start_date,
+            "end_date": end_date,
+            "min_problems_required": 5
+        }
+        
+        competition = self.run_test(
+            "Create competition with valid data",
+            "POST",
+            "competitions",
+            200,
+            competition_data
+        )
+        
+        if not competition:
+            print("❌ Cannot continue competition tests without created competition")
+            return
+        
+        competition_id = competition.get('competition_id')
+        print(f"   Created competition: {competition_id}")
+        
+        # Test 2: Teacher-only access for creation
+        print("\n   TEST 2: Teacher-only access for competition creation")
+        
+        if students1:
+            original_token = self.session_token
+            self.session_token = students1[0]["token"]  # Switch to student
+            
+            try:
+                self.run_test(
+                    "Student tries to create competition (should be 403)",
+                    "POST",
+                    "competitions",
+                    403,
+                    competition_data
+                )
+            finally:
+                self.session_token = original_token
+        
+        # Test 3: Classroom ownership validation
+        print("\n   TEST 3: Classroom ownership validation")
+        
+        # Create another teacher
+        other_teacher = self.create_other_teacher()
+        if other_teacher:
+            original_token = self.session_token
+            self.session_token = other_teacher["token"]
+            
+            try:
+                # Try to create competition with classrooms they don't own
+                invalid_competition_data = {
+                    "title": "Invalid Competition",
+                    "description": "Should fail",
+                    "classroom_ids": [classroom1_id, classroom2_id],  # Don't own these
+                    "start_date": start_date,
+                    "end_date": end_date,
+                    "min_problems_required": 5
+                }
+                
+                self.run_test(
+                    "Create competition with unowned classrooms (should be 403)",
+                    "POST",
+                    "competitions",
+                    403,
+                    invalid_competition_data
+                )
+            finally:
+                self.session_token = original_token
+        
+        # Test 4: Date parsing and status determination
+        print("\n   TEST 4: Date parsing and status determination")
+        
+        # Test upcoming competition
+        future_start = (datetime.now(timezone.utc) + timedelta(hours=1)).isoformat()
+        future_end = (datetime.now(timezone.utc) + timedelta(days=2)).isoformat()
+        
+        upcoming_competition_data = {
+            "title": "Future Competition",
+            "description": "Starts in the future",
+            "classroom_ids": [classroom1_id, classroom2_id],
+            "start_date": future_start,
+            "end_date": future_end,
+            "min_problems_required": 3
+        }
+        
+        upcoming_comp = self.run_test(
+            "Create upcoming competition",
+            "POST",
+            "competitions",
+            200,
+            upcoming_competition_data
+        )
+        
+        # Test completed competition
+        past_start = (datetime.now(timezone.utc) - timedelta(days=2)).isoformat()
+        past_end = (datetime.now(timezone.utc) - timedelta(hours=1)).isoformat()
+        
+        completed_competition_data = {
+            "title": "Past Competition",
+            "description": "Already completed",
+            "classroom_ids": [classroom1_id, classroom2_id],
+            "start_date": past_start,
+            "end_date": past_end,
+            "min_problems_required": 2
+        }
+        
+        completed_comp = self.run_test(
+            "Create completed competition",
+            "POST",
+            "competitions",
+            200,
+            completed_competition_data
+        )
+        
+        # Test 5: Get competitions as teacher
+        print("\n   TEST 5: Get competitions as teacher")
+        
+        competitions_response = self.run_test(
+            "Get competitions as teacher",
+            "GET",
+            "competitions",
+            200
+        )
+        
+        if competitions_response:
+            # Should see all competitions created by this teacher
+            teacher_competitions = [c for c in competitions_response if c.get("teacher_id") == self.user_id]
+            
+            if len(teacher_competitions) >= 3:  # At least the 3 we created
+                self.log_test("Teacher sees their created competitions", True)
+            else:
+                self.log_test("Teacher sees their created competitions", False, f"Expected at least 3, got {len(teacher_competitions)}")
+            
+            # Verify classroom names are included
+            for comp in teacher_competitions:
+                if "classrooms" in comp and len(comp["classrooms"]) > 0:
+                    self.log_test("Competition includes classroom names", True)
+                    break
+            else:
+                self.log_test("Competition includes classroom names", False, "No classroom names found")
+        
+        # Test 6: Get competitions as student
+        print("\n   TEST 6: Get competitions as student")
+        
+        if students1:
+            original_token = self.session_token
+            self.session_token = students1[0]["token"]  # Switch to student
+            
+            try:
+                student_competitions_response = self.run_test(
+                    "Get competitions as student",
+                    "GET",
+                    "competitions",
+                    200
+                )
+                
+                if student_competitions_response:
+                    # Student should see competitions their classrooms are in
+                    if len(student_competitions_response) >= 3:  # Should see all 3 competitions
+                        self.log_test("Student sees competitions for their classrooms", True)
+                    else:
+                        self.log_test("Student sees competitions for their classrooms", False, f"Expected at least 3, got {len(student_competitions_response)}")
+                
+            finally:
+                self.session_token = original_token
+        
+        # Test 7: Get specific competition with live standings
+        print("\n   TEST 7: Get specific competition with live standings")
+        
+        # First, create some test submissions during the competition period
+        print("   Creating test submissions for standings calculation...")
+        self.create_competition_submissions(students1, students2, competition_id, start_date, end_date)
+        
+        competition_detail = self.run_test(
+            "Get competition with live standings",
+            "GET",
+            f"competitions/{competition_id}",
+            200
+        )
+        
+        if competition_detail:
+            # Verify live standings are included
+            if "live_standings" in competition_detail:
+                self.log_test("Competition includes live standings", True)
+                
+                standings = competition_detail["live_standings"]
+                
+                # Verify standings structure
+                if len(standings) == 2:  # Should have 2 classrooms
+                    self.log_test("Standings include all classrooms", True)
+                else:
+                    self.log_test("Standings include all classrooms", False, f"Expected 2 classrooms, got {len(standings)}")
+                
+                # Verify standings fields
+                for standing in standings:
+                    required_fields = ["classroom_id", "classroom_name", "problems_solved", "xp_gained", "rank"]
+                    missing_fields = [field for field in required_fields if field not in standing]
+                    
+                    if not missing_fields:
+                        self.log_test("Standing has all required fields", True)
+                    else:
+                        self.log_test("Standing has all required fields", False, f"Missing: {missing_fields}")
+                        break
+                
+                # Verify sorting (by problems_solved DESC, then xp_gained DESC)
+                if len(standings) >= 2:
+                    first = standings[0]
+                    second = standings[1]
+                    
+                    if (first["problems_solved"] > second["problems_solved"] or 
+                        (first["problems_solved"] == second["problems_solved"] and first["xp_gained"] >= second["xp_gained"])):
+                        self.log_test("Standings sorted correctly", True)
+                    else:
+                        self.log_test("Standings sorted correctly", False, f"First: {first['problems_solved']}/{first['xp_gained']}, Second: {second['problems_solved']}/{second['xp_gained']}")
+                
+                # Verify ranks are assigned
+                for i, standing in enumerate(standings):
+                    expected_rank = i + 1
+                    if standing.get("rank") == expected_rank:
+                        self.log_test(f"Rank {expected_rank} assigned correctly", True)
+                    else:
+                        self.log_test(f"Rank {expected_rank} assigned correctly", False, f"Expected {expected_rank}, got {standing.get('rank')}")
+                
+                # Verify Class Captain and MVC identification
+                for standing in standings:
+                    captain = standing.get("captain")
+                    mvc = standing.get("mvc")
+                    
+                    if captain and "student_name" in captain and "problems_solved" in captain:
+                        self.log_test("Class Captain identified correctly", True)
+                    else:
+                        self.log_test("Class Captain identified correctly", False, f"Captain data: {captain}")
+                        break
+                    
+                    if mvc and "student_name" in mvc and "xp_gained" in mvc:
+                        self.log_test("MVC identified correctly", True)
+                    else:
+                        self.log_test("MVC identified correctly", False, f"MVC data: {mvc}")
+                        break
+            else:
+                self.log_test("Competition includes live standings", False, "live_standings field missing")
+        
+        # Test 8: Competition not found
+        print("\n   TEST 8: Competition not found")
+        
+        self.run_test(
+            "Get non-existent competition (should be 404)",
+            "GET",
+            "competitions/non-existent-id",
+            404
+        )
+        
+        # Test 9: Minimum problems requirement
+        print("\n   TEST 9: Minimum problems requirement validation")
+        
+        min_problems_data = {
+            "title": "High Requirement Competition",
+            "description": "Requires many problems",
+            "classroom_ids": [classroom1_id, classroom2_id],
+            "start_date": start_date,
+            "end_date": end_date,
+            "min_problems_required": 100  # Very high requirement
+        }
+        
+        high_req_comp = self.run_test(
+            "Create competition with high min problems requirement",
+            "POST",
+            "competitions",
+            200,
+            min_problems_data
+        )
+        
+        if high_req_comp:
+            high_req_comp_id = high_req_comp.get('competition_id')
+            
+            # Get standings - should show 0 eligible students
+            high_req_detail = self.run_test(
+                "Get high requirement competition standings",
+                "GET",
+                f"competitions/{high_req_comp_id}",
+                200
+            )
+            
+            if high_req_detail and "live_standings" in high_req_detail:
+                standings = high_req_detail["live_standings"]
+                
+                # All classrooms should have 0 eligible students
+                all_zero_eligible = all(standing.get("eligible_students", 0) == 0 for standing in standings)
+                
+                if all_zero_eligible:
+                    self.log_test("High min problems requirement filters students correctly", True)
+                else:
+                    self.log_test("High min problems requirement filters students correctly", False, "Some students still eligible")
+        
+        print(f"   Competition testing completed. Created competition ID: {competition_id}")
+        return competition_id
+
+    def create_other_teacher(self):
+        """Helper method to create another teacher user"""
+        timestamp = str(int(datetime.now().timestamp()) + 999)
+        teacher_id = f"test-teacher-{timestamp}"
+        teacher_token = f"test_teacher_session_{timestamp}"
+        
+        try:
+            from motor.motor_asyncio import AsyncIOMotorClient
+            import asyncio
+            
+            async def create_teacher_data():
+                client = AsyncIOMotorClient("mongodb://localhost:27017")
+                db = client["test_database"]
+                
+                # Create teacher user
+                user_doc = {
+                    "id": teacher_id,
+                    "email": f"other.teacher.{timestamp}@example.com",
+                    "name": f"Other Teacher {timestamp}",
+                    "role": "teacher",
+                    "created_at": datetime.now(timezone.utc).isoformat()
+                }
+                await db.users.insert_one(user_doc)
+                
+                # Create session
+                session_doc = {
+                    "user_id": teacher_id,
+                    "session_token": teacher_token,
+                    "expires_at": datetime.now(timezone.utc) + timedelta(days=7),
+                    "created_at": datetime.now(timezone.utc).isoformat()
+                }
+                await db.sessions.insert_one(session_doc)
+                
+                client.close()
+                return True
+            
+            asyncio.run(create_teacher_data())
+            return {"id": teacher_id, "token": teacher_token}
+            
+        except Exception as e:
+            print(f"   ❌ Failed to create other teacher: {str(e)}")
+            return None
+
+    def create_competition_submissions(self, students1, students2, competition_id, start_date, end_date):
+        """Create test submissions during competition period for standings calculation"""
+        try:
+            from motor.motor_asyncio import AsyncIOMotorClient
+            import asyncio
+            
+            async def create_submissions():
+                client = AsyncIOMotorClient("mongodb://localhost:27017")
+                db = client["test_database"]
+                
+                # Create some problems first
+                problem_ids = []
+                for i in range(5):
+                    problem_id = str(uuid.uuid4())
+                    problem_doc = {
+                        "id": problem_id,
+                        "title": f"Competition Problem {i+1}",
+                        "description": f"Solve problem {i+1}",
+                        "solution_code": f"print({i+1})",
+                        "creator_id": self.user_id,
+                        "creator_name": "Test Teacher",
+                        "created_at": datetime.now(timezone.utc).isoformat()
+                    }
+                    await db.problems.insert_one(problem_doc)
+                    problem_ids.append(problem_id)
+                
+                # Create assignment for submissions
+                assignment_id = str(uuid.uuid4())
+                assignment_doc = {
+                    "id": assignment_id,
+                    "title": "Competition Assignment",
+                    "description": "For competition testing",
+                    "teacher_id": self.user_id,
+                    "problem_ids": problem_ids,
+                    "classroom_ids": [students1[0]["id"], students2[0]["id"]],  # Use student IDs as placeholder
+                    "created_at": datetime.now(timezone.utc).isoformat()
+                }
+                await db.assignments.insert_one(assignment_doc)
+                
+                # Create submissions during competition period
+                submission_time = datetime.fromisoformat(start_date) + timedelta(minutes=30)
+                
+                # Classroom 1 students - give them more problems solved
+                for i, student in enumerate(students1):
+                    problems_to_solve = 4 - i  # First student solves 4, second 3, third 2
+                    xp_per_problem = 85 + (i * 5)  # Varying XP scores
+                    
+                    for j in range(problems_to_solve):
+                        submission_id = str(uuid.uuid4())
+                        submission_doc = {
+                            "id": submission_id,
+                            "assignment_id": assignment_id,
+                            "problem_id": problem_ids[j],
+                            "student_id": student["id"],
+                            "code": f"print({j+1})",
+                            "score": xp_per_problem,
+                            "feedback": "Good work",
+                            "test_results": [],
+                            "attempt_number": 1,
+                            "lives_remaining": 3,
+                            "is_passing": True,
+                            "is_late": False,
+                            "is_final": True,
+                            "submitted_at": submission_time.isoformat()
+                        }
+                        await db.submissions.insert_one(submission_doc)
+                
+                # Classroom 2 students - give them fewer problems but higher XP
+                for i, student in enumerate(students2):
+                    problems_to_solve = 2 - i  # First student solves 2, second 1
+                    xp_per_problem = 95 + (i * 5)  # Higher XP per problem
+                    
+                    for j in range(problems_to_solve):
+                        submission_id = str(uuid.uuid4())
+                        submission_doc = {
+                            "id": submission_id,
+                            "assignment_id": assignment_id,
+                            "problem_id": problem_ids[j],
+                            "student_id": student["id"],
+                            "code": f"print({j+1})",
+                            "score": xp_per_problem,
+                            "feedback": "Excellent work",
+                            "test_results": [],
+                            "attempt_number": 1,
+                            "lives_remaining": 3,
+                            "is_passing": True,
+                            "is_late": False,
+                            "is_final": True,
+                            "submitted_at": submission_time.isoformat()
+                        }
+                        await db.submissions.insert_one(submission_doc)
+                
+                client.close()
+                return True
+            
+            asyncio.run(create_submissions())
+            print("   ✅ Created test submissions for competition standings")
+            
+        except Exception as e:
+            print(f"   ❌ Failed to create competition submissions: {str(e)}")
+
     def run_all_tests(self):
         """Run all API tests"""
         print("🚀 Starting CodeClass API Tests...")
