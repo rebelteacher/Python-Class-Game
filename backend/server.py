@@ -495,6 +495,44 @@ class CompetitionCreate(BaseModel):
     end_date: str  # ISO format
     min_problems_required: int = 10
 
+# ==================== CHALLENGES ====================
+class Challenge(BaseModel):
+    model_config = ConfigDict(extra="ignore")
+    id: str = Field(default_factory=lambda: str(uuid.uuid4()))
+    challenger_id: str
+    challenger_name: str
+    challenged_id: str
+    challenged_name: str
+    classroom_id: str
+    problem_id: str
+    status: str = "pending"  # "pending", "accepted", "declined", "in_progress", "completed"
+    challenger_score: Optional[int] = None
+    challenged_score: Optional[int] = None
+    challenger_time: Optional[float] = None  # Seconds to complete
+    challenged_time: Optional[float] = None
+    winner_id: Optional[str] = None
+    created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+    accepted_at: Optional[datetime] = None
+    completed_at: Optional[datetime] = None
+
+class ChallengeCreate(BaseModel):
+    challenged_id: str
+    classroom_id: str
+
+class ChallengeProblem(BaseModel):
+    model_config = ConfigDict(extra="ignore")
+    id: str = Field(default_factory=lambda: str(uuid.uuid4()))
+    title: str
+    description: str
+    starter_code: str
+    solution_code: str
+    test_cases: List[dict]
+    difficulty: str = "medium"
+    chapter: str = ""
+    lesson: str = ""
+    created_by: str
+    created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+
 class PDFNoteCreate(BaseModel):
     title: str
     description: str = ""
