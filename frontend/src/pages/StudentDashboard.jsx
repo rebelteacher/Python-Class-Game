@@ -570,6 +570,74 @@ export default function StudentDashboard({ user, setUser, refreshUser }) {
           </Dialog>
         </div>
 
+        {/* Active Competitions Section */}
+        {competitions.length > 0 && (
+          <div className="mb-8">
+            <h2 className="text-2xl font-bold text-gray-900 mb-4 flex items-center gap-2">
+              <Trophy className="w-6 h-6 text-yellow-600" />
+              Active Competitions
+            </h2>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              {competitions.map((comp) => {
+                const now = new Date();
+                const startDate = new Date(comp.start_date);
+                const endDate = new Date(comp.end_date);
+                const isActive = now >= startDate && now <= endDate;
+                
+                return (
+                  <Card 
+                    key={comp.id} 
+                    className={`hover:shadow-lg transition-shadow cursor-pointer ${
+                      isActive ? 'border-2 border-green-400 bg-green-50' : 'border-2 border-yellow-400 bg-yellow-50'
+                    }`}
+                    onClick={() => navigate(`/student/competition/${comp.id}`)}
+                  >
+                    <CardHeader>
+                      <div className="flex justify-between items-start">
+                        <CardTitle className="text-lg">{comp.title}</CardTitle>
+                        <span className={`px-2 py-1 text-xs rounded font-semibold ${
+                          isActive ? 'bg-green-100 text-green-700' : 'bg-yellow-100 text-yellow-700'
+                        }`}>
+                          {isActive ? '🔴 LIVE' : 'UPCOMING'}
+                        </span>
+                      </div>
+                      <CardDescription>{comp.description}</CardDescription>
+                    </CardHeader>
+                    <CardContent>
+                      <div className="space-y-2 text-sm text-gray-700 mb-4">
+                        <div className="flex items-center gap-2">
+                          <Users className="w-4 h-4" />
+                          <span>{comp.classrooms?.length || 0} classes competing</span>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <Calendar className="w-4 h-4" />
+                          <span>
+                            {new Date(comp.start_date).toLocaleDateString()} - {new Date(comp.end_date).toLocaleDateString()}
+                          </span>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <TrendingUp className="w-4 h-4" />
+                          <span>Min {comp.min_problems_required} problems</span>
+                        </div>
+                      </div>
+                      <Button 
+                        variant="outline" 
+                        className="w-full"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          navigate(`/student/competition/${comp.id}`);
+                        }}
+                      >
+                        View Standings
+                      </Button>
+                    </CardContent>
+                  </Card>
+                );
+              })}
+            </div>
+          </div>
+        )}
+
         {/* Available Tests Section */}
         {availableTests.length > 0 && (
           <div className="mb-8">
