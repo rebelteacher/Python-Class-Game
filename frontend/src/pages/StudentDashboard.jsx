@@ -352,22 +352,28 @@ export default function StudentDashboard({ user, setUser, refreshUser }) {
         <AnimatedPet petId={userProfile.active_pet} shopItems={shopItems} />
       )}
       
-      <nav className="bg-white shadow-sm border-b border-gray-200">
+      <nav 
+        className="shadow-sm border-b"
+        style={{ 
+          backgroundColor: getThemeNavColor() || 'white',
+          borderColor: getThemeNavColor() ? 'rgba(255,255,255,0.2)' : '#e5e7eb'
+        }}
+      >
         <div className="container mx-auto px-6 py-4 flex justify-between items-center">
           <div className="flex items-center space-x-2">
-            <Code2 className="w-7 h-7 text-teal-600" />
-            <span className="text-xl font-bold text-gray-900">ByteBattles Arena</span>
-            <span className="ml-4 px-3 py-1 bg-teal-100 text-teal-700 text-sm font-medium rounded-full">
+            <Code2 className={`w-7 h-7 ${getThemeNavColor() ? 'text-white' : 'text-teal-600'}`} />
+            <span className={`text-xl font-bold ${getThemeNavColor() ? 'text-white' : 'text-gray-900'}`}>ByteBattles Arena</span>
+            <span className={`ml-4 px-3 py-1 text-sm font-medium rounded-full ${getThemeNavColor() ? 'bg-white/20 text-white border border-white/30' : 'bg-teal-100 text-teal-700'}`}>
               Student
             </span>
           </div>
           <div className="flex items-center space-x-3">
-            <span className="text-gray-700 hidden sm:inline">{user.name}</span>
-            <Button onClick={() => navigate("/notes")} variant="outline" size="sm" className="gap-2">
+            <span className={`hidden sm:inline ${getThemeNavColor() ? 'text-white' : 'text-gray-700'}`}>{user.name}</span>
+            <Button onClick={() => navigate("/notes")} variant="outline" size="sm" className={`gap-2 ${getThemeNavColor() ? 'border-white/30 text-white hover:bg-white/20' : ''}`}>
               <FileText className="w-4 h-4" />
               Notes
             </Button>
-            <Button data-testid="logout-btn" onClick={handleLogout} variant="ghost" size="sm" className="gap-2">
+            <Button data-testid="logout-btn" onClick={handleLogout} variant="ghost" size="sm" className={`gap-2 ${getThemeNavColor() ? 'text-white hover:bg-white/20' : ''}`}>
               <LogOut className="w-4 h-4" />
               Logout
             </Button>
