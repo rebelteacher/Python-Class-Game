@@ -267,6 +267,33 @@ function App() {
                   </ProtectedRoute>
                 }
               />
+
+              <Route
+                path="/teacher/competitions"
+                element={
+                  <ProtectedRoute user={user} requiredRole="teacher">
+                    <CompetitionManagement user={user} />
+                  </ProtectedRoute>
+                }
+              />
+
+              <Route
+                path="/teacher/competition/:competitionId"
+                element={
+                  <ProtectedRoute user={user} requiredRole="teacher">
+                    <CompetitionView user={user} />
+                  </ProtectedRoute>
+                }
+              />
+
+              <Route
+                path="/student/competition/:competitionId"
+                element={
+                  <ProtectedRoute user={user} requiredRole="student">
+                    <CompetitionView user={user} />
+                  </ProtectedRoute>
+                }
+              />
             </Routes>
           )}
         </AuthHandler>
