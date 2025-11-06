@@ -4056,6 +4056,9 @@ startxref
         # Test Move functionality endpoints
         self.test_move_functionality_endpoints()
         
+        # Test Class vs Class Competitions endpoints
+        self.test_competitions_endpoints()
+        
         # Print summary
         print(f"\n📊 Test Summary:")
         print(f"   Total tests: {self.tests_run}")
