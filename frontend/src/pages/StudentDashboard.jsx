@@ -100,6 +100,7 @@ export default function StudentDashboard({ user, setUser, refreshUser }) {
     fetchClassrooms();
     fetchTests();
     fetchCompetitions();
+    fetchChallenges();
     fetchShopItems();
     fetchUserProfile();
   }, [location.key]); // location.key changes on every navigation
