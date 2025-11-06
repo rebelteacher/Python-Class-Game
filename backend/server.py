@@ -3774,4 +3774,6 @@ async def initialize_admin_account():
         logger.error(f"Error initializing admin account: {str(e)}")
 
 
-# Placeholder for competitions section - moved above
+@app.on_event("shutdown")
+async def shutdown_db_client():
+    client.close()
