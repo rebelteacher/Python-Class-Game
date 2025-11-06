@@ -241,6 +241,76 @@ export default function StudentDashboard({ user, setUser, refreshUser }) {
     }
   };
 
+  const fetchChallenges = async () => {
+    try {
+      const response = await axios.get(`${API}/challenges`, {
+        withCredentials: true,
+      });
+      setChallenges(response.data);
+      
+      // Filter pending challenges where user is challenged
+      const pending = response.data.filter(c => 
+        c.challenged_id === userProfile?.id && c.status === 'pending'
+      );
+      setPendingChallenges(pending);
+    } catch (error) {
+      console.error("Error fetching challenges:", error);
+    }
+  };
+
+  const handleChallengeCreate = async () => {
+    if (!selectedClassroom || !selectedOpponent) {
+      toast.error("Please select a classroom and opponent");
+      return;
+    }
+
+    try {
+      const response = await axios.post(`${API}/challenges`, {
+        challenged_id: selectedOpponent,
+        classroom_id: selectedClassroom
+      }, {
+        withCredentials: true
+      });
+
+      if (response.data.success) {
+        toast.success("Challenge sent! ⚔️");
+        setChallengeDialogOpen(false);
+        setSelectedClassroom("");
+        setSelectedOpponent("");
+        fetchChallenges();
+      }
+    } catch (error) {
+      toast.error(error.response?.data?.detail || "Failed to send challenge");
+    }
+  };
+
+  const handleAcceptChallenge = async (challengeId) => {
+    try {
+      await axios.post(`${API}/challenges/${challengeId}/accept`, {}, {
+        withCredentials: true
+      });
+      toast.success("Challenge accepted! Get ready! 🔥");
+      fetchChallenges();
+      // Navigate to challenge arena
+      navigate(`/student/challenge/${challengeId}/arena`);
+    } catch (error) {
+      toast.error(error.response?.data?.detail || "Failed to accept challenge");
+    }
+  };
+
+  const handleDeclineChallenge = async (challengeId) => {
+    try {
+      await axios.post(`${API}/challenges/${challengeId}/decline`, {}, {
+        withCredentials: true
+      });
+      setShowChicken(true);
+      setTimeout(() => setShowChicken(false), 3000);
+      fetchChallenges();
+    } catch (error) {
+      toast.error(error.response?.data?.detail || "Failed to decline challenge");
+    }
+  };
+
   const handleJoinClassroom = async (e) => {
     e.preventDefault();
     if (!classCode.trim()) {
