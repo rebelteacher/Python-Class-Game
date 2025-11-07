@@ -635,13 +635,32 @@ export default function StudentDashboard({ user, setUser, refreshUser }) {
                 </DialogHeader>
                 <div className="space-y-4">
                   <div>
-                    <Label>Select Classroom</Label>
+                    <Label>Select Opponent (from any of your classes)</Label>
+                    <select
+                      value={selectedOpponent}
+                      onChange={(e) => setSelectedOpponent(e.target.value)}
+                      className="w-full mt-1 p-2 border rounded"
+                    >
+                      <option value="">Choose your opponent...</option>
+                      {classrooms.map(classroom => (
+                        <optgroup key={classroom.id} label={classroom.name}>
+                          {classroom.students
+                            ?.filter(s => s.id !== userProfile?.id)
+                            .map(student => (
+                              <option key={student.id} value={student.id}>
+                                {student.name}
+                              </option>
+                            ))}
+                        </optgroup>
+                      ))}
+                    </select>
+                  </div>
+                  
+                  <div>
+                    <Label>Battlefield (Classroom)</Label>
                     <select
                       value={selectedClassroom}
-                      onChange={(e) => {
-                        setSelectedClassroom(e.target.value);
-                        setSelectedOpponent("");
-                      }}
+                      onChange={(e) => setSelectedClassroom(e.target.value)}
                       className="w-full mt-1 p-2 border rounded"
                     >
                       <option value="">Choose a classroom...</option>
@@ -651,28 +670,8 @@ export default function StudentDashboard({ user, setUser, refreshUser }) {
                         </option>
                       ))}
                     </select>
+                    <p className="text-xs text-gray-500 mt-1">Select where the challenge takes place</p>
                   </div>
-                  
-                  {selectedClassroom && (
-                    <div>
-                      <Label>Select Opponent</Label>
-                      <select
-                        value={selectedOpponent}
-                        onChange={(e) => setSelectedOpponent(e.target.value)}
-                        className="w-full mt-1 p-2 border rounded"
-                      >
-                        <option value="">Choose your opponent...</option>
-                        {classrooms
-                          .find(c => c.id === selectedClassroom)
-                          ?.students?.filter(s => s.id !== userProfile?.id)
-                          .map(student => (
-                            <option key={student.id} value={student.id}>
-                              {student.name}
-                            </option>
-                          ))}
-                      </select>
-                    </div>
-                  )}
                   
                   <Button
                     onClick={handleChallengeCreate}
