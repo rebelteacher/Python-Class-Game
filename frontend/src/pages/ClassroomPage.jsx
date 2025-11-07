@@ -653,36 +653,36 @@ export default function ClassroomPage({ user }) {
                             const isChapterExpanded = expandedChapters.has(chapterKey);
                             const lessons = folderData[chapter];
                   
-                  return (
-                    <div key={chapter} className="border rounded-lg bg-white shadow-sm">
-                      {/* Chapter Folder */}
-                      <div
-                        className="flex items-center gap-3 p-4 cursor-pointer hover:bg-gray-50 transition-colors"
-                        onClick={() => toggleChapter(chapter)}
-                      >
-                        {isChapterExpanded ? (
-                          <ChevronDown className="w-5 h-5 text-gray-600" />
-                        ) : (
-                          <ChevronRight className="w-5 h-5 text-gray-600" />
-                        )}
-                        {isChapterExpanded ? (
-                          <FolderOpen className="w-6 h-6 text-blue-500" />
-                        ) : (
-                          <Folder className="w-6 h-6 text-blue-500" />
-                        )}
-                        <h3 className="text-lg font-semibold text-gray-900">{chapter}</h3>
-                        <span className="ml-auto text-sm text-gray-500 bg-gray-100 px-3 py-1 rounded-full">
-                          {Object.keys(lessons).length} lesson{Object.keys(lessons).length !== 1 ? 's' : ''}
-                        </span>
-                      </div>
+                            return (
+                              <div key={chapterKey} className="border rounded-lg bg-white shadow-sm">
+                                {/* Chapter Folder */}
+                                <div
+                                  className="flex items-center gap-3 p-4 cursor-pointer hover:bg-gray-50 transition-colors"
+                                  onClick={() => toggleChapter(chapterKey)}
+                                >
+                                  {isChapterExpanded ? (
+                                    <ChevronDown className="w-5 h-5 text-gray-600" />
+                                  ) : (
+                                    <ChevronRight className="w-5 h-5 text-gray-600" />
+                                  )}
+                                  {isChapterExpanded ? (
+                                    <FolderOpen className="w-6 h-6 text-blue-500" />
+                                  ) : (
+                                    <Folder className="w-6 h-6 text-blue-500" />
+                                  )}
+                                  <h3 className="text-lg font-semibold text-gray-900">{chapter}</h3>
+                                  <span className="ml-auto text-sm text-gray-500 bg-gray-100 px-3 py-1 rounded-full">
+                                    {Object.keys(lessons).length} lesson{Object.keys(lessons).length !== 1 ? 's' : ''}
+                                  </span>
+                                </div>
 
-                      {/* Lessons in Chapter */}
-                      {isChapterExpanded && (
-                        <div className="pl-8 pr-4 pb-4 space-y-3">
-                          {Object.keys(lessons).sort().map((lesson) => {
-                            const lessonKey = `${chapter}-${lesson}`;
-                            const isLessonExpanded = expandedLessons.has(lessonKey);
-                            const lessonAssignments = lessons[lesson];
+                                {/* Lessons in Chapter */}
+                                {isChapterExpanded && (
+                                  <div className="pl-8 pr-4 pb-4 space-y-3">
+                                    {Object.keys(lessons).sort().map((lesson) => {
+                                      const lessonKey = `${chapterKey}-${lesson}`;
+                                      const isLessonExpanded = expandedLessons.has(lessonKey);
+                                      const lessonAssignments = lessons[lesson];
                             
                             return (
                               <div key={lessonKey} className="border rounded-lg bg-gray-50">
