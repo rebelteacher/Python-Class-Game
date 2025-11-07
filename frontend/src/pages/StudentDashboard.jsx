@@ -718,38 +718,69 @@ export default function StudentDashboard({ user, setUser, refreshUser }) {
               <div className="mt-6 pt-6 border-t border-orange-200">
                 <h3 className="text-lg font-bold text-red-600 mb-3 flex items-center gap-2 animate-pulse">
                   <Zap className="w-5 h-5" />
-                  ⚔️ Incoming Challenges!
+                  ⚔️ Challenge Notifications!
                 </h3>
                 <div className="space-y-3">
-                  {pendingChallenges.map(challenge => (
-                    <div key={challenge.id} className="border-2 border-red-400 bg-red-50 rounded-lg p-4">
-                      <div className="flex flex-col gap-3">
-                        <div>
-                          <p className="font-bold text-red-900">
-                            {challenge.challenger_name} has challenged you to a duel!
-                          </p>
-                          <p className="text-sm text-red-700">
-                            5-minute coding battle • Random problem
-                          </p>
-                        </div>
-                        <div className="flex gap-2">
-                          <Button
-                            onClick={() => handleAcceptChallenge(challenge.id)}
-                            className="flex-1 bg-green-600 hover:bg-green-700"
-                          >
-                            Accept ⚔️
-                          </Button>
-                          <Button
-                            onClick={() => handleDeclineChallenge(challenge.id)}
-                            variant="outline"
-                            className="flex-1 border-red-300 text-red-700 hover:bg-red-100"
-                          >
-                            Decline 🐔
-                          </Button>
+                  {pendingChallenges.map(challenge => {
+                    const isChallenger = challenge.challenger_id === userProfile?.id;
+                    const isAccepted = challenge.status === 'accepted';
+                    
+                    return (
+                      <div key={challenge.id} className={`border-2 rounded-lg p-4 ${
+                        isAccepted ? 'border-green-400 bg-green-50' : 'border-red-400 bg-red-50'
+                      }`}>
+                        <div className="flex flex-col gap-3">
+                          <div>
+                            {isAccepted ? (
+                              <>
+                                <p className="font-bold text-green-900">
+                                  🎉 {challenge.challenged_name} accepted your challenge!
+                                </p>
+                                <p className="text-sm text-green-700">
+                                  Ready to battle? Click "Start Battle" below!
+                                </p>
+                              </>
+                            ) : (
+                              <>
+                                <p className="font-bold text-red-900">
+                                  {challenge.challenger_name} has challenged you to a duel!
+                                </p>
+                                <p className="text-sm text-red-700">
+                                  5-minute coding battle • Random problem
+                                </p>
+                              </>
+                            )}
+                          </div>
+                          <div className="flex gap-2">
+                            {isAccepted ? (
+                              <Button
+                                onClick={() => navigate(`/student/challenge/${challenge.id}/arena`)}
+                                className="flex-1 bg-green-600 hover:bg-green-700"
+                              >
+                                Start Battle 🔥
+                              </Button>
+                            ) : (
+                              <>
+                                <Button
+                                  onClick={() => handleAcceptChallenge(challenge.id)}
+                                  className="flex-1 bg-green-600 hover:bg-green-700"
+                                >
+                                  Accept ⚔️
+                                </Button>
+                                <Button
+                                  onClick={() => handleDeclineChallenge(challenge.id)}
+                                  variant="outline"
+                                  className="flex-1 border-red-300 text-red-700 hover:bg-red-100"
+                                >
+                                  Decline 🐔
+                                </Button>
+                              </>
+                            )}
+                          </div>
                         </div>
                       </div>
-                    </div>
-                  ))}
+                    );
+                  })}
                 </div>
               </div>
             )}
