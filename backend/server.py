@@ -885,16 +885,19 @@ async def get_classrooms(request: Request, include_archived: bool = False):
             
             # Populate student details for challenges
             student_ids = classroom.get("students", [])
-            logging.info(f"🔍 Classroom {classroom.get('name')}: Found {len(student_ids)} student IDs")
+            print(f"🔍 DEBUG: Classroom {classroom.get('name')}: Found {len(student_ids)} student IDs")
+            print(f"🔍 DEBUG: Student IDs: {student_ids}")
             students_details = []
             for student_id in student_ids:
+                print(f"🔍 DEBUG: Looking for student with ID: {student_id}")
                 student = await db.users.find_one({"id": student_id}, {"_id": 0, "id": 1, "name": 1, "email": 1})
                 if student:
-                    logging.info(f"✅ Found student: {student.get('name')} ({student.get('id')})")
+                    print(f"✅ DEBUG: Found student: {student.get('name')} ({student.get('id')})")
                     students_details.append(student)
                 else:
-                    logging.warning(f"❌ Student ID {student_id} not found in users collection")
-            logging.info(f"📝 Total students with details: {len(students_details)}")
+                    print(f"❌ DEBUG: Student ID {student_id} not found in users collection")
+            print(f"📝 DEBUG: Total students with details: {len(students_details)}")
+            print(f"📝 DEBUG: Students details: {students_details}")
             classroom["students"] = students_details
     
     return classrooms
