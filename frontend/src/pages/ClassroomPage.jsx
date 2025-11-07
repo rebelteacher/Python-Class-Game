@@ -778,16 +778,6 @@ export default function ClassroomPage({ user }) {
                                     ))}
                                   </div>
                                 )}
-                                      </div>
-                                    );
-                                  })}
-                                </div>
-                              )}
-                            </div>
-                                      );
-                                    })}
-                                  </div>
-                                )}
                               </div>
                             );
                           })}
