@@ -4079,10 +4079,8 @@ async def calculate_competition_standings(competition_id: str, competition: dict
             "is_final": True
         }).to_list(length=None)
         
-        problems_solved = len(submissions)
-        
-        # Calculate XP gained (tiebreaker)
-        xp_gained = sum(s.get("score", 0) for s in submissions)
+        total_problems_solved = len(submissions)
+        total_xp_gained = sum(s.get("score", 0) for s in submissions)
         
         # Find Class Captain (most problems) and MVC (most XP)
         student_stats = {}
@@ -4115,18 +4113,26 @@ async def calculate_competition_standings(competition_id: str, competition: dict
                     "xp_gained": student_stats[mvc_id]["xp"]
                 }
         
+        # Calculate averages per student to make it fair regardless of class size
+        num_students = len(student_ids)
+        avg_problems_per_student = round(total_problems_solved / num_students, 2) if num_students > 0 else 0
+        avg_xp_per_student = round(total_xp_gained / num_students, 2) if num_students > 0 else 0
+        
         standings.append({
             "classroom_id": classroom_id,
             "classroom_name": classroom["name"],
-            "problems_solved": problems_solved,
-            "xp_gained": xp_gained,
+            "problems_solved": total_problems_solved,  # Keep for display
+            "xp_gained": total_xp_gained,  # Keep for display
+            "avg_problems_per_student": avg_problems_per_student,  # Use for ranking
+            "avg_xp_per_student": avg_xp_per_student,  # Use for tiebreaker
+            "num_students": num_students,
             "captain": captain,
             "mvc": mvc,
             "eligible_students": len([sid for sid, stats in student_stats.items() if stats["problems"] >= competition.get("min_problems_required", 10)])
         })
     
-    # Sort by problems_solved (primary), then xp_gained (tiebreaker)
-    standings.sort(key=lambda x: (x["problems_solved"], x["xp_gained"]), reverse=True)
+    # Sort by average problems per student (primary), then average XP per student (tiebreaker)
+    standings.sort(key=lambda x: (x["avg_problems_per_student"], x["avg_xp_per_student"]), reverse=True)
     
     # Add ranks
     for i, standing in enumerate(standings):
