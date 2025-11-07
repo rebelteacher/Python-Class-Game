@@ -189,6 +189,11 @@ export default function StudentDashboard({ user, setUser, refreshUser }) {
       if (response.data.length > 0) {
         console.log("First classroom:", response.data[0]);
         console.log("First classroom has assignments?", !!response.data[0].assignments);
+        console.log("First classroom students:", response.data[0].students);
+        console.log("Students is array?", Array.isArray(response.data[0].students));
+        if (response.data[0].students && response.data[0].students.length > 0) {
+          console.log("First student:", response.data[0].students[0]);
+        }
         if (response.data[0].assignments) {
           console.log("Number of assignments:", response.data[0].assignments.length);
         }
