@@ -868,6 +868,21 @@ async def get_classrooms(request: Request, include_archived: bool = False):
             query["is_archived"] = {"$ne": True}
         
         classrooms = await db.classrooms.find(query, {"_id": 0}).to_list(1000)
+        
+        # Populate student details for teachers too (for challenges)
+        for classroom in classrooms:
+            student_ids = classroom.get("students", [])
+            print(f"🔍 TEACHER: Classroom {classroom.get('name')}: Found {len(student_ids)} student IDs")
+            students_details = []
+            for student_id in student_ids:
+                student = await db.users.find_one({"id": student_id}, {"_id": 0, "id": 1, "name": 1, "email": 1})
+                if student:
+                    print(f"✅ TEACHER: Found student: {student.get('name')}")
+                    students_details.append(student)
+                else:
+                    print(f"❌ TEACHER: Student ID {student_id} not found")
+            print(f"📝 TEACHER: Total students with details: {len(students_details)}")
+            classroom["students"] = students_details
     else:
         # Students see active classrooms they're enrolled in
         classrooms = await db.classrooms.find(
