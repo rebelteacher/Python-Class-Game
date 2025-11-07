@@ -875,13 +875,22 @@ async def get_classrooms(request: Request, include_archived: bool = False):
             {"_id": 0}
         ).to_list(1000)
         
-        # For students, fetch and include assignments
+        # For students, fetch and include assignments AND student details
         for classroom in classrooms:
             assignments = await db.assignments.find(
                 {"classroom_ids": classroom["id"]},
                 {"_id": 0}
             ).to_list(1000)
             classroom["assignments"] = assignments
+            
+            # Populate student details for challenges
+            student_ids = classroom.get("students", [])
+            students_details = []
+            for student_id in student_ids:
+                student = await db.users.find_one({"id": student_id}, {"_id": 0, "id": 1, "name": 1, "email": 1})
+                if student:
+                    students_details.append(student)
+            classroom["students"] = students_details
     
     return classrooms
 
