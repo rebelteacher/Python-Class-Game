@@ -230,12 +230,14 @@ function CompetitionView() {
                         {/* Metrics */}
                         <div className="grid grid-cols-2 gap-8 text-center">
                           <div>
-                            <p className="text-2xl font-bold text-purple-600">{standing.problems_solved}</p>
-                            <p className="text-xs text-gray-600">Problems Solved</p>
+                            <p className="text-2xl font-bold text-purple-600">{standing.avg_problems_per_student}</p>
+                            <p className="text-xs text-gray-600">Avg Problems/Student</p>
+                            <p className="text-xs text-gray-400">({standing.problems_solved} total)</p>
                           </div>
                           <div>
-                            <p className="text-2xl font-bold text-pink-600">{standing.xp_gained}</p>
-                            <p className="text-xs text-gray-600">XP Gained</p>
+                            <p className="text-2xl font-bold text-pink-600">{standing.avg_xp_per_student}</p>
+                            <p className="text-xs text-gray-600">Avg XP/Student</p>
+                            <p className="text-xs text-gray-400">({standing.xp_gained} total)</p>
                           </div>
                         </div>
                       </div>
