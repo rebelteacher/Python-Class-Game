@@ -598,10 +598,10 @@ export default function ClassroomPage({ user }) {
               )}
             </div>
 
-            {assignments.length === 0 ? (
+            {assignments.length === 0 && tests.length === 0 ? (
               <div data-testid="no-assignments" className="text-center py-20">
                 <BookOpen className="w-16 h-16 text-gray-400 mx-auto mb-4" />
-                <h3 className="text-xl font-semibold text-gray-700 mb-2">No assignments yet</h3>
+                <h3 className="text-xl font-semibold text-gray-700 mb-2">No assignments or tests yet</h3>
                 {isTeacher && (
                   <>
                     <p className="text-gray-500 mb-6">Create your first assignment</p>
@@ -613,10 +613,45 @@ export default function ClassroomPage({ user }) {
                 )}
               </div>
             ) : (
-              <div className="space-y-4">
-                {Object.keys(organizedAssignments).sort().map((chapter) => {
-                  const isChapterExpanded = expandedChapters.has(chapter);
-                  const lessons = organizedAssignments[chapter];
+              <div className="space-y-6">
+                {/* Top-level folders: Classwork and Tests */}
+                {['classwork', 'tests'].map((folderType) => {
+                  const isFolderExpanded = expandedFolders.has(folderType);
+                  const folderData = organizedAssignments[folderType] || {};
+                  const hasContent = Object.keys(folderData).length > 0;
+                  
+                  if (!hasContent) return null;
+                  
+                  return (
+                    <div key={folderType} className="border-2 rounded-lg bg-gradient-to-r from-purple-50 to-blue-50 shadow-md">
+                      {/* Main Folder Header */}
+                      <div
+                        className="flex items-center gap-3 p-5 cursor-pointer hover:bg-white/50 transition-colors"
+                        onClick={() => toggleFolder(folderType)}
+                      >
+                        {isFolderExpanded ? (
+                          <ChevronDown className="w-6 h-6 text-gray-700" />
+                        ) : (
+                          <ChevronRight className="w-6 h-6 text-gray-700" />
+                        )}
+                        {isFolderExpanded ? (
+                          <FolderOpen className="w-7 h-7 text-purple-600" />
+                        ) : (
+                          <Folder className="w-7 h-7 text-purple-600" />
+                        )}
+                        <h2 className="text-2xl font-bold text-gray-900 capitalize">{folderType}</h2>
+                        <span className="ml-auto text-sm text-gray-600 bg-white px-3 py-1 rounded-full font-medium">
+                          {Object.keys(folderData).length} chapter{Object.keys(folderData).length !== 1 ? 's' : ''}
+                        </span>
+                      </div>
+                      
+                      {/* Chapters within folder */}
+                      {isFolderExpanded && (
+                        <div className="px-4 pb-4 space-y-3">
+                          {Object.keys(folderData).sort().map((chapter) => {
+                            const chapterKey = `${folderType}-${chapter}`;
+                            const isChapterExpanded = expandedChapters.has(chapterKey);
+                            const lessons = folderData[chapter];
                   
                   return (
                     <div key={chapter} className="border rounded-lg bg-white shadow-sm">
