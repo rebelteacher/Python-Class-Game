@@ -253,11 +253,21 @@ export default function StudentDashboard({ user, setUser, refreshUser }) {
       });
       setChallenges(response.data);
       
-      // Filter pending challenges where user is challenged
-      const pending = response.data.filter(c => 
+      // Filter pending challenges where user is challenged (incoming)
+      const incomingPending = response.data.filter(c => 
         c.challenged_id === userProfile?.id && c.status === 'pending'
       );
-      setPendingChallenges(pending);
+      setPendingChallenges(incomingPending);
+      
+      // Filter accepted challenges where user is challenger (ready to start)
+      const acceptedAsChallenger = response.data.filter(c =>
+        c.challenger_id === userProfile?.id && c.status === 'accepted'
+      );
+      // Store in state for notifications
+      if (acceptedAsChallenger.length > 0) {
+        // Add to pending challenges so challenger sees them
+        setPendingChallenges([...incomingPending, ...acceptedAsChallenger]);
+      }
     } catch (error) {
       console.error("Error fetching challenges:", error);
     }
