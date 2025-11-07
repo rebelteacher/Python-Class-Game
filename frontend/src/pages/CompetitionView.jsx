@@ -270,6 +270,49 @@ function CompetitionView() {
                           )}
                         </div>
                       )}
+
+                      {/* Student Progress Details */}
+                      {standing.student_progress && standing.student_progress.length > 0 && (
+                        <details className="mt-4 pt-4 border-t">
+                          <summary className="cursor-pointer font-semibold text-sm text-gray-700 hover:text-gray-900">
+                            View Student Progress ({standing.eligible_students}/{standing.num_students} eligible)
+                          </summary>
+                          <div className="mt-3 space-y-2 max-h-64 overflow-y-auto">
+                            {standing.student_progress.map((student) => (
+                              <div 
+                                key={student.student_id} 
+                                className={`flex items-center justify-between p-2 rounded ${
+                                  student.is_eligible ? 'bg-green-50' : 'bg-gray-50'
+                                }`}
+                              >
+                                <div className="flex-1">
+                                  <p className="text-sm font-medium">
+                                    {student.student_name}
+                                    {student.is_eligible && (
+                                      <span className="ml-2 text-xs text-green-600 font-semibold">✓ Eligible</span>
+                                    )}
+                                  </p>
+                                  <div className="flex items-center gap-2 mt-1">
+                                    <div className="flex-1 bg-gray-200 rounded-full h-2">
+                                      <div 
+                                        className={`h-2 rounded-full ${
+                                          student.is_eligible ? 'bg-green-500' : 'bg-orange-400'
+                                        }`}
+                                        style={{ width: `${student.progress_percent}%` }}
+                                      />
+                                    </div>
+                                    <span className="text-xs text-gray-600">{student.progress_percent}%</span>
+                                  </div>
+                                </div>
+                                <div className="ml-4 text-right">
+                                  <p className="text-sm font-semibold">{student.problems_solved} problems</p>
+                                  <p className="text-xs text-gray-500">{student.xp_gained} XP</p>
+                                </div>
+                              </div>
+                            ))}
+                          </div>
+                        </details>
+                      )}
                     </CardContent>
                   </Card>
                 ))}
