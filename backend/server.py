@@ -3661,7 +3661,7 @@ async def create_challenge(challenge_data: ChallengeCreate, request: Request):
         challenger_name=challenger["name"],
         challenged_id=challenged["id"],
         challenged_name=challenged["name"],
-        classroom_id=challenge_data.classroom_id,
+        classroom_id=classroom_id,
         problem_id=problem["id"]
     )
     
