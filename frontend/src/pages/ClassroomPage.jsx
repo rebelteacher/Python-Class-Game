@@ -684,8 +684,8 @@ export default function ClassroomPage({ user }) {
                                       const isLessonExpanded = expandedLessons.has(lessonKey);
                                       const lessonAssignments = lessons[lesson];
                             
-                            return (
-                              <div key={lessonKey} className="border rounded-lg bg-gray-50">
+                                      return (
+                                        <div key={lessonKey} className="border rounded-lg bg-gray-50">
                                 {/* Lesson Folder */}
                                 <div
                                   className="flex items-center gap-3 p-3 cursor-pointer hover:bg-gray-100 transition-colors rounded-lg"
