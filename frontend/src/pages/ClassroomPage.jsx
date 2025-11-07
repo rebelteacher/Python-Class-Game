@@ -43,6 +43,18 @@ export default function ClassroomPage({ user }) {
     fetchTests();
   }, [classroomId]);
 
+  const toggleFolder = (folder) => {
+    setExpandedFolders(prev => {
+      const newSet = new Set(prev);
+      if (newSet.has(folder)) {
+        newSet.delete(folder);
+      } else {
+        newSet.add(folder);
+      }
+      return newSet;
+    });
+  };
+
   const toggleChapter = (chapter) => {
     setExpandedChapters(prev => {
       const newSet = new Set(prev);
