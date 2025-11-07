@@ -173,7 +173,10 @@ function CompetitionView() {
                   <p className="text-sm font-semibold text-yellow-800 mb-1">CHAMPION</p>
                   <p className="text-2xl font-bold text-yellow-900">{winner.classroom_name}</p>
                   <p className="text-sm text-yellow-700">
-                    {winner.problems_solved} problems solved • {winner.xp_gained} XP gained
+                    {winner.avg_problems_per_student} avg problems/student • {winner.avg_xp_per_student} avg XP/student
+                  </p>
+                  <p className="text-xs text-yellow-600">
+                    ({winner.num_students} students • {winner.problems_solved} total problems • {winner.xp_gained} total XP)
                   </p>
                 </div>
                 <Trophy className="w-12 h-12 text-yellow-600" />
