@@ -80,20 +80,41 @@ export default function ClassroomPage({ user }) {
   };
 
   const organizeAssignments = () => {
-    const organized = {};
+    const organized = {
+      classwork: {},
+      tests: {}
+    };
+    
     console.log("📊 Organizing assignments:", assignments);
     assignments.forEach(assignment => {
       const chapter = assignment.chapter || "Uncategorized";
       const lesson = assignment.lesson || "Lesson 1";
+      const folder = 'classwork'; // All assignments go to classwork
       
-      if (!organized[chapter]) {
-        organized[chapter] = {};
+      if (!organized[folder][chapter]) {
+        organized[folder][chapter] = {};
       }
-      if (!organized[chapter][lesson]) {
-        organized[chapter][lesson] = [];
+      if (!organized[folder][chapter][lesson]) {
+        organized[folder][chapter][lesson] = [];
       }
-      organized[chapter][lesson].push(assignment);
+      organized[folder][chapter][lesson].push(assignment);
     });
+    
+    console.log("📊 Organizing tests:", tests);
+    tests.forEach(test => {
+      const chapter = test.chapter || "Uncategorized";
+      const lesson = test.lesson || "Lesson 1";
+      const folder = 'tests';
+      
+      if (!organized[folder][chapter]) {
+        organized[folder][chapter] = {};
+      }
+      if (!organized[folder][chapter][lesson]) {
+        organized[folder][chapter][lesson] = [];
+      }
+      organized[folder][chapter][lesson].push(test);
+    });
+    
     console.log("📁 Organized result:", organized);
     return organized;
   };
