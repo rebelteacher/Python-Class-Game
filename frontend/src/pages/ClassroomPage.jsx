@@ -786,14 +786,16 @@ export default function ClassroomPage({ user }) {
                             </div>
                           );
                         })}
-                        </div>
-                      )}
-                    </div>
-                  );
-                })}
-              </div>
-            )}
-          </TabsContent>
+                      </div>
+                    )}
+                  </div>
+                );
+              })}
+            </div>
+          )}
+        </div>
+      )}
+    </TabsContent>
 
           {isTeacher && (
             <TabsContent value="students">
