@@ -3621,13 +3621,31 @@ async def create_challenge(challenge_data: ChallengeCreate, request: Request):
     if challenged["id"] == user["id"]:
         raise HTTPException(status_code=400, detail="Cannot challenge yourself")
     
-    # Verify both students are in the same classroom
-    classroom = await db.classrooms.find_one({"id": challenge_data.classroom_id}, {"_id": 0})
-    if not classroom:
-        raise HTTPException(status_code=404, detail="Classroom not found")
+    # Verify both students share at least one classroom (can be different classes)
+    challenger_classrooms = await db.classrooms.find(
+        {"students": user["id"]},
+        {"_id": 0, "id": 1}
+    ).to_list(length=None)
     
-    if user["id"] not in classroom.get("students", []) or challenged["id"] not in classroom.get("students", []):
-        raise HTTPException(status_code=403, detail="Both students must be in the same classroom")
+    challenged_classrooms = await db.classrooms.find(
+        {"students": challenged["id"]},
+        {"_id": 0, "id": 1}
+    ).to_list(length=None)
+    
+    challenger_classroom_ids = [c["id"] for c in challenger_classrooms]
+    challenged_classroom_ids = [c["id"] for c in challenged_classrooms]
+    
+    # Find common classrooms
+    common_classrooms = list(set(challenger_classroom_ids) & set(challenged_classroom_ids))
+    
+    if not common_classrooms:
+        raise HTTPException(status_code=403, detail="You must share at least one classroom with this student")
+    
+    # Use the first common classroom or the specified one
+    if challenge_data.classroom_id in common_classrooms:
+        classroom_id = challenge_data.classroom_id
+    else:
+        classroom_id = common_classrooms[0]
     
     # Get a random problem from challenge pool
     challenge_problems = await db.challenge_problems.find({}, {"_id": 0}).to_list(length=None)
