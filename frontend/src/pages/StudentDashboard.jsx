@@ -647,17 +647,31 @@ export default function StudentDashboard({ user, setUser, refreshUser }) {
                       className="w-full mt-1 p-2 border rounded"
                     >
                       <option value="">Choose your opponent...</option>
-                      {classrooms.map(classroom => (
-                        <optgroup key={classroom.id} label={classroom.name}>
-                          {classroom.students
-                            ?.filter(s => s.id !== userProfile?.id)
-                            .map(student => (
-                              <option key={student.id} value={student.id}>
-                                {student.name}
-                              </option>
-                            ))}
-                        </optgroup>
-                      ))}
+                      {classrooms.map(classroom => {
+                        console.log('Rendering classroom:', classroom.name);
+                        console.log('Students in classroom:', classroom.students);
+                        console.log('Type of first student:', typeof classroom.students?.[0]);
+                        console.log('First student value:', classroom.students?.[0]);
+                        
+                        return (
+                          <optgroup key={classroom.id} label={classroom.name}>
+                            {classroom.students
+                              ?.filter(s => {
+                                // If students are still IDs (strings), skip this logic
+                                if (typeof s === 'string') {
+                                  console.warn('Student is still an ID string:', s);
+                                  return false;
+                                }
+                                return s.id !== userProfile?.id;
+                              })
+                              .map(student => (
+                                <option key={student.id} value={student.id}>
+                                  {student.name}
+                                </option>
+                              ))}
+                          </optgroup>
+                        );
+                      })}
                     </select>
                   </div>
                   
