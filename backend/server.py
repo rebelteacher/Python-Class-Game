@@ -4118,6 +4118,27 @@ async def calculate_competition_standings(competition_id: str, competition: dict
         avg_problems_per_student = round(total_problems_solved / num_students, 2) if num_students > 0 else 0
         avg_xp_per_student = round(total_xp_gained / num_students, 2) if num_students > 0 else 0
         
+        # Build student progress list with eligibility info
+        min_required = competition.get("min_problems_required", 10)
+        student_progress = []
+        for student_id in student_ids:
+            student_user = await db.users.find_one({"id": student_id}, {"_id": 0, "id": 1, "name": 1})
+            if student_user:
+                problems = student_stats.get(student_id, {}).get("problems", 0)
+                xp = student_stats.get(student_id, {}).get("xp", 0)
+                is_eligible = problems >= min_required
+                student_progress.append({
+                    "student_id": student_id,
+                    "student_name": student_user["name"],
+                    "problems_solved": problems,
+                    "xp_gained": xp,
+                    "is_eligible": is_eligible,
+                    "progress_percent": min(100, round((problems / min_required) * 100, 1)) if min_required > 0 else 100
+                })
+        
+        # Sort student progress by problems solved descending
+        student_progress.sort(key=lambda x: x["problems_solved"], reverse=True)
+        
         standings.append({
             "classroom_id": classroom_id,
             "classroom_name": classroom["name"],
@@ -4128,7 +4149,8 @@ async def calculate_competition_standings(competition_id: str, competition: dict
             "num_students": num_students,
             "captain": captain,
             "mvc": mvc,
-            "eligible_students": len([sid for sid, stats in student_stats.items() if stats["problems"] >= competition.get("min_problems_required", 10)])
+            "eligible_students": len([sid for sid, stats in student_stats.items() if stats["problems"] >= min_required]),
+            "student_progress": student_progress  # NEW: Individual student progress
         })
     
     # Sort by average problems per student (primary), then average XP per student (tiebreaker)
