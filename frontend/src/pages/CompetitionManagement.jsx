@@ -166,7 +166,8 @@ function CompetitionManagement() {
             </h1>
             <p className="text-gray-600">Create and manage class vs class competitions</p>
           </div>
-          <div className="flex gap-3">
+          <div className="flex items-center gap-3">
+            {user && <span className="text-gray-700 font-medium">{user.name}</span>}
             <Button onClick={() => navigate('/teacher/dashboard')} variant="outline">
               Back to Dashboard
             </Button>
