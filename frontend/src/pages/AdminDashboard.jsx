@@ -213,6 +213,13 @@ export default function AdminDashboard({ user }) {
                 <Coins className="w-4 h-4 mr-2" />
                 Add Coins to Student
               </Button>
+              <Button
+                onClick={() => navigate("/platform-admin/dashboard")}
+                className="bg-purple-600 hover:bg-purple-700"
+              >
+                <UserCheck className="w-4 h-4 mr-2" />
+                Approve Admin Requests
+              </Button>
             </div>
           </CardContent>
         </Card>
