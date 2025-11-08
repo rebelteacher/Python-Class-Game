@@ -763,6 +763,54 @@ async def teacher_login(login_data: TeacherLoginRequest):
         logging.error(f"Teacher login error: {str(e)}")
         raise HTTPException(status_code=500, detail="Login failed")
 
+@api_router.post("/auth/school-admin-signup")
+async def school_admin_signup(signup_data: SchoolAdminSignupRequest):
+    """School admin signup - requires platform admin approval"""
+    try:
+        # Check if email already exists
+        existing_user = await db.users.find_one({"email": signup_data.email})
+        if existing_user:
+            raise HTTPException(status_code=400, detail="Email already registered")
+        
+        # Extract email domain
+        email_domain = "@" + signup_data.email.split("@")[1] if "@" in signup_data.email else None
+        
+        # Hash password
+        hashed_password = bcrypt.hashpw(
+            signup_data.password.encode('utf-8'),
+            bcrypt.gensalt()
+        ).decode('utf-8')
+        
+        # Create pending school admin user
+        user_id = str(uuid.uuid4())
+        pending_admin = {
+            "id": user_id,
+            "email": signup_data.email,
+            "name": signup_data.name,
+            "password": hashed_password,
+            "role": "school_admin",
+            "school": signup_data.school,
+            "district": signup_data.district,
+            "job_title": signup_data.job_title,
+            "email_domain": email_domain,
+            "status": "pending_approval",  # pending_approval, approved, rejected
+            "created_at": datetime.now(timezone.utc).isoformat(),
+            "is_admin": False
+        }
+        
+        await db.pending_school_admins.insert_one(pending_admin)
+        
+        return {
+            "success": True,
+            "message": "School admin request submitted! A platform administrator will review your request shortly."
+        }
+        
+    except HTTPException:
+        raise
+    except Exception as e:
+        logging.error(f"School admin signup error: {str(e)}")
+        raise HTTPException(status_code=500, detail="Signup failed")
+
 @api_router.post("/auth/teacher-signup")
 async def teacher_signup(signup_data: TeacherSignupRequest):
     """Teacher signup with invite code"""
