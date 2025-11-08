@@ -862,6 +862,8 @@ export default function AssignmentPage({ user }) {
                         lineNumbers: "on",
                         scrollBeyondLastLine: false,
                         automaticLayout: true,
+                        wordWrap: "on",
+                        wrappingIndent: "indent",
                       }}
                     />
                   </CardContent>
