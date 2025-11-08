@@ -150,7 +150,7 @@ function App() {
         <AuthHandler>
           {({ user, setUser, refreshUser }) => (
             <Routes>
-              <Route path="/" element={user ? <Navigate to={user.role === "teacher" ? "/teacher/dashboard" : "/student/dashboard"} replace /> : <LandingPage />} />
+              <Route path="/" element={user ? <Navigate to={getDashboardRoute(user.role)} replace /> : <LandingPage />} />
               
               <Route
                 path="/teacher/dashboard"
