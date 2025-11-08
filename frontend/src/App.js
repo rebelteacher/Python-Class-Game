@@ -60,8 +60,13 @@ function AuthHandler({ children }) {
           setUser(response.data);
           window.location.hash = "";
           
+          // Redirect based on role
           if (response.data.role === "teacher") {
             navigate("/teacher/dashboard");
+          } else if (response.data.role === "school_admin") {
+            navigate("/school-admin/dashboard");
+          } else if (response.data.role === "district_admin") {
+            navigate("/district-admin/dashboard");
           } else {
             navigate("/student/dashboard");
           }
