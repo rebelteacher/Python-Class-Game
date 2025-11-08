@@ -169,7 +169,7 @@ function ChallengeResults() {
         {/* Actions */}
         <div className="flex gap-4 justify-center">
           <Button
-            onClick={() => navigate('/student')}
+            onClick={() => navigate('/student/dashboard')}
             className="bg-gradient-to-r from-orange-600 to-red-600"
           >
             <Home className="w-4 h-4 mr-2" />
