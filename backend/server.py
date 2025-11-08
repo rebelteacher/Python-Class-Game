@@ -160,9 +160,11 @@ class User(BaseModel):
     email: str
     name: str
     picture: Optional[str] = None
-    role: str  # "teacher" or "student"
+    role: str  # "teacher", "student", or "school_admin"
     password: Optional[str] = None  # Hashed password for teacher accounts (optional, for non-OAuth teachers)
     is_admin: bool = False  # Admin flag for platform management
+    district: Optional[str] = None  # School district name
+    school: Optional[str] = None  # School name
     xp: int = 0
     coins: int = 0
     rank: str = "Rookie"
