@@ -309,6 +309,18 @@ frontend:
     status_history:
       - working: "NA"
 
+  - task: "Hierarchical Admin System - Backend Endpoints"
+    implemented: true
+    working: "NA"
+    file: "backend/server.py"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: true
+    status_history:
+      - working: "NA"
+        agent: "main"
+        comment: "Implemented 6 new admin endpoints: school-admin/dashboard, district-admin/dashboard, school-admin/teachers, school-admin/teacher/{id}/classrooms, district-admin/schools, district-admin/teachers-in-school/{school}. All endpoints have role-based access control. School admin can view teachers and classrooms in their school. District admin can view schools and all teachers in district. Endpoints return stats and hierarchical data."
+
 
   - task: "Improve grading consistency and output comparison"
     implemented: true
