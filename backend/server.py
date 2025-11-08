@@ -2840,7 +2840,78 @@ async def emergency_fix_account(fix_data: dict):
     
     return {"success": True, "message": "Account restored to teacher/admin status"}
 
-# ==================== SCHOOL ADMIN MANAGEMENT ====================
+# ==================== DISTRICT & SCHOOL ADMIN MANAGEMENT ====================
+
+@api_router.get("/admin/pending-district-admins")
+async def get_pending_district_admins(request: Request):
+    """Get all pending district admin requests (Platform admin only)"""
+    user = await get_current_user(request)
+    
+    if not user.get("is_admin"):
+        raise HTTPException(status_code=403, detail="Admin access required")
+    
+    pending = await db.pending_district_admins.find(
+        {"status": "pending_approval"},
+        {"_id": 0}
+    ).to_list(length=None)
+    
+    return pending
+
+@api_router.post("/admin/approve-district-admin/{user_id}")
+async def approve_district_admin(user_id: str, request: Request):
+    """Approve a pending district admin (Platform admin only)"""
+    user = await get_current_user(request)
+    
+    if not user.get("is_admin"):
+        raise HTTPException(status_code=403, detail="Admin access required")
+    
+    # Get pending admin
+    pending = await db.pending_district_admins.find_one({"id": user_id}, {"_id": 0})
+    if not pending:
+        raise HTTPException(status_code=404, detail="Pending request not found")
+    
+    # Create actual user account
+    new_user = {
+        "id": pending["id"],
+        "email": pending["email"],
+        "name": pending["name"],
+        "password": pending["password"],
+        "role": "district_admin",
+        "district": pending["district"],
+        "job_title": pending["job_title"],
+        "is_admin": False,
+        "created_at": pending["created_at"],
+        "approved_at": datetime.now(timezone.utc).isoformat()
+    }
+    
+    await db.users.insert_one(new_user)
+    
+    # Update pending status
+    await db.pending_district_admins.update_one(
+        {"id": user_id},
+        {"$set": {"status": "approved", "approved_at": datetime.now(timezone.utc).isoformat()}}
+    )
+    
+    return {"success": True, "message": "District admin approved"}
+
+@api_router.post("/admin/reject-district-admin/{user_id}")
+async def reject_district_admin(user_id: str, request: Request):
+    """Reject a pending district admin (Platform admin only)"""
+    user = await get_current_user(request)
+    
+    if not user.get("is_admin"):
+        raise HTTPException(status_code=403, detail="Admin access required")
+    
+    # Update pending status
+    result = await db.pending_district_admins.update_one(
+        {"id": user_id},
+        {"$set": {"status": "rejected", "rejected_at": datetime.now(timezone.utc).isoformat()}}
+    )
+    
+    if result.modified_count == 0:
+        raise HTTPException(status_code=404, detail="Pending request not found")
+    
+    return {"success": True, "message": "District admin request rejected"}
 
 @api_router.get("/admin/pending-school-admins")
 async def get_pending_school_admins(request: Request):
