@@ -158,7 +158,7 @@ function ChallengeArena() {
         <div className="max-w-7xl mx-auto flex justify-between items-center">
           <div className="flex items-center gap-4">
             <Button
-              onClick={() => navigate('/student')}
+              onClick={() => navigate('/student/dashboard')}
               variant="ghost"
               size="sm"
               className="text-white hover:bg-white/20"
