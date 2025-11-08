@@ -120,6 +120,41 @@ def generate_class_code():
     """Generate a unique 6-character class code"""
     return ''.join(random.choices(string.ascii_uppercase + string.digits, k=6))
 
+async def update_school_record(user_id: str, school: str, district: str, role: str):
+    """Update or create school record when user signs up"""
+    if not school or not district:
+        return
+    
+    # Find or create school
+    school_record = await db.schools.find_one({"name": school, "district": district}, {"_id": 0})
+    
+    if not school_record:
+        # Create new school
+        new_school = School(
+            name=school,
+            district=district,
+            teacher_ids=[user_id] if role == "teacher" else [],
+            school_admin_ids=[user_id] if role == "school_admin" else [],
+            teacher_count=1 if role == "teacher" else 0
+        )
+        school_dict = new_school.model_dump()
+        school_dict["created_at"] = school_dict["created_at"].isoformat()
+        await db.schools.insert_one(school_dict)
+    else:
+        # Update existing school
+        update_data = {}
+        if role == "teacher" and user_id not in school_record.get("teacher_ids", []):
+            update_data["$addToSet"] = {"teacher_ids": user_id}
+            update_data["$inc"] = {"teacher_count": 1}
+        elif role == "school_admin" and user_id not in school_record.get("school_admin_ids", []):
+            update_data["$addToSet"] = {"school_admin_ids": user_id}
+        
+        if update_data:
+            await db.schools.update_one(
+                {"name": school, "district": district},
+                update_data
+            )
+
 async def get_current_user(request: Request):
     """Get current user from session token in cookies or Authorization header"""
     session_token = request.cookies.get("session_token")
