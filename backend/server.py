@@ -260,6 +260,13 @@ class SchoolAdminSignupRequest(BaseModel):
     district: str
     job_title: str  # Principal, Assistant Principal, Administrator, etc.
 
+class DistrictAdminSignupRequest(BaseModel):
+    name: str
+    email: str
+    password: str
+    district: str
+    job_title: str  # Superintendent, Assistant Superintendent, Director, etc.
+
 class School(BaseModel):
     model_config = ConfigDict(extra="ignore")
     id: str = Field(default_factory=lambda: str(uuid.uuid4()))
