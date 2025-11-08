@@ -481,30 +481,29 @@ export default function StudentDashboard({ user, setUser, refreshUser }) {
         className="shadow-sm border-b"
         style={{ 
           backgroundColor: getThemeNavColor() || 'white',
-          borderColor: getThemeNavColor() ? 'rgba(255,255,255,0.2)' : '#e5e7eb',
-          width: '100vw',
-          position: 'relative',
-          left: '50%',
-          right: '50%',
-          marginLeft: '-50vw',
-          marginRight: '-50vw'
+          borderColor: getThemeNavColor() ? 'rgba(255,255,255,0.2)' : '#e5e7eb'
         }}
       >
-        <div className="px-6 py-4 flex justify-between items-center" style={{ maxWidth: '1400px', margin: '0 auto' }}>
-          <div className="flex items-center space-x-2">
-            <Code2 className={`w-7 h-7 ${getThemeNavColor() ? 'text-white' : 'text-teal-600'}`} />
-            <span className={`text-xl font-bold ${getThemeNavColor() ? 'text-white' : 'text-gray-900'}`}>ByteBattles Arena</span>
-            <span className={`ml-4 px-3 py-1 text-sm font-medium rounded-full ${getThemeNavColor() ? 'bg-white/20 text-white border border-white/30' : 'bg-teal-100 text-teal-700'}`}>
-              Student
-            </span>
+        <div className="px-6 py-3">
+          {/* Row 1: Branding and User Info */}
+          <div className="flex justify-between items-center mb-3">
+            <div className="flex items-center space-x-2">
+              <Code2 className={`w-7 h-7 ${getThemeNavColor() ? 'text-white' : 'text-teal-600'}`} />
+              <span className={`text-xl font-bold ${getThemeNavColor() ? 'text-white' : 'text-gray-900'}`}>ByteBattles Arena</span>
+              <span className={`ml-4 px-3 py-1 text-sm font-medium rounded-full ${getThemeNavColor() ? 'bg-white/20 text-white border border-white/30' : 'bg-teal-100 text-teal-700'}`}>
+                Student
+              </span>
+            </div>
+            <span className={`text-lg font-medium ${getThemeNavColor() ? 'text-white' : 'text-gray-700'}`}>{user.name}</span>
           </div>
-          <div className="flex items-center space-x-3">
-            <span className={`hidden sm:inline ${getThemeNavColor() ? 'text-white' : 'text-gray-700'}`}>{user.name}</span>
-            <Button onClick={() => navigate("/notes")} variant="outline" size="sm" className={`gap-2 ${getThemeNavColor() ? 'border-white/30 text-white hover:bg-white/20' : ''}`}>
+          
+          {/* Row 2: Action Buttons */}
+          <div className="flex items-center justify-end space-x-2 flex-wrap">
+            <Button onClick={() => navigate("/notes")} variant="outline" size="sm" className={`gap-2 ${getThemeNavColor() ? 'border-white/30 text-white hover:bg-white/20 bg-white/5' : ''}`}>
               <FileText className="w-4 h-4" />
               Notes
             </Button>
-            <Button data-testid="logout-btn" onClick={handleLogout} variant="ghost" size="sm" className={`gap-2 ${getThemeNavColor() ? 'text-white hover:bg-white/20' : ''}`}>
+            <Button data-testid="logout-btn" onClick={handleLogout} variant="outline" size="sm" className={`gap-2 ${getThemeNavColor() ? 'border-white/30 text-white hover:bg-white/20 bg-white/5' : ''}`}>
               <LogOut className="w-4 h-4" />
               Logout
             </Button>
