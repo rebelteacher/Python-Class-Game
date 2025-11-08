@@ -217,6 +217,26 @@ class TeacherSignupRequest(BaseModel):
     district: Optional[str] = None
     school: Optional[str] = None
 
+class SchoolAdminSignupRequest(BaseModel):
+    name: str
+    email: str
+    password: str
+    school: str
+    district: str
+    job_title: str  # Principal, Assistant Principal, Administrator, etc.
+
+class School(BaseModel):
+    model_config = ConfigDict(extra="ignore")
+    id: str = Field(default_factory=lambda: str(uuid.uuid4()))
+    name: str
+    district: str
+    email_domain: Optional[str] = None  # e.g., "@lincolnelem.edu"
+    teacher_ids: List[str] = Field(default_factory=list)
+    school_admin_ids: List[str] = Field(default_factory=list)
+    created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+    teacher_count: int = 0
+    student_count: int = 0
+
 class InviteCode(BaseModel):
     model_config = ConfigDict(extra="ignore")
     id: str = Field(default_factory=lambda: str(uuid.uuid4()))
