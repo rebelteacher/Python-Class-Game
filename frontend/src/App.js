@@ -29,6 +29,10 @@ import ChallengeArena from "./pages/ChallengeArena";
 import ChallengeResults from "./pages/ChallengeResults";
 import ChallengePool from "./pages/ChallengePool";
 import SchoolAdminSignup from "./pages/SchoolAdminSignup";
+import DistrictAdminSignup from "./pages/DistrictAdminSignup";
+import SchoolAdminDashboard from "./pages/SchoolAdminDashboard";
+import DistrictAdminDashboard from "./pages/DistrictAdminDashboard";
+import PlatformAdminDashboard from "./pages/PlatformAdminDashboard";
 
 const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
 const API = `${BACKEND_URL}/api`;
