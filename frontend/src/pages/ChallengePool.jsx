@@ -194,7 +194,8 @@ function ChallengePool() {
               </h1>
               <p className="text-gray-600">Problems for student-to-student challenges</p>
             </div>
-            <div className="flex gap-3">
+            <div className="flex items-center gap-3">
+              {user && <span className="text-gray-700 font-medium">{user.name}</span>}
               <Button onClick={() => navigate('/teacher/dashboard')} variant="outline">
                 <ArrowLeft className="w-4 h-4 mr-2" />
                 Back
