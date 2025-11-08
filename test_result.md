@@ -1160,3 +1160,151 @@ agent_communication:
       proper access controls, and real-time competition tracking.
       The feature successfully enables teachers to create competitions between classrooms
       with automatic Class Captain and MVC identification based on student performance.
+
+
+  - agent: "main"
+    message: |
+      HIERARCHICAL ADMIN SYSTEM - IMPLEMENTATION COMPLETE - READY FOR TESTING
+      
+      BACKEND IMPLEMENTATION:
+      1. Added School Admin Dashboard endpoint (GET /api/school-admin/dashboard):
+         - Returns stats (school_name, total_teachers, total_classrooms, total_students)
+         - Returns list of teachers in the school
+         - Returns list of classrooms for the school
+         - School admin only access
+      
+      2. Added District Admin Dashboard endpoint (GET /api/district-admin/dashboard):
+         - Returns stats (district, total_schools, total_teachers, total_classrooms, total_students)
+         - Returns list of schools in district with counts
+         - Returns list of all teachers in district
+         - District admin only access
+      
+      3. Added School Admin Teachers endpoint (GET /api/school-admin/teachers):
+         - Returns all teachers in school admin's school
+         - School admin only access
+      
+      4. Added School Admin Teacher Classrooms endpoint (GET /api/school-admin/teacher/{teacher_id}/classrooms):
+         - Returns classrooms for a specific teacher (with populated student details)
+         - Validates teacher is in same school as admin
+         - School admin only access
+      
+      5. Added District Admin Schools endpoint (GET /api/district-admin/schools):
+         - Returns all schools in district admin's district with teacher counts
+         - District admin only access
+      
+      6. Added District Admin Teachers in School endpoint (GET /api/district-admin/teachers-in-school/{school_name}):
+         - Returns all teachers in a specific school within the district
+         - District admin only access
+      
+      FRONTEND IMPLEMENTATION:
+      1. Created SchoolAdminDashboard.jsx:
+         - Main view: Shows school stats (teachers, classrooms, students)
+         - Lists all teachers in school with "View Classrooms" button
+         - Drill-down view: Shows selected teacher's classrooms with student details
+         - View-only badge displayed on all items
+         - Green/teal/blue gradient theme
+         - Back navigation between views
+      
+      2. Created PlatformAdminDashboard.jsx:
+         - Shows pending school and district admin requests
+         - Summary stats cards for pending requests
+         - Approve/reject buttons for each request
+         - Separate sections for school and district admins
+         - Purple/pink/red gradient theme
+         - Displays job title, school, district info for each request
+      
+      3. Updated DistrictAdminDashboard.jsx:
+         - Already existed with proper functionality
+         - Shows district stats and list of schools/teachers
+      
+      4. Updated App.js:
+         - Added imports for SchoolAdminDashboard, DistrictAdminDashboard, PlatformAdminDashboard
+         - Created getDashboardRoute() helper function for role-based redirects
+         - Updated login redirect logic to handle school_admin and district_admin roles
+         - Updated root route redirect to use getDashboardRoute()
+         - Updated ProtectedRoute to use getDashboardRoute()
+         - Added routes:
+           * /signup/school-admin (SchoolAdminSignup page)
+           * /signup/district-admin (DistrictAdminSignup page)
+           * /school-admin/dashboard (SchoolAdminDashboard - school_admin only)
+           * /district-admin/dashboard (DistrictAdminDashboard - district_admin only)
+           * /platform-admin/dashboard (PlatformAdminDashboard - platform admin only)
+      
+      5. Updated AdminDashboard.jsx:
+         - Added "Approve Admin Requests" button to Admin Tools section
+         - Button navigates to /platform-admin/dashboard
+      
+      6. Updated TeacherLogin.jsx:
+         - Added "District Admin Sign Up" link (purple)
+         - Updated "School Admin Sign Up" link to use new route
+         - All signup links now point to /signup/* routes
+      
+      ADMIN HIERARCHY STRUCTURE:
+      - Platform Admin (is_admin: true):
+         * Can approve/reject school and district admin requests
+         * Can manage all aspects of the platform
+         * Accesses approval center via Admin Dashboard
+      
+      - District Admin (role: district_admin):
+         * Views all schools in their district
+         * Views all teachers across district
+         * Can drill down to see individual school/teacher data
+         * READ-ONLY access (view-only)
+      
+      - School Admin (role: school_admin):
+         * Views all teachers in their school
+         * Can drill down to see teacher's classrooms and students
+         * READ-ONLY access (view-only)
+      
+      SIGNUP & APPROVAL FLOW:
+      1. User fills out school/district admin signup form (already implemented)
+      2. Request goes to pending_school_admins or pending_district_admins collection
+      3. Platform admin sees pending requests in Platform Admin Dashboard
+      4. Platform admin can approve (creates user account) or reject request
+      5. Upon approval, user can login and access their admin dashboard
+      
+      TESTING PRIORITY - HIERARCHICAL ADMIN SYSTEM:
+      Backend:
+      - Test GET /api/school-admin/dashboard (school admin only)
+      - Test GET /api/district-admin/dashboard (district admin only)
+      - Test GET /api/school-admin/teachers (returns teachers in school)
+      - Test GET /api/school-admin/teacher/{id}/classrooms (with student details)
+      - Test GET /api/district-admin/schools (returns schools in district)
+      - Test GET /api/district-admin/teachers-in-school/{school} (returns teachers)
+      - Test access control (403 for wrong roles)
+      
+      Frontend:
+      - Test School Admin Signup flow (/signup/school-admin)
+      - Test District Admin Signup flow (/signup/district-admin)
+      - Test Platform Admin approval workflow:
+         * Login as platform admin
+         * Navigate to Platform Admin Dashboard
+         * Approve pending school admin
+         * Approve pending district admin
+      - Test School Admin Dashboard:
+         * Login as school admin
+         * View school stats and teachers list
+         * Click "View Classrooms" on a teacher
+         * Verify classrooms and students display
+         * Verify view-only badges
+      - Test District Admin Dashboard:
+         * Login as district admin
+         * View district stats and schools list
+         * View all teachers in district
+      - Test login redirects:
+         * School admin → /school-admin/dashboard
+         * District admin → /district-admin/dashboard
+      
+      KEY FEATURES IMPLEMENTED:
+      ✅ School admin can view teachers and their classrooms (view-only)
+      ✅ District admin can view schools and all teachers (view-only)
+      ✅ Platform admin can approve/reject admin requests
+      ✅ Hierarchical data access (district → schools → teachers → classrooms)
+      ✅ Role-based navigation and redirects
+      ✅ Secure access control on all endpoints
+      ✅ Clean, distinct UI themes for each admin type
+      
+      NEXT PHASE (Deferred - not in current scope):
+      - Implement view-only mode in teacher components (TeacherDashboard, ClassroomPage, etc.)
+      - Add ability for admins to "impersonate" teacher view
+      - Add detailed reports for school/district admins
