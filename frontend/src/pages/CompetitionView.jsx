@@ -102,14 +102,16 @@ function CompetitionView() {
       <div className="max-w-7xl mx-auto">
         {/* Header */}
         <div className="mb-8">
-          <Button 
-            onClick={() => navigate(user?.role === 'teacher' ? '/teacher/competitions' : '/student/dashboard')}
-            variant="outline"
-            className="mb-4"
-          >
-            <ArrowLeft className="w-4 h-4 mr-2" />
-            Back
-          </Button>
+          <div className="flex justify-between items-center mb-4">
+            <Button 
+              onClick={() => navigate(user?.role === 'teacher' ? '/teacher/competitions' : '/student/dashboard')}
+              variant="outline"
+            >
+              <ArrowLeft className="w-4 h-4 mr-2" />
+              Back
+            </Button>
+            {user && <span className="text-gray-700 font-medium text-lg">{user.name}</span>}
+          </div>
           
           <div className="flex justify-between items-start">
             <div>
