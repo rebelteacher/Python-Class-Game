@@ -28,9 +28,24 @@ function CompetitionManagement() {
   const [minProblems, setMinProblems] = useState(10);
 
   useEffect(() => {
+    fetchUser();
     fetchCompetitions();
     fetchClassrooms();
   }, []);
+
+  const fetchUser = async () => {
+    try {
+      const response = await fetch(`${BACKEND_URL}/api/auth/me`, {
+        credentials: 'include'
+      });
+      if (response.ok) {
+        const data = await response.json();
+        setUser(data);
+      }
+    } catch (error) {
+      console.error('Error fetching user:', error);
+    }
+  };
 
   const fetchCompetitions = async () => {
     try {
