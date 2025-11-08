@@ -170,6 +170,16 @@ function App() {
                   </ProtectedRoute>
                 }
               />
+
+              <Route
+                path="/student/sandbox"
+                element={
+                  <ProtectedRoute user={user} requiredRole="student">
+                    <StudentSandbox user={user} />
+                  </ProtectedRoute>
+                }
+              />
+              
               
               <Route
                 path="/classroom/:classroomId"
