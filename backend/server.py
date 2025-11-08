@@ -819,6 +819,9 @@ async def teacher_signup(signup_data: TeacherSignupRequest):
         
         await db.users.insert_one(new_user)
         
+        # Update school record
+        await update_school_record(user_id, signup_data.school, signup_data.district, "teacher")
+        
         # Mark invite code as used
         await db.invite_codes.update_one(
             {"id": invite_code["id"]},
