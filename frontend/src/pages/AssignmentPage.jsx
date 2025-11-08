@@ -76,10 +76,25 @@ export default function AssignmentPage({ user }) {
     // Load saved code when switching problems or when savedCodePerProblem updates
     if (assignment && assignment.problems && assignment.problems[currentProblemIndex]) {
       const currentProblemId = getCurrentProblemId();
-      
-      // Check for saved code in the state (which is loaded from localStorage)
-      const savedCode = savedCodePerProblem[currentProblemId];
       const currentProblem = assignment.problems[currentProblemIndex];
+      
+      // If problem is marked as final/done, load the submitted code
+      if (problemsFinal[currentProblemId] && submissions.length > 0) {
+        const problemSubmissions = submissions.filter(sub => sub.problem_id === currentProblemId);
+        if (problemSubmissions.length > 0) {
+          // Get the final submission (last one with is_final flag)
+          const finalSubmission = problemSubmissions.find(sub => sub.is_final) || 
+                                  problemSubmissions[problemSubmissions.length - 1];
+          if (finalSubmission && finalSubmission.code) {
+            setCode(finalSubmission.code);
+            setOutput(""); // Clear output when loading saved submission
+            return;
+          }
+        }
+      }
+      
+      // Otherwise, check for saved code in localStorage
+      const savedCode = savedCodePerProblem[currentProblemId];
       
       if (savedCode && savedCode.trim() !== "" && savedCode !== currentProblem.starter_code) {
         // Load saved code
@@ -91,7 +106,7 @@ export default function AssignmentPage({ user }) {
       
       setOutput("");
     }
-  }, [currentProblemIndex, assignment, savedCodePerProblem]);
+  }, [currentProblemIndex, assignment, savedCodePerProblem, problemsFinal, submissions]);
   
   // Auto-save code to localStorage (debounced to prevent flickering)
   useEffect(() => {
