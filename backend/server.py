@@ -745,6 +745,8 @@ async def teacher_signup(signup_data: TeacherSignupRequest):
             "role": "teacher",
             "password": hashed_password,
             "is_admin": False,
+            "district": signup_data.district,
+            "school": signup_data.school,
             "xp": 0,
             "coins": 0,
             "rank": "Rookie",
