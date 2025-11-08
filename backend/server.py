@@ -195,7 +195,7 @@ class User(BaseModel):
     email: str
     name: str
     picture: Optional[str] = None
-    role: str  # "teacher", "student", or "school_admin"
+    role: str  # "teacher", "student", "school_admin", or "district_admin"
     password: Optional[str] = None  # Hashed password for teacher accounts (optional, for non-OAuth teachers)
     is_admin: bool = False  # Admin flag for platform management
     district: Optional[str] = None  # School district name
