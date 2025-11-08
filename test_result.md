@@ -430,18 +430,23 @@ frontend:
 
 metadata:
   created_by: "main_agent"
-  version: "4.1"
-  test_sequence: 6
+  version: "5.0"
+  test_sequence: 7
   run_ui: false
   last_tested_by: "testing_agent"
   backend_test_completion: "2024-12-28"
 
 test_plan:
-  current_focus: []
+  current_focus:
+    - "Hierarchical Admin System - Backend Endpoints"
+    - "Hierarchical Admin System - SchoolAdminDashboard Frontend"
+    - "Hierarchical Admin System - PlatformAdminDashboard Frontend"
+    - "Hierarchical Admin System - App.js Routes & Redirects"
+    - "Hierarchical Admin System - Navigation Links"
   stuck_tasks: []
   test_all: false
   test_priority: "high_first"
-  testing_complete: true
+  testing_complete: false
 
 agent_communication:
   - agent: "testing"
