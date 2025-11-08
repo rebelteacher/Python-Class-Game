@@ -115,13 +115,28 @@ function AuthHandler({ children }) {
   return children({ user, setUser, refreshUser });
 }
 
+// Helper function to get dashboard route based on role
+function getDashboardRoute(role) {
+  switch (role) {
+    case "teacher":
+      return "/teacher/dashboard";
+    case "school_admin":
+      return "/school-admin/dashboard";
+    case "district_admin":
+      return "/district-admin/dashboard";
+    case "student":
+    default:
+      return "/student/dashboard";
+  }
+}
+
 function ProtectedRoute({ children, user, requiredRole }) {
   if (!user) {
     return <Navigate to="/" replace />;
   }
 
   if (requiredRole && user.role !== requiredRole) {
-    return <Navigate to={user.role === "teacher" ? "/teacher/dashboard" : "/student/dashboard"} replace />;
+    return <Navigate to={getDashboardRoute(user.role)} replace />;
   }
 
   return children;
