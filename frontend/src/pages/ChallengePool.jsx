@@ -14,6 +14,7 @@ function ChallengePool() {
   const navigate = useNavigate();
   const { toast } = useToast();
   const [problems, setProblems] = useState([]);
+  const [user, setUser] = useState(null);
   const [dialogOpen, setDialogOpen] = useState(false);
   
   // Form state
@@ -24,8 +25,23 @@ function ChallengePool() {
   const [testCases, setTestCases] = useState([{ input_data: '', expected_output: '' }]);
 
   useEffect(() => {
+    fetchUser();
     fetchProblems();
   }, []);
+
+  const fetchUser = async () => {
+    try {
+      const response = await fetch(`${BACKEND_URL}/api/auth/me`, {
+        credentials: 'include'
+      });
+      if (response.ok) {
+        const data = await response.json();
+        setUser(data);
+      }
+    } catch (error) {
+      console.error('Error fetching user:', error);
+    }
+  };
 
   const fetchProblems = async () => {
     try {
