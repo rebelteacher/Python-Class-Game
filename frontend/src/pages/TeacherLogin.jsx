@@ -133,10 +133,18 @@ export default function TeacherLogin() {
                 <Button
                   type="button"
                   variant="link"
-                  onClick={() => navigate("/school-admin-signup")}
+                  onClick={() => navigate("/signup/school-admin")}
                   className="text-emerald-600"
                 >
                   School Admin Sign Up (requires approval)
+                </Button>
+                <Button
+                  type="button"
+                  variant="link"
+                  onClick={() => navigate("/signup/district-admin")}
+                  className="text-purple-600"
+                >
+                  District Admin Sign Up (requires approval)
                 </Button>
               </div>
             </div>
