@@ -151,7 +151,7 @@ function CompetitionManagement() {
             <p className="text-gray-600">Create and manage class vs class competitions</p>
           </div>
           <div className="flex gap-3">
-            <Button onClick={() => navigate('/teacher')} variant="outline">
+            <Button onClick={() => navigate('/teacher/dashboard')} variant="outline">
               Back to Dashboard
             </Button>
             <Dialog open={createDialogOpen} onOpenChange={setCreateDialogOpen}>
