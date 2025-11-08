@@ -2840,6 +2840,98 @@ async def emergency_fix_account(fix_data: dict):
     
     return {"success": True, "message": "Account restored to teacher/admin status"}
 
+# ==================== DISTRICT ADMIN DASHBOARD ====================
+
+@api_router.get("/district-admin/dashboard")
+async def get_district_admin_dashboard(request: Request):
+    """Get district-wide statistics (District admin only)"""
+    user = await get_current_user(request)
+    
+    if user.get("role") != "district_admin":
+        raise HTTPException(status_code=403, detail="District admin access required")
+    
+    district = user.get("district")
+    
+    # Get all schools in district
+    schools = await db.schools.find({"district": district}, {"_id": 0}).to_list(length=None)
+    
+    # Get all teachers in district
+    teachers = await db.users.find({"district": district, "role": "teacher"}, {"_id": 0}).to_list(length=None)
+    
+    # Calculate stats
+    total_schools = len(schools)
+    total_teachers = len(teachers)
+    total_students = sum(school.get("student_count", 0) for school in schools)
+    total_classrooms = 0
+    
+    for teacher in teachers:
+        classrooms = await db.classrooms.find({"teacher_id": teacher["id"]}, {"_id": 0}).to_list(length=None)
+        total_classrooms += len(classrooms)
+    
+    return {
+        "district": district,
+        "schools": schools,
+        "teachers": teachers,
+        "stats": {
+            "total_schools": total_schools,
+            "total_teachers": total_teachers,
+            "total_students": total_students,
+            "total_classrooms": total_classrooms
+        }
+    }
+
+# ==================== SCHOOL ADMIN DASHBOARD ====================
+
+@api_router.get("/school-admin/dashboard")
+async def get_school_admin_dashboard(request: Request):
+    """Get school statistics (School admin only)"""
+    user = await get_current_user(request)
+    
+    if user.get("role") != "school_admin":
+        raise HTTPException(status_code=403, detail="School admin access required")
+    
+    school = user.get("school")
+    district = user.get("district")
+    
+    # Get school record
+    school_record = await db.schools.find_one({"name": school, "district": district}, {"_id": 0})
+    
+    # Get all teachers at this school
+    teachers = await db.users.find({"school": school, "district": district, "role": "teacher"}, {"_id": 0}).to_list(length=None)
+    
+    # Calculate stats for each teacher
+    teacher_stats = []
+    total_students = 0
+    total_classrooms = 0
+    
+    for teacher in teachers:
+        classrooms = await db.classrooms.find({"teacher_id": teacher["id"]}, {"_id": 0}).to_list(length=None)
+        num_classrooms = len(classrooms)
+        num_students = sum(len(c.get("students", [])) for c in classrooms)
+        
+        total_classrooms += num_classrooms
+        total_students += num_students
+        
+        teacher_stats.append({
+            "id": teacher["id"],
+            "name": teacher["name"],
+            "email": teacher["email"],
+            "num_classrooms": num_classrooms,
+            "num_students": num_students
+        })
+    
+    return {
+        "school": school,
+        "district": district,
+        "teachers": teacher_stats,
+        "stats": {
+            "total_teachers": len(teachers),
+            "total_classrooms": total_classrooms,
+            "total_students": total_students
+        }
+    }
+
+# ==================== ADMIN ENDPOINTS ====================
 # ==================== DISTRICT & SCHOOL ADMIN MANAGEMENT ====================
 
 @api_router.get("/admin/pending-district-admins")
