@@ -19,6 +19,8 @@ export default function TeacherSignup() {
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [inviteCode, setInviteCode] = useState("");
+  const [district, setDistrict] = useState("");
+  const [school, setSchool] = useState("");
   const [loading, setLoading] = useState(false);
 
   // Auto-fill invite code from URL parameter
