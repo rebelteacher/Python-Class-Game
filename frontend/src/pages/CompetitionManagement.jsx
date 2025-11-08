@@ -15,6 +15,7 @@ function CompetitionManagement() {
   const { toast } = useToast();
   const [competitions, setCompetitions] = useState([]);
   const [classrooms, setClassrooms] = useState([]);
+  const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(false);
   const [createDialogOpen, setCreateDialogOpen] = useState(false);
   
