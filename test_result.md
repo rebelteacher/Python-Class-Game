@@ -113,6 +113,18 @@ user_problem_statement: |
   7. Score-only display (no answer review after submission)
   8. Printable test score reports by classroom
 
+  FUTURE FEATURE REQUEST:
+  9. **Hint Button for Students (Cost: Coins)** - Add a hint button to assignment problems that costs coins to use. 
+     - Purpose: Encourage students to read their feedback before asking for hints
+     - If students have to pay coins for a hint, they'll remember to check feedback first
+     - Implementation: Button on AssignmentPage that deducts coins and calls AI to generate a helpful hint based on:
+       * The problem description
+       * Their current code attempt
+       * The feedback they already received
+     - Consider pricing: 50-100 coins per hint (make it meaningful but not prohibitive)
+     - Track hint usage per student/problem for teacher analytics
+
+
 backend:
   - task: "Create MC Question model and CRUD endpoints"
     implemented: true
