@@ -769,7 +769,7 @@ export default function AssignmentPage({ user }) {
                       height="600px"
                       defaultLanguage="python"
                       value={code}
-                      onChange={(value) => setCode(value || "")}
+                      onChange={(value) => !problemsFinal[getCurrentProblemId()] && setCode(value || "")}
                       theme={darkMode ? "vs-dark" : "vs-light"}
                       options={{
                         minimap: { enabled: false },
@@ -779,6 +779,7 @@ export default function AssignmentPage({ user }) {
                         automaticLayout: true,
                         wordWrap: "on",
                         wrappingIndent: "indent",
+                        readOnly: problemsFinal[getCurrentProblemId()],
                       }}
                     />
                   </CardContent>
