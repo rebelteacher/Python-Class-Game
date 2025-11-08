@@ -350,6 +350,41 @@ function App() {
                   </ProtectedRoute>
                 }
               />
+
+              {/* Admin Signup Routes */}
+              <Route path="/signup/school-admin" element={<SchoolAdminSignup />} />
+              <Route path="/signup/district-admin" element={<DistrictAdminSignup />} />
+
+              {/* School Admin Routes */}
+              <Route
+                path="/school-admin/dashboard"
+                element={
+                  <ProtectedRoute user={user} requiredRole="school_admin">
+                    <SchoolAdminDashboard user={user} />
+                  </ProtectedRoute>
+                }
+              />
+
+              {/* District Admin Routes */}
+              <Route
+                path="/district-admin/dashboard"
+                element={
+                  <ProtectedRoute user={user} requiredRole="district_admin">
+                    <DistrictAdminDashboard user={user} />
+                  </ProtectedRoute>
+                }
+              />
+
+              {/* Platform Admin Routes */}
+              <Route
+                path="/platform-admin/dashboard"
+                element={
+                  <ProtectedRoute user={user}>
+                    <PlatformAdminDashboard user={user} />
+                  </ProtectedRoute>
+                }
+              />
+
             </Routes>
           )}
         </AuthHandler>
