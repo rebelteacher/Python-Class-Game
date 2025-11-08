@@ -179,7 +179,7 @@ function ChallengePool() {
               <p className="text-gray-600">Problems for student-to-student challenges</p>
             </div>
             <div className="flex gap-3">
-              <Button onClick={() => navigate('/teacher')} variant="outline">
+              <Button onClick={() => navigate('/teacher/dashboard')} variant="outline">
                 <ArrowLeft className="w-4 h-4 mr-2" />
                 Back
               </Button>
