@@ -57,7 +57,9 @@ export default function TeacherSignup() {
         name,
         email,
         password,
-        invite_code: inviteCode
+        invite_code: inviteCode,
+        district,
+        school
       });
 
       // Set session cookie
