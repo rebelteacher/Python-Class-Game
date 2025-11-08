@@ -842,6 +842,35 @@ export default function StudentDashboard({ user, setUser, refreshUser }) {
           </div>
         )}
 
+
+        {/* Quick Access Section */}
+        <div className="mb-8">
+          <Card className="border-2 border-purple-200 bg-gradient-to-r from-purple-50 to-pink-50">
+            <CardContent className="pt-6">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-4">
+                  <div className="p-3 bg-purple-100 rounded-lg">
+                    <Code2 className="w-8 h-8 text-purple-600" />
+                  </div>
+                  <div>
+                    <h3 className="text-lg font-semibold text-purple-900">Practice Coding</h3>
+                    <p className="text-sm text-purple-700">
+                      Try out your Python skills in a free-style coding sandbox - no assignments, just practice!
+                    </p>
+                  </div>
+                </div>
+                <Button 
+                  onClick={() => navigate("/student/sandbox")}
+                  className="bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 gap-2"
+                >
+                  <Code2 className="w-4 h-4" />
+                  Open Sandbox
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+
         {/* Active Competitions Section */}
         {competitions.length > 0 && (
           <div className="mb-8">
