@@ -129,6 +129,28 @@ export default function TeacherSignup() {
             </div>
 
             <div className="space-y-2">
+              <Label htmlFor="district">District (Optional)</Label>
+              <Input
+                id="district"
+                type="text"
+                placeholder="e.g., Springfield School District"
+                value={district}
+                onChange={(e) => setDistrict(e.target.value)}
+              />
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="school">School (Optional)</Label>
+              <Input
+                id="school"
+                type="text"
+                placeholder="e.g., Lincoln Elementary"
+                value={school}
+                onChange={(e) => setSchool(e.target.value)}
+              />
+            </div>
+
+            <div className="space-y-2">
               <Label htmlFor="password">Password</Label>
               <div className="relative">
                 <Lock className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
