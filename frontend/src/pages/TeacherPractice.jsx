@@ -242,6 +242,8 @@ export default function TeacherPractice({ user }) {
                         lineNumbers: "on",
                         scrollBeyondLastLine: false,
                         automaticLayout: true,
+                        wordWrap: "on",
+                        wrappingIndent: "indent",
                       }}
                     />
                   </CardContent>
