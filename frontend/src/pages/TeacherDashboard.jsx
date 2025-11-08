@@ -105,16 +105,21 @@ export default function TeacherDashboard({ user, setUser }) {
   return (
     <div data-testid="teacher-dashboard" className="min-h-screen bg-gradient-to-br from-teal-50 via-orange-50 to-pink-50">
       <nav className="bg-gradient-to-r from-teal-600 via-cyan-600 to-blue-600 shadow-lg">
-        <div className="container mx-auto px-6 py-4 flex justify-between items-center">
-          <div className="flex items-center space-x-2">
-            <Code2 className="w-7 h-7 text-white" />
-            <span className="text-xl font-bold text-white">ByteBattles Arena</span>
-            <span className="ml-4 px-3 py-1 bg-white/20 backdrop-blur-sm text-white text-sm font-medium rounded-full border border-white/30">
-              Teacher
-            </span>
+        <div className="px-6 py-3">
+          {/* Row 1: Branding and User Info */}
+          <div className="flex justify-between items-center mb-3">
+            <div className="flex items-center space-x-2">
+              <Code2 className="w-7 h-7 text-white" />
+              <span className="text-xl font-bold text-white">ByteBattles Arena</span>
+              <span className="ml-4 px-3 py-1 bg-white/20 backdrop-blur-sm text-white text-sm font-medium rounded-full border border-white/30">
+                Teacher
+              </span>
+            </div>
+            <span className="text-lg font-medium text-white">{user.name}</span>
           </div>
-          <div className="flex items-center space-x-3">
-            <span className="text-white font-medium hidden sm:inline">{user.name}</span>
+          
+          {/* Row 2: Navigation Buttons */}
+          <div className="flex items-center justify-end space-x-2 flex-wrap gap-y-2">
             {user.is_admin && (
               <Button data-testid="admin-nav-btn" onClick={() => navigate("/admin-dashboard")} variant="outline" size="sm" className="gap-2 border-white/30 text-white hover:bg-white/20 bg-white/10">
                 <Shield className="w-4 h-4" />
@@ -157,7 +162,7 @@ export default function TeacherDashboard({ user, setUser }) {
               <RefreshCw className="w-4 h-4" />
               Switch to Student
             </Button>
-            <Button data-testid="logout-btn" onClick={handleLogout} variant="ghost" size="sm" className="gap-2 text-white hover:bg-white/20">
+            <Button data-testid="logout-btn" onClick={handleLogout} variant="outline" size="sm" className="gap-2 border-white/30 text-white hover:bg-white/20 bg-white/10">
               <LogOut className="w-4 h-4" />
               Logout
             </Button>
