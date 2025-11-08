@@ -214,6 +214,8 @@ class TeacherSignupRequest(BaseModel):
     email: str
     password: str
     invite_code: str
+    district: Optional[str] = None
+    school: Optional[str] = None
 
 class InviteCode(BaseModel):
     model_config = ConfigDict(extra="ignore")
