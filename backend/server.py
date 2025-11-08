@@ -3080,6 +3080,220 @@ async def reject_school_admin(user_id: str, request: Request):
     
     return {"success": True, "message": "School admin request rejected"}
 
+
+# ----- School Admin & District Admin Routes -----
+
+@api_router.get("/school-admin/dashboard")
+async def get_school_admin_dashboard(request: Request):
+    """Get dashboard data for school admin (view teachers in their school)"""
+    user = await get_current_user(request)
+    
+    if user.get("role") != "school_admin":
+        raise HTTPException(status_code=403, detail="School admin access required")
+    
+    school_name = user.get("school")
+    if not school_name:
+        raise HTTPException(status_code=400, detail="School not assigned")
+    
+    # Get all teachers in this school
+    teachers = await db.users.find(
+        {"role": "teacher", "school": school_name},
+        {"_id": 0, "password": 0}
+    ).to_list(length=None)
+    
+    # Get all classrooms from these teachers
+    teacher_ids = [t["id"] for t in teachers]
+    classrooms = await db.classrooms.find(
+        {"teacher_id": {"$in": teacher_ids}},
+        {"_id": 0}
+    ).to_list(length=None)
+    
+    # Count total students
+    all_student_ids = set()
+    for classroom in classrooms:
+        all_student_ids.update(classroom.get("students", []))
+    
+    # Get stats
+    stats = {
+        "school_name": school_name,
+        "total_teachers": len(teachers),
+        "total_classrooms": len(classrooms),
+        "total_students": len(all_student_ids)
+    }
+    
+    return {
+        "stats": stats,
+        "teachers": teachers,
+        "classrooms": classrooms
+    }
+
+@api_router.get("/district-admin/dashboard")
+async def get_district_admin_dashboard(request: Request):
+    """Get dashboard data for district admin (view schools and teachers in district)"""
+    user = await get_current_user(request)
+    
+    if user.get("role") != "district_admin":
+        raise HTTPException(status_code=403, detail="District admin access required")
+    
+    district_name = user.get("district")
+    if not district_name:
+        raise HTTPException(status_code=400, detail="District not assigned")
+    
+    # Get all teachers in this district
+    teachers = await db.users.find(
+        {"role": "teacher", "district": district_name},
+        {"_id": 0, "password": 0}
+    ).to_list(length=None)
+    
+    # Get all schools in district (unique school names from teachers)
+    schools_set = set(t.get("school") for t in teachers if t.get("school"))
+    
+    # Get all classrooms from these teachers
+    teacher_ids = [t["id"] for t in teachers]
+    classrooms = await db.classrooms.find(
+        {"teacher_id": {"$in": teacher_ids}},
+        {"_id": 0}
+    ).to_list(length=None)
+    
+    # Count total students across all classrooms
+    all_student_ids = set()
+    for classroom in classrooms:
+        all_student_ids.update(classroom.get("students", []))
+    
+    # Build schools data with counts
+    schools_data = []
+    for school_name in schools_set:
+        school_teachers = [t for t in teachers if t.get("school") == school_name]
+        school_teacher_ids = [t["id"] for t in school_teachers]
+        school_classrooms = [c for c in classrooms if c.get("teacher_id") in school_teacher_ids]
+        
+        school_student_ids = set()
+        for classroom in school_classrooms:
+            school_student_ids.update(classroom.get("students", []))
+        
+        schools_data.append({
+            "name": school_name,
+            "id": school_name.lower().replace(" ", "_"),
+            "teacher_count": len(school_teachers),
+            "student_count": len(school_student_ids),
+            "classroom_count": len(school_classrooms)
+        })
+    
+    # Get stats
+    stats = {
+        "district": district_name,
+        "total_schools": len(schools_set),
+        "total_teachers": len(teachers),
+        "total_classrooms": len(classrooms),
+        "total_students": len(all_student_ids)
+    }
+    
+    return {
+        "district": district_name,
+        "stats": stats,
+        "schools": schools_data,
+        "teachers": teachers
+    }
+
+@api_router.get("/school-admin/teachers")
+async def get_school_admin_teachers(request: Request):
+    """Get all teachers in the school admin's school"""
+    user = await get_current_user(request)
+    
+    if user.get("role") != "school_admin":
+        raise HTTPException(status_code=403, detail="School admin access required")
+    
+    school_name = user.get("school")
+    if not school_name:
+        raise HTTPException(status_code=400, detail="School not assigned")
+    
+    teachers = await db.users.find(
+        {"role": "teacher", "school": school_name},
+        {"_id": 0, "password": 0}
+    ).to_list(length=None)
+    
+    return teachers
+
+@api_router.get("/school-admin/teacher/{teacher_id}/classrooms")
+async def get_teacher_classrooms_for_admin(teacher_id: str, request: Request):
+    """Get classrooms for a specific teacher (school admin view)"""
+    user = await get_current_user(request)
+    
+    if user.get("role") != "school_admin":
+        raise HTTPException(status_code=403, detail="School admin access required")
+    
+    # Verify teacher is in the same school
+    teacher = await db.users.find_one({"id": teacher_id, "role": "teacher"}, {"_id": 0})
+    if not teacher or teacher.get("school") != user.get("school"):
+        raise HTTPException(status_code=403, detail="Teacher not in your school")
+    
+    classrooms = await db.classrooms.find(
+        {"teacher_id": teacher_id},
+        {"_id": 0}
+    ).to_list(length=None)
+    
+    # Populate student details for each classroom
+    for classroom in classrooms:
+        student_ids = classroom.get("students", [])
+        students = await db.users.find(
+            {"id": {"$in": student_ids}},
+            {"_id": 0, "password": 0}
+        ).to_list(length=None)
+        classroom["students"] = students
+    
+    return classrooms
+
+@api_router.get("/district-admin/schools")
+async def get_district_admin_schools(request: Request):
+    """Get all schools in the district admin's district"""
+    user = await get_current_user(request)
+    
+    if user.get("role") != "district_admin":
+        raise HTTPException(status_code=403, detail="District admin access required")
+    
+    district_name = user.get("district")
+    if not district_name:
+        raise HTTPException(status_code=400, detail="District not assigned")
+    
+    # Get all teachers in district to determine schools
+    teachers = await db.users.find(
+        {"role": "teacher", "district": district_name},
+        {"_id": 0, "password": 0}
+    ).to_list(length=None)
+    
+    # Group by school
+    schools_set = set(t.get("school") for t in teachers if t.get("school"))
+    
+    schools_data = []
+    for school_name in schools_set:
+        school_teachers = [t for t in teachers if t.get("school") == school_name]
+        schools_data.append({
+            "name": school_name,
+            "id": school_name.lower().replace(" ", "_"),
+            "teacher_count": len(school_teachers)
+        })
+    
+    return schools_data
+
+@api_router.get("/district-admin/teachers-in-school/{school_name}")
+async def get_teachers_in_school(school_name: str, request: Request):
+    """Get all teachers in a specific school (district admin view)"""
+    user = await get_current_user(request)
+    
+    if user.get("role") != "district_admin":
+        raise HTTPException(status_code=403, detail="District admin access required")
+    
+    # Verify school is in the district
+    if user.get("district"):
+        teachers = await db.users.find(
+            {"role": "teacher", "school": school_name, "district": user.get("district")},
+            {"_id": 0, "password": 0}
+        ).to_list(length=None)
+    else:
+        raise HTTPException(status_code=400, detail="District not assigned")
+    
+    return teachers
+
 # ----- Gamification Routes -----
 
 @api_router.get("/leaderboard/classroom/{classroom_id}")
