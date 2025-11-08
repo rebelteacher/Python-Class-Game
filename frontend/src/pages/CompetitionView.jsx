@@ -103,7 +103,7 @@ function CompetitionView() {
         {/* Header */}
         <div className="mb-8">
           <Button 
-            onClick={() => navigate(user?.role === 'teacher' ? '/teacher/competitions' : '/student')}
+            onClick={() => navigate(user?.role === 'teacher' ? '/teacher/competitions' : '/student/dashboard')}
             variant="outline"
             className="mb-4"
           >
