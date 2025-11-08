@@ -478,13 +478,19 @@ export default function StudentDashboard({ user, setUser, refreshUser }) {
       )}
       
       <nav 
-        className="shadow-sm border-b w-full"
+        className="shadow-sm border-b"
         style={{ 
           backgroundColor: getThemeNavColor() || 'white',
-          borderColor: getThemeNavColor() ? 'rgba(255,255,255,0.2)' : '#e5e7eb'
+          borderColor: getThemeNavColor() ? 'rgba(255,255,255,0.2)' : '#e5e7eb',
+          width: '100vw',
+          position: 'relative',
+          left: '50%',
+          right: '50%',
+          marginLeft: '-50vw',
+          marginRight: '-50vw'
         }}
       >
-        <div className="px-6 py-4 flex justify-between items-center max-w-[1400px] mx-auto">
+        <div className="px-6 py-4 flex justify-between items-center" style={{ maxWidth: '1400px', margin: '0 auto' }}>
           <div className="flex items-center space-x-2">
             <Code2 className={`w-7 h-7 ${getThemeNavColor() ? 'text-white' : 'text-teal-600'}`} />
             <span className={`text-xl font-bold ${getThemeNavColor() ? 'text-white' : 'text-gray-900'}`}>ByteBattles Arena</span>
