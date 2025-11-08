@@ -119,16 +119,26 @@ export default function TeacherLogin() {
 
             <div className="text-center pt-4 border-t">
               <p className="text-sm text-gray-600 mb-2">
-                Don't have a teacher account?
+                Don't have an account?
               </p>
-              <Button
-                type="button"
-                variant="link"
-                onClick={() => navigate("/teacher-signup")}
-                className="text-indigo-600"
-              >
-                Sign up with an invite code
-              </Button>
+              <div className="flex flex-col gap-2">
+                <Button
+                  type="button"
+                  variant="link"
+                  onClick={() => navigate("/teacher-signup")}
+                  className="text-indigo-600"
+                >
+                  Teacher Sign Up (with invite code)
+                </Button>
+                <Button
+                  type="button"
+                  variant="link"
+                  onClick={() => navigate("/school-admin-signup")}
+                  className="text-emerald-600"
+                >
+                  School Admin Sign Up (requires approval)
+                </Button>
+              </div>
             </div>
           </form>
         </CardContent>
