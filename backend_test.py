@@ -4903,6 +4903,10 @@ def main():
             tester = CodeClassAPITester()
             success = tester.run_mc_test_tests_only()
             return 0 if success else 1
+        elif sys.argv[1] == "notes":
+            tester = CodeClassAPITester()
+            success = tester.run_notes_diagnosis_only()
+            return 0 if success else 1
     else:
         tester = CodeClassAPITester()
         success = tester.run_all_tests()
