@@ -4624,6 +4624,274 @@ startxref
         
         return self.tests_passed == self.tests_run
 
+    def test_notes_endpoints(self):
+        """Test PDF Notes endpoints - specifically for diagnosing 'failed to load' issue"""
+        print("\n📚 Testing Notes Library Endpoints...")
+        
+        # Test 1: Check database connection and collection existence
+        print("\n   TEST 1: Database Connection and Collection Check")
+        try:
+            from motor.motor_asyncio import AsyncIOMotorClient
+            import asyncio
+            
+            async def check_database():
+                client = AsyncIOMotorClient("mongodb://localhost:27017")
+                db = client["test_database"]
+                
+                # Check if pdf_notes collection exists
+                collections = await db.list_collection_names()
+                pdf_notes_exists = "pdf_notes" in collections
+                
+                # Count documents in pdf_notes collection
+                notes_count = await db.pdf_notes.count_documents({})
+                
+                # Get sample documents
+                sample_notes = await db.pdf_notes.find({}, {"_id": 0, "file_data": 0}).limit(3).to_list(3)
+                
+                client.close()
+                return {
+                    "collection_exists": pdf_notes_exists,
+                    "notes_count": notes_count,
+                    "sample_notes": sample_notes
+                }
+            
+            db_info = asyncio.run(check_database())
+            
+            if db_info["collection_exists"]:
+                self.log_test("pdf_notes collection exists", True)
+                print(f"   📊 Found {db_info['notes_count']} notes in database")
+                
+                if db_info["sample_notes"]:
+                    print("   📄 Sample notes:")
+                    for note in db_info["sample_notes"]:
+                        print(f"     - {note.get('title', 'Untitled')} (creator: {note.get('creator_id', 'Unknown')})")
+                else:
+                    print("   📄 No notes found in database")
+            else:
+                self.log_test("pdf_notes collection exists", False, "Collection not found")
+                
+        except Exception as e:
+            self.log_test("Database connection check", False, f"Error: {str(e)}")
+        
+        # Test 2: Authentication Test - Login as teacher and test GET /api/notes
+        print("\n   TEST 2: Authentication Test - GET /api/notes with teacher session")
+        
+        # Test with different filter parameters
+        filter_tests = [
+            ("all", "Get all notes (filter=all)"),
+            ("mine", "Get my notes (filter=mine)"),
+            ("shared", "Get shared notes (filter=shared)")
+        ]
+        
+        for filter_param, test_name in filter_tests:
+            response = self.run_test(
+                test_name,
+                "GET",
+                f"notes?filter={filter_param}",
+                200
+            )
+            
+            if response is not None:
+                if isinstance(response, list):
+                    print(f"     ✅ {test_name}: Returned {len(response)} notes")
+                    
+                    # Check structure of returned notes
+                    if response:
+                        sample_note = response[0]
+                        required_fields = ['id', 'title', 'creator_id', 'created_at']
+                        missing_fields = [field for field in required_fields if field not in sample_note]
+                        
+                        if not missing_fields:
+                            self.log_test(f"{test_name} - correct structure", True)
+                        else:
+                            self.log_test(f"{test_name} - correct structure", False, f"Missing fields: {missing_fields}")
+                    else:
+                        print(f"     📄 No notes returned for filter={filter_param}")
+                else:
+                    self.log_test(f"{test_name} - returns array", False, f"Expected array, got {type(response)}")
+            else:
+                print(f"     ❌ {test_name}: Failed to get response")
+        
+        # Test 3: Test without authentication (should get 401)
+        print("\n   TEST 3: Unauthenticated Access Test")
+        original_token = self.session_token
+        self.session_token = None
+        
+        try:
+            self.run_test(
+                "Get notes without authentication (should be 401)",
+                "GET",
+                "notes",
+                401
+            )
+        finally:
+            self.session_token = original_token
+        
+        # Test 4: Create a test note and verify it appears in listings
+        print("\n   TEST 4: Create Test Note and Verify Listing")
+        
+        # Create a simple test note
+        import base64
+        test_pdf_content = b"Test PDF content for notes testing"
+        test_pdf_data = base64.b64encode(test_pdf_content).decode('utf-8')
+        
+        note_data = {
+            "title": f"Test Note {datetime.now().strftime('%H%M%S')}",
+            "description": "Test note for diagnosing notes library issue",
+            "chapter": "Test Chapter",
+            "category": "Test Category",
+            "resource_type": "teacher_resource",
+            "file_data": test_pdf_data,
+            "file_size": len(test_pdf_content),
+            "is_shared": False,
+            "tags": ["test", "diagnosis"]
+        }
+        
+        create_response = self.run_test(
+            "Create test note",
+            "POST",
+            "notes",
+            200,
+            note_data
+        )
+        
+        if create_response:
+            test_note_id = create_response.get('id')
+            print(f"     ✅ Created test note: {test_note_id}")
+            
+            # Verify it appears in "mine" filter
+            mine_response = self.run_test(
+                "Verify test note appears in 'mine' filter",
+                "GET",
+                "notes?filter=mine",
+                200
+            )
+            
+            if mine_response and isinstance(mine_response, list):
+                note_ids = [note.get('id') for note in mine_response]
+                if test_note_id in note_ids:
+                    self.log_test("Created note appears in 'mine' filter", True)
+                else:
+                    self.log_test("Created note appears in 'mine' filter", False, f"Note {test_note_id} not found in response")
+            
+            # Test getting specific note
+            specific_note_response = self.run_test(
+                "Get specific note by ID",
+                "GET",
+                f"notes/{test_note_id}",
+                200
+            )
+            
+            if specific_note_response:
+                if specific_note_response.get('id') == test_note_id:
+                    self.log_test("Get specific note by ID works", True)
+                else:
+                    self.log_test("Get specific note by ID works", False, "ID mismatch in response")
+        
+        # Test 5: Test as student (should only see student_resource notes)
+        print("\n   TEST 5: Student Access Test")
+        
+        # Create a student user
+        student = self.create_student_user("notestest")
+        if student:
+            original_token = self.session_token
+            self.session_token = student["token"]
+            
+            try:
+                student_response = self.run_test(
+                    "Get notes as student",
+                    "GET",
+                    "notes",
+                    200
+                )
+                
+                if student_response is not None:
+                    if isinstance(student_response, list):
+                        print(f"     ✅ Student sees {len(student_response)} notes")
+                        
+                        # Verify all returned notes are student_resource type
+                        if student_response:
+                            non_student_resources = [
+                                note for note in student_response 
+                                if note.get('resource_type') != 'student_resource'
+                            ]
+                            
+                            if not non_student_resources:
+                                self.log_test("Student only sees student_resource notes", True)
+                            else:
+                                self.log_test("Student only sees student_resource notes", False, 
+                                            f"Found {len(non_student_resources)} non-student resources")
+                    else:
+                        self.log_test("Student notes response is array", False, f"Expected array, got {type(student_response)}")
+                
+                # Test student trying to create note (should get 403)
+                student_note_data = {
+                    "title": "Student Note",
+                    "description": "Should not be allowed",
+                    "file_data": test_pdf_data,
+                    "file_size": len(test_pdf_content)
+                }
+                
+                self.run_test(
+                    "Student create note (should be 403)",
+                    "POST",
+                    "notes",
+                    403,
+                    student_note_data
+                )
+                
+            finally:
+                self.session_token = original_token
+        
+        # Test 6: Error Response Analysis
+        print("\n   TEST 6: Error Response Analysis")
+        
+        # Test with invalid note ID
+        self.run_test(
+            "Get non-existent note (should be 404)",
+            "GET",
+            "notes/invalid-note-id",
+            404
+        )
+        
+        # Test with malformed request
+        malformed_data = {
+            "title": "",  # Empty title should cause validation error
+            "file_data": "invalid-base64-data"
+        }
+        
+        self.run_test(
+            "Create note with invalid data (should be 400)",
+            "POST",
+            "notes",
+            400,
+            malformed_data
+        )
+        
+        print("   📚 Notes Library endpoint testing complete!")
+
+    def run_notes_diagnosis_only(self):
+        """Run only Notes diagnosis tests"""
+        print("🚀 Starting Notes Library Diagnosis...")
+        print(f"Testing against: {self.base_url}")
+        
+        # Setup test user
+        if not self.setup_test_user():
+            print("❌ Cannot proceed without test user setup")
+            return False
+        
+        # Test Notes endpoints
+        self.test_notes_endpoints()
+        
+        # Print summary
+        print(f"\n📊 Notes Diagnosis Summary:")
+        print(f"   Total tests: {self.tests_run}")
+        print(f"   Passed: {self.tests_passed}")
+        print(f"   Failed: {self.tests_run - self.tests_passed}")
+        print(f"   Success rate: {(self.tests_passed/self.tests_run)*100:.1f}%")
+        
+        return self.tests_passed == self.tests_run
+
 def main():
     import sys
     if len(sys.argv) > 1:
