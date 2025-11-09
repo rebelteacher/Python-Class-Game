@@ -2337,15 +2337,28 @@ async def get_hint(hint_request: HintRequest, request: Request):
     if not assignment:
         raise HTTPException(status_code=404, detail="Assignment not found")
     
-    # Find the specific problem
+    # Find the specific problem - handle both single problem and multi-problem assignments
     problem = None
-    for p in assignment.get("problems", []):
-        if p.get("id") == hint_request.problem_id:
-            problem = p
-            break
+    problems_list = assignment.get("problems", [])
+    
+    # If problems is a list and not empty
+    if problems_list:
+        for p in problems_list:
+            if p.get("id") == hint_request.problem_id:
+                problem = p
+                break
+    
+    # If still not found, check if this is a single-problem assignment (old structure)
+    if not problem and hint_request.problem_id == hint_request.assignment_id:
+        # For backward compatibility with single-problem assignments
+        problem = {
+            "id": assignment.get("id"),
+            "title": assignment.get("title", "Coding Problem"),
+            "description": assignment.get("description", assignment.get("problem_description", ""))
+        }
     
     if not problem:
-        raise HTTPException(status_code=404, detail="Problem not found")
+        raise HTTPException(status_code=404, detail=f"Problem not found. Problem ID: {hint_request.problem_id}, Assignment has {len(problems_list)} problems")
     
     # Get student's previous submissions/feedback for this problem
     previous_submissions = await db.submissions.find(
