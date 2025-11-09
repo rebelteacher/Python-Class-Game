@@ -380,6 +380,73 @@ export default function AssignmentPage({ user }) {
     }
   };
 
+
+  // Fetch hint status when assignment loads
+  useEffect(() => {
+    if (assignment && user?.role === "student") {
+      fetchHintStatus();
+    }
+  }, [assignment]);
+
+  const fetchHintStatus = async () => {
+    try {
+      const response = await axios.get(`${API}/hint-status/${assignmentId}`, {
+        withCredentials: true
+      });
+      setHintStatus(response.data);
+    } catch (error) {
+      console.error("Error fetching hint status:", error);
+    }
+  };
+
+  const handleRequestHint = async (hintLevel) => {
+    if (!code.trim()) {
+      toast.error("Please write some code first before requesting a hint!");
+      return;
+    }
+
+    const coinCost = hintLevel === 1 ? 50 : 100;
+    
+    setLoadingHint(true);
+    try {
+      const response = await axios.post(
+        `${API}/get-hint`,
+        {
+          assignment_id: assignmentId,
+          problem_id: getCurrentProblemId(),
+          code: code,
+          hint_level: hintLevel
+        },
+        { withCredentials: true }
+      );
+
+      setCurrentHint({
+        text: response.data.hint,
+        level: hintLevel,
+        coins_spent: response.data.coins_spent
+      });
+      setShowHintDialog(true);
+      
+      // Update hint status
+      setHintStatus({
+        hints_used: response.data.hints_used,
+        hints_remaining: response.data.hints_remaining,
+        hint1_used: hintLevel === 1 ? true : hintStatus.hint1_used,
+        hint2_used: hintLevel === 2 ? true : hintStatus.hint2_used
+      });
+      
+      // Update user coins in parent (if needed)
+      toast.success(`Hint received! ${coinCost} coins spent. ${response.data.remaining_coins} coins remaining.`);
+      
+    } catch (error) {
+      console.error("Error requesting hint:", error);
+      toast.error(error.response?.data?.detail || "Failed to get hint");
+    } finally {
+      setLoadingHint(false);
+    }
+  };
+
+
   if (loading) {
     return (
       <div data-testid="assignment-loading" className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 to-indigo-50">
