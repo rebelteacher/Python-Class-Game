@@ -779,22 +779,50 @@ export default function AssignmentPage({ user }) {
                         <p className="text-xs text-red-600">🚫 This problem is locked. Try the next one!</p>
                       )}
                       
-                      {/* Mark as Done Button - Placed separately to avoid accidental clicks */}
+                      {/* Hint and Mark as Done Buttons Row */}
                       {user.role === "student" && !problemsFinal[getCurrentProblemId()] && submissions.filter(s => s.problem_id === getCurrentProblemId()).length > 0 && (
-                        <div className="mt-4 pt-4 border-t">
-                          <Button
-                            onClick={handleMarkFinal}
-                            disabled={markingFinal}
-                            variant="outline"
-                            className="w-full border-green-500 text-green-700 hover:bg-green-50"
-                            size="sm"
-                          >
-                            <CheckCircle className="w-4 h-4 mr-2" />
-                            {markingFinal ? "Marking..." : "Mark as Done (Final Submission)"}
-                          </Button>
-                          <p className="text-xs text-gray-500 mt-2 text-center">
-                            ⚠️ Warning: Once marked as done, you cannot submit again to this problem!
-                          </p>
+                        <div className="mt-4 pt-4 border-t space-y-3">
+                          {/* Hint Buttons */}
+                          <div className="flex gap-2">
+                            <Button
+                              onClick={() => handleRequestHint(1)}
+                              disabled={loadingHint || hintStatus.hint1_used || hintStatus.hints_remaining === 0}
+                              variant="outline"
+                              className="flex-1 border-yellow-400 text-yellow-700 hover:bg-yellow-50 disabled:opacity-50"
+                              size="sm"
+                            >
+                              <Lightbulb className="w-4 h-4 mr-1" />
+                              {hintStatus.hint1_used ? "Hint 1 Used" : "Hint 1 (50🪙)"}
+                            </Button>
+                            <Button
+                              onClick={() => handleRequestHint(2)}
+                              disabled={loadingHint || !hintStatus.hint1_used || hintStatus.hint2_used || hintStatus.hints_remaining === 0}
+                              variant="outline"
+                              className="flex-1 border-orange-400 text-orange-700 hover:bg-orange-50 disabled:opacity-50"
+                              size="sm"
+                            >
+                              <Lightbulb className="w-4 h-4 mr-1" />
+                              {hintStatus.hint2_used ? "Hint 2 Used" : "Hint 2 (100🪙)"}
+                            </Button>
+                            <Button
+                              onClick={handleMarkFinal}
+                              disabled={markingFinal}
+                              variant="outline"
+                              className="flex-1 border-green-500 text-green-700 hover:bg-green-50"
+                              size="sm"
+                            >
+                              <CheckCircle className="w-4 h-4 mr-1" />
+                              {markingFinal ? "..." : "Done"}
+                            </Button>
+                          </div>
+                          <div className="text-xs text-center space-y-1">
+                            <p className="text-gray-600">
+                              💡 {hintStatus.hints_remaining}/2 hints remaining for this assignment
+                            </p>
+                            <p className="text-gray-500">
+                              💰 Try reading the feedback first to save coins!
+                            </p>
+                          </div>
                         </div>
                       )}
                       
