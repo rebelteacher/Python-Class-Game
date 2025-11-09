@@ -2275,6 +2275,165 @@ async def mark_submission_final(submission_id: str, request: Request):
     
     return {"success": True, "message": "Submission marked as final"}
 
+
+
+@api_router.post("/get-hint")
+async def get_hint(hint_request: HintRequest, request: Request):
+    """Get an AI-generated hint for a coding problem (costs coins)"""
+    from emergentintegrations.llm.chat import LlmChat, UserMessage
+    from dotenv import load_dotenv
+    load_dotenv()
+    
+    user = await get_current_user(request)
+    
+    if user["role"] != "student":
+        raise HTTPException(status_code=403, detail="Only students can request hints")
+    
+    # Validate hint level
+    if hint_request.hint_level not in [1, 2]:
+        raise HTTPException(status_code=400, detail="Hint level must be 1 or 2")
+    
+    # Check how many hints student has used for this assignment
+    hints_used = await db.hint_usage.count_documents({
+        "student_id": user["id"],
+        "assignment_id": hint_request.assignment_id
+    })
+    
+    if hints_used >= 2:
+        raise HTTPException(
+            status_code=400, 
+            detail="You've used all 2 hints for this assignment. Try reading the feedback carefully!"
+        )
+    
+    # Check if they're requesting the right hint level (must be sequential)
+    if hint_request.hint_level == 2 and hints_used < 1:
+        raise HTTPException(
+            status_code=400,
+            detail="You must use Hint 1 before requesting Hint 2"
+        )
+    
+    if hint_request.hint_level == 1 and hints_used >= 1:
+        raise HTTPException(
+            status_code=400,
+            detail="You've already used Hint 1. Try Hint 2 or read the feedback!"
+        )
+    
+    # Determine coin cost
+    coin_cost = 50 if hint_request.hint_level == 1 else 100
+    
+    # Check if student has enough coins
+    if user.get("coins", 0) < coin_cost:
+        raise HTTPException(
+            status_code=400,
+            detail=f"Not enough coins! You need {coin_cost} coins but only have {user.get('coins', 0)}."
+        )
+    
+    # Get the assignment and problem details
+    assignment = await db.assignments.find_one(
+        {"id": hint_request.assignment_id},
+        {"_id": 0}
+    )
+    
+    if not assignment:
+        raise HTTPException(status_code=404, detail="Assignment not found")
+    
+    # Find the specific problem
+    problem = None
+    for p in assignment.get("problems", []):
+        if p.get("id") == hint_request.problem_id:
+            problem = p
+            break
+    
+    if not problem:
+        raise HTTPException(status_code=404, detail="Problem not found")
+    
+    # Get student's previous submissions/feedback for this problem
+    previous_submissions = await db.submissions.find(
+        {
+            "student_id": user["id"],
+            "assignment_id": hint_request.assignment_id,
+            "problem_id": hint_request.problem_id
+        },
+        {"_id": 0}
+    ).sort("submitted_at", -1).limit(3).to_list(length=3)
+    
+    # Build context for AI
+    previous_feedback = ""
+    if previous_submissions:
+        feedback_list = [sub.get("feedback", "") for sub in previous_submissions if sub.get("feedback")]
+        if feedback_list:
+            previous_feedback = "\n\nPrevious feedback they received:\n" + "\n---\n".join(feedback_list[:2])
+    
+    # Generate hint using AI
+    try:
+        api_key = os.environ.get("EMERGENT_LLM_KEY")
+        
+        if hint_request.hint_level == 1:
+            system_message = """You are a helpful coding tutor. Provide a brief, encouraging hint that guides the student toward the solution WITHOUT giving away the answer. Focus on:
+1. Pointing out what they should think about
+2. Asking guiding questions
+3. Reminding them to check their feedback
+Keep it under 100 words."""
+        else:
+            system_message = """You are a helpful coding tutor. Provide a more detailed hint that helps the student understand their mistake. You can:
+1. Point out specific issues in their code
+2. Explain concepts they might be missing
+3. Give a partial example (but not the full solution)
+Keep it under 150 words."""
+        
+        chat = LlmChat(
+            api_key=api_key,
+            session_id=f"hint_{user['id']}_{hint_request.assignment_id}",
+            system_message=system_message
+        ).with_model("openai", "gpt-4o-mini")
+        
+        prompt = f"""Problem: {problem.get('title', 'Coding Problem')}
+Description: {problem.get('description', '')}
+
+Student's current code:
+```python
+{hint_request.code}
+```
+{previous_feedback}
+
+Provide a helpful hint at level {hint_request.hint_level}."""
+
+        user_message = UserMessage(text=prompt)
+        hint_text = await chat.send_message(user_message)
+        
+    except Exception as e:
+        logger.error(f"Error generating hint: {e}")
+        raise HTTPException(status_code=500, detail="Failed to generate hint. Please try again.")
+    
+    # Deduct coins from student
+    await db.users.update_one(
+        {"id": user["id"]},
+        {"$inc": {"coins": -coin_cost}}
+    )
+    
+    # Record hint usage
+    hint_usage = HintUsage(
+        student_id=user["id"],
+        assignment_id=hint_request.assignment_id,
+        problem_id=hint_request.problem_id,
+        hint_level=hint_request.hint_level,
+        coins_spent=coin_cost,
+        hint_text=hint_text
+    )
+    
+    await db.hint_usage.insert_one(hint_usage.model_dump())
+    
+    # Get updated coin balance
+    updated_user = await db.users.find_one({"id": user["id"]}, {"_id": 0})
+    
+    return {
+        "hint": hint_text,
+        "coins_spent": coin_cost,
+        "remaining_coins": updated_user.get("coins", 0),
+        "hints_used": hints_used + 1,
+        "hints_remaining": 2 - (hints_used + 1)
+    }
+
 @api_router.get("/student/{student_id}/lesson-scores")
 async def get_student_lesson_scores(student_id: str, classroom_id: str, request: Request):
     """Calculate assignment scores for a student in a classroom"""
