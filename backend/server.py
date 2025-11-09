@@ -2415,9 +2415,14 @@ Provide a helpful hint at level {hint_request.hint_level}."""
         user_message = UserMessage(text=prompt)
         hint_text = await chat.send_message(user_message)
         
+        logger.info(f"Generated hint for student {user['id']}, level {hint_request.hint_level}, length: {len(hint_text) if hint_text else 0}")
+        
+        if not hint_text or hint_text.strip() == "":
+            raise ValueError("AI returned empty hint")
+        
     except Exception as e:
         logger.error(f"Error generating hint: {e}")
-        raise HTTPException(status_code=500, detail="Failed to generate hint. Please try again.")
+        raise HTTPException(status_code=500, detail=f"Failed to generate hint: {str(e)}")
     
     # Deduct coins from student
     await db.users.update_one(
