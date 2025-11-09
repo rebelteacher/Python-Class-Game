@@ -2424,6 +2424,39 @@ Provide a helpful hint at level {hint_request.hint_level}."""
     await db.hint_usage.insert_one(hint_usage.model_dump())
     
     # Get updated coin balance
+
+
+@api_router.get("/hint-status/{assignment_id}")
+async def get_hint_status(assignment_id: str, request: Request):
+    """Get how many hints the student has used for this assignment"""
+    user = await get_current_user(request)
+    
+    if user["role"] != "student":
+        raise HTTPException(status_code=403, detail="Only students can check hint status")
+    
+    hints_used = await db.hint_usage.count_documents({
+        "student_id": user["id"],
+        "assignment_id": assignment_id
+    })
+    
+    # Check which hint levels have been used
+    hint_records = await db.hint_usage.find(
+        {
+            "student_id": user["id"],
+            "assignment_id": assignment_id
+        },
+        {"_id": 0, "hint_level": 1}
+    ).to_list(length=None)
+    
+    used_levels = [h["hint_level"] for h in hint_records]
+    
+    return {
+        "hints_used": hints_used,
+        "hints_remaining": 2 - hints_used,
+        "hint1_used": 1 in used_levels,
+        "hint2_used": 2 in used_levels
+    }
+
     updated_user = await db.users.find_one({"id": user["id"]}, {"_id": 0})
     
     return {
