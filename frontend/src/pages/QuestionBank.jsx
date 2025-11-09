@@ -341,10 +341,13 @@ export default function QuestionBank({ user }) {
                 <div className="space-y-4">
                   <div>
                     <Label>CSV Format:</Label>
-                    <pre className="text-xs bg-gray-100 p-2 rounded mt-2 overflow-x-auto">
+                    <pre className="text-xs bg-gray-100 p-3 rounded mt-2 overflow-x-auto whitespace-pre-wrap">
 question_text,choice_a,choice_b,choice_c,choice_d,correct_answer,chapter,lesson,difficulty
-What is 2+2?,3,4,5,6,B,Chapter 1,Lesson 1,Easy
-                    </pre>
+What is 2+2?,3,4,5,6,B,Chapter 1,Lesson 1,Easy</pre>
+                    <p className="text-xs text-gray-600 mt-2">
+                      • correct_answer should be A, B, C, or D<br/>
+                      • difficulty should be Easy, Medium, or Hard
+                    </p>
                   </div>
                   <div>
                     <Label htmlFor="csv-upload">Select CSV File</Label>
