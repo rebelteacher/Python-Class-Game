@@ -189,19 +189,60 @@ export default function QuestionBank({ user }) {
         return;
       }
 
-      // Parse CSV
-      const headers = lines[0].split(',').map(h => h.trim());
+      // Parse CSV - proper handling of quoted fields with commas
+      const parseCSVLine = (line) => {
+        const result = [];
+        let current = '';
+        let inQuotes = false;
+        
+        for (let i = 0; i < line.length; i++) {
+          const char = line[i];
+          const nextChar = line[i + 1];
+          
+          if (char === '"') {
+            if (inQuotes && nextChar === '"') {
+              // Escaped quote
+              current += '"';
+              i++; // Skip next quote
+            } else {
+              // Toggle quote state
+              inQuotes = !inQuotes;
+            }
+          } else if (char === ',' && !inQuotes) {
+            // Field delimiter
+            result.push(current.trim());
+            current = '';
+          } else {
+            current += char;
+          }
+        }
+        
+        // Add last field
+        result.push(current.trim());
+        return result;
+      };
+
+      const headers = parseCSVLine(lines[0]);
       const questions = [];
 
       for (let i = 1; i < lines.length; i++) {
-        const values = lines[i].split(',').map(v => v.trim());
+        const values = parseCSVLine(lines[i]);
         const question = {};
         
         headers.forEach((header, index) => {
           question[header] = values[index] || "";
         });
         
-        questions.push(question);
+        // Only add if question has required fields
+        if (question.question_text && question.choice_a) {
+          questions.push(question);
+        }
+      }
+
+      if (questions.length === 0) {
+        toast.error("No valid questions found in CSV");
+        setUploading(false);
+        return;
       }
 
       // Upload to backend
