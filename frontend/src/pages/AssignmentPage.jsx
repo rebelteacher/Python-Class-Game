@@ -405,6 +405,10 @@ export default function AssignmentPage({ user }) {
       toast.error("Please write some code first before requesting a hint!");
       return;
     }
+    
+    if (loadingHint) {
+      return; // Prevent duplicate requests
+    }
 
     const coinCost = hintLevel === 1 ? 50 : 100;
     
@@ -436,12 +440,15 @@ export default function AssignmentPage({ user }) {
         hint2_used: hintLevel === 2 ? true : hintStatus.hint2_used
       });
       
-      // Update user coins in parent (if needed)
       toast.success(`Hint received! ${coinCost} coins spent. ${response.data.remaining_coins} coins remaining.`);
       
     } catch (error) {
       console.error("Error requesting hint:", error);
-      toast.error(error.response?.data?.detail || "Failed to get hint");
+      const errorMsg = error.response?.data?.detail || "Failed to get hint";
+      toast.error(errorMsg);
+      
+      // Refresh hint status in case something changed
+      fetchHintStatus();
     } finally {
       setLoadingHint(false);
     }
