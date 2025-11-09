@@ -2426,18 +2426,29 @@ Provide a helpful hint at level {hint_request.hint_level}."""
     )
     
     # Record hint usage
-    hint_usage = HintUsage(
-        student_id=user["id"],
-        assignment_id=hint_request.assignment_id,
-        problem_id=hint_request.problem_id,
-        hint_level=hint_request.hint_level,
-        coins_spent=coin_cost,
-        hint_text=hint_text
-    )
+    hint_usage_data = {
+        "id": str(uuid.uuid4()),
+        "student_id": user["id"],
+        "assignment_id": hint_request.assignment_id,
+        "problem_id": hint_request.problem_id,
+        "hint_level": hint_request.hint_level,
+        "coins_spent": coin_cost,
+        "hint_text": hint_text,
+        "created_at": datetime.now(timezone.utc).isoformat()
+    }
     
-    await db.hint_usage.insert_one(hint_usage.model_dump())
+    await db.hint_usage.insert_one(hint_usage_data)
     
     # Get updated coin balance
+    updated_user = await db.users.find_one({"id": user["id"]}, {"_id": 0})
+    
+    return {
+        "hint": hint_text,
+        "coins_spent": coin_cost,
+        "remaining_coins": updated_user.get("coins", 0),
+        "hints_used": hints_used + 1,
+        "hints_remaining": 2 - (hints_used + 1)
+    }
 
 
 @api_router.get("/hint-status/{assignment_id}")
