@@ -418,6 +418,24 @@ class SubmissionCreate(BaseModel):
     problem_id: Optional[str] = None  # Optional for backward compatibility
     code: str
 
+
+class HintUsage(BaseModel):
+    model_config = ConfigDict(extra="ignore")
+    id: str = Field(default_factory=lambda: str(uuid.uuid4()))
+    student_id: str
+    assignment_id: str
+    problem_id: str
+    hint_level: int  # 1 or 2
+    coins_spent: int  # 50 or 100
+    hint_text: str
+    created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+
+class HintRequest(BaseModel):
+    assignment_id: str
+    problem_id: str
+    code: str
+    hint_level: int  # 1 or 2
+
 class Battle(BaseModel):
     model_config = ConfigDict(extra="ignore")
     id: str = Field(default_factory=lambda: str(uuid.uuid4()))
