@@ -414,6 +414,7 @@ export default function AssignmentPage({ user }) {
     
     setLoadingHint(true);
     try {
+      console.log("Requesting hint level:", hintLevel);
       const response = await axios.post(
         `${API}/get-hint`,
         {
@@ -425,22 +426,33 @@ export default function AssignmentPage({ user }) {
         { withCredentials: true }
       );
 
-      setCurrentHint({
-        text: response.data.hint,
-        level: hintLevel,
-        coins_spent: response.data.coins_spent
-      });
-      setShowHintDialog(true);
-      
-      // Update hint status
-      setHintStatus({
-        hints_used: response.data.hints_used,
-        hints_remaining: response.data.hints_remaining,
-        hint1_used: hintLevel === 1 ? true : hintStatus.hint1_used,
-        hint2_used: hintLevel === 2 ? true : hintStatus.hint2_used
-      });
-      
-      toast.success(`Hint received! ${coinCost} coins spent. ${response.data.remaining_coins} coins remaining.`);
+      console.log("Hint response:", response.data);
+
+      if (response.data && response.data.hint) {
+        setCurrentHint({
+          text: response.data.hint,
+          level: hintLevel,
+          coins_spent: response.data.coins_spent
+        });
+        
+        // Update hint status first
+        setHintStatus({
+          hints_used: response.data.hints_used,
+          hints_remaining: response.data.hints_remaining,
+          hint1_used: hintLevel === 1 ? true : hintStatus.hint1_used,
+          hint2_used: hintLevel === 2 ? true : hintStatus.hint2_used
+        });
+        
+        // Then show the dialog
+        setTimeout(() => {
+          setShowHintDialog(true);
+          console.log("Dialog should be showing now");
+        }, 100);
+        
+        toast.success(`Hint received! ${coinCost} coins spent. ${response.data.remaining_coins} coins remaining.`);
+      } else {
+        toast.error("Hint received but was empty");
+      }
       
     } catch (error) {
       console.error("Error requesting hint:", error);
