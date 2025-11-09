@@ -34,6 +34,12 @@ export default function AssignmentPage({ user }) {
   const [darkMode, setDarkMode] = useState(false); // Dark mode toggle
   const [markingFinal, setMarkingFinal] = useState(false);
   const [testInput, setTestInput] = useState(""); // For input() functions
+  
+  // Hint system state
+  const [hintStatus, setHintStatus] = useState({ hints_used: 0, hints_remaining: 2, hint1_used: false, hint2_used: false });
+  const [loadingHint, setLoadingHint] = useState(false);
+  const [currentHint, setCurrentHint] = useState(null);
+  const [showHintDialog, setShowHintDialog] = useState(false);
 
   // Get current problem's ID
   const getCurrentProblemId = () => {
