@@ -1062,6 +1062,30 @@ export default function AssignmentPage({ user }) {
           </Panel>
         </PanelGroup>
       </main>
+
+      {/* Hint Dialog */}
+      <Dialog open={showHintDialog} onOpenChange={setShowHintDialog}>
+        <DialogContent className="max-w-2xl">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Lightbulb className="w-5 h-5 text-yellow-500" />
+              Hint {currentHint?.level} - {currentHint?.coins_spent} Coins Spent
+            </DialogTitle>
+            <DialogDescription>
+              Here's a hint to help you solve this problem. Remember to read the feedback too!
+            </DialogDescription>
+          </DialogHeader>
+          <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4 my-4">
+            <p className="text-gray-800 whitespace-pre-wrap">{currentHint?.text}</p>
+          </div>
+          <div className="flex justify-between items-center text-sm text-gray-600">
+            <span>💡 {hintStatus.hints_remaining} hints remaining for this assignment</span>
+            <Button onClick={() => setShowHintDialog(false)} size="sm">
+              Got it!
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
