@@ -528,6 +528,12 @@ class PDFNote(BaseModel):
     category: str = ""  # e.g., "Lesson Notes", "Study Guide", "Reference"
     resource_type: str = "student_resource"  # "teacher_resource" or "student_resource"
     file_data: str  # Base64 encoded PDF data
+    file_size: int = 0
+    creator_id: str = ""
+    creator_name: str = ""
+    is_shared: bool = False
+    tags: List[str] = Field(default_factory=list)
+    created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
 
 
 # Competition Models
