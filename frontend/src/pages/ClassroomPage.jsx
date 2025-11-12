@@ -427,7 +427,7 @@ export default function ClassroomPage({ user }) {
                           )}
                           {isTeacher && (
                             <Button
-                              onClick={() => navigate(`/test/${test.id}/results`)}
+                              onClick={() => navigate(`/test-reports`, { state: { classroomId: classroomId, selectedTestId: test.id } })}
                               variant="outline"
                               className="w-full"
                             >
