@@ -4474,16 +4474,27 @@ async def get_test_results(test_id: str, request: Request):
             {"_id": 0}
         ).to_list(length=None)
         
+        logger.info(f"🔍 Found {len(attempts)} completed attempts for test {test_id}")
+        
         # Populate student names
         for attempt in attempts:
+            student_id = attempt.get("student_id")
+            logger.info(f"🔍 Looking up student_id: {student_id}")
+            
             student = await db.users.find_one(
-                {"id": attempt["student_id"]},
+                {"id": student_id},
                 {"_id": 0, "name": 1, "email": 1}
             )
+            
             if student:
+                logger.info(f"✅ Found student: {student.get('name')}")
                 attempt["student_name"] = student.get("name", "Unknown")
                 attempt["student_email"] = student.get("email", "")
             else:
+                logger.info(f"❌ Student not found for id: {student_id}")
+                # Try to get count of users to debug
+                user_count = await db.users.count_documents({})
+                logger.info(f"📊 Total users in database: {user_count}")
                 attempt["student_name"] = "Unknown Student"
                 attempt["student_email"] = ""
         
