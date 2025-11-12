@@ -4474,6 +4474,19 @@ async def get_test_results(test_id: str, request: Request):
             {"_id": 0}
         ).to_list(length=None)
         
+        # Populate student names
+        for attempt in attempts:
+            student = await db.users.find_one(
+                {"id": attempt["student_id"]},
+                {"_id": 0, "name": 1, "email": 1}
+            )
+            if student:
+                attempt["student_name"] = student.get("name", "Unknown")
+                attempt["student_email"] = student.get("email", "")
+            else:
+                attempt["student_name"] = "Unknown Student"
+                attempt["student_email"] = ""
+        
         return {"results": attempts}
     else:
         # Student gets only their result
