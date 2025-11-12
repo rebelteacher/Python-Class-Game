@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import axios from "axios";
 import { toast } from "sonner";
 import * as XLSX from "xlsx";
@@ -14,6 +14,7 @@ const API = `${BACKEND_URL}/api`;
 
 export default function TestReports({ user }) {
   const navigate = useNavigate();
+  const location = useLocation();
   const [classrooms, setClassrooms] = useState([]);
   const [selectedClassroom, setSelectedClassroom] = useState("");
   const [tests, setTests] = useState([]);
@@ -25,6 +26,14 @@ export default function TestReports({ user }) {
 
   useEffect(() => {
     fetchClassrooms();
+    
+    // Pre-select from navigation state
+    if (location.state?.classroomId) {
+      setSelectedClassroom(location.state.classroomId);
+    }
+    if (location.state?.selectedTestId) {
+      setSelectedTest(location.state.selectedTestId);
+    }
   }, []);
 
   useEffect(() => {
