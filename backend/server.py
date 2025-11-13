@@ -1551,6 +1551,51 @@ async def create_assignment(assignment: AssignmentCreate, request: Request):
     
     return {"success": True, "assignment_id": new_assignment.id, "classrooms": len(assignment.classroom_ids)}
 
+
+@api_router.put("/assignments/{assignment_id}")
+async def update_assignment(assignment_id: str, update_data: dict, request: Request):
+    """Update assignment metadata (title, chapter, lesson, due_date)"""
+    user = await get_current_user(request)
+    
+    if user["role"] != "teacher":
+        raise HTTPException(status_code=403, detail="Only teachers can update assignments")
+    
+    # Get the assignment
+    assignment = await db.assignments.find_one({"id": assignment_id})
+    if not assignment:
+        raise HTTPException(status_code=404, detail="Assignment not found")
+    
+    # Verify ownership
+    if assignment["teacher_id"] != user["id"]:
+        raise HTTPException(status_code=403, detail="You don't own this assignment")
+    
+    # Build update dict (only allow certain fields)
+    allowed_fields = ["title", "chapter", "lesson", "due_date", "description"]
+    update_dict = {}
+    
+    for field in allowed_fields:
+        if field in update_data:
+            if field == "due_date" and update_data[field]:
+                # Parse date if provided
+                try:
+                    update_dict[field] = datetime.fromisoformat(update_data[field]).isoformat()
+                except:
+                    update_dict[field] = update_data[field]
+            else:
+                update_dict[field] = update_data[field]
+    
+    if not update_dict:
+        raise HTTPException(status_code=400, detail="No valid fields to update")
+    
+    # Update the assignment
+    await db.assignments.update_one(
+        {"id": assignment_id},
+        {"$set": update_dict}
+    )
+    
+    return {"success": True, "updated_fields": list(update_dict.keys())}
+
+
 @api_router.put("/assignments/{assignment_id}/schedule")
 async def update_assignment_schedule(assignment_id: str, request: Request):
     """Update assignment scheduling (available_date, due_date, late policy)"""
