@@ -2,6 +2,7 @@ import React from "react";
 import ReactDOM from "react-dom/client";
 import "@/index.css";
 import App from "@/App";
+import ErrorBoundary from "@/components/ErrorBoundary";
 
 // AGGRESSIVE: Suppress ResizeObserver errors (known benign issue with react-resizable-panels)
 const resizeObserverErr = window.console.error;
@@ -36,5 +37,7 @@ window.addEventListener('unhandledrejection', (e) => {
 
 const root = ReactDOM.createRoot(document.getElementById("root"));
 root.render(
-  <App />
+  <ErrorBoundary>
+    <App />
+  </ErrorBoundary>
 );
