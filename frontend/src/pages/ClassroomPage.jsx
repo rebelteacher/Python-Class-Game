@@ -825,52 +825,96 @@ export default function ClassroomPage({ user }) {
           <Dialog open={editScheduleDialogOpen} onOpenChange={setEditScheduleDialogOpen}>
             <DialogContent className="max-w-2xl">
               <DialogHeader>
-                <DialogTitle>Edit Assignment Schedule</DialogTitle>
+                <DialogTitle>Edit Assignment</DialogTitle>
                 <DialogDescription>
-                  Update availability and due dates for: {editingAssignment.title}
+                  Update assignment details, chapter/lesson, and schedule
                 </DialogDescription>
               </DialogHeader>
               <form onSubmit={handleUpdateSchedule} className="space-y-4">
-                <div className="grid grid-cols-2 gap-4">
+                {/* Title, Chapter, Lesson */}
+                <div className="space-y-4">
                   <div>
-                    <Label htmlFor="edit-available-date">Available Date</Label>
+                    <Label htmlFor="edit-title">Assignment Title</Label>
                     <Input
-                      id="edit-available-date"
-                      type="date"
-                      value={editingAssignment.available_date}
-                      onChange={(e) => setEditingAssignment({ ...editingAssignment, available_date: e.target.value })}
+                      id="edit-title"
+                      type="text"
+                      value={editingAssignment.title}
+                      onChange={(e) => setEditingAssignment({ ...editingAssignment, title: e.target.value })}
                       className="mt-1"
+                      required
                     />
                   </div>
-                  <div>
-                    <Label htmlFor="edit-available-time">Available Time</Label>
-                    <Input
-                      id="edit-available-time"
-                      type="time"
-                      value={editingAssignment.available_time}
-                      onChange={(e) => setEditingAssignment({ ...editingAssignment, available_time: e.target.value })}
-                      className="mt-1"
-                    />
+                  
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <Label htmlFor="edit-chapter">Chapter</Label>
+                      <Input
+                        id="edit-chapter"
+                        type="text"
+                        placeholder="e.g., Chapter 1"
+                        value={editingAssignment.chapter || ""}
+                        onChange={(e) => setEditingAssignment({ ...editingAssignment, chapter: e.target.value })}
+                        className="mt-1"
+                      />
+                    </div>
+                    <div>
+                      <Label htmlFor="edit-lesson">Lesson</Label>
+                      <Input
+                        id="edit-lesson"
+                        type="text"
+                        placeholder="e.g., Lesson 1"
+                        value={editingAssignment.lesson || ""}
+                        onChange={(e) => setEditingAssignment({ ...editingAssignment, lesson: e.target.value })}
+                        className="mt-1"
+                      />
+                    </div>
                   </div>
-                  <div>
-                    <Label htmlFor="edit-due-date">Due Date</Label>
-                    <Input
-                      id="edit-due-date"
-                      type="date"
-                      value={editingAssignment.due_date}
-                      onChange={(e) => setEditingAssignment({ ...editingAssignment, due_date: e.target.value })}
-                      className="mt-1"
-                    />
-                  </div>
-                  <div>
-                    <Label htmlFor="edit-due-time">Due Time</Label>
-                    <Input
-                      id="edit-due-time"
-                      type="time"
-                      value={editingAssignment.due_time}
-                      onChange={(e) => setEditingAssignment({ ...editingAssignment, due_time: e.target.value })}
-                      className="mt-1"
-                    />
+                </div>
+
+                {/* Schedule Section */}
+                <div className="pt-4 border-t">
+                  <h3 className="text-sm font-semibold mb-3 text-gray-700">Schedule</h3>
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <Label htmlFor="edit-available-date">Available Date</Label>
+                      <Input
+                        id="edit-available-date"
+                        type="date"
+                        value={editingAssignment.available_date}
+                        onChange={(e) => setEditingAssignment({ ...editingAssignment, available_date: e.target.value })}
+                        className="mt-1"
+                      />
+                    </div>
+                    <div>
+                      <Label htmlFor="edit-available-time">Available Time</Label>
+                      <Input
+                        id="edit-available-time"
+                        type="time"
+                        value={editingAssignment.available_time}
+                        onChange={(e) => setEditingAssignment({ ...editingAssignment, available_time: e.target.value })}
+                        className="mt-1"
+                      />
+                    </div>
+                    <div>
+                      <Label htmlFor="edit-due-date">Due Date</Label>
+                      <Input
+                        id="edit-due-date"
+                        type="date"
+                        value={editingAssignment.due_date}
+                        onChange={(e) => setEditingAssignment({ ...editingAssignment, due_date: e.target.value })}
+                        className="mt-1"
+                      />
+                    </div>
+                    <div>
+                      <Label htmlFor="edit-due-time">Due Time</Label>
+                      <Input
+                        id="edit-due-time"
+                        type="time"
+                        value={editingAssignment.due_time}
+                        onChange={(e) => setEditingAssignment({ ...editingAssignment, due_time: e.target.value })}
+                        className="mt-1"
+                      />
+                    </div>
                   </div>
                 </div>
 
@@ -903,7 +947,7 @@ export default function ClassroomPage({ user }) {
                 </div>
 
                 <Button type="submit" className="w-full bg-indigo-600 hover:bg-indigo-700">
-                  Update Schedule
+                  Update Assignment
                 </Button>
               </form>
             </DialogContent>
