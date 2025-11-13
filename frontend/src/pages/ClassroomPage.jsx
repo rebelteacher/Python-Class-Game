@@ -210,6 +210,19 @@ export default function ClassroomPage({ user }) {
         ? `${editingAssignment.due_date}T${editingAssignment.due_time}:00Z`
         : null;
       
+      // Update assignment details via new endpoint
+      await axios.put(
+        `${API}/assignments/${editingAssignment.id}`,
+        {
+          title: editingAssignment.title,
+          chapter: editingAssignment.chapter,
+          lesson: editingAssignment.lesson,
+          due_date: dueDateTime
+        },
+        { withCredentials: true }
+      );
+      
+      // Update schedule via existing endpoint
       await axios.put(
         `${API}/assignments/${editingAssignment.id}/schedule`,
         {
@@ -221,13 +234,13 @@ export default function ClassroomPage({ user }) {
         { withCredentials: true }
       );
       
-      toast.success("Schedule updated!");
+      toast.success("Assignment updated!");
       setEditScheduleDialogOpen(false);
       setEditingAssignment(null);
       fetchAssignments();
     } catch (error) {
-      console.error("Error updating schedule:", error);
-      toast.error("Failed to update schedule");
+      console.error("Error updating assignment:", error);
+      toast.error("Failed to update assignment");
     }
   };
 
