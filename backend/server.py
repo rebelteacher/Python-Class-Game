@@ -1516,6 +1516,8 @@ async def create_assignment(assignment: AssignmentCreate, request: Request):
     new_assignment = Assignment(
         title=assignment.title,
         description=assignment.description,
+        chapter=assignment.chapter,
+        lesson=assignment.lesson,
         teacher_id=user["id"],
         problem_ids=assignment.problem_ids,
         classroom_ids=classroom_ids,
