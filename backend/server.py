@@ -784,9 +784,11 @@ async def teacher_login(login_data: TeacherLoginRequest, response: Response):
             key="session_token",
             value=session_token,
             max_age=7 * 24 * 60 * 60,  # 7 days
-            httponly=False,  # Allow JavaScript access for now
+            path="/",
+            httponly=False,  # Allow JavaScript access
             samesite="lax",
-            secure=False  # Set to True in production with HTTPS
+            secure=False,  # Set to True in production with HTTPS
+            domain=None  # Let browser handle domain
         )
         
         return {
