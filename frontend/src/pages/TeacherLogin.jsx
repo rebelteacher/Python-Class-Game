@@ -33,11 +33,17 @@ export default function TeacherLogin() {
         password
       });
 
+      // Store session token in localStorage as fallback
+      localStorage.setItem("session_token", response.data.session_token);
+      
       // Set session cookie
       const maxAge = 7 * 24 * 60 * 60; // 7 days
       const isProduction = window.location.protocol === 'https:';
       const cookieString = `session_token=${response.data.session_token}; path=/; max-age=${maxAge}${isProduction ? '; secure' : ''}; samesite=lax`;
       document.cookie = cookieString;
+      
+      // Set default axios header
+      axios.defaults.headers.common['Authorization'] = `Bearer ${response.data.session_token}`;
       
       console.log("Cookie set:", cookieString);
       console.log("User data:", response.data);
