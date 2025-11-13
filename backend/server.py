@@ -742,7 +742,7 @@ async def get_me(request: Request):
     }
 
 @api_router.post("/auth/teacher-login")
-async def teacher_login(login_data: TeacherLoginRequest):
+async def teacher_login(login_data: TeacherLoginRequest, response: Response):
     """Teacher login with email and password"""
     try:
         # Find user by email
@@ -778,6 +778,16 @@ async def teacher_login(login_data: TeacherLoginRequest):
         }
         
         await db.sessions.insert_one(session)
+        
+        # Set cookie in response
+        response.set_cookie(
+            key="session_token",
+            value=session_token,
+            max_age=7 * 24 * 60 * 60,  # 7 days
+            httponly=False,  # Allow JavaScript access for now
+            samesite="lax",
+            secure=False  # Set to True in production with HTTPS
+        )
         
         return {
             "id": user["id"],
