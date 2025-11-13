@@ -758,6 +758,8 @@ export default function ClassroomPage({ user }) {
                                                     setEditingAssignment({
                                                       id: assignment.id,
                                                       title: assignment.title,
+                                                      chapter: assignment.chapter || '',
+                                                      lesson: assignment.lesson || '',
                                                       available_date: availDate ? availDate.toISOString().split('T')[0] : '',
                                                       available_time: availDate ? availDate.toISOString().split('T')[1].substring(0, 5) : '00:00',
                                                       due_date: dueDate ? dueDate.toISOString().split('T')[0] : '',
@@ -769,8 +771,10 @@ export default function ClassroomPage({ user }) {
                                                   }}
                                                   variant="outline"
                                                   size="sm"
+                                                  className="gap-1"
                                                 >
-                                                  <Calendar className="w-4 h-4" />
+                                                  <Edit className="w-4 h-4" />
+                                                  Edit
                                                 </Button>
                                                 <Button
                                                   onClick={(e) => {
