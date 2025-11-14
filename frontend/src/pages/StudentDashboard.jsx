@@ -419,27 +419,10 @@ export default function StudentDashboard({ user, setUser, refreshUser }) {
     });
   };
 
-  const organizeAssignments = (filterCompleted = false) => {
+  const organizeAssignments = () => {
     const organized = {};
     classrooms.forEach(classroom => {
       classroom.assignments?.forEach(assignment => {
-        // Check if assignment is completed
-        // For multi-problem assignments: check if all problems are final
-        // For single-problem assignments: check if the assignment itself is final
-        let isCompleted = false;
-        
-        if (assignment.problems && assignment.problems.length > 0) {
-          // Multi-problem assignment: check each problem
-          isCompleted = assignment.problems.every(problem => problemsFinal[problem.id]);
-        } else {
-          // Single-problem assignment: check the assignment ID
-          isCompleted = !!problemsFinal[assignment.id];
-        }
-        
-        // Filter based on completed status
-        if (filterCompleted && !isCompleted) return;
-        if (!filterCompleted && isCompleted) return;
-        
         const chapter = assignment.chapter || "Uncategorized";
         const lesson = assignment.lesson || "Lesson 1";
         
@@ -458,8 +441,7 @@ export default function StudentDashboard({ user, setUser, refreshUser }) {
     return organized;
   };
 
-  const todoAssignments = organizeAssignments(false);
-  const completedAssignments = organizeAssignments(true);
+  const organizedAssignments = organizeAssignments();
 
 
   const getBackgroundStyle = () => {
