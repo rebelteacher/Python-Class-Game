@@ -425,10 +425,20 @@ export default function StudentDashboard({ user, setUser, refreshUser }) {
     classrooms.forEach(classroom => {
       console.log(`Classroom ${classroom.name} has assignments:`, classroom.assignments);
       classroom.assignments?.forEach(assignment => {
-        // Check if assignment is completed (all problems marked as final)
-        const isCompleted = assignment.problems && assignment.problems.length > 0 
-          ? assignment.problems.every(problem => problemsFinal[problem.id])
-          : false;
+        // Check if assignment is completed
+        // For multi-problem assignments: check if all problems are final
+        // For single-problem assignments: check if the assignment itself is final
+        let isCompleted = false;
+        
+        if (assignment.problems && assignment.problems.length > 0) {
+          // Multi-problem assignment: check each problem
+          isCompleted = assignment.problems.every(problem => problemsFinal[problem.id]);
+        } else {
+          // Single-problem assignment: check the assignment ID
+          isCompleted = problemsFinal[assignment.id] === true;
+        }
+        
+        console.log(`Assignment ${assignment.title}: isCompleted=${isCompleted}, problemsFinal=`, problemsFinal);
         
         // Filter based on completed status
         if (filterCompleted && !isCompleted) return;
