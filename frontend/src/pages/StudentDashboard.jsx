@@ -421,9 +421,7 @@ export default function StudentDashboard({ user, setUser, refreshUser }) {
 
   const organizeAssignments = (filterCompleted = false) => {
     const organized = {};
-    console.log("Organizing assignments, classrooms:", classrooms);
     classrooms.forEach(classroom => {
-      console.log(`Classroom ${classroom.name} has assignments:`, classroom.assignments);
       classroom.assignments?.forEach(assignment => {
         // Check if assignment is completed
         // For multi-problem assignments: check if all problems are final
@@ -435,10 +433,8 @@ export default function StudentDashboard({ user, setUser, refreshUser }) {
           isCompleted = assignment.problems.every(problem => problemsFinal[problem.id]);
         } else {
           // Single-problem assignment: check the assignment ID
-          isCompleted = problemsFinal[assignment.id] === true;
+          isCompleted = !!problemsFinal[assignment.id];
         }
-        
-        console.log(`Assignment ${assignment.title}: isCompleted=${isCompleted}, problemsFinal=`, problemsFinal);
         
         // Filter based on completed status
         if (filterCompleted && !isCompleted) return;
@@ -459,7 +455,6 @@ export default function StudentDashboard({ user, setUser, refreshUser }) {
         });
       });
     });
-    console.log("Organized assignments:", organized);
     return organized;
   };
 
