@@ -104,6 +104,7 @@ export default function StudentDashboard({ user, setUser, refreshUser }) {
     fetchChallenges();
     fetchShopItems();
     fetchUserProfile();
+    fetchCompletedAssignments();
   }, [location.key]); // location.key changes on every navigation
   
   // Also update when the user prop changes (from parent)
