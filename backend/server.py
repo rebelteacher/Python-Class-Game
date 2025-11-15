@@ -2335,6 +2335,34 @@ async def mark_submission_final(submission_id: str, request: Request):
     return {"success": True, "message": "Submission marked as final"}
 
 
+@api_router.get("/student/completed-assignments")
+async def get_completed_assignments(request: Request):
+    """Get all assignment IDs that the student has completed (has at least one final submission)"""
+    user = await get_current_user(request)
+    
+    if user["role"] != "student":
+        raise HTTPException(status_code=403, detail="Only students can access this endpoint")
+    
+    # Find all unique assignment_ids where the student has at least one final submission
+    pipeline = [
+        {
+            "$match": {
+                "student_id": user["id"],
+                "is_final": True
+            }
+        },
+        {
+            "$group": {
+                "_id": "$assignment_id"
+            }
+        }
+    ]
+    
+    result = await db.submissions.aggregate(pipeline).to_list(1000)
+    completed_assignment_ids = [doc["_id"] for doc in result]
+    
+    return {"completed_assignment_ids": completed_assignment_ids}
+
 
 @api_router.post("/get-hint")
 async def get_hint(hint_request: HintRequest, request: Request):
