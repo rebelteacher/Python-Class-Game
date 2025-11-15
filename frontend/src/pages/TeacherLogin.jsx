@@ -31,6 +31,8 @@ export default function TeacherLogin() {
       const response = await axios.post(`${API}/auth/teacher-login`, {
         email,
         password
+      }, {
+        withCredentials: true  // Important: allows cookies to be set
       });
 
       // Store session token in localStorage as fallback
