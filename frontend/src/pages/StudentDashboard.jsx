@@ -433,10 +433,16 @@ export default function StudentDashboard({ user, setUser, refreshUser }) {
     });
   };
 
-  const organizeAssignments = () => {
+  const organizeAssignments = (filterCompleted) => {
     const organized = {};
     classrooms.forEach(classroom => {
       classroom.assignments?.forEach(assignment => {
+        const isCompleted = completedAssignmentIds.has(assignment.id);
+        
+        // Filter based on the tab we're organizing for
+        if (filterCompleted && !isCompleted) return; // "Completed" tab should only show completed
+        if (!filterCompleted && isCompleted) return; // "To Do" tab should only show incomplete
+        
         const chapter = assignment.chapter || "Uncategorized";
         const lesson = assignment.lesson || "Lesson 1";
         
@@ -455,7 +461,8 @@ export default function StudentDashboard({ user, setUser, refreshUser }) {
     return organized;
   };
 
-  const organizedAssignments = organizeAssignments();
+  const toDoAssignments = organizeAssignments(false);
+  const completedAssignments = organizeAssignments(true);
 
 
   const getBackgroundStyle = () => {
