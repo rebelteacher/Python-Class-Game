@@ -2574,15 +2574,6 @@ async def get_hint_status(assignment_id: str, request: Request):
         "hint2_used": 2 in used_levels
     }
 
-    updated_user = await db.users.find_one({"id": user["id"]}, {"_id": 0})
-    
-    return {
-        "hint": hint_text,
-        "coins_spent": coin_cost,
-        "remaining_coins": updated_user.get("coins", 0),
-        "hints_used": hints_used + 1,
-        "hints_remaining": 2 - (hints_used + 1)
-    }
 
 @api_router.get("/student/{student_id}/lesson-scores")
 async def get_student_lesson_scores(student_id: str, classroom_id: str, request: Request):
