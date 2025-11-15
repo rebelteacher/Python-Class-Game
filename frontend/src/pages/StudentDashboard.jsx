@@ -126,6 +126,18 @@ export default function StudentDashboard({ user, setUser, refreshUser }) {
     }
   };
 
+  const fetchCompletedAssignments = async () => {
+    try {
+      const response = await axios.get(`${API}/student/completed-assignments`, {
+        withCredentials: true,
+      });
+      console.log("Completed assignments:", response.data.completed_assignment_ids);
+      setCompletedAssignmentIds(new Set(response.data.completed_assignment_ids));
+    } catch (error) {
+      console.error("Error fetching completed assignments:", error);
+    }
+  };
+
   const fetchShopItems = async () => {
     try {
       const response = await axios.get(`${API}/shop`, {
