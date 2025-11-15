@@ -5045,27 +5045,35 @@ async def calculate_competition_standings(competition_id: str, competition: dict
         # Get all students in classroom
         student_ids = classroom.get("students", [])
         
-        # Count problems solved during competition period
+        # Count problems solved during competition period (score = 100 counts as solved)
         submissions = await db.submissions.find({
             "student_id": {"$in": student_ids},
             "submitted_at": {
                 "$gte": start_date.isoformat(),
                 "$lte": end_date.isoformat()
             },
-            "is_final": True
+            "score": 100  # Only count perfect scores as "solved"
         }).to_list(length=None)
         
-        total_problems_solved = len(submissions)
-        total_xp_gained = sum(s.get("score", 0) for s in submissions)
-        
-        # Find Class Captain (most problems) and MVC (most XP)
+        # Count unique problems per student (a student might solve the same problem multiple times)
         student_stats = {}
         for sub in submissions:
             sid = sub["student_id"]
+            problem_id = sub.get("problem_id")
+            
             if sid not in student_stats:
-                student_stats[sid] = {"problems": 0, "xp": 0}
-            student_stats[sid]["problems"] += 1
-            student_stats[sid]["xp"] += sub.get("score", 0)
+                student_stats[sid] = {"problems": set(), "xp": 0}
+            
+            # Add problem to set (automatically handles duplicates)
+            student_stats[sid]["problems"].add(problem_id)
+            student_stats[sid]["xp"] += 100  # Each perfect score = 100 XP
+        
+        # Convert sets to counts
+        for sid in student_stats:
+            student_stats[sid]["problems"] = len(student_stats[sid]["problems"])
+        
+        total_problems_solved = sum(stats["problems"] for stats in student_stats.values())
+        total_xp_gained = sum(stats["xp"] for stats in student_stats.values())
         
         captain = None
         mvc = None
