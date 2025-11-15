@@ -1021,7 +1021,7 @@ export default function StudentDashboard({ user, setUser, refreshUser }) {
           </div>
         )}
 
-        {/* Assignments - Folder View */}
+        {/* Assignments - Folder View with Tabs */}
         {loading ? (
           <div className="text-center py-20 text-gray-600">Loading assignments...</div>
         ) : classrooms.length === 0 ? (
@@ -1034,14 +1034,42 @@ export default function StudentDashboard({ user, setUser, refreshUser }) {
               Join Class
             </Button>
           </div>
-        ) : Object.keys(organizedAssignments).length === 0 ? (
-          <div className="text-center py-20">
-            <BookOpen className="w-16 h-16 text-gray-400 mx-auto mb-4" />
-            <h3 className="text-xl font-semibold text-gray-700 mb-2">No assignments yet</h3>
-            <p className="text-gray-500">Your teacher will assign work soon</p>
-          </div>
         ) : (
-          <div className="space-y-4">
+          <Card className="mb-8">
+            <CardHeader>
+              <CardTitle className="text-2xl flex items-center gap-2">
+                <BookOpen className="w-6 h-6 text-teal-600" />
+                My Assignments
+              </CardTitle>
+              <CardDescription>
+                Track your progress and complete assignments
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <Tabs defaultValue="todo" className="w-full">
+                <TabsList className="mb-4">
+                  <TabsTrigger value="todo" className="gap-2">
+                    <FileText className="w-4 h-4" />
+                    To Do ({Object.values(toDoAssignments).reduce((acc, chapter) => 
+                      acc + Object.values(chapter).reduce((sum, lessons) => sum + lessons.length, 0), 0)})
+                  </TabsTrigger>
+                  <TabsTrigger value="completed" className="gap-2">
+                    <CheckCircle className="w-4 h-4" />
+                    Completed ({Object.values(completedAssignments).reduce((acc, chapter) => 
+                      acc + Object.values(chapter).reduce((sum, lessons) => sum + lessons.length, 0), 0)})
+                  </TabsTrigger>
+                </TabsList>
+
+                {/* To Do Tab */}
+                <TabsContent value="todo">
+                  {Object.keys(toDoAssignments).length === 0 ? (
+                    <div className="text-center py-12">
+                      <CheckCircle className="w-16 h-16 text-green-400 mx-auto mb-4" />
+                      <h3 className="text-xl font-semibold text-gray-700 mb-2">All caught up! 🎉</h3>
+                      <p className="text-gray-500">You've completed all your assignments</p>
+                    </div>
+                  ) : (
+                    <div className="space-y-4">
             {Object.keys(organizedAssignments).sort().map((chapter) => {
               const isChapterExpanded = expandedChapters.has(chapter);
               const lessons = organizedAssignments[chapter];
