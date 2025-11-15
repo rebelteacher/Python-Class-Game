@@ -60,10 +60,21 @@ export default function TeacherSignup() {
         invite_code: inviteCode,
         district,
         school
+      }, {
+        withCredentials: true  // Important: allows cookies to be set
       });
 
+      // Store session token in localStorage as fallback
+      localStorage.setItem("session_token", response.data.session_token);
+      
+      // Set default axios header
+      axios.defaults.headers.common['Authorization'] = `Bearer ${response.data.session_token}`;
+      
       // Set session cookie
-      document.cookie = `session_token=${response.data.session_token}; path=/; max-age=${7 * 24 * 60 * 60}; secure; samesite=none`;
+      const maxAge = 7 * 24 * 60 * 60;
+      const isProduction = window.location.protocol === 'https:';
+      const cookieString = `session_token=${response.data.session_token}; path=/; max-age=${maxAge}${isProduction ? '; secure' : ''}; samesite=lax`;
+      document.cookie = cookieString;
       
       toast.success("Account created successfully!");
       navigate("/teacher/dashboard");
