@@ -91,6 +91,7 @@ export default function StudentDashboard({ user, setUser, refreshUser }) {
   const [expandedLessons, setExpandedLessons] = useState(new Set());
   const [selectedClassroom, setSelectedClassroom] = useState("");
   const [selectedOpponent, setSelectedOpponent] = useState("");
+  const [completedAssignmentIds, setCompletedAssignmentIds] = useState(new Set());
   const navigate = useNavigate();
   const location = useLocation();
 
