@@ -48,6 +48,8 @@ export default function DistrictAdminSignup() {
         password,
         district,
         job_title: jobTitle
+      }, {
+        withCredentials: true
       });
       
       toast.success("Request submitted! A platform administrator will review your request shortly.");
