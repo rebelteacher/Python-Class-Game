@@ -780,6 +780,8 @@ async def teacher_login(login_data: TeacherLoginRequest, response: Response):
         await db.sessions.insert_one(session)
         
         # Set cookie in response
+        # Auto-detect if we're in production (HTTPS) or development (HTTP)
+        is_production = os.environ.get("ENVIRONMENT", "development") == "production"
         response.set_cookie(
             key="session_token",
             value=session_token,
@@ -787,7 +789,7 @@ async def teacher_login(login_data: TeacherLoginRequest, response: Response):
             path="/",
             httponly=False,  # Allow JavaScript access
             samesite="lax",
-            secure=False,  # Set to True in production with HTTPS
+            secure=is_production,  # True in production (HTTPS), False in development
             domain=None  # Let browser handle domain
         )
         
