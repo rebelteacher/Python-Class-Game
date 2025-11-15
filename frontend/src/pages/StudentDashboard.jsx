@@ -252,8 +252,12 @@ export default function StudentDashboard({ user, setUser, refreshUser }) {
       const response = await axios.get(`${API}/competitions`, {
         withCredentials: true,
       });
-      // Filter to show only active and upcoming competitions
-      const activeComps = response.data.filter(c => c.status === 'active' || c.status === 'upcoming');
+      // Filter to show only active and upcoming competitions (calculate status based on dates)
+      const now = new Date();
+      const activeComps = response.data.filter(c => {
+        const endDate = new Date(c.end_date);
+        return now <= endDate; // Show if competition hasn't ended yet
+      });
       setCompetitions(activeComps);
     } catch (error) {
       console.error("Error fetching competitions:", error);
