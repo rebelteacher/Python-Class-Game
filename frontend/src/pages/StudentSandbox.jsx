@@ -236,15 +236,11 @@ export default function StudentSandbox({ user }) {
 
           {/* Quick Tips */}
           <Card className="mt-6 border-blue-200 bg-gradient-to-r from-blue-50 to-purple-50">
-            <CardContent className="pt-4">
-              <h3 className="font-semibold text-blue-900 mb-2">💡 Quick Tips:</h3>
-              <ul className="text-sm text-blue-700 space-y-1">
-                <li>• Press the <strong>Run Code</strong> button to execute your Python code</li>
-                <li>• <strong>NEW!</strong> Code with <code className="bg-blue-100 px-1 rounded">input()</code> will show an interactive dialog - no need to pre-fill inputs!</li>
-                <li>• You can still use the "Test Input" box for manual input if you prefer</li>
-                <li>• Press <strong>Clear</strong> to start fresh with a blank editor</li>
-                <li>• Toggle between light and dark editor themes with the theme button</li>
-                <li>• Try printing variables, doing math, creating functions, or anything else you want!</li>
+            <CardContent className="pt-3 pb-3">
+              <h3 className="font-semibold text-blue-900 mb-1 text-sm">💡 Quick Tips:</h3>
+              <ul className="text-xs text-blue-700 space-y-0.5">
+                <li>• <strong>NEW!</strong> Code with <code className="bg-blue-100 px-1 rounded">input()</code> shows an interactive dialog</li>
+                <li>• Toggle light/dark theme • Press <strong>Clear</strong> to reset</li>
               </ul>
             </CardContent>
           </Card>
