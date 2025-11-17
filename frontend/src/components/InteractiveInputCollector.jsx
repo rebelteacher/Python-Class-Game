@@ -53,7 +53,12 @@ export default function InteractiveInputCollector({
     return matches;
   };
 
-  const handleNext = () => {
+  const handleNext = (e) => {
+    // Prevent default if it's an event
+    if (e && e.preventDefault) {
+      e.preventDefault();
+    }
+
     if (!currentInput.trim() && currentIndex < inputPrompts.length - 1) {
       return; // Don't allow empty input
     }
@@ -67,7 +72,8 @@ export default function InteractiveInputCollector({
       setCurrentInput("");
     } else {
       // All inputs collected, run the code
-      onSubmitInputs(newCollected.join('\n'));
+      const inputString = newCollected.join('\n');
+      onSubmitInputs(inputString);
       onClose();
     }
   };
