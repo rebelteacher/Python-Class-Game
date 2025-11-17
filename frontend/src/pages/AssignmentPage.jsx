@@ -222,7 +222,15 @@ export default function AssignmentPage({ user }) {
     }
   };
 
-  const handleRunCode = async () => {
+  const handleRunCode = async (providedInput = null) => {
+    // Check if code contains input() calls and no input provided yet
+    const hasInputCalls = /input\s*\(/i.test(code);
+    if (hasInputCalls && !testInput && providedInput === null) {
+      // Show interactive dialog
+      setShowInteractiveDialog(true);
+      return;
+    }
+
     setRunning(true);
     setOutput("");
     
@@ -234,11 +242,12 @@ export default function AssignmentPage({ user }) {
     }));
     
     try {
+      const inputToUse = providedInput !== null ? providedInput : testInput;
       const response = await axios.post(
         `${API}/code/execute`,
         {
           code: code,
-          test_input: testInput,
+          test_input: inputToUse,
         },
         { withCredentials: true }
       );
@@ -253,6 +262,10 @@ export default function AssignmentPage({ user }) {
     } finally {
       setRunning(false);
     }
+  };
+
+  const handleInteractiveInputSubmit = (collectedInputs) => {
+    handleRunCode(collectedInputs);
   };
 
   const handleSubmit = async () => {
