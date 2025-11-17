@@ -240,7 +240,8 @@ export default function StudentSandbox({ user }) {
               <h3 className="font-semibold text-blue-900 mb-2">💡 Quick Tips:</h3>
               <ul className="text-sm text-blue-700 space-y-1">
                 <li>• Press the <strong>Run Code</strong> button to execute your Python code</li>
-                <li>• Use <code className="bg-blue-100 px-1 rounded">input()</code> to get user input - enter test data in the Input box first</li>
+                <li>• <strong>NEW!</strong> Code with <code className="bg-blue-100 px-1 rounded">input()</code> will show an interactive dialog - no need to pre-fill inputs!</li>
+                <li>• You can still use the "Test Input" box for manual input if you prefer</li>
                 <li>• Press <strong>Clear</strong> to start fresh with a blank editor</li>
                 <li>• Toggle between light and dark editor themes with the theme button</li>
                 <li>• Try printing variables, doing math, creating functions, or anything else you want!</li>
@@ -249,6 +250,14 @@ export default function StudentSandbox({ user }) {
           </Card>
         </div>
       </div>
+
+      {/* Interactive Input Dialog */}
+      <InteractiveInputCollector
+        isOpen={showInteractiveDialog}
+        onClose={() => setShowInteractiveDialog(false)}
+        onSubmitInputs={handleInteractiveInputSubmit}
+        codePreview={code}
+      />
     </div>
   );
 }
