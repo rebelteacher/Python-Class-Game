@@ -306,6 +306,14 @@ export default function TeacherPractice({ user }) {
           </Panel>
         </PanelGroup>
       </main>
+
+      {/* Interactive Input Dialog */}
+      <InteractiveInputCollector
+        isOpen={showInteractiveDialog}
+        onClose={() => setShowInteractiveDialog(false)}
+        onSubmitInputs={handleInteractiveInputSubmit}
+        codePreview={code}
+      />
     </div>
   );
 }
