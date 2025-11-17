@@ -197,39 +197,21 @@ export default function StudentSandbox({ user }) {
               {/* Resize Handle */}
               <PanelResizeHandle className="w-2 bg-gray-300 hover:bg-purple-500 transition-colors cursor-col-resize mx-2" />
 
-              {/* Input & Output - Right */}
+              {/* Output - Right - Full Space */}
               <Panel defaultSize={45} minSize={35}>
-                <div className="h-full flex flex-col gap-3">
-                  {/* Test Input Section - Smaller */}
-                  <Card className="h-[140px] flex-shrink-0">
-                    <CardHeader className="pb-2 pt-3">
-                      <CardTitle className="text-sm">Test Input (Optional)</CardTitle>
-                      <CardDescription className="text-xs">
-                        For manual input (or use interactive dialog)
-                      </CardDescription>
-                    </CardHeader>
-                    <CardContent className="h-[calc(100%-70px)]">
-                      <Textarea
-                        placeholder="Enter test data..."
-                        value={testInput}
-                        onChange={(e) => setTestInput(e.target.value)}
-                        className="font-mono text-sm h-full resize-none"
-                      />
-                    </CardContent>
-                  </Card>
-
-                  {/* Output Section - Larger */}
-                  <Card className="flex-1 flex flex-col min-h-0">
-                    <CardHeader className="pb-2 pt-3 flex-shrink-0">
-                      <CardTitle className="text-lg">Output</CardTitle>
-                    </CardHeader>
-                    <CardContent className="flex-1 overflow-auto min-h-0">
-                      <pre className="p-4 bg-gray-900 text-green-400 rounded-lg font-mono text-sm whitespace-pre-wrap min-h-full">
-                        {output || "Run your code to see output here... 🎯"}
-                      </pre>
-                    </CardContent>
-                  </Card>
-                </div>
+                <Card className="h-full flex flex-col">
+                  <CardHeader className="pb-2 pt-3 flex-shrink-0">
+                    <CardTitle className="text-lg">Output</CardTitle>
+                    <CardDescription className="text-xs">
+                      Code with input() will show interactive dialog automatically
+                    </CardDescription>
+                  </CardHeader>
+                  <CardContent className="flex-1 overflow-auto min-h-0">
+                    <pre className="p-4 bg-gray-900 text-green-400 rounded-lg font-mono text-sm whitespace-pre-wrap h-full">
+                      {output || "Run your code to see output here... 🎯"}
+                    </pre>
+                  </CardContent>
+                </Card>
               </Panel>
             </PanelGroup>
           </div>
