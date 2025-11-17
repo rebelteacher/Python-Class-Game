@@ -126,7 +126,7 @@ export default function StudentSandbox({ user }) {
               Clear
             </Button>
             <Button
-              onClick={handleRunCode}
+              onClick={() => handleRunCode()}
               disabled={running}
               size="sm"
               className="gap-2 bg-white text-purple-600 hover:bg-gray-100"
