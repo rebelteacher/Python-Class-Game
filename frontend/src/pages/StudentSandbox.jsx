@@ -160,7 +160,7 @@ export default function StudentSandbox({ user }) {
           </Card>
 
           {/* Editor and Output Layout */}
-          <div className="h-[calc(100vh-300px)]">
+          <div className="h-[calc(100vh-240px)]">
             <PanelGroup direction="horizontal">
               {/* Code Editor - Left */}
               <Panel defaultSize={55} minSize={40}>
@@ -200,17 +200,17 @@ export default function StudentSandbox({ user }) {
               {/* Input & Output - Right */}
               <Panel defaultSize={45} minSize={35}>
                 <div className="h-full flex flex-col gap-3">
-                  {/* Test Input Section */}
-                  <Card className="h-1/3">
-                    <CardHeader className="pb-3">
+                  {/* Test Input Section - Smaller */}
+                  <Card className="h-[140px] flex-shrink-0">
+                    <CardHeader className="pb-2 pt-3">
                       <CardTitle className="text-sm">Test Input (Optional)</CardTitle>
                       <CardDescription className="text-xs">
-                        Enter input data for input() functions. Each line = one input.
+                        For manual input (or use interactive dialog)
                       </CardDescription>
                     </CardHeader>
-                    <CardContent className="h-[calc(100%-90px)]">
+                    <CardContent className="h-[calc(100%-70px)]">
                       <Textarea
-                        placeholder="Enter input data here (e.g., your name, a number, etc.)"
+                        placeholder="Enter test data..."
                         value={testInput}
                         onChange={(e) => setTestInput(e.target.value)}
                         className="font-mono text-sm h-full resize-none"
@@ -218,13 +218,13 @@ export default function StudentSandbox({ user }) {
                     </CardContent>
                   </Card>
 
-                  {/* Output Section */}
-                  <Card className="flex-1 flex flex-col">
-                    <CardHeader className="pb-3">
+                  {/* Output Section - Larger */}
+                  <Card className="flex-1 flex flex-col min-h-0">
+                    <CardHeader className="pb-2 pt-3 flex-shrink-0">
                       <CardTitle className="text-lg">Output</CardTitle>
                     </CardHeader>
-                    <CardContent className="flex-1 overflow-auto">
-                      <pre className="p-4 bg-gray-900 text-green-400 rounded-lg font-mono text-sm h-full whitespace-pre-wrap">
+                    <CardContent className="flex-1 overflow-auto min-h-0">
+                      <pre className="p-4 bg-gray-900 text-green-400 rounded-lg font-mono text-sm whitespace-pre-wrap min-h-full">
                         {output || "Run your code to see output here... 🎯"}
                       </pre>
                     </CardContent>
