@@ -233,7 +233,7 @@ export default function TeacherPractice({ user }) {
                           Show Solution
                         </Button>
                         <Button 
-                          onClick={handleRunCode} 
+                          onClick={() => handleRunCode()} 
                           disabled={running}
                           className="bg-green-600 hover:bg-green-700 gap-2"
                           size="sm"
