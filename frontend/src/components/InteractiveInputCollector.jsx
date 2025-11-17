@@ -85,8 +85,14 @@ export default function InteractiveInputCollector({
     return `Input ${currentIndex + 1}`;
   };
 
+  const handleDialogChange = (open) => {
+    if (!open) {
+      onClose();
+    }
+  };
+
   return (
-    <Dialog open={isOpen} onOpenChange={onClose}>
+    <Dialog open={isOpen} onOpenChange={handleDialogChange}>
       <DialogContent className="sm:max-w-md">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
