@@ -23,12 +23,7 @@ export default function StudentSandbox({ user }) {
     const saved = localStorage.getItem('sandboxDarkMode');
     return saved === 'true';
   });
-  const [interactiveMode, setInteractiveMode] = useState(false);
-  const [showInputDialog, setShowInputDialog] = useState(false);
-  const [inputPrompts, setInputPrompts] = useState([]);
-  const [currentInputIndex, setCurrentInputIndex] = useState(0);
-  const [currentInputValue, setCurrentInputValue] = useState("");
-  const [collectedInputs, setCollectedInputs] = useState([]);
+  const [showInteractiveDialog, setShowInteractiveDialog] = useState(false);
 
   const handleRunCode = async () => {
     if (!code.trim()) {
