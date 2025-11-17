@@ -1033,35 +1033,35 @@ export default function AssignmentPage({ user }) {
                 {/* Test Input & Output - Right */}
                 <Panel defaultSize={50} minSize={30}>
                 <div className="h-full flex flex-col gap-3">
-                  {/* Test Input Section */}
-                  <Card>
-                    <CardHeader className="pb-3">
+                  {/* Test Input Section - Compact */}
+                  <Card className="flex-shrink-0">
+                    <CardHeader className="pb-2 pt-3">
                       <CardTitle className="text-sm">Test Input (Optional)</CardTitle>
                       <CardDescription className="text-xs">
-                        Enter input data for input() functions. Leave empty if no input needed.
+                        For manual input (or use interactive dialog)
                       </CardDescription>
                     </CardHeader>
-                    <CardContent>
+                    <CardContent className="pb-3">
                       <Textarea
-                        placeholder="Enter input data here (e.g., blue)"
+                        placeholder="Enter test data..."
                         value={testInput}
                         onChange={(e) => setTestInput(e.target.value)}
                         rows={2}
-                        className="font-mono text-sm"
+                        className="font-mono text-sm resize-none"
                       />
                     </CardContent>
                   </Card>
 
-                  {/* Output Section */}
-                  <Card className="flex-1 flex flex-col">
-                    <CardHeader className="pb-3">
+                  {/* Output Section - Expanded */}
+                  <Card className="flex-1 flex flex-col min-h-0">
+                    <CardHeader className="pb-2 pt-3 flex-shrink-0">
                       <CardTitle className="flex justify-between items-center">
                         <span>Output</span>
                         <span className="text-xs text-gray-500 font-normal">Demo mode - not graded</span>
                       </CardTitle>
                     </CardHeader>
-                    <CardContent className="flex-1 overflow-auto">
-                      <pre className={`p-4 ${darkMode ? 'bg-gray-900 text-green-400' : 'bg-gray-100 text-gray-900'} rounded-lg font-mono text-sm min-h-[300px] whitespace-pre-wrap`}>
+                    <CardContent className="flex-1 overflow-auto min-h-0">
+                      <pre className={`p-4 ${darkMode ? 'bg-gray-900 text-green-400' : 'bg-gray-100 text-gray-900'} rounded-lg font-mono text-sm whitespace-pre-wrap min-h-full`}>
                         {output || "Run your code to see output here..."}
                       </pre>
                     </CardContent>
