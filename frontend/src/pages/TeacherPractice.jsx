@@ -267,36 +267,19 @@ export default function TeacherPractice({ user }) {
 
               <PanelResizeHandle className="h-2 bg-gray-200 hover:bg-indigo-400 transition-colors" />
 
-              {/* Test Input & Output */}
+              {/* Output Section - Full Space */}
               <Panel defaultSize={40} minSize={20}>
-                <div className="h-full flex flex-col gap-3 p-3">
-                  {/* Test Input Section */}
-                  <Card>
-                    <CardHeader className="pb-3">
-                      <CardTitle className="text-sm">Test Input (Optional)</CardTitle>
+                <div className="h-full p-3">
+                  <Card className="h-full flex flex-col">
+                    <CardHeader className="pb-3 flex-shrink-0">
+                      <CardTitle className="text-lg">Output</CardTitle>
                       <CardDescription className="text-xs">
-                        Enter input data for input() functions. Leave empty if no input needed.
+                        Code with input() will show interactive dialog automatically
                       </CardDescription>
                     </CardHeader>
-                    <CardContent>
-                      <Textarea
-                        placeholder="Enter input data here (e.g., blue)"
-                        value={testInput}
-                        onChange={(e) => setTestInput(e.target.value)}
-                        rows={2}
-                        className="font-mono text-sm"
-                      />
-                    </CardContent>
-                  </Card>
-
-                  {/* Output Window */}
-                  <Card className="flex-1 flex flex-col">
-                    <CardHeader className="pb-3">
-                      <CardTitle className="text-lg">Output</CardTitle>
-                    </CardHeader>
-                    <CardContent className="flex-1 overflow-auto">
-                      <pre className="p-4 bg-gray-900 text-gray-100 rounded-lg font-mono text-sm whitespace-pre-wrap min-h-[100px]">
-                        {output || "Run your code to see output here..."}
+                    <CardContent className="flex-1 overflow-auto min-h-0">
+                      <pre className="p-4 bg-gray-900 text-green-400 rounded-lg font-mono text-sm whitespace-pre-wrap h-full">
+                        {output || "Run your code to see output here... 🎯"}
                       </pre>
                     </CardContent>
                   </Card>
