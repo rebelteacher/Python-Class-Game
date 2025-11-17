@@ -994,7 +994,7 @@ export default function AssignmentPage({ user }) {
                       <div className="flex gap-2">
                         <Button 
                           data-testid="teacher-run-code-btn" 
-                          onClick={handleRunCode} 
+                          onClick={() => handleRunCode()} 
                           disabled={running}
                           variant="outline" 
                           size="sm"
