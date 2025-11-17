@@ -1120,6 +1120,14 @@ export default function AssignmentPage({ user }) {
           </div>
         </DialogContent>
       </Dialog>
+
+      {/* Interactive Input Dialog */}
+      <InteractiveInputCollector
+        isOpen={showInteractiveDialog}
+        onClose={() => setShowInteractiveDialog(false)}
+        onSubmitInputs={handleInteractiveInputSubmit}
+        codePreview={code}
+      />
     </div>
   );
 }
