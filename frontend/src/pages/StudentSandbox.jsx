@@ -25,9 +25,17 @@ export default function StudentSandbox({ user }) {
   });
   const [showInteractiveDialog, setShowInteractiveDialog] = useState(false);
 
-  const handleRunCode = async () => {
+  const handleRunCode = async (providedInput = null) => {
     if (!code.trim()) {
       toast.error("Please write some code first!");
+      return;
+    }
+
+    // Check if code contains input() calls and no input provided yet
+    const hasInputCalls = /input\s*\(/i.test(code);
+    if (hasInputCalls && !testInput && providedInput === null) {
+      // Show interactive dialog
+      setShowInteractiveDialog(true);
       return;
     }
 
@@ -35,11 +43,12 @@ export default function StudentSandbox({ user }) {
     setOutput("Running code...");
 
     try {
+      const inputToUse = providedInput !== null ? providedInput : testInput;
       const response = await axios.post(
-        `${API}/run-code`,
+        `${API}/code/execute`,
         {
           code: code,
-          test_input: testInput,
+          test_input: inputToUse,
         },
         { withCredentials: true }
       );
@@ -58,6 +67,10 @@ export default function StudentSandbox({ user }) {
     } finally {
       setRunning(false);
     }
+  };
+
+  const handleInteractiveInputSubmit = (collectedInputs) => {
+    handleRunCode(collectedInputs);
   };
 
   const handleClearCode = () => {
