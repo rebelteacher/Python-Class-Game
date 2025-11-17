@@ -58,16 +58,25 @@ export default function TeacherPractice({ user }) {
     }
   };
 
-  const handleRunCode = async () => {
+  const handleRunCode = async (providedInput = null) => {
+    // Check if code contains input() calls and no input provided yet
+    const hasInputCalls = /input\s*\(/i.test(code);
+    if (hasInputCalls && !testInput && providedInput === null) {
+      // Show interactive dialog
+      setShowInteractiveDialog(true);
+      return;
+    }
+
     setRunning(true);
     setOutput("");
     
     try {
+      const inputToUse = providedInput !== null ? providedInput : testInput;
       const response = await axios.post(
         `${API}/code/execute`,
         {
           code: code,
-          test_input: testInput,
+          test_input: inputToUse,
         },
         { withCredentials: true }
       );
@@ -78,6 +87,10 @@ export default function TeacherPractice({ user }) {
     } finally {
       setRunning(false);
     }
+  };
+
+  const handleInteractiveInputSubmit = (collectedInputs) => {
+    handleRunCode(collectedInputs);
   };
 
   const handleSaveNotes = () => {
