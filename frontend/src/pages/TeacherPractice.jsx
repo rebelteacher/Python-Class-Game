@@ -24,6 +24,7 @@ export default function TeacherPractice({ user }) {
   const [notes, setNotes] = useState("");
   const [savingNotes, setSavingNotes] = useState(false);
   const [testInput, setTestInput] = useState("");
+  const [showInteractiveDialog, setShowInteractiveDialog] = useState(false);
 
   useEffect(() => {
     fetchProblem();
