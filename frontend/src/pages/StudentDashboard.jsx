@@ -468,6 +468,11 @@ export default function StudentDashboard({ user, setUser, refreshUser }) {
   const toDoAssignments = organizeAssignments(false);
   const completedAssignments = organizeAssignments(true);
 
+  // Natural sort function for alphanumeric strings (e.g., "Chapter 1, 2, 10" instead of "1, 10, 2")
+  const naturalSort = (a, b) => {
+    return a.localeCompare(b, undefined, { numeric: true, sensitivity: 'base' });
+  };
+
 
   const getBackgroundStyle = () => {
     if (userProfile?.active_background && shopItems?.backgrounds) {
