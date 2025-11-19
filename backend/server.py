@@ -4995,10 +4995,22 @@ async def get_competitions(request: Request):
         classroom_ids = [c["id"] for c in user_classrooms]
         competitions = await db.competitions.find({"classroom_ids": {"$in": classroom_ids}}, {"_id": 0}).to_list(length=None)
     
-    # Add classroom names
+    # Add classroom names and calculate current status
+    now = datetime.now(timezone.utc)
     for comp in competitions:
         classrooms = await db.classrooms.find({"id": {"$in": comp["classroom_ids"]}}, {"_id": 0}).to_list(length=None)
         comp["classrooms"] = [{"id": c["id"], "name": c["name"]} for c in classrooms]
+        
+        # Calculate current status based on dates
+        start_date = datetime.fromisoformat(comp["start_date"])
+        end_date = datetime.fromisoformat(comp["end_date"])
+        
+        if now < start_date:
+            comp["status"] = "upcoming"
+        elif now > end_date:
+            comp["status"] = "completed"
+        else:
+            comp["status"] = "active"
     
     return competitions
 
