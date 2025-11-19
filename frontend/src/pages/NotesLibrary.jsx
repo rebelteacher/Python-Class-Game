@@ -235,8 +235,13 @@ export default function NotesLibrary({ user }) {
     }
   };
 
-  const chapters = [...new Set(notes.map(n => n.chapter))].filter(Boolean).sort();
-  const categories = [...new Set(notes.map(n => n.category))].filter(Boolean).sort();
+  // Natural sort function for alphanumeric strings (e.g., "1, 2, 10" instead of "1, 10, 2")
+  const naturalSort = (a, b) => {
+    return a.localeCompare(b, undefined, { numeric: true, sensitivity: 'base' });
+  };
+
+  const chapters = [...new Set(notes.map(n => n.chapter))].filter(Boolean).sort(naturalSort);
+  const categories = [...new Set(notes.map(n => n.category))].filter(Boolean).sort(naturalSort);
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50">
