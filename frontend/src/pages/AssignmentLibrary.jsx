@@ -768,7 +768,7 @@ export default function AssignmentLibrary({ user }) {
           </div>
         ) : (
           <div className="space-y-4">
-            {Object.keys(groupedProblems).sort().map((chapter) => {
+            {Object.keys(groupedProblems).sort(naturalSort).map((chapter) => {
               const isChapterExpanded = expandedChapters.has(chapter);
               const lessons = groupedProblems[chapter];
               
