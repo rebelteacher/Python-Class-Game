@@ -1194,7 +1194,7 @@ export default function StudentDashboard({ user, setUser, refreshUser }) {
                     </div>
                   ) : (
                     <div className="space-y-4">
-                      {Object.keys(completedAssignments).sort().map((chapter) => {
+                      {Object.keys(completedAssignments).sort(naturalSort).map((chapter) => {
                         const isChapterExpanded = expandedChapters.has(chapter);
                         const lessons = completedAssignments[chapter];
                         
