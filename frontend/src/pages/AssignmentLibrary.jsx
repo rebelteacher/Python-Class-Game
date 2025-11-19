@@ -829,7 +829,7 @@ export default function AssignmentLibrary({ user }) {
                             {/* Problem Types in Lesson */}
                             {isLessonExpanded && (
                               <div className="pl-6 pr-3 pb-3 pt-0 space-y-3">
-                                {Object.keys(problemTypes).sort().map((problemType) => {
+                                {Object.keys(problemTypes).sort(naturalSort).map((problemType) => {
                                   const typeKey = `${chapter}-${lesson}-${problemType}`;
                                   const isTypeExpanded = expandedProblemTypes.has(typeKey);
                                   const problems = problemTypes[problemType];
