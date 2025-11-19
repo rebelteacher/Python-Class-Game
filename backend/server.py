@@ -5012,6 +5012,18 @@ async def get_competition(competition_id: str, request: Request):
     if not competition:
         raise HTTPException(status_code=404, detail="Competition not found")
     
+    # Calculate current status based on dates
+    now = datetime.now(timezone.utc)
+    start_date = datetime.fromisoformat(competition["start_date"])
+    end_date = datetime.fromisoformat(competition["end_date"])
+    
+    if now < start_date:
+        competition["status"] = "upcoming"
+    elif now > end_date:
+        competition["status"] = "completed"
+    else:
+        competition["status"] = "active"
+    
     # Calculate live standings
     standings = await calculate_competition_standings(competition_id, competition)
     competition["live_standings"] = standings
