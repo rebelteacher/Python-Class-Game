@@ -274,6 +274,30 @@ export default function AssignmentPage({ user }) {
     handleRunCode(collectedInputs);
   };
 
+  const handleViewLesson = async () => {
+    setLoadingLesson(true);
+    try {
+      const currentProblemId = getCurrentProblemId();
+      const response = await axios.get(
+        `${API}/lessons/${assignmentId}?problem_id=${currentProblemId}`,
+        { withCredentials: true }
+      );
+      
+      if (response.data.exists === false) {
+        toast.info("No lesson available yet for this assignment. Check back later!");
+        return;
+      }
+      
+      setLesson(response.data);
+      setShowLessonDialog(true);
+    } catch (error) {
+      console.error("Error fetching lesson:", error);
+      toast.error("Failed to load lesson");
+    } finally {
+      setLoadingLesson(false);
+    }
+  };
+
   const handleSubmit = async () => {
     if (!hasRun) {
       toast.error("Please run your code first before submitting!");
