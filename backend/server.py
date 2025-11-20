@@ -2594,6 +2594,113 @@ async def get_hint_status(assignment_id: str, request: Request):
     }
 
 
+# ==================== LESSON ROUTES ====================
+
+@api_router.post("/lessons")
+async def create_lesson(lesson: LessonCreate, request: Request):
+    """Create a learning lesson for an assignment/problem"""
+    user = await get_current_user(request)
+    
+    if user["role"] != "teacher":
+        raise HTTPException(status_code=403, detail="Only teachers can create lessons")
+    
+    # Verify the assignment exists and teacher has access
+    assignment = await db.assignments.find_one({"id": lesson.assignment_id}, {"_id": 0})
+    if not assignment:
+        raise HTTPException(status_code=404, detail="Assignment not found")
+    
+    if assignment.get("teacher_id") != user["id"]:
+        raise HTTPException(status_code=403, detail="You can only create lessons for your own assignments")
+    
+    new_lesson = Lesson(
+        assignment_id=lesson.assignment_id,
+        problem_id=lesson.problem_id,
+        title=lesson.title,
+        content=lesson.content,
+        teacher_id=user["id"]
+    )
+    
+    lesson_dict = new_lesson.model_dump()
+    lesson_dict["created_at"] = lesson_dict["created_at"].isoformat()
+    lesson_dict["updated_at"] = lesson_dict["updated_at"].isoformat()
+    
+    await db.lessons.insert_one(lesson_dict)
+    
+    return {"success": True, "lesson_id": new_lesson.id}
+
+
+@api_router.get("/lessons/{assignment_id}")
+async def get_lesson(assignment_id: str, problem_id: Optional[str] = None, request: Request = None):
+    """Get lesson for an assignment or specific problem"""
+    # Allow both authenticated and unauthenticated access for flexibility
+    query = {"assignment_id": assignment_id}
+    
+    if problem_id:
+        # First try to find problem-specific lesson
+        query["problem_id"] = problem_id
+        lesson = await db.lessons.find_one(query, {"_id": 0})
+        if lesson:
+            return lesson
+        
+        # Fall back to assignment-level lesson
+        query = {"assignment_id": assignment_id, "problem_id": None}
+    
+    lesson = await db.lessons.find_one(query, {"_id": 0})
+    
+    if not lesson:
+        return {"exists": False}
+    
+    return lesson
+
+
+@api_router.put("/lessons/{lesson_id}")
+async def update_lesson(lesson_id: str, lesson_update: LessonCreate, request: Request):
+    """Update an existing lesson"""
+    user = await get_current_user(request)
+    
+    if user["role"] != "teacher":
+        raise HTTPException(status_code=403, detail="Only teachers can update lessons")
+    
+    existing_lesson = await db.lessons.find_one({"id": lesson_id}, {"_id": 0})
+    if not existing_lesson:
+        raise HTTPException(status_code=404, detail="Lesson not found")
+    
+    if existing_lesson["teacher_id"] != user["id"]:
+        raise HTTPException(status_code=403, detail="You can only update your own lessons")
+    
+    await db.lessons.update_one(
+        {"id": lesson_id},
+        {"$set": {
+            "title": lesson_update.title,
+            "content": lesson_update.content,
+            "problem_id": lesson_update.problem_id,
+            "updated_at": datetime.now(timezone.utc).isoformat()
+        }}
+    )
+    
+    return {"success": True}
+
+
+@api_router.delete("/lessons/{lesson_id}")
+async def delete_lesson(lesson_id: str, request: Request):
+    """Delete a lesson"""
+    user = await get_current_user(request)
+    
+    if user["role"] != "teacher":
+        raise HTTPException(status_code=403, detail="Only teachers can delete lessons")
+    
+    existing_lesson = await db.lessons.find_one({"id": lesson_id}, {"_id": 0})
+    if not existing_lesson:
+        raise HTTPException(status_code=404, detail="Lesson not found")
+    
+    if existing_lesson["teacher_id"] != user["id"]:
+        raise HTTPException(status_code=403, detail="You can only delete your own lessons")
+    
+    await db.lessons.delete_one({"id": lesson_id})
+    
+    return {"success": True}
+
+
 @api_router.get("/student/{student_id}/lesson-scores")
 async def get_student_lesson_scores(student_id: str, classroom_id: str, request: Request):
     """Calculate assignment scores for a student in a classroom"""
