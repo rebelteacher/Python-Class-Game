@@ -44,6 +44,11 @@ export default function AssignmentPage({ user }) {
   const [loadingHint, setLoadingHint] = useState(false);
   const [currentHint, setCurrentHint] = useState(null);
   const [showHintDialog, setShowHintDialog] = useState(false);
+  
+  // Lesson state
+  const [lesson, setLesson] = useState(null);
+  const [showLessonDialog, setShowLessonDialog] = useState(false);
+  const [loadingLesson, setLoadingLesson] = useState(false);
 
   // Get current problem's ID
   const getCurrentProblemId = () => {
