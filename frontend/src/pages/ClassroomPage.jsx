@@ -1069,6 +1069,108 @@ export default function ClassroomPage({ user }) {
             </DialogContent>
           </Dialog>
         )}
+
+        {/* Lesson Management Dialog */}
+        {lessonDialogOpen && editingLesson && (
+          <Dialog open={lessonDialogOpen} onOpenChange={setLessonDialogOpen}>
+            <DialogContent className="max-w-5xl max-h-[90vh] overflow-y-auto">
+              <DialogHeader>
+                <DialogTitle className="flex items-center gap-2">
+                  <BookOpen className="w-5 h-5 text-blue-600" />
+                  {editingLesson.id ? "Edit" : "Create"} Lesson: {editingLesson.assignment_title}
+                </DialogTitle>
+                <DialogDescription>
+                  Add learning materials with text, images, memes, and code examples using Markdown
+                </DialogDescription>
+              </DialogHeader>
+
+              <Tabs value={lessonPreview ? "preview" : "edit"} onValueChange={(v) => setLessonPreview(v === "preview")}>
+                <TabsList className="grid w-full grid-cols-2">
+                  <TabsTrigger value="edit">✏️ Edit</TabsTrigger>
+                  <TabsTrigger value="preview">👁️ Preview</TabsTrigger>
+                </TabsList>
+
+                <TabsContent value="edit" className="space-y-4">
+                  <div>
+                    <Label htmlFor="lesson-title">Lesson Title</Label>
+                    <Input
+                      id="lesson-title"
+                      value={editingLesson.title}
+                      onChange={(e) => setEditingLesson({ ...editingLesson, title: e.target.value })}
+                      placeholder="e.g., Learn: Understanding Loops"
+                      className="mt-1"
+                    />
+                  </div>
+
+                  <div>
+                    <Label htmlFor="lesson-content">Lesson Content (Markdown)</Label>
+                    <Textarea
+                      id="lesson-content"
+                      value={editingLesson.content}
+                      onChange={(e) => setEditingLesson({ ...editingLesson, content: e.target.value })}
+                      placeholder="Use markdown to format your lesson..."
+                      rows={20}
+                      className="mt-1 font-mono text-sm"
+                    />
+                  </div>
+
+                  <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+                    <h4 className="font-semibold text-blue-900 mb-2">📝 Markdown Tips:</h4>
+                    <ul className="text-sm text-blue-800 space-y-1">
+                      <li>• <code># Heading</code> for titles</li>
+                      <li>• <code>**bold**</code> for emphasis</li>
+                      <li>• <code>![Alt text](image-url)</code> for images/memes</li>
+                      <li>• <code>```python</code> for code blocks</li>
+                      <li>• <code>`code`</code> for inline code</li>
+                    </ul>
+                  </div>
+                </TabsContent>
+
+                <TabsContent value="preview" className="border rounded-lg p-6 bg-white min-h-[400px]">
+                  <div className="prose prose-sm max-w-none">
+                    <h2 className="text-2xl font-bold mb-4">{editingLesson.title}</h2>
+                    <div className="whitespace-pre-wrap">{editingLesson.content}</div>
+                    <p className="text-sm text-gray-500 mt-4 italic">
+                      Note: Full preview with markdown rendering will show to students
+                    </p>
+                  </div>
+                </TabsContent>
+              </Tabs>
+
+              <div className="flex justify-between pt-4 border-t">
+                <div>
+                  {editingLesson.id && (
+                    <Button
+                      onClick={handleDeleteLesson}
+                      variant="destructive"
+                      size="sm"
+                    >
+                      <Trash2 className="w-4 h-4 mr-2" />
+                      Delete Lesson
+                    </Button>
+                  )}
+                </div>
+                <div className="flex gap-2">
+                  <Button
+                    onClick={() => {
+                      setLessonDialogOpen(false);
+                      setEditingLesson(null);
+                    }}
+                    variant="outline"
+                  >
+                    Cancel
+                  </Button>
+                  <Button
+                    onClick={handleSaveLesson}
+                    className="bg-blue-600 hover:bg-blue-700"
+                  >
+                    {editingLesson.id ? "Update" : "Create"} Lesson
+                  </Button>
+                </div>
+              </div>
+            </DialogContent>
+          </Dialog>
+        )}
       </main>
     </div>
   );
