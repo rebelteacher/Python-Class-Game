@@ -866,6 +866,18 @@ export default function ClassroomPage({ user }) {
                                                 <Button
                                                   onClick={(e) => {
                                                     e.stopPropagation();
+                                                    handleOpenLessonDialog(assignment);
+                                                  }}
+                                                  variant="outline"
+                                                  size="sm"
+                                                  className="gap-1 bg-blue-50 text-blue-700 hover:bg-blue-100 border-blue-300"
+                                                >
+                                                  <BookOpen className="w-4 h-4" />
+                                                  Lesson
+                                                </Button>
+                                                <Button
+                                                  onClick={(e) => {
+                                                    e.stopPropagation();
                                                     handleDeleteAssignment(assignment.id, assignment.title);
                                                   }}
                                                   variant="outline"
