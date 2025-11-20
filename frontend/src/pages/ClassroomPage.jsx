@@ -247,6 +247,90 @@ export default function ClassroomPage({ user }) {
     }
   };
 
+  const handleOpenLessonDialog = async (assignment) => {
+    // Fetch existing lesson if it exists
+    try {
+      const response = await axios.get(`${API}/lessons/${assignment.id}`, {
+        withCredentials: true
+      });
+      
+      if (response.data.exists === false) {
+        // No lesson exists, create new
+        setEditingLesson({
+          assignment_id: assignment.id,
+          assignment_title: assignment.title,
+          title: `Learn: ${assignment.title}`,
+          content: "# Welcome!\n\nAdd your lesson content here with markdown...\n\n## Example:\n```python\nprint('Hello, World!')\n```\n\n![Add image URL](https://example.com/image.jpg)"
+        });
+      } else {
+        // Lesson exists, edit it
+        setEditingLesson({
+          ...response.data,
+          assignment_title: assignment.title
+        });
+      }
+      setLessonDialogOpen(true);
+    } catch (error) {
+      console.error("Error fetching lesson:", error);
+      toast.error("Failed to load lesson");
+    }
+  };
+
+  const handleSaveLesson = async () => {
+    try {
+      if (editingLesson.id) {
+        // Update existing lesson
+        await axios.put(
+          `${API}/lessons/${editingLesson.id}`,
+          {
+            assignment_id: editingLesson.assignment_id,
+            title: editingLesson.title,
+            content: editingLesson.content,
+            problem_id: null
+          },
+          { withCredentials: true }
+        );
+        toast.success("Lesson updated!");
+      } else {
+        // Create new lesson
+        await axios.post(
+          `${API}/lessons`,
+          {
+            assignment_id: editingLesson.assignment_id,
+            title: editingLesson.title,
+            content: editingLesson.content,
+            problem_id: null
+          },
+          { withCredentials: true }
+        );
+        toast.success("Lesson created!");
+      }
+      setLessonDialogOpen(false);
+      setEditingLesson(null);
+    } catch (error) {
+      console.error("Error saving lesson:", error);
+      toast.error("Failed to save lesson");
+    }
+  };
+
+  const handleDeleteLesson = async () => {
+    if (!window.confirm("Are you sure you want to delete this lesson?")) {
+      return;
+    }
+
+    try {
+      await axios.delete(`${API}/lessons/${editingLesson.id}`, {
+        withCredentials: true
+      });
+      toast.success("Lesson deleted");
+      setLessonDialogOpen(false);
+      setEditingLesson(null);
+    } catch (error) {
+      console.error("Error deleting lesson:", error);
+      toast.error("Failed to delete lesson");
+    }
+  };
+
   const handleDeleteAssignment = async (assignmentId, assignmentTitle) => {
     if (!window.confirm(`Are you sure you want to delete "${assignmentTitle}"? This will also delete all student submissions.`)) {
       return;
