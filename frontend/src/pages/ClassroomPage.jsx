@@ -26,6 +26,9 @@ export default function ClassroomPage({ user }) {
   const [createDialogOpen, setCreateDialogOpen] = useState(false);
   const [editScheduleDialogOpen, setEditScheduleDialogOpen] = useState(false);
   const [editingAssignment, setEditingAssignment] = useState(null);
+  const [lessonDialogOpen, setLessonDialogOpen] = useState(false);
+  const [editingLesson, setEditingLesson] = useState(null);
+  const [lessonPreview, setLessonPreview] = useState(false);
   const [expandedFolders, setExpandedFolders] = useState(new Set(['classwork', 'tests'])); // Open by default
   const [expandedChapters, setExpandedChapters] = useState(new Set());
   const [expandedLessons, setExpandedLessons] = useState(new Set());
