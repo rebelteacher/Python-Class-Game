@@ -1073,7 +1073,7 @@ export default function ClassroomPage({ user }) {
         {/* Lesson Management Dialog */}
         {lessonDialogOpen && editingLesson && (
           <Dialog open={lessonDialogOpen} onOpenChange={setLessonDialogOpen}>
-            <DialogContent className="max-w-5xl max-h-[90vh] overflow-y-auto">
+            <DialogContent className="max-w-[90vw] max-h-[90vh] w-full overflow-y-auto">
               <DialogHeader>
                 <DialogTitle className="flex items-center gap-2">
                   <BookOpen className="w-5 h-5 text-blue-600" />
