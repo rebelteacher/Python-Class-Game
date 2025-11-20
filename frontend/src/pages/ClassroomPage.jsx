@@ -1114,15 +1114,30 @@ export default function ClassroomPage({ user }) {
                     />
                   </div>
 
-                  <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
-                    <h4 className="font-semibold text-blue-900 mb-2">📝 Markdown Tips:</h4>
-                    <ul className="text-sm text-blue-800 space-y-1">
-                      <li>• <code># Heading</code> for titles</li>
-                      <li>• <code>**bold**</code> for emphasis</li>
-                      <li>• <code>![Alt text](image-url)</code> for images/memes</li>
-                      <li>• <code>```python</code> for code blocks</li>
-                      <li>• <code>`code`</code> for inline code</li>
-                    </ul>
+                  <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 space-y-3">
+                    <div>
+                      <h4 className="font-semibold text-blue-900 mb-2">📝 Markdown Tips:</h4>
+                      <ul className="text-sm text-blue-800 space-y-1">
+                        <li>• <code># Heading</code> for titles</li>
+                        <li>• <code>**bold**</code> for emphasis</li>
+                        <li>• <code>`code`</code> for inline code</li>
+                        <li>• <code>```python</code> (on new line) for code blocks</li>
+                      </ul>
+                    </div>
+                    
+                    <div className="border-t border-blue-300 pt-3">
+                      <h4 className="font-semibold text-blue-900 mb-2">🖼️ How to Add Memes/Images:</h4>
+                      <ol className="text-sm text-blue-800 space-y-2">
+                        <li className="font-medium">1. Find your meme/image online (Google, Imgflip, etc.)</li>
+                        <li className="font-medium">2. Right-click the image → "Copy image address" or "Copy image link"</li>
+                        <li className="font-medium">3. Paste in this format: <code className="bg-white px-1">![Description](paste-url-here)</code></li>
+                        <li className="pl-4">
+                          <strong>Example:</strong><br/>
+                          <code className="bg-white px-2 py-1 block mt-1">![Funny loop meme](https://i.imgflip.com/7k3jqx.jpg)</code>
+                        </li>
+                        <li className="text-blue-600 font-medium">💡 Popular meme sites: imgflip.com, imgur.com, quickmeme.com</li>
+                      </ol>
+                    </div>
                   </div>
                 </TabsContent>
 
