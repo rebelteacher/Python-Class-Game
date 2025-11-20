@@ -1138,6 +1138,13 @@ export default function AssignmentPage({ user }) {
         onSubmitInputs={handleInteractiveInputSubmit}
         codePreview={code}
       />
+
+      {/* Lesson Modal */}
+      <LessonModal
+        isOpen={showLessonDialog}
+        onClose={() => setShowLessonDialog(false)}
+        lesson={lesson}
+      />
     </div>
   );
 }
