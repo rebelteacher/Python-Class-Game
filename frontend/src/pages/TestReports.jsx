@@ -103,7 +103,7 @@ export default function TestReports({ user }) {
       
       // Map student IDs to names
       const resultsWithNames = response.data.results.map(result => {
-        const student = classroom.students_details?.find(s => s.id === result.student_id);
+        const student = classroom.student_details?.find(s => s.id === result.student_id);
         return {
           ...result,
           student_name: student?.name || "Unknown Student"
