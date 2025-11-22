@@ -4494,77 +4494,121 @@ startxref
         test_id = "1c4da924-5ea0-4104-bc09-db46242c7cbe"
         expected_student_name = "Ali Faith"
         expected_student_id = "570dc5e1-db8b-4c2a-8c71-51d570951910"
+        teacher_id = "8ebbb939-8837-4370-bb8f-3c9e72c3db66"  # Amy Stapp - the teacher who created this test
         
         print(f"   Testing with test_id: {test_id}")
         print(f"   Expected student: {expected_student_name} (ID: {expected_student_id})")
+        print(f"   Test created by teacher: {teacher_id}")
         
-        # Test the results endpoint
-        response = self.run_test(
-            "Get MC test results with student names",
-            "GET",
-            f"mc-tests/{test_id}/results",
-            200
-        )
+        # Save original session token
+        original_token = self.session_token
         
-        if response:
-            results = response.get("results", [])
-            print(f"   Found {len(results)} test results")
+        try:
+            # Create a session for the teacher who created this test
+            teacher_session_token = f"test_session_amy_stapp_{int(datetime.now().timestamp())}"
             
-            # Check if we have any results
-            if len(results) == 0:
-                self.log_test("MC test has results", False, "No results found")
-                return
+            from motor.motor_asyncio import AsyncIOMotorClient
+            import asyncio
             
-            # Look for the specific student
-            ali_faith_found = False
-            student_names_found = []
+            async def create_teacher_session():
+                client = AsyncIOMotorClient("mongodb://localhost:27017")
+                db = client["test_database"]
+                
+                # Create session for the teacher who created the test
+                session_doc = {
+                    "user_id": teacher_id,
+                    "session_token": teacher_session_token,
+                    "expires_at": datetime.now(timezone.utc) + timedelta(days=7),
+                    "created_at": datetime.now(timezone.utc).isoformat()
+                }
+                await db.sessions.insert_one(session_doc)
+                
+                client.close()
+                return True
             
-            for result in results:
-                student_name = result.get("student_name")
-                student_id = result.get("student_id")
-                score = result.get("score", 0)
+            # Create the session
+            if asyncio.run(create_teacher_session()):
+                print(f"   ✅ Created session for teacher Amy Stapp")
                 
-                print(f"   Result: student_name='{student_name}', student_id='{student_id}', score={score}")
+                # Switch to the teacher's session
+                self.session_token = teacher_session_token
                 
-                if student_name:
-                    student_names_found.append(student_name)
+                # Test the results endpoint
+                response = self.run_test(
+                    "Get MC test results with student names",
+                    "GET",
+                    f"mc-tests/{test_id}/results",
+                    200
+                )
                 
-                # Check for the specific student we're looking for
-                if student_id == expected_student_id:
-                    ali_faith_found = True
-                    if student_name == expected_student_name:
-                        self.log_test(f"Student name correctly returned for {expected_student_id}", True, f"Found '{student_name}'")
-                    elif student_name == "Unknown Student":
-                        self.log_test(f"Student name correctly returned for {expected_student_id}", False, f"Still showing 'Unknown Student' instead of '{expected_student_name}'")
-                    elif student_name:
-                        self.log_test(f"Student name correctly returned for {expected_student_id}", False, f"Found '{student_name}' instead of '{expected_student_name}'")
+                if response:
+                    results = response.get("results", [])
+                    print(f"   Found {len(results)} test results")
+                    
+                    # Check if we have any results
+                    if len(results) == 0:
+                        self.log_test("MC test has results", False, "No results found")
+                        return
+                    
+                    # Look for the specific student
+                    ali_faith_found = False
+                    student_names_found = []
+                    
+                    for result in results:
+                        student_name = result.get("student_name")
+                        student_id = result.get("student_id")
+                        score = result.get("score", 0)
+                        
+                        print(f"   Result: student_name='{student_name}', student_id='{student_id}', score={score}")
+                        
+                        if student_name:
+                            student_names_found.append(student_name)
+                        
+                        # Check for the specific student we're looking for
+                        if student_id == expected_student_id:
+                            ali_faith_found = True
+                            if student_name == expected_student_name:
+                                self.log_test(f"Student name correctly returned for {expected_student_id}", True, f"Found '{student_name}'")
+                            elif student_name == "Unknown Student":
+                                self.log_test(f"Student name correctly returned for {expected_student_id}", False, f"Still showing 'Unknown Student' instead of '{expected_student_name}'")
+                            elif student_name:
+                                self.log_test(f"Student name correctly returned for {expected_student_id}", False, f"Found '{student_name}' instead of '{expected_student_name}'")
+                            else:
+                                self.log_test(f"Student name correctly returned for {expected_student_id}", False, "student_name field is missing or null")
+                    
+                    # Overall checks
+                    if not ali_faith_found:
+                        self.log_test(f"Expected student {expected_student_id} found in results", False, f"Student ID {expected_student_id} not found in results")
                     else:
-                        self.log_test(f"Student name correctly returned for {expected_student_id}", False, "student_name field is missing or null")
-            
-            # Overall checks
-            if not ali_faith_found:
-                self.log_test(f"Expected student {expected_student_id} found in results", False, f"Student ID {expected_student_id} not found in results")
+                        self.log_test(f"Expected student {expected_student_id} found in results", True)
+                    
+                    # Check that no results show "Unknown Student"
+                    unknown_students = [name for name in student_names_found if name == "Unknown Student"]
+                    if len(unknown_students) == 0:
+                        self.log_test("No 'Unknown Student' entries found", True)
+                    else:
+                        self.log_test("No 'Unknown Student' entries found", False, f"Found {len(unknown_students)} 'Unknown Student' entries")
+                    
+                    # Check that all results have student_name field
+                    results_with_names = [r for r in results if r.get("student_name")]
+                    if len(results_with_names) == len(results):
+                        self.log_test("All results have student_name field", True)
+                    else:
+                        self.log_test("All results have student_name field", False, f"{len(results_with_names)}/{len(results)} results have student_name")
+                    
+                    print(f"   Summary: Found student names: {student_names_found}")
+                
+                else:
+                    print("   ❌ Failed to get test results - endpoint may not be working")
             else:
-                self.log_test(f"Expected student {expected_student_id} found in results", True)
-            
-            # Check that no results show "Unknown Student"
-            unknown_students = [name for name in student_names_found if name == "Unknown Student"]
-            if len(unknown_students) == 0:
-                self.log_test("No 'Unknown Student' entries found", True)
-            else:
-                self.log_test("No 'Unknown Student' entries found", False, f"Found {len(unknown_students)} 'Unknown Student' entries")
-            
-            # Check that all results have student_name field
-            results_with_names = [r for r in results if r.get("student_name")]
-            if len(results_with_names) == len(results):
-                self.log_test("All results have student_name field", True)
-            else:
-                self.log_test("All results have student_name field", False, f"{len(results_with_names)}/{len(results)} results have student_name")
-            
-            print(f"   Summary: Found student names: {student_names_found}")
+                print("   ❌ Failed to create teacher session")
+                
+        except Exception as e:
+            print(f"   ❌ Error during test: {str(e)}")
         
-        else:
-            print("   ❌ Failed to get test results - endpoint may not be working")
+        finally:
+            # Restore original session token
+            self.session_token = original_token
 
     def run_all_tests(self):
         """Run all API tests"""
