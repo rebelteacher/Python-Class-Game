@@ -4717,6 +4717,42 @@ async def get_test_results(test_id: str, request: Request):
         return {"score": attempt["score"]}
 
 
+@api_router.put("/mc-tests/{test_id}/schedule")
+async def update_test_schedule(
+    test_id: str,
+    schedule_update: dict,
+    request: Request
+):
+    """Update test availability and due dates"""
+    user = await get_current_user(request)
+    
+    if user["role"] != "teacher":
+        raise HTTPException(status_code=403, detail="Only teachers can update test schedules")
+    
+    # Verify test exists and belongs to teacher
+    test = await db.mc_tests.find_one({"id": test_id}, {"_id": 0})
+    if not test:
+        raise HTTPException(status_code=404, detail="Test not found")
+    
+    if test["teacher_id"] != user["id"]:
+        raise HTTPException(status_code=403, detail="You can only update your own tests")
+    
+    # Update the schedule
+    update_data = {}
+    if "available_date" in schedule_update and schedule_update["available_date"]:
+        update_data["available_date"] = schedule_update["available_date"]
+    if "due_date" in schedule_update and schedule_update["due_date"]:
+        update_data["due_date"] = schedule_update["due_date"]
+    
+    if update_data:
+        await db.mc_tests.update_one(
+            {"id": test_id},
+            {"$set": update_data}
+        )
+    
+    return {"success": True, "message": "Test schedule updated"}
+
+
 # ==================== STUDENT CHALLENGES ====================
 
 @api_router.post("/challenges")
