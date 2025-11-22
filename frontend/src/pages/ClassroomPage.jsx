@@ -204,46 +204,60 @@ export default function ClassroomPage({ user }) {
 
   const handleUpdateSchedule = async (e) => {
     e.preventDefault();
-    
     try {
       const availableDateTime = editingAssignment.available_date && editingAssignment.available_time
         ? `${editingAssignment.available_date}T${editingAssignment.available_time}:00Z`
         : null;
+      
       const dueDateTime = editingAssignment.due_date && editingAssignment.due_time
         ? `${editingAssignment.due_date}T${editingAssignment.due_time}:00Z`
         : null;
       
-      // Update assignment details via new endpoint
-      await axios.put(
-        `${API}/assignments/${editingAssignment.id}`,
-        {
-          title: editingAssignment.title,
-          chapter: editingAssignment.chapter,
-          lesson: editingAssignment.lesson,
-          due_date: dueDateTime
-        },
-        { withCredentials: true }
-      );
+      if (editingAssignment.isTest) {
+        // Update test schedule
+        await axios.put(
+          `${API}/mc-tests/${editingAssignment.id}/schedule`,
+          {
+            available_date: availableDateTime,
+            due_date: dueDateTime
+          },
+          { withCredentials: true }
+        );
+        toast.success("Test schedule updated!");
+      } else {
+        // Update assignment details via new endpoint
+        await axios.put(
+          `${API}/assignments/${editingAssignment.id}`,
+          {
+            title: editingAssignment.title,
+            chapter: editingAssignment.chapter,
+            lesson: editingAssignment.lesson,
+            due_date: dueDateTime
+          },
+          { withCredentials: true }
+        );
+        
+        // Update schedule via existing endpoint
+        await axios.put(
+          `${API}/assignments/${editingAssignment.id}/schedule`,
+          {
+            available_date: availableDateTime,
+            due_date: dueDateTime,
+            allow_late_submission: editingAssignment.allow_late_submission,
+            late_penalty_percent: parseInt(editingAssignment.late_penalty_percent)
+          },
+          { withCredentials: true }
+        );
+        toast.success("Assignment updated!");
+      }
       
-      // Update schedule via existing endpoint
-      await axios.put(
-        `${API}/assignments/${editingAssignment.id}/schedule`,
-        {
-          available_date: availableDateTime,
-          due_date: dueDateTime,
-          allow_late_submission: editingAssignment.allow_late_submission,
-          late_penalty_percent: parseInt(editingAssignment.late_penalty_percent)
-        },
-        { withCredentials: true }
-      );
-      
-      toast.success("Assignment updated!");
       setEditScheduleDialogOpen(false);
       setEditingAssignment(null);
       fetchAssignments();
+      fetchTests();
     } catch (error) {
-      console.error("Error updating assignment:", error);
-      toast.error("Failed to update assignment");
+      console.error("Error updating:", error);
+      toast.error(editingAssignment.isTest ? "Failed to update test" : "Failed to update assignment");
     }
   };
 
