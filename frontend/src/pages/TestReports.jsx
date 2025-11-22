@@ -17,9 +17,9 @@ export default function TestReports({ user }) {
   const location = useLocation();
   const { testId } = useParams(); // Get testId from URL
   const [classrooms, setClassrooms] = useState([]);
-  const [selectedClassroom, setSelectedClassroom] = useState("");
-  const [tests, setTests] = useState([]);
-  const [selectedTest, setSelectedTest] = useState("");
+  const [selectedClassrooms, setSelectedClassrooms] = useState([]); // Changed to array
+  const [allTests, setAllTests] = useState([]); // All tests from selected classrooms
+  const [selectedTests, setSelectedTests] = useState([]); // Changed to array
   const [loading, setLoading] = useState(true);
   const [loadingResults, setLoadingResults] = useState(false);
   const [results, setResults] = useState([]);
