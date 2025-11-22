@@ -77,9 +77,15 @@ export default function TestTaking({ user }) {
       setAnswers(initialAnswers);
     } catch (error) {
       console.error("Error starting test:", error);
-      if (error.response?.status === 400 && error.response?.data?.detail?.includes("already completed")) {
+      if (error.response?.status === 404) {
+        toast.error("Test not found. It may have been deleted or the link is incorrect.");
+        navigate("/student/dashboard");
+      } else if (error.response?.status === 400 && error.response?.data?.detail?.includes("already completed")) {
         toast.error("You have already completed this test");
         navigate("/student/dashboard");
+      } else if (error.response?.status === 403) {
+        toast.error("Only students can take tests. Teachers should use Test Reports to view results.");
+        navigate("/teacher/dashboard");
       } else {
         toast.error(error.response?.data?.detail || "Failed to start test");
         navigate("/student/dashboard");
