@@ -163,9 +163,9 @@ export default function TestReports({ user }) {
     const highest = Math.max(...scores);
     const lowest = Math.min(...scores);
     
-    // Get classroom student count
-    const classroom = classrooms.find(c => c.id === selectedClassroom);
-    const totalStudents = classroom?.students?.length || 0;
+    // Get total students from selected classrooms
+    const selectedClassroomData = classrooms.filter(c => selectedClassrooms.includes(c.id));
+    const totalStudents = selectedClassroomData.reduce((sum, c) => sum + (c.students?.length || 0), 0);
     const completionRate = totalStudents > 0 ? (results.length / totalStudents * 100) : 0;
     
     return {
