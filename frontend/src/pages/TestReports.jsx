@@ -234,7 +234,6 @@ export default function TestReports({ user }) {
   };
 
   const stats = calculateStats();
-  const classroom = classrooms.find(c => c.id === selectedClassroom);
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50">
