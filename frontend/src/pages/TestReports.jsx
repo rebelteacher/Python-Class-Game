@@ -216,7 +216,7 @@ export default function TestReports({ user }) {
     // Add statistics sheet
     const statsData = [
       { Metric: "Test Name", Value: testInfo?.title || "N/A" },
-      { Metric: "Classroom", Value: classroom?.name || "N/A" },
+      { Metric: "Classrooms", Value: selectedClassrooms.length > 0 ? classrooms.filter(c => selectedClassrooms.includes(c.id)).map(c => c.name).join(", ") : "N/A" },
       { Metric: "Total Students", Value: stats.totalStudents },
       { Metric: "Completed", Value: stats.completed },
       { Metric: "Completion Rate", Value: `${stats.completionRate}%` },
