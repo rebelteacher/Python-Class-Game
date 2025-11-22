@@ -408,7 +408,7 @@ export default function TestReports({ user }) {
           </Card>
         )}
 
-        {!loadingResults && selectedTest && results.length > 0 && stats && (
+        {!loadingResults && selectedTests.length > 0 && results.length > 0 && stats && (
           <>
             {/* Action Buttons */}
             <div className="flex gap-4 mb-6 no-print">
