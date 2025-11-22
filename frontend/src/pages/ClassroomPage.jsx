@@ -846,7 +846,7 @@ export default function ClassroomPage({ user }) {
                                               {assignment.num_questions !== undefined || assignment.question_pool_ids !== undefined ? 
                                                 (isTeacher ? "View Results" : "Start Test") : "View"}
                                             </Button>
-                                            {isTeacher && (
+                                            {isTeacher && !(assignment.num_questions !== undefined || assignment.question_pool_ids !== undefined) && (
                                               <>
                                                 <Button
                                                   onClick={(e) => {
