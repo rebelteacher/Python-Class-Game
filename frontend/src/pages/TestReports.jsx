@@ -72,12 +72,18 @@ export default function TestReports({ user }) {
     }
   };
 
-  const fetchTests = async () => {
+  const fetchAllTests = async () => {
     try {
-      const response = await axios.get(`${API}/mc-tests/classroom/${selectedClassroom}`, {
-        withCredentials: true,
-      });
-      setTests(response.data);
+      // Fetch tests from all selected classrooms
+      const testPromises = selectedClassrooms.map(classroomId =>
+        axios.get(`${API}/mc-tests/classroom/${classroomId}`, {
+          withCredentials: true,
+        })
+      );
+      
+      const responses = await Promise.all(testPromises);
+      const allTestsData = responses.flatMap(response => response.data);
+      setAllTests(allTestsData);
     } catch (error) {
       console.error("Error fetching tests:", error);
       toast.error("Failed to load tests");
