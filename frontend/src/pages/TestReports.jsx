@@ -481,9 +481,12 @@ export default function TestReports({ user }) {
               <CardHeader>
                 <CardTitle>{testInfo?.title || "Test Results"}</CardTitle>
                 <div className="text-sm text-gray-600 space-y-1">
-                  <p><strong>Classroom:</strong> {classroom?.name || "N/A"}</p>
-                  <p><strong>Questions:</strong> {testInfo?.num_questions || "N/A"} per student</p>
-                  {testInfo?.time_limit_minutes > 0 && (
+                  <p><strong>Classrooms:</strong> {selectedClassrooms.length} selected ({classrooms.filter(c => selectedClassrooms.includes(c.id)).map(c => c.name).join(", ")})</p>
+                  <p><strong>Tests:</strong> {selectedTests.length} selected</p>
+                  {selectedTests.length === 1 && testInfo?.num_questions && (
+                    <p><strong>Questions:</strong> {testInfo.num_questions} per student</p>
+                  )}
+                  {selectedTests.length === 1 && testInfo?.time_limit_minutes > 0 && (
                     <p><strong>Time Limit:</strong> {testInfo.time_limit_minutes} minutes</p>
                   )}
                 </div>
