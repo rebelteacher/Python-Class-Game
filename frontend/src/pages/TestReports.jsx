@@ -228,7 +228,7 @@ export default function TestReports({ user }) {
     XLSX.utils.book_append_sheet(wb, statsWs, "Statistics");
     
     // Download
-    const fileName = `${testInfo?.title || "Test"}_${classroom?.name || "Results"}_${new Date().toISOString().split('T')[0]}.xlsx`;
+    const fileName = `${testInfo?.title || "Test"}_Results_${new Date().toISOString().split('T')[0]}.xlsx`;
     XLSX.writeFile(wb, fileName);
     toast.success("Report exported successfully!");
   };
