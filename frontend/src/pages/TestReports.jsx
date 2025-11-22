@@ -493,6 +493,9 @@ export default function TestReports({ user }) {
                       <tr className="border-b">
                         <th className="text-left py-3 px-4 font-semibold text-gray-700">#</th>
                         <th className="text-left py-3 px-4 font-semibold text-gray-700">Student Name</th>
+                        {selectedTests.length > 1 && (
+                          <th className="text-left py-3 px-4 font-semibold text-gray-700">Test</th>
+                        )}
                         <th className="text-left py-3 px-4 font-semibold text-gray-700">Score</th>
                         <th className="text-left py-3 px-4 font-semibold text-gray-700">Date Taken</th>
                       </tr>
@@ -504,6 +507,9 @@ export default function TestReports({ user }) {
                           <tr key={result.id || index} className="border-b hover:bg-gray-50">
                             <td className="py-3 px-4 text-gray-600">{index + 1}</td>
                             <td className="py-3 px-4 font-medium">{result.student_name}</td>
+                            {selectedTests.length > 1 && (
+                              <td className="py-3 px-4 text-gray-600 text-sm">{result.test_title}</td>
+                            )}
                             <td className="py-3 px-4">
                               <span className={`font-bold ${
                                 result.score >= 90 ? "text-green-600" :
