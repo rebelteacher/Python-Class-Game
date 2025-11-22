@@ -398,7 +398,7 @@ export default function TestReports({ user }) {
         )}
 
         {/* Results */}
-        {!loadingResults && selectedTest && results.length === 0 && (
+        {!loadingResults && selectedTests.length > 0 && results.length === 0 && (
           <Card>
             <CardContent className="py-20 text-center">
               <Users className="w-16 h-16 text-gray-400 mx-auto mb-4" />
