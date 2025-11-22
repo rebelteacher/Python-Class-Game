@@ -4620,6 +4620,9 @@ startxref
         # Test MC Test endpoints (Phase 2)
         self.test_mc_test_endpoints()
         
+        # Test MC Test Results - Student Names Fix
+        self.test_mc_test_results_student_names()
+        
         # Test AdminAddCoins endpoints
         self.test_admin_add_coins_endpoints()
         
