@@ -526,13 +526,40 @@ export default function ClassroomPage({ user }) {
                             </Button>
                           )}
                           {isTeacher && (
-                            <Button
-                              onClick={() => navigate(`/test-reports`, { state: { classroomId: classroomId, selectedTestId: test.id } })}
-                              variant="outline"
-                              className="w-full"
-                            >
-                              View Results
-                            </Button>
+                            <>
+                              <Button
+                                onClick={() => {
+                                  const availDate = test.available_date ? new Date(test.available_date) : null;
+                                  const dueDate = test.due_date ? new Date(test.due_date) : null;
+                                  
+                                  setEditingAssignment({
+                                    id: test.id,
+                                    title: test.title,
+                                    chapter: test.chapter || '',
+                                    lesson: test.lesson || '',
+                                    available_date: availDate ? availDate.toISOString().split('T')[0] : '',
+                                    available_time: availDate ? availDate.toISOString().split('T')[1].substring(0, 5) : '00:00',
+                                    due_date: dueDate ? dueDate.toISOString().split('T')[0] : '',
+                                    due_time: dueDate ? dueDate.toISOString().split('T')[1].substring(0, 5) : '23:59',
+                                    isTest: true // Mark as test so we update the right collection
+                                  });
+                                  setEditScheduleDialogOpen(true);
+                                }}
+                                variant="outline"
+                                size="sm"
+                              >
+                                <Edit className="w-4 h-4 mr-1" />
+                                Edit
+                              </Button>
+                              <Button
+                                onClick={() => navigate(`/test-reports`, { state: { classroomId: classroomId, selectedTestId: test.id } })}
+                                variant="outline"
+                                size="sm"
+                                className="flex-1"
+                              >
+                                View Results
+                              </Button>
+                            </>
                           )}
                         </div>
                       </CardContent>
