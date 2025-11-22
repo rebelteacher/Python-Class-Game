@@ -826,13 +826,25 @@ export default function ClassroomPage({ user }) {
                                           </div>
                                           <div className="flex gap-2">
                                             <Button
-                                              onClick={() => navigate(`/assignment/${assignment.id}`, { 
-                                                state: { classroomId: classroomId } 
-                                              })}
+                                              onClick={() => {
+                                                // Check if this is a test or assignment
+                                                const isTest = assignment.num_questions !== undefined || assignment.question_pool_ids !== undefined;
+                                                if (isTest && isTeacher) {
+                                                  // Teachers view test results
+                                                  navigate(`/test-reports`, { state: { classroomId: classroomId, selectedTestId: assignment.id } });
+                                                } else if (isTest) {
+                                                  // Students take test
+                                                  navigate(`/test/${assignment.id}`);
+                                                } else {
+                                                  // Regular assignment
+                                                  navigate(`/assignment/${assignment.id}`, { state: { classroomId: classroomId } });
+                                                }
+                                              }}
                                               className="flex-1"
                                               size="sm"
                                             >
-                                              View
+                                              {assignment.num_questions !== undefined || assignment.question_pool_ids !== undefined ? 
+                                                (isTeacher ? "View Results" : "Start Test") : "View"}
                                             </Button>
                                             {isTeacher && (
                                               <>
