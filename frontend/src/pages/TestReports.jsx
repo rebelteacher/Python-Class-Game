@@ -189,7 +189,6 @@ export default function TestReports({ user }) {
     }
 
     const stats = calculateStats();
-    const classroom = classrooms.find(c => c.id === selectedClassroom);
     
     // Prepare data for Excel
     const exportData = results.map(result => {
