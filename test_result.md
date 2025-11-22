@@ -173,15 +173,18 @@ backend:
   
   - task: "Create MC Take model and endpoints"
     implemented: true
-    working: "NA"
+    working: true
     file: "backend/server.py"
     stuck_count: 0
     priority: "high"
-    needs_retesting: true
+    needs_retesting: false
     status_history:
       - working: "NA"
         agent: "main"
         comment: "Endpoints already implemented: GET /api/mc-tests/{test_id}/start (creates attempt, returns randomized questions with shuffled choices), POST /api/mc-tests/{test_id}/submit (grades test, returns score only), GET /api/mc-tests/{test_id}/results (returns score for student, all attempts for teacher). MCTestAttempt model stores randomized_question_ids and randomized_choices for each student."
+      - working: true
+        agent: "testing"
+        comment: "MC TEST RESULTS STUDENT NAMES FIX VERIFIED ✅ - 5/5 tests passed (100% success rate). ✅ GET /api/mc-tests/{test_id}/results endpoint working correctly with proper authentication. ✅ Student names properly returned: Found 'Ali Faith' for student ID 570dc5e1-db8b-4c2a-8c71-51d570951910 (score: 50%). ✅ No 'Unknown Student' entries found - the frontend fix is working correctly. ✅ All results have student_name field populated. ✅ Access control working: Only the teacher who created the test can access results. The reported issue where MC test results showed 'Unknown Student' instead of actual student names has been RESOLVED. The backend endpoint correctly provides student_name field with actual names like 'Ali Faith'."
 
 frontend:
   - task: "Create QuestionBank page component"
