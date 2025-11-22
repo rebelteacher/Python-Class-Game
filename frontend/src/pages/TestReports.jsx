@@ -102,35 +102,17 @@ export default function TestReports({ user }) {
       
       const allResultsData = await Promise.all(resultsPromises);
       
-      // Get all unique classrooms from selected tests
-      const uniqueClassroomIds = [...new Set(selectedTests.map(testId => {
-        const test = allTests.find(t => t.id === testId);
-        return test?.classroom_id;
-      }).filter(Boolean))];
-      
-      // Fetch all classrooms to map student IDs to names
-      const classroomPromises = uniqueClassroomIds.map(classroomId =>
-        axios.get(`${API}/classrooms/${classroomId}`, { withCredentials: true })
-      );
-      const classroomResponses = await Promise.all(classroomPromises);
-      
-      // Create a map of classroom_id to student details
-      const classroomStudentMap = {};
-      classroomResponses.forEach(res => {
-        classroomStudentMap[res.data.id] = res.data.student_details || [];
-      });
-      
-      // Combine all results with student names and test info
+      // Combine all results with test info
+      // Backend already provides student_name in each result
       const combinedResults = [];
       allResultsData.forEach(({ testId, data }) => {
         const test = allTests.find(t => t.id === testId);
-        const students = classroomStudentMap[test?.classroom_id] || [];
         
         data.results.forEach(result => {
-          const student = students.find(s => s.id === result.student_id);
           combinedResults.push({
             ...result,
-            student_name: student?.name || "Unknown Student",
+            // Use student_name from backend (already populated there)
+            student_name: result.student_name || "Unknown Student",
             test_title: test?.title || "Unknown Test",
             test_id: testId,
             classroom_id: test?.classroom_id
