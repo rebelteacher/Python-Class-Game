@@ -30,33 +30,33 @@ export default function TestReports({ user }) {
     
     // Pre-select from URL param or navigation state
     if (testId) {
-      setSelectedTest(testId);
+      setSelectedTests([testId]);
     } else if (location.state?.selectedTestId) {
-      setSelectedTest(location.state.selectedTestId);
+      setSelectedTests([location.state.selectedTestId]);
     }
     
     if (location.state?.classroomId) {
-      setSelectedClassroom(location.state.classroomId);
+      setSelectedClassrooms([location.state.classroomId]);
     }
   }, [testId]);
 
   useEffect(() => {
-    if (selectedClassroom) {
-      fetchTests();
+    if (selectedClassrooms.length > 0) {
+      fetchAllTests();
     } else {
-      setTests([]);
-      setSelectedTest("");
+      setAllTests([]);
+      setSelectedTests([]);
       setResults([]);
     }
-  }, [selectedClassroom]);
+  }, [selectedClassrooms]);
 
   useEffect(() => {
-    if (selectedTest) {
+    if (selectedTests.length > 0) {
       fetchResults();
     } else {
       setResults([]);
     }
-  }, [selectedTest]);
+  }, [selectedTests]);
 
   const fetchClassrooms = async () => {
     try {
