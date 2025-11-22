@@ -93,30 +93,60 @@ export default function TestReports({ user }) {
   const fetchResults = async () => {
     setLoadingResults(true);
     try {
-      const response = await axios.get(`${API}/mc-tests/${selectedTest}/results`, {
-        withCredentials: true,
+      // Fetch results from all selected tests
+      const resultsPromises = selectedTests.map(testId =>
+        axios.get(`${API}/mc-tests/${testId}/results`, {
+          withCredentials: true,
+        }).then(response => ({ testId, data: response.data }))
+      );
+      
+      const allResultsData = await Promise.all(resultsPromises);
+      
+      // Get all unique classrooms from selected tests
+      const uniqueClassroomIds = [...new Set(selectedTests.map(testId => {
+        const test = allTests.find(t => t.id === testId);
+        return test?.classroom_id;
+      }).filter(Boolean))];
+      
+      // Fetch all classrooms to map student IDs to names
+      const classroomPromises = uniqueClassroomIds.map(classroomId =>
+        axios.get(`${API}/classrooms/${classroomId}`, { withCredentials: true })
+      );
+      const classroomResponses = await Promise.all(classroomPromises);
+      
+      // Create a map of classroom_id to student details
+      const classroomStudentMap = {};
+      classroomResponses.forEach(res => {
+        classroomStudentMap[res.data.id] = res.data.student_details || [];
       });
       
-      // Get test info
-      const test = tests.find(t => t.id === selectedTest);
-      setTestInfo(test);
-      
-      // Get classroom to map student IDs to names
-      const classroomRes = await axios.get(`${API}/classrooms/${selectedClassroom}`, {
-        withCredentials: true,
+      // Combine all results with student names and test info
+      const combinedResults = [];
+      allResultsData.forEach(({ testId, data }) => {
+        const test = allTests.find(t => t.id === testId);
+        const students = classroomStudentMap[test?.classroom_id] || [];
+        
+        data.results.forEach(result => {
+          const student = students.find(s => s.id === result.student_id);
+          combinedResults.push({
+            ...result,
+            student_name: student?.name || "Unknown Student",
+            test_title: test?.title || "Unknown Test",
+            test_id: testId,
+            classroom_id: test?.classroom_id
+          });
+        });
       });
-      const classroom = classroomRes.data;
       
-      // Map student IDs to names
-      const resultsWithNames = response.data.results.map(result => {
-        const student = classroom.student_details?.find(s => s.id === result.student_id);
-        return {
-          ...result,
-          student_name: student?.name || "Unknown Student"
-        };
-      });
+      setResults(combinedResults);
       
-      setResults(resultsWithNames);
+      // Set test info for stats (use first test if multiple)
+      if (selectedTests.length === 1) {
+        const test = allTests.find(t => t.id === selectedTests[0]);
+        setTestInfo(test);
+      } else {
+        setTestInfo({ title: `${selectedTests.length} Tests Combined` });
+      }
     } catch (error) {
       console.error("Error fetching results:", error);
       toast.error("Failed to load test results");
