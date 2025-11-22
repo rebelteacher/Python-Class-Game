@@ -272,44 +272,112 @@ export default function TestReports({ user }) {
         {/* Filters */}
         <Card className="mb-6 no-print">
           <CardHeader>
-            <CardTitle>Select Test</CardTitle>
+            <CardTitle>Select Tests to Report On</CardTitle>
+            <p className="text-sm text-gray-500 mt-1">Select multiple classrooms and tests to combine results</p>
           </CardHeader>
           <CardContent>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              {/* Classroom Selection */}
               <div>
-                <Label htmlFor="classroom">Classroom</Label>
-                <Select value={selectedClassroom} onValueChange={setSelectedClassroom}>
-                  <SelectTrigger id="classroom" className="mt-1">
-                    <SelectValue placeholder="Select a classroom" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {classrooms.map((classroom) => (
-                      <SelectItem key={classroom.id} value={classroom.id}>
+                <Label className="mb-2 block font-semibold">Classrooms ({selectedClassrooms.length} selected)</Label>
+                <div className="border rounded-lg p-4 max-h-60 overflow-y-auto space-y-2">
+                  <div className="flex items-center space-x-2 pb-2 border-b">
+                    <input
+                      type="checkbox"
+                      id="select-all-classrooms"
+                      checked={selectedClassrooms.length === classrooms.length && classrooms.length > 0}
+                      onChange={(e) => {
+                        if (e.target.checked) {
+                          setSelectedClassrooms(classrooms.map(c => c.id));
+                        } else {
+                          setSelectedClassrooms([]);
+                        }
+                      }}
+                      className="w-4 h-4"
+                    />
+                    <Label htmlFor="select-all-classrooms" className="font-semibold cursor-pointer">
+                      Select All
+                    </Label>
+                  </div>
+                  {classrooms.map((classroom) => (
+                    <div key={classroom.id} className="flex items-center space-x-2">
+                      <input
+                        type="checkbox"
+                        id={`classroom-${classroom.id}`}
+                        checked={selectedClassrooms.includes(classroom.id)}
+                        onChange={(e) => {
+                          if (e.target.checked) {
+                            setSelectedClassrooms([...selectedClassrooms, classroom.id]);
+                          } else {
+                            setSelectedClassrooms(selectedClassrooms.filter(id => id !== classroom.id));
+                            // Also remove tests from this classroom
+                            const testsFromClassroom = allTests.filter(t => t.classroom_id === classroom.id).map(t => t.id);
+                            setSelectedTests(selectedTests.filter(id => !testsFromClassroom.includes(id)));
+                          }
+                        }}
+                        className="w-4 h-4"
+                      />
+                      <Label htmlFor={`classroom-${classroom.id}`} className="cursor-pointer">
                         {classroom.name}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
+                      </Label>
+                    </div>
+                  ))}
+                </div>
               </div>
 
+              {/* Test Selection */}
               <div>
-                <Label htmlFor="test">Test</Label>
-                <Select 
-                  value={selectedTest} 
-                  onValueChange={setSelectedTest}
-                  disabled={!selectedClassroom || tests.length === 0}
-                >
-                  <SelectTrigger id="test" className="mt-1">
-                    <SelectValue placeholder={!selectedClassroom ? "Select classroom first" : tests.length === 0 ? "No tests available" : "Select a test"} />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {tests.map((test) => (
-                      <SelectItem key={test.id} value={test.id}>
-                        {test.title}
-                      </SelectItem>
+                <Label className="mb-2 block font-semibold">Tests ({selectedTests.length} selected)</Label>
+                {selectedClassrooms.length === 0 ? (
+                  <div className="border rounded-lg p-4 text-center text-gray-500">
+                    Select classrooms first
+                  </div>
+                ) : allTests.length === 0 ? (
+                  <div className="border rounded-lg p-4 text-center text-gray-500">
+                    No tests available in selected classrooms
+                  </div>
+                ) : (
+                  <div className="border rounded-lg p-4 max-h-60 overflow-y-auto space-y-2">
+                    <div className="flex items-center space-x-2 pb-2 border-b">
+                      <input
+                        type="checkbox"
+                        id="select-all-tests"
+                        checked={selectedTests.length === allTests.length && allTests.length > 0}
+                        onChange={(e) => {
+                          if (e.target.checked) {
+                            setSelectedTests(allTests.map(t => t.id));
+                          } else {
+                            setSelectedTests([]);
+                          }
+                        }}
+                        className="w-4 h-4"
+                      />
+                      <Label htmlFor="select-all-tests" className="font-semibold cursor-pointer">
+                        Select All
+                      </Label>
+                    </div>
+                    {allTests.map((test) => (
+                      <div key={test.id} className="flex items-center space-x-2">
+                        <input
+                          type="checkbox"
+                          id={`test-${test.id}`}
+                          checked={selectedTests.includes(test.id)}
+                          onChange={(e) => {
+                            if (e.target.checked) {
+                              setSelectedTests([...selectedTests, test.id]);
+                            } else {
+                              setSelectedTests(selectedTests.filter(id => id !== test.id));
+                            }
+                          }}
+                          className="w-4 h-4"
+                        />
+                        <Label htmlFor={`test-${test.id}`} className="cursor-pointer">
+                          {test.title}
+                        </Label>
+                      </div>
                     ))}
-                  </SelectContent>
-                </Select>
+                  </div>
+                )}
               </div>
             </div>
           </CardContent>
