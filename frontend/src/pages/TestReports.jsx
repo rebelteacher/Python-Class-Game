@@ -192,11 +192,20 @@ export default function TestReports({ user }) {
     const classroom = classrooms.find(c => c.id === selectedClassroom);
     
     // Prepare data for Excel
-    const exportData = results.map(result => ({
-      "Student Name": result.student_name,
-      "Score (%)": result.score.toFixed(1),
-      "Date Taken": new Date(result.submitted_at).toLocaleString()
-    }));
+    const exportData = results.map(result => {
+      const data = {
+        "Student Name": result.student_name,
+        "Score (%)": result.score.toFixed(1),
+        "Date Taken": new Date(result.submitted_at).toLocaleString()
+      };
+      
+      // Add test name if multiple tests selected
+      if (selectedTests.length > 1) {
+        data["Test"] = result.test_title;
+      }
+      
+      return data;
+    });
     
     // Create workbook
     const wb = XLSX.utils.book_new();
