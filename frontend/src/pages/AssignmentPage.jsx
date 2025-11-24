@@ -764,9 +764,9 @@ export default function AssignmentPage({ user }) {
 
           {/* Right Side: Code Editor & Output */}
           <Panel defaultSize={70} minSize={50}>
-            <div className="pl-3 overflow-y-auto" style={{ maxHeight: 'calc(100vh - 250px)' }}>
+            <div className="pl-3" style={{ height: 'calc(100vh - 250px)' }}>
             {!isTeacher ? (
-              <PanelGroup direction="horizontal">
+              <PanelGroup direction="horizontal" style={{ height: '100%' }}>
                 {/* Code Editor - Left */}
                 <Panel defaultSize={50} minSize={30}>
                 <Card data-testid="code-editor-card" className="h-full">
