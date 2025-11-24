@@ -150,5 +150,14 @@ export default function LessonModal({ isOpen, onClose, lesson }) {
         </div>
       </DialogContent>
     </Dialog>
+
+    {/* Resizable Video Player - Floats on top */}
+    {showVideo && videoUrl && (
+      <ResizableVideoPlayer
+        videoUrl={videoUrl}
+        onClose={() => setShowVideo(false)}
+      />
+    )}
+  </>
   );
 }
