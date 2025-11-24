@@ -5131,13 +5131,23 @@ startxref
             )
             
             if lesson_check_response:
+                print(f"   📋 Lesson response: {lesson_check_response}")
                 video_filename = lesson_check_response.get('video_filename')
+                lesson_id_in_response = lesson_check_response.get('id')
+                
+                # Check if this is the lesson we just created
+                if lesson_id_in_response == lesson_id:
+                    print(f"   ✅ Fetched the correct lesson (ID matches: {lesson_id})")
+                else:
+                    print(f"   ⚠️  Fetched different lesson. Expected: {lesson_id}, Got: {lesson_id_in_response}")
+                
                 if video_filename:
                     self.log_test("Lesson contains video_filename after upload", True)
                     print(f"   ✅ Lesson video_filename verified: {video_filename}")
                 else:
                     self.log_test("Lesson contains video_filename after upload", False, "No video_filename in lesson")
                     print("   ❌ No video_filename in lesson after upload")
+                    print("   🔍 This might be because GET /api/lessons/{assignment_id} returns a different lesson")
             else:
                 print("   ❌ Could not fetch lesson to verify video_filename")
             
