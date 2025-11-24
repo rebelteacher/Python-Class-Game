@@ -5223,6 +5223,9 @@ startxref
             print("❌ Cannot proceed without test user setup")
             return False
         
+        # Run the specific lesson video upload test first (as requested in review)
+        self.test_lesson_video_upload_flow()
+        
         # Test authentication
         self.test_auth_endpoints()
         
