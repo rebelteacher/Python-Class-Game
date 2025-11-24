@@ -764,7 +764,7 @@ export default function AssignmentPage({ user }) {
 
           {/* Right Side: Code Editor & Output */}
           <Panel defaultSize={70} minSize={50}>
-            <div className="pl-3">
+            <div className="pl-3 overflow-y-auto" style={{ maxHeight: 'calc(100vh - 250px)' }}>
             {!isTeacher ? (
               <PanelGroup direction="horizontal">
                 {/* Code Editor - Left */}
