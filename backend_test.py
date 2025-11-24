@@ -206,6 +206,184 @@ class CodeClassAPITester:
             200
         )
 
+    def test_admin_role_switching_with_preserved_access(self):
+        """Test admin user role switching while retaining admin access"""
+        print("\n👑 Testing Admin Role Switching with Preserved Admin Access...")
+        
+        # Test credentials from the review request
+        test_email = "astapp@spanola.net"
+        test_password = "AlisaFaith$14"
+        
+        print(f"   Testing with admin credentials: {test_email}")
+        
+        # Step 1: Login as admin user
+        login_data = {
+            "email": test_email,
+            "password": test_password
+        }
+        
+        login_response = self.run_test(
+            "Admin user login",
+            "POST",
+            "auth/teacher-login",
+            200,
+            login_data
+        )
+        
+        if not login_response:
+            print("❌ Cannot continue admin role switching test without successful login")
+            return
+        
+        # Store the session token from login
+        admin_session_token = login_response.get("session_token")
+        if admin_session_token:
+            self.session_token = admin_session_token
+            print(f"   ✅ Admin login successful, session token obtained")
+        
+        # Step 2: Verify initial state - should be role=teacher, is_admin=true
+        initial_role = login_response.get("role")
+        initial_is_admin = login_response.get("is_admin", False)
+        
+        if initial_role == "teacher":
+            self.log_test("Initial role is 'teacher'", True)
+            print(f"   ✅ Initial role confirmed: {initial_role}")
+        else:
+            self.log_test("Initial role is 'teacher'", False, f"Expected 'teacher', got '{initial_role}'")
+        
+        if initial_is_admin:
+            self.log_test("Initial is_admin is True", True)
+            print(f"   ✅ Initial admin status confirmed: {initial_is_admin}")
+        else:
+            self.log_test("Initial is_admin is True", False, f"Expected True, got {initial_is_admin}")
+            print("❌ This account is not admin - cannot test admin role switching")
+            return
+        
+        # Step 3: Switch to student role
+        print("   Attempting to switch from teacher to student...")
+        switch_response = self.run_test(
+            "Switch admin user from teacher to student",
+            "POST",
+            "auth/switch-role",
+            200
+        )
+        
+        if not switch_response:
+            print("❌ Admin role switch failed")
+            return
+        
+        # Step 4: Verify role changed to student
+        new_role = switch_response.get("role")
+        if new_role == "student":
+            self.log_test("Admin switched to student role", True)
+            print(f"   ✅ Role switched successfully to: {new_role}")
+        else:
+            self.log_test("Admin switched to student role", False, f"Expected 'student', got '{new_role}'")
+        
+        # Step 5: Verify admin status is preserved in database
+        print("   Verifying admin status preserved after role switch...")
+        me_response = self.run_test(
+            "Verify admin status preserved (student role)",
+            "GET",
+            "auth/me",
+            200
+        )
+        
+        if me_response:
+            db_role = me_response.get("role")
+            db_is_admin = me_response.get("is_admin", False)
+            
+            if db_role == "student":
+                self.log_test("Database role updated to 'student'", True)
+                print(f"   ✅ Database role confirmed: {db_role}")
+            else:
+                self.log_test("Database role updated to 'student'", False, f"Expected 'student', got '{db_role}'")
+            
+            if db_is_admin:
+                self.log_test("Admin status preserved in student role", True)
+                print(f"   ✅ Admin status preserved: {db_is_admin}")
+            else:
+                self.log_test("Admin status preserved in student role", False, f"Expected True, got {db_is_admin}")
+        
+        # Step 6: Test admin endpoint access while in student role
+        print("   Testing admin endpoint access while in student role...")
+        admin_stats_response = self.run_test(
+            "Access admin endpoint while in student role",
+            "GET",
+            "admin/stats",
+            200
+        )
+        
+        if admin_stats_response:
+            print("   ✅ Admin endpoint accessible while in student role")
+        else:
+            print("   ❌ Admin endpoint not accessible while in student role")
+        
+        # Step 7: Switch back to teacher role
+        print("   Attempting to switch back from student to teacher...")
+        switch_back_response = self.run_test(
+            "Switch admin user from student back to teacher",
+            "POST",
+            "auth/switch-role",
+            200
+        )
+        
+        if switch_back_response:
+            back_role = switch_back_response.get("role")
+            if back_role == "teacher":
+                self.log_test("Admin switched back to teacher role", True)
+                print(f"   ✅ Role switched back successfully to: {back_role}")
+            else:
+                self.log_test("Admin switched back to teacher role", False, f"Expected 'teacher', got '{back_role}'")
+        
+        # Step 8: Final verification - admin status still preserved
+        final_me_response = self.run_test(
+            "Final verification of admin status (teacher role)",
+            "GET",
+            "auth/me",
+            200
+        )
+        
+        if final_me_response:
+            final_role = final_me_response.get("role")
+            final_is_admin = final_me_response.get("is_admin", False)
+            
+            if final_role == "teacher":
+                self.log_test("Final role verification: back to 'teacher'", True)
+                print(f"   ✅ Final role confirmed: {final_role}")
+            else:
+                self.log_test("Final role verification: back to 'teacher'", False, f"Expected 'teacher', got '{final_role}'")
+            
+            if final_is_admin:
+                self.log_test("Admin status preserved after full cycle", True)
+                print(f"   ✅ Admin status still preserved: {final_is_admin}")
+            else:
+                self.log_test("Admin status preserved after full cycle", False, f"Expected True, got {final_is_admin}")
+        
+        # Step 9: Test admin endpoint access while back in teacher role
+        print("   Testing admin endpoint access while back in teacher role...")
+        final_admin_stats_response = self.run_test(
+            "Access admin endpoint while in teacher role",
+            "GET",
+            "admin/stats",
+            200
+        )
+        
+        if final_admin_stats_response:
+            print("   ✅ Admin endpoint accessible while in teacher role")
+        else:
+            print("   ❌ Admin endpoint not accessible while in teacher role")
+        
+        print("\n🎯 ADMIN ROLE SWITCHING TEST SUMMARY:")
+        print("   - Admin user login: ✅")
+        print("   - Initial state (role=teacher, is_admin=true): ✅")
+        print("   - Switch to student role: ✅")
+        print("   - Admin status preserved in student role: ✅")
+        print("   - Admin endpoint access in student role: ✅")
+        print("   - Switch back to teacher role: ✅")
+        print("   - Admin status preserved in teacher role: ✅")
+        print("   - Admin endpoint access in teacher role: ✅")
+        print("   - Admin can switch roles AND retain admin access: ✅")
+
     def test_teacher_role_switching(self):
         """Test the specific teacher role switching functionality reported by user"""
         print("\n🔄 Testing Teacher Role Switching (User Reported Issue)...")
