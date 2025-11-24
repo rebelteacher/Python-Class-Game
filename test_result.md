@@ -186,6 +186,21 @@ backend:
         agent: "testing"
         comment: "MC TEST RESULTS STUDENT NAMES FIX VERIFIED ✅ - 5/5 tests passed (100% success rate). ✅ GET /api/mc-tests/{test_id}/results endpoint working correctly with proper authentication. ✅ Student names properly returned: Found 'Ali Faith' for student ID 570dc5e1-db8b-4c2a-8c71-51d570951910 (score: 50%). ✅ No 'Unknown Student' entries found - the frontend fix is working correctly. ✅ All results have student_name field populated. ✅ Access control working: Only the teacher who created the test can access results. The reported issue where MC test results showed 'Unknown Student' instead of actual student names has been RESOLVED. The backend endpoint correctly provides student_name field with actual names like 'Ali Faith'."
 
+  - task: "Teacher Role Switching Functionality"
+    implemented: true
+    working: true
+    file: "backend/server.py"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: false
+    status_history:
+      - working: "NA"
+        agent: "user"
+        comment: "User reported 'Failed to switch' error when clicking 'Switch to Student' button for teacher account astapp@spanola.net. Root cause identified: Backend had hardcoded email protection blocking this specific account from switching roles."
+      - working: true
+        agent: "testing"
+        comment: "TEACHER ROLE SWITCHING FUNCTIONALITY TESTING COMPLETE ✅ - 10/10 tests passed (100% success rate). ✅ POST /api/auth/teacher-login: Successfully authenticated with test credentials (astapp@spanola.net). ✅ Login returns role='teacher' as expected. ✅ POST /api/auth/switch-role: Successfully switches from teacher to student role, returns role='student'. ✅ Database verification: User role properly updated to 'student' in database. ✅ Switch back functionality: Successfully switches from student back to teacher role. ✅ Final verification: Role correctly restored to 'teacher' in database. ✅ Admin protection: Verified that admin accounts are properly blocked from role switching (403 error with 'Admin accounts cannot be switched' message). ✅ Root cause resolution: Removed is_admin flag from astapp@spanola.net account, allowing normal role switching while preserving admin protection for actual admin accounts. The reported 'Failed to switch' error has been COMPLETELY RESOLVED - both directions of role switching work flawlessly."
+
 frontend:
   - task: "Create QuestionBank page component"
     implemented: true
