@@ -1029,10 +1029,6 @@ async def switch_role(request: Request):
     if user.get("is_admin"):
         raise HTTPException(status_code=403, detail="Admin accounts cannot be switched")
     
-    # Protect specific email from being switched
-    if user.get("email") == "astapp@spanola.net":
-        raise HTTPException(status_code=403, detail="This account cannot be switched")
-    
     new_role = "teacher" if user["role"] == "student" else "student"
     
     await db.users.update_one(
