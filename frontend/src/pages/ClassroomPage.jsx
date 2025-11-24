@@ -292,6 +292,8 @@ export default function ClassroomPage({ user }) {
 
   const handleSaveLesson = async () => {
     try {
+      let lessonId = editingLesson.id;
+      
       if (editingLesson.id) {
         // Update existing lesson
         await axios.put(
@@ -307,7 +309,7 @@ export default function ClassroomPage({ user }) {
         toast.success("Lesson updated!");
       } else {
         // Create new lesson
-        await axios.post(
+        const response = await axios.post(
           `${API}/lessons`,
           {
             assignment_id: editingLesson.assignment_id,
@@ -317,13 +319,38 @@ export default function ClassroomPage({ user }) {
           },
           { withCredentials: true }
         );
+        lessonId = response.data.id;
         toast.success("Lesson created!");
       }
+      
+      // Upload video if a file was selected
+      if (editingLesson.videoFile) {
+        toast.info("Uploading video...");
+        const formData = new FormData();
+        formData.append("video", editingLesson.videoFile);
+        
+        await axios.post(
+          `${API}/lessons/${lessonId}/upload-video`,
+          formData,
+          {
+            withCredentials: true,
+            headers: {
+              "Content-Type": "multipart/form-data",
+            },
+            onUploadProgress: (progressEvent) => {
+              const percentCompleted = Math.round((progressEvent.loaded * 100) / progressEvent.total);
+              console.log(`Upload progress: ${percentCompleted}%`);
+            }
+          }
+        );
+        toast.success("Video uploaded!");
+      }
+      
       setLessonDialogOpen(false);
       setEditingLesson(null);
     } catch (error) {
       console.error("Error saving lesson:", error);
-      toast.error("Failed to save lesson");
+      toast.error(error.response?.data?.detail || "Failed to save lesson");
     }
   };
 
