@@ -2692,9 +2692,119 @@ async def delete_lesson(lesson_id: str, request: Request):
     if existing_lesson["teacher_id"] != user["id"]:
         raise HTTPException(status_code=403, detail="You can only delete your own lessons")
     
+    # Delete video file if exists
+    if existing_lesson.get("video_filename"):
+        video_path = f"/app/backend/uploads/videos/{existing_lesson['video_filename']}"
+        if os.path.exists(video_path):
+            os.remove(video_path)
+    
     await db.lessons.delete_one({"id": lesson_id})
     
     return {"success": True}
+
+
+@api_router.post("/lessons/{lesson_id}/upload-video")
+async def upload_lesson_video(lesson_id: str, request: Request, video: UploadFile = File(...)):
+    """Upload a video for a lesson"""
+    user = await get_current_user(request)
+    
+    if user["role"] != "teacher":
+        raise HTTPException(status_code=403, detail="Only teachers can upload videos")
+    
+    # Check lesson exists and belongs to teacher
+    lesson = await db.lessons.find_one({"id": lesson_id}, {"_id": 0})
+    if not lesson:
+        raise HTTPException(status_code=404, detail="Lesson not found")
+    
+    if lesson["teacher_id"] != user["id"]:
+        raise HTTPException(status_code=403, detail="You can only upload videos to your own lessons")
+    
+    # Validate file type
+    allowed_types = ["video/mp4", "video/webm", "video/quicktime", "video/x-msvideo"]
+    if video.content_type not in allowed_types:
+        raise HTTPException(status_code=400, detail="Invalid video format. Supported: MP4, WEBM, MOV, AVI")
+    
+    # Create uploads directory if it doesn't exist
+    upload_dir = "/app/backend/uploads/videos"
+    os.makedirs(upload_dir, exist_ok=True)
+    
+    # Generate unique filename
+    file_extension = video.filename.split(".")[-1]
+    unique_filename = f"{lesson_id}_{uuid.uuid4()}.{file_extension}"
+    file_path = f"{upload_dir}/{unique_filename}"
+    
+    # Delete old video if exists
+    if lesson.get("video_filename"):
+        old_video_path = f"{upload_dir}/{lesson['video_filename']}"
+        if os.path.exists(old_video_path):
+            os.remove(old_video_path)
+    
+    # Save video file in chunks (handles large files)
+    try:
+        with open(file_path, "wb") as f:
+            while chunk := await video.read(1024 * 1024):  # Read 1MB at a time
+                f.write(chunk)
+    except Exception as e:
+        logger.error(f"Error saving video: {str(e)}")
+        if os.path.exists(file_path):
+            os.remove(file_path)
+        raise HTTPException(status_code=500, detail="Failed to save video")
+    
+    # Update lesson with video filename
+    await db.lessons.update_one(
+        {"id": lesson_id},
+        {"$set": {"video_filename": unique_filename, "updated_at": datetime.now(timezone.utc)}}
+    )
+    
+    return {"success": True, "video_filename": unique_filename}
+
+
+@api_router.get("/lessons/{lesson_id}/video")
+async def stream_lesson_video(lesson_id: str, request: Request):
+    """Stream lesson video with range support for seeking"""
+    from fastapi.responses import FileResponse, StreamingResponse
+    
+    # Check lesson exists
+    lesson = await db.lessons.find_one({"id": lesson_id}, {"_id": 0})
+    if not lesson or not lesson.get("video_filename"):
+        raise HTTPException(status_code=404, detail="Video not found")
+    
+    video_path = f"/app/backend/uploads/videos/{lesson['video_filename']}"
+    if not os.path.exists(video_path):
+        raise HTTPException(status_code=404, detail="Video file not found")
+    
+    # Get file size
+    file_size = os.path.getsize(video_path)
+    
+    # Handle range requests for video seeking
+    range_header = request.headers.get("range")
+    if range_header:
+        range_match = range_header.replace("bytes=", "").split("-")
+        start = int(range_match[0])
+        end = int(range_match[1]) if range_match[1] else file_size - 1
+        
+        def iter_file():
+            with open(video_path, "rb") as f:
+                f.seek(start)
+                bytes_to_read = end - start + 1
+                while bytes_to_read > 0:
+                    chunk_size = min(1024 * 1024, bytes_to_read)  # 1MB chunks
+                    data = f.read(chunk_size)
+                    if not data:
+                        break
+                    bytes_to_read -= len(data)
+                    yield data
+        
+        headers = {
+            "Content-Range": f"bytes {start}-{end}/{file_size}",
+            "Accept-Ranges": "bytes",
+            "Content-Length": str(end - start + 1),
+            "Content-Type": "video/mp4",
+        }
+        return StreamingResponse(iter_file(), status_code=206, headers=headers)
+    
+    # Return full file if no range header
+    return FileResponse(video_path, media_type="video/mp4")
 
 
 @api_router.get("/student/{student_id}/lesson-scores")
