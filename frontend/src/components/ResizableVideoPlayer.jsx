@@ -78,14 +78,15 @@ const ResizableVideoPlayer = ({ videoUrl, onClose }) => {
   return (
     <div
       ref={containerRef}
-      className="fixed z-50 bg-gray-900 rounded-lg shadow-2xl overflow-hidden border-2 border-gray-700"
+      className="fixed bg-gray-900 rounded-lg shadow-2xl overflow-hidden border-2 border-gray-700"
       style={{
         left: `${position.x}px`,
         top: `${position.y}px`,
         width: `${size.width}px`,
         height: `${size.height + 40}px`, // +40 for header
         cursor: isDragging ? 'grabbing' : 'default',
-        transition: isFullscreen ? 'all 0.3s ease' : 'none'
+        transition: isFullscreen ? 'all 0.3s ease' : 'none',
+        zIndex: 9999 // Ensure it's above everything including dialogs
       }}
     >
       {/* Header - Draggable */}
