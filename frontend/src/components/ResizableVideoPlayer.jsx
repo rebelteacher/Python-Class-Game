@@ -12,6 +12,8 @@ const ResizableVideoPlayer = ({ videoUrl, onClose }) => {
   const videoRef = useRef(null);
   const containerRef = useRef(null);
 
+  console.log('ResizableVideoPlayer rendering with videoUrl:', videoUrl);
+
   // Handle dragging
   const handleMouseDown = (e) => {
     if (e.target.closest('.video-controls') || e.target.tagName === 'VIDEO') return;
