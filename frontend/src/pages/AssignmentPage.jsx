@@ -635,8 +635,8 @@ export default function AssignmentPage({ user }) {
         </div>
       )}
 
-      <main className="container mx-auto px-6 py-6" style={{ height: 'calc(100vh - 200px)' }}>
-        <PanelGroup direction="horizontal" style={{ height: '100%' }}>
+      <main className="container mx-auto px-6 py-6">
+        <PanelGroup direction="horizontal">
           {/* Left Side: Instructions & Test Cases */}
           <Panel defaultSize={30} minSize={20} maxSize={50}>
             <div className="space-y-6 pr-3">
