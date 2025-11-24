@@ -5061,7 +5061,7 @@ startxref
             print("❌ Cannot continue without lesson")
             return
         
-        lesson_id = lesson_response.get('id')
+        lesson_id = lesson_response.get('lesson_id')  # Backend returns lesson_id, not id
         print(f"   ✅ Created lesson: {lesson_id}")
         
         # Step 4: Verify the response contains lesson_id
