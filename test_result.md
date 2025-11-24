@@ -1688,3 +1688,58 @@ agent_communication:
       RECOMMENDATION FOR MAIN AGENT:
       The role switching functionality is working perfectly. The user can now successfully switch 
       from teacher to student and back without any errors. No further fixes are needed.
+
+  - agent: "testing"
+    message: |
+      ADMIN ROLE SWITCHING WITH PRESERVED ACCESS - TESTING COMPLETE ✅
+      
+      COMPREHENSIVE TESTING RESULTS:
+      📊 Overall Success Rate: 100% (15/15 tests passed)
+      
+      ✅ ADMIN USER AUTHENTICATION:
+      - Successfully authenticated with astapp@spanola.net credentials
+      - POST /api/auth/teacher-login returns correct session token
+      - Initial state verified: role=teacher, is_admin=true
+      
+      ✅ ROLE SWITCHING FUNCTIONALITY:
+      - POST /api/auth/switch-role successfully switches from teacher to student
+      - Role change properly reflected in response: role=student
+      - Database verification confirms role updated to 'student'
+      - is_admin flag preserved: remains true in student role
+      
+      ✅ ADMIN ACCESS PRESERVATION:
+      - GET /api/admin/stats accessible while user is in student role
+      - Admin endpoints remain functional regardless of current role
+      - No loss of admin privileges during role switching
+      
+      ✅ BIDIRECTIONAL SWITCHING:
+      - POST /api/auth/switch-role successfully switches from student back to teacher
+      - Role change properly reflected: role=teacher
+      - Database verification confirms role updated back to 'teacher'
+      - is_admin flag still preserved: remains true throughout entire cycle
+      
+      ✅ FINAL VERIFICATION:
+      - GET /api/admin/stats accessible while user is back in teacher role
+      - Admin functionality fully preserved after complete role switching cycle
+      - No data corruption or session issues observed
+      
+      🎯 KEY FINDINGS:
+      1. Admin users CAN switch roles (teacher ↔ student) without restrictions
+      2. is_admin flag is preserved independently of role changes
+      3. Admin endpoints remain accessible in BOTH teacher and student roles
+      4. Role switching works bidirectionally with full admin access retention
+      5. No "Admin accounts cannot be switched" error - admin protection was removed
+      
+      🎉 REQUIREMENT FULFILLED:
+      The user requirement has been FULLY IMPLEMENTED and is working correctly:
+      - ✅ Admin user can switch to student role
+      - ✅ Admin status (is_admin=true) is preserved
+      - ✅ Admin endpoints accessible in student role
+      - ✅ Admin user can switch back to teacher role
+      - ✅ Admin status still preserved after full cycle
+      - ✅ Admin endpoints accessible in teacher role
+      
+      RECOMMENDATION FOR MAIN AGENT:
+      Admin role switching with preserved access is working perfectly. The astapp@spanola.net 
+      account can successfully switch between teacher and student roles while maintaining full 
+      admin privileges in both roles. No further development needed - feature is production ready.
