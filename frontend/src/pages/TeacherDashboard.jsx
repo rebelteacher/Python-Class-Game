@@ -83,9 +83,28 @@ export default function TeacherDashboard({ user, setUser }) {
       const response = await axios.post(`${API}/auth/switch-role`, {}, {
         withCredentials: true,
       });
-      setUser({ ...user, role: response.data.role });
-      toast.success("Switched to student mode");
-      navigate("/student/dashboard");
+      
+      // Open student dashboard in new window/tab
+      const studentWindow = window.open('/student/dashboard', '_blank');
+      
+      if (studentWindow) {
+        toast.success("Opening student view in new window");
+        
+        // Switch back to teacher role in this window after a brief delay
+        // This allows the new window to load with student role
+        setTimeout(async () => {
+          try {
+            const switchBackResponse = await axios.post(`${API}/auth/switch-role`, {}, {
+              withCredentials: true,
+            });
+            setUser({ ...user, role: switchBackResponse.data.role });
+          } catch (err) {
+            console.error("Error switching back:", err);
+          }
+        }, 1000);
+      } else {
+        toast.error("Please allow pop-ups to open student view");
+      }
     } catch (error) {
       console.error("Error switching role:", error);
       toast.error("Failed to switch role");
