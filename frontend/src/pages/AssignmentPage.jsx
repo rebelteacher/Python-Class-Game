@@ -639,7 +639,7 @@ export default function AssignmentPage({ user }) {
         <PanelGroup direction="horizontal">
           {/* Left Side: Instructions & Test Cases */}
           <Panel defaultSize={30} minSize={20} maxSize={50}>
-            <div className="space-y-6 pr-3">
+            <div className="space-y-6 pr-3 overflow-y-auto" style={{ maxHeight: 'calc(100vh - 250px)' }}>
               <Card data-testid="assignment-instructions">
                 <CardHeader>
                   <CardTitle>Instructions</CardTitle>
