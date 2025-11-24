@@ -46,7 +46,10 @@ export default function LessonModal({ isOpen, onClose, lesson }) {
                   <Button
                     variant="default"
                     size="sm"
-                    onClick={() => setShowVideo(true)}
+                    onClick={() => {
+                      console.log('Watch Tutorial clicked, videoUrl:', videoUrl);
+                      setShowVideo(true);
+                    }}
                     className="bg-purple-600 hover:bg-purple-700 gap-2"
                   >
                     <Video className="w-4 h-4" />
