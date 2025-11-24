@@ -5033,6 +5033,32 @@ startxref
         
         return self.tests_passed == self.tests_run
 
+    def run_admin_role_switching_test_only(self):
+        """Run only the admin role switching test with preserved admin access"""
+        print("🚀 Starting Admin Role Switching Test...")
+        print(f"Testing against: {self.base_url}")
+        print("📋 Testing admin user role switching while retaining admin access")
+        print("🎯 Requirement: Admin user should be able to switch roles AND retain admin privileges")
+        print("🔧 Expected: is_admin flag remains True regardless of role, admin endpoints accessible in both roles")
+        
+        # Test the admin role switching functionality
+        self.test_admin_role_switching_with_preserved_access()
+        
+        # Print summary
+        print(f"\n📊 Admin Role Switching Test Summary:")
+        print(f"   Total tests: {self.tests_run}")
+        print(f"   Passed: {self.tests_passed}")
+        print(f"   Failed: {self.tests_run - self.tests_passed}")
+        print(f"   Success rate: {(self.tests_passed/self.tests_run)*100:.1f}%")
+        
+        if self.tests_passed == self.tests_run:
+            print("\n🎉 SUCCESS: Admin role switching with preserved access is working correctly!")
+            print("✅ Admin users can switch roles AND retain admin access!")
+        else:
+            print("\n❌ FAILURE: Admin role switching test failed - admin access may not be preserved")
+        
+        return self.tests_passed == self.tests_run
+
     def run_role_switching_test_only(self):
         """Run only the role switching test for the specific user reported issue"""
         print("🚀 Starting Role Switching Test (User Reported Issue)...")
