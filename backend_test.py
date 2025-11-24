@@ -5120,36 +5120,64 @@ startxref
                 print(f"   Response: {response.text[:200]}")
                 return
             
-            # Step 7: Fetch the lesson (GET /api/lessons/{assignment_id}) and verify video_filename is populated
-            print("   Fetching lesson to verify video_filename...")
+            # Step 7: Verify video_filename is populated by checking database directly
+            print("   Verifying video_filename in database...")
             
-            lesson_check_response = self.run_test(
-                "Fetch lesson to verify video_filename",
-                "GET",
-                f"lessons/{assignment_id}",
-                200
-            )
-            
-            if lesson_check_response:
-                print(f"   📋 Lesson response: {lesson_check_response}")
-                video_filename = lesson_check_response.get('video_filename')
-                lesson_id_in_response = lesson_check_response.get('id')
+            try:
+                from motor.motor_asyncio import AsyncIOMotorClient
+                import asyncio
                 
-                # Check if this is the lesson we just created
-                if lesson_id_in_response == lesson_id:
-                    print(f"   ✅ Fetched the correct lesson (ID matches: {lesson_id})")
-                else:
-                    print(f"   ⚠️  Fetched different lesson. Expected: {lesson_id}, Got: {lesson_id_in_response}")
+                async def check_lesson_in_db():
+                    client = AsyncIOMotorClient("mongodb://localhost:27017")
+                    db = client["test_database"]
+                    
+                    # Find the specific lesson we created
+                    lesson_doc = await db.lessons.find_one({"id": lesson_id}, {"_id": 0})
+                    
+                    client.close()
+                    return lesson_doc
                 
-                if video_filename:
-                    self.log_test("Lesson contains video_filename after upload", True)
-                    print(f"   ✅ Lesson video_filename verified: {video_filename}")
+                lesson_from_db = asyncio.run(check_lesson_in_db())
+                
+                if lesson_from_db:
+                    video_filename = lesson_from_db.get('video_filename')
+                    if video_filename:
+                        self.log_test("Lesson contains video_filename after upload", True)
+                        print(f"   ✅ Lesson video_filename verified in database: {video_filename}")
+                    else:
+                        self.log_test("Lesson contains video_filename after upload", False, "No video_filename in lesson database record")
+                        print("   ❌ No video_filename in lesson database record")
                 else:
-                    self.log_test("Lesson contains video_filename after upload", False, "No video_filename in lesson")
-                    print("   ❌ No video_filename in lesson after upload")
-                    print("   🔍 This might be because GET /api/lessons/{assignment_id} returns a different lesson")
-            else:
-                print("   ❌ Could not fetch lesson to verify video_filename")
+                    self.log_test("Lesson contains video_filename after upload", False, "Lesson not found in database")
+                    print("   ❌ Lesson not found in database")
+                    
+            except Exception as e:
+                print(f"   ⚠️  Could not check database directly: {str(e)}")
+                
+                # Fallback: Try the API endpoint but note the limitation
+                print("   Falling back to API endpoint (may return different lesson)...")
+                lesson_check_response = self.run_test(
+                    "Fetch lesson via API (may be different lesson)",
+                    "GET",
+                    f"lessons/{assignment_id}",
+                    200
+                )
+                
+                if lesson_check_response:
+                    video_filename = lesson_check_response.get('video_filename')
+                    lesson_id_in_response = lesson_check_response.get('id')
+                    
+                    print(f"   ⚠️  API returned lesson ID: {lesson_id_in_response} (expected: {lesson_id})")
+                    
+                    if lesson_id_in_response == lesson_id:
+                        if video_filename:
+                            self.log_test("Lesson contains video_filename after upload", True)
+                            print(f"   ✅ Lesson video_filename verified: {video_filename}")
+                        else:
+                            self.log_test("Lesson contains video_filename after upload", False, "No video_filename in lesson")
+                    else:
+                        self.log_test("Lesson contains video_filename after upload", False, "API returned different lesson")
+                        print("   ❌ API returned different lesson - cannot verify video upload")
             
             # Step 8: Test video streaming endpoint (GET /api/lessons/{lesson_id}/video)
             print("   Testing video streaming endpoint...")
