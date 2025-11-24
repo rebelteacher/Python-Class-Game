@@ -1,7 +1,11 @@
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { BookOpen, X } from "lucide-react";
+import { BookOpen, X, Video } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import ReactMarkdown from 'react-markdown';
+import { useState } from 'react';
+import ResizableVideoPlayer from './ResizableVideoPlayer';
+
+const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
 
 /**
  * LessonModal Component
@@ -10,36 +14,56 @@ import ReactMarkdown from 'react-markdown';
  * Free for students to access anytime while working on assignments
  */
 export default function LessonModal({ isOpen, onClose, lesson }) {
+  const [showVideo, setShowVideo] = useState(false);
+
   if (!lesson || !lesson.exists === false) {
     return null;
   }
 
+  const videoUrl = lesson.video_filename 
+    ? `${BACKEND_URL}/api/lessons/${lesson.id}/video`
+    : null;
+
   return (
-    <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="max-w-[95vw] max-h-[95vh] w-full h-full overflow-y-auto">
-        <DialogHeader>
-          <div className="flex items-start justify-between">
-            <div className="flex items-center gap-3">
-              <div className="p-2 bg-blue-100 rounded-lg">
-                <BookOpen className="w-6 h-6 text-blue-600" />
+    <>
+      <Dialog open={isOpen} onOpenChange={onClose}>
+        <DialogContent className="max-w-[95vw] max-h-[95vh] w-full h-full overflow-y-auto">
+          <DialogHeader>
+            <div className="flex items-start justify-between">
+              <div className="flex items-center gap-3">
+                <div className="p-2 bg-blue-100 rounded-lg">
+                  <BookOpen className="w-6 h-6 text-blue-600" />
+                </div>
+                <div>
+                  <DialogTitle className="text-2xl">{lesson.title}</DialogTitle>
+                  <DialogDescription className="text-sm mt-1">
+                    📚 Free learning material • Study as much as you need!
+                  </DialogDescription>
+                </div>
               </div>
-              <div>
-                <DialogTitle className="text-2xl">{lesson.title}</DialogTitle>
-                <DialogDescription className="text-sm mt-1">
-                  📚 Free learning material • Study as much as you need!
-                </DialogDescription>
+              <div className="flex items-center gap-2">
+                {videoUrl && (
+                  <Button
+                    variant="default"
+                    size="sm"
+                    onClick={() => setShowVideo(true)}
+                    className="bg-purple-600 hover:bg-purple-700 gap-2"
+                  >
+                    <Video className="w-4 h-4" />
+                    Watch Tutorial
+                  </Button>
+                )}
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={onClose}
+                  className="h-8 w-8 p-0"
+                >
+                  <X className="w-4 h-4" />
+                </Button>
               </div>
             </div>
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={onClose}
-              className="h-8 w-8 p-0"
-            >
-              <X className="w-4 h-4" />
-            </Button>
-          </div>
-        </DialogHeader>
+          </DialogHeader>
 
         <div className="mt-6">
           <div className="prose prose-sm max-w-none">
