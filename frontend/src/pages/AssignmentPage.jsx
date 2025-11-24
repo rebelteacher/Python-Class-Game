@@ -1106,6 +1106,7 @@ export default function AssignmentPage({ user }) {
           </div>
           </Panel>
         </PanelGroup>
+        </div>
       </main>
 
       {/* Hint Dialog */}
