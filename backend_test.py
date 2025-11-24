@@ -5179,21 +5179,22 @@ startxref
             )
             
             if lesson_response2:
-                lesson_id2 = lesson_response2.get('id')  # Should be 'id', not 'lesson_id'
-                lesson_id_field = lesson_response2.get('lesson_id')  # Check if this exists too
-                
-                if lesson_id2:
-                    self.log_test("Lesson response contains 'id' field", True)
-                    print(f"   ✅ Lesson response contains 'id': {lesson_id2}")
-                else:
-                    self.log_test("Lesson response contains 'id' field", False, "No 'id' field in response")
+                lesson_id2 = lesson_response2.get('id')  # Check if backend returns 'id'
+                lesson_id_field = lesson_response2.get('lesson_id')  # Check if backend returns 'lesson_id'
                 
                 if lesson_id_field:
                     self.log_test("Lesson response contains 'lesson_id' field", True)
                     print(f"   ✅ Lesson response contains 'lesson_id': {lesson_id_field}")
+                    print("   ✅ Backend correctly returns lesson_id field")
                 else:
                     self.log_test("Lesson response contains 'lesson_id' field", False, "No 'lesson_id' field in response")
-                    print("   ℹ️  Note: Frontend should use response.data.id, not response.data.lesson_id")
+                
+                if lesson_id2:
+                    self.log_test("Lesson response contains 'id' field", True)
+                    print(f"   ✅ Lesson response also contains 'id': {lesson_id2}")
+                else:
+                    self.log_test("Lesson response contains 'id' field", False, "No 'id' field in response")
+                    print("   ℹ️  Note: Backend returns lesson_id, frontend should use response.data.lesson_id")
             
         finally:
             # Clean up the temporary video file
