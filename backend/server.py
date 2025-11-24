@@ -443,6 +443,7 @@ class Lesson(BaseModel):
     problem_id: Optional[str] = None  # Optional: lesson can be for whole assignment or specific problem
     title: str
     content: str  # Markdown content with images, code examples, etc.
+    video_filename: Optional[str] = None  # Video tutorial file
     teacher_id: str
     created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
     updated_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
@@ -452,6 +453,7 @@ class LessonCreate(BaseModel):
     problem_id: Optional[str] = None
     title: str
     content: str
+    video_filename: Optional[str] = None
 
 class Battle(BaseModel):
     model_config = ConfigDict(extra="ignore")
