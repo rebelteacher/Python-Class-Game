@@ -765,7 +765,7 @@ export default function AssignmentPage({ user }) {
 
           {/* Right Side: Code Editor & Output */}
           <Panel defaultSize={70} minSize={50}>
-            <div className="pl-3" style={{ height: 'calc(100vh - 250px)' }}>
+            <div className="pl-3 h-full">
             {!isTeacher ? (
               <PanelGroup direction="horizontal" style={{ height: '100%' }}>
                 {/* Code Editor - Left */}
