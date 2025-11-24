@@ -1167,6 +1167,46 @@ export default function ClassroomPage({ user }) {
                     />
                   </div>
 
+                  <div className="bg-purple-50 border border-purple-200 rounded-lg p-4">
+                    <Label className="text-purple-900 font-semibold flex items-center gap-2">
+                      🎥 Tutorial Video (Optional)
+                    </Label>
+                    <p className="text-sm text-purple-700 mb-3">Upload a screen recording to help students learn (up to 10 minutes, MP4/WEBM)</p>
+                    
+                    {editingLesson.video_filename ? (
+                      <div className="flex items-center gap-3">
+                        <div className="flex-1 bg-white border border-purple-300 rounded px-3 py-2 text-sm">
+                          ✅ Video uploaded: {editingLesson.video_filename}
+                        </div>
+                        <Button 
+                          type="button"
+                          variant="outline" 
+                          size="sm"
+                          onClick={() => {
+                            if (window.confirm("Remove this video?")) {
+                              setEditingLesson({ ...editingLesson, video_filename: null });
+                            }
+                          }}
+                        >
+                          Remove
+                        </Button>
+                      </div>
+                    ) : (
+                      <input
+                        type="file"
+                        accept="video/mp4,video/webm,video/quicktime"
+                        onChange={(e) => {
+                          const file = e.target.files?.[0];
+                          if (file) {
+                            // Store file temporarily - will upload when saving
+                            setEditingLesson({ ...editingLesson, videoFile: file });
+                          }
+                        }}
+                        className="block w-full text-sm text-purple-700 file:mr-4 file:py-2 file:px-4 file:rounded file:border-0 file:text-sm file:font-semibold file:bg-purple-600 file:text-white hover:file:bg-purple-700"
+                      />
+                    )}
+                  </div>
+
                   <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 space-y-3">
                     <div>
                       <h4 className="font-semibold text-blue-900 mb-2">📝 Markdown Tips:</h4>
