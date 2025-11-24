@@ -5208,6 +5208,10 @@ def main():
             tester = CodeClassAPITester()
             success = tester.run_notes_diagnosis_only()
             return 0 if success else 1
+        elif sys.argv[1] == "role-switching":
+            tester = CodeClassAPITester()
+            success = tester.run_role_switching_test_only()
+            return 0 if success else 1
     else:
         tester = CodeClassAPITester()
         success = tester.run_all_tests()
