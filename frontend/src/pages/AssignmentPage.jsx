@@ -992,7 +992,7 @@ export default function AssignmentPage({ user }) {
               </PanelGroup>
             ) : (
               // Teacher Demo/Sandbox Mode - Interactive coding without submissions
-              <PanelGroup direction="horizontal">
+              <PanelGroup direction="horizontal" style={{ height: '100%' }}>
                 {/* Code Editor - Left */}
                 <Panel defaultSize={50} minSize={30}>
                 <Card data-testid="teacher-sandbox-card" className="h-full">
