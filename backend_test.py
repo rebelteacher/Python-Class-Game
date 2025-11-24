@@ -4855,6 +4855,32 @@ startxref
         
         return self.tests_passed == self.tests_run
 
+    def run_role_switching_test_only(self):
+        """Run only the role switching test for the specific user reported issue"""
+        print("🚀 Starting Role Switching Test (User Reported Issue)...")
+        print(f"Testing against: {self.base_url}")
+        print("📋 Testing 'Switch to Student' functionality for teacher account")
+        print("🎯 Issue: User reported 'Failed to switch' error when clicking 'Switch to Student' button")
+        print("🔧 Fix Applied: Removed hardcoded email protection blocking astapp@spanola.net")
+        
+        # Test the specific role switching functionality
+        self.test_teacher_role_switching()
+        
+        # Print summary
+        print(f"\n📊 Role Switching Test Summary:")
+        print(f"   Total tests: {self.tests_run}")
+        print(f"   Passed: {self.tests_passed}")
+        print(f"   Failed: {self.tests_run - self.tests_passed}")
+        print(f"   Success rate: {(self.tests_passed/self.tests_run)*100:.1f}%")
+        
+        if self.tests_passed == self.tests_run:
+            print("\n🎉 SUCCESS: Role switching functionality is working correctly!")
+            print("✅ The 'Failed to switch' error has been RESOLVED!")
+        else:
+            print("\n❌ FAILURE: Role switching test failed - issue may still exist")
+        
+        return self.tests_passed == self.tests_run
+
     def run_mc_question_tests_only(self):
         """Run only MC Question tests"""
         print("🚀 Starting MC Question API Tests...")
