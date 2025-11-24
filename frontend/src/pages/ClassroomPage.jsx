@@ -319,12 +319,12 @@ export default function ClassroomPage({ user }) {
           },
           { withCredentials: true }
         );
-        lessonId = response.data.id;
+        lessonId = response.data.lesson_id; // Fixed: use lesson_id from response
         toast.success("Lesson created!");
       }
       
       // Upload video if a file was selected
-      if (editingLesson.videoFile) {
+      if (editingLesson.videoFile && lessonId) {
         toast.info("Uploading video...");
         const formData = new FormData();
         formData.append("video", editingLesson.videoFile);
