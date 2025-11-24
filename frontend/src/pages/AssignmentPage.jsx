@@ -845,23 +845,21 @@ export default function AssignmentPage({ user }) {
                         <p className="text-xs text-red-600">🚫 This problem is locked. Try the next one!</p>
                       )}
                       
-                      {/* Learn Button - Always visible for students */}
-                      {user.role === "student" && (
-                        <div className="mt-4 pt-4 border-t">
-                          <Button
-                            onClick={handleViewLesson}
-                            disabled={loadingLesson}
-                            className="w-full bg-blue-600 hover:bg-blue-700 text-white"
-                            size="sm"
-                          >
-                            <BookOpen className="w-4 h-4 mr-2" />
-                            {loadingLesson ? "Loading..." : "📚 Learn This Concept (FREE)"}
-                          </Button>
-                          <p className="text-xs text-center text-gray-500 mt-2">
-                            💡 Review the lesson anytime - no coins needed!
-                          </p>
-                        </div>
-                      )}
+                      {/* Learn Button - Visible for both students and teachers */}
+                      <div className="mt-4 pt-4 border-t">
+                        <Button
+                          onClick={handleViewLesson}
+                          disabled={loadingLesson}
+                          className="w-full bg-blue-600 hover:bg-blue-700 text-white"
+                          size="sm"
+                        >
+                          <BookOpen className="w-4 h-4 mr-2" />
+                          {loadingLesson ? "Loading..." : "📚 Learn This Concept (FREE)"}
+                        </Button>
+                        <p className="text-xs text-center text-gray-500 mt-2">
+                          💡 Review the lesson anytime - no coins needed!
+                        </p>
+                      </div>
 
                       {/* Hint and Mark as Done Buttons Row */}
                       {user.role === "student" && !problemsFinal[getCurrentProblemId()] && submissions.filter(s => s.problem_id === getCurrentProblemId()).length > 0 && (
