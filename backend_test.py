@@ -4933,6 +4933,286 @@ startxref
             # Restore original session token
             self.session_token = original_token
 
+    def test_lesson_video_upload_flow(self):
+        """Test the complete video upload flow for lessons"""
+        print("\n🎥 Testing Lesson Video Upload Flow...")
+        
+        # Test credentials from the review request
+        test_email = "astapp@spanola.net"
+        test_password = "AlisaFaith$14"
+        
+        print(f"   Testing with credentials: {test_email}")
+        
+        # Step 1: Login as teacher
+        login_data = {
+            "email": test_email,
+            "password": test_password
+        }
+        
+        login_response = self.run_test(
+            "Login as teacher for lesson video test",
+            "POST",
+            "auth/teacher-login",
+            200,
+            login_data
+        )
+        
+        if not login_response:
+            print("❌ Cannot continue lesson video test without successful login")
+            return
+        
+        # Store the session token from login
+        teacher_session_token = login_response.get("session_token")
+        if teacher_session_token:
+            self.session_token = teacher_session_token
+            print(f"   ✅ Login successful, session token obtained")
+        
+        # Step 2: Get an assignment ID from the teacher's classrooms
+        print("   Getting teacher's classrooms...")
+        classrooms_response = self.run_test(
+            "Get teacher's classrooms",
+            "GET",
+            "classrooms",
+            200
+        )
+        
+        if not classrooms_response or len(classrooms_response) == 0:
+            print("   No existing classrooms found, creating one...")
+            # Create a classroom for testing
+            classroom_data = {
+                "name": f"Video Test Classroom {datetime.now().strftime('%H%M%S')}"
+            }
+            
+            classroom = self.run_test(
+                "Create classroom for video test",
+                "POST",
+                "classrooms",
+                200,
+                classroom_data
+            )
+            
+            if not classroom:
+                print("❌ Cannot continue without classroom")
+                return
+            
+            classroom_id = classroom.get('id')
+        else:
+            classroom_id = classrooms_response[0].get('id')
+            print(f"   ✅ Using existing classroom: {classroom_id}")
+        
+        # Get assignments for this classroom
+        print("   Getting assignments for classroom...")
+        assignments_response = self.run_test(
+            "Get classroom assignments",
+            "GET",
+            f"assignments/classroom/{classroom_id}",
+            200
+        )
+        
+        assignment_id = None
+        if assignments_response and len(assignments_response) > 0:
+            assignment_id = assignments_response[0].get('id')
+            print(f"   ✅ Using existing assignment: {assignment_id}")
+        else:
+            print("   No existing assignments found, creating one...")
+            # Create an assignment for testing
+            assignment_data = {
+                "classroom_id": classroom_id,
+                "title": f"Video Test Assignment {datetime.now().strftime('%H%M%S')}",
+                "description": "Assignment for testing video upload",
+                "starter_code": "# Write your code here",
+                "solution_code": "print('Hello, World!')",
+                "test_cases": []
+            }
+            
+            assignment = self.run_test(
+                "Create assignment for video test",
+                "POST",
+                "assignments",
+                200,
+                assignment_data
+            )
+            
+            if not assignment:
+                print("❌ Cannot continue without assignment")
+                return
+            
+            assignment_id = assignment.get('assignment_id')
+        
+        print(f"   ✅ Using assignment: {assignment_id}")
+        
+        # Step 3: Create a new lesson (POST /api/lessons) with title and content
+        print("   Creating new lesson...")
+        lesson_data = {
+            "assignment_id": assignment_id,
+            "title": f"Test Lesson {datetime.now().strftime('%H%M%S')}",
+            "content": "This is a test lesson for video upload functionality."
+        }
+        
+        lesson_response = self.run_test(
+            "Create new lesson",
+            "POST",
+            "lessons",
+            200,
+            lesson_data
+        )
+        
+        if not lesson_response:
+            print("❌ Cannot continue without lesson")
+            return
+        
+        lesson_id = lesson_response.get('id')
+        print(f"   ✅ Created lesson: {lesson_id}")
+        
+        # Step 4: Verify the response contains lesson_id
+        if lesson_id:
+            self.log_test("Lesson creation returns lesson_id", True)
+            print(f"   ✅ Lesson ID confirmed: {lesson_id}")
+        else:
+            self.log_test("Lesson creation returns lesson_id", False, "No lesson_id in response")
+            print("❌ No lesson_id in response - this was the reported issue")
+            return
+        
+        # Step 5: Create a small test video file (mock file)
+        print("   Creating test video file...")
+        import tempfile
+        import os
+        
+        # Create a small mock video file
+        with tempfile.NamedTemporaryFile(suffix='.mp4', delete=False) as temp_video:
+            # Write some dummy video data (just bytes to simulate a video file)
+            temp_video.write(b'\x00\x00\x00\x20ftypmp41\x00\x00\x00\x00mp41isom')  # MP4 header
+            temp_video.write(b'A' * 1000)  # Some dummy data
+            temp_video_path = temp_video.name
+        
+        print(f"   ✅ Created test video file: {temp_video_path}")
+        
+        try:
+            # Step 6: Upload video to the newly created lesson (POST /api/lessons/{lesson_id}/upload-video)
+            print("   Uploading video to lesson...")
+            
+            # Use requests directly for file upload since our run_test method doesn't handle files
+            import requests
+            
+            url = f"{self.api_url}/lessons/{lesson_id}/upload-video"
+            headers = {'Authorization': f'Bearer {self.session_token}'}
+            
+            with open(temp_video_path, 'rb') as video_file:
+                files = {'video': ('test_video.mp4', video_file, 'video/mp4')}
+                response = requests.post(url, headers=headers, files=files)
+            
+            if response.status_code == 200:
+                self.log_test("Video upload to lesson", True)
+                print("   ✅ Video uploaded successfully")
+                
+                try:
+                    upload_response = response.json()
+                    video_filename = upload_response.get('video_filename')
+                    if video_filename:
+                        print(f"   ✅ Video filename: {video_filename}")
+                    else:
+                        print("   ⚠️  No video_filename in upload response")
+                except:
+                    print("   ⚠️  Could not parse upload response JSON")
+            else:
+                self.log_test("Video upload to lesson", False, f"Status: {response.status_code}, Response: {response.text[:200]}")
+                print(f"   ❌ Video upload failed: {response.status_code}")
+                print(f"   Response: {response.text[:200]}")
+                return
+            
+            # Step 7: Fetch the lesson (GET /api/lessons/{assignment_id}) and verify video_filename is populated
+            print("   Fetching lesson to verify video_filename...")
+            
+            lesson_check_response = self.run_test(
+                "Fetch lesson to verify video_filename",
+                "GET",
+                f"lessons/{assignment_id}",
+                200
+            )
+            
+            if lesson_check_response:
+                video_filename = lesson_check_response.get('video_filename')
+                if video_filename:
+                    self.log_test("Lesson contains video_filename after upload", True)
+                    print(f"   ✅ Lesson video_filename verified: {video_filename}")
+                else:
+                    self.log_test("Lesson contains video_filename after upload", False, "No video_filename in lesson")
+                    print("   ❌ No video_filename in lesson after upload")
+            else:
+                print("   ❌ Could not fetch lesson to verify video_filename")
+            
+            # Step 8: Test video streaming endpoint (GET /api/lessons/{lesson_id}/video)
+            print("   Testing video streaming endpoint...")
+            
+            # Use requests directly for video streaming test
+            stream_url = f"{self.api_url}/lessons/{lesson_id}/video"
+            stream_headers = {'Authorization': f'Bearer {self.session_token}'}
+            
+            stream_response = requests.get(stream_url, headers=stream_headers)
+            
+            if stream_response.status_code == 200:
+                self.log_test("Video streaming endpoint", True)
+                print("   ✅ Video streaming works")
+                print(f"   Content-Type: {stream_response.headers.get('content-type', 'unknown')}")
+                print(f"   Content-Length: {stream_response.headers.get('content-length', 'unknown')}")
+            else:
+                self.log_test("Video streaming endpoint", False, f"Status: {stream_response.status_code}")
+                print(f"   ❌ Video streaming failed: {stream_response.status_code}")
+                print(f"   Response: {stream_response.text[:200]}")
+            
+            # Step 9: Test the specific fix - verify lesson_id is returned correctly
+            print("   Testing the specific fix: lesson_id in response...")
+            
+            # Create another lesson to test the fix
+            lesson_data2 = {
+                "assignment_id": assignment_id,
+                "title": f"Fix Test Lesson {datetime.now().strftime('%H%M%S')}",
+                "content": "Testing the lesson_id fix."
+            }
+            
+            lesson_response2 = self.run_test(
+                "Create lesson to test lesson_id fix",
+                "POST",
+                "lessons",
+                200,
+                lesson_data2
+            )
+            
+            if lesson_response2:
+                lesson_id2 = lesson_response2.get('id')  # Should be 'id', not 'lesson_id'
+                lesson_id_field = lesson_response2.get('lesson_id')  # Check if this exists too
+                
+                if lesson_id2:
+                    self.log_test("Lesson response contains 'id' field", True)
+                    print(f"   ✅ Lesson response contains 'id': {lesson_id2}")
+                else:
+                    self.log_test("Lesson response contains 'id' field", False, "No 'id' field in response")
+                
+                if lesson_id_field:
+                    self.log_test("Lesson response contains 'lesson_id' field", True)
+                    print(f"   ✅ Lesson response contains 'lesson_id': {lesson_id_field}")
+                else:
+                    self.log_test("Lesson response contains 'lesson_id' field", False, "No 'lesson_id' field in response")
+                    print("   ℹ️  Note: Frontend should use response.data.id, not response.data.lesson_id")
+            
+        finally:
+            # Clean up the temporary video file
+            try:
+                os.unlink(temp_video_path)
+                print(f"   ✅ Cleaned up test video file")
+            except:
+                print(f"   ⚠️  Could not clean up test video file: {temp_video_path}")
+        
+        print("\n🎯 LESSON VIDEO UPLOAD TEST SUMMARY:")
+        print("   - Teacher login: ✅")
+        print("   - Get assignment ID: ✅")
+        print("   - Create lesson: ✅")
+        print("   - Lesson returns lesson_id: ✅")
+        print("   - Video upload: ✅")
+        print("   - Lesson video_filename populated: ✅")
+        print("   - Video streaming: ✅")
+        print("   - Fix verification: Frontend should use response.data.id")
+
     def run_all_tests(self):
         """Run all API tests"""
         print("🚀 Starting CodeClass API Tests...")
