@@ -4768,6 +4768,9 @@ startxref
         # Test authentication
         self.test_auth_endpoints()
         
+        # Test specific teacher role switching functionality (user reported issue)
+        self.test_teacher_role_switching()
+        
         # Test classrooms
         classroom = self.test_classroom_endpoints()
         if not classroom:
