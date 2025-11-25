@@ -35,6 +35,7 @@ import DistrictAdminDashboard from "./pages/DistrictAdminDashboard";
 import PlatformAdminDashboard from "./pages/PlatformAdminDashboard";
 import StudentSandbox from "./pages/StudentSandbox";
 import VideoLibrary from "./pages/VideoLibrary";
+import AdminMessages from "./pages/AdminMessages";
 
 const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
 const API = `${BACKEND_URL}/api`;
