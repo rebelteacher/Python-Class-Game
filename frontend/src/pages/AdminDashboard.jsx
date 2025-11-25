@@ -17,7 +17,9 @@ import {
   Calendar,
   UserCheck,
   UserX,
-  Coins
+  Coins,
+  MessageCircle,
+  Bell
 } from "lucide-react";
 
 const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
