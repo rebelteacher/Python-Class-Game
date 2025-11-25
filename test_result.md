@@ -528,6 +528,21 @@ frontend:
         agent: "main"
         comment: "Created StudentSandbox.jsx - a free-style coding playground for students. Features: Monaco code editor with word wrap, test input section, output display, dark/light mode toggle, clear button, run code functionality. No assignments or grading - pure practice environment. Added route /student/sandbox to App.js. Added 'Practice Coding' quick access card to Student Dashboard with purple/pink gradient theme. Uses existing /api/run-code endpoint for code execution."
 
+  - task: "Video Library Upload Endpoint Fix"
+    implemented: true
+    working: true
+    file: "backend/server.py"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: false
+    status_history:
+      - working: "NA"
+        agent: "user"
+        comment: "User reported issue: 'Created new lesson, loaded video, pressed create, got Video uploaded then Lesson not found'. Root cause identified: Backend now accepts Form data instead of Pydantic model + file. Frontend now sends all data via FormData (video file, title, chapter, description)."
+      - working: true
+        agent: "testing"
+        comment: "VIDEO LIBRARY UPLOAD ENDPOINT TESTING COMPLETE ✅ - All 9 test steps passed (100% success rate). ✅ Admin login with test credentials (astapp@spanola.net): SUCCESS. ✅ Admin privileges verified (is_admin=True): SUCCESS. ✅ Test video file creation (mock MP4): SUCCESS. ✅ Video upload via FormData (POST /api/video-library): SUCCESS - accepts video file, title, chapter, description as form data. ✅ Upload response contains video_id and filename: SUCCESS - backend returns proper response structure. ✅ Video record created in database (library_videos collection): SUCCESS - all metadata persisted correctly. ✅ Video file saved to disk (/app/backend/uploads/library_videos/): SUCCESS - file exists with proper content. ✅ Video appears in GET /api/video-library endpoint: SUCCESS - uploaded video found in library response. ✅ Complete end-to-end flow verified: The reported video upload issue has been RESOLVED - the backend correctly accepts FormData and processes video uploads successfully."
+
 metadata:
   created_by: "main_agent"
   version: "5.0"
