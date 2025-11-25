@@ -1,6 +1,8 @@
+import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { Code2, Users, BookOpen, CheckCircle, GraduationCap, UserCircle } from "lucide-react";
+import { Code2, Users, BookOpen, CheckCircle, GraduationCap, UserCircle, MessageCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import ContactForm from "@/components/ContactForm";
 
 const REDIRECT_URL = window.location.origin + "/student/dashboard";
 const AUTH_BASE_URL = process.env.REACT_APP_AUTH_URL || "https://auth.emergentagent.com";
