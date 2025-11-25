@@ -10,6 +10,7 @@ const AUTH_URL = `${AUTH_BASE_URL}/?redirect=${encodeURIComponent(REDIRECT_URL)}
 
 export default function LandingPage() {
   const navigate = useNavigate();
+  const [contactOpen, setContactOpen] = useState(false);
   
   const handleStudentLogin = () => {
     window.location.href = AUTH_URL;
