@@ -871,12 +871,40 @@ export default function StudentDashboard({ user, setUser, refreshUser }) {
         )}
 
 
-        {/* Quick Access Section */}
+        {/* Video Library Card */}
         <div className="mb-8">
-          <Card className="border-2 border-purple-200 bg-gradient-to-r from-purple-50 to-pink-50">
-            <CardContent className="pt-6">
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-4">
+          <Card className="border-2 border-indigo-200 bg-gradient-to-br from-indigo-50 to-blue-50">
+            <CardContent className="p-6">
+              <div className="flex items-start justify-between">
+                <div className="flex items-start gap-4">
+                  <div className="p-3 bg-indigo-100 rounded-lg">
+                    <Video className="w-8 h-8 text-indigo-600" />
+                  </div>
+                  <div>
+                    <h3 className="text-lg font-semibold text-indigo-900">Video Library</h3>
+                    <p className="text-sm text-indigo-700">
+                      Watch tutorial videos organized by chapter - learn at your own pace!
+                    </p>
+                  </div>
+                </div>
+                <Button 
+                  onClick={() => navigate("/video-library")}
+                  className="bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 gap-2"
+                >
+                  <Video className="w-4 h-4" />
+                  Browse Videos
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+
+        {/* Practice Sandbox Card */}
+        <div className="mb-8">
+          <Card className="border-2 border-purple-200 bg-gradient-to-br from-purple-50 to-pink-50">
+            <CardContent className="p-6">
+              <div className="flex items-start justify-between">
+                <div className="flex items-start gap-4">
                   <div className="p-3 bg-purple-100 rounded-lg">
                     <Code2 className="w-8 h-8 text-purple-600" />
                   </div>
