@@ -17,6 +17,7 @@ export default function TeacherDashboard({ user, setUser }) {
   const [loading, setLoading] = useState(true);
   const [createDialogOpen, setCreateDialogOpen] = useState(false);
   const [newClassName, setNewClassName] = useState("");
+  const [unreadCount, setUnreadCount] = useState(0);
   const navigate = useNavigate();
 
   // Fun classroom name suggestions
