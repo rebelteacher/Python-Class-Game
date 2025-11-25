@@ -196,6 +196,22 @@ export default function TeacherDashboard({ user, setUser }) {
               <Trophy className="w-4 h-4" />
               Challenge Pool
             </Button>
+            {user?.is_admin && (
+              <Button 
+                onClick={() => navigate("/admin/messages")} 
+                variant="outline" 
+                size="sm" 
+                className="gap-2 border-white/30 text-white hover:bg-white/20 bg-white/10 relative"
+              >
+                <Bell className="w-4 h-4" />
+                Messages
+                {unreadCount > 0 && (
+                  <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center">
+                    {unreadCount}
+                  </span>
+                )}
+              </Button>
+            )}
             <Button data-testid="switch-role-btn" onClick={handleSwitchToStudent} variant="outline" size="sm" className="gap-2 border-white/30 text-white hover:bg-white/20 bg-white/10">
               <RefreshCw className="w-4 h-4" />
               Switch to Student
