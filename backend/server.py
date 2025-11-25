@@ -2824,6 +2824,174 @@ async def stream_lesson_video(lesson_id: str, request: Request):
     return FileResponse(video_path, media_type="video/mp4")
 
 
+# ==================== VIDEO LIBRARY ROUTES ====================
+
+@api_router.get("/video-library")
+async def get_video_library(request: Request):
+    """Get all videos in the library organized by chapter"""
+    user = await get_current_user(request)
+    
+    # All authenticated users can view the library
+    videos = await db.library_videos.find({}, {"_id": 0}).to_list(length=None)
+    
+    # Organize by chapter
+    chapters = {}
+    for video in videos:
+        chapter = video.get("chapter", "Uncategorized")
+        if chapter not in chapters:
+            chapters[chapter] = []
+        chapters[chapter].append(video)
+    
+    return {"chapters": chapters}
+
+
+@api_router.post("/video-library")
+async def create_library_video(video_data: LibraryVideoCreate, request: Request, video: UploadFile = File(...)):
+    """Upload a new video to the library (Admin only)"""
+    user = await get_current_user(request)
+    
+    if not user.get("is_admin"):
+        raise HTTPException(status_code=403, detail="Only admins can upload videos to the library")
+    
+    # Validate file type
+    allowed_types = ["video/mp4", "video/webm", "video/quicktime", "video/x-msvideo"]
+    if video.content_type not in allowed_types:
+        raise HTTPException(status_code=400, detail="Invalid video format. Supported: MP4, WEBM, MOV, AVI")
+    
+    # Create uploads directory if it doesn't exist
+    upload_dir = "/app/backend/uploads/library_videos"
+    os.makedirs(upload_dir, exist_ok=True)
+    
+    # Generate unique filename
+    file_extension = video.filename.split(".")[-1]
+    video_id = str(uuid.uuid4())
+    unique_filename = f"{video_id}.{file_extension}"
+    file_path = f"{upload_dir}/{unique_filename}"
+    
+    # Save video file in chunks (handles large files)
+    try:
+        with open(file_path, "wb") as f:
+            while chunk := await video.read(1024 * 1024):  # Read 1MB at a time
+                f.write(chunk)
+    except Exception as e:
+        logger.error(f"Error saving library video: {str(e)}")
+        if os.path.exists(file_path):
+            os.remove(file_path)
+        raise HTTPException(status_code=500, detail="Failed to save video")
+    
+    # Create video record
+    new_video = LibraryVideo(
+        id=video_id,
+        title=video_data.title,
+        chapter=video_data.chapter,
+        description=video_data.description,
+        filename=unique_filename,
+        uploaded_by=user["id"]
+    )
+    
+    video_dict = new_video.model_dump()
+    video_dict["created_at"] = video_dict["created_at"].isoformat()
+    video_dict["updated_at"] = video_dict["updated_at"].isoformat()
+    
+    await db.library_videos.insert_one(video_dict)
+    
+    return {"success": True, "video_id": video_id, "filename": unique_filename}
+
+
+@api_router.put("/video-library/{video_id}")
+async def update_library_video(video_id: str, video_data: LibraryVideoCreate, request: Request):
+    """Update video metadata (Admin only)"""
+    user = await get_current_user(request)
+    
+    if not user.get("is_admin"):
+        raise HTTPException(status_code=403, detail="Only admins can update library videos")
+    
+    existing_video = await db.library_videos.find_one({"id": video_id}, {"_id": 0})
+    if not existing_video:
+        raise HTTPException(status_code=404, detail="Video not found")
+    
+    await db.library_videos.update_one(
+        {"id": video_id},
+        {"$set": {
+            "title": video_data.title,
+            "chapter": video_data.chapter,
+            "description": video_data.description,
+            "updated_at": datetime.now(timezone.utc).isoformat()
+        }}
+    )
+    
+    return {"success": True}
+
+
+@api_router.delete("/video-library/{video_id}")
+async def delete_library_video(video_id: str, request: Request):
+    """Delete a video from the library (Admin only)"""
+    user = await get_current_user(request)
+    
+    if not user.get("is_admin"):
+        raise HTTPException(status_code=403, detail="Only admins can delete library videos")
+    
+    existing_video = await db.library_videos.find_one({"id": video_id}, {"_id": 0})
+    if not existing_video:
+        raise HTTPException(status_code=404, detail="Video not found")
+    
+    # Delete video file
+    video_path = f"/app/backend/uploads/library_videos/{existing_video['filename']}"
+    if os.path.exists(video_path):
+        os.remove(video_path)
+    
+    await db.library_videos.delete_one({"id": video_id})
+    
+    return {"success": True}
+
+
+@api_router.get("/video-library/{video_id}/stream")
+async def stream_library_video(video_id: str, request: Request):
+    """Stream a library video"""
+    from fastapi.responses import FileResponse, StreamingResponse
+    
+    # Check video exists
+    video = await db.library_videos.find_one({"id": video_id}, {"_id": 0})
+    if not video:
+        raise HTTPException(status_code=404, detail="Video not found")
+    
+    video_path = f"/app/backend/uploads/library_videos/{video['filename']}"
+    if not os.path.exists(video_path):
+        raise HTTPException(status_code=404, detail="Video file not found")
+    
+    # Get file size
+    file_size = os.path.getsize(video_path)
+    
+    # Handle range requests for video seeking
+    range_header = request.headers.get("range")
+    if range_header:
+        range_match = range_header.replace("bytes=", "").split("-")
+        start = int(range_match[0])
+        end = int(range_match[1]) if range_match[1] else file_size - 1
+        
+        def iter_file():
+            with open(video_path, "rb") as f:
+                f.seek(start)
+                bytes_to_read = end - start + 1
+                while bytes_to_read > 0:
+                    chunk_size = min(1024 * 1024, bytes_to_read)
+                    data = f.read(chunk_size)
+                    if not data:
+                        break
+                    bytes_to_read -= len(data)
+                    yield data
+        
+        headers = {
+            "Content-Range": f"bytes {start}-{end}/{file_size}",
+            "Accept-Ranges": "bytes",
+            "Content-Length": str(end - start + 1),
+            "Content-Type": "video/mp4",
+        }
+        return StreamingResponse(iter_file(), status_code=206, headers=headers)
+    
+    return FileResponse(video_path, media_type="video/mp4")
+
+
 @api_router.get("/student/{student_id}/lesson-scores")
 async def get_student_lesson_scores(student_id: str, classroom_id: str, request: Request):
     """Calculate assignment scores for a student in a classroom"""
