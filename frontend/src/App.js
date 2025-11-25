@@ -228,6 +228,15 @@ function App() {
               />
               
               <Route
+                path="/video-library"
+                element={
+                  <ProtectedRoute user={user}>
+                    <VideoLibrary user={user} />
+                  </ProtectedRoute>
+                }
+              />
+              
+              <Route
                 path="/test-builder"
                 element={
                   <ProtectedRoute user={user} requiredRole="teacher">
