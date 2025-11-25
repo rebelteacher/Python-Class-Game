@@ -238,6 +238,15 @@ function App() {
               />
               
               <Route
+                path="/admin/messages"
+                element={
+                  <ProtectedRoute user={user} requiredRole="teacher">
+                    <AdminMessages user={user} />
+                  </ProtectedRoute>
+                }
+              />
+              
+              <Route
                 path="/test-builder"
                 element={
                   <ProtectedRoute user={user} requiredRole="teacher">
