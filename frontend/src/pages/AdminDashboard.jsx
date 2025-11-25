@@ -225,34 +225,45 @@ export default function AdminDashboard({ user }) {
         </Card>
 
         {/* Support Contact */}
-        <Card className="mb-8">
+        <Card className="mb-8 border-2 border-indigo-200 bg-gradient-to-br from-indigo-50 to-blue-50">
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
-              <Mail className="w-5 h-5" />
-              Teacher Support Contact
+              <MessageCircle className="w-5 h-5 text-indigo-600" />
+              Teacher Support & Feedback
             </CardTitle>
             <CardDescription>
-              Teachers can reach out to you directly for questions and support
+              Manage all messages and questions from your community
             </CardDescription>
           </CardHeader>
           <CardContent>
-            <div className="flex items-center gap-4">
-              <div className="flex-1 p-4 bg-blue-50 border border-blue-200 rounded-lg">
-                <p className="text-sm text-gray-600 mb-1">Support Email</p>
-                <p className="text-lg font-semibold text-indigo-600">amyastapp@gmail.com</p>
+            <div className="space-y-4">
+              <div className="p-4 bg-white border border-indigo-200 rounded-lg">
+                <p className="text-sm text-gray-700 mb-3">
+                  ✅ <strong>Feedback System Active!</strong> Teachers and users can now contact you through the built-in messaging system.
+                </p>
+                <div className="flex gap-3">
+                  <Button
+                    onClick={() => navigate("/admin/messages")}
+                    className="bg-indigo-600 hover:bg-indigo-700 gap-2"
+                  >
+                    <MessageCircle className="w-4 h-4" />
+                    View All Messages
+                  </Button>
+                  {unreadCount > 0 && (
+                    <div className="px-4 py-2 bg-red-100 border border-red-300 rounded-lg flex items-center gap-2">
+                      <Bell className="w-4 h-4 text-red-600" />
+                      <span className="text-sm font-semibold text-red-700">{unreadCount} Unread</span>
+                    </div>
+                  )}
+                </div>
               </div>
-              <Button
-                onClick={() => copyToClipboard("amyastapp@gmail.com")}
-                variant="outline"
-                className="gap-2"
-              >
-                <Copy className="w-4 h-4" />
-                Copy
-              </Button>
+              
+              <div className="bg-blue-50 border border-blue-200 p-3 rounded-lg">
+                <p className="text-sm text-blue-800">
+                  💡 <strong>How it works:</strong> Users click "Contact Us" on the landing page or send feedback. You get notifications here and can reply directly from your admin dashboard.
+                </p>
+              </div>
             </div>
-            <p className="text-xs text-gray-500 mt-3">
-              Note: Built-in ticketing system will be added after the pilot program
-            </p>
           </CardContent>
         </Card>
 
