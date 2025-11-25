@@ -455,6 +455,23 @@ class LessonCreate(BaseModel):
     content: str
     video_filename: Optional[str] = None
 
+class LibraryVideo(BaseModel):
+    model_config = ConfigDict(extra="ignore")
+    id: str = Field(default_factory=lambda: str(uuid.uuid4()))
+    title: str
+    chapter: str  # e.g., "Chapter 1: Variables", "Chapter 2: Loops"
+    description: Optional[str] = None
+    filename: str  # Video file name
+    duration: Optional[int] = None  # Duration in seconds
+    uploaded_by: str  # Admin user ID
+    created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+    updated_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+
+class LibraryVideoCreate(BaseModel):
+    title: str
+    chapter: str
+    description: Optional[str] = None
+
 class Battle(BaseModel):
     model_config = ConfigDict(extra="ignore")
     id: str = Field(default_factory=lambda: str(uuid.uuid4()))
