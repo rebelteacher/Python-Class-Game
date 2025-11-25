@@ -32,6 +32,7 @@ export default function AdminDashboard({ user }) {
   const [inviteCodes, setInviteCodes] = useState([]);
   const [loading, setLoading] = useState(true);
   const [generatingCode, setGeneratingCode] = useState(false);
+  const [unreadCount, setUnreadCount] = useState(0);
 
   useEffect(() => {
     if (!user?.is_admin) {
@@ -41,7 +42,19 @@ export default function AdminDashboard({ user }) {
     }
     
     fetchData();
+    fetchUnreadCount();
   }, [user]);
+
+  const fetchUnreadCount = async () => {
+    try {
+      const response = await axios.get(`${API}/admin/feedback/unread-count`, {
+        withCredentials: true,
+      });
+      setUnreadCount(response.data.unread_count);
+    } catch (error) {
+      console.error("Error fetching unread count:", error);
+    }
+  };
 
   const fetchData = async () => {
     try {
