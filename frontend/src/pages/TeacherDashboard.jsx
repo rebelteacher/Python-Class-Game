@@ -40,7 +40,21 @@ export default function TeacherDashboard({ user, setUser }) {
 
   useEffect(() => {
     fetchClassrooms();
-  }, []);
+    if (user?.is_admin) {
+      fetchUnreadCount();
+    }
+  }, [user]);
+
+  const fetchUnreadCount = async () => {
+    try {
+      const response = await axios.get(`${API}/admin/feedback/unread-count`, {
+        withCredentials: true,
+      });
+      setUnreadCount(response.data.unread_count);
+    } catch (error) {
+      console.error("Error fetching unread count:", error);
+    }
+  };
 
   const fetchClassrooms = async () => {
     try {
