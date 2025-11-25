@@ -66,16 +66,16 @@ export default function VideoLibrary({ user }) {
     try {
       const formData = new FormData();
       formData.append("video", newVideo.file);
+      formData.append("title", newVideo.title);
+      formData.append("chapter", newVideo.chapter);
+      if (newVideo.description) {
+        formData.append("description", newVideo.description);
+      }
 
       await axios.post(
         `${API}/video-library`,
         formData,
         {
-          params: {
-            title: newVideo.title,
-            chapter: newVideo.chapter,
-            description: newVideo.description || undefined
-          },
           withCredentials: true,
           headers: {
             "Content-Type": "multipart/form-data",
