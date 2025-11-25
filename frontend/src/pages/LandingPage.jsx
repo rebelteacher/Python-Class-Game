@@ -113,6 +113,8 @@ export default function LandingPage() {
           </div>
         </div>
       </main>
+
+      <ContactForm isOpen={contactOpen} onClose={() => setContactOpen(false)} />
     </div>
   );
 }
