@@ -2846,8 +2846,16 @@ async def get_video_library(request: Request):
 
 
 @api_router.post("/video-library")
-async def create_library_video(video_data: LibraryVideoCreate, request: Request, video: UploadFile = File(...)):
+async def create_library_video(
+    request: Request,
+    video: UploadFile = File(...),
+    title: str = Form(...),
+    chapter: str = Form(...),
+    description: Optional[str] = Form(None)
+):
     """Upload a new video to the library (Admin only)"""
+    from fastapi import Form
+    
     user = await get_current_user(request)
     
     if not user.get("is_admin"):
@@ -2882,9 +2890,9 @@ async def create_library_video(video_data: LibraryVideoCreate, request: Request,
     # Create video record
     new_video = LibraryVideo(
         id=video_id,
-        title=video_data.title,
-        chapter=video_data.chapter,
-        description=video_data.description,
+        title=title,
+        chapter=chapter,
+        description=description,
         filename=unique_filename,
         uploaded_by=user["id"]
     )
