@@ -472,6 +472,29 @@ class LibraryVideoCreate(BaseModel):
     chapter: str
     description: Optional[str] = None
 
+class FeedbackMessage(BaseModel):
+    model_config = ConfigDict(extra="ignore")
+    id: str = Field(default_factory=lambda: str(uuid.uuid4()))
+    name: str
+    email: str
+    user_type: Optional[str] = None  # "teacher", "student", "prospective", None
+    category: str  # "question", "bug", "feature", "other"
+    message: str
+    admin_reply: Optional[str] = None
+    status: str = "unread"  # "unread", "read", "resolved"
+    created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+    replied_at: Optional[datetime] = None
+
+class FeedbackCreate(BaseModel):
+    name: str
+    email: str
+    user_type: Optional[str] = None
+    category: str
+    message: str
+
+class FeedbackReply(BaseModel):
+    reply: str
+
 class Battle(BaseModel):
     model_config = ConfigDict(extra="ignore")
     id: str = Field(default_factory=lambda: str(uuid.uuid4()))
