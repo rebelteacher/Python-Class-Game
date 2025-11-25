@@ -29,6 +29,14 @@ export default function LandingPage() {
         </div>
         <div className="flex items-center space-x-3">
           <Button 
+            onClick={() => setContactOpen(true)} 
+            variant="ghost"
+            className="gap-2 text-indigo-600 hover:bg-indigo-50"
+          >
+            <MessageCircle className="w-4 h-4" />
+            Contact Us
+          </Button>
+          <Button 
             onClick={handleTeacherLogin} 
             variant="outline"
             className="gap-2 border-indigo-600 text-indigo-600 hover:bg-indigo-50"
