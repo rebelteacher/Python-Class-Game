@@ -3023,6 +3023,128 @@ async def stream_library_video(video_id: str, request: Request):
     return FileResponse(video_path, media_type="video/mp4")
 
 
+# ==================== FEEDBACK & MESSAGES ROUTES ====================
+
+@api_router.post("/feedback")
+async def submit_feedback(feedback: FeedbackCreate):
+    """Submit feedback/question (public - no auth required)"""
+    new_message = FeedbackMessage(
+        name=feedback.name,
+        email=feedback.email,
+        user_type=feedback.user_type,
+        category=feedback.category,
+        message=feedback.message,
+        status="unread"
+    )
+    
+    message_dict = new_message.model_dump()
+    message_dict["created_at"] = message_dict["created_at"].isoformat()
+    
+    await db.feedback_messages.insert_one(message_dict)
+    
+    return {"success": True, "message": "Thank you! Your message has been received."}
+
+
+@api_router.get("/admin/feedback")
+async def get_all_feedback(request: Request):
+    """Get all feedback messages (Admin only)"""
+    user = await get_current_user(request)
+    
+    if not user.get("is_admin"):
+        raise HTTPException(status_code=403, detail="Admin access required")
+    
+    messages = await db.feedback_messages.find({}, {"_id": 0}).to_list(length=None)
+    
+    # Sort by created_at descending (newest first)
+    messages.sort(key=lambda x: x.get("created_at", ""), reverse=True)
+    
+    return {"messages": messages}
+
+
+@api_router.get("/admin/feedback/unread-count")
+async def get_unread_count(request: Request):
+    """Get count of unread messages (Admin only)"""
+    user = await get_current_user(request)
+    
+    if not user.get("is_admin"):
+        raise HTTPException(status_code=403, detail="Admin access required")
+    
+    count = await db.feedback_messages.count_documents({"status": "unread"})
+    
+    return {"unread_count": count}
+
+
+@api_router.put("/admin/feedback/{message_id}/status")
+async def update_message_status(message_id: str, status: str, request: Request):
+    """Update message status (Admin only)"""
+    user = await get_current_user(request)
+    
+    if not user.get("is_admin"):
+        raise HTTPException(status_code=403, detail="Admin access required")
+    
+    if status not in ["unread", "read", "resolved"]:
+        raise HTTPException(status_code=400, detail="Invalid status")
+    
+    result = await db.feedback_messages.update_one(
+        {"id": message_id},
+        {"$set": {"status": status}}
+    )
+    
+    if result.matched_count == 0:
+        raise HTTPException(status_code=404, detail="Message not found")
+    
+    return {"success": True}
+
+
+@api_router.post("/admin/feedback/{message_id}/reply")
+async def reply_to_message(message_id: str, reply_data: FeedbackReply, request: Request):
+    """Reply to a feedback message (Admin only)"""
+    user = await get_current_user(request)
+    
+    if not user.get("is_admin"):
+        raise HTTPException(status_code=403, detail="Admin access required")
+    
+    message = await db.feedback_messages.find_one({"id": message_id}, {"_id": 0})
+    if not message:
+        raise HTTPException(status_code=404, detail="Message not found")
+    
+    result = await db.feedback_messages.update_one(
+        {"id": message_id},
+        {
+            "$set": {
+                "admin_reply": reply_data.reply,
+                "replied_at": datetime.now(timezone.utc).isoformat(),
+                "status": "resolved"
+            }
+        }
+    )
+    
+    # TODO: Send email notification to user when email service is configured
+    # For now, admin can copy the user's email and send manually
+    
+    return {
+        "success": True,
+        "message": "Reply saved! Copy user email to send notification manually.",
+        "user_email": message.get("email")
+    }
+
+
+@api_router.delete("/admin/feedback/{message_id}")
+async def delete_message(message_id: str, request: Request):
+    """Delete a feedback message (Admin only)"""
+    user = await get_current_user(request)
+    
+    if not user.get("is_admin"):
+        raise HTTPException(status_code=403, detail="Admin access required")
+    
+    result = await db.feedback_messages.delete_one({"id": message_id})
+    
+    if result.deleted_count == 0:
+        raise HTTPException(status_code=404, detail="Message not found")
+    
+    return {"success": True}
+
+
 @api_router.get("/student/{student_id}/lesson-scores")
 async def get_student_lesson_scores(student_id: str, classroom_id: str, request: Request):
     """Calculate assignment scores for a student in a classroom"""
