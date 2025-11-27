@@ -3670,10 +3670,37 @@ async def get_all_teachers(request: Request):
                 
                 # Count assignments created
                 teacher["assignment_count"] = await db.assignments.count_documents({"teacher_id": teacher["id"]})
+                
+                # Login analytics
+                teacher["total_logins"] = await db.login_history.count_documents({"user_id": teacher["id"]})
+                teacher["last_login"] = teacher.get("last_login", "Never")
+                
+                # Calculate frequency (logins in last 30 days)
+                thirty_days_ago = datetime.now(timezone.utc) - timedelta(days=30)
+                recent_logins = await db.login_history.count_documents({
+                    "user_id": teacher["id"],
+                    "timestamp": {"$gte": thirty_days_ago.isoformat()}
+                })
+                teacher["recent_login_count"] = recent_logins
+                
+                # Determine frequency label
+                if recent_logins == 0:
+                    teacher["frequency"] = "Inactive"
+                elif recent_logins >= 20:
+                    teacher["frequency"] = "Very Active"
+                elif recent_logins >= 10:
+                    teacher["frequency"] = "Active"
+                else:
+                    teacher["frequency"] = "Low Activity"
+                    
             except Exception as e:
                 logging.error(f"Error enriching teacher {teacher.get('id')}: {e}")
                 teacher["classroom_count"] = 0
                 teacher["assignment_count"] = 0
+                teacher["total_logins"] = 0
+                teacher["last_login"] = "Never"
+                teacher["recent_login_count"] = 0
+                teacher["frequency"] = "Unknown"
         
         # Sort by email to avoid datetime issues
         teachers.sort(key=lambda t: t.get("email", ""), reverse=False)
