@@ -3172,6 +3172,101 @@ async def delete_message(message_id: str, request: Request):
     return {"success": True}
 
 
+# ==================== ANNOUNCEMENTS ROUTES ====================
+
+@api_router.get("/announcements")
+async def get_announcements(request: Request):
+    """Get all active announcements (for teachers)"""
+    user = await get_current_user(request)
+    
+    if user["role"] != "teacher":
+        raise HTTPException(status_code=403, detail="Teachers only")
+    
+    announcements = await db.announcements.find(
+        {"is_active": True},
+        {"_id": 0}
+    ).to_list(length=None)
+    
+    # Sort by created_at descending (newest first)
+    announcements.sort(key=lambda x: x.get("created_at", ""), reverse=True)
+    
+    return {"announcements": announcements}
+
+
+@api_router.post("/admin/announcements")
+async def create_announcement(announcement_data: AnnouncementCreate, request: Request):
+    """Create a new announcement (Admin only)"""
+    user = await get_current_user(request)
+    
+    if not user.get("is_admin"):
+        raise HTTPException(status_code=403, detail="Admin access required")
+    
+    new_announcement = Announcement(
+        title=announcement_data.title,
+        content=announcement_data.content,
+        created_by=user["id"]
+    )
+    
+    announcement_dict = new_announcement.model_dump()
+    announcement_dict["created_at"] = announcement_dict["created_at"].isoformat()
+    
+    await db.announcements.insert_one(announcement_dict)
+    
+    return {"success": True, "announcement_id": new_announcement.id}
+
+
+@api_router.get("/admin/announcements")
+async def get_all_announcements_admin(request: Request):
+    """Get all announcements including inactive (Admin only)"""
+    user = await get_current_user(request)
+    
+    if not user.get("is_admin"):
+        raise HTTPException(status_code=403, detail="Admin access required")
+    
+    announcements = await db.announcements.find({}, {"_id": 0}).to_list(length=None)
+    announcements.sort(key=lambda x: x.get("created_at", ""), reverse=True)
+    
+    return {"announcements": announcements}
+
+
+@api_router.put("/admin/announcements/{announcement_id}/toggle")
+async def toggle_announcement(announcement_id: str, request: Request):
+    """Toggle announcement active status (Admin only)"""
+    user = await get_current_user(request)
+    
+    if not user.get("is_admin"):
+        raise HTTPException(status_code=403, detail="Admin access required")
+    
+    announcement = await db.announcements.find_one({"id": announcement_id}, {"_id": 0})
+    if not announcement:
+        raise HTTPException(status_code=404, detail="Announcement not found")
+    
+    new_status = not announcement.get("is_active", True)
+    
+    await db.announcements.update_one(
+        {"id": announcement_id},
+        {"$set": {"is_active": new_status}}
+    )
+    
+    return {"success": True, "is_active": new_status}
+
+
+@api_router.delete("/admin/announcements/{announcement_id}")
+async def delete_announcement(announcement_id: str, request: Request):
+    """Delete an announcement (Admin only)"""
+    user = await get_current_user(request)
+    
+    if not user.get("is_admin"):
+        raise HTTPException(status_code=403, detail="Admin access required")
+    
+    result = await db.announcements.delete_one({"id": announcement_id})
+    
+    if result.deleted_count == 0:
+        raise HTTPException(status_code=404, detail="Announcement not found")
+    
+    return {"success": True}
+
+
 @api_router.get("/student/{student_id}/lesson-scores")
 async def get_student_lesson_scores(student_id: str, classroom_id: str, request: Request):
     """Calculate assignment scores for a student in a classroom"""
