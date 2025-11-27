@@ -248,6 +248,15 @@ function App() {
               />
               
               <Route
+                path="/admin/analytics"
+                element={
+                  <ProtectedRoute user={user} requiredRole="teacher">
+                    <AdminAnalytics user={user} />
+                  </ProtectedRoute>
+                }
+              />
+              
+              <Route
                 path="/test-builder"
                 element={
                   <ProtectedRoute user={user} requiredRole="teacher">
