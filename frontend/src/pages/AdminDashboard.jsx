@@ -208,6 +208,33 @@ export default function AdminDashboard({ user }) {
           </Card>
         </div>
 
+        {/* Teacher Analytics */}
+        <Card className="mb-8 border-2 border-purple-200 bg-gradient-to-br from-purple-50 to-pink-50">
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <Activity className="w-5 h-5 text-purple-600" />
+              Teacher Analytics & Engagement
+            </CardTitle>
+            <CardDescription>
+              View detailed login statistics and teacher activity patterns
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-3">
+              <p className="text-sm text-gray-700">
+                Track teacher engagement with detailed login analytics, activity frequency, and email lists for communication.
+              </p>
+              <Button
+                onClick={() => navigate("/admin/analytics")}
+                className="bg-purple-600 hover:bg-purple-700 gap-2"
+              >
+                <Activity className="w-4 h-4" />
+                View Teacher Analytics
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
+
         {/* Admin Tools */}
         <Card className="mb-8">
           <CardHeader>
