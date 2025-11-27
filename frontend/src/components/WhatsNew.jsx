@@ -18,13 +18,37 @@ export default function WhatsNew() {
     checkForNew();
   }, []);
 
+  const getViewedAnnouncementIds = () => {
+    try {
+      const stored = localStorage.getItem('viewedAnnouncements');
+      return stored ? JSON.parse(stored) : [];
+    } catch {
+      return [];
+    }
+  };
+
+  const markAnnouncementsAsViewed = (announcementIds) => {
+    try {
+      const viewed = getViewedAnnouncementIds();
+      const updated = [...new Set([...viewed, ...announcementIds])];
+      localStorage.setItem('viewedAnnouncements', JSON.stringify(updated));
+    } catch (error) {
+      console.error("Error saving viewed announcements:", error);
+    }
+  };
+
   const checkForNew = async () => {
     try {
       const response = await axios.get(`${API}/announcements`, {
         withCredentials: true,
       });
       const announcements = response.data.announcements || [];
-      setHasNew(announcements.length > 0);
+      
+      // Check if there are any announcements the user hasn't seen
+      const viewedIds = getViewedAnnouncementIds();
+      const hasUnviewed = announcements.some(a => !viewedIds.includes(a.id));
+      
+      setHasNew(hasUnviewed);
     } catch (error) {
       console.error("Error checking announcements:", error);
     }
@@ -36,7 +60,15 @@ export default function WhatsNew() {
       const response = await axios.get(`${API}/announcements`, {
         withCredentials: true,
       });
-      setAnnouncements(response.data.announcements || []);
+      const fetchedAnnouncements = response.data.announcements || [];
+      setAnnouncements(fetchedAnnouncements);
+      
+      // Mark all current announcements as viewed
+      const announcementIds = fetchedAnnouncements.map(a => a.id);
+      markAnnouncementsAsViewed(announcementIds);
+      
+      // Hide the red dot
+      setHasNew(false);
     } catch (error) {
       console.error("Error fetching announcements:", error);
       toast.error("Failed to load announcements");
