@@ -495,6 +495,19 @@ class FeedbackCreate(BaseModel):
 class FeedbackReply(BaseModel):
     reply: str
 
+class Announcement(BaseModel):
+    model_config = ConfigDict(extra="ignore")
+    id: str = Field(default_factory=lambda: str(uuid.uuid4()))
+    title: str
+    content: str
+    created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+    created_by: str  # Admin user ID
+    is_active: bool = True
+
+class AnnouncementCreate(BaseModel):
+    title: str
+    content: str
+
 class Battle(BaseModel):
     model_config = ConfigDict(extra="ignore")
     id: str = Field(default_factory=lambda: str(uuid.uuid4()))
