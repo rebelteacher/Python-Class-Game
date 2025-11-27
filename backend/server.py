@@ -838,6 +838,20 @@ async def teacher_login(login_data: TeacherLoginRequest, response: Response):
         
         await db.sessions.insert_one(session)
         
+        # Track login for analytics
+        await db.login_history.insert_one({
+            "user_id": user["id"],
+            "email": user["email"],
+            "role": user["role"],
+            "timestamp": datetime.now(timezone.utc).isoformat()
+        })
+        
+        # Update user's last_login timestamp
+        await db.users.update_one(
+            {"id": user["id"]},
+            {"$set": {"last_login": datetime.now(timezone.utc).isoformat()}}
+        )
+        
         # Set cookie in response
         # Auto-detect if we're in production (HTTPS) or development (HTTP)
         is_production = os.environ.get("ENVIRONMENT", "development") == "production"
