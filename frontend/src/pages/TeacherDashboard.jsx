@@ -343,9 +343,18 @@ export default function TeacherDashboard({ user, setUser }) {
                 <Card
                   data-testid={`classroom-card-${classroom.id}`}
                   key={classroom.id}
-                  className={`hover:shadow-2xl transition-all cursor-pointer border-2 ${borderClass} transform hover:-translate-y-1`}
+                  className={`hover:shadow-2xl transition-all cursor-pointer border-2 ${borderClass} transform hover:-translate-y-1 relative group`}
                   onClick={() => navigate(`/classroom/${classroom.id}`)}
                 >
+                  {/* Delete Button - appears on hover */}
+                  <button
+                    onClick={(e) => handleDeleteClassroom(classroom.id, classroom.name, e)}
+                    className="absolute top-2 right-2 p-2 bg-red-500 text-white rounded-full opacity-0 group-hover:opacity-100 transition-opacity hover:bg-red-600 z-10"
+                    title="Delete Classroom"
+                  >
+                    <Trash2 className="w-4 h-4" />
+                  </button>
+                  
                   <CardHeader className={`bg-gradient-to-r ${gradientClass} text-white rounded-t-lg`}>
                     <CardTitle className="text-xl">{classroom.name}</CardTitle>
                     <CardDescription className="text-white/90">
