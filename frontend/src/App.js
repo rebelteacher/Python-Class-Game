@@ -37,6 +37,7 @@ import StudentSandbox from "./pages/StudentSandbox";
 import VideoLibrary from "./pages/VideoLibrary";
 import AdminMessages from "./pages/AdminMessages";
 import AdminAnalytics from "./pages/AdminAnalytics";
+import AdminAnnouncements from "./pages/AdminAnnouncements";
 
 const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
 const API = `${BACKEND_URL}/api`;
