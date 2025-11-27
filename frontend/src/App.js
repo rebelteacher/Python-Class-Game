@@ -258,6 +258,15 @@ function App() {
               />
               
               <Route
+                path="/admin/announcements"
+                element={
+                  <ProtectedRoute user={user} requiredRole="teacher">
+                    <AdminAnnouncements user={user} />
+                  </ProtectedRoute>
+                }
+              />
+              
+              <Route
                 path="/test-builder"
                 element={
                   <ProtectedRoute user={user} requiredRole="teacher">
