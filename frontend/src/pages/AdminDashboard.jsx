@@ -208,32 +208,60 @@ export default function AdminDashboard({ user }) {
           </Card>
         </div>
 
-        {/* Teacher Analytics */}
-        <Card className="mb-8 border-2 border-purple-200 bg-gradient-to-br from-purple-50 to-pink-50">
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <Activity className="w-5 h-5 text-purple-600" />
-              Teacher Analytics & Engagement
-            </CardTitle>
-            <CardDescription>
-              View detailed login statistics and teacher activity patterns
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <div className="space-y-3">
-              <p className="text-sm text-gray-700">
-                Track teacher engagement with detailed login analytics, activity frequency, and email lists for communication.
-              </p>
-              <Button
-                onClick={() => navigate("/admin/analytics")}
-                className="bg-purple-600 hover:bg-purple-700 gap-2"
-              >
-                <Activity className="w-4 h-4" />
-                View Teacher Analytics
-              </Button>
-            </div>
-          </CardContent>
-        </Card>
+        {/* Teacher Analytics & Announcements */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+          <Card className="border-2 border-purple-200 bg-gradient-to-br from-purple-50 to-pink-50">
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Activity className="w-5 h-5 text-purple-600" />
+                Teacher Analytics
+              </CardTitle>
+              <CardDescription>
+                Login statistics and activity patterns
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-3">
+                <p className="text-sm text-gray-700">
+                  Track teacher engagement, login frequency, and get email lists for communication.
+                </p>
+                <Button
+                  onClick={() => navigate("/admin/analytics")}
+                  className="bg-purple-600 hover:bg-purple-700 gap-2 w-full"
+                >
+                  <Activity className="w-4 h-4" />
+                  View Analytics
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card className="border-2 border-indigo-200 bg-gradient-to-br from-indigo-50 to-purple-50">
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <MessageCircle className="w-5 h-5 text-indigo-600" />
+                Announcements
+              </CardTitle>
+              <CardDescription>
+                Notify teachers about new content
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-3">
+                <p className="text-sm text-gray-700">
+                  Create announcements that appear in the "What's New" button on teacher dashboards.
+                </p>
+                <Button
+                  onClick={() => navigate("/admin/announcements")}
+                  className="bg-indigo-600 hover:bg-indigo-700 gap-2 w-full"
+                >
+                  <MessageCircle className="w-4 h-4" />
+                  Manage Announcements
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
 
         {/* Admin Tools */}
         <Card className="mb-8">
