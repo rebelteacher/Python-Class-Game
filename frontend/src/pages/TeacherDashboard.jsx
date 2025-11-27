@@ -136,6 +136,33 @@ export default function TeacherDashboard({ user, setUser }) {
     }
   };
 
+  const handleDeleteClassroom = async (classroomId, classroomName, e) => {
+    e.stopPropagation(); // Prevent card click
+    
+    const confirmed = window.confirm(
+      `⚠️ WARNING: Are you sure you want to PERMANENTLY DELETE "${classroomName}"?\n\n` +
+      `This will delete:\n` +
+      `- All student data\n` +
+      `- All assignments\n` +
+      `- All submissions\n` +
+      `- Everything associated with this classroom\n\n` +
+      `This action CANNOT be undone!`
+    );
+    
+    if (!confirmed) return;
+    
+    try {
+      await axios.delete(`${API}/classrooms/${classroomId}`, {
+        withCredentials: true,
+      });
+      toast.success("Classroom deleted successfully");
+      fetchClassrooms(); // Refresh the list
+    } catch (error) {
+      console.error("Error deleting classroom:", error);
+      toast.error(error.response?.data?.detail || "Failed to delete classroom");
+    }
+  };
+
   return (
     <div data-testid="teacher-dashboard" className="min-h-screen bg-gradient-to-br from-teal-50 via-orange-50 to-pink-50">
       <nav className="bg-gradient-to-r from-teal-600 via-cyan-600 to-blue-600 shadow-lg">
