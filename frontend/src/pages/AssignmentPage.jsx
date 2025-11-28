@@ -948,9 +948,9 @@ export default function AssignmentPage({ user }) {
                       )}
                     </CardTitle>
                   </CardHeader>
-                  <CardContent className="p-0 flex-1 overflow-hidden">
+                  <CardContent className="p-0">
                     <Editor
-                      height="100%"
+                      height="600px"
                       defaultLanguage="python"
                       value={code}
                       onChange={(value) => !problemsFinal[getCurrentProblemId()] && setCode(value || "")}
@@ -1035,9 +1035,9 @@ export default function AssignmentPage({ user }) {
                       </div>
                     </CardTitle>
                   </CardHeader>
-                  <CardContent className="p-0 flex-1 overflow-hidden">
+                  <CardContent className="p-0">
                     <Editor
-                      height="100%"
+                      height="600px"
                       defaultLanguage="python"
                       value={code}
                       onChange={(value) => !problemsFinal[getCurrentProblemId()] && setCode(value || "")}
