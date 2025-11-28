@@ -1034,7 +1034,7 @@ export default function AssignmentPage({ user }) {
                       </div>
                     </CardTitle>
                   </CardHeader>
-                  <CardContent className="h-[calc(100%-120px)]">
+                  <CardContent className="p-0 flex-1 overflow-hidden">
                     <Editor
                       height="100%"
                       defaultLanguage="python"
