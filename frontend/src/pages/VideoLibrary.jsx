@@ -149,6 +149,13 @@ export default function VideoLibrary({ user }) {
     setPlayingVideo(video);
   };
 
+  const toggleFolder = (chapterName) => {
+    setExpandedFolders(prev => ({
+      ...prev,
+      [chapterName]: !prev[chapterName]
+    }));
+  };
+
   const sortedChapterNames = Object.keys(chapters).sort();
 
   return (
