@@ -3044,10 +3044,19 @@ async def stream_library_video(video_id: str, request: Request):
             "Accept-Ranges": "bytes",
             "Content-Length": str(end - start + 1),
             "Content-Type": "video/mp4",
+            "Access-Control-Allow-Origin": "*",
+            "Access-Control-Allow-Methods": "GET, OPTIONS",
+            "Access-Control-Allow-Headers": "Range",
         }
         return StreamingResponse(iter_file(), status_code=206, headers=headers)
     
-    return FileResponse(video_path, media_type="video/mp4")
+    # Return full file if no range header
+    headers = {
+        "Accept-Ranges": "bytes",
+        "Content-Type": "video/mp4",
+        "Access-Control-Allow-Origin": "*",
+    }
+    return FileResponse(video_path, media_type="video/mp4", headers=headers)
 
 
 # ==================== FEEDBACK & MESSAGES ROUTES ====================
