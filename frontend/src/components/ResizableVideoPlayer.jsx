@@ -126,7 +126,12 @@ const ResizableVideoPlayer = ({ videoUrl, onClose }) => {
           className="w-full h-full video-controls"
           controls
           controlsList="nodownload"
+          crossOrigin="anonymous"
           src={videoUrl}
+          onError={(e) => {
+            console.error("Video load error:", e);
+            console.log("Video URL:", videoUrl);
+          }}
         >
           Your browser does not support the video tag.
         </video>
