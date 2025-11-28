@@ -1057,6 +1057,7 @@ export default function AssignmentPage({ user }) {
                     />
                   </CardContent>
                 </Card>
+                </div>
                 </Panel>
 
                 <PanelResizeHandle className="w-2 bg-gray-300 hover:bg-indigo-500 transition-colors cursor-col-resize mx-2" />
