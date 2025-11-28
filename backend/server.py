@@ -3004,9 +3004,22 @@ async def delete_library_video(video_id: str, request: Request):
 
 
 @api_router.get("/video-library/{video_id}/stream")
+@api_router.options("/video-library/{video_id}/stream")
 async def stream_library_video(video_id: str, request: Request):
-    """Stream a library video"""
-    from fastapi.responses import FileResponse, StreamingResponse
+    """Stream a library video with CORS support"""
+    from fastapi.responses import FileResponse, StreamingResponse, Response
+    
+    # Handle OPTIONS request for CORS preflight
+    if request.method == "OPTIONS":
+        return Response(
+            status_code=200,
+            headers={
+                "Access-Control-Allow-Origin": "*",
+                "Access-Control-Allow-Methods": "GET, OPTIONS",
+                "Access-Control-Allow-Headers": "Range, Content-Type",
+                "Access-Control-Max-Age": "86400",
+            }
+        )
     
     # Check video exists
     video = await db.library_videos.find_one({"id": video_id}, {"_id": 0})
