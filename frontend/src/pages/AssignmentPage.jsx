@@ -996,8 +996,9 @@ export default function AssignmentPage({ user }) {
               <PanelGroup direction="horizontal" style={{ height: '100%' }}>
                 {/* Code Editor - Left */}
                 <Panel defaultSize={50} minSize={30}>
-                <Card data-testid="teacher-sandbox-card" className="h-full flex flex-col">
-                  <CardHeader className="flex-shrink-0">
+                <div className="h-full overflow-y-auto">
+                <Card data-testid="teacher-sandbox-card">
+                  <CardHeader>
                     <CardTitle className="flex flex-col gap-3">
                       <div className="flex justify-between items-center">
                         <span>Live Demo / Sandbox</span>
