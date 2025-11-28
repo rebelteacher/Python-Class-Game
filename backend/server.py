@@ -3004,6 +3004,7 @@ async def delete_library_video(video_id: str, request: Request):
 
 
 @api_router.get("/video-library/{video_id}/stream")
+@api_router.head("/video-library/{video_id}/stream")
 @api_router.options("/video-library/{video_id}/stream")
 async def stream_library_video(video_id: str, request: Request):
     """Stream a library video with CORS support"""
