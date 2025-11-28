@@ -205,63 +205,93 @@ export default function VideoLibrary({ user }) {
             </CardContent>
           </Card>
         ) : (
-          <div className="space-y-8">
-            {sortedChapterNames.map((chapterName) => (
-              <Card key={chapterName}>
-                <CardHeader>
-                  <CardTitle className="text-2xl">{chapterName}</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                    {chapters[chapterName].map((video) => (
-                      <Card key={video.id} className="hover:shadow-lg transition-shadow">
-                        <CardContent className="p-4">
-                          <div className="flex items-start justify-between mb-3">
-                            <div className="flex-1">
-                              <h4 className="font-semibold text-gray-900 mb-1">{video.title}</h4>
-                              {video.description && (
-                                <p className="text-sm text-gray-600 line-clamp-2">{video.description}</p>
+          <div className="space-y-4">
+            {sortedChapterNames.map((chapterName) => {
+              const isExpanded = expandedFolders[chapterName];
+              const videoCount = chapters[chapterName].length;
+
+              return (
+                <Card key={chapterName} className="overflow-hidden">
+                  {/* Folder Header - Clickable */}
+                  <div
+                    onClick={() => toggleFolder(chapterName)}
+                    className="flex items-center justify-between p-4 cursor-pointer hover:bg-gray-50 transition-colors"
+                  >
+                    <div className="flex items-center gap-3">
+                      {isExpanded ? (
+                        <FolderOpen className="w-6 h-6 text-purple-600" />
+                      ) : (
+                        <Folder className="w-6 h-6 text-purple-600" />
+                      )}
+                      <div>
+                        <h3 className="text-lg font-semibold text-gray-900">{chapterName}</h3>
+                        <p className="text-sm text-gray-600">{videoCount} video{videoCount !== 1 ? 's' : ''}</p>
+                      </div>
+                    </div>
+                    {isExpanded ? (
+                      <ChevronDown className="w-5 h-5 text-gray-500" />
+                    ) : (
+                      <ChevronRight className="w-5 h-5 text-gray-500" />
+                    )}
+                  </div>
+
+                  {/* Folder Content - Collapsible */}
+                  {isExpanded && (
+                    <CardContent className="pt-0 pb-4">
+                      <div className="space-y-3">
+                        {chapters[chapterName].map((video) => (
+                          <div
+                            key={video.id}
+                            className="flex items-center justify-between p-4 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors"
+                          >
+                            <div className="flex items-center gap-3 flex-1">
+                              <Video className="w-5 h-5 text-purple-600" />
+                              <div className="flex-1">
+                                <h4 className="font-semibold text-gray-900">{video.title}</h4>
+                                {video.description && (
+                                  <p className="text-sm text-gray-600 line-clamp-1">{video.description}</p>
+                                )}
+                              </div>
+                            </div>
+
+                            <div className="flex items-center gap-2">
+                              <Button
+                                onClick={() => playVideo(video)}
+                                className="bg-purple-600 hover:bg-purple-700 gap-2"
+                                size="sm"
+                              >
+                                <Play className="w-4 h-4" />
+                                Watch
+                              </Button>
+
+                              {user.is_admin && (
+                                <>
+                                  <Button
+                                    onClick={() => openEditDialog(video)}
+                                    variant="outline"
+                                    size="sm"
+                                  >
+                                    <Edit className="w-4 h-4" />
+                                  </Button>
+                                  <Button
+                                    onClick={() => handleDelete(video.id)}
+                                    variant="outline"
+                                    size="sm"
+                                    className="text-red-600 hover:text-red-700"
+                                  >
+                                    <Trash2 className="w-4 h-4" />
+                                  </Button>
+                                </>
                               )}
                             </div>
                           </div>
-                          
-                          <div className="flex items-center gap-2">
-                            <Button
-                              onClick={() => playVideo(video)}
-                              className="flex-1 bg-purple-600 hover:bg-purple-700 gap-2"
-                              size="sm"
-                            >
-                              <Play className="w-4 h-4" />
-                              Watch
-                            </Button>
-                            
-                            {user.is_admin && (
-                              <>
-                                <Button
-                                  onClick={() => openEditDialog(video)}
-                                  variant="outline"
-                                  size="sm"
-                                >
-                                  <Edit className="w-4 h-4" />
-                                </Button>
-                                <Button
-                                  onClick={() => handleDelete(video.id)}
-                                  variant="outline"
-                                  size="sm"
-                                  className="text-red-600 hover:text-red-700"
-                                >
-                                  <Trash2 className="w-4 h-4" />
-                                </Button>
-                              </>
-                            )}
-                          </div>
-                        </CardContent>
-                      </Card>
-                    ))}
-                  </div>
-                </CardContent>
-              </Card>
-            ))}
+                        ))}
+                      </div>
+                    </CardContent>
+                  )}
+                </Card>
+              );
+            })}
           </div>
         )}
       </main>
