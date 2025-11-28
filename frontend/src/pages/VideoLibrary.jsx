@@ -23,6 +23,7 @@ export default function VideoLibrary({ user }) {
   const [selectedVideo, setSelectedVideo] = useState(null);
   const [playingVideo, setPlayingVideo] = useState(null);
   const [uploading, setUploading] = useState(false);
+  const [expandedFolders, setExpandedFolders] = useState({});
   
   const [newVideo, setNewVideo] = useState({
     title: "",
