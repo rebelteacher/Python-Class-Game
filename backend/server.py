@@ -3003,6 +3003,26 @@ async def delete_library_video(video_id: str, request: Request):
     return {"success": True}
 
 
+@api_router.get("/video-library/{video_id}/info")
+async def get_video_info(video_id: str):
+    """Get video file information for debugging"""
+    video = await db.library_videos.find_one({"id": video_id}, {"_id": 0})
+    if not video:
+        return {"error": "Video not found in database", "video_id": video_id}
+    
+    video_path = f"/app/backend/uploads/library_videos/{video['filename']}"
+    file_exists = os.path.exists(video_path)
+    file_size = os.path.getsize(video_path) if file_exists else 0
+    
+    return {
+        "video_id": video_id,
+        "filename": video.get("filename"),
+        "title": video.get("title"),
+        "file_exists": file_exists,
+        "file_size": file_size,
+        "file_path": video_path
+    }
+
 @api_router.get("/video-library/{video_id}/stream")
 @api_router.head("/video-library/{video_id}/stream")
 @api_router.options("/video-library/{video_id}/stream")
@@ -3016,9 +3036,30 @@ async def stream_library_video(video_id: str, request: Request):
             status_code=200,
             headers={
                 "Access-Control-Allow-Origin": "*",
-                "Access-Control-Allow-Methods": "GET, OPTIONS",
+                "Access-Control-Allow-Methods": "GET, HEAD, OPTIONS",
                 "Access-Control-Allow-Headers": "Range, Content-Type",
                 "Access-Control-Max-Age": "86400",
+            }
+        )
+    
+    # Handle HEAD request
+    if request.method == "HEAD":
+        video = await db.library_videos.find_one({"id": video_id}, {"_id": 0})
+        if not video:
+            raise HTTPException(status_code=404, detail="Video not found")
+        
+        video_path = f"/app/backend/uploads/library_videos/{video['filename']}"
+        if not os.path.exists(video_path):
+            raise HTTPException(status_code=404, detail="Video file not found")
+        
+        file_size = os.path.getsize(video_path)
+        return Response(
+            status_code=200,
+            headers={
+                "Content-Type": "video/mp4",
+                "Accept-Ranges": "bytes",
+                "Content-Length": str(file_size),
+                "Access-Control-Allow-Origin": "*",
             }
         )
     
