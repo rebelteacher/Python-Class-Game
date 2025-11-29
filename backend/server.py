@@ -641,6 +641,7 @@ class CodingTestSubmission(BaseModel):
     test_id: str
     student_id: str
     student_name: str
+    problem_id: str  # Which problem this submission is for
     code: str
     score: float
     feedback: str
@@ -652,6 +653,7 @@ class CodingTestSubmission(BaseModel):
 
 class CodingTestSubmit(BaseModel):
     test_id: str
+    problem_id: str  # Which problem being submitted
     code: str
     time_taken_seconds: int = 0
 
