@@ -320,28 +320,59 @@ export default function CodingTestTaking({ user }) {
       <div className="flex-1 flex overflow-hidden">
         {/* Instructions Panel */}
         <div className="w-1/3 bg-gray-800 p-6 overflow-y-auto border-r border-gray-700">
-          <h2 className="text-lg font-bold mb-4">Instructions</h2>
-          <div className="prose prose-invert text-sm">
-            <p className="whitespace-pre-wrap">{problem.description}</p>
-            
-            {problem.expected_output && (
-              <div className="mt-4 p-3 bg-gray-900 rounded">
-                <p className="font-semibold mb-2">Expected Output:</p>
-                <pre className="text-green-400">{problem.expected_output}</pre>
-              </div>
-            )}
-            
-            <div className="mt-4 p-3 bg-blue-900 rounded">
-              <p className="font-semibold mb-2">Test Rules:</p>
-              <ul className="text-xs space-y-1">
-                <li>✓ Stay in fullscreen mode</li>
-                <li>✓ Do not switch tabs or windows</li>
-                <li>✓ Copy-paste is disabled</li>
-                <li>✓ You can only submit once</li>
-                <li>✓ Click "Run" to test your code before submitting</li>
-              </ul>
-            </div>
+          {/* Problem Navigation */}
+          <div className="mb-4 flex gap-2 flex-wrap">
+            {problems.map((prob, idx) => (
+              <button
+                key={prob.id}
+                onClick={() => {
+                  if (!submittedProblemIds.includes(problems[currentProblemIndex]?.id)) {
+                    setCurrentProblemIndex(idx);
+                    setCode(prob.starter_code || "# Write your code here\n");
+                    setOutput("");
+                  } else {
+                    toast.info("Please submit current problem before switching");
+                  }
+                }}
+                className={`px-3 py-1 rounded text-sm ${
+                  idx === currentProblemIndex
+                    ? 'bg-blue-600 text-white'
+                    : submittedProblemIds.includes(prob.id)
+                    ? 'bg-green-600 text-white'
+                    : 'bg-gray-700 text-gray-300 hover:bg-gray-600'
+                }`}
+                disabled={submitting}
+              >
+                {idx + 1}
+              </button>
+            ))}
           </div>
+
+          <h2 className="text-lg font-bold mb-4">Instructions</h2>
+          {currentProblem && (
+            <div className="prose prose-invert text-sm">
+              <p className="whitespace-pre-wrap">{currentProblem.description}</p>
+              
+              {currentProblem.expected_output && (
+                <div className="mt-4 p-3 bg-gray-900 rounded">
+                  <p className="font-semibold mb-2">Expected Output:</p>
+                  <pre className="text-green-400">{currentProblem.expected_output}</pre>
+                </div>
+              )}
+              
+              <div className="mt-4 p-3 bg-blue-900 rounded">
+                <p className="font-semibold mb-2">Test Rules:</p>
+                <ul className="text-xs space-y-1">
+                  <li>✓ Stay in fullscreen mode</li>
+                  <li>✓ Do not switch tabs or windows</li>
+                  <li>✓ Copy-paste is disabled</li>
+                  <li>✓ You can only submit once per problem</li>
+                  <li>✓ Click "Run" to test your code before submitting</li>
+                  <li>✓ Navigate between problems using numbered buttons</li>
+                </ul>
+              </div>
+            </div>
+          )}
         </div>
 
         {/* Code Editor Panel */}
