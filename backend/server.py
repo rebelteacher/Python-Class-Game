@@ -5882,6 +5882,70 @@ async def get_coding_test_submissions(test_id: str, request: Request):
     return submissions
 
 
+@api_router.delete("/coding-tests/{test_id}")
+async def delete_coding_test(test_id: str, request: Request):
+    """Delete a coding test (teacher only)"""
+    user = await get_current_user(request)
+    
+    if user["role"] != "teacher":
+        raise HTTPException(status_code=403, detail="Only teachers can delete tests")
+    
+    # Verify test belongs to teacher
+    test = await db.coding_tests.find_one({"id": test_id}, {"_id": 0})
+    if not test:
+        raise HTTPException(status_code=404, detail="Test not found")
+    
+    if test["teacher_id"] != user["id"]:
+        raise HTTPException(status_code=403, detail="Access denied")
+    
+    # Delete the test
+    await db.coding_tests.delete_one({"id": test_id})
+    
+    # Optionally delete associated submissions
+    await db.coding_test_submissions.delete_many({"test_id": test_id})
+    
+    return {"success": True, "message": "Coding test deleted successfully"}
+
+
+@api_router.put("/coding-tests/{test_id}/schedule")
+async def update_coding_test_schedule(test_id: str, data: dict, request: Request):
+    """Update coding test schedule (teacher only)"""
+    user = await get_current_user(request)
+    
+    if user["role"] != "teacher":
+        raise HTTPException(status_code=403, detail="Only teachers can update tests")
+    
+    # Verify test belongs to teacher
+    test = await db.coding_tests.find_one({"id": test_id}, {"_id": 0})
+    if not test:
+        raise HTTPException(status_code=404, detail="Test not found")
+    
+    if test["teacher_id"] != user["id"]:
+        raise HTTPException(status_code=403, detail="Access denied")
+    
+    # Parse dates
+    central = pytz.timezone('America/Chicago')
+    update_data = {}
+    
+    if data.get("available_date"):
+        naive_dt = datetime.fromisoformat(data["available_date"].replace('Z', ''))
+        central_dt = central.localize(naive_dt)
+        update_data["available_date"] = central_dt.astimezone(timezone.utc).isoformat()
+    
+    if data.get("due_date"):
+        naive_dt = datetime.fromisoformat(data["due_date"].replace('Z', ''))
+        central_dt = central.localize(naive_dt)
+        update_data["due_date"] = central_dt.astimezone(timezone.utc).isoformat()
+    
+    # Update test
+    await db.coding_tests.update_one(
+        {"id": test_id},
+        {"$set": update_data}
+    )
+    
+    return {"success": True, "message": "Test schedule updated"}
+
+
 # ==================== STUDENT CHALLENGES ====================
 
 @api_router.post("/challenges")
