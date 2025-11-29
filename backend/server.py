@@ -5526,7 +5526,11 @@ async def create_coding_test(test: CodingTestCreate, request: Request):
     
     await db.coding_tests.insert_one(test_dict)
     
-    return {"id": coding_test.id, "message": "Coding test created successfully"}
+    return {
+        "id": coding_test.id, 
+        "proctor_code": proctor_code,
+        "message": "Coding test created successfully"
+    }
 
 
 @api_router.get("/coding-tests")
