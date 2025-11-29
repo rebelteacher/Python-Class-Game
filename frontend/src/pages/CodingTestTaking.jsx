@@ -318,6 +318,62 @@ export default function CodingTestTaking({ user }) {
     );
   }
 
+  // Show start screen if not in fullscreen yet
+  if (!isFullscreen && !isLocked) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-blue-900 via-indigo-900 to-purple-900 text-white flex items-center justify-center p-8">
+        <Card className="max-w-2xl w-full">
+          <CardHeader>
+            <CardTitle className="text-2xl text-center">{test?.title}</CardTitle>
+            <CardDescription className="text-center text-lg">
+              Ready to begin your coding test?
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-6">
+            <div className="bg-blue-50 p-6 rounded-lg text-gray-900">
+              <h3 className="font-semibold mb-3 text-lg">Test Information:</h3>
+              <ul className="space-y-2 text-sm">
+                <li className="flex items-center gap-2">
+                  <span className="font-semibold">Problems:</span> {problems.length}
+                </li>
+                {timeRemaining && (
+                  <li className="flex items-center gap-2">
+                    <Clock className="w-4 h-4" />
+                    <span className="font-semibold">Time Limit:</span> {Math.floor(timeRemaining / 60)} minutes
+                  </li>
+                )}
+              </ul>
+            </div>
+
+            <div className="bg-yellow-50 p-4 rounded-lg border-2 border-yellow-300">
+              <h3 className="font-semibold mb-2 text-yellow-900 flex items-center gap-2">
+                <AlertTriangle className="w-5 h-5" />
+                Important Rules:
+              </h3>
+              <ul className="text-sm text-yellow-800 space-y-1">
+                <li>• Test will open in <strong>fullscreen mode</strong></li>
+                <li>• Stay in fullscreen throughout the test</li>
+                <li>• If you exit fullscreen, you'll need a proctor code to continue</li>
+                <li>• Copy-paste is disabled</li>
+                <li>• Tab switching is monitored</li>
+                <li>• You can only submit each problem once</li>
+              </ul>
+            </div>
+
+            <Button
+              onClick={requestFullscreen}
+              className="w-full bg-green-600 hover:bg-green-700 text-lg py-6"
+              size="lg"
+            >
+              <Play className="w-5 h-5 mr-2" />
+              Start Test in Fullscreen
+            </Button>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
+
   return (
     <div className="h-screen bg-gray-900 text-white flex flex-col overflow-hidden relative">
       {/* Proctor Code Lock Screen */}
