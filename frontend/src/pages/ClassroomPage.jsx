@@ -22,6 +22,7 @@ export default function ClassroomPage({ user }) {
   const [classroom, setClassroom] = useState(null);
   const [assignments, setAssignments] = useState([]);
   const [tests, setTests] = useState([]);
+  const [codingTests, setCodingTests] = useState([]);
   const [loading, setLoading] = useState(true);
   const [createDialogOpen, setCreateDialogOpen] = useState(false);
   const [editScheduleDialogOpen, setEditScheduleDialogOpen] = useState(false);
