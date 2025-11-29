@@ -617,7 +617,7 @@ class CodingTest(BaseModel):
     chapter: str = ""
     lesson: str = ""
     teacher_id: str
-    problem_id: str  # Reference to Problem from library
+    problem_ids: List[str]  # References to Problems from library
     time_limit_minutes: int = 0  # 0 = no time limit
     classroom_ids: List[str]
     available_date: Optional[datetime] = None
@@ -629,7 +629,7 @@ class CodingTestCreate(BaseModel):
     description: str = ""
     chapter: str = ""
     lesson: str = ""
-    problem_id: str
+    problem_ids: List[str]
     time_limit_minutes: int = 0
     classroom_ids: List[str]
     available_date: Optional[str] = None
