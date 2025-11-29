@@ -339,6 +339,51 @@ function App() {
                 }
               />
 
+              <Route
+                path="/coding-tests/create"
+                element={
+                  <ProtectedRoute user={user} requiredRole="teacher">
+                    <CodingTestCreate user={user} />
+                  </ProtectedRoute>
+                }
+              />
+
+              <Route
+                path="/coding-tests"
+                element={
+                  <ProtectedRoute user={user} requiredRole="teacher">
+                    <CodingTestList user={user} />
+                  </ProtectedRoute>
+                }
+              />
+
+              <Route
+                path="/my-tests"
+                element={
+                  <ProtectedRoute user={user} requiredRole="student">
+                    <MyTests user={user} />
+                  </ProtectedRoute>
+                }
+              />
+
+              <Route
+                path="/coding-test/:testId"
+                element={
+                  <ProtectedRoute user={user} requiredRole="student">
+                    <CodingTestTaking user={user} />
+                  </ProtectedRoute>
+                }
+              />
+
+              <Route
+                path="/coding-test-result/:testId"
+                element={
+                  <ProtectedRoute user={user} requiredRole="student">
+                    <CodingTestResult user={user} />
+                  </ProtectedRoute>
+                }
+              />
+
 
               <Route path="/teacher-login" element={<TeacherLogin />} />
               <Route path="/teacher-signup" element={<TeacherSignup />} />
