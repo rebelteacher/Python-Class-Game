@@ -63,9 +63,10 @@ export default function CodingTestTaking({ user }) {
 
     const handleFullscreenChange = () => {
       setIsFullscreen(!!document.fullscreenElement);
-      if (!document.fullscreenElement && test && !submitting) {
-        toast.error("Please stay in fullscreen mode during the test!");
-        requestFullscreen();
+      if (!document.fullscreenElement && test && !submitting && !showScoreModal) {
+        // Lock the test if they exit fullscreen
+        setIsLocked(true);
+        toast.error("⚠️ Test locked! Enter proctor code to continue.");
       }
     };
 
