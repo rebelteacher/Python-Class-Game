@@ -5583,12 +5583,13 @@ async def start_coding_test(test_id: str, request: Request):
     if not test:
         raise HTTPException(status_code=404, detail="Test not found")
     
-    # Check if student has already submitted
-    existing_submission = await db.coding_test_submissions.find_one({
+    # Check if student has already submitted ALL problems
+    submission_count = await db.coding_test_submissions.count_documents({
         "test_id": test_id,
         "student_id": user["id"]
     })
-    if existing_submission:
+    total_problems = len(test.get("problem_ids", []))
+    if submission_count >= total_problems:
         raise HTTPException(status_code=403, detail="You have already submitted this test")
     
     # Check availability
@@ -5598,22 +5599,33 @@ async def start_coding_test(test_id: str, request: Request):
         if now < available_date:
             raise HTTPException(status_code=403, detail="This test is not yet available")
     
-    # Get the problem
-    problem = await db.problems.find_one({"id": test["problem_id"]}, {"_id": 0})
-    if not problem:
-        raise HTTPException(status_code=404, detail="Problem not found")
+    # Get all problems for the test
+    problems = []
+    for problem_id in test.get("problem_ids", []):
+        problem = await db.problems.find_one({"id": problem_id}, {"_id": 0})
+        if problem:
+            problems.append({
+                "id": problem["id"],
+                "title": problem["title"],
+                "description": problem["description"],
+                "starter_code": problem["starter_code"],
+                "expected_output": problem.get("expected_output", ""),
+                "difficulty": problem.get("difficulty", "Medium")
+            })
     
-    # Return test and problem info (without solution)
+    # Get already submitted problem IDs
+    submitted_problem_ids = []
+    submissions = await db.coding_test_submissions.find({
+        "test_id": test_id,
+        "student_id": user["id"]
+    }, {"_id": 0, "problem_id": 1}).to_list(100)
+    submitted_problem_ids = [sub["problem_id"] for sub in submissions]
+    
+    # Return test and all problems info (without solutions)
     return {
         "test": test,
-        "problem": {
-            "id": problem["id"],
-            "title": problem["title"],
-            "description": problem["description"],
-            "starter_code": problem["starter_code"],
-            "expected_output": problem.get("expected_output", ""),
-            "difficulty": problem.get("difficulty", "Medium")
-        }
+        "problems": problems,
+        "submitted_problem_ids": submitted_problem_ids
     }
 
 
