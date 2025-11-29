@@ -198,24 +198,27 @@ export default function CodingTestTaking({ user }) {
 
     setVerifyingCode(true);
     try {
+      console.log("Verifying code:", proctorCodeInput);
       const response = await axios.post(
         `${API}/coding-tests/${testId}/verify-proctor-code`,
-        { proctor_code: proctorCodeInput },
+        { proctor_code: proctorCodeInput.trim() },
         { withCredentials: true }
       );
+
+      console.log("Verification response:", response.data);
 
       if (response.data.success) {
         setIsLocked(false);
         setProctorCodeInput("");
-        requestFullscreen();
         toast.success("Code verified! Returning to fullscreen...");
+        setTimeout(() => requestFullscreen(), 500);
       } else {
         toast.error("Invalid proctor code. Please ask your teacher.");
         setProctorCodeInput("");
       }
     } catch (error) {
       console.error("Error verifying code:", error);
-      toast.error("Failed to verify code");
+      toast.error(error.response?.data?.detail || "Failed to verify code");
     } finally {
       setVerifyingCode(false);
     }
