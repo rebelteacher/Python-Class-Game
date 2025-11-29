@@ -270,9 +270,16 @@ export default function CodingTestTaking({ user }) {
     <div className="h-screen bg-gray-900 text-white flex flex-col overflow-hidden">
       {/* Header with Timer */}
       <div className="bg-gray-800 border-b border-gray-700 p-4 flex items-center justify-between">
-        <div>
-          <h1 className="text-xl font-bold">{test.title}</h1>
-          <p className="text-sm text-gray-400">{problem.title}</p>
+        <div className="flex-1">
+          <h1 className="text-xl font-bold">{test?.title}</h1>
+          <div className="flex items-center gap-4 mt-1">
+            <p className="text-sm text-gray-400">
+              Problem {currentProblemIndex + 1} of {problems.length}: {currentProblem?.title}
+            </p>
+            {submittedProblemIds.includes(currentProblem?.id) && (
+              <span className="px-2 py-1 bg-green-600 text-xs rounded">Submitted</span>
+            )}
+          </div>
         </div>
         
         <div className="flex items-center gap-4">
