@@ -33,6 +33,9 @@ export default function CodingTestTaking({ user }) {
   const [showInteractiveDialog, setShowInteractiveDialog] = useState(false);
   const [showScoreModal, setShowScoreModal] = useState(false);
   const [testResults, setTestResults] = useState(null);
+  const [isLocked, setIsLocked] = useState(false);
+  const [proctorCodeInput, setProctorCodeInput] = useState("");
+  const [verifyingCode, setVerifyingCode] = useState(false);
   
   const timerRef = useRef(null);
   
