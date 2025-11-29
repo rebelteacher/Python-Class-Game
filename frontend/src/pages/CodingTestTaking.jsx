@@ -175,8 +175,10 @@ export default function CodingTestTaking({ user }) {
   };
 
   const handleSubmit = async () => {
+    if (!currentProblem) return;
+    
     const confirmSubmit = window.confirm(
-      "⚠️ Are you sure you want to submit? You can only submit once and cannot make changes after submission."
+      `⚠️ Are you sure you want to submit "${currentProblem.title}"? You can only submit once per problem.`
     );
     
     if (!confirmSubmit) return;
@@ -186,22 +188,40 @@ export default function CodingTestTaking({ user }) {
     const timeTaken = Math.floor((Date.now() - startTime) / 1000);
     
     try {
-      const response = await axios.post(
+      await axios.post(
         `${API}/coding-tests/${testId}/submit`,
         {
           test_id: testId,
+          problem_id: currentProblem.id,
           code: code,
           time_taken_seconds: timeTaken
         },
         { withCredentials: true }
       );
       
-      exitFullscreen();
-      toast.success("Test submitted successfully!");
-      navigate(`/coding-test-result/${testId}`);
+      toast.success(`Problem "${currentProblem.title}" submitted successfully!`);
+      
+      // Add to submitted list
+      setSubmittedProblemIds([...submittedProblemIds, currentProblem.id]);
+      
+      // Check if all problems are submitted
+      if (submittedProblemIds.length + 1 >= problems.length) {
+        exitFullscreen();
+        toast.success("All problems submitted! Redirecting to results...");
+        setTimeout(() => navigate(`/coding-test-result/${testId}`), 1500);
+      } else {
+        // Move to next problem
+        const nextIndex = currentProblemIndex + 1;
+        if (nextIndex < problems.length) {
+          setCurrentProblemIndex(nextIndex);
+          setCode(problems[nextIndex].starter_code || "# Write your code here\n");
+          setOutput("");
+        }
+      }
     } catch (error) {
-      console.error("Error submitting test:", error);
-      toast.error(error.response?.data?.detail || "Failed to submit test");
+      console.error("Error submitting problem:", error);
+      toast.error(error.response?.data?.detail || "Failed to submit problem");
+    } finally {
       setSubmitting(false);
     }
   };
