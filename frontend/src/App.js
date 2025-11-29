@@ -385,6 +385,15 @@ function App() {
                 }
               />
 
+              <Route
+                path="/coding-tests/:testId/submissions"
+                element={
+                  <ProtectedRoute user={user} requiredRole="teacher">
+                    <CodingTestSubmissions user={user} />
+                  </ProtectedRoute>
+                }
+              />
+
 
               <Route path="/teacher-login" element={<TeacherLogin />} />
               <Route path="/teacher-signup" element={<TeacherSignup />} />
