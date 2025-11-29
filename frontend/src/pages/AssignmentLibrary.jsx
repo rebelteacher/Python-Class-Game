@@ -1676,12 +1676,22 @@ function CodingTestBuilder({ open, onOpenChange, selectedProblems, problems, onS
         </DialogHeader>
 
         <form onSubmit={handleSubmit} className="space-y-4">
-          {/* Selected Problem Display */}
-          {selectedProblem && (
+          {/* Selected Problems Display */}
+          {selectedProblems.length > 0 && (
             <div className="p-3 bg-blue-50 rounded border border-blue-200">
-              <p className="font-semibold text-sm text-blue-900">Selected Problem:</p>
-              <p className="text-sm text-blue-700">{selectedProblem.title}</p>
-              <p className="text-xs text-blue-600 mt-1">{selectedProblem.description?.substring(0, 100)}...</p>
+              <p className="font-semibold text-sm text-blue-900 mb-2">
+                Selected Problems ({selectedProblems.length})
+              </p>
+              <ol className="space-y-1 text-sm text-blue-700 list-decimal list-inside">
+                {selectedProblems.map((problemId) => {
+                  const problem = problems.find(p => p.id === problemId);
+                  return problem ? (
+                    <li key={problemId}>
+                      {problem.title} <span className="text-xs text-blue-600">({problem.difficulty})</span>
+                    </li>
+                  ) : null;
+                })}
+              </ol>
             </div>
           )}
 
