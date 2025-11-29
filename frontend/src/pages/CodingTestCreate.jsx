@@ -105,7 +105,7 @@ export default function CodingTestCreate({ user }) {
       <div className="max-w-4xl mx-auto">
         <Button
           variant="outline"
-          onClick={() => navigate("/teacher")}
+          onClick={() => navigate("/teacher/dashboard")}
           className="mb-6"
         >
           <ArrowLeft className="w-4 h-4 mr-2" />
