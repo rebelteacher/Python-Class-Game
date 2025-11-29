@@ -5637,21 +5637,26 @@ async def submit_coding_test(test_id: str, submission: CodingTestSubmit, request
     if user["role"] != "student":
         raise HTTPException(status_code=403, detail="Only students can submit tests")
     
-    # Check if already submitted
+    # Check if this specific problem was already submitted
     existing_submission = await db.coding_test_submissions.find_one({
         "test_id": test_id,
-        "student_id": user["id"]
+        "student_id": user["id"],
+        "problem_id": submission.problem_id
     })
     if existing_submission:
-        raise HTTPException(status_code=403, detail="You have already submitted this test. Only one submission is allowed.")
+        raise HTTPException(status_code=403, detail="You have already submitted this problem. Only one submission per problem is allowed.")
     
     # Get the test
     test = await db.coding_tests.find_one({"id": test_id}, {"_id": 0})
     if not test:
         raise HTTPException(status_code=404, detail="Test not found")
     
+    # Verify problem is part of this test
+    if submission.problem_id not in test.get("problem_ids", []):
+        raise HTTPException(status_code=400, detail="Problem not part of this test")
+    
     # Get the problem
-    problem = await db.problems.find_one({"id": test["problem_id"]}, {"_id": 0})
+    problem = await db.problems.find_one({"id": submission.problem_id}, {"_id": 0})
     if not problem:
         raise HTTPException(status_code=404, detail="Problem not found")
     
