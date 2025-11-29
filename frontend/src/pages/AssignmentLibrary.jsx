@@ -1585,7 +1585,7 @@ function AssignmentBuilder({ open, onOpenChange, selectedProblems, problems, onS
 }
 
 // Coding Test Builder Component
-function CodingTestBuilder({ open, onOpenChange, selectedProblem, onSuccess }) {
+function CodingTestBuilder({ open, onOpenChange, selectedProblems, problems, onSuccess }) {
   const [classrooms, setClassrooms] = useState([]);
   const [selectedClassrooms, setSelectedClassrooms] = useState([]);
   const [testTitle, setTestTitle] = useState("");
@@ -1600,15 +1600,16 @@ function CodingTestBuilder({ open, onOpenChange, selectedProblem, onSuccess }) {
   const API = `${process.env.REACT_APP_BACKEND_URL}/api`;
 
   useEffect(() => {
-    if (open) {
+    if (open && selectedProblems.length > 0) {
       fetchClassrooms();
-      if (selectedProblem) {
-        setTestTitle(`${selectedProblem.title} - Test`);
-        setChapter(selectedProblem.chapter || "");
-        setLesson(selectedProblem.lesson || "");
+      const firstProblem = problems.find(p => p.id === selectedProblems[0]);
+      if (firstProblem) {
+        setTestTitle(`${firstProblem.title} - Test`);
+        setChapter(firstProblem.chapter || "");
+        setLesson(firstProblem.lesson || "");
       }
     }
-  }, [open, selectedProblem]);
+  }, [open, selectedProblems, problems]);
 
   const fetchClassrooms = async () => {
     try {
