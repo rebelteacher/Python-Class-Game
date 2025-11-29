@@ -310,7 +310,50 @@ export default function CodingTestTaking({ user }) {
   }
 
   return (
-    <div className="h-screen bg-gray-900 text-white flex flex-col overflow-hidden">
+    <div className="h-screen bg-gray-900 text-white flex flex-col overflow-hidden relative">
+      {/* Proctor Code Lock Screen */}
+      {isLocked && (
+        <div className="absolute inset-0 bg-black bg-opacity-95 z-50 flex items-center justify-center">
+          <Card className="max-w-md w-full mx-4">
+            <CardHeader>
+              <CardTitle className="text-center flex items-center justify-center gap-2">
+                <AlertTriangle className="w-6 h-6 text-red-600" />
+                Test Locked
+              </CardTitle>
+              <CardDescription className="text-center">
+                You exited fullscreen mode. Enter the proctor code to continue.
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div>
+                <label className="block text-sm font-medium mb-2">
+                  Proctor Code
+                </label>
+                <input
+                  type="text"
+                  value={proctorCodeInput}
+                  onChange={(e) => setProctorCodeInput(e.target.value)}
+                  onKeyPress={(e) => e.key === 'Enter' && handleVerifyProctorCode()}
+                  placeholder="Enter 6-digit code"
+                  className="w-full px-4 py-2 border rounded text-center text-2xl font-mono tracking-widest"
+                  maxLength={6}
+                  autoFocus
+                />
+              </div>
+              <Button
+                onClick={handleVerifyProctorCode}
+                disabled={verifyingCode || proctorCodeInput.length !== 6}
+                className="w-full"
+              >
+                {verifyingCode ? "Verifying..." : "Verify Code"}
+              </Button>
+              <p className="text-xs text-center text-gray-500">
+                Ask your teacher for the proctor code to unlock the test.
+              </p>
+            </CardContent>
+          </Card>
+        </div>
+      )}
       {/* Header with Timer */}
       <div className="bg-gray-800 border-b border-gray-700 p-4 flex items-center justify-between">
         <div className="flex-1">
