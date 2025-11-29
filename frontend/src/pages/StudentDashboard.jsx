@@ -527,6 +527,10 @@ export default function StudentDashboard({ user, setUser, refreshUser }) {
           
           {/* Row 2: Action Buttons */}
           <div className="flex items-center justify-end space-x-2 flex-wrap">
+            <Button onClick={() => navigate("/my-tests")} variant="outline" size="sm" className={`gap-2 ${getThemeNavColor() ? 'border-white/30 text-white hover:bg-white/20 bg-white/5' : ''}`}>
+              <FileQuestion className="w-4 h-4" />
+              My Tests
+            </Button>
             <Button onClick={() => navigate("/notes")} variant="outline" size="sm" className={`gap-2 ${getThemeNavColor() ? 'border-white/30 text-white hover:bg-white/20 bg-white/5' : ''}`}>
               <FileText className="w-4 h-4" />
               Notes
