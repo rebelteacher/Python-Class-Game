@@ -165,6 +165,18 @@ export default function ClassroomPage({ user }) {
     }
   };
 
+  const fetchCodingTests = async () => {
+    try {
+      const response = await axios.get(`${API}/coding-tests/classroom/${classroomId}`, {
+        withCredentials: true,
+      });
+      setCodingTests(response.data);
+    } catch (error) {
+      console.error("Error fetching coding tests:", error);
+      toast.error("Failed to load coding tests");
+    }
+  };
+
   const handleCreateAssignment = async (e) => {
     e.preventDefault();
     
