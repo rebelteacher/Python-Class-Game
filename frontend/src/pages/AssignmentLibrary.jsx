@@ -691,13 +691,7 @@ export default function AssignmentLibrary({ user }) {
                     Create Assignment ({selectedProblems.length} selected)
                   </Button>
                   <Button 
-                    onClick={() => {
-                      if (selectedProblems.length === 1) {
-                        setTestBuilderOpen(true);
-                      } else {
-                        toast.error("Please select exactly one problem for a coding test");
-                      }
-                    }}
+                    onClick={() => setTestBuilderOpen(true)}
                     disabled={selectedProblems.length === 0}
                     className="bg-indigo-600 hover:bg-indigo-700"
                   >
