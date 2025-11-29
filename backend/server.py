@@ -5500,6 +5500,9 @@ async def create_coding_test(test: CodingTestCreate, request: Request):
         central_dt = central.localize(naive_dt)
         due_date = central_dt.astimezone(timezone.utc)
     
+    # Generate 6-digit proctor code
+    proctor_code = ''.join([str(random.randint(0, 9)) for _ in range(6)])
+    
     coding_test = CodingTest(
         title=test.title,
         description=test.description,
@@ -5509,6 +5512,7 @@ async def create_coding_test(test: CodingTestCreate, request: Request):
         problem_ids=test.problem_ids,
         time_limit_minutes=test.time_limit_minutes,
         classroom_ids=test.classroom_ids,
+        proctor_code=proctor_code,
         available_date=available_date,
         due_date=due_date
     )
