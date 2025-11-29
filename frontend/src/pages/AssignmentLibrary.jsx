@@ -1208,7 +1208,8 @@ export default function AssignmentLibrary({ user }) {
         <CodingTestBuilder
           open={testBuilderOpen}
           onOpenChange={setTestBuilderOpen}
-          selectedProblem={selectedProblems.length > 0 ? problems.find(p => p.id === selectedProblems[0]) : null}
+          selectedProblems={selectedProblems}
+          problems={problems}
           onSuccess={() => {
             setTestBuilderOpen(false);
             setSelectionMode(false);
