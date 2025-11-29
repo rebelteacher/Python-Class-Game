@@ -704,6 +704,9 @@ export default function ClassroomPage({ user }) {
                     </Card>
                   );
                 })}
+                    </div>
+                  </div>
+                )}
               </div>
             )}
           </TabsContent>
