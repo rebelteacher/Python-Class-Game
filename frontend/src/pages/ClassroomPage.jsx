@@ -45,6 +45,7 @@ export default function ClassroomPage({ user }) {
     fetchClassroom();
     fetchAssignments();
     fetchTests();
+    fetchCodingTests();
   }, [classroomId]);
 
   const toggleFolder = (folder) => {
