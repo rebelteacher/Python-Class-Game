@@ -1210,6 +1210,20 @@ export default function AssignmentLibrary({ user }) {
           }}
         />
 
+        {/* Coding Test Builder Dialog */}
+        <CodingTestBuilder
+          open={testBuilderOpen}
+          onOpenChange={setTestBuilderOpen}
+          selectedProblem={selectedProblems.length > 0 ? problems.find(p => p.id === selectedProblems[0]) : null}
+          onSuccess={() => {
+            setTestBuilderOpen(false);
+            setSelectionMode(false);
+            setSelectedProblems([]);
+            toast.success("Coding test created successfully!");
+            navigate(-1);
+          }}
+        />
+
         {/* Move Dialog */}
         {movingProblem && (
           <Dialog open={moveDialogOpen} onOpenChange={setMoveDialogOpen}>
