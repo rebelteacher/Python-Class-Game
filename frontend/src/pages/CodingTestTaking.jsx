@@ -43,7 +43,6 @@ export default function CodingTestTaking({ user }) {
 
   useEffect(() => {
     startTest();
-    requestFullscreen();
     
     return () => {
       if (timerRef.current) {
@@ -52,6 +51,16 @@ export default function CodingTestTaking({ user }) {
       exitFullscreen();
     };
   }, [testId]);
+
+  // Request fullscreen after test is loaded
+  useEffect(() => {
+    if (!loading && problems.length > 0) {
+      // Small delay to ensure DOM is ready
+      setTimeout(() => {
+        requestFullscreen();
+      }, 100);
+    }
+  }, [loading, problems]);
 
   useEffect(() => {
     const handleVisibilityChange = () => {
