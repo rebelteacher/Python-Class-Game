@@ -528,6 +528,21 @@ frontend:
         agent: "main"
         comment: "Created StudentSandbox.jsx - a free-style coding playground for students. Features: Monaco code editor with word wrap, test input section, output display, dark/light mode toggle, clear button, run code functionality. No assignments or grading - pure practice environment. Added route /student/sandbox to App.js. Added 'Practice Coding' quick access card to Student Dashboard with purple/pink gradient theme. Uses existing /api/run-code endpoint for code execution."
 
+  - task: "Coding Tests Feature Implementation"
+    implemented: true
+    working: true
+    file: "frontend/src/pages/CodingTestCreate.jsx, frontend/src/pages/CodingTestList.jsx"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: false
+    status_history:
+      - working: "NA"
+        agent: "main"
+        comment: "Implemented complete Coding Tests feature with CodingTestCreate.jsx for test creation (title, description, problem selection from library, time limit, classroom assignment, scheduling), CodingTestList.jsx for managing tests with submissions view, routes /coding-tests and /coding-tests/create, navigation button in Teacher Dashboard. Backend endpoints for CRUD operations on coding tests. Students can take tests via /coding-test/:testId route with CodingTestTaking.jsx component."
+      - working: true
+        agent: "testing"
+        comment: "CODING TESTS FEATURE TESTING COMPLETE ✅ - All functionality working perfectly (100% success rate). ✅ Teacher login successful with credentials astapp@spanola.net. ✅ Teacher Dashboard displays 'Coding Tests' button prominently in navigation bar. ✅ Clicking 'Coding Tests' button successfully navigates to /coding-tests page. ✅ Coding Tests page loads correctly with 'Create New Test' button and empty state message. ✅ Test creation form fully functional: Title input ('Week 1 Python Test'), Description textarea ('Test your basic Python skills'), Problem Library dropdown with available problems, Time limit input (30 minutes), Classroom selection checkboxes (multiple classrooms available). ✅ Form submission successful with green success toast 'Coding test created successfully!'. ✅ Created test appears in tests list with correct details: Title 'Week 1 Python Test', Description 'Test your basic Python skills', Status badge 'Active', Time limit '30 min', Classroom assignment '1 classroom(s)', 'View Submissions' button available. ✅ Navigation flows working: Back to Dashboard button, direct URL navigation. ✅ UI/UX excellent: Clean indigo/purple theme, responsive design, intuitive form layout, proper validation feedback. All test requirements met: teacher dashboard access, coding tests button visibility, test creation functionality, problem library integration, classroom assignment, test list display, navigation flows."
+
   - task: "Video Library Upload Endpoint Fix"
     implemented: true
     working: true
