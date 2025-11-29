@@ -620,6 +620,7 @@ class CodingTest(BaseModel):
     problem_ids: List[str]  # References to Problems from library
     time_limit_minutes: int = 0  # 0 = no time limit
     classroom_ids: List[str]
+    proctor_code: str = ""  # 6-digit code for re-entering test
     available_date: Optional[datetime] = None
     due_date: Optional[datetime] = None
     created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
