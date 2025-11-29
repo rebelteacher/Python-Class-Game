@@ -1634,7 +1634,7 @@ function CodingTestBuilder({ open, onOpenChange, selectedProblems, problems, onS
 
     setCreating(true);
     try {
-      await axios.post(`${API}/coding-tests`, {
+      const response = await axios.post(`${API}/coding-tests`, {
         title: testTitle,
         description: testDescription,
         chapter: chapter,
@@ -1648,7 +1648,16 @@ function CodingTestBuilder({ open, onOpenChange, selectedProblems, problems, onS
         withCredentials: true
       });
       
-      toast.success("Coding test created successfully!");
+      // Show proctor code in success message
+      const proctorCode = response.data.proctor_code;
+      toast.success(
+        <div>
+          <p className="font-semibold">Coding test created!</p>
+          <p className="text-sm mt-1">Proctor Code: <span className="font-mono font-bold">{proctorCode}</span></p>
+          <p className="text-xs mt-1">Students need this code if they exit fullscreen</p>
+        </div>,
+        { duration: 8000 }
+      );
       onSuccess();
     } catch (error) {
       console.error("Error creating test:", error);
