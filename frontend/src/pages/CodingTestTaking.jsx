@@ -181,6 +181,37 @@ export default function CodingTestTaking({ user }) {
     handleRunCode(collectedInputs);
   };
 
+  const handleVerifyProctorCode = async () => {
+    if (!proctorCodeInput.trim()) {
+      toast.error("Please enter the proctor code");
+      return;
+    }
+
+    setVerifyingCode(true);
+    try {
+      const response = await axios.post(
+        `${API}/coding-tests/${testId}/verify-proctor-code`,
+        { proctor_code: proctorCodeInput },
+        { withCredentials: true }
+      );
+
+      if (response.data.success) {
+        setIsLocked(false);
+        setProctorCodeInput("");
+        requestFullscreen();
+        toast.success("Code verified! Returning to fullscreen...");
+      } else {
+        toast.error("Invalid proctor code. Please ask your teacher.");
+        setProctorCodeInput("");
+      }
+    } catch (error) {
+      console.error("Error verifying code:", error);
+      toast.error("Failed to verify code");
+    } finally {
+      setVerifyingCode(false);
+    }
+  };
+
   const handleSubmit = async () => {
     if (!currentProblem) return;
     
