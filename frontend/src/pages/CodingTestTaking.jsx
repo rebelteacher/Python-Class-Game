@@ -30,6 +30,8 @@ export default function CodingTestTaking({ user }) {
   const [isFullscreen, setIsFullscreen] = useState(false);
   const [tabSwitchCount, setTabSwitchCount] = useState(0);
   const [showInteractiveDialog, setShowInteractiveDialog] = useState(false);
+  const [showScoreModal, setShowScoreModal] = useState(false);
+  const [testResults, setTestResults] = useState(null);
   
   const timerRef = useRef(null);
   
