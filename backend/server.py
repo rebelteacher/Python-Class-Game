@@ -5480,10 +5480,11 @@ async def create_coding_test(test: CodingTestCreate, request: Request):
     if user["role"] != "teacher":
         raise HTTPException(status_code=403, detail="Only teachers can create coding tests")
     
-    # Validate that problem exists
-    problem = await db.problems.find_one({"id": test.problem_id})
-    if not problem:
-        raise HTTPException(status_code=404, detail="Problem not found")
+    # Validate that all problems exist
+    for problem_id in test.problem_ids:
+        problem = await db.problems.find_one({"id": problem_id})
+        if not problem:
+            raise HTTPException(status_code=404, detail=f"Problem {problem_id} not found")
     
     # Parse dates
     central = pytz.timezone('America/Chicago')
@@ -5504,7 +5505,7 @@ async def create_coding_test(test: CodingTestCreate, request: Request):
         chapter=test.chapter,
         lesson=test.lesson,
         teacher_id=user["id"],
-        problem_id=test.problem_id,
+        problem_ids=test.problem_ids,
         time_limit_minutes=test.time_limit_minutes,
         classroom_ids=test.classroom_ids,
         available_date=available_date,
