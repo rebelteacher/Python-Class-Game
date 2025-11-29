@@ -280,6 +280,7 @@ export default function ClassroomPage({ user }) {
       setEditingAssignment(null);
       fetchAssignments();
       fetchTests();
+      fetchCodingTests();
     } catch (error) {
       console.error("Error updating:", error);
       toast.error(editingAssignment.isTest ? "Failed to update test" : "Failed to update assignment");
