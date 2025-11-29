@@ -171,7 +171,7 @@ export default function CodingTestList({ user }) {
                 </CardHeader>
                 <CardContent>
                   <div className="space-y-3">
-                    <div className="flex items-center gap-4 text-sm text-gray-600">
+                    <div className="flex items-center gap-4 text-sm text-gray-600 flex-wrap">
                       <div className="flex items-center gap-1">
                         <Calendar className="w-4 h-4" />
                         <span>Available: {formatDate(test.available_date)}</span>
@@ -185,6 +185,18 @@ export default function CodingTestList({ user }) {
                         <span>{test.classroom_ids?.length || 0} classroom(s)</span>
                       </div>
                     </div>
+                    
+                    {test.proctor_code && (
+                      <div className="p-3 bg-yellow-50 border border-yellow-200 rounded">
+                        <p className="text-sm font-semibold text-yellow-900 mb-1">Proctor Code:</p>
+                        <p className="text-2xl font-mono font-bold text-yellow-800 tracking-widest">
+                          {test.proctor_code}
+                        </p>
+                        <p className="text-xs text-yellow-700 mt-1">
+                          Students need this code if they exit fullscreen during the test
+                        </p>
+                      </div>
+                    )}
 
                     <Button
                       variant="outline"
