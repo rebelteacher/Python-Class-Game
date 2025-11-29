@@ -5845,8 +5845,12 @@ async def verify_proctor_code(test_id: str, data: dict, request: Request):
     if not test:
         raise HTTPException(status_code=404, detail="Test not found")
     
-    provided_code = data.get("proctor_code", "")
-    if provided_code == test.get("proctor_code"):
+    provided_code = data.get("proctor_code", "").strip()
+    stored_code = test.get("proctor_code", "").strip()
+    
+    logging.info(f"Proctor code verification - Provided: '{provided_code}', Stored: '{stored_code}', Match: {provided_code == stored_code}")
+    
+    if provided_code == stored_code:
         return {"success": True, "message": "Proctor code verified"}
     else:
         return {"success": False, "message": "Invalid proctor code"}
