@@ -102,7 +102,7 @@ export default function CodingTestList({ user }) {
         <div className="flex items-center justify-between mb-6">
           <Button
             variant="outline"
-            onClick={() => navigate("/teacher")}
+            onClick={() => navigate("/teacher/dashboard")}
           >
             <ArrowLeft className="w-4 h-4 mr-2" />
             Back to Dashboard
