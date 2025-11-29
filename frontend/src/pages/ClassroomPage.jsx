@@ -228,7 +228,7 @@ export default function ClassroomPage({ user }) {
         : null;
       
       if (editingAssignment.isTest) {
-        // Update test schedule
+        // Update MC test schedule
         await axios.put(
           `${API}/mc-tests/${editingAssignment.id}/schedule`,
           {
@@ -238,6 +238,17 @@ export default function ClassroomPage({ user }) {
           { withCredentials: true }
         );
         toast.success("Test schedule updated!");
+      } else if (editingAssignment.isCodingTest) {
+        // Update Coding test schedule
+        await axios.put(
+          `${API}/coding-tests/${editingAssignment.id}/schedule`,
+          {
+            available_date: availableDateTime,
+            due_date: dueDateTime
+          },
+          { withCredentials: true }
+        );
+        toast.success("Coding test schedule updated!");
       } else {
         // Update assignment details via new endpoint
         await axios.put(
