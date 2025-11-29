@@ -1248,6 +1248,25 @@ async def get_classrooms(request: Request, include_archived: bool = False):
     
     return classrooms
 
+@api_router.get("/classrooms/student")
+async def get_student_classrooms(request: Request):
+    """Get classrooms for student (specific endpoint for MyTests page)"""
+    user = await get_current_user(request)
+    
+    if user["role"] != "student":
+        raise HTTPException(status_code=403, detail="Only students can access this endpoint")
+    
+    # Find classrooms where student is enrolled
+    classrooms = await db.classrooms.find(
+        {"students": user["id"], "is_archived": {"$ne": True}},
+        {"_id": 0}
+    ).to_list(1000)
+    
+    if not classrooms:
+        raise HTTPException(status_code=404, detail="Classroom not found")
+    
+    return classrooms
+
 @api_router.post("/classrooms/join")
 async def join_classroom(join_data: ClassroomJoin, request: Request):
     """Join a classroom using class code (Student only)"""
