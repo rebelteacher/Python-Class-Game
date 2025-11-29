@@ -267,8 +267,12 @@ export default function CodingTestTaking({ user }) {
       const newSubmittedIds = [...submittedProblemIds, currentProblem.id];
       setSubmittedProblemIds(newSubmittedIds);
       
+      console.log(`Submitted problems: ${newSubmittedIds.length} / ${problems.length}`);
+      console.log(`Current problem index: ${currentProblemIndex}`);
+      
       // Check if all problems are submitted
       if (newSubmittedIds.length >= problems.length) {
+        console.log("All problems submitted - showing results modal");
         // Fetch results and show modal
         exitFullscreen();
         const resultsResponse = await axios.get(`${API}/coding-tests/${testId}/result`, {
@@ -279,10 +283,15 @@ export default function CodingTestTaking({ user }) {
       } else {
         // Move to next problem
         const nextIndex = currentProblemIndex + 1;
+        console.log(`Moving to next problem. Next index: ${nextIndex}`);
+        
         if (nextIndex < problems.length) {
           setCurrentProblemIndex(nextIndex);
           setCode(problems[nextIndex].starter_code || "# Write your code here\n");
           setOutput("");
+          toast.info(`Moving to Problem ${nextIndex + 1} of ${problems.length}`);
+        } else {
+          console.log("No more problems to show");
         }
       }
     } catch (error) {
