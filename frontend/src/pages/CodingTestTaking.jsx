@@ -342,8 +342,8 @@ export default function CodingTestTaking({ user }) {
     );
   }
 
-  // Show start screen if not in fullscreen yet
-  if (!isFullscreen && !isLocked) {
+  // Show start screen if not in fullscreen yet AND test hasn't started
+  if (!isFullscreen && !isLocked && submittedProblemIds.length === 0) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-blue-900 via-indigo-900 to-purple-900 text-white flex items-center justify-center p-8">
         <Card className="max-w-2xl w-full">
