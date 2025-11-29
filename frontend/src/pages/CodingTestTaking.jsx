@@ -204,13 +204,18 @@ export default function CodingTestTaking({ user }) {
       toast.success(`Problem "${currentProblem.title}" submitted successfully!`);
       
       // Add to submitted list
-      setSubmittedProblemIds([...submittedProblemIds, currentProblem.id]);
+      const newSubmittedIds = [...submittedProblemIds, currentProblem.id];
+      setSubmittedProblemIds(newSubmittedIds);
       
       // Check if all problems are submitted
-      if (submittedProblemIds.length + 1 >= problems.length) {
+      if (newSubmittedIds.length >= problems.length) {
+        // Fetch results and show modal
         exitFullscreen();
-        toast.success("All problems submitted! Redirecting to results...");
-        setTimeout(() => navigate(`/coding-test-result/${testId}`), 1500);
+        const resultsResponse = await axios.get(`${API}/coding-tests/${testId}/result`, {
+          withCredentials: true
+        });
+        setTestResults(resultsResponse.data);
+        setShowScoreModal(true);
       } else {
         // Move to next problem
         const nextIndex = currentProblemIndex + 1;
