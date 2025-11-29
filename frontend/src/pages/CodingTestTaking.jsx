@@ -415,9 +415,14 @@ export default function CodingTestTaking({ user }) {
               >
                 {verifyingCode ? "Verifying..." : "Verify Code"}
               </Button>
-              <p className="text-xs text-center text-gray-500">
-                Ask your teacher for the proctor code to unlock the test.
-              </p>
+              <div className="space-y-2">
+                <p className="text-xs text-center text-gray-500">
+                  Ask your teacher for the proctor code to unlock the test.
+                </p>
+                <p className="text-xs text-center text-orange-600 font-medium">
+                  ⚠️ Important: Close all other browser tabs (especially teacher login) before starting the test to avoid authentication conflicts.
+                </p>
+              </div>
             </CardContent>
           </Card>
         </div>
