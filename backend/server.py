@@ -5764,6 +5764,7 @@ Format your response as JSON:
         test_id=test_id,
         student_id=user["id"],
         student_name=user.get("name", "Unknown"),
+        problem_id=submission.problem_id,
         code=submission.code,
         score=final_score,
         feedback=feedback,
