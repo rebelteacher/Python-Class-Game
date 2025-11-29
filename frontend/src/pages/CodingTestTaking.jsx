@@ -17,7 +17,9 @@ export default function CodingTestTaking({ user }) {
   const navigate = useNavigate();
   
   const [test, setTest] = useState(null);
-  const [problem, setProblem] = useState(null);
+  const [problems, setProblems] = useState([]);
+  const [currentProblemIndex, setCurrentProblemIndex] = useState(0);
+  const [submittedProblemIds, setSubmittedProblemIds] = useState([]);
   const [code, setCode] = useState("");
   const [output, setOutput] = useState("");
   const [loading, setLoading] = useState(true);
@@ -30,6 +32,8 @@ export default function CodingTestTaking({ user }) {
   const [showInteractiveDialog, setShowInteractiveDialog] = useState(false);
   
   const timerRef = useRef(null);
+  
+  const currentProblem = problems[currentProblemIndex];
 
   useEffect(() => {
     startTest();
