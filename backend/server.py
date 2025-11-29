@@ -5449,6 +5449,352 @@ async def update_test_schedule(
     return {"success": True, "message": "Test schedule updated"}
 
 
+# ==================== CODING TESTS ====================
+
+@api_router.post("/coding-tests")
+async def create_coding_test(test: CodingTestCreate, request: Request):
+    """Create and assign a coding test"""
+    user = await get_current_user(request)
+    
+    if user["role"] != "teacher":
+        raise HTTPException(status_code=403, detail="Only teachers can create coding tests")
+    
+    # Validate that problem exists
+    problem = await db.problems.find_one({"id": test.problem_id})
+    if not problem:
+        raise HTTPException(status_code=404, detail="Problem not found")
+    
+    # Parse dates
+    central = pytz.timezone('America/Chicago')
+    available_date = None
+    due_date = None
+    if test.available_date:
+        naive_dt = datetime.fromisoformat(test.available_date.replace('Z', ''))
+        central_dt = central.localize(naive_dt)
+        available_date = central_dt.astimezone(timezone.utc)
+    if test.due_date:
+        naive_dt = datetime.fromisoformat(test.due_date.replace('Z', ''))
+        central_dt = central.localize(naive_dt)
+        due_date = central_dt.astimezone(timezone.utc)
+    
+    coding_test = CodingTest(
+        title=test.title,
+        description=test.description,
+        chapter=test.chapter,
+        lesson=test.lesson,
+        teacher_id=user["id"],
+        problem_id=test.problem_id,
+        time_limit_minutes=test.time_limit_minutes,
+        classroom_ids=test.classroom_ids,
+        available_date=available_date,
+        due_date=due_date
+    )
+    
+    test_dict = coding_test.model_dump()
+    test_dict["created_at"] = test_dict["created_at"].isoformat()
+    if test_dict.get("available_date"):
+        test_dict["available_date"] = test_dict["available_date"].isoformat()
+    if test_dict.get("due_date"):
+        test_dict["due_date"] = test_dict["due_date"].isoformat()
+    
+    await db.coding_tests.insert_one(test_dict)
+    
+    return {"id": coding_test.id, "message": "Coding test created successfully"}
+
+
+@api_router.get("/coding-tests")
+async def get_all_coding_tests(request: Request):
+    """Get all coding tests created by the teacher"""
+    user = await get_current_user(request)
+    
+    if user["role"] != "teacher":
+        raise HTTPException(status_code=403, detail="Only teachers can view tests")
+    
+    tests = await db.coding_tests.find(
+        {"teacher_id": user["id"]},
+        {"_id": 0}
+    ).to_list(1000)
+    
+    return tests
+
+
+@api_router.get("/coding-tests/classroom/{classroom_id}")
+async def get_coding_tests_for_classroom(classroom_id: str, request: Request):
+    """Get all coding tests for a specific classroom"""
+    user = await get_current_user(request)
+    
+    # Verify student is enrolled in this classroom
+    if user["role"] == "student":
+        classroom = await db.classrooms.find_one({"id": classroom_id})
+        if not classroom or user["id"] not in classroom.get("students", []):
+            raise HTTPException(status_code=403, detail="You are not enrolled in this classroom")
+    
+    # Get all tests for this classroom
+    tests = await db.coding_tests.find(
+        {"classroom_ids": classroom_id},
+        {"_id": 0}
+    ).to_list(1000)
+    
+    # For students, check if they have already submitted
+    if user["role"] == "student":
+        for test in tests:
+            submission = await db.coding_test_submissions.find_one({
+                "test_id": test["id"],
+                "student_id": user["id"]
+            })
+            test["is_submitted"] = submission is not None
+            test["submission_id"] = submission["id"] if submission else None
+    
+    return tests
+
+
+@api_router.get("/coding-tests/{test_id}/start")
+async def start_coding_test(test_id: str, request: Request):
+    """Start a coding test and get the problem"""
+    user = await get_current_user(request)
+    
+    if user["role"] != "student":
+        raise HTTPException(status_code=403, detail="Only students can take tests")
+    
+    # Get the test
+    test = await db.coding_tests.find_one({"id": test_id}, {"_id": 0})
+    if not test:
+        raise HTTPException(status_code=404, detail="Test not found")
+    
+    # Check if student has already submitted
+    existing_submission = await db.coding_test_submissions.find_one({
+        "test_id": test_id,
+        "student_id": user["id"]
+    })
+    if existing_submission:
+        raise HTTPException(status_code=403, detail="You have already submitted this test")
+    
+    # Check availability
+    now = datetime.now(timezone.utc)
+    if test.get("available_date"):
+        available_date = datetime.fromisoformat(test["available_date"])
+        if now < available_date:
+            raise HTTPException(status_code=403, detail="This test is not yet available")
+    
+    # Get the problem
+    problem = await db.problems.find_one({"id": test["problem_id"]}, {"_id": 0})
+    if not problem:
+        raise HTTPException(status_code=404, detail="Problem not found")
+    
+    # Return test and problem info (without solution)
+    return {
+        "test": test,
+        "problem": {
+            "id": problem["id"],
+            "title": problem["title"],
+            "description": problem["description"],
+            "starter_code": problem["starter_code"],
+            "expected_output": problem.get("expected_output", ""),
+            "difficulty": problem.get("difficulty", "Medium")
+        }
+    }
+
+
+@api_router.post("/coding-tests/{test_id}/submit")
+async def submit_coding_test(test_id: str, submission: CodingTestSubmit, request: Request):
+    """Submit coding test and get AI evaluation (one-time only)"""
+    user = await get_current_user(request)
+    
+    if user["role"] != "student":
+        raise HTTPException(status_code=403, detail="Only students can submit tests")
+    
+    # Check if already submitted
+    existing_submission = await db.coding_test_submissions.find_one({
+        "test_id": test_id,
+        "student_id": user["id"]
+    })
+    if existing_submission:
+        raise HTTPException(status_code=403, detail="You have already submitted this test. Only one submission is allowed.")
+    
+    # Get the test
+    test = await db.coding_tests.find_one({"id": test_id}, {"_id": 0})
+    if not test:
+        raise HTTPException(status_code=404, detail="Test not found")
+    
+    # Get the problem
+    problem = await db.problems.find_one({"id": test["problem_id"]}, {"_id": 0})
+    if not problem:
+        raise HTTPException(status_code=404, detail="Problem not found")
+    
+    # Run test cases using the problem's solution
+    test_results = []
+    passed_tests = 0
+    total_tests = 0
+    
+    # Use expected_output comparison if available
+    try:
+        solution_result = run_python_code(problem.get("solution_code", ""), "")
+        student_result = run_python_code(submission.code, "")
+        
+        solution_output = normalize_output(solution_result["output"]) if solution_result["success"] else ""
+        student_output = normalize_output(student_result["output"]) if student_result["success"] else ""
+        
+        if student_result["success"] and student_output == solution_output:
+            base_score = 100
+            passed_tests = 1
+        else:
+            base_score = 50 if student_result["success"] else 0
+        
+        total_tests = 1
+        test_results.append({
+            "test_id": "output_comparison",
+            "description": "Compare output to solution",
+            "passed": student_output == solution_output,
+            "expected": solution_output,
+            "actual": student_output,
+            "error": student_result.get("error")
+        })
+    except Exception as e:
+        logging.error(f"Error during test evaluation: {str(e)}")
+        base_score = 0
+        test_results = [{
+            "test_id": "evaluation_error",
+            "description": "Error during evaluation",
+            "passed": False,
+            "error": str(e)
+        }]
+    
+    # AI Evaluation
+    llm_key = os.environ.get("EMERGENT_LLM_KEY")
+    chat = LlmChat(
+        api_key=llm_key,
+        session_id=f"coding_test_{test_id}_{user['id']}",
+        system_message="You are a coding instructor evaluating student Python code for a timed coding test. Provide constructive, encouraging feedback."
+    ).with_model("openai", "gpt-4o")
+    
+    prompt = f"""
+Evaluate this Python code submission for a coding test:
+
+Problem: {problem['title']}
+Description: {problem['description']}
+
+Expected Solution:
+```python
+{problem['solution_code']}
+```
+
+Student Code:
+```python
+{submission.code}
+```
+
+Expected Output: {test_results[0].get('expected', 'N/A')}
+Student Output: {test_results[0].get('actual', 'N/A')}
+
+Base Score: {base_score}%
+
+EVALUATION CRITERIA:
+1. Start with base score: {base_score}%
+2. Award full credit if output matches correctly
+3. Award partial credit for correct approach with minor issues
+4. Provide specific, actionable feedback (2-3 sentences)
+5. Be encouraging but honest
+
+Format your response as JSON:
+{{
+  "score": <number 0-100>,
+  "feedback": "<2-3 sentences with specific guidance>"
+}}
+"""
+    
+    try:
+        user_message = UserMessage(text=prompt)
+        ai_response = await chat.send_message(user_message)
+        
+        import re
+        json_match = re.search(r'\{[^{}]*"score"[^{}]*\}', ai_response, re.DOTALL)
+        if json_match:
+            ai_eval = json.loads(json_match.group())
+            final_score = float(ai_eval.get("score", base_score))
+            feedback = ai_eval.get("feedback", "Good effort!")
+        else:
+            final_score = base_score
+            feedback = "Test completed. Keep practicing to improve your skills!"
+    except Exception as e:
+        logging.error(f"AI evaluation error: {str(e)}")
+        final_score = base_score
+        feedback = f"Test completed with {base_score}% score. Keep practicing!"
+    
+    # Create submission record
+    test_submission = CodingTestSubmission(
+        test_id=test_id,
+        student_id=user["id"],
+        student_name=user.get("name", "Unknown"),
+        code=submission.code,
+        score=final_score,
+        feedback=feedback,
+        test_results=test_results,
+        time_taken_seconds=submission.time_taken_seconds
+    )
+    
+    submission_dict = test_submission.model_dump()
+    submission_dict["started_at"] = submission_dict["started_at"].isoformat()
+    submission_dict["submitted_at"] = submission_dict["submitted_at"].isoformat()
+    
+    await db.coding_test_submissions.insert_one(submission_dict)
+    
+    return {
+        "submission_id": test_submission.id,
+        "score": final_score,
+        "feedback": feedback,
+        "message": "Test submitted successfully"
+    }
+
+
+@api_router.get("/coding-tests/{test_id}/result")
+async def get_coding_test_result(test_id: str, request: Request):
+    """Get student's test result (score and feedback only, no code)"""
+    user = await get_current_user(request)
+    
+    if user["role"] != "student":
+        raise HTTPException(status_code=403, detail="Only students can view results")
+    
+    submission = await db.coding_test_submissions.find_one({
+        "test_id": test_id,
+        "student_id": user["id"]
+    }, {"_id": 0})
+    
+    if not submission:
+        raise HTTPException(status_code=404, detail="No submission found")
+    
+    # Return only score and feedback (not the code)
+    return {
+        "score": submission["score"],
+        "feedback": submission["feedback"],
+        "submitted_at": submission["submitted_at"],
+        "time_taken_seconds": submission.get("time_taken_seconds", 0)
+    }
+
+
+@api_router.get("/coding-tests/{test_id}/submissions")
+async def get_coding_test_submissions(test_id: str, request: Request):
+    """Get all submissions for a coding test (teacher only)"""
+    user = await get_current_user(request)
+    
+    if user["role"] != "teacher":
+        raise HTTPException(status_code=403, detail="Only teachers can view submissions")
+    
+    # Verify test belongs to teacher
+    test = await db.coding_tests.find_one({"id": test_id}, {"_id": 0})
+    if not test:
+        raise HTTPException(status_code=404, detail="Test not found")
+    
+    if test["teacher_id"] != user["id"]:
+        raise HTTPException(status_code=403, detail="Access denied")
+    
+    submissions = await db.coding_test_submissions.find(
+        {"test_id": test_id},
+        {"_id": 0}
+    ).to_list(1000)
+    
+    return submissions
+
+
 # ==================== STUDENT CHALLENGES ====================
 
 @api_router.post("/challenges")
