@@ -94,8 +94,14 @@ export default function CodingTestTaking({ user }) {
       });
       
       setTest(response.data.test);
-      setProblem(response.data.problem);
-      setCode(response.data.problem.starter_code || "# Write your code here\n");
+      setProblems(response.data.problems || []);
+      setSubmittedProblemIds(response.data.submitted_problem_ids || []);
+      
+      // Set initial code for first problem
+      if (response.data.problems && response.data.problems.length > 0) {
+        setCode(response.data.problems[0].starter_code || "# Write your code here\n");
+      }
+      
       setStartTime(Date.now());
       
       if (response.data.test.time_limit_minutes > 0) {
