@@ -444,6 +444,81 @@ export default function CodingTestTaking({ user }) {
         onSubmitInputs={handleInteractiveInputSubmit}
         codePreview={code}
       />
+
+      {/* Score Modal */}
+      <Dialog open={showScoreModal} onOpenChange={setShowScoreModal}>
+        <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle className="text-2xl">Test Complete! 🎉</DialogTitle>
+            <DialogDescription>
+              Here are your results for all problems
+            </DialogDescription>
+          </DialogHeader>
+
+          {testResults && (
+            <div className="space-y-6">
+              {/* Overall Score */}
+              <div className="text-center p-6 bg-gradient-to-br from-blue-50 to-indigo-50 rounded-lg border-2">
+                <p className="text-sm text-gray-600 mb-2">Overall Score</p>
+                <p className={`text-6xl font-bold ${
+                  testResults.overall_score >= 90 ? 'text-green-600' :
+                  testResults.overall_score >= 70 ? 'text-blue-600' :
+                  testResults.overall_score >= 50 ? 'text-yellow-600' :
+                  'text-red-600'
+                }`}>
+                  {Math.round(testResults.overall_score)}%
+                </p>
+                <p className="text-sm text-gray-600 mt-2">
+                  {testResults.total_problems} {testResults.total_problems === 1 ? 'Problem' : 'Problems'} Completed
+                </p>
+              </div>
+
+              {/* Individual Problem Scores */}
+              <div className="space-y-3">
+                <h3 className="font-semibold text-lg">Problem Breakdown:</h3>
+                {testResults.submissions?.map((submission, index) => (
+                  <div key={submission.problem_id} className="p-4 bg-gray-50 rounded-lg border">
+                    <div className="flex items-center justify-between mb-2">
+                      <span className="font-medium">Problem {index + 1}</span>
+                      <span className={`text-xl font-bold ${
+                        submission.score >= 90 ? 'text-green-600' :
+                        submission.score >= 70 ? 'text-blue-600' :
+                        submission.score >= 50 ? 'text-yellow-600' :
+                        'text-red-600'
+                      }`}>
+                        {Math.round(submission.score)}%
+                      </span>
+                    </div>
+                    <p className="text-sm text-gray-700 bg-white p-3 rounded border">
+                      {submission.feedback}
+                    </p>
+                  </div>
+                ))}
+              </div>
+
+              {/* Actions */}
+              <div className="flex gap-3">
+                <Button
+                  onClick={() => {
+                    setShowScoreModal(false);
+                    navigate("/my-tests");
+                  }}
+                  className="flex-1 bg-blue-600 hover:bg-blue-700"
+                >
+                  Done
+                </Button>
+                <Button
+                  onClick={() => navigate(`/coding-test-result/${testId}`)}
+                  variant="outline"
+                  className="flex-1"
+                >
+                  View Full Results
+                </Button>
+              </div>
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
