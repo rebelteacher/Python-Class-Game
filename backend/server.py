@@ -5836,10 +5836,12 @@ async def get_coding_test_result(test_id: str, request: Request):
 @api_router.post("/coding-tests/{test_id}/verify-proctor-code")
 async def verify_proctor_code(test_id: str, data: dict, request: Request):
     """Verify proctor code to unlock test"""
-    user = await get_current_user(request)
-    
-    if user["role"] != "student":
-        raise HTTPException(status_code=403, detail="Only students can verify proctor codes")
+    try:
+        user = await get_current_user(request)
+        logging.info(f"Proctor code verification attempt by user: {user.get('email')} with role: {user.get('role')}")
+    except Exception as e:
+        logging.error(f"Authentication failed in proctor code verification: {str(e)}")
+        raise HTTPException(status_code=401, detail="Not authenticated")
     
     test = await db.coding_tests.find_one({"id": test_id}, {"_id": 0})
     if not test:
