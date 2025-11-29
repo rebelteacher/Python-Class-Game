@@ -5,6 +5,7 @@ import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Alert, AlertDescription } from "@/components/ui/alert";
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Clock, Play, Send, AlertTriangle, Maximize } from "lucide-react";
 import Editor from "@monaco-editor/react";
 import InteractiveInputCollector from "@/components/InteractiveInputCollector";
