@@ -2927,15 +2927,34 @@ async def create_library_video(
     file_path = f"{upload_dir}/{unique_filename}"
     
     # Save video file in chunks (handles large files)
+    bytes_written = 0
     try:
         with open(file_path, "wb") as f:
             while chunk := await video.read(1024 * 1024):  # Read 1MB at a time
                 f.write(chunk)
+                bytes_written += len(chunk)
     except Exception as e:
         logger.error(f"Error saving library video: {str(e)}")
         if os.path.exists(file_path):
             os.remove(file_path)
         raise HTTPException(status_code=500, detail="Failed to save video")
+    
+    # Validate uploaded file size
+    if bytes_written < 1000:  # Less than 1KB indicates corruption
+        if os.path.exists(file_path):
+            os.remove(file_path)
+        raise HTTPException(status_code=400, detail="Video file appears to be corrupted or empty. Please try uploading again.")
+    
+    # Verify file was written correctly
+    if not os.path.exists(file_path):
+        raise HTTPException(status_code=500, detail="Video file was not saved properly")
+    
+    actual_size = os.path.getsize(file_path)
+    if actual_size < 1000:
+        os.remove(file_path)
+        raise HTTPException(status_code=400, detail=f"Video file too small ({actual_size} bytes). Upload may have been interrupted.")
+    
+    logger.info(f"Successfully uploaded video: {unique_filename} ({actual_size} bytes)")
     
     # Create video record
     new_video = LibraryVideo(
