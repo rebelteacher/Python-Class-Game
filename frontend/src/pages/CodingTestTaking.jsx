@@ -415,11 +415,15 @@ export default function CodingTestTaking({ user }) {
             </Button>
             <Button
               onClick={handleSubmit}
-              disabled={submitting}
+              disabled={submitting || submittedProblemIds.includes(currentProblem?.id)}
               className="flex-1 bg-green-600 hover:bg-green-700 gap-2"
             >
               <Send className="w-4 h-4" />
-              {submitting ? "Submitting..." : "Submit Test"}
+              {submittedProblemIds.includes(currentProblem?.id)
+                ? "Already Submitted"
+                : submitting
+                ? "Submitting..."
+                : `Submit Problem ${currentProblemIndex + 1}`}
             </Button>
           </div>
         </div>
