@@ -334,13 +334,9 @@ export default function CodingTestTaking({ user }) {
               <button
                 key={prob.id}
                 onClick={() => {
-                  if (!submittedProblemIds.includes(problems[currentProblemIndex]?.id)) {
-                    setCurrentProblemIndex(idx);
-                    setCode(prob.starter_code || "# Write your code here\n");
-                    setOutput("");
-                  } else {
-                    toast.info("Please submit current problem before switching");
-                  }
+                  setCurrentProblemIndex(idx);
+                  setCode(prob.starter_code || "# Write your code here\n");
+                  setOutput("");
                 }}
                 className={`px-3 py-1 rounded text-sm ${
                   idx === currentProblemIndex
