@@ -1638,7 +1638,7 @@ function CodingTestBuilder({ open, onOpenChange, selectedProblems, problems, onS
         description: testDescription,
         chapter: chapter,
         lesson: lesson,
-        problem_id: selectedProblem.id,
+        problem_ids: selectedProblems,
         time_limit_minutes: timeLimit,
         classroom_ids: selectedClassrooms,
         available_date: availableDate || null,
