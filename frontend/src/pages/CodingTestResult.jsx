@@ -78,52 +78,69 @@ export default function CodingTestResult({ user }) {
           Back to My Tests
         </Button>
 
-        {/* Score Card */}
+        {/* Overall Score Card */}
         <Card className="mb-6 border-2">
           <CardHeader className="text-center pb-2">
             <div className="flex justify-center mb-4">
               <div className={`w-32 h-32 rounded-full flex items-center justify-center ${
-                result.score >= 70 ? 'bg-green-100' : 'bg-gray-100'
+                result.overall_score >= 70 ? 'bg-green-100' : 'bg-gray-100'
               }`}>
                 <Trophy className={`w-16 h-16 ${
-                  result.score >= 70 ? 'text-green-600' : 'text-gray-400'
+                  result.overall_score >= 70 ? 'text-green-600' : 'text-gray-400'
                 }`} />
               </div>
             </div>
             <CardTitle className="text-4xl font-bold">
-              <span className={getScoreColor(result.score)}>
-                {Math.round(result.score)}%
+              <span className={getScoreColor(result.overall_score)}>
+                {Math.round(result.overall_score)}%
               </span>
             </CardTitle>
             <CardDescription className="text-xl mt-2">
-              {getScoreMessage(result.score)}
+              {getScoreMessage(result.overall_score)}
             </CardDescription>
+            <p className="text-sm text-gray-600 mt-2">
+              {result.total_problems} {result.total_problems === 1 ? 'Problem' : 'Problems'} Completed
+            </p>
           </CardHeader>
-          <CardContent>
-            <div className="flex items-center justify-center gap-8 text-sm text-gray-600">
-              <div className="flex items-center gap-2">
-                <Clock className="w-4 h-4" />
-                <span>Time: {formatTime(result.time_taken_seconds)}</span>
-              </div>
-              <div className="flex items-center gap-2">
-                <span>Submitted: {new Date(result.submitted_at).toLocaleString()}</span>
-              </div>
-            </div>
-          </CardContent>
         </Card>
 
-        {/* Feedback Card */}
+        {/* Individual Problem Results */}
+        <div className="space-y-4 mb-6">
+          <h2 className="text-2xl font-bold text-gray-900">Problem Results</h2>
+          {result.submissions?.map((submission, index) => (
+            <Card key={submission.problem_id}>
+              <CardHeader>
+                <CardTitle className="flex items-center justify-between">
+                  <span className="flex items-center gap-2">
+                    <MessageSquare className="w-5 h-5 text-blue-600" />
+                    Problem {index + 1}
+                  </span>
+                  <span className={`text-2xl font-bold ${getScoreColor(submission.score)}`}>
+                    {Math.round(submission.score)}%
+                  </span>
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="bg-blue-50 p-4 rounded-lg mb-3">
+                  <p className="text-gray-800 whitespace-pre-wrap">{submission.feedback}</p>
+                </div>
+                <div className="flex items-center gap-4 text-sm text-gray-600">
+                  <div className="flex items-center gap-2">
+                    <Clock className="w-4 h-4" />
+                    <span>Time: {formatTime(submission.time_taken_seconds)}</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <span>Submitted: {new Date(submission.submitted_at).toLocaleString()}</span>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          ))}
+        </div>
+
+        {/* Note Card */}
         <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <MessageSquare className="w-5 h-5 text-blue-600" />
-              Instructor Feedback
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="bg-blue-50 p-4 rounded-lg">
-              <p className="text-gray-800 whitespace-pre-wrap">{result.feedback}</p>
-            </div>
+          <CardContent className="pt-6">
 
             <div className="mt-6 p-4 bg-yellow-50 border border-yellow-200 rounded-lg">
               <h4 className="font-semibold text-yellow-900 mb-2">📝 Note</h4>
