@@ -1575,3 +1575,221 @@ function AssignmentBuilder({ open, onOpenChange, selectedProblems, problems, onS
     </Dialog>
   );
 }
+
+// Coding Test Builder Component
+function CodingTestBuilder({ open, onOpenChange, selectedProblem, onSuccess }) {
+  const [classrooms, setClassrooms] = useState([]);
+  const [selectedClassrooms, setSelectedClassrooms] = useState([]);
+  const [testTitle, setTestTitle] = useState("");
+  const [testDescription, setTestDescription] = useState("");
+  const [chapter, setChapter] = useState("");
+  const [lesson, setLesson] = useState("");
+  const [timeLimit, setTimeLimit] = useState(30);
+  const [availableDate, setAvailableDate] = useState("");
+  const [dueDate, setDueDate] = useState("");
+  const [creating, setCreating] = useState(false);
+
+  const API = `${process.env.REACT_APP_BACKEND_URL}/api`;
+
+  useEffect(() => {
+    if (open) {
+      fetchClassrooms();
+      if (selectedProblem) {
+        setTestTitle(`${selectedProblem.title} - Test`);
+        setChapter(selectedProblem.chapter || "");
+        setLesson(selectedProblem.lesson || "");
+      }
+    }
+  }, [open, selectedProblem]);
+
+  const fetchClassrooms = async () => {
+    try {
+      const response = await axios.get(`${API}/classrooms`, {
+        withCredentials: true
+      });
+      setClassrooms(response.data);
+    } catch (error) {
+      console.error("Error fetching classrooms:", error);
+      toast.error("Failed to load classrooms");
+    }
+  };
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    
+    if (selectedClassrooms.length === 0) {
+      toast.error("Please select at least one classroom");
+      return;
+    }
+
+    setCreating(true);
+    try {
+      await axios.post(`${API}/coding-tests`, {
+        title: testTitle,
+        description: testDescription,
+        chapter: chapter,
+        lesson: lesson,
+        problem_id: selectedProblem.id,
+        time_limit_minutes: timeLimit,
+        classroom_ids: selectedClassrooms,
+        available_date: availableDate || null,
+        due_date: dueDate || null
+      }, {
+        withCredentials: true
+      });
+      
+      toast.success("Coding test created successfully!");
+      onSuccess();
+    } catch (error) {
+      console.error("Error creating test:", error);
+      toast.error(error.response?.data?.detail || "Failed to create test");
+    } finally {
+      setCreating(false);
+    }
+  };
+
+  const toggleClassroom = (classroomId) => {
+    setSelectedClassrooms(prev =>
+      prev.includes(classroomId)
+        ? prev.filter(id => id !== classroomId)
+        : [...prev, classroomId]
+    );
+  };
+
+  return (
+    <Dialog open={open} onOpenChange={onOpenChange}>
+      <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+        <DialogHeader>
+          <DialogTitle>Create Coding Test</DialogTitle>
+          <DialogDescription>
+            Create a timed coding test from the selected problem
+          </DialogDescription>
+        </DialogHeader>
+
+        <form onSubmit={handleSubmit} className="space-y-4">
+          {/* Selected Problem Display */}
+          {selectedProblem && (
+            <div className="p-3 bg-blue-50 rounded border border-blue-200">
+              <p className="font-semibold text-sm text-blue-900">Selected Problem:</p>
+              <p className="text-sm text-blue-700">{selectedProblem.title}</p>
+              <p className="text-xs text-blue-600 mt-1">{selectedProblem.description?.substring(0, 100)}...</p>
+            </div>
+          )}
+
+          {/* Test Details */}
+          <div>
+            <Label htmlFor="testTitle">Test Title *</Label>
+            <Input
+              id="testTitle"
+              value={testTitle}
+              onChange={(e) => setTestTitle(e.target.value)}
+              placeholder="e.g., Week 1 Python Assessment"
+              required
+              className="mt-1"
+            />
+          </div>
+
+          <div>
+            <Label htmlFor="testDescription">Description</Label>
+            <Textarea
+              id="testDescription"
+              value={testDescription}
+              onChange={(e) => setTestDescription(e.target.value)}
+              placeholder="Brief description..."
+              rows={3}
+              className="mt-1"
+            />
+          </div>
+
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <Label htmlFor="chapter">Chapter</Label>
+              <Input
+                id="chapter"
+                value={chapter}
+                onChange={(e) => setChapter(e.target.value)}
+                placeholder="e.g., Chapter 1"
+                className="mt-1"
+              />
+            </div>
+            <div>
+              <Label htmlFor="lesson">Lesson</Label>
+              <Input
+                id="lesson"
+                value={lesson}
+                onChange={(e) => setLesson(e.target.value)}
+                placeholder="e.g., Lesson 2"
+                className="mt-1"
+              />
+            </div>
+          </div>
+
+          <div>
+            <Label htmlFor="timeLimit">Time Limit (minutes) *</Label>
+            <Input
+              id="timeLimit"
+              type="number"
+              min="0"
+              value={timeLimit}
+              onChange={(e) => setTimeLimit(parseInt(e.target.value) || 0)}
+              required
+              className="mt-1"
+            />
+            <p className="text-xs text-gray-500 mt-1">Set to 0 for unlimited time</p>
+          </div>
+
+          {/* Classroom Selection */}
+          <div>
+            <Label>Assign to Classrooms *</Label>
+            <div className="mt-2 space-y-2 max-h-40 overflow-y-auto border rounded p-2">
+              {classrooms.map((classroom) => (
+                <label
+                  key={classroom.id}
+                  className="flex items-center gap-2 p-2 hover:bg-gray-50 rounded cursor-pointer"
+                >
+                  <Checkbox
+                    checked={selectedClassrooms.includes(classroom.id)}
+                    onCheckedChange={() => toggleClassroom(classroom.id)}
+                  />
+                  <span className="text-sm">{classroom.name}</span>
+                </label>
+              ))}
+            </div>
+          </div>
+
+          {/* Schedule */}
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <Label htmlFor="availableDate">Available Date</Label>
+              <Input
+                id="availableDate"
+                type="datetime-local"
+                value={availableDate}
+                onChange={(e) => setAvailableDate(e.target.value)}
+                className="mt-1"
+              />
+            </div>
+            <div>
+              <Label htmlFor="dueDate">Due Date</Label>
+              <Input
+                id="dueDate"
+                type="datetime-local"
+                value={dueDate}
+                onChange={(e) => setDueDate(e.target.value)}
+                className="mt-1"
+              />
+            </div>
+          </div>
+
+          <Button
+            type="submit"
+            disabled={creating}
+            className="w-full bg-indigo-600 hover:bg-indigo-700"
+          >
+            {creating ? "Creating..." : "Create Coding Test"}
+          </Button>
+        </form>
+      </DialogContent>
+    </Dialog>
+  );
+}
