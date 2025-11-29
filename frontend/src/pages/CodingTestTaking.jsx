@@ -218,7 +218,19 @@ export default function CodingTestTaking({ user }) {
       }
     } catch (error) {
       console.error("Error verifying code:", error);
-      toast.error(error.response?.data?.detail || "Failed to verify code");
+      const errorMsg = error.response?.data?.detail || "Failed to verify code";
+      
+      if (errorMsg.includes("authenticated") || errorMsg.includes("Only students")) {
+        toast.error(
+          <div>
+            <p className="font-semibold">Authentication Error</p>
+            <p className="text-xs mt-1">Please close all other browser tabs and refresh this page to continue as a student.</p>
+          </div>,
+          { duration: 6000 }
+        );
+      } else {
+        toast.error(errorMsg);
+      }
     } finally {
       setVerifyingCode(false);
     }
