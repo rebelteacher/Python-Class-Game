@@ -608,6 +608,53 @@ class MCTestSubmission(BaseModel):
     test_id: str
     answers: dict  # {question_id: selected_answer}
 
+# Coding Test Models
+class CodingTest(BaseModel):
+    model_config = ConfigDict(extra="ignore")
+    id: str = Field(default_factory=lambda: str(uuid.uuid4()))
+    title: str
+    description: str = ""
+    chapter: str = ""
+    lesson: str = ""
+    teacher_id: str
+    problem_id: str  # Reference to Problem from library
+    time_limit_minutes: int = 0  # 0 = no time limit
+    classroom_ids: List[str]
+    available_date: Optional[datetime] = None
+    due_date: Optional[datetime] = None
+    created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+
+class CodingTestCreate(BaseModel):
+    title: str
+    description: str = ""
+    chapter: str = ""
+    lesson: str = ""
+    problem_id: str
+    time_limit_minutes: int = 0
+    classroom_ids: List[str]
+    available_date: Optional[str] = None
+    due_date: Optional[str] = None
+
+class CodingTestSubmission(BaseModel):
+    model_config = ConfigDict(extra="ignore")
+    id: str = Field(default_factory=lambda: str(uuid.uuid4()))
+    test_id: str
+    student_id: str
+    student_name: str
+    code: str
+    score: float
+    feedback: str
+    test_results: List[dict] = []
+    started_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+    submitted_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+    time_taken_seconds: int = 0
+    is_complete: bool = True
+
+class CodingTestSubmit(BaseModel):
+    test_id: str
+    code: str
+    time_taken_seconds: int = 0
+
 # PDF Note model for library resources
 class PDFNote(BaseModel):
     model_config = ConfigDict(extra="ignore")
