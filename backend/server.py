@@ -3091,46 +3091,19 @@ async def stream_library_video(video_id: str, request: Request):
     if not os.path.exists(video_path):
         raise HTTPException(status_code=404, detail="Video file not found")
     
-    # Get file size
-    file_size = os.path.getsize(video_path)
-    
-    # Handle range requests for video seeking
-    range_header = request.headers.get("range")
-    if range_header:
-        range_match = range_header.replace("bytes=", "").split("-")
-        start = int(range_match[0])
-        end = int(range_match[1]) if range_match[1] else file_size - 1
-        
-        def iter_file():
-            with open(video_path, "rb") as f:
-                f.seek(start)
-                bytes_to_read = end - start + 1
-                while bytes_to_read > 0:
-                    chunk_size = min(1024 * 1024, bytes_to_read)
-                    data = f.read(chunk_size)
-                    if not data:
-                        break
-                    bytes_to_read -= len(data)
-                    yield data
-        
-        headers = {
-            "Content-Range": f"bytes {start}-{end}/{file_size}",
+    # Use FileResponse with headers - simpler and more reliable
+    # FileResponse automatically handles range requests
+    return FileResponse(
+        video_path,
+        media_type="video/mp4",
+        headers={
             "Accept-Ranges": "bytes",
-            "Content-Length": str(end - start + 1),
-            "Content-Type": "video/mp4",
+            "Cache-Control": "public, max-age=3600",
             "Access-Control-Allow-Origin": "*",
-            "Access-Control-Allow-Methods": "GET, OPTIONS",
-            "Access-Control-Allow-Headers": "Range",
+            "Access-Control-Allow-Methods": "GET, HEAD, OPTIONS",
+            "Access-Control-Allow-Headers": "Range, Content-Type",
         }
-        return StreamingResponse(iter_file(), status_code=206, headers=headers)
-    
-    # Return full file if no range header
-    headers = {
-        "Accept-Ranges": "bytes",
-        "Content-Type": "video/mp4",
-        "Access-Control-Allow-Origin": "*",
-    }
-    return FileResponse(video_path, media_type="video/mp4", headers=headers)
+    )
 
 
 # ==================== FEEDBACK & MESSAGES ROUTES ====================
