@@ -198,7 +198,11 @@ export default function TeacherDashboard({ user, setUser }) {
             </Button>
             <Button onClick={() => navigate("/test-builder")} variant="outline" size="sm" className="gap-2 border-white/30 text-white hover:bg-white/20 bg-white/10">
               <FileQuestion className="w-4 h-4" />
-              Test Builder
+              MC Test Builder
+            </Button>
+            <Button onClick={() => navigate("/coding-tests")} variant="outline" size="sm" className="gap-2 border-white/30 text-white hover:bg-white/20 bg-white/10">
+              <Code2 className="w-4 h-4" />
+              Coding Tests
             </Button>
             <Button onClick={() => navigate("/notes")} variant="outline" size="sm" className="gap-2 border-white/30 text-white hover:bg-white/20 bg-white/10">
               <FileText className="w-4 h-4" />
