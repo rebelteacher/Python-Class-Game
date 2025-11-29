@@ -5788,26 +5788,39 @@ Format your response as JSON:
 
 @api_router.get("/coding-tests/{test_id}/result")
 async def get_coding_test_result(test_id: str, request: Request):
-    """Get student's test result (score and feedback only, no code)"""
+    """Get student's test results for all problems (score and feedback only, no code)"""
     user = await get_current_user(request)
     
     if user["role"] != "student":
         raise HTTPException(status_code=403, detail="Only students can view results")
     
-    submission = await db.coding_test_submissions.find_one({
+    # Get all submissions for this test
+    submissions = await db.coding_test_submissions.find({
         "test_id": test_id,
         "student_id": user["id"]
-    }, {"_id": 0})
+    }, {"_id": 0}).to_list(100)
     
-    if not submission:
-        raise HTTPException(status_code=404, detail="No submission found")
+    if not submissions:
+        raise HTTPException(status_code=404, detail="No submissions found")
     
-    # Return only score and feedback (not the code)
+    # Calculate overall score (average of all problem scores)
+    total_score = sum(sub["score"] for sub in submissions)
+    average_score = total_score / len(submissions)
+    
+    # Return aggregated results and individual problem results
     return {
-        "score": submission["score"],
-        "feedback": submission["feedback"],
-        "submitted_at": submission["submitted_at"],
-        "time_taken_seconds": submission.get("time_taken_seconds", 0)
+        "overall_score": average_score,
+        "total_problems": len(submissions),
+        "submissions": [
+            {
+                "problem_id": sub["problem_id"],
+                "score": sub["score"],
+                "feedback": sub["feedback"],
+                "submitted_at": sub["submitted_at"],
+                "time_taken_seconds": sub.get("time_taken_seconds", 0)
+            }
+            for sub in submissions
+        ]
     }
 
 
