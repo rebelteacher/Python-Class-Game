@@ -38,6 +38,11 @@ import VideoLibrary from "./pages/VideoLibrary";
 import AdminMessages from "./pages/AdminMessages";
 import AdminAnalytics from "./pages/AdminAnalytics";
 import AdminAnnouncements from "./pages/AdminAnnouncements";
+import CodingTestCreate from "./pages/CodingTestCreate";
+import CodingTestList from "./pages/CodingTestList";
+import MyTests from "./pages/MyTests";
+import CodingTestTaking from "./pages/CodingTestTaking";
+import CodingTestResult from "./pages/CodingTestResult";
 
 const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
 const API = `${BACKEND_URL}/api`;
