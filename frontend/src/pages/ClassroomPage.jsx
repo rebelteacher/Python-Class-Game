@@ -578,6 +578,61 @@ export default function ClassroomPage({ user }) {
                                   </div>
                                 )}
                               </div>
+                              
+                              {/* Action Buttons for Teachers */}
+                              {isTeacher && (
+                                <div className="mt-4 flex gap-2">
+                                  <Button
+                                    onClick={() => {
+                                      // Set up editing state for schedule
+                                      setEditingAssignment({
+                                        id: test.id,
+                                        title: test.title,
+                                        available_date: availableDate ? availableDate.toISOString().split('T')[0] : '',
+                                        available_time: availableDate ? availableDate.toISOString().split('T')[1].substring(0, 5) : '00:00',
+                                        due_date: dueDate ? dueDate.toISOString().split('T')[0] : '',
+                                        due_time: dueDate ? dueDate.toISOString().split('T')[1].substring(0, 5) : '23:59',
+                                        isCodingTest: true // Flag to identify coding test
+                                      });
+                                      setEditScheduleDialogOpen(true);
+                                    }}
+                                    variant="outline"
+                                    size="sm"
+                                  >
+                                    <Edit className="w-4 h-4 mr-1" />
+                                    Edit
+                                  </Button>
+                                  <Button
+                                    onClick={() => navigate(`/coding-tests/${test.id}/submissions`)}
+                                    variant="outline"
+                                    size="sm"
+                                    className="flex-1"
+                                  >
+                                    View Results
+                                  </Button>
+                                  <Button
+                                    onClick={async () => {
+                                      if (window.confirm('Are you sure you want to delete this coding test?')) {
+                                        try {
+                                          await axios.delete(`${API}/coding-tests/${test.id}`, {
+                                            withCredentials: true
+                                          });
+                                          toast.success('Coding test deleted successfully');
+                                          fetchCodingTests();
+                                        } catch (error) {
+                                          console.error('Error deleting test:', error);
+                                          toast.error('Failed to delete test');
+                                        }
+                                      }
+                                    }}
+                                    variant="outline"
+                                    size="sm"
+                                    className="text-red-600 hover:bg-red-50"
+                                  >
+                                    <Trash2 className="w-4 h-4" />
+                                  </Button>
+                                </div>
+                              )}
                             </CardContent>
                           </Card>
                         );
