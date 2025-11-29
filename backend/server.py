@@ -5833,6 +5833,25 @@ async def get_coding_test_result(test_id: str, request: Request):
     }
 
 
+@api_router.post("/coding-tests/{test_id}/verify-proctor-code")
+async def verify_proctor_code(test_id: str, data: dict, request: Request):
+    """Verify proctor code to unlock test"""
+    user = await get_current_user(request)
+    
+    if user["role"] != "student":
+        raise HTTPException(status_code=403, detail="Only students can verify proctor codes")
+    
+    test = await db.coding_tests.find_one({"id": test_id}, {"_id": 0})
+    if not test:
+        raise HTTPException(status_code=404, detail="Test not found")
+    
+    provided_code = data.get("proctor_code", "")
+    if provided_code == test.get("proctor_code"):
+        return {"success": True, "message": "Proctor code verified"}
+    else:
+        return {"success": False, "message": "Invalid proctor code"}
+
+
 @api_router.get("/coding-tests/{test_id}/submissions")
 async def get_coding_test_submissions(test_id: str, request: Request):
     """Get all submissions for a coding test (teacher only)"""
