@@ -592,13 +592,12 @@ export default function NotesLibrary({ user }) {
                         Download PDF
                       </Button>
                     </div>
-                  </object>
-                ) : (
-                  <div className="p-8 text-center text-gray-500 flex items-center justify-center h-full">
-                    No PDF data available
-                  </div>
-                )}
-              </div>
+                </object>
+              ) : (
+                <div className="p-8 text-center text-gray-500 flex items-center justify-center h-full bg-gray-100">
+                  No PDF data available
+                </div>
+              )}
             </div>
           </DialogContent>
         </Dialog>
