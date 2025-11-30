@@ -191,6 +191,14 @@ function App() {
                 }
               />
               
+              <Route
+                path="/turtle"
+                element={
+                  <ProtectedRoute user={user}>
+                    <TurtleGraphics user={user} />
+                  </ProtectedRoute>
+                }
+              />
               
               <Route
                 path="/classroom/:classroomId"
