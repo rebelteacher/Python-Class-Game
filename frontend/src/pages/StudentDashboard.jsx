@@ -931,33 +931,6 @@ export default function StudentDashboard({ user, setUser, refreshUser }) {
           </Card>
         </div>
 
-        {/* Turtle Graphics Card */}
-        <div className="mb-8">
-          <Card className="border-2 border-green-200 bg-gradient-to-br from-green-50 to-blue-50">
-            <CardContent className="p-6">
-              <div className="flex items-start justify-between">
-                <div className="flex items-start gap-4">
-                  <div className="p-3 bg-green-100 rounded-lg text-2xl">
-                    🐢
-                  </div>
-                  <div>
-                    <h3 className="text-lg font-semibold text-green-900">Turtle Graphics</h3>
-                    <p className="text-sm text-green-700">
-                      Learn Python with visual programming! Draw shapes, patterns, and art with turtle graphics.
-                    </p>
-                  </div>
-                </div>
-                <Button 
-                  onClick={() => navigate("/turtle")}
-                  className="bg-gradient-to-r from-green-600 to-blue-600 hover:from-green-700 hover:to-blue-700 gap-2"
-                >
-                  🐢 Try Turtle
-                </Button>
-              </div>
-            </CardContent>
-          </Card>
-        </div>
-
         {/* Active Competitions Section */}
         {competitions.length > 0 && (
           <div className="mb-8">
