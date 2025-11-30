@@ -568,12 +568,12 @@ export default function NotesLibrary({ user }) {
                   type="application/pdf"
                   className="w-full h-full bg-gray-100"
                 />
-                ) : selectedNote.file_data ? (
-                  <object
-                    data={`data:application/pdf;base64,${selectedNote.file_data}`}
-                    type="application/pdf"
-                    className="w-full h-full"
-                  >
+              ) : selectedNote.file_data ? (
+                <object
+                  data={`data:application/pdf;base64,${selectedNote.file_data}`}
+                  type="application/pdf"
+                  className="w-full h-full bg-gray-100"
+                >
                     <div className="p-8 text-center space-y-4 flex flex-col items-center justify-center h-full">
                       <FileText className="w-16 h-16 text-gray-400" />
                       <p className="text-gray-600">
