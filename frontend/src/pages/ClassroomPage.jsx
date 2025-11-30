@@ -764,6 +764,27 @@ export default function ClassroomPage({ user }) {
                               >
                                 View Results
                               </Button>
+                              <Button
+                                onClick={async () => {
+                                  if (window.confirm('Are you sure you want to delete this MC test? This will also delete all student submissions.')) {
+                                    try {
+                                      await axios.delete(`${API}/mc-tests/${test.id}`, {
+                                        withCredentials: true
+                                      });
+                                      toast.success('Test deleted successfully');
+                                      fetchTests();
+                                    } catch (error) {
+                                      console.error('Error deleting test:', error);
+                                      toast.error('Failed to delete test');
+                                    }
+                                  }
+                                }}
+                                variant="outline"
+                                size="sm"
+                                className="text-red-600 hover:bg-red-50"
+                              >
+                                <Trash2 className="w-4 h-4" />
+                              </Button>
                             </>
                           )}
                         </div>
