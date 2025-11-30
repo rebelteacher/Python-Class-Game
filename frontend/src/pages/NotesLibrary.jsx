@@ -508,7 +508,10 @@ export default function NotesLibrary({ user }) {
                           <Share2 className="w-4 h-4" />
                         </Button>
                         <Button
-                          onClick={() => handleDeleteNote(note.id)}
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleDeleteNote(note.id);
+                          }}
                           variant="outline"
                           size="sm"
                           className="text-red-600 hover:text-red-700"
