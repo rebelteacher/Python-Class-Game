@@ -533,12 +533,12 @@ export default function NotesLibrary({ user }) {
             URL.revokeObjectURL(selectedNote.pdfBlobUrl);
           }
         }}>
-          <DialogContent className="max-w-[95vw] max-h-[95vh] w-full h-full">
-            <DialogHeader>
-              <DialogTitle>{selectedNote.title}</DialogTitle>
-              <DialogDescription>{selectedNote.description}</DialogDescription>
+          <DialogContent className="max-w-[95vw] max-h-[95vh] w-full h-full p-4">
+            <DialogHeader className="pb-2">
+              <DialogTitle className="text-lg">{selectedNote.title}</DialogTitle>
+              <DialogDescription className="text-sm">{selectedNote.description}</DialogDescription>
             </DialogHeader>
-            <div className="space-y-4 h-[calc(100%-80px)] flex flex-col">
+            <div className="space-y-2 h-[calc(100%-100px)] flex flex-col">
               {/* Only show download button for Student Resources */}
               {selectedNote.resource_type === "student_resource" && (
                 <div className="flex gap-2 flex-shrink-0">
