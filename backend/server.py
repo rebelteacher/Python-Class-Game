@@ -2025,26 +2025,28 @@ async def execute_turtle_code(execute_req: CodeExecuteRequest, request: Request)
         
         # Create a temporary Python file with turtle code
         with tempfile.NamedTemporaryFile(mode='w', suffix='.py', delete=False) as f:
-            # Wrapper code to capture turtle output using SVG
+            # Wrapper code to capture turtle output
             wrapper_code = f'''
 import turtle
 import sys
 import io
 import base64
-from PIL import Image
-import tkinter as tk
 
-# Redirect stdout/stderr
-old_stdout = sys.stdout
-old_stderr = sys.stderr
-sys.stdout = io.StringIO()
-sys.stderr = io.StringIO()
+# Redirect stdout/stderr to capture print statements
+captured_stdout = io.StringIO()
+captured_stderr = io.StringIO()
+
+original_stdout = sys.stdout
+original_stderr = sys.stderr
 
 output_text = ""
 error_text = ""
 
 try:
-    # Setup turtle in headless mode with Tkinter
+    sys.stdout = captured_stdout
+    sys.stderr = captured_stderr
+    
+    # Setup turtle in headless mode
     screen = turtle.Screen()
     screen.setup(600, 600)
     screen.bgcolor("white")
@@ -2052,58 +2054,45 @@ try:
     # Execute student code
 {chr(10).join("    " + line for line in execute_req.code.split(chr(10)))}
     
-    # Get any print output
-    output_text = sys.stdout.getvalue()
+    # Restore stdout/stderr temporarily to write output
+    sys.stdout = original_stdout
+    sys.stderr = original_stderr
     
-    # Update canvas
+    # Get any print output from user code
+    output_text = captured_stdout.getvalue()
+    if output_text:
+        print("OUTPUT:" + output_text.strip())
+    
+    # Update and save canvas as PostScript
     screen.update()
-    
-    # Get the canvas and convert to PostScript
     canvas = screen.getcanvas()
-    ps_data = canvas.postscript(colormode='color')
-    
-    # Save PostScript to file
-    with open("/tmp/turtle_output.eps", "w") as ps_file:
-        ps_file.write(ps_data)
-    
-    # Use PIL to convert EPS to PNG
-    # Note: This requires ghostscript, but we'll use an alternative approach
-    # Instead, we'll try to capture the canvas directly using tkinter
-    
-    # Alternative: Save canvas as PNG directly if possible
-    # For now, we'll encode the PostScript and handle conversion later
-    # But since we don't have ghostscript, let's use a workaround
-    
-    # Try to use tkinter to save the canvas
-    import os
-    # Save using PostScript
     canvas.postscript(file="/tmp/turtle_output.eps", colormode='color')
     
-    # Since we can't convert PS to PNG without ghostscript,
-    # we'll need to use a different approach: SVG
-    # But turtle doesn't support SVG directly either
+    # Convert EPS to PNG using PIL (requires ghostscript)
+    from PIL import Image
+    img = Image.open("/tmp/turtle_output.eps")
+    img = img.convert('RGB')
     
-    # Alternative solution: Use turtle's built-in shape/drawing capture
-    # We'll output the PostScript and let the user know they need to install ghostscript
-    # OR we can use a Python library to convert
+    # Resize if too large
+    if img.width > 800 or img.height > 800:
+        img.thumbnail((800, 800), Image.Resampling.LANCZOS)
     
-    # Best solution for now: Install ghostscript or use svg-turtle
-    # Let's try installing ghostscript first
+    img.save("/tmp/turtle_output.png", "PNG")
     
-    # For now, read the EPS file and encode it
-    with open("/tmp/turtle_output.eps", "rb") as eps_file:
-        eps_data = base64.b64encode(eps_file.read()).decode('utf-8')
-        print("IMAGE_DATA:" + eps_data)
+    # Read and encode the PNG
+    with open("/tmp/turtle_output.png", "rb") as img_file:
+        img_data = base64.b64encode(img_file.read()).decode('utf-8')
+        print("IMAGE_DATA:" + img_data)
     
+    # Close turtle
     turtle.bye()
     
 except Exception as e:
+    sys.stdout = original_stdout
+    sys.stderr = original_stderr
     import traceback
     error_text = str(e) + "\\n" + traceback.format_exc()
     print("ERROR:" + error_text, file=sys.stderr)
-finally:
-    sys.stdout = old_stdout
-    sys.stderr = old_stderr
 '''
             f.write(wrapper_code)
             temp_file = f.name
@@ -2115,70 +2104,71 @@ finally:
                 capture_output=True,
                 text=True,
                 timeout=15,
-                env={{**os.environ, 'DISPLAY': ':99'}}  # Headless display
+                env={**os.environ, 'DISPLAY': ':99'}  # Headless display
             )
             
             stdout = result.stdout
             stderr = result.stderr
             
-            # Extract image data (EPS format for now)
+            # Parse output
             image_data = None
-            output_lines = []
+            output_text = ""
             error_msg = None
             
-            for line in stdout.split('\\n'):
+            for line in stdout.split('\n'):
                 if line.startswith('IMAGE_DATA:'):
-                    # This is EPS data, not PNG - we'll handle it differently
-                    eps_data = line.replace('IMAGE_DATA:', '')
-                    # For now, return error since we need ghostscript
-                    error_msg = "PostScript conversion requires ghostscript. Installing..."
-                elif line.strip():
-                    output_lines.append(line)
+                    image_data = line.replace('IMAGE_DATA:', '').strip()
+                elif line.startswith('OUTPUT:'):
+                    output_text = line.replace('OUTPUT:', '').strip()
             
-            for line in stderr.split('\\n'):
-                if line.startswith('ERROR:'):
-                    error_msg = line.replace('ERROR:', '')
+            if stderr and 'ERROR:' in stderr:
+                error_msg = stderr.split('ERROR:')[-1].strip()
+            elif result.returncode != 0 and not image_data:
+                error_msg = stderr if stderr else "Execution failed"
             
             if error_msg:
-                return {{
-                    "output": '\\n'.join(output_lines),
+                return {
+                    "output": output_text,
                     "error": error_msg,
                     "success": False,
                     "image_data": None
-                }}
+                }
             
-            return {{
-                "output": '\\n'.join(output_lines),
+            return {
+                "output": output_text,
                 "error": "",
                 "success": True,
                 "image_data": image_data
-            }}
+            }
             
         finally:
             # Clean up temp file
-            os.unlink(temp_file)
+            try:
+                os.unlink(temp_file)
+            except:
+                pass
             # Clean up generated files
-            for f in ['/tmp/turtle_output.eps', '/tmp/turtle_output.png', '/tmp/turtle_output.ps']:
+            for f in ['/tmp/turtle_output.eps', '/tmp/turtle_output.png']:
                 try:
                     os.unlink(f)
                 except:
                     pass
                     
     except subprocess.TimeoutExpired:
-        return {{
+        return {
             "output": "",
             "error": "Turtle code execution timed out (15 seconds limit)",
             "success": False,
             "image_data": None
-        }}
+        }
     except Exception as e:
-        logging.error(f"Turtle execution error: {{str(e)}}")
-        return {{
+        logging.error(f"Turtle execution error: {str(e)}")
+        return {
             "output": "",
-            "error": f"Execution failed: {{str(e)}}",
+            "error": f"Execution failed: {str(e)}",
             "success": False,
             "image_data": None
-        }}
+        }
 
 
 # ----- Submission Routes -----
