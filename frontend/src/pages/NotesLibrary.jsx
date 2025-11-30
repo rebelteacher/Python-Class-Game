@@ -539,7 +539,7 @@ export default function NotesLibrary({ user }) {
           <DialogContent className="max-w-[95vw] max-h-[95vh] w-full h-full p-0">
             <div className="flex items-center justify-between h-[40px] px-4 border-b flex-shrink-0">
               <DialogTitle className="text-base font-semibold">{selectedNote.title}</DialogTitle>
-              <div className="flex gap-2 items-center">
+              <div className="flex gap-2 items-center mr-20">
                 <Button
                   onClick={() => {
                     const link = document.createElement('a');
@@ -561,8 +561,7 @@ export default function NotesLibrary({ user }) {
                 )}
               </div>
             </div>
-            <div className="h-[calc(100%-40px)]">
-              <div className="overflow-hidden bg-gray-100 h-full w-full">
+            <div className="h-[calc(100%-40px)] overflow-hidden bg-gray-100">
                 {selectedNote.pdfBlobUrl ? (
                   <embed
                     src={selectedNote.pdfBlobUrl}
