@@ -491,13 +491,29 @@ export default function NotesLibrary({ user }) {
                   <div className="flex gap-2 mt-3">
                     <Button
                       onClick={() => {
-                        // Create blob URL and open in new tab
-                        const pdfData = note.file_data;
-                        const blob = new Blob([Uint8Array.from(atob(pdfData), c => c.charCodeAt(0))], { type: 'application/pdf' });
-                        const url = URL.createObjectURL(blob);
-                        window.open(url, '_blank');
-                        // Clean up after a short delay
-                        setTimeout(() => URL.revokeObjectURL(url), 1000);
+                        try {
+                          // Check if file_data exists and is valid base64
+                          if (!note.file_data) {
+                            toast.error("No PDF data available");
+                            return;
+                          }
+                          
+                          // Create blob URL and open in new tab
+                          const pdfData = note.file_data;
+                          const binaryString = atob(pdfData);
+                          const bytes = new Uint8Array(binaryString.length);
+                          for (let i = 0; i < binaryString.length; i++) {
+                            bytes[i] = binaryString.charCodeAt(i);
+                          }
+                          const blob = new Blob([bytes], { type: 'application/pdf' });
+                          const url = URL.createObjectURL(blob);
+                          window.open(url, '_blank');
+                          // Clean up after a short delay
+                          setTimeout(() => URL.revokeObjectURL(url), 1000);
+                        } catch (error) {
+                          console.error("Error opening PDF:", error);
+                          toast.error("Failed to open PDF. Try downloading instead.");
+                        }
                       }}
                       className="flex-1 bg-indigo-600 hover:bg-indigo-700"
                       size="sm"
