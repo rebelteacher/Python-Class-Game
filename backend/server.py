@@ -2098,9 +2098,11 @@ except Exception as e:
             temp_file = f.name
         
         try:
-            # Execute the turtle code with timeout
+            # Execute the turtle code with timeout using the same Python interpreter
+            import sys as system
+            python_executable = system.executable
             result = subprocess.run(
-                ['python3', temp_file],
+                [python_executable, temp_file],
                 capture_output=True,
                 text=True,
                 timeout=15,
