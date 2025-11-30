@@ -44,6 +44,7 @@ import MyTests from "./pages/MyTests";
 import CodingTestTaking from "./pages/CodingTestTaking";
 import CodingTestResult from "./pages/CodingTestResult";
 import CodingTestSubmissions from "./pages/CodingTestSubmissions";
+import TurtleGraphics from "./pages/TurtleGraphics";
 
 const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
 const API = `${BACKEND_URL}/api`;
