@@ -490,16 +490,23 @@ export default function NotesLibrary({ user }) {
                   </div>
                   <div className="flex gap-2 mt-3">
                     <Button
-                      onClick={() => {
+                      onClick={async () => {
                         try {
-                          // Check if file_data exists and is valid base64
-                          if (!note.file_data) {
+                          // Fetch the full note with file_data
+                          const response = await axios.get(`${API}/notes/${note.id}`, {
+                            withCredentials: true
+                          });
+                          
+                          const fullNote = response.data;
+                          
+                          // Check if file_data exists
+                          if (!fullNote.file_data) {
                             toast.error("No PDF data available");
                             return;
                           }
                           
                           // Create blob URL and open in new tab
-                          const pdfData = note.file_data;
+                          const pdfData = fullNote.file_data;
                           const binaryString = atob(pdfData);
                           const bytes = new Uint8Array(binaryString.length);
                           for (let i = 0; i < binaryString.length; i++) {
