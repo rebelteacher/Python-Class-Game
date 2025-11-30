@@ -561,8 +561,8 @@ export default function NotesLibrary({ user }) {
                 )}
               </div>
             </div>
-            <div className="h-[calc(100%-40px)] overflow-hidden bg-gray-100">
-                {selectedNote.pdfBlobUrl ? (
+            <div className="h-[calc(100%-40px)]">
+              {selectedNote.pdfBlobUrl ? (
                   <embed
                     src={selectedNote.pdfBlobUrl}
                     type="application/pdf"
