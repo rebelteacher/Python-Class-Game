@@ -5471,6 +5471,31 @@ async def update_test_schedule(
     return {"success": True, "message": "Test schedule updated"}
 
 
+@api_router.delete("/mc-tests/{test_id}")
+async def delete_mc_test(test_id: str, request: Request):
+    """Delete an MC test (teacher only)"""
+    user = await get_current_user(request)
+    
+    if user["role"] != "teacher":
+        raise HTTPException(status_code=403, detail="Only teachers can delete tests")
+    
+    # Verify test belongs to teacher
+    test = await db.mc_tests.find_one({"id": test_id}, {"_id": 0})
+    if not test:
+        raise HTTPException(status_code=404, detail="Test not found")
+    
+    if test["teacher_id"] != user["id"]:
+        raise HTTPException(status_code=403, detail="Access denied")
+    
+    # Delete the test
+    await db.mc_tests.delete_one({"id": test_id})
+    
+    # Delete associated submissions
+    await db.mc_test_submissions.delete_many({"test_id": test_id})
+    
+    return {"success": True, "message": "Test deleted successfully"}
+
+
 # ==================== CODING TESTS ====================
 
 @api_router.post("/coding-tests")
