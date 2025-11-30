@@ -550,15 +550,16 @@ export default function NotesLibrary({ user }) {
                       link.click();
                     }}
                     variant="outline"
-                    className="gap-2"
+                    size="sm"
+                    className="gap-1"
                   >
-                    <Download className="w-4 h-4" />
+                    <Download className="w-3 h-3" />
                     Download PDF
                   </Button>
                 </div>
               )}
               {selectedNote.resource_type === "teacher_resource" && (
-                <div className="p-2 bg-amber-50 border border-amber-200 rounded text-sm text-amber-800 flex-shrink-0">
+                <div className="p-1.5 bg-amber-50 border border-amber-200 rounded text-xs text-amber-800 flex-shrink-0">
                   ℹ️ Teacher resources are view-only and cannot be downloaded.
                 </div>
               )}
