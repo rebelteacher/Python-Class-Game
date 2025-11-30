@@ -490,7 +490,15 @@ export default function NotesLibrary({ user }) {
                   </div>
                   <div className="flex gap-2 mt-3">
                     <Button
-                      onClick={() => handleViewNote(note)}
+                      onClick={() => {
+                        // Create blob URL and open in new tab
+                        const pdfData = note.file_data;
+                        const blob = new Blob([Uint8Array.from(atob(pdfData), c => c.charCodeAt(0))], { type: 'application/pdf' });
+                        const url = URL.createObjectURL(blob);
+                        window.open(url, '_blank');
+                        // Clean up after a short delay
+                        setTimeout(() => URL.revokeObjectURL(url), 1000);
+                      }}
                       className="flex-1 bg-indigo-600 hover:bg-indigo-700"
                       size="sm"
                     >
