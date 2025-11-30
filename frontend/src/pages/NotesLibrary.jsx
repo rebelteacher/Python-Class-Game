@@ -563,11 +563,11 @@ export default function NotesLibrary({ user }) {
             </div>
             <div className="h-[calc(100%-40px)]">
               {selectedNote.pdfBlobUrl ? (
-                  <embed
-                    src={selectedNote.pdfBlobUrl}
-                    type="application/pdf"
-                    className="w-full h-full"
-                  />
+                <embed
+                  src={selectedNote.pdfBlobUrl}
+                  type="application/pdf"
+                  className="w-full h-full bg-gray-100"
+                />
                 ) : selectedNote.file_data ? (
                   <object
                     data={`data:application/pdf;base64,${selectedNote.file_data}`}
