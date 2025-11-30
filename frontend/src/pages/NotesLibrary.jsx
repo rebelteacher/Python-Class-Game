@@ -533,15 +533,15 @@ export default function NotesLibrary({ user }) {
             URL.revokeObjectURL(selectedNote.pdfBlobUrl);
           }
         }}>
-          <DialogContent className="max-w-4xl max-h-[90vh]">
+          <DialogContent className="max-w-[95vw] max-h-[95vh] w-full h-full">
             <DialogHeader>
               <DialogTitle>{selectedNote.title}</DialogTitle>
               <DialogDescription>{selectedNote.description}</DialogDescription>
             </DialogHeader>
-            <div className="space-y-4">
+            <div className="space-y-4 h-[calc(100%-80px)] flex flex-col">
               {/* Only show download button for Student Resources */}
               {selectedNote.resource_type === "student_resource" && (
-                <div className="flex gap-2">
+                <div className="flex gap-2 flex-shrink-0">
                   <Button
                     onClick={() => {
                       const link = document.createElement('a');
@@ -558,11 +558,11 @@ export default function NotesLibrary({ user }) {
                 </div>
               )}
               {selectedNote.resource_type === "teacher_resource" && (
-                <div className="p-2 bg-amber-50 border border-amber-200 rounded text-sm text-amber-800">
+                <div className="p-2 bg-amber-50 border border-amber-200 rounded text-sm text-amber-800 flex-shrink-0">
                   ℹ️ Teacher resources are view-only and cannot be downloaded.
                 </div>
               )}
-              <div className="border rounded-lg overflow-hidden bg-gray-100" style={{ height: "60vh" }}>
+              <div className="border rounded-lg overflow-hidden bg-gray-100 flex-1 min-h-0">
                 {selectedNote.pdfBlobUrl ? (
                   <embed
                     src={selectedNote.pdfBlobUrl}
