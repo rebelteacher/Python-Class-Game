@@ -6329,7 +6329,7 @@ async def start_challenge(challenge_id: str, request: Request):
     if user["id"] not in [challenge["challenger_id"], challenge["challenged_id"]]:
         raise HTTPException(status_code=403, detail="Not a participant in this challenge")
     
-    if challenge["status"] != "accepted":
+    if challenge["status"] not in ["accepted", "in_progress"]:
         raise HTTPException(status_code=400, detail="Challenge must be accepted first")
     
     # Get the problem
