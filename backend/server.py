@@ -2019,18 +2019,20 @@ async def execute_code(execute_req: CodeExecuteRequest, request: Request):
 
 @api_router.post("/code/execute-turtle")
 async def execute_turtle_code(execute_req: CodeExecuteRequest, request: Request):
-    """Execute Python turtle graphics code and return image"""
+    """Execute Python turtle graphics code using Pillow-based simulator"""
     try:
         await get_current_user(request)  # Ensure authenticated
         
         # Create a temporary Python file with turtle code
         with tempfile.NamedTemporaryFile(mode='w', suffix='.py', delete=False) as f:
-            # Wrapper code to capture turtle output
+            # Wrapper code using our Pillow-based turtle simulator
             wrapper_code = f'''
-import turtle
 import sys
 import io
-import base64
+import json
+sys.path.insert(0, '/app/backend')
+
+from turtle_sim import TurtleSim, Turtle, Screen
 
 # Redirect stdout/stderr to capture print statements
 captured_stdout = io.StringIO()
@@ -2041,20 +2043,78 @@ original_stderr = sys.stderr
 
 output_text = ""
 error_text = ""
+image_data = ""
+tracking_data = {{}}
 
 try:
     sys.stdout = captured_stdout
     sys.stderr = captured_stderr
     
-    # Setup turtle in headless mode
-    screen = turtle.Screen()
-    screen.setup(600, 600)
-    screen.bgcolor("white")
+    # Create turtle simulator
+    turtle_sim = TurtleSim(width=600, height=600, bg_color="white")
+    
+    # Create mock turtle module
+    class MockTurtleModule:
+        def __init__(self, sim):
+            self._sim = sim
+            self.Turtle = lambda: Turtle(sim)
+            self.Screen = lambda: Screen(sim)
+        
+        def forward(self, d):
+            self._sim.forward(d)
+        def backward(self, d):
+            self._sim.backward(d)
+        def right(self, a):
+            self._sim.right(a)
+        def left(self, a):
+            self._sim.left(a)
+        def goto(self, x, y=None):
+            if y is None:
+                x, y = x
+            self._sim.goto(x, y)
+        def circle(self, r, e=None, s=None):
+            self._sim.circle(r, e, s)
+        def penup(self):
+            self._sim.penup()
+        def pendown(self):
+            self._sim.pendown()
+        def pensize(self, w):
+            self._sim.pensize(w)
+        def pencolor(self, c):
+            self._sim.pencolor(c)
+        def color(self, *args):
+            self._sim.color(*args)
+        def speed(self, s):
+            self._sim.speed(s)
+        def hideturtle(self):
+            self._sim.hideturtle()
+        def showturtle(self):
+            self._sim.showturtle()
+        def begin_fill(self):
+            self._sim.begin_fill()
+        def end_fill(self):
+            self._sim.end_fill()
+        def setheading(self, a):
+            self._sim.setheading(a)
+        def bye(self):
+            pass
+        
+        # Aliases
+        fd = forward
+        bk = backward
+        rt = right
+        lt = left
+        pu = penup
+        pd = pendown
+        ht = hideturtle
+        st = showturtle
+    
+    turtle = MockTurtleModule(turtle_sim)
     
     # Execute student code
 {chr(10).join("    " + line for line in execute_req.code.split(chr(10)))}
     
-    # Restore stdout/stderr temporarily to write output
+    # Restore stdout/stderr
     sys.stdout = original_stdout
     sys.stderr = original_stderr
     
@@ -2063,29 +2123,12 @@ try:
     if output_text:
         print("OUTPUT:" + output_text.strip())
     
-    # Update and save canvas as PostScript
-    screen.update()
-    canvas = screen.getcanvas()
-    canvas.postscript(file="/tmp/turtle_output.eps", colormode='color')
+    # Get image and tracking data
+    image_data = turtle_sim.get_image_base64()
+    tracking_data = turtle_sim.get_tracking_data()
     
-    # Convert EPS to PNG using PIL (requires ghostscript)
-    from PIL import Image
-    img = Image.open("/tmp/turtle_output.eps")
-    img = img.convert('RGB')
-    
-    # Resize if too large
-    if img.width > 800 or img.height > 800:
-        img.thumbnail((800, 800), Image.Resampling.LANCZOS)
-    
-    img.save("/tmp/turtle_output.png", "PNG")
-    
-    # Read and encode the PNG
-    with open("/tmp/turtle_output.png", "rb") as img_file:
-        img_data = base64.b64encode(img_file.read()).decode('utf-8')
-        print("IMAGE_DATA:" + img_data)
-    
-    # Close turtle
-    turtle.bye()
+    print("IMAGE_DATA:" + image_data)
+    print("TRACKING_DATA:" + json.dumps(tracking_data))
     
 except Exception as e:
     sys.stdout = original_stdout
@@ -2098,15 +2141,14 @@ except Exception as e:
             temp_file = f.name
         
         try:
-            # Execute the turtle code with timeout using the same Python interpreter
+            # Execute the turtle code with timeout
             import sys as system
             python_executable = system.executable
             result = subprocess.run(
                 [python_executable, temp_file],
                 capture_output=True,
                 text=True,
-                timeout=15,
-                env={**os.environ, 'DISPLAY': ':99'}  # Headless display
+                timeout=15
             )
             
             stdout = result.stdout
@@ -2115,6 +2157,7 @@ except Exception as e:
             # Parse output
             image_data = None
             output_text = ""
+            tracking_data = None
             error_msg = None
             
             for line in stdout.split('\n'):
@@ -2122,6 +2165,11 @@ except Exception as e:
                     image_data = line.replace('IMAGE_DATA:', '').strip()
                 elif line.startswith('OUTPUT:'):
                     output_text = line.replace('OUTPUT:', '').strip()
+                elif line.startswith('TRACKING_DATA:'):
+                    try:
+                        tracking_data = json.loads(line.replace('TRACKING_DATA:', '').strip())
+                    except:
+                        pass
             
             if stderr and 'ERROR:' in stderr:
                 error_msg = stderr.split('ERROR:')[-1].strip()
@@ -2133,14 +2181,16 @@ except Exception as e:
                     "output": output_text,
                     "error": error_msg,
                     "success": False,
-                    "image_data": None
+                    "image_data": None,
+                    "tracking_data": None
                 }
             
             return {
                 "output": output_text,
                 "error": "",
                 "success": True,
-                "image_data": image_data
+                "image_data": image_data,
+                "tracking_data": tracking_data
             }
             
         finally:
@@ -2149,19 +2199,14 @@ except Exception as e:
                 os.unlink(temp_file)
             except:
                 pass
-            # Clean up generated files
-            for f in ['/tmp/turtle_output.eps', '/tmp/turtle_output.png']:
-                try:
-                    os.unlink(f)
-                except:
-                    pass
                     
     except subprocess.TimeoutExpired:
         return {
             "output": "",
             "error": "Turtle code execution timed out (15 seconds limit)",
             "success": False,
-            "image_data": None
+            "image_data": None,
+            "tracking_data": None
         }
     except Exception as e:
         logging.error(f"Turtle execution error: {str(e)}")
@@ -2169,7 +2214,8 @@ except Exception as e:
             "output": "",
             "error": f"Execution failed: {str(e)}",
             "success": False,
-            "image_data": None
+            "image_data": None,
+            "tracking_data": None
         }
 
 
