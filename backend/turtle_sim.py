@@ -30,7 +30,7 @@ class TurtleSim:
         self.pen_down = True
         self.pen_color = "black"
         self.pen_width = 2
-        self.speed = 3
+        self._speed = 3
         self.is_visible = True
         
         # Tracking data for auto-grading
