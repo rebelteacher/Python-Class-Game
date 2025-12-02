@@ -180,7 +180,7 @@ class TurtleSim:
     def speed(self, speed: int):
         """Set turtle speed (ignored in simulation)"""
         self.commands_used.append(f"speed({speed})")
-        self.speed = speed
+        self._speed = speed
     
     def hideturtle(self):
         """Hide the turtle"""
