@@ -2111,6 +2111,9 @@ try:
     
     turtle = MockTurtleModule(turtle_sim)
     
+    # CRITICAL: Inject mock turtle module before user code imports it
+    sys.modules['turtle'] = turtle
+    
     # Execute student code
 {chr(10).join("    " + line for line in execute_req.code.split(chr(10)))}
     
