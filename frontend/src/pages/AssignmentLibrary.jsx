@@ -755,11 +755,49 @@ export default function AssignmentLibrary({ user }) {
                   </div>
 
                   <div>
-                    <Label htmlFor="solutionCode">Solution Code *</Label>
+                    <div className="flex items-center justify-between mb-2">
+                      <Label htmlFor="solutionCode">Solution Code *</Label>
+                      {newProblem.assignment_type === "turtle" && (
+                        <Button
+                          type="button"
+                          size="sm"
+                          variant="outline"
+                          onClick={async () => {
+                            if (!newProblem.solution_code.trim()) {
+                              toast.error("Please enter solution code first");
+                              return;
+                            }
+                            try {
+                              const response = await axios.post(`${API}/code/execute-turtle`, {
+                                code: newProblem.solution_code,
+                                test_input: ""
+                              });
+                              if (response.data.success && response.data.image_data) {
+                                setTurtlePreviewImage(response.data.image_data);
+                                setTurtlePreviewOpen(true);
+                                // Store the expected image
+                                setNewProblem({
+                                  ...newProblem,
+                                  expected_turtle_image: response.data.image_data
+                                });
+                                toast.success("Preview generated!");
+                              } else {
+                                toast.error("Failed to generate preview: " + (response.data.error || "Unknown error"));
+                              }
+                            } catch (error) {
+                              toast.error("Failed to preview: " + (error.response?.data?.detail || error.message));
+                            }
+                          }}
+                          className="bg-green-600 hover:bg-green-700 text-white"
+                        >
+                          🐢 Preview Turtle Output
+                        </Button>
+                      )}
+                    </div>
                     <Textarea
                       data-testid="lib-solution-input"
                       id="solutionCode"
-                      placeholder="# Your solution code..."
+                      placeholder={newProblem.assignment_type === "turtle" ? "# Turtle graphics code...\nimport turtle\nt = turtle.Turtle()\n..." : "# Your solution code..."}
                       value={newProblem.solution_code}
                       onChange={(e) => setNewProblem({ ...newProblem, solution_code: e.target.value })}
                       className="mt-1 font-mono text-sm"
@@ -767,19 +805,34 @@ export default function AssignmentLibrary({ user }) {
                     />
                   </div>
 
-                  <div>
-                    <Label htmlFor="expectedOutput">Expected Output (Optional)</Label>
-                    <Textarea
-                      data-testid="lib-expected-output-input"
-                      id="expectedOutput"
-                      placeholder="e.g., 60"
-                      value={newProblem.expected_output}
-                      onChange={(e) => setNewProblem({ ...newProblem, expected_output: e.target.value })}
-                      className="mt-1 font-mono text-sm"
-                      rows={3}
-                    />
-                    <p className="text-xs text-gray-500 mt-1">What the program should output when run</p>
-                  </div>
+                  {newProblem.assignment_type === "code" && (
+                    <div>
+                      <Label htmlFor="expectedOutput">Expected Output (Optional)</Label>
+                      <Textarea
+                        data-testid="lib-expected-output-input"
+                        id="expectedOutput"
+                        placeholder="e.g., 60"
+                        value={newProblem.expected_output}
+                        onChange={(e) => setNewProblem({ ...newProblem, expected_output: e.target.value })}
+                        className="mt-1 font-mono text-sm"
+                        rows={3}
+                      />
+                      <p className="text-xs text-gray-500 mt-1">What the program should output when run</p>
+                    </div>
+                  )}
+                  
+                  {newProblem.assignment_type === "turtle" && newProblem.expected_turtle_image && (
+                    <div className="border-2 border-green-200 bg-green-50 rounded-lg p-4">
+                      <Label className="font-semibold">Expected Output Preview</Label>
+                      <img 
+                        src={`data:image/png;base64,${newProblem.expected_turtle_image}`}
+                        alt="Expected turtle output"
+                        className="mt-2 border-2 border-gray-300 rounded"
+                        style={{ maxWidth: "100%", height: "auto" }}
+                      />
+                      <p className="text-sm text-gray-600 mt-2">✓ This will be shown to students as the expected output</p>
+                    </div>
+                  )}
 
                   <Button data-testid="lib-submit-btn" type="submit" className="w-full bg-indigo-600 hover:bg-indigo-700">
                     Add to Library
