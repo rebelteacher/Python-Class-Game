@@ -63,8 +63,19 @@ export default function AssignmentLibrary({ user }) {
     lesson: "",
     problem_type: "Independent Practice",
     resources_link: "",
-    csta_standard: ""
+    csta_standard: "",
+    assignment_type: "code",
+    turtle_grading_criteria: {
+      min_lines: 0,
+      min_circles: 0,
+      required_colors: [],
+      min_distance: 0
+    },
+    expected_turtle_image: ""
   });
+  
+  const [turtlePreviewOpen, setTurtlePreviewOpen] = useState(false);
+  const [turtlePreviewImage, setTurtlePreviewImage] = useState("");
 
   useEffect(() => {
     fetchProblems();
