@@ -1431,6 +1431,31 @@ export default function AssignmentLibrary({ user }) {
           </Dialog>
         )}
       </main>
+      
+      {/* Turtle Preview Dialog */}
+      <Dialog open={turtlePreviewOpen} onOpenChange={setTurtlePreviewOpen}>
+        <DialogContent className="max-w-3xl">
+          <DialogHeader>
+            <DialogTitle>🐢 Turtle Graphics Preview</DialogTitle>
+            <DialogDescription>
+              This is what students will see as the expected output
+            </DialogDescription>
+          </DialogHeader>
+          <div className="flex justify-center">
+            {turtlePreviewImage && (
+              <img 
+                src={`data:image/png;base64,${turtlePreviewImage}`}
+                alt="Turtle preview"
+                className="border-2 border-gray-300 rounded"
+                style={{ maxWidth: "100%", height: "auto" }}
+              />
+            )}
+          </div>
+          <Button onClick={() => setTurtlePreviewOpen(false)}>
+            Close
+          </Button>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
