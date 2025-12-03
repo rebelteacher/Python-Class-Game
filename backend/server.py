@@ -2521,7 +2521,82 @@ async def submit_assignment(submission: SubmissionCreate, request: Request):
         lives_remaining = 3
         attempt_number = 1
     
-    # Run test cases (if provided)
+    # Handle turtle graphics assignments differently
+    if is_turtle:
+        grading_criteria = problem.get("turtle_grading_criteria", {})
+        expected_image = problem.get("expected_turtle_image", "")
+        
+        # Grade turtle submission
+        turtle_result = await grade_turtle_submission(
+            submission.code,
+            grading_criteria,
+            expected_image
+        )
+        
+        base_score = turtle_result["score"]
+        feedback = turtle_result["feedback"]
+        test_results = [{
+            "test_id": "turtle_grading",
+            "description": "Turtle graphics requirements",
+            "passed": base_score >= 70,
+            "tracking_data": turtle_result["tracking_data"]
+        }]
+        is_passing = base_score >= 70
+        
+        # Deduct life if not passing
+        if not is_passing:
+            lives_remaining -= 1
+        
+        # Check if late
+        is_late = False
+        try:
+            due_date = datetime.fromisoformat(assignment["due_date"]) if assignment.get("due_date") else None
+            if due_date and datetime.now(timezone.utc) > due_date:
+                is_late = True
+                if assignment.get("late_penalty_percent", 0) > 0:
+                    base_score *= (1 - assignment["late_penalty_percent"] / 100)
+        except (ValueError, TypeError):
+            pass
+        
+        # Create turtle submission
+        new_submission = {
+            "id": str(uuid.uuid4()),
+            "assignment_id": submission.assignment_id,
+            "problem_id": submission.problem_id,
+            "student_id": user["id"],
+            "code": submission.code,
+            "score": base_score,
+            "feedback": feedback,
+            "test_results": test_results,
+            "attempt_number": attempt_number,
+            "lives_remaining": lives_remaining,
+            "is_passing": is_passing,
+            "is_late": is_late,
+            "is_final": False,
+            "turtle_image": turtle_result["image_data"],
+            "turtle_tracking_data": turtle_result["tracking_data"],
+            "submitted_at": datetime.now(timezone.utc).isoformat()
+        }
+        
+        await db.submissions.insert_one(new_submission)
+        
+        # Update user stats if passing
+        if is_passing:
+            xp_earned = calculate_xp_and_coins(base_score, attempt_number == 1, user.get("current_streak", 0))
+            await db.users.update_one(
+                {"id": user["id"]},
+                {"$inc": {
+                    "xp": xp_earned["xp"],
+                    "coins": xp_earned["coins"],
+                    "problems_solved": 1
+                }}
+            )
+        
+        # Remove MongoDB _id before returning
+        new_submission.pop("_id", None)
+        return new_submission
+    
+    # Run test cases (if provided) - for traditional code assignments
     test_results = []
     total_tests = len(assignment.get("test_cases", []))
     passed_tests = 0
