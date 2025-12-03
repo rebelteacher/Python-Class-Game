@@ -715,18 +715,47 @@ export default function AssignmentPage({ user }) {
                 </CardContent>
               </Card>
 
-              {(assignment.expected_output || (assignment.problems && assignment.problems[currentProblemIndex]?.expected_output)) && (
-                <Card data-testid="expected-output-card" className="border-2 border-green-200 bg-green-50">
-                  <CardHeader>
-                    <CardTitle className="text-lg">Expected Output</CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <pre className="p-3 bg-white rounded border border-green-300 text-gray-800 text-sm font-mono whitespace-pre-wrap">
-                      {assignment.expected_output || assignment.problems[currentProblemIndex].expected_output}
-                    </pre>
-                  </CardContent>
-                </Card>
-              )}
+              {/* Expected Output - Text or Turtle Image */}
+              {(() => {
+                const currentProblem = assignment.problems?.[currentProblemIndex];
+                const isTurtle = currentProblem?.assignment_type === "turtle";
+                const hasExpectedOutput = assignment.expected_output || currentProblem?.expected_output;
+                const hasExpectedImage = currentProblem?.expected_turtle_image;
+                
+                if (isTurtle && hasExpectedImage) {
+                  return (
+                    <Card data-testid="expected-output-card" className="border-2 border-green-200 bg-green-50">
+                      <CardHeader>
+                        <CardTitle className="text-lg">🎯 Expected Output</CardTitle>
+                        <CardDescription>Your turtle graphics should look like this</CardDescription>
+                      </CardHeader>
+                      <CardContent>
+                        <div className="flex justify-center">
+                          <img 
+                            src={`data:image/png;base64,${hasExpectedImage}`}
+                            alt="Expected turtle output"
+                            className="border-2 border-green-300 rounded max-w-full h-auto"
+                          />
+                        </div>
+                      </CardContent>
+                    </Card>
+                  );
+                } else if (!isTurtle && hasExpectedOutput) {
+                  return (
+                    <Card data-testid="expected-output-card" className="border-2 border-green-200 bg-green-50">
+                      <CardHeader>
+                        <CardTitle className="text-lg">Expected Output</CardTitle>
+                      </CardHeader>
+                      <CardContent>
+                        <pre className="p-3 bg-white rounded border border-green-300 text-gray-800 text-sm font-mono whitespace-pre-wrap">
+                          {assignment.expected_output || currentProblem.expected_output}
+                        </pre>
+                      </CardContent>
+                    </Card>
+                  );
+                }
+                return null;
+              })()}
 
               <Card data-testid="test-cases-card">
                 <CardHeader>
