@@ -49,6 +49,9 @@ export default function AssignmentPage({ user }) {
   const [lesson, setLesson] = useState(null);
   const [showLessonDialog, setShowLessonDialog] = useState(false);
   const [loadingLesson, setLoadingLesson] = useState(false);
+  
+  // Turtle graphics state
+  const [turtleImage, setTurtleImage] = useState("");
 
   // Get current problem's ID
   const getCurrentProblemId = () => {
