@@ -1219,15 +1219,44 @@ export default function AssignmentPage({ user }) {
               </CardHeader>
               <CardContent>
                 <div className="space-y-3 max-h-[400px] overflow-auto">
-                  {submissions.map((sub, index) => (
-                    <div key={sub.id} data-testid={`submission-${index}`} className="p-3 bg-gray-50 rounded-lg border border-gray-200">
-                      <div className="flex justify-between items-start mb-2">
-                        <div className="font-semibold text-sm">{sub.student_name}</div>
-                        <div className="text-sm font-bold text-indigo-600">{sub.score.toFixed(1)}%</div>
+                  {submissions.map((sub, index) => {
+                    const isTurtleSubmission = sub.turtle_image && sub.turtle_image.length > 0;
+                    return (
+                      <div key={sub.id} data-testid={`submission-${index}`} className="p-3 bg-gray-50 rounded-lg border border-gray-200">
+                        <div className="flex justify-between items-start mb-2">
+                          <div className="font-semibold text-sm">{sub.student_name}</div>
+                          <div className="text-sm font-bold text-indigo-600">{sub.score.toFixed(1)}%</div>
+                        </div>
+                        <div className="text-xs text-gray-600 mb-2">{sub.feedback}</div>
+                        
+                        {/* Show turtle image if this is a turtle submission */}
+                        {isTurtleSubmission && (
+                          <div className="mt-3">
+                            <div className="text-xs font-semibold text-gray-700 mb-1">Student's Turtle Graphics:</div>
+                            <div className="flex justify-center bg-white p-2 rounded border">
+                              <img 
+                                src={`data:image/png;base64,${sub.turtle_image}`}
+                                alt="Student turtle output"
+                                className="max-w-full h-auto"
+                                style={{ maxHeight: "200px" }}
+                              />
+                            </div>
+                            {sub.turtle_tracking_data && (
+                              <div className="mt-2 text-xs text-gray-600 bg-white p-2 rounded">
+                                <div className="font-semibold mb-1">📊 Tracking Data:</div>
+                                <div className="grid grid-cols-2 gap-1">
+                                  <span>Lines: {sub.turtle_tracking_data.lines_drawn}</span>
+                                  <span>Circles: {sub.turtle_tracking_data.circles_drawn}</span>
+                                  <span>Distance: {sub.turtle_tracking_data.total_distance?.toFixed(0)}</span>
+                                  <span>Colors: {sub.turtle_tracking_data.colors_used?.join(", ")}</span>
+                                </div>
+                              </div>
+                            )}
+                          </div>
+                        )}
                       </div>
-                      <div className="text-xs text-gray-600">{sub.feedback}</div>
-                    </div>
-                  ))}
+                    );
+                  })}
                 </div>
               </CardContent>
             </Card>
