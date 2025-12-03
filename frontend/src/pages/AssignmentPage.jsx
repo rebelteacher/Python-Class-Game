@@ -1046,20 +1046,24 @@ export default function AssignmentPage({ user }) {
                         : "Code with input() will show interactive dialog automatically"}
                     </CardDescription>
                   </CardHeader>
-                  <CardContent className="flex-1 overflow-auto min-h-0">
+                  <CardContent className="flex-1 overflow-auto min-h-0 p-4">
                     {assignment.problems?.[currentProblemIndex]?.assignment_type === "turtle" ? (
                       <div className="h-full flex flex-col gap-3">
                         {turtleImage ? (
-                          <div className="flex justify-center items-start">
+                          <div className="flex justify-center items-center bg-white p-4 rounded border-2 border-gray-200">
                             <img 
                               src={`data:image/png;base64,${turtleImage}`}
                               alt="Turtle output"
-                              className="border-2 border-gray-300 rounded max-w-full h-auto"
+                              className="max-w-full h-auto"
+                              style={{ maxHeight: "500px" }}
                             />
                           </div>
                         ) : (
-                          <div className="flex items-center justify-center h-full text-gray-500">
-                            Run your turtle code to see the output here...
+                          <div className="flex items-center justify-center h-64 bg-gray-50 rounded border-2 border-dashed border-gray-300 text-gray-500">
+                            <div className="text-center">
+                              <div className="text-4xl mb-2">🐢</div>
+                              <div>Run your turtle code to see the output here...</div>
+                            </div>
                           </div>
                         )}
                         {output && (
