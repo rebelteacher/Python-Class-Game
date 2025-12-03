@@ -636,6 +636,111 @@ export default function AssignmentLibrary({ user }) {
                     </div>
                   </div>
 
+                  {/* Assignment Type Selection */}
+                  <div className="border-2 border-green-200 bg-green-50 rounded-lg p-4">
+                    <div className="flex items-center justify-between mb-3">
+                      <div>
+                        <Label className="text-lg font-semibold">Assignment Type</Label>
+                        <p className="text-sm text-gray-600 mt-1">Choose between traditional code or turtle graphics</p>
+                      </div>
+                      <div className="flex items-center gap-2 bg-white px-3 py-2 rounded-lg border">
+                        <span className={newProblem.assignment_type === "code" ? "font-bold" : "text-gray-500"}>Code</span>
+                        <Button
+                          type="button"
+                          variant="outline"
+                          size="sm"
+                          className={newProblem.assignment_type === "turtle" ? "bg-green-500 text-white" : ""}
+                          onClick={() => setNewProblem({ 
+                            ...newProblem, 
+                            assignment_type: newProblem.assignment_type === "code" ? "turtle" : "code" 
+                          })}
+                        >
+                          {newProblem.assignment_type === "turtle" ? "🐢 Turtle" : "Switch to Turtle"}
+                        </Button>
+                      </div>
+                    </div>
+
+                    {/* Turtle Grading Criteria (only show when turtle is selected) */}
+                    {newProblem.assignment_type === "turtle" && (
+                      <div className="space-y-3 mt-4 pt-4 border-t border-green-300">
+                        <Label className="font-semibold">Auto-Grading Criteria</Label>
+                        <p className="text-sm text-gray-600 mb-3">Students must meet these requirements to pass</p>
+                        
+                        <div className="grid grid-cols-2 gap-3">
+                          <div>
+                            <Label className="text-sm">Minimum Lines</Label>
+                            <Input
+                              type="number"
+                              min="0"
+                              placeholder="e.g., 6"
+                              value={newProblem.turtle_grading_criteria.min_lines || ""}
+                              onChange={(e) => setNewProblem({
+                                ...newProblem,
+                                turtle_grading_criteria: {
+                                  ...newProblem.turtle_grading_criteria,
+                                  min_lines: parseInt(e.target.value) || 0
+                                }
+                              })}
+                              className="mt-1"
+                            />
+                          </div>
+                          
+                          <div>
+                            <Label className="text-sm">Minimum Circles</Label>
+                            <Input
+                              type="number"
+                              min="0"
+                              placeholder="e.g., 1"
+                              value={newProblem.turtle_grading_criteria.min_circles || ""}
+                              onChange={(e) => setNewProblem({
+                                ...newProblem,
+                                turtle_grading_criteria: {
+                                  ...newProblem.turtle_grading_criteria,
+                                  min_circles: parseInt(e.target.value) || 0
+                                }
+                              })}
+                              className="mt-1"
+                            />
+                          </div>
+                          
+                          <div>
+                            <Label className="text-sm">Minimum Distance (pixels)</Label>
+                            <Input
+                              type="number"
+                              min="0"
+                              placeholder="e.g., 400"
+                              value={newProblem.turtle_grading_criteria.min_distance || ""}
+                              onChange={(e) => setNewProblem({
+                                ...newProblem,
+                                turtle_grading_criteria: {
+                                  ...newProblem.turtle_grading_criteria,
+                                  min_distance: parseInt(e.target.value) || 0
+                                }
+                              })}
+                              className="mt-1"
+                            />
+                          </div>
+                          
+                          <div>
+                            <Label className="text-sm">Required Colors (comma-separated)</Label>
+                            <Input
+                              placeholder="e.g., red, blue"
+                              value={newProblem.turtle_grading_criteria.required_colors?.join(", ") || ""}
+                              onChange={(e) => setNewProblem({
+                                ...newProblem,
+                                turtle_grading_criteria: {
+                                  ...newProblem.turtle_grading_criteria,
+                                  required_colors: e.target.value.split(",").map(c => c.trim()).filter(c => c)
+                                }
+                              })}
+                              className="mt-1"
+                            />
+                          </div>
+                        </div>
+                      </div>
+                    )}
+                  </div>
+
                   <div>
                     <Label htmlFor="starterCode">Starter Code (Optional)</Label>
                     <Textarea
