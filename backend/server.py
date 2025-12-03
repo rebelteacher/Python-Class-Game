@@ -2028,6 +2028,200 @@ async def execute_code(execute_req: CodeExecuteRequest, request: Request):
         )
 
 
+async def grade_turtle_submission(code: str, grading_criteria: dict, expected_image: str = "") -> dict:
+    """Grade a turtle graphics submission based on criteria
+    
+    Returns: {
+        "score": float,
+        "feedback": str,
+        "tracking_data": dict,
+        "image_data": str
+    }
+    """
+    # Execute turtle code
+    temp_file = None
+    try:
+        with tempfile.NamedTemporaryFile(mode='w', suffix='.py', delete=False) as f:
+            wrapper_code = f'''
+import sys
+import io
+import json
+sys.path.insert(0, '/app/backend')
+
+from turtle_sim import TurtleSim, Turtle, Screen
+
+captured_stdout = io.StringIO()
+original_stdout = sys.stdout
+
+try:
+    sys.stdout = captured_stdout
+    
+    turtle_sim = TurtleSim(width=600, height=600, bg_color="white")
+    
+    class MockTurtleModule:
+        def __init__(self, sim):
+            self._sim = sim
+            self.Turtle = lambda: Turtle(sim)
+            self.Screen = lambda: Screen(sim)
+        def forward(self, d): self._sim.forward(d)
+        def backward(self, d): self._sim.backward(d)
+        def right(self, a): self._sim.right(a)
+        def left(self, a): self._sim.left(a)
+        def goto(self, x, y=None):
+            if y is None: x, y = x
+            self._sim.goto(x, y)
+        def circle(self, r, e=None, s=None): self._sim.circle(r, e, s)
+        def penup(self): self._sim.penup()
+        def pendown(self): self._sim.pendown()
+        def pensize(self, w): self._sim.pensize(w)
+        def pencolor(self, c): self._sim.pencolor(c)
+        def color(self, *args): self._sim.color(*args)
+        def speed(self, s): self._sim.speed(s)
+        def hideturtle(self): self._sim.hideturtle()
+        def showturtle(self): self._sim.showturtle()
+        def begin_fill(self): self._sim.begin_fill()
+        def end_fill(self): self._sim.end_fill()
+        def setheading(self, a): self._sim.setheading(a)
+        def bye(self): pass
+        fd = forward
+        bk = backward
+        rt = right
+        lt = left
+        pu = penup
+        pd = pendown
+        ht = hideturtle
+        st = showturtle
+    
+    turtle = MockTurtleModule(turtle_sim)
+    sys.modules['turtle'] = turtle
+    
+{chr(10).join("    " + line for line in code.split(chr(10)))}
+    
+    sys.stdout = original_stdout
+    
+    image_data = turtle_sim.get_image_base64()
+    tracking_data = turtle_sim.get_tracking_data()
+    
+    print("IMAGE_DATA:" + image_data)
+    print("TRACKING_DATA:" + json.dumps(tracking_data))
+    
+except Exception as e:
+    sys.stdout = original_stdout
+    import traceback
+    print("ERROR:" + str(e) + "\\n" + traceback.format_exc(), file=sys.stderr)
+'''
+            f.write(wrapper_code)
+            temp_file = f.name
+        
+        import sys as system
+        python_executable = system.executable
+        result = subprocess.run(
+            [python_executable, temp_file],
+            capture_output=True,
+            text=True,
+            timeout=15
+        )
+        
+        # Parse output
+        image_data = None
+        tracking_data = None
+        error_msg = None
+        
+        for line in result.stdout.split('\n'):
+            if line.startswith('IMAGE_DATA:'):
+                image_data = line.replace('IMAGE_DATA:', '').strip()
+            elif line.startswith('TRACKING_DATA:'):
+                try:
+                    tracking_data = json.loads(line.replace('TRACKING_DATA:', '').strip())
+                except:
+                    pass
+        
+        if result.stderr and 'ERROR:' in result.stderr:
+            error_msg = result.stderr.split('ERROR:')[-1].strip()
+        
+        if error_msg or not tracking_data:
+            return {
+                "score": 0,
+                "feedback": f"Code execution failed: {error_msg or 'Unknown error'}",
+                "tracking_data": {},
+                "image_data": ""
+            }
+        
+        # Grade based on criteria
+        score = 100
+        feedback_parts = []
+        
+        if grading_criteria:
+            # Check minimum lines
+            if "min_lines" in grading_criteria:
+                min_lines = grading_criteria["min_lines"]
+                actual_lines = tracking_data.get("lines_drawn", 0)
+                if actual_lines < min_lines:
+                    score -= 20
+                    feedback_parts.append(f"Need at least {min_lines} lines (drew {actual_lines})")
+            
+            # Check minimum circles
+            if "min_circles" in grading_criteria:
+                min_circles = grading_criteria["min_circles"]
+                actual_circles = tracking_data.get("circles_drawn", 0)
+                if actual_circles < min_circles:
+                    score -= 20
+                    feedback_parts.append(f"Need at least {min_circles} circles (drew {actual_circles})")
+            
+            # Check required colors
+            if "required_colors" in grading_criteria and grading_criteria["required_colors"]:
+                required_colors = set(grading_criteria["required_colors"])
+                actual_colors = set(tracking_data.get("colors_used", []))
+                missing_colors = required_colors - actual_colors
+                if missing_colors:
+                    score -= 15
+                    feedback_parts.append(f"Missing colors: {', '.join(missing_colors)}")
+            
+            # Check minimum distance
+            if "min_distance" in grading_criteria:
+                min_distance = grading_criteria["min_distance"]
+                actual_distance = tracking_data.get("total_distance", 0)
+                if actual_distance < min_distance:
+                    score -= 15
+                    feedback_parts.append(f"Need to travel at least {min_distance} pixels (traveled {actual_distance:.0f})")
+        
+        score = max(0, score)
+        
+        if feedback_parts:
+            feedback = "Good attempt! " + " • ".join(feedback_parts)
+        else:
+            feedback = "Excellent work! All requirements met."
+        
+        return {
+            "score": score,
+            "feedback": feedback,
+            "tracking_data": tracking_data,
+            "image_data": image_data
+        }
+        
+    except subprocess.TimeoutExpired:
+        return {
+            "score": 0,
+            "feedback": "Code execution timed out (15 seconds limit)",
+            "tracking_data": {},
+            "image_data": ""
+        }
+    except Exception as e:
+        logging.error(f"Turtle grading error: {str(e)}")
+        return {
+            "score": 0,
+            "feedback": f"Grading failed: {str(e)}",
+            "tracking_data": {},
+            "image_data": ""
+        }
+    finally:
+        if temp_file:
+            try:
+                os.unlink(temp_file)
+            except:
+                pass
+
+
 @api_router.post("/code/execute-turtle")
 async def execute_turtle_code(execute_req: CodeExecuteRequest, request: Request):
     """Execute Python turtle graphics code using Pillow-based simulator"""
