@@ -1037,15 +1037,45 @@ export default function AssignmentPage({ user }) {
               <Panel defaultSize={50} minSize={30}>
                 <Card data-testid="output-card" className="h-full flex flex-col">
                   <CardHeader className="pb-2 pt-3 flex-shrink-0">
-                    <CardTitle className="text-lg">Output</CardTitle>
+                    <CardTitle className="text-lg">
+                      {assignment.problems?.[currentProblemIndex]?.assignment_type === "turtle" ? "🐢 Your Turtle Output" : "Output"}
+                    </CardTitle>
                     <CardDescription className="text-xs">
-                      Code with input() will show interactive dialog automatically
+                      {assignment.problems?.[currentProblemIndex]?.assignment_type === "turtle" 
+                        ? "Your turtle graphics will appear here" 
+                        : "Code with input() will show interactive dialog automatically"}
                     </CardDescription>
                   </CardHeader>
                   <CardContent className="flex-1 overflow-auto min-h-0">
-                    <pre className="p-4 bg-gray-900 text-green-400 rounded-lg font-mono text-sm whitespace-pre-wrap h-full">
-                      {output || "Run your code to see output here..."}
-                    </pre>
+                    {assignment.problems?.[currentProblemIndex]?.assignment_type === "turtle" ? (
+                      <div className="h-full flex flex-col gap-3">
+                        {turtleImage ? (
+                          <div className="flex justify-center items-start">
+                            <img 
+                              src={`data:image/png;base64,${turtleImage}`}
+                              alt="Turtle output"
+                              className="border-2 border-gray-300 rounded max-w-full h-auto"
+                            />
+                          </div>
+                        ) : (
+                          <div className="flex items-center justify-center h-full text-gray-500">
+                            Run your turtle code to see the output here...
+                          </div>
+                        )}
+                        {output && (
+                          <div className="mt-2">
+                            <div className="text-sm font-semibold text-gray-700 mb-1">Console Output:</div>
+                            <pre className="p-3 bg-gray-900 text-green-400 rounded-lg font-mono text-xs whitespace-pre-wrap">
+                              {output}
+                            </pre>
+                          </div>
+                        )}
+                      </div>
+                    ) : (
+                      <pre className="p-4 bg-gray-900 text-green-400 rounded-lg font-mono text-sm whitespace-pre-wrap h-full">
+                        {output || "Run your code to see output here..."}
+                      </pre>
+                    )}
                   </CardContent>
                 </Card>
               </Panel>
