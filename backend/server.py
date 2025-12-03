@@ -419,6 +419,9 @@ class Submission(BaseModel):
     is_passing: bool = False
     is_late: bool = False
     is_final: bool = False  # Student marked this as their final submission
+    # Turtle graphics fields
+    turtle_image: str = ""  # Base64 encoded turtle output image
+    turtle_tracking_data: Optional[dict] = None  # Tracking data for auto-grading
     submitted_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
 
 class SubmissionCreate(BaseModel):
