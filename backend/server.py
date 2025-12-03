@@ -332,6 +332,10 @@ class Problem(BaseModel):
     creator_name: str
     is_approved: bool = True
     times_imported: int = 0
+    # Turtle graphics fields
+    assignment_type: str = "code"  # "code" or "turtle"
+    turtle_grading_criteria: Optional[dict] = None  # {"min_lines": 6, "min_circles": 1, etc}
+    expected_turtle_image: str = ""  # Base64 encoded image for turtle assignments
     created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
 
 class ProblemCreate(BaseModel):
