@@ -351,6 +351,10 @@ class ProblemCreate(BaseModel):
     problem_type: str = "Independent Practice"
     resources_link: str = ""
     csta_standard: str = ""
+    # Turtle graphics fields
+    assignment_type: str = "code"  # "code" or "turtle"
+    turtle_grading_criteria: Optional[dict] = None
+    expected_turtle_image: str = ""
 
 # Assignment model - bundle of multiple problems with unified scheduling
 class Assignment(BaseModel):
