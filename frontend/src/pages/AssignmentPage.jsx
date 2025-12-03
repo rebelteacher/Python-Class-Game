@@ -232,16 +232,23 @@ export default function AssignmentPage({ user }) {
   };
 
   const handleRunCode = async (providedInput = null) => {
-    // Check if code contains input() calls and no input provided yet
-    const hasInputCalls = /input\s*\(/i.test(code);
-    if (hasInputCalls && !testInput && providedInput === null) {
-      // Show interactive dialog
-      setShowInteractiveDialog(true);
-      return;
+    // Get current problem
+    const currentProblem = assignment?.problems?.[currentProblemIndex];
+    const isTurtle = currentProblem?.assignment_type === "turtle";
+    
+    // Check if code contains input() calls and no input provided yet (skip for turtle)
+    if (!isTurtle) {
+      const hasInputCalls = /input\s*\(/i.test(code);
+      if (hasInputCalls && !testInput && providedInput === null) {
+        // Show interactive dialog
+        setShowInteractiveDialog(true);
+        return;
+      }
     }
 
     setRunning(true);
     setOutput("");
+    setTurtleImage(""); // Clear previous turtle image
     
     // Mark current problem as run
     const currentProblemId = getCurrentProblemId();
@@ -251,16 +258,36 @@ export default function AssignmentPage({ user }) {
     }));
     
     try {
-      const inputToUse = providedInput !== null ? providedInput : testInput;
-      const response = await axios.post(
-        `${API}/code/execute`,
-        {
-          code: code,
-          test_input: inputToUse,
-        },
-        { withCredentials: true }
-      );
-      setOutput(response.data.output || response.data.error || "No output");
+      if (isTurtle) {
+        // Execute turtle graphics code
+        const response = await axios.post(
+          `${API}/code/execute-turtle`,
+          {
+            code: code,
+            test_input: "",
+          },
+          { withCredentials: true }
+        );
+        
+        if (response.data.success && response.data.image_data) {
+          setTurtleImage(response.data.image_data);
+          setOutput(response.data.output || "✅ Turtle graphics executed successfully!");
+        } else {
+          setOutput("❌ Error: " + (response.data.error || "Failed to generate turtle graphics"));
+        }
+      } else {
+        // Regular code execution
+        const inputToUse = providedInput !== null ? providedInput : testInput;
+        const response = await axios.post(
+          `${API}/code/execute`,
+          {
+            code: code,
+            test_input: inputToUse,
+          },
+          { withCredentials: true }
+        );
+        setOutput(response.data.output || response.data.error || "No output");
+      }
     } catch (error) {
       console.error("Error running code:", error);
       const errorMsg = error.response?.status === 502 
