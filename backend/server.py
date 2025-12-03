@@ -2473,11 +2473,15 @@ async def submit_assignment(submission: SubmissionCreate, request: Request):
         problem = {
             "id": assignment["id"],
             "solution_code": assignment.get("solution_code", ""),
-            "title": assignment.get("title", "")
+            "title": assignment.get("title", ""),
+            "assignment_type": assignment.get("assignment_type", "code")
         }
         # For backward compatibility, use assignment_id as problem_id
         if not submission.problem_id:
             submission.problem_id = assignment["id"]
+    
+    # Check if this is a turtle graphics assignment
+    is_turtle = problem.get("assignment_type") == "turtle"
     
     # Check if assignment is available
     now = datetime.now(timezone.utc)
