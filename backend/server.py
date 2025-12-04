@@ -2668,12 +2668,66 @@ async def submit_assignment(submission: SubmissionCreate, request: Request):
             "error": str(e)
         }]
     
-    # AI Evaluation for partial credit and feedback
+    # Apply deterministic partial credit rules if configured
+    partial_credit_rules = problem.get("partial_credit_rules", {})
+    
+    # Calculate deterministic adjustments
+    score_adjustment = 0
+    adjustment_reasons = []
+    
+    if partial_credit_rules:
+        # Check for syntax errors
+        student_result = None
+        try:
+            student_result = run_python_code(submission.code, "")
+        except:
+            pass
+        
+        if student_result and not student_result.get("success") and "error" in student_result:
+            error = student_result.get("error", "")
+            if "SyntaxError" in error or "IndentationError" in error:
+                penalty = partial_credit_rules.get("syntax_error_penalty", 30)
+                score_adjustment -= penalty
+                adjustment_reasons.append(f"Syntax/Indentation error: -{penalty}%")
+            elif "NameError" in error or "TypeError" in error:
+                penalty = partial_credit_rules.get("runtime_error_penalty", 20)
+                score_adjustment -= penalty
+                adjustment_reasons.append(f"Runtime error: -{penalty}%")
+        
+        # Check for partial test passes (logic mostly correct)
+        if total_tests > 0 and passed_tests > 0 and passed_tests < total_tests:
+            pass_rate = passed_tests / total_tests
+            if pass_rate >= 0.5:  # More than half tests passing
+                bonus = partial_credit_rules.get("partial_pass_bonus", 10)
+                score_adjustment += bonus
+                adjustment_reasons.append(f"Partial solution bonus: +{bonus}%")
+        
+        # Check for output formatting issues (close but not exact)
+        if total_tests > 0 and passed_tests == 0:
+            has_close_attempt = False
+            for test_result in test_results:
+                expected = str(test_result.get("expected", "")).strip().lower()
+                actual = str(test_result.get("actual", "")).strip().lower()
+                # Check if outputs are similar (same numbers/words, different format)
+                if expected and actual and (expected in actual or actual in expected or 
+                    len(set(expected.split()) & set(actual.split())) > len(expected.split()) * 0.5):
+                    has_close_attempt = True
+                    break
+            
+            if has_close_attempt:
+                bonus = partial_credit_rules.get("close_attempt_bonus", 15)
+                score_adjustment += bonus
+                adjustment_reasons.append(f"Close attempt (formatting): +{bonus}%")
+    
+    # Apply adjustment to base score
+    final_score = max(0, min(100, base_score + score_adjustment))
+    
+    # Generate AI feedback (for guidance only, not scoring)
     llm_key = os.environ.get("EMERGENT_LLM_KEY")
     chat = LlmChat(
         api_key=llm_key,
         session_id=f"submission_{submission.assignment_id}_{user['id']}",
-        system_message="You are a coding instructor evaluating student Python code submissions. Provide constructive feedback and award partial credit. Be consistent in your evaluations - the same code should receive the same score."
+        system_message="You are a helpful coding instructor. Provide constructive feedback to help students improve. Do NOT assign scores - only give guidance."
     ).with_model("openai", "gpt-4o")
     
     if total_tests > 0 and len(assignment.get("test_cases", [])) > 0:
