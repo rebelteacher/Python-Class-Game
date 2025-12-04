@@ -71,7 +71,13 @@ export default function AssignmentLibrary({ user }) {
       required_colors: [],
       min_distance: 0
     },
-    expected_turtle_image: ""
+    expected_turtle_image: "",
+    partial_credit_rules: {
+      syntax_error_penalty: 30,
+      runtime_error_penalty: 20,
+      partial_pass_bonus: 10,
+      close_attempt_bonus: 15
+    }
   });
   
   const [turtlePreviewOpen, setTurtlePreviewOpen] = useState(false);
