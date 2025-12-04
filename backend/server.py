@@ -384,6 +384,7 @@ class Assignment(BaseModel):
     late_penalty_percent: int = 0
     completion_bonus_xp: int = 100  # Bonus for completing all problems
     completion_bonus_coins: int = 50  # Bonus coins for completing all
+    proctor_code: str = ""  # 6-digit code to unlock accidentally "done" problems
     created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
 
 class AssignmentCreate(BaseModel):
