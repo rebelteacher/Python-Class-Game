@@ -10,6 +10,8 @@ import { ArrowLeft, Play, Send, CheckCircle, XCircle, Code2, Lightbulb, X, BookO
 import Editor from "@monaco-editor/react";
 import { Panel, PanelGroup, PanelResizeHandle } from "react-resizable-panels";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Label } from "@/components/ui/label";
+import { Input } from "@/components/ui/input";
 import InteractiveInputCollector from "@/components/InteractiveInputCollector";
 import LessonModal from "@/components/LessonModal";
 
