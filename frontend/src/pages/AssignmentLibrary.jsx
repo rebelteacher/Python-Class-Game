@@ -747,6 +747,88 @@ export default function AssignmentLibrary({ user }) {
                     )}
                   </div>
 
+                  {/* Partial Credit Rules */}
+                  {newProblem.assignment_type === "code" && (
+                    <div className="border-2 border-blue-200 bg-blue-50 rounded-lg p-4">
+                      <Label className="text-lg font-semibold">Partial Credit Rules</Label>
+                      <p className="text-sm text-gray-600 mt-1 mb-3">Customize penalties/bonuses for consistent grading</p>
+                      
+                      <div className="grid grid-cols-2 gap-3">
+                        <div>
+                          <Label className="text-sm">Syntax Error Penalty (%)</Label>
+                          <Input
+                            type="number"
+                            min="0"
+                            max="100"
+                            value={newProblem.partial_credit_rules.syntax_error_penalty || ""}
+                            onChange={(e) => setNewProblem({
+                              ...newProblem,
+                              partial_credit_rules: {
+                                ...newProblem.partial_credit_rules,
+                                syntax_error_penalty: parseInt(e.target.value) || 0
+                              }
+                            })}
+                            className="mt-1"
+                          />
+                        </div>
+                        
+                        <div>
+                          <Label className="text-sm">Runtime Error Penalty (%)</Label>
+                          <Input
+                            type="number"
+                            min="0"
+                            max="100"
+                            value={newProblem.partial_credit_rules.runtime_error_penalty || ""}
+                            onChange={(e) => setNewProblem({
+                              ...newProblem,
+                              partial_credit_rules: {
+                                ...newProblem.partial_credit_rules,
+                                runtime_error_penalty: parseInt(e.target.value) || 0
+                              }
+                            })}
+                            className="mt-1"
+                          />
+                        </div>
+                        
+                        <div>
+                          <Label className="text-sm">Partial Pass Bonus (%)</Label>
+                          <Input
+                            type="number"
+                            min="0"
+                            max="100"
+                            value={newProblem.partial_credit_rules.partial_pass_bonus || ""}
+                            onChange={(e) => setNewProblem({
+                              ...newProblem,
+                              partial_credit_rules: {
+                                ...newProblem.partial_credit_rules,
+                                partial_pass_bonus: parseInt(e.target.value) || 0
+                              }
+                            })}
+                            className="mt-1"
+                          />
+                        </div>
+                        
+                        <div>
+                          <Label className="text-sm">Close Attempt Bonus (%)</Label>
+                          <Input
+                            type="number"
+                            min="0"
+                            max="100"
+                            value={newProblem.partial_credit_rules.close_attempt_bonus || ""}
+                            onChange={(e) => setNewProblem({
+                              ...newProblem,
+                              partial_credit_rules: {
+                                ...newProblem.partial_credit_rules,
+                                close_attempt_bonus: parseInt(e.target.value) || 0
+                              }
+                            })}
+                            className="mt-1"
+                          />
+                        </div>
+                      </div>
+                    </div>
+                  )}
+
                   <div>
                     <Label htmlFor="starterCode">Starter Code (Optional)</Label>
                     <Textarea
