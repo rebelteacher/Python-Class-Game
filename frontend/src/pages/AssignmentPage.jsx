@@ -1017,9 +1017,19 @@ export default function AssignmentPage({ user }) {
                               <CheckCircle className="w-5 h-5" />
                               This problem is marked as done!
                             </div>
-                            <p className="text-sm text-green-600 text-center">
+                            <p className="text-sm text-green-600 text-center mb-3">
                               You're viewing your final submitted code. You can reference it anytime, but cannot submit changes.
                             </p>
+                            <div className="flex justify-center">
+                              <Button
+                                onClick={() => setShowProctorDialog(true)}
+                                variant="outline"
+                                size="sm"
+                                className="border-orange-400 text-orange-700 hover:bg-orange-50"
+                              >
+                                🔓 Accidentally clicked Done? Unlock with Proctor Code
+                              </Button>
+                            </div>
                           </div>
                         </div>
                       )}
