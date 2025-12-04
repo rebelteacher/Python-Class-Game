@@ -2731,9 +2731,9 @@ async def submit_assignment(submission: SubmissionCreate, request: Request):
     ).with_model("openai", "gpt-4o")
     
     if total_tests > 0 and len(assignment.get("test_cases", [])) > 0:
-        # Traditional test case prompt
+        # Traditional test case prompt - FEEDBACK ONLY
         prompt = f"""
-Evaluate this Python code submission consistently and objectively:
+Provide helpful feedback for this Python code submission:
 
 Problem: {problem.get('title', assignment.get('title', 'Coding Problem'))}
 Description: {problem.get('description', assignment.get('description', ''))}
@@ -2750,34 +2750,19 @@ Student Code:
 
 Test Results:
 - Passed: {passed_tests}/{total_tests}
-- Base Score: {base_score}%
+- Score: {final_score}% (already calculated)
 
 Test Details:
 {json.dumps(test_results, indent=2)}
 
-EVALUATION CRITERIA:
-1. Start with the base score ({base_score}%) from test results
-2. Award partial credit for:
-   - Correct logic even if output format is slightly off
-   - Proper use of Python syntax and best practices
-   - Close attempts that show understanding
-3. Deduct points for:
-   - Incorrect logic or approach
-   - Syntax errors or poor code quality
-   - Missing key functionality
+INSTRUCTIONS:
+- Provide 2-3 sentences of constructive feedback
+- Focus on what they did well and what to improve
+- Give specific suggestions (e.g., "Try using a for loop instead of while")
+- Be encouraging and helpful
+- DO NOT assign a score - that's already been calculated
 
-IMPORTANT: 
-- Be consistent: Same code = same score
-- Focus on correctness and logic, not style preferences
-- If output matches but formatting differs slightly, give full credit
-- Don't penalize for extra/missing whitespace, quotes, or escape characters if the content is correct
-- Provide specific, actionable feedback
-
-Format your response as JSON:
-{{
-  "score": <number 0-100>,
-  "feedback": "<2-3 sentences with specific guidance>"
-}}
+Just provide the feedback text (no JSON, no score):
 """
     else:
         # Simple comparison prompt
