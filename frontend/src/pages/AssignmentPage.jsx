@@ -1357,6 +1357,51 @@ export default function AssignmentPage({ user }) {
         onClose={() => setShowLessonDialog(false)}
         lesson={lesson}
       />
+      
+      {/* Proctor Code Dialog for Unlocking Done Problems */}
+      <Dialog open={showProctorDialog} onOpenChange={setShowProctorDialog}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>🔓 Unlock Problem</DialogTitle>
+            <DialogDescription>
+              Enter the proctor code to unlock this problem and submit again
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div>
+              <Label htmlFor="proctorCode">Proctor Code</Label>
+              <Input
+                id="proctorCode"
+                type="text"
+                placeholder="Enter 6-digit code"
+                value={proctorCode}
+                onChange={(e) => setProctorCode(e.target.value)}
+                className="mt-2"
+                maxLength={6}
+              />
+            </div>
+            <div className="flex gap-2">
+              <Button
+                onClick={handleUnlockProblem}
+                disabled={unlockingProblem || !proctorCode.trim()}
+                className="flex-1"
+              >
+                {unlockingProblem ? "Verifying..." : "Unlock Problem"}
+              </Button>
+              <Button
+                onClick={() => {
+                  setShowProctorDialog(false);
+                  setProctorCode("");
+                }}
+                variant="outline"
+                className="flex-1"
+              >
+                Cancel
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
