@@ -52,6 +52,11 @@ export default function AssignmentPage({ user }) {
   
   // Turtle graphics state
   const [turtleImage, setTurtleImage] = useState("");
+  
+  // Proctor code for unlocking done problems
+  const [showProctorDialog, setShowProctorDialog] = useState(false);
+  const [proctorCode, setProctorCode] = useState("");
+  const [unlockingProblem, setUnlockingProblem] = useState(false);
 
   // Get current problem's ID
   const getCurrentProblemId = () => {
