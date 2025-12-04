@@ -439,7 +439,7 @@ export default function AssignmentPage({ user }) {
     const latestSubmission = problemSubmissions[problemSubmissions.length - 1];
     
     setMarkingFinal(true);
-    try:
+    try {
       await axios.post(
         `${API}/submissions/${latestSubmission.id}/mark-final`,
         {},
