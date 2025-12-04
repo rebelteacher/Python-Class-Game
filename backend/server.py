@@ -357,6 +357,8 @@ class ProblemCreate(BaseModel):
     assignment_type: str = "code"  # "code" or "turtle"
     turtle_grading_criteria: Optional[dict] = None
     expected_turtle_image: str = ""
+    # Partial credit rules
+    partial_credit_rules: Optional[dict] = None
 
 # Assignment model - bundle of multiple problems with unified scheduling
 class Assignment(BaseModel):
