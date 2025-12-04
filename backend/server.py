@@ -2765,9 +2765,9 @@ INSTRUCTIONS:
 Just provide the feedback text (no JSON, no score):
 """
     else:
-        # Simple comparison prompt
+        # Simple comparison prompt - FEEDBACK ONLY
         prompt = f"""
-Evaluate this Python code submission consistently and objectively:
+Provide helpful feedback for this Python code submission:
 
 Problem: {problem.get('title', assignment.get('title', 'Coding Problem'))}
 Description: {problem.get('description', assignment.get('description', ''))}
@@ -2784,31 +2784,16 @@ Student Code:
 
 Expected Output: {test_results[0]['expected']}
 Student Output: {test_results[0]['actual']}
+Score: {final_score}% (already calculated)
 
-EVALUATION CRITERIA:
-1. Start with base score: {base_score}%
-2. Award full credit if:
-   - Output content matches (ignore minor formatting differences)
-   - Logic is correct and produces the right result
-3. Award partial credit for:
-   - Correct approach but minor output differences
-   - Proper Python syntax and logic
-   - Close attempts showing understanding
-4. Deduct points for:
-   - Incorrect logic or completely wrong output
-   - Syntax errors or broken code
+INSTRUCTIONS:
+- Provide 2-3 sentences of constructive feedback
+- Explain what they did well and what needs improvement
+- Give specific suggestions to help them succeed
+- Be encouraging and supportive
+- DO NOT assign a score - that's already been calculated
 
-IMPORTANT:
-- Be consistent: Same code = same score
-- Don't penalize for whitespace, quotes, or escape characters if content is correct
-- Focus on whether the student solved the problem correctly
-- Provide specific, actionable feedback
-
-Format your response as JSON:
-{{
-  "score": <number 0-100>,
-  "feedback": "<2-3 sentences with specific guidance>"
-}}
+Just provide the feedback text (no JSON, no score):
 """
     
     try:
