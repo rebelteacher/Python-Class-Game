@@ -1691,6 +1691,10 @@ async def create_assignment(assignment: AssignmentCreate, request: Request):
     available_date = datetime.fromisoformat(assignment.available_date) if assignment.available_date else None
     due_date = datetime.fromisoformat(assignment.due_date) if assignment.due_date else None
     
+    # Generate proctor code (6-digit)
+    import random
+    proctor_code = ''.join([str(random.randint(0, 9)) for _ in range(6)])
+    
     # Create assignment
     new_assignment = Assignment(
         title=assignment.title,
@@ -1709,7 +1713,8 @@ async def create_assignment(assignment: AssignmentCreate, request: Request):
         allow_late_submission=assignment.allow_late_submission,
         late_penalty_percent=assignment.late_penalty_percent,
         completion_bonus_xp=assignment.completion_bonus_xp,
-        completion_bonus_coins=assignment.completion_bonus_coins
+        completion_bonus_coins=assignment.completion_bonus_coins,
+        proctor_code=proctor_code
     )
     
     assignment_dict = new_assignment.model_dump()
