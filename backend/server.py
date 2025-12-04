@@ -78,6 +78,8 @@ SHOP_ITEMS = {
         {"id": "snappy_alligator", "name": "Snappy Alligator 🐊", "price": 400, "icon": "🐊", "animation": "swim"},
         {"id": "speedy_shark", "name": "Speedy Shark 🦈", "price": 450, "icon": "🦈", "animation": "swim"},
         {"id": "peaceful_panda", "name": "Peaceful Panda 🐼", "price": 350, "icon": "🐼", "animation": "float"},
+        {"id": "cheeky_monkey", "name": "Cheeky Monkey 🐵", "price": 350, "icon": "🐵", "animation": "float"},
+        {"id": "happy_hippo", "name": "Happy Hippo 🦛", "price": 400, "icon": "🦛", "animation": "swim"},
     ],
     "profile_frames": [
         {"id": "gold_border", "name": "Gold Border ✨", "price": 150, "style": "3px solid #FFD700"},
