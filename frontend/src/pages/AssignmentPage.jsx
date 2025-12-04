@@ -439,7 +439,7 @@ export default function AssignmentPage({ user }) {
     const latestSubmission = problemSubmissions[problemSubmissions.length - 1];
     
     setMarkingFinal(true);
-    try {
+    try:
       await axios.post(
         `${API}/submissions/${latestSubmission.id}/mark-final`,
         {},
@@ -458,6 +458,43 @@ export default function AssignmentPage({ user }) {
       toast.error(error.response?.data?.detail || "Failed to mark as done");
     } finally {
       setMarkingFinal(false);
+    }
+  };
+  
+  const handleUnlockProblem = async () => {
+    if (!proctorCode.trim()) {
+      toast.error("Please enter the proctor code");
+      return;
+    }
+    
+    const problemId = getCurrentProblemId();
+    setUnlockingProblem(true);
+    
+    try {
+      // Verify proctor code with backend
+      await axios.post(
+        `${API}/assignments/${assignmentId}/unlock-problem`,
+        {
+          problem_id: problemId,
+          proctor_code: proctorCode
+        },
+        { withCredentials: true }
+      );
+      
+      // Update local state to unlock
+      setProblemsFinal(prev => ({
+        ...prev,
+        [problemId]: false
+      }));
+      
+      setShowProctorDialog(false);
+      setProctorCode("");
+      toast.success("Problem unlocked! You can now submit again.");
+    } catch (error) {
+      console.error("Error unlocking problem:", error);
+      toast.error(error.response?.data?.detail || "Invalid proctor code");
+    } finally {
+      setUnlockingProblem(false);
     }
   };
 
