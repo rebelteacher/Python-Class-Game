@@ -2798,22 +2798,20 @@ Just provide the feedback text (no JSON, no score):
     
     try:
         user_message = UserMessage(text=prompt)
-        ai_response = await chat.send_message(user_message)
+        ai_feedback_response = await chat.send_message(user_message)
         
-        # Parse AI response
-        import re
-        json_match = re.search(r'\{[^{}]*"score"[^{}]*\}', ai_response, re.DOTALL)
-        if json_match:
-            ai_eval = json.loads(json_match.group())
-            final_score = float(ai_eval.get("score", base_score))
-            feedback = ai_eval.get("feedback", "Good effort!")
-        else:
-            final_score = base_score
-            feedback = ai_response[:500] if ai_response else "Good effort!"
+        # AI provides feedback only, score is already calculated
+        feedback = ai_feedback_response[:500] if ai_feedback_response else "Good effort! Keep practicing."
+        
+        # Add adjustment reasons to feedback if any
+        if adjustment_reasons:
+            feedback = " | ".join(adjustment_reasons) + " | " + feedback
+            
     except Exception as e:
-        logging.error(f"AI evaluation error: {str(e)}")
-        final_score = base_score
-        feedback = f"Test Results: {passed_tests}/{total_tests} passed. {problem.get('title', 'Problem')} - Keep practicing!"
+        logging.error(f"AI feedback error: {str(e)}")
+        feedback = f"Test Results: {passed_tests}/{total_tests} passed."
+        if adjustment_reasons:
+            feedback += " | " + " | ".join(adjustment_reasons)
     
     # Determine if passing (70% threshold)
     is_passing = final_score >= 70
