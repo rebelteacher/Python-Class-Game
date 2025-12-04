@@ -2974,6 +2974,46 @@ async def get_submissions(assignment_id: str, request: Request, classroom_id: st
 
 
 
+@api_router.post("/assignments/{assignment_id}/unlock-problem")
+async def unlock_problem(assignment_id: str, data: dict, request: Request):
+    """Unlock a 'done' problem with proctor code"""
+    user = await get_current_user(request)
+    
+    if user["role"] != "student":
+        raise HTTPException(status_code=403, detail="Only students can unlock problems")
+    
+    assignment = await db.assignments.find_one({"id": assignment_id})
+    if not assignment:
+        raise HTTPException(status_code=404, detail="Assignment not found")
+    
+    # Verify proctor code
+    provided_code = data.get("proctor_code", "").strip()
+    stored_code = assignment.get("proctor_code", "").strip()
+    
+    if not provided_code or provided_code != stored_code:
+        raise HTTPException(status_code=403, detail="Invalid proctor code")
+    
+    # Find the submission marked as final
+    problem_id = data.get("problem_id")
+    submission = await db.submissions.find_one({
+        "assignment_id": assignment_id,
+        "problem_id": problem_id,
+        "student_id": user["id"],
+        "is_final": True
+    })
+    
+    if not submission:
+        raise HTTPException(status_code=404, detail="No final submission found")
+    
+    # Unlock by setting is_final to False
+    await db.submissions.update_one(
+        {"id": submission["id"]},
+        {"$set": {"is_final": False}}
+    )
+    
+    return {"message": "Problem unlocked successfully"}
+
+
 @api_router.post("/submissions/{submission_id}/mark-final")
 async def mark_submission_final(submission_id: str, request: Request):
     """Mark a submission as the student's final submission for this problem"""
