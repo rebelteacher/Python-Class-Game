@@ -2726,16 +2726,35 @@ async def submit_assignment(submission: SubmissionCreate, request: Request):
         # Check for output formatting issues (close but not exact)
         if total_tests > 0 and passed_tests == 0:
             has_close_attempt = False
-            for test_result in test_results:
-                expected = str(test_result.get("expected", "")).strip().lower()
-                actual = str(test_result.get("actual", "")).strip().lower()
-                # Check if outputs are similar (same numbers/words, different format)
-                if expected and actual and (expected in actual or actual in expected or 
-                    len(set(expected.split()) & set(actual.split())) > len(expected.split()) * 0.5):
-                    has_close_attempt = True
-                    break
+            almost_perfect = False
             
-            if has_close_attempt:
+            for test_result in test_results:
+                expected = str(test_result.get("expected", "")).strip()
+                actual = str(test_result.get("actual", "")).strip()
+                
+                # Remove punctuation and compare
+                import string
+                expected_no_punct = expected.translate(str.maketrans('', '', string.punctuation)).lower()
+                actual_no_punct = actual.translate(str.maketrans('', '', string.punctuation)).lower()
+                
+                # Almost perfect: same content, just punctuation/spacing difference
+                if expected_no_punct == actual_no_punct:
+                    almost_perfect = True
+                    break
+                
+                # Close attempt: similar content
+                expected_lower = expected.lower()
+                actual_lower = actual.lower()
+                if expected and actual and (expected_lower in actual_lower or actual_lower in expected_lower or 
+                    len(set(expected_lower.split()) & set(actual_lower.split())) > len(expected_lower.split()) * 0.5):
+                    has_close_attempt = True
+            
+            if almost_perfect:
+                # Very close - just punctuation or minor formatting
+                bonus = partial_credit_rules.get("close_attempt_bonus", 15) * 6  # 90% of full credit
+                score_adjustment += bonus
+                adjustment_reasons.append(f"Almost perfect (minor punctuation/formatting): +{bonus}%")
+            elif has_close_attempt:
                 bonus = partial_credit_rules.get("close_attempt_bonus", 15)
                 score_adjustment += bonus
                 adjustment_reasons.append(f"Close attempt (formatting): +{bonus}%")
