@@ -340,6 +340,7 @@ class Problem(BaseModel):
     expected_turtle_image: str = ""  # Base64 encoded image for turtle assignments
     # Partial credit rules (deterministic grading)
     partial_credit_rules: Optional[dict] = None  # {"syntax_error_penalty": 30, "logic_error_penalty": 20, etc}
+    test_cases: List[dict] = []  # Test cases for auto-grading
     created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
 
 class ProblemCreate(BaseModel):
