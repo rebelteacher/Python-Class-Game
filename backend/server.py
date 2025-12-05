@@ -362,6 +362,7 @@ class ProblemCreate(BaseModel):
     expected_turtle_image: str = ""
     # Partial credit rules
     partial_credit_rules: Optional[dict] = None
+    test_cases: List[dict] = []
 
 # Assignment model - bundle of multiple problems with unified scheduling
 class Assignment(BaseModel):
