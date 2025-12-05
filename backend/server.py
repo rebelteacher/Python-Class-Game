@@ -1992,7 +1992,7 @@ original_stdout = sys.stdout
 captured_output = io.StringIO()
 
 # Override input to use test data and not print prompts
-test_inputs = {repr(test_input.split('\\n') if test_input else [])}
+test_inputs = {repr(test_input.split('\n') if test_input else [])}
 input_index = [0]
 
 def mock_input(prompt=''):
