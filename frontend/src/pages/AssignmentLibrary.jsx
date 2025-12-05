@@ -1518,6 +1518,83 @@ export default function AssignmentLibrary({ user }) {
                   <p className="text-xs text-gray-500 mt-1">What the program should output when run</p>
                 </div>
 
+                {/* Test Cases Builder for Edit */}
+                <div className="border-2 border-yellow-200 bg-yellow-50 rounded-lg p-4">
+                  <div className="flex items-center justify-between mb-3">
+                    <div>
+                      <Label className="text-lg font-semibold">Test Cases (Optional but Recommended)</Label>
+                      <p className="text-sm text-gray-600 mt-1">For problems with input(), add test cases for auto-grading</p>
+                    </div>
+                    <Button
+                      type="button"
+                      onClick={() => {
+                        setEditingProblem({
+                          ...editingProblem,
+                          test_cases: [...(editingProblem.test_cases || []), { input: "", expected_output: "" }]
+                        });
+                      }}
+                      size="sm"
+                      className="bg-yellow-600 hover:bg-yellow-700"
+                    >
+                      + Add Test Case
+                    </Button>
+                  </div>
+
+                  {(!editingProblem.test_cases || editingProblem.test_cases.length === 0) ? (
+                    <p className="text-sm text-gray-500 text-center py-4">No test cases added yet. Click "Add Test Case" to create one.</p>
+                  ) : (
+                    <div className="space-y-3">
+                      {editingProblem.test_cases.map((testCase, index) => (
+                        <div key={index} className="bg-white p-3 rounded border border-yellow-300">
+                          <div className="flex items-center justify-between mb-2">
+                            <Label className="font-semibold">Test Case {index + 1}</Label>
+                            <Button
+                              type="button"
+                              variant="outline"
+                              size="sm"
+                              onClick={() => {
+                                const newTestCases = editingProblem.test_cases.filter((_, i) => i !== index);
+                                setEditingProblem({ ...editingProblem, test_cases: newTestCases });
+                              }}
+                              className="text-red-600 hover:text-red-700"
+                            >
+                              Remove
+                            </Button>
+                          </div>
+                          <div className="space-y-2">
+                            <div>
+                              <Label className="text-sm">Input (use \n for multiple inputs)</Label>
+                              <Input
+                                placeholder="e.g., 5\n6 (for two inputs: 5 and 6)"
+                                value={testCase.input}
+                                onChange={(e) => {
+                                  const newTestCases = [...editingProblem.test_cases];
+                                  newTestCases[index].input = e.target.value;
+                                  setEditingProblem({ ...editingProblem, test_cases: newTestCases });
+                                }}
+                                className="mt-1 font-mono text-sm"
+                              />
+                            </div>
+                            <div>
+                              <Label className="text-sm">Expected Output</Label>
+                              <Input
+                                placeholder="e.g., 11"
+                                value={testCase.expected_output}
+                                onChange={(e) => {
+                                  const newTestCases = [...editingProblem.test_cases];
+                                  newTestCases[index].expected_output = e.target.value;
+                                  setEditingProblem({ ...editingProblem, test_cases: newTestCases });
+                                }}
+                                className="mt-1 font-mono text-sm"
+                              />
+                            </div>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+
                 <Button type="submit" className="w-full bg-indigo-600 hover:bg-indigo-700">
                   Update Problem
                 </Button>
