@@ -1980,16 +1980,53 @@ def normalize_output(output: str) -> str:
 
 
 def run_python_code(code: str, test_input: str = "", timeout: int = 5) -> dict:
-    """Execute Python code safely with test input"""
+    """Execute Python code safely with test input, separating prompts from output"""
     try:
+        # Wrap code to capture only print() output, not input() prompts
+        wrapped_code = f"""
+import sys
+import io
+
+# Redirect stdout to capture only print statements
+original_stdout = sys.stdout
+captured_output = io.StringIO()
+
+# Override input to use test data and not print prompts
+test_inputs = {repr(test_input.split('\\n') if test_input else [])}
+input_index = [0]
+
+def mock_input(prompt=''):
+    # Don't print the prompt to stdout
+    if input_index[0] < len(test_inputs):
+        value = test_inputs[input_index[0]]
+        input_index[0] += 1
+        return value
+    else:
+        raise EOFError("No more input available")
+
+# Replace built-in input with mock
+__builtins__.input = mock_input
+
+# Redirect stdout to our capture
+sys.stdout = captured_output
+
+try:
+    # Execute user code
+{chr(10).join('    ' + line for line in code.split(chr(10)))}
+finally:
+    # Restore stdout
+    sys.stdout = original_stdout
+    # Print captured output
+    print(captured_output.getvalue(), end='')
+"""
+        
         with tempfile.NamedTemporaryFile(mode='w', suffix='.py', delete=False) as f:
-            f.write(code)
+            f.write(wrapped_code)
             temp_file = f.name
         
-        # Run code with input
+        # Run code without providing input (it's handled by mock_input)
         result = subprocess.run(
             ['python3', temp_file],
-            input=test_input,
             capture_output=True,
             text=True,
             timeout=timeout
