@@ -2726,38 +2726,43 @@ async def submit_assignment(submission: SubmissionCreate, request: Request):
         # Check for output formatting issues (close but not exact)
         if total_tests > 0 and passed_tests == 0:
             has_close_attempt = False
-            almost_perfect = False
+            minor_difference = False
             
             for test_result in test_results:
                 expected = str(test_result.get("expected", "")).strip()
                 actual = str(test_result.get("actual", "")).strip()
                 
-                # Remove punctuation and compare
-                import string
-                expected_no_punct = expected.translate(str.maketrans('', '', string.punctuation)).lower()
-                actual_no_punct = actual.translate(str.maketrans('', '', string.punctuation)).lower()
+                # Check for minor differences (only end punctuation)
+                # Remove only trailing punctuation (., !, ?) but keep internal content like quotes
+                import re
+                expected_trimmed = re.sub(r'[.!?]+$', '', expected).strip()
+                actual_trimmed = re.sub(r'[.!?]+$', '', actual).strip()
                 
-                # Almost perfect: same content, just punctuation/spacing difference
-                if expected_no_punct == actual_no_punct:
-                    almost_perfect = True
-                    break
+                # Minor difference: exact match except for trailing punctuation
+                if expected_trimmed.lower() == actual_trimmed.lower():
+                    # Check if they only differ by 1-2 characters at the end
+                    if abs(len(expected) - len(actual)) <= 2:
+                        minor_difference = True
+                        break
                 
-                # Close attempt: similar content
+                # Close attempt: similar content (50%+ words match)
                 expected_lower = expected.lower()
                 actual_lower = actual.lower()
-                if expected and actual and (expected_lower in actual_lower or actual_lower in expected_lower or 
-                    len(set(expected_lower.split()) & set(actual_lower.split())) > len(expected_lower.split()) * 0.5):
-                    has_close_attempt = True
+                if expected and actual:
+                    expected_words = set(expected_lower.split())
+                    actual_words = set(actual_lower.split())
+                    if len(expected_words & actual_words) >= len(expected_words) * 0.5:
+                        has_close_attempt = True
             
-            if almost_perfect:
-                # Very close - just punctuation or minor formatting
-                bonus = partial_credit_rules.get("close_attempt_bonus", 15) * 6  # 90% of full credit
+            if minor_difference:
+                # Very close - just missing/wrong end punctuation
+                bonus = min(30, partial_credit_rules.get("close_attempt_bonus", 15) * 2)
                 score_adjustment += bonus
-                adjustment_reasons.append(f"Almost perfect (minor punctuation/formatting): +{bonus}%")
+                adjustment_reasons.append(f"Minor punctuation issue: +{bonus}%")
             elif has_close_attempt:
                 bonus = partial_credit_rules.get("close_attempt_bonus", 15)
                 score_adjustment += bonus
-                adjustment_reasons.append(f"Close attempt (formatting): +{bonus}%")
+                adjustment_reasons.append(f"Close attempt (partial match): +{bonus}%")
     
     # Apply adjustment to base score
     final_score = max(0, min(100, base_score + score_adjustment))
