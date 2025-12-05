@@ -192,7 +192,8 @@ export default function AssignmentLibrary({ user }) {
           lesson: editingProblem.lesson || "",
           problem_type: editingProblem.problem_type,
           resources_link: editingProblem.resources_link,
-          csta_standard: editingProblem.csta_standard
+          csta_standard: editingProblem.csta_standard,
+          test_cases: editingProblem.test_cases || []
         },
         { withCredentials: true }
       );
