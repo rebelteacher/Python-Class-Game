@@ -168,10 +168,23 @@ export default function CodingTestSubmissions({ user }) {
 
         <Card>
           <CardHeader>
-            <CardTitle>Student Submissions</CardTitle>
-            <CardDescription>
-              {submissions.length} student{submissions.length !== 1 ? 's' : ''} submitted
-            </CardDescription>
+            <div className="flex items-center justify-between">
+              <div>
+                <CardTitle>Student Submissions</CardTitle>
+                <CardDescription>
+                  {submissions.length} student{submissions.length !== 1 ? 's' : ''} submitted
+                </CardDescription>
+              </div>
+              {submissions.length > 0 && (
+                <Button
+                  onClick={handleExportToExcel}
+                  className="bg-green-600 hover:bg-green-700"
+                >
+                  <FileSpreadsheet className="w-4 h-4 mr-2" />
+                  Export to Excel
+                </Button>
+              )}
+            </div>
           </CardHeader>
           <CardContent>
             {submissions.length === 0 ? (
