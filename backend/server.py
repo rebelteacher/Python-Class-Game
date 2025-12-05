@@ -2676,14 +2676,23 @@ async def submit_assignment(submission: SubmissionCreate, request: Request):
             "error": str(e)
         }]
     
-    # Apply deterministic partial credit rules if configured
+    # Apply deterministic partial credit rules (use defaults if not configured)
     partial_credit_rules = problem.get("partial_credit_rules", {})
+    
+    # Set defaults if not configured (for backwards compatibility with old assignments)
+    if not partial_credit_rules:
+        partial_credit_rules = {
+            "syntax_error_penalty": 30,
+            "runtime_error_penalty": 20,
+            "partial_pass_bonus": 10,
+            "close_attempt_bonus": 15
+        }
     
     # Calculate deterministic adjustments
     score_adjustment = 0
     adjustment_reasons = []
     
-    if partial_credit_rules:
+    if True:  # Always apply deterministic rules
         # Check for syntax/runtime errors from test results (not by running code separately)
         # Look at the test results to see if there were actual errors
         has_syntax_error = False
