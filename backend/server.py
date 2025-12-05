@@ -2684,23 +2684,27 @@ async def submit_assignment(submission: SubmissionCreate, request: Request):
     adjustment_reasons = []
     
     if partial_credit_rules:
-        # Check for syntax errors
-        student_result = None
-        try:
-            student_result = run_python_code(submission.code, "")
-        except:
-            pass
+        # Check for syntax/runtime errors from test results (not by running code separately)
+        # Look at the test results to see if there were actual errors
+        has_syntax_error = False
+        has_runtime_error = False
         
-        if student_result and not student_result.get("success") and "error" in student_result:
-            error = student_result.get("error", "")
-            if "SyntaxError" in error or "IndentationError" in error:
-                penalty = partial_credit_rules.get("syntax_error_penalty", 30)
-                score_adjustment -= penalty
-                adjustment_reasons.append(f"Syntax/Indentation error: -{penalty}%")
-            elif "NameError" in error or "TypeError" in error:
-                penalty = partial_credit_rules.get("runtime_error_penalty", 20)
-                score_adjustment -= penalty
-                adjustment_reasons.append(f"Runtime error: -{penalty}%")
+        for test_result in test_results:
+            error_msg = test_result.get("error", "")
+            if error_msg:
+                if "SyntaxError" in error_msg or "IndentationError" in error_msg:
+                    has_syntax_error = True
+                elif "NameError" in error_msg or "TypeError" in error_msg or "AttributeError" in error_msg:
+                    has_runtime_error = True
+        
+        if has_syntax_error:
+            penalty = partial_credit_rules.get("syntax_error_penalty", 30)
+            score_adjustment -= penalty
+            adjustment_reasons.append(f"Syntax/Indentation error: -{penalty}%")
+        elif has_runtime_error:
+            penalty = partial_credit_rules.get("runtime_error_penalty", 20)
+            score_adjustment -= penalty
+            adjustment_reasons.append(f"Runtime error: -{penalty}%")
         
         # Check for partial test passes (logic mostly correct)
         if total_tests > 0 and passed_tests > 0 and passed_tests < total_tests:
