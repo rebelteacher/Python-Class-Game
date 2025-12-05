@@ -1982,8 +1982,11 @@ def normalize_output(output: str) -> str:
 def run_python_code(code: str, test_input: str = "", timeout: int = 5) -> dict:
     """Execute Python code safely with test input, separating prompts from output"""
     try:
+        # Split test input into lines for input() calls
+        input_lines = test_input.split('\n') if test_input else []
+        
         # Wrap code to capture only print() output, not input() prompts
-        wrapped_code = f"""
+        wrapped_code = """
 import sys
 import io
 
@@ -1992,7 +1995,7 @@ original_stdout = sys.stdout
 captured_output = io.StringIO()
 
 # Override input to use test data and not print prompts
-test_inputs = {repr(test_input.split('\n') if test_input else [])}
+test_inputs = """ + repr(input_lines) + """
 input_index = [0]
 
 def mock_input(prompt=''):
@@ -2012,7 +2015,7 @@ sys.stdout = captured_output
 
 try:
     # Execute user code
-{chr(10).join('    ' + line for line in code.split(chr(10)))}
+""" + '\n'.join('    ' + line for line in code.split('\n')) + """
 finally:
     # Restore stdout
     sys.stdout = original_stdout
