@@ -84,6 +84,55 @@ export default function CodingTestSubmissions({ user }) {
     return `${mins}m ${secs}s`;
   };
 
+  const handleExportToExcel = () => {
+    if (!submissions || submissions.length === 0) {
+      toast.error("No submissions to export");
+      return;
+    }
+
+    // Prepare main results data
+    const exportData = submissions.map(student => {
+      return {
+        "Student Name": student.student_name,
+        "Overall Score": student.overall_score.toFixed(1) + "%",
+        "Problems Completed": `${student.problems_submitted}/${student.total_problems}`,
+        "Student ID": student.student_id
+      };
+    });
+
+    // Create workbook
+    const wb = XLSX.utils.book_new();
+
+    // Add main results sheet
+    const ws = XLSX.utils.json_to_sheet(exportData);
+    XLSX.utils.book_append_sheet(wb, ws, "Student Scores");
+
+    // Add statistics sheet
+    const avgScore = submissions.reduce((sum, s) => sum + s.overall_score, 0) / submissions.length;
+    const highestScore = Math.max(...submissions.map(s => s.overall_score));
+    const lowestScore = Math.min(...submissions.map(s => s.overall_score));
+    const completionRate = (submissions.reduce((sum, s) => sum + s.problems_submitted, 0) / (submissions.length * (test?.problem_ids?.length || 1))) * 100;
+
+    const statsData = [
+      { "Metric": "Total Students", "Value": submissions.length },
+      { "Metric": "Average Score", "Value": avgScore.toFixed(1) + "%" },
+      { "Metric": "Highest Score", "Value": highestScore.toFixed(1) + "%" },
+      { "Metric": "Lowest Score", "Value": lowestScore.toFixed(1) + "%" },
+      { "Metric": "Completion Rate", "Value": completionRate.toFixed(1) + "%" },
+      { "Metric": "Total Problems", "Value": test?.problem_ids?.length || 0 }
+    ];
+
+    const statsWs = XLSX.utils.json_to_sheet(statsData);
+    XLSX.utils.book_append_sheet(wb, statsWs, "Statistics");
+
+    // Generate filename
+    const fileName = `CodingTest_${test?.title || 'Report'}_${new Date().toISOString().split('T')[0]}.xlsx`;
+
+    // Download
+    XLSX.writeFile(wb, fileName);
+    toast.success("Report exported successfully!");
+  };
+
   if (loading) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-indigo-50 via-white to-purple-50 p-8">
