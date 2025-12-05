@@ -77,7 +77,8 @@ export default function AssignmentLibrary({ user }) {
       runtime_error_penalty: 20,
       partial_pass_bonus: 10,
       close_attempt_bonus: 15
-    }
+    },
+    test_cases: []
   });
   
   const [turtlePreviewOpen, setTurtlePreviewOpen] = useState(false);
