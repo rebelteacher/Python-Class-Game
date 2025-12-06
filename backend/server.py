@@ -6287,7 +6287,8 @@ async def start_coding_test(test_id: str, request: Request):
                 "description": problem["description"],
                 "starter_code": problem["starter_code"],
                 "expected_output": problem.get("expected_output", ""),
-                "difficulty": problem.get("difficulty", "Medium")
+                "difficulty": problem.get("difficulty", "Medium"),
+                "test_cases": problem.get("test_cases", [])
             })
     
     # Get already submitted problem IDs
