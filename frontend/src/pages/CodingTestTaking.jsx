@@ -591,7 +591,7 @@ export default function CodingTestTaking({ user }) {
                   <li>✓ Stay in fullscreen mode</li>
                   <li>✓ Do not switch tabs or windows</li>
                   <li>✓ Copy-paste is disabled</li>
-                  <li>✓ You can only submit once per problem</li>
+                  <li>✓ You can submit up to twice per problem (best score counts)</li>
                   <li>✓ Click "Run" to test your code before submitting</li>
                   <li>✓ Navigate between problems using numbered buttons</li>
                 </ul>
