@@ -436,7 +436,7 @@ export default function CodingTestTaking({ user }) {
               <ul className="text-sm text-yellow-800 space-y-1">
                 <li>• Test will open in <strong>fullscreen mode</strong></li>
                 <li>• Stay in fullscreen throughout the test</li>
-                <li>• If you exit fullscreen, you'll need a proctor code to continue</li>
+                <li>• If you exit fullscreen, you&apos;ll need a proctor code to continue</li>
                 <li>• Copy-paste is disabled</li>
                 <li>• Tab switching is monitored</li>
                 <li>• You can only submit each problem once</li>
@@ -609,7 +609,7 @@ export default function CodingTestTaking({ user }) {
                   <li>✓ Do not switch tabs or windows</li>
                   <li>✓ Copy-paste is disabled</li>
                   <li>✓ You can submit up to twice per problem (best score counts)</li>
-                  <li>✓ Click "Run" to test your code before submitting</li>
+                  <li>✓ Click &quot;Run&quot; to test your code before submitting</li>
                   <li>✓ Navigate between problems using numbered buttons</li>
                 </ul>
               </div>
