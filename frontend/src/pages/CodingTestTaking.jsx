@@ -302,6 +302,19 @@ export default function CodingTestTaking({ user }) {
       const newCount = response.data.attempt_number || currentCount + 1;
       setSubmissionCounts(prev => ({ ...prev, [currentProblem.id]: newCount }));
       
+      // Store feedback for display
+      setSubmissionFeedback(prev => ({
+        ...prev,
+        [currentProblem.id]: {
+          score: response.data.score,
+          feedback: response.data.feedback,
+          attempt_number: newCount,
+          best_score: response.data.best_score,
+          is_best: response.data.is_best_attempt,
+          message: response.data.message
+        }
+      }));
+      
       // Show detailed feedback
       const message = response.data.message || `Attempt ${newCount}/2 submitted!`;
       toast.success(
