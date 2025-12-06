@@ -861,6 +861,39 @@ export default function AssignmentPage({ user }) {
                     }
                     return null;
                   })()}
+                  
+                  {/* Custom Input Section */}
+                  <div className="mt-4 p-3 bg-gray-50 rounded-lg border border-gray-300">
+                    <div className="flex items-center gap-2 mb-2">
+                      <input
+                        type="checkbox"
+                        id="useCustomInputAssignment"
+                        checked={useCustomInput}
+                        onChange={(e) => setUseCustomInput(e.target.checked)}
+                        className="w-4 h-4"
+                      />
+                      <label htmlFor="useCustomInputAssignment" className="font-semibold text-sm text-gray-900 cursor-pointer">
+                        Use Custom Test Input (Optional)
+                      </label>
+                    </div>
+                    {useCustomInput && (
+                      <div>
+                        <p className="text-xs text-gray-600 mb-2">
+                          Enter your own test input (one value per line):
+                        </p>
+                        <Textarea
+                          value={customInput}
+                          onChange={(e) => setCustomInput(e.target.value)}
+                          placeholder="Example:&#10;5&#10;3"
+                          className="w-full h-20 bg-white text-gray-900 p-2 rounded text-sm font-mono resize-none"
+                          rows={3}
+                        />
+                        <p className="text-xs text-gray-500 mt-1">
+                          💡 Submissions will still be graded using official test cases
+                        </p>
+                      </div>
+                    )}
+                  </div>
                 </CardContent>
               </Card>
 
