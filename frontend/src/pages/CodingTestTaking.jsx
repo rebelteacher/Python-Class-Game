@@ -662,6 +662,8 @@ export default function CodingTestTaking({ user }) {
                   <li>✓ Copy-paste is disabled</li>
                   <li>✓ You can submit up to twice per problem (best score counts)</li>
                   <li>✓ Click &quot;Run&quot; to test your code before submitting</li>
+                  <li>✓ Use custom input to test with your own values</li>
+                  <li>✓ Submissions are graded using official test cases</li>
                   <li>✓ Navigate between problems using numbered buttons</li>
                 </ul>
               </div>
