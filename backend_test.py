@@ -5554,7 +5554,9 @@ startxref
                 third_submission_data
             )
             
-            # Verify the error message
+            # The run_test method already logged whether the 403 test passed or failed
+            # If we get here, we can check the logs to see if it was successful
+            # Since run_test returns None for failed tests (like 403), we expect None here
             if third_submission is None:  # 403 response expected (run_test returns None for non-success)
                 self.log_test("Third submission properly blocked with 403", True)
                 print("   ✅ Third submission correctly blocked")
