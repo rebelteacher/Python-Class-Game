@@ -640,15 +640,15 @@ export default function CodingTestTaking({ user }) {
             </Button>
             <Button
               onClick={handleSubmit}
-              disabled={submitting || submittedProblemIds.includes(currentProblem?.id)}
+              disabled={submitting || (submissionCounts[currentProblem?.id] || 0) >= 2}
               className="flex-1 bg-green-600 hover:bg-green-700 gap-2"
             >
               <Send className="w-4 h-4" />
-              {submittedProblemIds.includes(currentProblem?.id)
-                ? "Already Submitted"
+              {(submissionCounts[currentProblem?.id] || 0) >= 2
+                ? "Max Submissions Reached (2/2)"
                 : submitting
                 ? "Submitting..."
-                : `Submit Problem ${currentProblemIndex + 1}`}
+                : `Submit Problem ${currentProblemIndex + 1} (${submissionCounts[currentProblem?.id] || 0}/2)`}
             </Button>
           </div>
         </div>
