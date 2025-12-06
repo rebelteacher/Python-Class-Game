@@ -6505,23 +6505,32 @@ async def get_coding_test_result(test_id: str, request: Request):
     if not submissions:
         raise HTTPException(status_code=404, detail="No submissions found")
     
-    # Calculate overall score (average of all problem scores)
-    total_score = sum(sub["score"] for sub in submissions)
-    average_score = total_score / len(submissions)
+    # Group by problem_id and keep only the best score for each problem
+    problem_best_scores = {}
+    for sub in submissions:
+        problem_id = sub["problem_id"]
+        if problem_id not in problem_best_scores or sub["score"] > problem_best_scores[problem_id]["score"]:
+            problem_best_scores[problem_id] = sub
     
-    # Return aggregated results and individual problem results
+    # Calculate overall score (average of best scores per problem)
+    best_submissions = list(problem_best_scores.values())
+    total_score = sum(sub["score"] for sub in best_submissions)
+    average_score = total_score / len(best_submissions) if best_submissions else 0
+    
+    # Return aggregated results with best submission per problem
     return {
         "overall_score": average_score,
-        "total_problems": len(submissions),
+        "total_problems": len(best_submissions),
         "submissions": [
             {
                 "problem_id": sub["problem_id"],
                 "score": sub["score"],
                 "feedback": sub["feedback"],
                 "submitted_at": sub["submitted_at"],
-                "time_taken_seconds": sub.get("time_taken_seconds", 0)
+                "time_taken_seconds": sub.get("time_taken_seconds", 0),
+                "attempt_number": sub.get("attempt_number", 1)
             }
-            for sub in submissions
+            for sub in best_submissions
         ]
     }
 
