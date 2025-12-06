@@ -1735,7 +1735,11 @@ async def create_assignment(assignment: AssignmentCreate, request: Request):
     if assignment_dict["due_date"]:
         assignment_dict["due_date"] = assignment_dict["due_date"].isoformat()
     
+    logging.info(f"💾 Saving assignment with classroom_ids: {assignment_dict.get('classroom_ids')}")
+    
     await db.assignments.insert_one(assignment_dict)
+    
+    logging.info(f"✅ Assignment created successfully with ID: {new_assignment.id}")
     
     # Increment times_imported counter for each problem (library-based only)
     for problem_id in assignment.problem_ids:
