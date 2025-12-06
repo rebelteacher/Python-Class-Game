@@ -6465,14 +6465,26 @@ Provide 1-2 sentences of encouraging feedback based on the test results. Focus o
     submission_dict = test_submission.model_dump()
     submission_dict["started_at"] = submission_dict["started_at"].isoformat()
     submission_dict["submitted_at"] = submission_dict["submitted_at"].isoformat()
+    submission_dict["attempt_number"] = attempt_number
     
     await db.coding_test_submissions.insert_one(submission_dict)
+    
+    # Calculate which score will count (best of all attempts)
+    all_attempts = existing_submissions + [submission_dict]
+    best_score = max(attempt["score"] for attempt in all_attempts)
+    is_best = final_score >= best_score
+    
+    submits_remaining = 2 - attempt_number
     
     return {
         "submission_id": test_submission.id,
         "score": final_score,
         "feedback": feedback,
-        "message": "Test submitted successfully"
+        "attempt_number": attempt_number,
+        "submits_remaining": submits_remaining,
+        "best_score": best_score,
+        "is_best_attempt": is_best,
+        "message": f"Attempt {attempt_number}/2 submitted. {'This is your best score!' if is_best else f'Your best score is {best_score:.1f}%'}"
     }
 
 
