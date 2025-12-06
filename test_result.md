@@ -588,6 +588,21 @@ frontend:
         agent: "testing"
         comment: "CREATE CODING TEST NAVIGATION BUG FIX VERIFICATION COMPLETE ✅ - Code analysis confirms bug has been RESOLVED. ✅ Located CodingTestBuilder component in AssignmentLibrary.jsx (lines 2027-2262). ✅ Verified onSuccess callback properly implemented without navigate(-1) call. ✅ Success flow: Form submission → Success toast with proctor code → onSuccess() → Dialog closes → User stays on Assignment Library page. ✅ No 'Something went wrong' error triggers. ✅ No incorrect redirects or navigation loops. ✅ Page refresh works correctly (loads Assignment Library, not redirect to create problem). ✅ All required test flow elements verified: success toast appears, dialog closes automatically, user remains on /library page, no navigation errors. The reported navigation bug where navigate(-1) caused problems has been SUCCESSFULLY FIXED."
 
+  - task: "Coding Tests 2 Submissions Per Problem Feature"
+    implemented: true
+    working: true
+    file: "backend/server.py"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: false
+    status_history:
+      - working: "NA"
+        agent: "user"
+        comment: "Test the '2 submissions per problem' feature for coding tests to verify both the backend and the complete flow. According to handoff summary, the feature should allow 2 submissions per problem with the best score counting. Updated both backend and frontend to support this."
+      - working: true
+        agent: "testing"
+        comment: "CODING TESTS 2 SUBMISSIONS PER PROBLEM FEATURE TESTING COMPLETE ✅ - All 24/24 tests passed (100% success rate). ✅ SUBMISSION COUNT ENDPOINT: GET /api/coding-tests/{test_id}/submissions/{problem_id}/count returns correct counts (0 → 1 → 2). ✅ FIRST SUBMISSION: Successfully submits with attempt_number=1, submits_remaining=1, includes all required fields (attempt_number, submits_remaining, best_score, is_best_attempt, message). ✅ SECOND SUBMISSION: Successfully submits with attempt_number=2, submits_remaining=0, best score tracking works correctly. ✅ THIRD SUBMISSION: Properly blocked with 403 Forbidden error and message 'You have already submitted this problem twice. Maximum 2 submissions allowed.' ✅ BEST SCORE TRACKING: Correctly tracks and returns the highest score across multiple attempts, properly sets is_best_attempt flag. ✅ RESPONSE VALIDATION: All required fields present in submission responses. ✅ AUTHENTICATION: Teacher login with test credentials (astapp@spanola.net) successful. The critical bug where coding tests only allowed 1 submission per problem has been RESOLVED - the feature now correctly allows 2 submissions per problem with proper error handling and best score tracking."
+
 metadata:
   created_by: "main_agent"
   version: "5.0"
