@@ -6340,43 +6340,79 @@ async def submit_coding_test(test_id: str, submission: CodingTestSubmit, request
     if not problem:
         raise HTTPException(status_code=404, detail="Problem not found")
     
-    # Run test cases using the problem's solution
+    # Run test cases - use problem's test_cases if available, otherwise simple comparison
     test_results = []
     passed_tests = 0
     total_tests = 0
     
-    # Use expected_output comparison if available
-    try:
-        solution_result = run_python_code(problem.get("solution_code", ""), "")
-        student_result = run_python_code(submission.code, "")
-        
-        solution_output = normalize_output(solution_result["output"]) if solution_result["success"] else ""
-        student_output = normalize_output(student_result["output"]) if student_result["success"] else ""
-        
-        if student_result["success"] and student_output == solution_output:
-            base_score = 100
-            passed_tests = 1
-        else:
-            base_score = 50 if student_result["success"] else 0
-        
-        total_tests = 1
-        test_results.append({
-            "test_id": "output_comparison",
-            "description": "Compare output to solution",
-            "passed": student_output == solution_output,
-            "expected": solution_output,
-            "actual": student_output,
-            "error": student_result.get("error")
-        })
-    except Exception as e:
-        logging.error(f"Error during test evaluation: {str(e)}")
-        base_score = 0
-        test_results = [{
-            "test_id": "evaluation_error",
-            "description": "Error during evaluation",
-            "passed": False,
-            "error": str(e)
-        }]
+    # Check if problem has test cases
+    test_cases = problem.get("test_cases", [])
+    
+    if test_cases and len(test_cases) > 0:
+        # Use structured test cases
+        total_tests = len(test_cases)
+        for i, test_case in enumerate(test_cases):
+            test_input = test_case.get("input", "")
+            expected_output = normalize_output(test_case.get("expected_output", ""))
+            
+            try:
+                result = run_python_code(submission.code, test_input)
+                actual_output = normalize_output(result.get("output", ""))
+                passed = result.get("success") and actual_output == expected_output
+                
+                if passed:
+                    passed_tests += 1
+                
+                test_results.append({
+                    "test_id": f"test_{i+1}",
+                    "description": f"Test case {i+1}",
+                    "passed": passed,
+                    "expected": expected_output,
+                    "actual": actual_output,
+                    "error": result.get("error")
+                })
+            except Exception as e:
+                test_results.append({
+                    "test_id": f"test_{i+1}",
+                    "description": f"Test case {i+1}",
+                    "passed": False,
+                    "expected": expected_output,
+                    "actual": "",
+                    "error": str(e)
+                })
+    else:
+        # Fallback to simple comparison with solution
+        try:
+            solution_result = run_python_code(problem.get("solution_code", ""), "")
+            student_result = run_python_code(submission.code, "")
+            
+            solution_output = normalize_output(solution_result["output"]) if solution_result["success"] else ""
+            student_output = normalize_output(student_result["output"]) if student_result["success"] else ""
+            
+            passed = student_result["success"] and student_output == solution_output
+            if passed:
+                passed_tests = 1
+            
+            total_tests = 1
+            test_results.append({
+                "test_id": "output_comparison",
+                "description": "Compare output to solution",
+                "passed": passed,
+                "expected": solution_output,
+                "actual": student_output,
+                "error": student_result.get("error")
+            })
+        except Exception as e:
+            logging.error(f"Error during test evaluation: {str(e)}")
+            test_results = [{
+                "test_id": "evaluation_error",
+                "description": "Error during evaluation",
+                "passed": False,
+                "error": str(e)
+            }]
+    
+    # Calculate base score from test results (deterministic)
+    base_score = (passed_tests / total_tests * 100) if total_tests > 0 else 0
     
     # AI Evaluation
     llm_key = os.environ.get("EMERGENT_LLM_KEY")
