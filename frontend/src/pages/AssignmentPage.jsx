@@ -39,6 +39,8 @@ export default function AssignmentPage({ user }) {
   const [darkMode, setDarkMode] = useState(false); // Dark mode toggle
   const [markingFinal, setMarkingFinal] = useState(false);
   const [testInput, setTestInput] = useState(""); // For input() functions
+  const [customInput, setCustomInput] = useState(""); // For custom test input
+  const [useCustomInput, setUseCustomInput] = useState(false); // Toggle for custom input
   const [showInteractiveDialog, setShowInteractiveDialog] = useState(false); // Interactive input mode
   
   // Hint system state
