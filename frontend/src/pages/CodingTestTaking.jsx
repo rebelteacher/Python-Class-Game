@@ -273,8 +273,11 @@ export default function CodingTestTaking({ user }) {
   const handleSubmit = async () => {
     if (!currentProblem) return;
     
+    const currentCount = submissionCounts[currentProblem.id] || 0;
+    const remainingAttempts = 2 - currentCount;
+    
     const confirmSubmit = window.confirm(
-      `⚠️ Are you sure you want to submit "${currentProblem.title}"? You can only submit once per problem.`
+      `⚠️ Are you sure you want to submit "${currentProblem.title}"?\n\nYou have ${remainingAttempts} submission${remainingAttempts !== 1 ? 's' : ''} remaining for this problem (maximum 2 submissions allowed).`
     );
     
     if (!confirmSubmit) return;
@@ -295,11 +298,16 @@ export default function CodingTestTaking({ user }) {
         { withCredentials: true }
       );
       
-      toast.success(`Problem "${currentProblem.title}" submitted successfully!`);
+      const newCount = currentCount + 1;
+      setSubmissionCounts(prev => ({ ...prev, [currentProblem.id]: newCount }));
       
-      // Add to submitted list
-      const newSubmittedIds = [...submittedProblemIds, currentProblem.id];
-      setSubmittedProblemIds(newSubmittedIds);
+      toast.success(`Problem "${currentProblem.title}" submitted successfully! (Attempt ${newCount}/2)`);
+      
+      // Add to submitted list only if this is the second submission
+      if (newCount >= 2) {
+        const newSubmittedIds = [...submittedProblemIds, currentProblem.id];
+        setSubmittedProblemIds(newSubmittedIds);
+      }
       
       console.log(`Submitted problems: ${newSubmittedIds.length} / ${problems.length}`);
       console.log(`Current problem index: ${currentProblemIndex}`);
