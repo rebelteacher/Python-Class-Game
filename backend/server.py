@@ -2662,14 +2662,16 @@ async def submit_assignment(submission: SubmissionCreate, request: Request):
         return new_submission
     
     # Run test cases (if provided) - for traditional code assignments
+    # Check both assignment and problem for test cases
+    test_cases = assignment.get("test_cases", []) or problem.get("test_cases", [])
     test_results = []
-    total_tests = len(assignment.get("test_cases", []))
+    total_tests = len(test_cases)
     passed_tests = 0
     
     try:
         if total_tests > 0:
             # Traditional test case evaluation
-            for test_case in assignment["test_cases"]:
+            for test_case in test_cases:
                 # Support both 'input_data' (old) and 'input' (new) field names
                 test_input = test_case.get("input_data") or test_case.get("input", "")
                 result = run_python_code(submission.code, test_input)
