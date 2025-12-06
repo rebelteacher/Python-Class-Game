@@ -1615,7 +1615,6 @@ export default function AssignmentLibrary({ user }) {
             setSelectionMode(false);
             setSelectedProblems([]);
             toast.success("Assignment created successfully!");
-            navigate(-1);
           }}
         />
 
@@ -1630,7 +1629,6 @@ export default function AssignmentLibrary({ user }) {
             setSelectionMode(false);
             setSelectedProblems([]);
             toast.success("Coding test created successfully!");
-            navigate(-1);
           }}
         />
 
