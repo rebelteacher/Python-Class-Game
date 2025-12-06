@@ -351,7 +351,7 @@ export default function CodingTestTaking({ user }) {
         }
       } else {
         // First submission - stay on same problem
-        toast.info(`You can submit one more time for this problem to improve your score.`);
+        toast.info('You can submit one more time for this problem to improve your score.');
       }
     } catch (error) {
       console.error("Error submitting problem:", error);
