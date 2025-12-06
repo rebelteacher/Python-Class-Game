@@ -662,7 +662,7 @@ export default function CodingTestTaking({ user }) {
             >
               <Send className="w-4 h-4" />
               {(submissionCounts[currentProblem?.id] || 0) >= 2
-                ? "Max Submissions Reached (2/2)"
+                ? 'Max Submissions Reached (2/2)'
                 : submitting
                 ? "Submitting..."
                 : `Submit Problem ${currentProblemIndex + 1} (${submissionCounts[currentProblem?.id] || 0}/2)`}
