@@ -1671,10 +1671,17 @@ async def create_assignment(assignment: AssignmentCreate, request: Request):
     if user["role"] != "teacher":
         raise HTTPException(status_code=403, detail="Only teachers can create assignments")
     
+    # Debug logging
+    logging.info(f"📝 Creating assignment: {assignment.title}")
+    logging.info(f"📋 Received classroom_ids: {assignment.classroom_ids}")
+    logging.info(f"📋 Received classroom_id: {assignment.classroom_id}")
+    
     # Handle classroom_id or classroom_ids
     classroom_ids = assignment.classroom_ids if assignment.classroom_ids else []
     if assignment.classroom_id:
         classroom_ids.append(assignment.classroom_id)
+    
+    logging.info(f"📋 Final classroom_ids after processing: {classroom_ids}")
     
     if not classroom_ids:
         raise HTTPException(status_code=400, detail="At least one classroom is required")
