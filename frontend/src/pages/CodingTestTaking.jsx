@@ -114,6 +114,9 @@ export default function CodingTestTaking({ user }) {
       setProblems(response.data.problems || []);
       setSubmittedProblemIds(response.data.submitted_problem_ids || []);
       
+      // Fetch submission counts for each problem
+      await fetchSubmissionCounts(response.data.problems || []);
+      
       // Set initial code for first problem
       if (response.data.problems && response.data.problems.length > 0) {
         setCode(response.data.problems[0].starter_code || "# Write your code here\n");
@@ -131,6 +134,26 @@ export default function CodingTestTaking({ user }) {
       navigate("/my-tests");
     } finally {
       setLoading(false);
+    }
+  };
+
+  const fetchSubmissionCounts = async (problemList) => {
+    try {
+      const counts = {};
+      for (const problem of problemList) {
+        const response = await axios.get(
+          `${API}/coding-tests/${testId}/submissions/${problem.id}/count`,
+          { withCredentials: true }
+        );
+        counts[problem.id] = response.data.count || 0;
+      }
+      setSubmissionCounts(counts);
+    } catch (error) {
+      console.error("Error fetching submission counts:", error);
+      // Default to 0 if error
+      const counts = {};
+      problemList.forEach(p => counts[p.id] = 0);
+      setSubmissionCounts(counts);
     }
   };
 
