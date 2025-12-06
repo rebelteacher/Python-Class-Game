@@ -439,7 +439,7 @@ export default function CodingTestTaking({ user }) {
                 <li>• If you exit fullscreen, you&apos;ll need a proctor code to continue</li>
                 <li>• Copy-paste is disabled</li>
                 <li>• Tab switching is monitored</li>
-                <li>• You can only submit each problem once</li>
+                <li>• You can submit each problem up to twice (best score counts)</li>
               </ul>
             </div>
 
