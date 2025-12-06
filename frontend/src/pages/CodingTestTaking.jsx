@@ -324,9 +324,11 @@ export default function CodingTestTaking({ user }) {
       console.log(`Submitted problems: ${newSubmittedIds.length} / ${problems.length}`);
       console.log(`Current problem index: ${currentProblemIndex}`);
       
-      // Check if all problems are submitted
-      if (newSubmittedIds.length >= problems.length) {
-        console.log("All problems submitted - showing results modal");
+      // Check if all problems have reached max submissions (2 each)
+      const allProblemsMaxed = problems.every(p => (submissionCounts[p.id] || 0) >= 2);
+      
+      if (allProblemsMaxed) {
+        console.log("All problems maxed out - showing results modal");
         // Fetch results and show modal
         exitFullscreen();
         const resultsResponse = await axios.get(`${API}/coding-tests/${testId}/result`, {
@@ -334,10 +336,10 @@ export default function CodingTestTaking({ user }) {
         });
         setTestResults(resultsResponse.data);
         setShowScoreModal(true);
-      } else {
-        // Move to next problem
+      } else if (newCount >= 2) {
+        // Only auto-advance if this was the 2nd submission for this problem
         const nextIndex = currentProblemIndex + 1;
-        console.log(`Moving to next problem. Next index: ${nextIndex}`);
+        console.log(`Moving to next problem after 2nd submission. Next index: ${nextIndex}`);
         
         if (nextIndex < problems.length) {
           setCurrentProblemIndex(nextIndex);
@@ -347,6 +349,9 @@ export default function CodingTestTaking({ user }) {
         } else {
           console.log("No more problems to show");
         }
+      } else {
+        // First submission - stay on same problem
+        toast.info(`You can submit one more time for this problem to improve your score.`);
       }
     } catch (error) {
       console.error("Error submitting problem:", error);
