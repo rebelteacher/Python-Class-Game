@@ -287,7 +287,7 @@ export default function CodingTestTaking({ user }) {
     const timeTaken = Math.floor((Date.now() - startTime) / 1000);
     
     try {
-      await axios.post(
+      const response = await axios.post(
         `${API}/coding-tests/${testId}/submit`,
         {
           test_id: testId,
@@ -298,14 +298,26 @@ export default function CodingTestTaking({ user }) {
         { withCredentials: true }
       );
       
-      const newCount = currentCount + 1;
+      const newCount = response.data.attempt_number || currentCount + 1;
       setSubmissionCounts(prev => ({ ...prev, [currentProblem.id]: newCount }));
       
-      toast.success(`Problem "${currentProblem.title}" submitted successfully! (Attempt ${newCount}/2)`);
+      // Show detailed feedback
+      const message = response.data.message || `Attempt ${newCount}/2 submitted!`;
+      toast.success(
+        <div>
+          <p className="font-semibold">Problem "{currentProblem.title}" submitted!</p>
+          <p className="text-sm mt-1">Score: {response.data.score?.toFixed(1)}%</p>
+          <p className="text-xs mt-1">{message}</p>
+        </div>,
+        { duration: 5000 }
+      );
       
       // Add to submitted list only if this is the second submission
-      if (newCount >= 2) {
-        const newSubmittedIds = [...submittedProblemIds, currentProblem.id];
+      const newSubmittedIds = newCount >= 2 
+        ? [...submittedProblemIds, currentProblem.id]
+        : submittedProblemIds;
+      
+      if (newCount >= 2 && !submittedProblemIds.includes(currentProblem.id)) {
         setSubmittedProblemIds(newSubmittedIds);
       }
       
