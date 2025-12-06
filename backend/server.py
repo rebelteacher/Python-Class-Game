@@ -2670,7 +2670,9 @@ async def submit_assignment(submission: SubmissionCreate, request: Request):
         if total_tests > 0:
             # Traditional test case evaluation
             for test_case in assignment["test_cases"]:
-                result = run_python_code(submission.code, test_case.get("input_data", ""))
+                # Support both 'input_data' (old) and 'input' (new) field names
+                test_input = test_case.get("input_data") or test_case.get("input", "")
+                result = run_python_code(submission.code, test_input)
                 expected = normalize_output(test_case.get("expected_output", ""))
                 actual = normalize_output(result["output"]) if result["success"] else ""
                 
