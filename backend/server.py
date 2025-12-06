@@ -6882,7 +6882,9 @@ async def submit_challenge(challenge_id: str, submission_data: dict, request: Re
     total_tests = len(problem.get("test_cases", []))
     
     for test_case in problem["test_cases"]:
-        result = run_python_code(code, test_case.get("input_data", ""))
+        # Support both 'input_data' (old) and 'input' (new) field names
+        test_input = test_case.get("input_data") or test_case.get("input", "")
+        result = run_python_code(code, test_input)
         expected = normalize_output(test_case.get("expected_output", ""))
         actual = normalize_output(result.get("output", ""))
         passed = expected == actual and result.get("error") is None
@@ -6891,7 +6893,7 @@ async def submit_challenge(challenge_id: str, submission_data: dict, request: Re
             passed_tests += 1
         
         test_results.append({
-            "input": test_case.get("input_data", ""),
+            "input": test_input,
             "expected": expected,
             "actual": actual,
             "passed": passed
