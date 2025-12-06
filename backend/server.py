@@ -6314,14 +6314,17 @@ async def submit_coding_test(test_id: str, submission: CodingTestSubmit, request
     if user["role"] != "student":
         raise HTTPException(status_code=403, detail="Only students can submit tests")
     
-    # Check if this specific problem was already submitted
-    existing_submission = await db.coding_test_submissions.find_one({
+    # Check how many submissions exist for this problem (allow up to 2)
+    existing_submissions = await db.coding_test_submissions.find({
         "test_id": test_id,
         "student_id": user["id"],
         "problem_id": submission.problem_id
-    })
-    if existing_submission:
-        raise HTTPException(status_code=403, detail="You have already submitted this problem. Only one submission per problem is allowed.")
+    }).to_list(10)
+    
+    attempt_number = len(existing_submissions) + 1
+    
+    if attempt_number > 2:
+        raise HTTPException(status_code=403, detail="You have already submitted this problem twice. Maximum 2 submissions allowed.")
     
     # Get the test
     test = await db.coding_tests.find_one({"id": test_id}, {"_id": 0})
