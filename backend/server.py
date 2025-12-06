@@ -6414,66 +6414,40 @@ async def submit_coding_test(test_id: str, submission: CodingTestSubmit, request
     # Calculate base score from test results (deterministic)
     base_score = (passed_tests / total_tests * 100) if total_tests > 0 else 0
     
-    # AI Evaluation
+    # AI Feedback (feedback only, score is already calculated deterministically)
+    final_score = base_score
+    
     llm_key = os.environ.get("EMERGENT_LLM_KEY")
     chat = LlmChat(
         api_key=llm_key,
-        session_id=f"coding_test_{test_id}_{user['id']}",
-        system_message="You are a coding instructor evaluating student Python code for a timed coding test. Provide constructive, encouraging feedback."
+        session_id=f"coding_test_{test_id}_{user['id']}_{submission.problem_id}",
+        system_message="You are a helpful coding instructor. Provide brief, encouraging feedback based on test results. Do NOT assign scores."
     ).with_model("openai", "gpt-4o")
     
     prompt = f"""
-Evaluate this Python code submission for a coding test:
+Provide helpful feedback for this coding test submission:
 
 Problem: {problem['title']}
 Description: {problem['description']}
 
-Expected Solution:
-```python
-{problem['solution_code']}
-```
+Test Results: {passed_tests}/{total_tests} passed
+Score: {final_score}% (already calculated)
 
 Student Code:
 ```python
 {submission.code}
 ```
 
-Expected Output: {test_results[0].get('expected', 'N/A')}
-Student Output: {test_results[0].get('actual', 'N/A')}
-
-Base Score: {base_score}%
-
-EVALUATION CRITERIA:
-1. Start with base score: {base_score}%
-2. Award full credit if output matches correctly
-3. Award partial credit for correct approach with minor issues
-4. Provide specific, actionable feedback (2-3 sentences)
-5. Be encouraging but honest
-
-Format your response as JSON:
-{{
-  "score": <number 0-100>,
-  "feedback": "<2-3 sentences with specific guidance>"
-}}
+Provide 1-2 sentences of encouraging feedback based on the test results. Focus on what they did well or what to improve. Do NOT mention or change the score.
 """
     
     try:
         user_message = UserMessage(text=prompt)
         ai_response = await chat.send_message(user_message)
-        
-        import re
-        json_match = re.search(r'\{[^{}]*"score"[^{}]*\}', ai_response, re.DOTALL)
-        if json_match:
-            ai_eval = json.loads(json_match.group())
-            final_score = float(ai_eval.get("score", base_score))
-            feedback = ai_eval.get("feedback", "Good effort!")
-        else:
-            final_score = base_score
-            feedback = "Test completed. Keep practicing to improve your skills!"
+        feedback = ai_response[:300] if ai_response else "Good effort! Review the test results to see which cases passed."
     except Exception as e:
-        logging.error(f"AI evaluation error: {str(e)}")
-        final_score = base_score
-        feedback = f"Test completed with {base_score}% score. Keep practicing!"
+        logging.error(f"AI feedback error: {str(e)}")
+        feedback = f"Test completed: {passed_tests}/{total_tests} test cases passed. Keep practicing!"
     
     # Create submission record
     test_submission = CodingTestSubmission(
