@@ -21,6 +21,7 @@ export default function CodingTestTaking({ user }) {
   const [problems, setProblems] = useState([]);
   const [currentProblemIndex, setCurrentProblemIndex] = useState(0);
   const [submittedProblemIds, setSubmittedProblemIds] = useState([]);
+  const [submissionCounts, setSubmissionCounts] = useState({}); // Track submissions per problem
   const [code, setCode] = useState("");
   const [output, setOutput] = useState("");
   const [loading, setLoading] = useState(true);
