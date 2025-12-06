@@ -25,6 +25,8 @@ export default function CodingTestTaking({ user }) {
   const [submissionFeedback, setSubmissionFeedback] = useState({}); // Track feedback per problem
   const [code, setCode] = useState("");
   const [output, setOutput] = useState("");
+  const [customInput, setCustomInput] = useState(""); // For student's custom test input
+  const [useCustomInput, setUseCustomInput] = useState(false); // Toggle between test case and custom input
   const [loading, setLoading] = useState(true);
   const [running, setRunning] = useState(false);
   const [submitting, setSubmitting] = useState(false);
