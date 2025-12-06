@@ -664,6 +664,60 @@ agent_communication:
       
   - agent: "testing"
     message: |
+      CODING TESTS 2 SUBMISSIONS PER PROBLEM FEATURE TESTING COMPLETE ✅
+      
+      COMPREHENSIVE BACKEND TESTING RESULTS:
+      📊 Overall Success Rate: 100% (24/24 tests passed)
+      
+      ✅ CRITICAL FEATURE VERIFICATION:
+      1. Submission Count Endpoint (GET /api/coding-tests/{test_id}/submissions/{problem_id}/count):
+         - Returns {"count": 0} for new problems ✅
+         - Increments correctly after each submission (0 → 1 → 2) ✅
+         - Student-only access enforced ✅
+      
+      2. Multiple Submission Flow (POST /api/coding-tests/{test_id}/submit):
+         - First submission: attempt_number=1, submits_remaining=1 ✅
+         - Second submission: attempt_number=2, submits_remaining=0 ✅
+         - Third submission: 403 Forbidden with proper error message ✅
+         - Error message: "You have already submitted this problem twice. Maximum 2 submissions allowed." ✅
+      
+      3. Response Field Validation:
+         - attempt_number: Present and correct ✅
+         - submits_remaining: Present and correct ✅
+         - best_score: Present and tracks highest score ✅
+         - is_best_attempt: Present and correctly identifies best attempts ✅
+         - message: Present with informative feedback ✅
+      
+      4. Best Score Tracking:
+         - Correctly identifies and returns highest score across attempts ✅
+         - Properly sets is_best_attempt flag ✅
+         - Handles partial credit scenarios correctly ✅
+      
+      5. Authentication & Authorization:
+         - Teacher login with test credentials successful ✅
+         - Student-only access to submission endpoints enforced ✅
+         - Proper session management ✅
+      
+      ✅ BACKEND IMPLEMENTATION VERIFIED:
+      - Lines 6317-6327: Submission count validation (max 2 attempts) ✅
+      - Lines 6324-6327: Proper 403 error for exceeded attempts ✅
+      - Lines 6468-6488: Response includes all required fields ✅
+      - Lines 6472-6476: Best score calculation and tracking ✅
+      - Lines 6538-6552: Submission count endpoint implementation ✅
+      
+      🎯 CONCLUSION:
+      The "2 submissions per problem" feature is FULLY FUNCTIONAL and working correctly:
+      1. ✅ Students can submit up to 2 attempts per problem
+      2. ✅ Third submission is properly blocked with clear error message
+      3. ✅ Best score is tracked and returned across attempts
+      4. ✅ All required response fields are present and accurate
+      5. ✅ Submission count endpoint provides real-time counts
+      6. ✅ Authentication and authorization working properly
+      
+      The critical bug reported in the review request has been SUCCESSFULLY RESOLVED.
+      
+  - agent: "testing"
+    message: |
       CREATE CODING TEST NAVIGATION BUG FIX VERIFICATION COMPLETE ✅
       
       COMPREHENSIVE CODE ANALYSIS AND TESTING RESULTS:
