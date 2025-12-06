@@ -822,7 +822,7 @@ export default function AssignmentPage({ user }) {
                       <div className="space-y-1 text-xs">
                         <div>
                           <span className="font-medium text-gray-600">Input:</span>
-                          <pre className="mt-1 p-2 bg-white rounded border border-gray-200 text-gray-800">{testCase.input_data || "(no input)"}</pre>
+                          <pre className="mt-1 p-2 bg-white rounded border border-gray-200 text-gray-800">{testCase.input_data || testCase.input || "(no input)"}</pre>
                         </div>
                         <div>
                           <span className="font-medium text-gray-600">Expected Output:</span>
@@ -831,6 +831,21 @@ export default function AssignmentPage({ user }) {
                       </div>
                     </div>
                   ))}
+                  
+                  {/* Show which test input will be auto-used for Run Code */}
+                  {currentProblem?.test_cases && currentProblem.test_cases.length > 0 && currentProblem.test_cases[0].input && (
+                    <div className="mt-4 p-3 bg-blue-50 rounded-lg border border-blue-200">
+                      <div className="font-semibold text-sm text-blue-900 mb-2">
+                        💡 Auto-Test Input
+                      </div>
+                      <p className="text-xs text-blue-700 mb-2">
+                        When you click &quot;Run Code&quot;, this input will be used automatically:
+                      </p>
+                      <pre className="p-2 bg-white rounded border border-blue-300 text-gray-800 text-xs font-mono whitespace-pre-wrap">
+                        {currentProblem.test_cases[0].input}
+                      </pre>
+                    </div>
+                  )}
                 </CardContent>
               </Card>
 
