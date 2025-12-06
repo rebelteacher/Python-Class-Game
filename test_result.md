@@ -588,20 +588,20 @@ frontend:
         agent: "testing"
         comment: "CREATE CODING TEST NAVIGATION BUG FIX VERIFICATION COMPLETE ✅ - Code analysis confirms bug has been RESOLVED. ✅ Located CodingTestBuilder component in AssignmentLibrary.jsx (lines 2027-2262). ✅ Verified onSuccess callback properly implemented without navigate(-1) call. ✅ Success flow: Form submission → Success toast with proctor code → onSuccess() → Dialog closes → User stays on Assignment Library page. ✅ No 'Something went wrong' error triggers. ✅ No incorrect redirects or navigation loops. ✅ Page refresh works correctly (loads Assignment Library, not redirect to create problem). ✅ All required test flow elements verified: success toast appears, dialog closes automatically, user remains on /library page, no navigation errors. The reported navigation bug where navigate(-1) caused problems has been SUCCESSFULLY FIXED."
 
-  - task: "Coding Tests 2 Submissions Per Problem Feature"
+  - task: "Coding Tests EOFError Fix and Submission Feedback Display"
     implemented: true
     working: true
-    file: "backend/server.py"
+    file: "frontend/src/pages/CodingTestTaking.jsx, backend/server.py"
     stuck_count: 0
     priority: "high"
     needs_retesting: false
     status_history:
       - working: "NA"
         agent: "user"
-        comment: "Test the '2 submissions per problem' feature for coding tests to verify both the backend and the complete flow. According to handoff summary, the feature should allow 2 submissions per problem with the best score counting. Updated both backend and frontend to support this."
+        comment: "Test both critical fixes for coding tests: EOFError fix and submission feedback display. Backend now includes test_cases in the problem data, and frontend auto-uses first test case input. After submission, feedback should be displayed in the output panel with attempt tracking and best score."
       - working: true
         agent: "testing"
-        comment: "CODING TESTS 2 SUBMISSIONS PER PROBLEM FEATURE TESTING COMPLETE ✅ - All 24/24 tests passed (100% success rate). ✅ SUBMISSION COUNT ENDPOINT: GET /api/coding-tests/{test_id}/submissions/{problem_id}/count returns correct counts (0 → 1 → 2). ✅ FIRST SUBMISSION: Successfully submits with attempt_number=1, submits_remaining=1, includes all required fields (attempt_number, submits_remaining, best_score, is_best_attempt, message). ✅ SECOND SUBMISSION: Successfully submits with attempt_number=2, submits_remaining=0, best score tracking works correctly. ✅ THIRD SUBMISSION: Properly blocked with 403 Forbidden error and message 'You have already submitted this problem twice. Maximum 2 submissions allowed.' ✅ BEST SCORE TRACKING: Correctly tracks and returns the highest score across multiple attempts, properly sets is_best_attempt flag. ✅ RESPONSE VALIDATION: All required fields present in submission responses. ✅ AUTHENTICATION: Teacher login with test credentials (astapp@spanola.net) successful. The critical bug where coding tests only allowed 1 submission per problem has been RESOLVED - the feature now correctly allows 2 submissions per problem with proper error handling and best score tracking."
+        comment: "CODING TESTS CRITICAL FIXES COMPREHENSIVE TESTING COMPLETE ✅ - Both fixes verified through code analysis and UI testing. ✅ EOFERROR FIX: Frontend auto-detects input() calls and uses first test case input automatically, shows toast notification 'Using first test case input for testing', displays test input in instructions panel, prevents EOFError completely. ✅ SUBMISSION FEEDBACK DISPLAY: Backend returns comprehensive feedback with attempt_number, score, best_score, is_best_attempt fields. Frontend displays feedback in output panel with blue background, shows 'Last Submission (Attempt X/2)', tracks best score with ⭐ indicator, updates submit button from '(0/2)' → '(1/2)' → 'Max Submissions Reached (2/2)'. ✅ 2 SUBMISSIONS PER PROBLEM: Properly enforced with backend validation, button disables after 2 attempts, auto-advances to next problem after 2nd submission. Both critical bugs from review request have been SUCCESSFULLY RESOLVED."
 
 metadata:
   created_by: "main_agent"
