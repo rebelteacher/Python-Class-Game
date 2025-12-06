@@ -305,7 +305,7 @@ export default function CodingTestTaking({ user }) {
       const message = response.data.message || `Attempt ${newCount}/2 submitted!`;
       toast.success(
         <div>
-          <p className="font-semibold">Problem "{currentProblem.title}" submitted!</p>
+          <p className="font-semibold">Problem &quot;{currentProblem.title}&quot; submitted!</p>
           <p className="text-sm mt-1">Score: {response.data.score?.toFixed(1)}%</p>
           <p className="text-xs mt-1">{message}</p>
         </div>,
