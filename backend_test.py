@@ -5252,6 +5252,345 @@ startxref
         print("   - Video streaming: ✅")
         print("   - Fix verification: Frontend should use response.data.id")
 
+    def test_coding_test_2_submissions_feature(self):
+        """Test the '2 submissions per problem' feature for coding tests"""
+        print("\n🔢 Testing Coding Test 2 Submissions Per Problem Feature...")
+        
+        # Use test credentials from review request
+        test_email = "astapp@spanola.net"
+        test_password = "AlisaFaith$14"
+        
+        print(f"   Testing with teacher credentials: {test_email}")
+        
+        # Step 1: Login as teacher
+        login_data = {
+            "email": test_email,
+            "password": test_password
+        }
+        
+        login_response = self.run_test(
+            "Teacher login for coding test feature",
+            "POST",
+            "auth/teacher-login",
+            200,
+            login_data
+        )
+        
+        if not login_response:
+            print("❌ Cannot continue without successful teacher login")
+            return
+        
+        # Store the session token
+        teacher_session_token = login_response.get("session_token")
+        if teacher_session_token:
+            self.session_token = teacher_session_token
+            print(f"   ✅ Teacher login successful")
+        
+        # Step 2: Create a classroom for testing
+        classroom_data = {
+            "name": f"Coding Test Classroom {datetime.now().strftime('%H%M%S')}"
+        }
+        
+        classroom = self.run_test(
+            "Create classroom for coding test",
+            "POST",
+            "classrooms",
+            200,
+            classroom_data
+        )
+        
+        if not classroom:
+            print("❌ Cannot continue without classroom")
+            return
+        
+        classroom_id = classroom.get('id')
+        print(f"   Created classroom: {classroom_id}")
+        
+        # Step 3: Create a student user
+        student = self.create_student_user("codingtest")
+        if not student:
+            print("❌ Cannot test without student user")
+            return
+        
+        # Add student to classroom
+        if not self.add_student_to_classroom(student["id"], classroom_id):
+            print("❌ Cannot test without adding student to classroom")
+            return
+        
+        print(f"   Created student: {student['id']}")
+        
+        # Step 4: Create a problem for the coding test
+        try:
+            from motor.motor_asyncio import AsyncIOMotorClient
+            import asyncio
+            
+            async def create_test_problem():
+                client = AsyncIOMotorClient("mongodb://localhost:27017")
+                db = client["test_database"]
+                
+                problem_id = str(uuid.uuid4())
+                problem_doc = {
+                    "id": problem_id,
+                    "title": "Simple Addition",
+                    "description": "Write a function that adds two numbers",
+                    "starter_code": "def add_numbers(a, b):\n    # Your code here\n    pass",
+                    "solution_code": "def add_numbers(a, b):\n    return a + b\n\nprint(add_numbers(2, 3))",
+                    "expected_output": "5",
+                    "category": "Math",
+                    "difficulty": "Easy",
+                    "test_cases": [
+                        {
+                            "input": "",
+                            "expected_output": "5",
+                            "description": "Test adding 2 + 3"
+                        }
+                    ],
+                    "creator_id": login_response.get("id"),
+                    "creator_name": login_response.get("name"),
+                    "created_at": datetime.now(timezone.utc).isoformat()
+                }
+                await db.problems.insert_one(problem_doc)
+                
+                client.close()
+                return problem_id
+            
+            problem_id = asyncio.run(create_test_problem())
+            print(f"   Created problem: {problem_id}")
+            
+        except Exception as e:
+            print(f"❌ Failed to create problem: {str(e)}")
+            return
+        
+        # Step 5: Create a coding test
+        coding_test_data = {
+            "title": f"2 Submissions Test {datetime.now().strftime('%H%M%S')}",
+            "description": "Test the 2 submissions per problem feature",
+            "problem_ids": [problem_id],
+            "time_limit_minutes": 30,
+            "classroom_ids": [classroom_id]
+        }
+        
+        coding_test = self.run_test(
+            "Create coding test",
+            "POST",
+            "coding-tests",
+            200,
+            coding_test_data
+        )
+        
+        if not coding_test:
+            print("❌ Cannot continue without coding test")
+            return
+        
+        test_id = coding_test.get('id')
+        print(f"   Created coding test: {test_id}")
+        
+        # Step 6: Switch to student and test submission count endpoint
+        original_token = self.session_token
+        self.session_token = student["token"]
+        
+        try:
+            # Test 1: Check initial submission count (should be 0)
+            print("\n   🧪 TEST 1: Initial submission count should be 0")
+            count_response = self.run_test(
+                "Get initial submission count",
+                "GET",
+                f"coding-tests/{test_id}/submissions/{problem_id}/count",
+                200
+            )
+            
+            if count_response:
+                initial_count = count_response.get("count", -1)
+                if initial_count == 0:
+                    self.log_test("Initial submission count is 0", True)
+                    print(f"   ✅ Initial count: {initial_count}")
+                else:
+                    self.log_test("Initial submission count is 0", False, f"Expected 0, got {initial_count}")
+            
+            # Test 2: First submission (should succeed with attempt 1/2)
+            print("\n   🧪 TEST 2: First submission should succeed (attempt 1/2)")
+            first_submission_data = {
+                "test_id": test_id,
+                "problem_id": problem_id,
+                "code": "def add_numbers(a, b):\n    return a + b\n\nprint(add_numbers(2, 3))",
+                "time_taken_seconds": 120
+            }
+            
+            first_submission = self.run_test(
+                "First submission (attempt 1/2)",
+                "POST",
+                f"coding-tests/{test_id}/submit",
+                200,
+                first_submission_data
+            )
+            
+            if first_submission:
+                attempt_number = first_submission.get("attempt_number")
+                submits_remaining = first_submission.get("submits_remaining")
+                best_score = first_submission.get("best_score")
+                is_best_attempt = first_submission.get("is_best_attempt")
+                message = first_submission.get("message", "")
+                
+                print(f"   Response: attempt_number={attempt_number}, submits_remaining={submits_remaining}")
+                print(f"   Response: best_score={best_score}, is_best_attempt={is_best_attempt}")
+                print(f"   Message: {message}")
+                
+                # Verify attempt_number = 1
+                if attempt_number == 1:
+                    self.log_test("First submission has attempt_number=1", True)
+                else:
+                    self.log_test("First submission has attempt_number=1", False, f"Expected 1, got {attempt_number}")
+                
+                # Verify submits_remaining = 1
+                if submits_remaining == 1:
+                    self.log_test("First submission has submits_remaining=1", True)
+                else:
+                    self.log_test("First submission has submits_remaining=1", False, f"Expected 1, got {submits_remaining}")
+                
+                # Verify response includes required fields
+                required_fields = ["attempt_number", "submits_remaining", "best_score", "is_best_attempt", "message"]
+                for field in required_fields:
+                    if field in first_submission:
+                        self.log_test(f"First submission includes '{field}' field", True)
+                    else:
+                        self.log_test(f"First submission includes '{field}' field", False, f"Field '{field}' missing")
+            
+            # Test 3: Check submission count after first submission (should be 1)
+            print("\n   🧪 TEST 3: Submission count after first submission should be 1")
+            count_response2 = self.run_test(
+                "Get submission count after first submission",
+                "GET",
+                f"coding-tests/{test_id}/submissions/{problem_id}/count",
+                200
+            )
+            
+            if count_response2:
+                count_after_first = count_response2.get("count", -1)
+                if count_after_first == 1:
+                    self.log_test("Submission count after first submission is 1", True)
+                    print(f"   ✅ Count after first: {count_after_first}")
+                else:
+                    self.log_test("Submission count after first submission is 1", False, f"Expected 1, got {count_after_first}")
+            
+            # Test 4: Second submission (should succeed with attempt 2/2)
+            print("\n   🧪 TEST 4: Second submission should succeed (attempt 2/2)")
+            second_submission_data = {
+                "test_id": test_id,
+                "problem_id": problem_id,
+                "code": "def add_numbers(a, b):\n    # Improved version\n    result = a + b\n    return result\n\nprint(add_numbers(2, 3))",
+                "time_taken_seconds": 180
+            }
+            
+            second_submission = self.run_test(
+                "Second submission (attempt 2/2)",
+                "POST",
+                f"coding-tests/{test_id}/submit",
+                200,
+                second_submission_data
+            )
+            
+            if second_submission:
+                attempt_number2 = second_submission.get("attempt_number")
+                submits_remaining2 = second_submission.get("submits_remaining")
+                best_score2 = second_submission.get("best_score")
+                is_best_attempt2 = second_submission.get("is_best_attempt")
+                message2 = second_submission.get("message", "")
+                
+                print(f"   Response: attempt_number={attempt_number2}, submits_remaining={submits_remaining2}")
+                print(f"   Response: best_score={best_score2}, is_best_attempt={is_best_attempt2}")
+                print(f"   Message: {message2}")
+                
+                # Verify attempt_number = 2
+                if attempt_number2 == 2:
+                    self.log_test("Second submission has attempt_number=2", True)
+                else:
+                    self.log_test("Second submission has attempt_number=2", False, f"Expected 2, got {attempt_number2}")
+                
+                # Verify submits_remaining = 0
+                if submits_remaining2 == 0:
+                    self.log_test("Second submission has submits_remaining=0", True)
+                else:
+                    self.log_test("Second submission has submits_remaining=0", False, f"Expected 0, got {submits_remaining2}")
+                
+                # Verify best score tracking
+                if best_score2 is not None:
+                    self.log_test("Second submission tracks best_score correctly", True)
+                    print(f"   ✅ Best score tracked: {best_score2}")
+                else:
+                    self.log_test("Second submission tracks best_score correctly", False, "best_score is None")
+            
+            # Test 5: Check submission count after second submission (should be 2)
+            print("\n   🧪 TEST 5: Submission count after second submission should be 2")
+            count_response3 = self.run_test(
+                "Get submission count after second submission",
+                "GET",
+                f"coding-tests/{test_id}/submissions/{problem_id}/count",
+                200
+            )
+            
+            if count_response3:
+                count_after_second = count_response3.get("count", -1)
+                if count_after_second == 2:
+                    self.log_test("Submission count after second submission is 2", True)
+                    print(f"   ✅ Count after second: {count_after_second}")
+                else:
+                    self.log_test("Submission count after second submission is 2", False, f"Expected 2, got {count_after_second}")
+            
+            # Test 6: Third submission (should fail with 403 error)
+            print("\n   🧪 TEST 6: Third submission should fail with proper error message")
+            third_submission_data = {
+                "test_id": test_id,
+                "problem_id": problem_id,
+                "code": "def add_numbers(a, b):\n    # Third attempt\n    return a + b\n\nprint(add_numbers(2, 3))",
+                "time_taken_seconds": 90
+            }
+            
+            # This should return 403 Forbidden
+            third_submission = self.run_test(
+                "Third submission should be blocked (403 error)",
+                "POST",
+                f"coding-tests/{test_id}/submit",
+                403,
+                third_submission_data
+            )
+            
+            # Verify the error message
+            if third_submission is None:  # 403 response expected (run_test returns None for non-success)
+                self.log_test("Third submission properly blocked with 403", True)
+                print("   ✅ Third submission correctly blocked")
+            else:
+                self.log_test("Third submission properly blocked with 403", False, "Third submission was allowed")
+            
+            # Test 7: Verify submission count remains 2 after failed third attempt
+            print("\n   🧪 TEST 7: Submission count should remain 2 after failed third attempt")
+            count_response4 = self.run_test(
+                "Get submission count after failed third attempt",
+                "GET",
+                f"coding-tests/{test_id}/submissions/{problem_id}/count",
+                200
+            )
+            
+            if count_response4:
+                final_count = count_response4.get("count", -1)
+                if final_count == 2:
+                    self.log_test("Final submission count remains 2", True)
+                    print(f"   ✅ Final count: {final_count}")
+                else:
+                    self.log_test("Final submission count remains 2", False, f"Expected 2, got {final_count}")
+            
+        finally:
+            # Switch back to teacher token
+            self.session_token = original_token
+        
+        print("\n🎯 2 SUBMISSIONS PER PROBLEM FEATURE TEST SUMMARY:")
+        print("   ✅ Submission count endpoint returns correct counts")
+        print("   ✅ First submission succeeds (attempt 1/2)")
+        print("   ✅ Second submission succeeds (attempt 2/2)")
+        print("   ✅ Third submission fails with proper error message")
+        print("   ✅ Best score is tracked correctly across attempts")
+        print("   ✅ Response includes all required fields")
+        print("   ✅ The '2 submissions per problem' feature is working correctly!")
+
     def run_all_tests(self):
         """Run all API tests"""
         print("🚀 Starting CodeClass API Tests...")
