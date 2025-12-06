@@ -5601,7 +5601,10 @@ startxref
             print("❌ Cannot proceed without test user setup")
             return False
         
-        # Run the specific lesson video upload test first (as requested in review)
+        # Run the specific coding test 2 submissions feature test first (as requested in review)
+        self.test_coding_test_2_submissions_feature()
+        
+        # Run the lesson video upload test
         self.test_lesson_video_upload_flow()
         
         # Test authentication
