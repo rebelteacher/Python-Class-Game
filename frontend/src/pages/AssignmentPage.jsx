@@ -1049,7 +1049,7 @@ export default function AssignmentPage({ user }) {
                               This problem is marked as done!
                             </div>
                             <p className="text-sm text-green-600 text-center mb-3">
-                              You're viewing your final submitted code. You can reference it anytime, but cannot submit changes.
+                              You&apos;re viewing your final submitted code. You can reference it anytime, but cannot submit changes.
                             </p>
                             <div className="flex justify-center">
                               <Button
@@ -1315,7 +1315,7 @@ export default function AssignmentPage({ user }) {
                         {/* Show turtle image if this is a turtle submission */}
                         {isTurtleSubmission && (
                           <div className="mt-3">
-                            <div className="text-xs font-semibold text-gray-700 mb-1">Student's Turtle Graphics:</div>
+                            <div className="text-xs font-semibold text-gray-700 mb-1">Student&apos;s Turtle Graphics:</div>
                             <div className="flex justify-center bg-white p-2 rounded border">
                               <img 
                                 src={`data:image/png;base64,${sub.turtle_image}`}
@@ -1359,7 +1359,7 @@ export default function AssignmentPage({ user }) {
               Hint {currentHint?.level} - {currentHint?.coins_spent} Coins Spent
             </DialogTitle>
             <DialogDescription>
-              Here's a hint to help you solve this problem. Remember to read the feedback too!
+              Here&apos;s a hint to help you solve this problem. Remember to read the feedback too!
             </DialogDescription>
           </DialogHeader>
           <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4 my-4">
