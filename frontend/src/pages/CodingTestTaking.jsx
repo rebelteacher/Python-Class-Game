@@ -624,6 +624,36 @@ export default function CodingTestTaking({ user }) {
                 </div>
               )}
               
+              {/* Custom Input Section */}
+              <div className="mt-4 p-3 bg-gray-800 rounded border border-gray-700">
+                <div className="flex items-center gap-2 mb-2">
+                  <input
+                    type="checkbox"
+                    id="useCustomInput"
+                    checked={useCustomInput}
+                    onChange={(e) => setUseCustomInput(e.target.checked)}
+                    className="w-4 h-4"
+                  />
+                  <label htmlFor="useCustomInput" className="font-semibold text-sm cursor-pointer">
+                    Use Custom Test Input (Optional)
+                  </label>
+                </div>
+                {useCustomInput && (
+                  <div>
+                    <p className="text-xs text-gray-400 mb-2">
+                      Enter your own test input (one value per line):
+                    </p>
+                    <textarea
+                      value={customInput}
+                      onChange={(e) => setCustomInput(e.target.value)}
+                      placeholder="Example:\n5\n3"
+                      className="w-full h-20 bg-gray-900 text-white p-2 rounded text-sm font-mono"
+                      rows={3}
+                    />
+                  </div>
+                )}
+              </div>
+              
               <div className="mt-4 p-3 bg-blue-900 rounded">
                 <p className="font-semibold mb-2">Test Rules:</p>
                 <ul className="text-xs space-y-1">
