@@ -657,6 +657,27 @@ export default function CodingTestTaking({ user }) {
             <pre className="text-sm text-green-400 font-mono whitespace-pre-wrap">
               {output || "Run your code to see output here..."}
             </pre>
+            
+            {/* Submission Feedback */}
+            {submissionFeedback[currentProblem?.id] && (
+              <div className="mt-4 p-3 bg-blue-900 border border-blue-700 rounded">
+                <h4 className="text-sm font-semibold text-blue-300 mb-2">
+                  Last Submission (Attempt {submissionFeedback[currentProblem.id].attempt_number}/2):
+                </h4>
+                <p className="text-sm text-white">
+                  Score: <span className="font-bold text-yellow-400">{submissionFeedback[currentProblem.id].score?.toFixed(1)}%</span>
+                  {submissionFeedback[currentProblem.id].best_score !== undefined && (
+                    <span className="ml-2">
+                      | Best: <span className="font-bold text-green-400">{submissionFeedback[currentProblem.id].best_score?.toFixed(1)}%</span>
+                    </span>
+                  )}
+                </p>
+                {submissionFeedback[currentProblem.id].is_best && (
+                  <p className="text-xs text-green-400 mt-1">⭐ This is your best score!</p>
+                )}
+                <p className="text-xs text-gray-300 mt-2">{submissionFeedback[currentProblem.id].feedback}</p>
+              </div>
+            )}
           </div>
 
           {/* Action Buttons */}
