@@ -854,18 +854,6 @@ export default function AssignmentPage({ user }) {
                     return null;
                   })()}
                   
-                  {/* Custom Input Button */}
-                  <div className="mt-4">
-                    <button
-                      onClick={() => setShowInteractiveDialog(true)}
-                      className="w-full p-3 bg-blue-600 hover:bg-blue-700 text-white rounded text-sm font-semibold transition-colors"
-                    >
-                      🎯 Enter Custom Test Input
-                    </button>
-                    <p className="text-xs text-gray-600 mt-2 text-center">
-                      Opens a dialog to enter your own test values with input prompts
-                    </p>
-                  </div>
                 </CardContent>
               </Card>
 
