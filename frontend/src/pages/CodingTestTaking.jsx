@@ -198,15 +198,16 @@ export default function CodingTestTaking({ user }) {
   const handleRunCode = async (providedInput = null) => {
     const hasInputCalls = /input\s*\(/i.test(code);
     
-    // Determine which input to use
+    // If code has input() calls and no input provided yet
     if (hasInputCalls && providedInput === null) {
-      // Auto-use first test case if available
+      // Check if test cases are available
       const testCases = currentProblem?.test_cases || [];
       if (testCases.length > 0 && testCases[0].input) {
+        // Auto-use first test case
         providedInput = testCases[0].input;
         toast.info("Using test case input for testing");
       } else {
-        // No test cases available, show interactive dialog
+        // No test cases - show interactive dialog to collect input
         setShowInteractiveDialog(true);
         return;
       }
