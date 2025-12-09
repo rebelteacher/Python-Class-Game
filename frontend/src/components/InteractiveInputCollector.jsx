@@ -20,7 +20,7 @@ export default function InteractiveInputCollector({
   const [inputValues, setInputValues] = useState([]);
   const [inputPrompts, setInputPrompts] = useState([]);
 
-  const extractInputPrompts = (code) => {
+  const extractInputPrompts = useCallback((code) => {
     // Match input("prompt") or input('prompt')
     const regex = /input\s*\(\s*["']([^"']*)["']\s*\)/g;
     const matches = [];
@@ -38,7 +38,7 @@ export default function InteractiveInputCollector({
     }
     
     return matches;
-  };
+  }, [inputCount]);
 
   // Extract input() prompts from code
   useEffect(() => {
