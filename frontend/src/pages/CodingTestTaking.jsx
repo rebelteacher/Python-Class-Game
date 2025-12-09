@@ -145,14 +145,30 @@ export default function CodingTestTaking({ user }) {
   const fetchSubmissionCounts = async (problemList) => {
     try {
       const counts = {};
+      const allSubs = {};
+      
       for (const problem of problemList) {
         const response = await axios.get(
           `${API}/coding-tests/${testId}/submissions/${problem.id}/count`,
           { withCredentials: true }
         );
         counts[problem.id] = response.data.count || 0;
+        
+        // Fetch all submissions for this problem
+        try {
+          const subsResponse = await axios.get(
+            `${API}/coding-tests/${testId}/problem/${problem.id}/submissions`,
+            { withCredentials: true }
+          );
+          allSubs[problem.id] = subsResponse.data.submissions || [];
+        } catch (err) {
+          console.error(`Error fetching submissions for problem ${problem.id}:`, err);
+          allSubs[problem.id] = [];
+        }
       }
+      
       setSubmissionCounts(counts);
+      setAllSubmissions(allSubs);
     } catch (error) {
       console.error("Error fetching submission counts:", error);
       // Default to 0 if error
