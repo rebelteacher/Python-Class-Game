@@ -6568,6 +6568,23 @@ async def get_submission_count(test_id: str, problem_id: str, request: Request):
     return {"count": count}
 
 
+@api_router.get("/coding-tests/{test_id}/problem/{problem_id}/submissions")
+async def get_problem_submissions(test_id: str, problem_id: str, request: Request):
+    """Get all submissions for a specific problem in a test"""
+    user = await get_current_user(request)
+    
+    if user["role"] != "student":
+        raise HTTPException(status_code=403, detail="Only students can view their submissions")
+    
+    submissions = await db.coding_test_submissions.find({
+        "test_id": test_id,
+        "student_id": user["id"],
+        "problem_id": problem_id
+    }, {"_id": 0}).sort("submitted_at", 1).to_list(10)
+    
+    return {"submissions": submissions}
+
+
 @api_router.post("/coding-tests/{test_id}/verify-proctor-code")
 async def verify_proctor_code(test_id: str, data: dict, request: Request):
     """Verify proctor code to unlock test"""
