@@ -247,16 +247,9 @@ export default function AssignmentPage({ user }) {
     if (!isTurtle) {
       const hasInputCalls = /input\s*\(/i.test(code);
       if (hasInputCalls && !testInput && providedInput === null) {
-        // Auto-use first test case if available
-        const testCases = currentProblem?.test_cases || [];
-        if (testCases.length > 0 && testCases[0].input) {
-          providedInput = testCases[0].input;
-          toast.info("Using test case input for testing");
-        } else {
-          // No test cases available, show interactive dialog
-          setShowInteractiveDialog(true);
-          return;
-        }
+        // Always show interactive dialog for student to enter input
+        setShowInteractiveDialog(true);
+        return;
       }
     }
 
