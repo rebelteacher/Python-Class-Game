@@ -588,8 +588,20 @@ export default function CodingTestTaking({ user }) {
               <button
                 key={prob.id}
                 onClick={() => {
+                  // Save current code before switching
+                  if (currentProblem) {
+                    setCodePerProblem(prev => ({
+                      ...prev,
+                      [currentProblem.id]: code
+                    }));
+                  }
+                  
+                  // Switch to new problem
                   setCurrentProblemIndex(idx);
-                  setCode(prob.starter_code || "# Write your code here\n");
+                  
+                  // Load saved code or use starter code
+                  const savedCode = codePerProblem[prob.id];
+                  setCode(savedCode || prob.starter_code || "# Write your code here\n");
                   setOutput("");
                 }}
                 className={`px-3 py-1 rounded text-sm ${
