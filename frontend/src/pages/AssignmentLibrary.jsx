@@ -970,18 +970,17 @@ export default function AssignmentLibrary({ user }) {
                               </div>
                               <div className="space-y-2">
                                 <div>
-                                  <Label className="text-sm">Input (use \n for multiple inputs)</Label>
-                                  <Input
-                                    placeholder="e.g., 5\n6 (for two inputs: 5 and 6)"
+                                  <Label className="text-sm">Input (press Enter for multiple inputs)</Label>
+                                  <Textarea
+                                    placeholder="Example:\n50\n12"
                                     value={testCase.input}
                                     onChange={(e) => {
                                       const newTestCases = [...newProblem.test_cases];
-                                      // Convert literal \n to actual newlines
-                                      const processedInput = e.target.value.replace(/\\n/g, '\n');
-                                      newTestCases[index].input = processedInput;
+                                      newTestCases[index].input = e.target.value;
                                       setNewProblem({ ...newProblem, test_cases: newTestCases });
                                     }}
                                     className="mt-1 font-mono text-sm"
+                                    rows={3}
                                   />
                                 </div>
                                 <div>
