@@ -647,19 +647,6 @@ export default function CodingTestTaking({ user }) {
                 </div>
               )}
               
-              {/* Custom Input Button */}
-              <div className="mt-4">
-                <button
-                  onClick={() => setShowInteractiveDialog(true)}
-                  className="w-full p-3 bg-blue-600 hover:bg-blue-700 rounded text-sm font-semibold transition-colors"
-                >
-                  🎯 Enter Custom Test Input
-                </button>
-                <p className="text-xs text-gray-400 mt-2 text-center">
-                  Opens a dialog to enter your own test values with input prompts
-                </p>
-              </div>
-              
               <div className="mt-4 p-3 bg-blue-900 rounded">
                 <p className="font-semibold mb-2">Test Rules:</p>
                 <ul className="text-xs space-y-1">
