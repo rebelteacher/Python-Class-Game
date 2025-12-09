@@ -328,18 +328,19 @@ export default function CodingTestTaking({ user }) {
       const newCount = response.data.attempt_number || currentCount + 1;
       setSubmissionCounts(prev => ({ ...prev, [currentProblem.id]: newCount }));
       
-      // Store feedback for display
-      setSubmissionFeedback(prev => ({
-        ...prev,
-        [currentProblem.id]: {
-          score: response.data.score,
-          feedback: response.data.feedback,
-          attempt_number: newCount,
-          best_score: response.data.best_score,
-          is_best: response.data.is_best_attempt,
-          message: response.data.message
-        }
-      }));
+      // Update submissions list by re-fetching
+      try {
+        const subsResponse = await axios.get(
+          `${API}/coding-tests/${testId}/problem/${currentProblem.id}/submissions`,
+          { withCredentials: true }
+        );
+        setAllSubmissions(prev => ({
+          ...prev,
+          [currentProblem.id]: subsResponse.data.submissions || []
+        }));
+      } catch (err) {
+        console.error("Error refreshing submissions:", err);
+      }
       
       // Show detailed feedback
       const message = response.data.message || `Attempt ${newCount}/2 submitted!`;
