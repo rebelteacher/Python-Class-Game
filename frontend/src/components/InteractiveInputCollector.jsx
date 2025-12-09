@@ -47,6 +47,7 @@ export default function InteractiveInputCollector({
     if (isOpen && inputPrompts.length > 0) {
       setInputValues(new Array(inputPrompts.length).fill(""));
     }
+    // eslint-disable-next-line react-hooks/set-state-in-effect
   }, [isOpen, inputPrompts.length]);
 
   const handleInputChange = (index, value) => {
