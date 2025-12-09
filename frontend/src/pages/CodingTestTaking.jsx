@@ -737,24 +737,43 @@ export default function CodingTestTaking({ user }) {
               {output || "Run your code to see output here..."}
             </pre>
             
-            {/* Submission Feedback */}
-            {submissionFeedback[currentProblem?.id] && (
-              <div className="mt-4 p-3 bg-blue-900 border border-blue-700 rounded">
-                <h4 className="text-sm font-semibold text-blue-300 mb-2">
-                  Last Submission (Attempt {submissionFeedback[currentProblem.id].attempt_number}/2):
+            {/* Submission History */}
+            {allSubmissions[currentProblem?.id] && allSubmissions[currentProblem.id].length > 0 && (
+              <div className="mt-4 space-y-2">
+                <h4 className="text-sm font-semibold text-gray-300">
+                  Your Submissions ({allSubmissions[currentProblem.id].length}/2):
                 </h4>
-                <p className="text-sm text-white">
-                  Score: <span className="font-bold text-yellow-400">{submissionFeedback[currentProblem.id].score?.toFixed(1)}%</span>
-                  {submissionFeedback[currentProblem.id].best_score !== undefined && (
-                    <span className="ml-2">
-                      | Best: <span className="font-bold text-green-400">{submissionFeedback[currentProblem.id].best_score?.toFixed(1)}%</span>
-                    </span>
-                  )}
-                </p>
-                {submissionFeedback[currentProblem.id].is_best && (
-                  <p className="text-xs text-green-400 mt-1">⭐ This is your best score!</p>
-                )}
-                <p className="text-xs text-gray-300 mt-2">{submissionFeedback[currentProblem.id].feedback}</p>
+                {allSubmissions[currentProblem.id].map((sub, index) => (
+                  <div 
+                    key={index}
+                    className={`p-3 rounded border ${
+                      sub.is_best_attempt 
+                        ? 'bg-green-900 border-green-700' 
+                        : 'bg-gray-800 border-gray-700'
+                    }`}
+                  >
+                    <div className="flex items-center justify-between mb-2">
+                      <span className="text-sm font-semibold text-white">
+                        Attempt {sub.attempt_number}/2
+                      </span>
+                      <span className={`text-lg font-bold ${
+                        sub.score >= 80 ? 'text-green-400' : 
+                        sub.score >= 50 ? 'text-yellow-400' : 'text-red-400'
+                      }`}>
+                        {sub.score?.toFixed(1)}%
+                      </span>
+                    </div>
+                    {sub.is_best_attempt && (
+                      <p className="text-xs text-green-400 mb-1">⭐ Best Score</p>
+                    )}
+                    <p className="text-xs text-gray-300">
+                      {sub.feedback || 'No feedback available'}
+                    </p>
+                    <p className="text-xs text-gray-500 mt-1">
+                      Submitted: {new Date(sub.submitted_at).toLocaleTimeString()}
+                    </p>
+                  </div>
+                ))}
               </div>
             )}
           </div>
