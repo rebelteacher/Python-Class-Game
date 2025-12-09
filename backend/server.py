@@ -1748,7 +1748,12 @@ async def create_assignment(assignment: AssignmentCreate, request: Request):
             {"$inc": {"times_imported": len(assignment.classroom_ids)}}
         )
     
-    return {"success": True, "assignment_id": new_assignment.id, "classrooms": len(assignment.classroom_ids)}
+    return {
+        "success": True, 
+        "assignment_id": new_assignment.id, 
+        "classrooms": len(assignment.classroom_ids),
+        "proctor_code": proctor_code
+    }
 
 
 @api_router.put("/assignments/{assignment_id}")
