@@ -825,28 +825,6 @@ export default function AssignmentPage({ user }) {
                     </div>
                   ))}
                   
-                  {/* Show which test input will be auto-used for Run Code */}
-                  {(() => {
-                    const currentProblem = assignment?.problems?.[currentProblemIndex] || assignment;
-                    const testCases = currentProblem?.test_cases || [];
-                    if (testCases.length > 0 && testCases[0].input) {
-                      return (
-                        <div className="mt-4 p-3 bg-blue-50 rounded-lg border border-blue-200">
-                          <div className="font-semibold text-sm text-blue-900 mb-2">
-                            💡 Auto-Test Input
-                          </div>
-                          <p className="text-xs text-blue-700 mb-2">
-                            When you click &quot;Run Code&quot;, this input will be used automatically:
-                          </p>
-                          <pre className="p-2 bg-white rounded border border-blue-300 text-gray-800 text-xs font-mono whitespace-pre-wrap">
-                            {testCases[0].input}
-                          </pre>
-                        </div>
-                      );
-                    }
-                    return null;
-                  })()}
-                  
                 </CardContent>
               </Card>
 
