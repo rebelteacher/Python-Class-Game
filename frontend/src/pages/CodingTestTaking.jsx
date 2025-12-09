@@ -23,6 +23,7 @@ export default function CodingTestTaking({ user }) {
   const [submittedProblemIds, setSubmittedProblemIds] = useState([]);
   const [submissionCounts, setSubmissionCounts] = useState({}); // Track submissions per problem
   const [submissionFeedback, setSubmissionFeedback] = useState({}); // Track feedback per problem
+  const [codePerProblem, setCodePerProblem] = useState({}); // Save code per problem
   const [code, setCode] = useState("");
   const [output, setOutput] = useState("");
   const [customInput, setCustomInput] = useState(""); // For student's custom test input
