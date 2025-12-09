@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useMemo } from "react";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -20,13 +20,16 @@ export default function InteractiveInputCollector({
   const [inputValues, setInputValues] = useState([]);
   const [inputPrompts, setInputPrompts] = useState([]);
 
-  const extractInputPrompts = useCallback((code) => {
+  // Extract input() prompts from code using useMemo
+  const extractedPrompts = useMemo(() => {
+    if (!isOpen || !codePreview) return [];
+    
     // Match input("prompt") or input('prompt')
     const regex = /input\s*\(\s*["']([^"']*)["']\s*\)/g;
     const matches = [];
     let match;
     
-    while ((match = regex.exec(code)) !== null) {
+    while ((match = regex.exec(codePreview)) !== null) {
       matches.push(match[1] || `Input ${matches.length + 1}`);
     }
     
@@ -38,17 +41,15 @@ export default function InteractiveInputCollector({
     }
     
     return matches;
-  }, [inputCount]);
+  }, [isOpen, codePreview, inputCount]);
 
-  // Extract input() prompts from code
+  // Set prompts and initialize values when dialog opens
   useEffect(() => {
-    if (isOpen && codePreview) {
-      const prompts = extractInputPrompts(codePreview);
-      setInputPrompts(prompts);
-      // Initialize empty values for each prompt
-      setInputValues(new Array(prompts.length).fill(""));
+    if (isOpen) {
+      setInputPrompts(extractedPrompts);
+      setInputValues(new Array(extractedPrompts.length).fill(""));
     }
-  }, [isOpen, codePreview, extractInputPrompts]);
+  }, [isOpen, extractedPrompts]);
 
   const handleInputChange = (index, value) => {
     const newValues = [...inputValues];
