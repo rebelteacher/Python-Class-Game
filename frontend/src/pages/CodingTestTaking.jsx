@@ -633,13 +633,6 @@ export default function CodingTestTaking({ user }) {
                 </div>
               )}
               
-              {currentProblem.test_cases && currentProblem.test_cases.length > 0 && currentProblem.test_cases[0].input && (
-                <div className="mt-4 p-3 bg-gray-900 rounded">
-                  <p className="font-semibold mb-2">Test Input (Auto-used when you click &quot;Run&quot;):</p>
-                  <pre className="text-blue-400">{currentProblem.test_cases[0].input}</pre>
-                </div>
-              )}
-              
               <div className="mt-4 p-3 bg-blue-900 rounded">
                 <p className="font-semibold mb-2">Test Rules:</p>
                 <ul className="text-xs space-y-1">
