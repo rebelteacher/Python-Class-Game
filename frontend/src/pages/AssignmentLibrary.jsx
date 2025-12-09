@@ -1784,7 +1784,7 @@ function AssignmentBuilder({ open, onOpenChange, selectedProblems, problems, onS
         ? `${dueDate}T${dueTime}:00Z`
         : null;
 
-      await axios.post(
+      const response = await axios.post(
         `${API}/assignments`,
         {
           title: assignmentTitle,
@@ -1802,6 +1802,18 @@ function AssignmentBuilder({ open, onOpenChange, selectedProblems, problems, onS
         },
         { withCredentials: true }
       );
+
+      // Show proctor code to teacher
+      if (response.data.proctor_code) {
+        toast.success(
+          <div>
+            <p className="font-bold mb-2">Assignment Created!</p>
+            <p className="text-sm mb-1">Proctor Code: <span className="font-mono font-bold text-lg">{response.data.proctor_code}</span></p>
+            <p className="text-xs text-gray-600">Students can use this code to unlock if they accidentally mark as Done.</p>
+          </div>,
+          { duration: 10000 }
+        );
+      }
 
       onSuccess();
     } catch (error) {
