@@ -20,16 +20,6 @@ export default function InteractiveInputCollector({
   const [inputValues, setInputValues] = useState([]);
   const [inputPrompts, setInputPrompts] = useState([]);
 
-  // Extract input() prompts from code
-  useEffect(() => {
-    if (isOpen && codePreview) {
-      const prompts = extractInputPrompts(codePreview);
-      setInputPrompts(prompts);
-      // Initialize empty values for each prompt
-      setInputValues(new Array(prompts.length).fill(""));
-    }
-  }, [isOpen, codePreview]);
-
   const extractInputPrompts = (code) => {
     // Match input("prompt") or input('prompt')
     const regex = /input\s*\(\s*["']([^"']*)["']\s*\)/g;
@@ -49,6 +39,16 @@ export default function InteractiveInputCollector({
     
     return matches;
   };
+
+  // Extract input() prompts from code
+  useEffect(() => {
+    if (isOpen && codePreview) {
+      const prompts = extractInputPrompts(codePreview);
+      setInputPrompts(prompts);
+      // Initialize empty values for each prompt
+      setInputValues(new Array(prompts.length).fill(""));
+    }
+  }, [isOpen, codePreview, extractInputPrompts]);
 
   const handleInputChange = (index, value) => {
     const newValues = [...inputValues];
