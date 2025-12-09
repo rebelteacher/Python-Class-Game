@@ -43,11 +43,11 @@ export default function InteractiveInputCollector({
   }, [isOpen, codePreview, inputCount]);
 
   // Initialize values when dialog opens or prompts change
+  // eslint-disable-next-line react-hooks/set-state-in-effect
   useEffect(() => {
     if (isOpen && inputPrompts.length > 0) {
       setInputValues(new Array(inputPrompts.length).fill(""));
     }
-    // eslint-disable-next-line react-hooks/set-state-in-effect
   }, [isOpen, inputPrompts.length]);
 
   const handleInputChange = (index, value) => {
