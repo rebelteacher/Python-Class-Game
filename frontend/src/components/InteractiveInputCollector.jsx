@@ -18,10 +18,9 @@ export default function InteractiveInputCollector({
   codePreview = ""
 }) {
   const [inputValues, setInputValues] = useState([]);
-  const [inputPrompts, setInputPrompts] = useState([]);
 
   // Extract input() prompts from code using useMemo
-  const extractedPrompts = useMemo(() => {
+  const inputPrompts = useMemo(() => {
     if (!isOpen || !codePreview) return [];
     
     // Match input("prompt") or input('prompt')
@@ -43,13 +42,12 @@ export default function InteractiveInputCollector({
     return matches;
   }, [isOpen, codePreview, inputCount]);
 
-  // Set prompts and initialize values when dialog opens
+  // Initialize values when dialog opens or prompts change
   useEffect(() => {
-    if (isOpen) {
-      setInputPrompts(extractedPrompts);
-      setInputValues(new Array(extractedPrompts.length).fill(""));
+    if (isOpen && inputPrompts.length > 0) {
+      setInputValues(new Array(inputPrompts.length).fill(""));
     }
-  }, [isOpen, extractedPrompts]);
+  }, [isOpen, inputPrompts.length]);
 
   const handleInputChange = (index, value) => {
     const newValues = [...inputValues];
