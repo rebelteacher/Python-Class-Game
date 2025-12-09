@@ -1572,7 +1572,9 @@ export default function AssignmentLibrary({ user }) {
                                 value={testCase.input}
                                 onChange={(e) => {
                                   const newTestCases = [...editingProblem.test_cases];
-                                  newTestCases[index].input = e.target.value;
+                                  // Convert literal \n to actual newlines
+                                  const processedInput = e.target.value.replace(/\\n/g, '\n');
+                                  newTestCases[index].input = processedInput;
                                   setEditingProblem({ ...editingProblem, test_cases: newTestCases });
                                 }}
                                 className="mt-1 font-mono text-sm"
