@@ -1080,6 +1080,13 @@ export default function ClassroomPage({ user }) {
                                           <div className="text-sm text-gray-600 mb-3">
                                             {assignment.problem_count ? `${assignment.problem_count} problems` : `${assignment.test_cases?.length || 0} test cases`}
                                           </div>
+                                          {isTeacher && assignment.proctor_code && (
+                                            <div className="mb-3 p-2 bg-yellow-50 border border-yellow-200 rounded">
+                                              <p className="text-xs font-semibold text-yellow-900">Proctor Code:</p>
+                                              <p className="text-lg font-mono font-bold text-yellow-800">{assignment.proctor_code}</p>
+                                              <p className="text-xs text-yellow-700 mt-1">Share with students who need to unlock this assignment</p>
+                                            </div>
+                                          )}
                                           <div className="flex gap-2">
                                             <Button
                                               onClick={() => {
