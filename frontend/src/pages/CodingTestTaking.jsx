@@ -692,7 +692,16 @@ export default function CodingTestTaking({ user }) {
               defaultLanguage="python"
               theme="vs-dark"
               value={code}
-              onChange={(value) => setCode(value || "")}
+              onChange={(value) => {
+                setCode(value || "");
+                // Auto-save code for current problem
+                if (currentProblem) {
+                  setCodePerProblem(prev => ({
+                    ...prev,
+                    [currentProblem.id]: value || ""
+                  }));
+                }
+              }}
               onMount={handleEditorMount}
               options={{
                 minimap: { enabled: false },
