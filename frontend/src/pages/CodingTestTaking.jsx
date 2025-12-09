@@ -655,34 +655,17 @@ export default function CodingTestTaking({ user }) {
                 </div>
               )}
               
-              {/* Custom Input Section */}
-              <div className="mt-4 p-3 bg-gray-800 rounded border border-gray-700">
-                <div className="flex items-center gap-2 mb-2">
-                  <input
-                    type="checkbox"
-                    id="useCustomInput"
-                    checked={useCustomInput}
-                    onChange={(e) => setUseCustomInput(e.target.checked)}
-                    className="w-4 h-4"
-                  />
-                  <label htmlFor="useCustomInput" className="font-semibold text-sm cursor-pointer">
-                    Use Custom Test Input (Optional)
-                  </label>
-                </div>
-                {useCustomInput && (
-                  <div>
-                    <p className="text-xs text-gray-400 mb-2">
-                      Enter your own test input (one value per line):
-                    </p>
-                    <textarea
-                      value={customInput}
-                      onChange={(e) => setCustomInput(e.target.value)}
-                      placeholder="Example:\n5\n3"
-                      className="w-full h-20 bg-gray-900 text-white p-2 rounded text-sm font-mono"
-                      rows={3}
-                    />
-                  </div>
-                )}
+              {/* Custom Input Button */}
+              <div className="mt-4">
+                <button
+                  onClick={() => setShowInteractiveDialog(true)}
+                  className="w-full p-3 bg-blue-600 hover:bg-blue-700 rounded text-sm font-semibold transition-colors"
+                >
+                  🎯 Enter Custom Test Input
+                </button>
+                <p className="text-xs text-gray-400 mt-2 text-center">
+                  Opens a dialog to enter your own test values with input prompts
+                </p>
               </div>
               
               <div className="mt-4 p-3 bg-blue-900 rounded">
