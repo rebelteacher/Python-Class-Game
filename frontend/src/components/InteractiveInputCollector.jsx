@@ -17,9 +17,7 @@ export default function InteractiveInputCollector({
   inputCount = 1,
   codePreview = ""
 }) {
-  const [currentIndex, setCurrentIndex] = useState(0);
-  const [currentInput, setCurrentInput] = useState("");
-  const [collectedInputs, setCollectedInputs] = useState([]);
+  const [inputValues, setInputValues] = useState([]);
   const [inputPrompts, setInputPrompts] = useState([]);
 
   // Extract input() prompts from code
@@ -27,9 +25,8 @@ export default function InteractiveInputCollector({
     if (isOpen && codePreview) {
       const prompts = extractInputPrompts(codePreview);
       setInputPrompts(prompts);
-      setCurrentIndex(0);
-      setCollectedInputs([]);
-      setCurrentInput("");
+      // Initialize empty values for each prompt
+      setInputValues(new Array(prompts.length).fill(""));
     }
   }, [isOpen, codePreview]);
 
@@ -43,7 +40,7 @@ export default function InteractiveInputCollector({
       matches.push(match[1] || `Input ${matches.length + 1}`);
     }
     
-    // If no prompts found, generate generic ones
+    // If no prompts found, generate generic ones based on input count
     if (matches.length === 0) {
       for (let i = 0; i < inputCount; i++) {
         matches.push(`Input ${i + 1}`);
@@ -53,47 +50,28 @@ export default function InteractiveInputCollector({
     return matches;
   };
 
-  const handleNext = (e) => {
-    // Prevent default if it's an event
-    if (e && e.preventDefault) {
-      e.preventDefault();
-    }
+  const handleInputChange = (index, value) => {
+    const newValues = [...inputValues];
+    newValues[index] = value;
+    setInputValues(newValues);
+  };
 
-    if (!currentInput.trim() && currentIndex < inputPrompts.length - 1) {
-      return; // Don't allow empty input
-    }
-
-    const newCollected = [...collectedInputs, currentInput];
-    setCollectedInputs(newCollected);
+  const handleSubmit = (e) => {
+    e.preventDefault();
     
-    if (currentIndex < inputPrompts.length - 1) {
-      // More inputs needed
-      setCurrentIndex(currentIndex + 1);
-      setCurrentInput("");
-    } else {
-      // All inputs collected, run the code
-      const inputString = newCollected.join('\n');
-      onSubmitInputs(inputString);
-      onClose();
-    }
-  };
-
-  const handleKeyPress = (e) => {
-    if (e.key === 'Enter') {
-      handleNext();
-    }
-  };
-
-  const getCurrentPrompt = () => {
-    if (inputPrompts.length > 0 && currentIndex < inputPrompts.length) {
-      return inputPrompts[currentIndex];
-    }
-    return `Input ${currentIndex + 1}`;
+    // Join all inputs with newlines
+    const inputString = inputValues.join('\n');
+    onSubmitInputs(inputString);
+    onClose();
+    
+    // Reset for next time
+    setInputValues([]);
   };
 
   const handleDialogChange = (open) => {
     if (!open) {
       onClose();
+      setInputValues([]);
     }
   };
 
