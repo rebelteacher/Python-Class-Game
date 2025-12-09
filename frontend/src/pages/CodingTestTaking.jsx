@@ -200,17 +200,9 @@ export default function CodingTestTaking({ user }) {
     
     // If code has input() calls and no input provided yet
     if (hasInputCalls && providedInput === null) {
-      // Check if test cases are available
-      const testCases = currentProblem?.test_cases || [];
-      if (testCases.length > 0 && testCases[0].input) {
-        // Auto-use first test case
-        providedInput = testCases[0].input;
-        toast.info("Using test case input for testing");
-      } else {
-        // No test cases - show interactive dialog to collect input
-        setShowInteractiveDialog(true);
-        return;
-      }
+      // Always show interactive dialog for student to enter input
+      setShowInteractiveDialog(true);
+      return;
     }
 
     setRunning(true);
