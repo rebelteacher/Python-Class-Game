@@ -131,6 +131,8 @@ export default function TeacherDashboard({ user, setUser }) {
     try {
       await axios.post(`${API}/auth/logout`, {}, { withCredentials: true });
       document.cookie = "session_token=; path=/; max-age=0";
+      localStorage.removeItem("session_token");
+      delete axios.defaults.headers.common['Authorization'];
       window.location.href = "/";
     } catch (error) {
       console.error("Logout error:", error);
