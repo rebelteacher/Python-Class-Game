@@ -32,7 +32,6 @@ export default function AssignmentPage({ user }) {
   const [submitting, setSubmitting] = useState(false);
   const [submissions, setSubmissions] = useState([]);
   const [hasRunPerProblem, setHasRunPerProblem] = useState({}); // Track run status per problem
-  const [livesPerProblem, setLivesPerProblem] = useState({}); // Track lives for each problem separately
   const [problemStatuses, setProblemStatuses] = useState({}); // Track completion status (score) per problem
   const [problemsFinal, setProblemsFinal] = useState({}); // Track which problems are marked as done/final
   const [currentProblemIndex, setCurrentProblemIndex] = useState(0);
@@ -55,7 +54,7 @@ export default function AssignmentPage({ user }) {
   // Turtle graphics state
   const [turtleImage, setTurtleImage] = useState("");
   
-  // Proctor code for unlocking done problems
+  // Proctor code for unlocking done problems (kept for teacher override)
   const [showProctorDialog, setShowProctorDialog] = useState(false);
   const [proctorCode, setProctorCode] = useState("");
   const [unlockingProblem, setUnlockingProblem] = useState(false);
