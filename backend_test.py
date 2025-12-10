@@ -5611,6 +5611,32 @@ startxref
             login_data
         )
         
+        # If login failed due to role issue, try switching role first
+        if not login_response:
+            print("   Login failed, checking if user needs role switch...")
+            # Try to get current user info to see if they exist but are in wrong role
+            try:
+                import requests
+                check_response = requests.get(f"{self.api_url}/auth/me", 
+                                            headers={'Authorization': f'Bearer {self.session_token}'})
+                if check_response.status_code == 200:
+                    user_info = check_response.json()
+                    if user_info.get('email') == test_email and user_info.get('role') == 'student':
+                        print("   User exists but is in student role, switching to teacher...")
+                        switch_response = requests.post(f"{self.api_url}/auth/switch-role",
+                                                      headers={'Authorization': f'Bearer {self.session_token}'})
+                        if switch_response.status_code == 200:
+                            print("   Role switched, retrying login...")
+                            login_response = self.run_test(
+                                "Teacher login after role switch",
+                                "POST",
+                                "auth/teacher-login",
+                                200,
+                                login_data
+                            )
+            except Exception as e:
+                print(f"   Role switch attempt failed: {e}")
+        
         if not login_response:
             print("❌ Cannot continue coding test bug fix test without successful login")
             return
