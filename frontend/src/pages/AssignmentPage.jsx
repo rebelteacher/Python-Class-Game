@@ -872,29 +872,37 @@ export default function AssignmentPage({ user }) {
                             {darkMode ? '☀️ Light' : '🌙 Dark'}
                           </Button>
                           
-                          <div className="flex items-center gap-2 text-sm">
-                            <span className="text-gray-600">Lives (this problem):</span>
-                            {(() => {
-                              const currentProblemId = getCurrentProblemId();
-                              const currentLives = livesPerProblem[currentProblemId] || 3;
-                              const isProblemLocked = currentLives <= 0;
-                              
-                              if (isProblemLocked) {
-                                return <span className="text-red-600 font-semibold">🚫 Locked</span>;
-                              }
-                              
+                          {/* Show current best score for this problem */}
+                          {(() => {
+                            const currentProblemId = getCurrentProblemId();
+                            const bestScore = problemStatuses[currentProblemId];
+                            const isFinal = problemsFinal[currentProblemId];
+                            
+                            if (isFinal) {
                               return (
-                                <span>
-                                  {Array.from({ length: currentLives }).map((_, i) => (
-                                    <span key={i} className="text-red-500">❤️</span>
-                                  ))}
-                                  {Array.from({ length: 3 - currentLives }).map((_, i) => (
-                                    <span key={i} className="text-gray-300">🤍</span>
-                                  ))}
-                                </span>
+                                <div className="flex items-center gap-2 text-sm">
+                                  <span className="text-blue-600 font-semibold">✔ Submitted as Done ({bestScore?.toFixed(0) || 0}%)</span>
+                                </div>
                               );
-                            })()}
-                          </div>
+                            }
+                            
+                            if (bestScore !== null && bestScore !== undefined) {
+                              return (
+                                <div className="flex items-center gap-2 text-sm">
+                                  <span className="text-gray-600">Best Score:</span>
+                                  <span className={`font-semibold ${bestScore >= 70 ? 'text-green-600' : 'text-orange-600'}`}>
+                                    {bestScore.toFixed(0)}%
+                                  </span>
+                                </div>
+                              );
+                            }
+                            
+                            return (
+                              <div className="text-sm text-gray-500">
+                                <span>Unlimited attempts</span>
+                              </div>
+                            );
+                          })()}
                         </div>
                       </div>
                       <div className="flex gap-2">
