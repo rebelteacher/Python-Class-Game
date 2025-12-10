@@ -965,7 +965,7 @@ async def teacher_login(login_data: TeacherLoginRequest, response: Response):
             "name": user["name"],
             "picture": user.get("picture"),
             "session_token": session_token,  # Also return in body for localStorage fallback
-            "role": user["role"],
+            "role": current_role,
             "is_admin": user.get("is_admin", False)
         }
     except HTTPException:
