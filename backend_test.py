@@ -5597,55 +5597,43 @@ startxref
         
         print(f"   Testing with teacher credentials: {test_email}")
         
-        # Step 1: Login as teacher
-        login_data = {
-            "email": test_email,
-            "password": test_password
-        }
+        # Step 1: Use existing session and ensure we're in teacher role
+        print("   Using existing session, checking current role...")
         
-        login_response = self.run_test(
-            "Teacher login for coding test bug fix",
-            "POST",
-            "auth/teacher-login",
-            200,
-            login_data
+        # Check current user role
+        me_response = self.run_test(
+            "Check current user role",
+            "GET",
+            "auth/me",
+            200
         )
         
-        # If login failed due to role issue, try switching role first
-        if not login_response:
-            print("   Login failed, checking if user needs role switch...")
-            # Try to get current user info to see if they exist but are in wrong role
-            try:
-                import requests
-                check_response = requests.get(f"{self.api_url}/auth/me", 
-                                            headers={'Authorization': f'Bearer {self.session_token}'})
-                if check_response.status_code == 200:
-                    user_info = check_response.json()
-                    if user_info.get('email') == test_email and user_info.get('role') == 'student':
-                        print("   User exists but is in student role, switching to teacher...")
-                        switch_response = requests.post(f"{self.api_url}/auth/switch-role",
-                                                      headers={'Authorization': f'Bearer {self.session_token}'})
-                        if switch_response.status_code == 200:
-                            print("   Role switched, retrying login...")
-                            login_response = self.run_test(
-                                "Teacher login after role switch",
-                                "POST",
-                                "auth/teacher-login",
-                                200,
-                                login_data
-                            )
-            except Exception as e:
-                print(f"   Role switch attempt failed: {e}")
-        
-        if not login_response:
-            print("❌ Cannot continue coding test bug fix test without successful login")
+        if not me_response:
+            print("❌ Cannot get current user info")
             return
         
-        # Store the session token from login
-        teacher_session_token = login_response.get("session_token")
-        if teacher_session_token:
-            self.session_token = teacher_session_token
-            print(f"   ✅ Teacher login successful")
+        current_role = me_response.get("role")
+        current_email = me_response.get("email")
+        
+        print(f"   Current user: {current_email} (role: {current_role})")
+        
+        # If not teacher role, switch to teacher
+        if current_role != "teacher":
+            print("   Switching to teacher role...")
+            switch_response = self.run_test(
+                "Switch to teacher role",
+                "POST",
+                "auth/switch-role",
+                200
+            )
+            
+            if not switch_response:
+                print("❌ Cannot switch to teacher role")
+                return
+            
+            print(f"   ✅ Switched to teacher role")
+        else:
+            print(f"   ✅ Already in teacher role")
         
         # Step 2: Create a test classroom
         classroom_data = {
