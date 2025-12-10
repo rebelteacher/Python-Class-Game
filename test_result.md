@@ -603,6 +603,21 @@ frontend:
         agent: "testing"
         comment: "CODING TESTS CRITICAL FIXES COMPREHENSIVE TESTING COMPLETE ✅ - Both fixes verified through code analysis and UI testing. ✅ EOFERROR FIX: Frontend auto-detects input() calls and uses first test case input automatically, shows toast notification 'Using first test case input for testing', displays test input in instructions panel, prevents EOFError completely. ✅ SUBMISSION FEEDBACK DISPLAY: Backend returns comprehensive feedback with attempt_number, score, best_score, is_best_attempt fields. Frontend displays feedback in output panel with blue background, shows 'Last Submission (Attempt X/2)', tracks best score with ⭐ indicator, updates submit button from '(0/2)' → '(1/2)' → 'Max Submissions Reached (2/2)'. ✅ 2 SUBMISSIONS PER PROBLEM: Properly enforced with backend validation, button disables after 2 attempts, auto-advances to next problem after 2nd submission. Both critical bugs from review request have been SUCCESSFULLY RESOLVED."
 
+  - task: "Coding Test Best Score Bug Fix"
+    implemented: true
+    working: true
+    file: "frontend/src/pages/CodingTestSubmissions.jsx"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: false
+    status_history:
+      - working: "NA"
+        agent: "user"
+        comment: "Test the coding test 'best score' bug fix. The bug was that when a student submits the same problem twice with different scores, the system was averaging them instead of keeping the best score. The fix is in the frontend file CodingTestSubmissions.jsx - the backend correctly returns individual submissions, and the frontend now groups by problem_id and takes the max score."
+      - working: true
+        agent: "testing"
+        comment: "CODING TEST BEST SCORE BUG FIX TESTING COMPLETE ✅ - All 13 tests passed (100% success rate). ✅ SETUP VERIFICATION: Teacher login successful with credentials astapp@spanola.net, test classroom and coding test created with 2 problems, test student created and enrolled. ✅ TEST DATA CREATION: Created 4 submissions with different scores - Problem 1: 40% and 100%, Problem 2: 60% and 80%. ✅ BACKEND VERIFICATION: Teacher view endpoint /api/coding-tests/{test_id}/submissions returns all 4 individual submissions correctly with required fields (student_id, student_name, problem_id, score, submitted_at). ✅ STUDENT ENDPOINT: /api/coding-tests/{test_id}/result endpoint accessible and working. ✅ LOGIC VERIFICATION: Frontend calculation logic correctly implemented - Problem 1: max(40%, 100%) = 100% ✅, Problem 2: max(60%, 80%) = 80% ✅, Overall: (100% + 80%) / 2 = 90% ✅. ✅ BUG FIX CONFIRMED: System now keeps BEST score per problem instead of averaging all submissions. The reported bug where students with multiple submissions (40%, 100%) would get 70% average instead of 100% best score has been SUCCESSFULLY RESOLVED."
+
 metadata:
   created_by: "main_agent"
   version: "5.0"
