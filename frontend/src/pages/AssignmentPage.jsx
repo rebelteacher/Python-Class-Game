@@ -642,7 +642,7 @@ export default function AssignmentPage({ user }) {
             <div className="flex gap-2 overflow-x-auto pb-2">
               {assignment.problems.map((problem, index) => {
                 const problemScore = problemStatuses[problem.id];
-                const problemLives = livesPerProblem[problem.id] || 3;
+                const isFinal = problemsFinal[problem.id];
                 
                 // Determine color based on score
                 let colorClass = 'bg-gray-100 text-gray-700 hover:bg-gray-200'; // Not attempted
@@ -656,26 +656,24 @@ export default function AssignmentPage({ user }) {
                   }
                 }
                 
-                // Locked out?
-                const isLocked = problemLives <= 0;
-                if (isLocked) {
-                  colorClass = 'bg-gray-300 text-gray-500 cursor-not-allowed';
+                // Mark as done/final
+                if (isFinal) {
+                  colorClass = 'bg-blue-500 text-white hover:bg-blue-600';
                 }
                 
                 // Current problem highlight
-                if (currentProblemIndex === index && !isLocked) {
+                if (currentProblemIndex === index) {
                   colorClass = 'bg-indigo-600 text-white border-2 border-indigo-800';
                 }
                 
                 return (
                   <button
                     key={problem.id}
-                    onClick={() => !isLocked && setCurrentProblemIndex(index)}
-                    disabled={isLocked}
+                    onClick={() => setCurrentProblemIndex(index)}
                     className={`px-4 py-2 rounded-lg text-sm font-medium whitespace-nowrap transition-colors ${colorClass}`}
                   >
                     {problemScore === 100 && '✓ '}
-                    {isLocked && '🔒 '}
+                    {isFinal && problemScore !== 100 && '✔ '}
                     {index + 1}. {problem.title}
                     {problemScore !== null && problemScore !== undefined && (
                       <span className="ml-1 text-xs">({problemScore.toFixed(0)}%)</span>
