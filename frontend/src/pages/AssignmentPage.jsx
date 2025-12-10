@@ -193,15 +193,13 @@ export default function AssignmentPage({ user }) {
       });
       setSubmissions(response.data);
       
-      // Calculate lives remaining and status PER PROBLEM for students
+      // Calculate status PER PROBLEM for students (no lives tracking - unlimited attempts)
       if (user.role === "student" && assignment && assignment.problems) {
-        const livesMap = {};
         const statusMap = {};
         const finalMap = {};
         
-        // Initialize all problems with 3 lives and no status
+        // Initialize all problems with no status
         assignment.problems.forEach(problem => {
-          livesMap[problem.id] = 3;
           statusMap[problem.id] = null; // null = not attempted
           finalMap[problem.id] = false;
         });
@@ -209,11 +207,6 @@ export default function AssignmentPage({ user }) {
         // Update based on submissions
         response.data.forEach(submission => {
           const problemId = submission.problem_id;
-          
-          // Track lives for this specific problem
-          if (submission.lives_remaining !== undefined) {
-            livesMap[problemId] = submission.lives_remaining;
-          }
           
           // Track best score for this problem
           const currentBestScore = statusMap[problemId];
@@ -228,7 +221,6 @@ export default function AssignmentPage({ user }) {
           }
         });
         
-        setLivesPerProblem(livesMap);
         setProblemStatuses(statusMap);
         setProblemsFinal(finalMap);
       }
