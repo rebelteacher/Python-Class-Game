@@ -5779,7 +5779,10 @@ startxref
             print("❌ Cannot continue without adding student to classroom")
             return
         
-        print(f"   Created student: {student['name']} ({student['id']})")
+        if student:
+            print(f"   Created student: {student.get('name', 'Unknown')} ({student['id']})")
+        else:
+            print("❌ Failed to create student")
         
         # Step 6: Create multiple submissions with different scores for the same problem
         print("   Creating test submissions with different scores...")
