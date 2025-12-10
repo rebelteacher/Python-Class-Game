@@ -49,15 +49,27 @@ export default function CodingTestSubmissions({ user }) {
         submissionsByStudent[sub.student_id].submissions.push(sub);
       });
 
-      // Calculate overall scores
+      // Calculate overall scores (best score per problem, then average across problems)
       const studentsWithScores = Object.values(submissionsByStudent).map(student => {
-        const totalScore = student.submissions.reduce((sum, sub) => sum + sub.score, 0);
-        const averageScore = totalScore / student.submissions.length;
+        // Group submissions by problem and get best score for each
+        const bestScoreByProblem = {};
+        student.submissions.forEach(sub => {
+          if (!bestScoreByProblem[sub.problem_id] || sub.score > bestScoreByProblem[sub.problem_id]) {
+            bestScoreByProblem[sub.problem_id] = sub.score;
+          }
+        });
+        
+        // Calculate average of best scores across all problems attempted
+        const bestScores = Object.values(bestScoreByProblem);
+        const totalBestScore = bestScores.reduce((sum, score) => sum + score, 0);
+        const averageScore = bestScores.length > 0 ? totalBestScore / bestScores.length : 0;
+        
         return {
           ...student,
           overall_score: averageScore,
-          problems_submitted: student.submissions.length,
-          total_problems: foundTest?.problem_ids?.length || 0
+          problems_submitted: Object.keys(bestScoreByProblem).length, // Count unique problems
+          total_problems: foundTest?.problem_ids?.length || 0,
+          best_scores_by_problem: bestScoreByProblem // Include for detailed view
         };
       });
 
