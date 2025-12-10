@@ -6003,6 +6003,9 @@ startxref
             print("❌ Cannot proceed without test user setup")
             return False
         
+        # Run the specific coding test best score bug fix test (as requested in review)
+        self.test_coding_test_best_score_bug_fix()
+        
         # Run the specific coding test 2 submissions feature test first (as requested in review)
         self.test_coding_test_2_submissions_feature()
         
