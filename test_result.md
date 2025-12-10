@@ -639,6 +639,56 @@ test_plan:
 agent_communication:
   - agent: "testing"
     message: |
+      TEACHER LOGIN AND STUDENT CLASSROOM JOIN FLOW TESTING COMPLETE ✅
+      
+      📊 TESTING SUMMARY: All 4 test scenarios from review request completed successfully (100% success rate)
+      
+      ✅ SCENARIO 1: TEACHER LOGIN WORKS (NORMAL CASE)
+      - POST /api/auth/teacher-login with credentials astapp@spanola.net: SUCCESS ✅
+      - Login returns role='teacher' as expected: SUCCESS ✅
+      - Session token obtained and authentication working: SUCCESS ✅
+      
+      ✅ SCENARIO 2: LOGIN AFTER ROLE SWITCH
+      - Teacher login successful: SUCCESS ✅
+      - Switch to student via POST /api/auth/switch-role: SUCCESS ✅
+      - Logout (clear session): SUCCESS ✅
+      - Login again via teacher-login after role switch: SUCCESS ✅
+      - Role automatically reset to 'teacher' on login: SUCCESS ✅
+      - KEY FIX VERIFIED: Teachers can login via teacher-login even when current role is 'student' ✅
+      
+      ✅ SCENARIO 3: STUDENT MODE - CLASSROOM OPERATIONS
+      - Switch to student role: SUCCESS ✅
+      - GET /api/classrooms returns enrolled classrooms (found 2): SUCCESS ✅
+      - Create test classroom with class code KMTDEP: SUCCESS ✅
+      - POST /api/classrooms/join with valid class code: SUCCESS ✅
+      - Successfully joined classroom: SUCCESS ✅
+      - GET /api/classrooms/{id} access classroom details: SUCCESS ✅
+      - Can access joined classroom details: SUCCESS ✅
+      
+      ✅ SCENARIO 4: ACCESS CONTROL
+      - Create inaccessible classroom for test: SUCCESS ✅
+      - Switch to student role: SUCCESS ✅
+      - Attempt to access classroom NOT enrolled in: SUCCESS ✅
+      - Access correctly denied (403) for non-enrolled classroom: SUCCESS ✅
+      
+      🎯 KEY FIX VERIFICATION:
+      The critical fix in /app/backend/server.py teacher-login endpoint is working correctly:
+      - Backend no longer checks role field during teacher login ✅
+      - Only checks if user has password (indicating teacher account) ✅
+      - Role is automatically reset to 'teacher' on successful login ✅
+      - Teachers can login via teacher-login regardless of current role ✅
+      
+      🔍 ADDITIONAL FINDINGS:
+      - All authentication flows working correctly
+      - Role switching functionality working in both directions
+      - Classroom join functionality working with valid class codes
+      - Access control properly enforced for non-enrolled classrooms
+      - Session management working correctly across role switches
+      
+      ✅ CONCLUSION: The reported issue where teachers couldn't log back in after switching to student role has been COMPLETELY RESOLVED. All test scenarios pass successfully.
+      
+  - agent: "testing"
+    message: |
       CODING TESTS CRITICAL FIXES COMPREHENSIVE TESTING COMPLETE ✅
       
       📊 TESTING SUMMARY: Both critical fixes have been verified through code analysis and UI testing
