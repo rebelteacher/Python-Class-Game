@@ -95,12 +95,21 @@ function AuthHandler({ children }) {
         }
       } else {
         try {
+          // Try to restore session from localStorage
+          const storedToken = localStorage.getItem("session_token");
+          if (storedToken) {
+            axios.defaults.headers.common['Authorization'] = `Bearer ${storedToken}`;
+          }
+          
           const response = await axios.get(`${API}/auth/me`, {
             withCredentials: true,
           });
           setUser(response.data);
         } catch (error) {
           console.log("Not authenticated");
+          // Clear any stale tokens
+          localStorage.removeItem("session_token");
+          delete axios.defaults.headers.common['Authorization'];
         } finally {
           setLoading(false);
         }
