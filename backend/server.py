@@ -893,11 +893,13 @@ async def teacher_login(login_data: TeacherLoginRequest, response: Response):
         if not user:
             raise HTTPException(status_code=401, detail="Invalid email or password")
         
-        if user.get("role") != "teacher":
-            raise HTTPException(status_code=403, detail="This login is for teachers only")
-        
+        # Check if user has a password (teachers sign up with passwords, students use Google)
+        # This allows teachers who switched to student role to still log in
         if not user.get("password"):
             raise HTTPException(status_code=401, detail="This account uses Google login. Please use the student/Google login option.")
+        
+        # Note: We no longer check role here because teachers may have switched to student role
+        # Having a password indicates they are a teacher account
         
         # Verify password
         password_match = bcrypt.checkpw(
