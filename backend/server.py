@@ -931,11 +931,19 @@ async def teacher_login(login_data: TeacherLoginRequest, response: Response):
             "timestamp": datetime.now(timezone.utc).isoformat()
         })
         
-        # Update user's last_login timestamp
+        # Update user's last_login timestamp and reset role to teacher if needed
+        # (in case they were in student mode)
+        update_fields = {"last_login": datetime.now(timezone.utc).isoformat()}
+        if user["role"] != "teacher":
+            update_fields["role"] = "teacher"
+        
         await db.users.update_one(
             {"id": user["id"]},
-            {"$set": {"last_login": datetime.now(timezone.utc).isoformat()}}
+            {"$set": update_fields}
         )
+        
+        # Use updated role for response
+        current_role = update_fields.get("role", user["role"])
         
         # Set cookie in response
         # Auto-detect if we're in production (HTTPS) or development (HTTP)
