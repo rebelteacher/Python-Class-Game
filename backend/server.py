@@ -2937,9 +2937,8 @@ Just provide the feedback text (no JSON, no score):
             else:
                 raise HTTPException(status_code=403, detail="Late submissions are not allowed for this assignment")
     
-    # Calculate lives after this submission
-    if not is_passing:
-        lives_remaining -= 1
+    # No lives deduction - unlimited attempts until student clicks Done
+    # lives_remaining stays at 999
     
     # Award XP and coins if passing
     xp_earned = 0
