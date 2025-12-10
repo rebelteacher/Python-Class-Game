@@ -49,6 +49,15 @@ import TurtleGraphics from "./pages/TurtleGraphics";
 const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
 const API = `${BACKEND_URL}/api`;
 
+// Set up axios interceptor to always include the session token
+axios.interceptors.request.use((config) => {
+  const token = localStorage.getItem("session_token");
+  if (token && !config.headers['Authorization']) {
+    config.headers['Authorization'] = `Bearer ${token}`;
+  }
+  return config;
+});
+
 function AuthHandler({ children }) {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
