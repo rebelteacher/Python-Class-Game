@@ -75,7 +75,7 @@ export default function MyTests({ user }) {
   };
 
   const handleStartMCTest = (testId) => {
-    navigate(`/test-taking/${testId}`);
+    navigate(`/test/${testId}`);
   };
 
   const handleStartCodingTest = (testId) => {
