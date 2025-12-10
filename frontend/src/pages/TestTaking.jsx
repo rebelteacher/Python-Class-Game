@@ -160,6 +160,28 @@ export default function TestTaking({ user }) {
     );
   }
 
+  // Handle case where test data failed to load
+  if (!testData || !questions || questions.length === 0) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 flex items-center justify-center">
+        <Card className="max-w-md">
+          <CardContent className="p-6 text-center">
+            <AlertCircle className="w-12 h-12 text-red-500 mx-auto mb-4" />
+            <p className="text-lg font-medium text-gray-900 mb-2">Unable to load test</p>
+            <p className="text-gray-600 mb-4">The test may have been deleted or there was an error loading it.</p>
+            <Button 
+              onClick={() => navigate("/student/dashboard")}
+              className="bg-indigo-600 hover:bg-indigo-700"
+            >
+              <ArrowLeft className="w-4 h-4 mr-2" />
+              Back to Dashboard
+            </Button>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
+
   if (submitted && score !== null) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50">
