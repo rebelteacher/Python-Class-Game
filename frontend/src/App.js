@@ -122,6 +122,12 @@ function AuthHandler({ children }) {
   // Function to refresh user data (for updates like purchases)
   const refreshUser = async () => {
     try {
+      // Ensure Authorization header is set
+      const storedToken = localStorage.getItem("session_token");
+      if (storedToken) {
+        axios.defaults.headers.common['Authorization'] = `Bearer ${storedToken}`;
+      }
+      
       const response = await axios.get(`${API}/auth/me`, {
         withCredentials: true,
       });
