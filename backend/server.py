@@ -2574,7 +2574,7 @@ async def submit_assignment(submission: SubmissionCreate, request: Request):
     if available_date and now < available_date:
         raise HTTPException(status_code=403, detail="This assignment is not yet available")
     
-    # Check previous submissions and lives (for this specific problem)
+    # Check previous submissions for this specific problem
     previous_submissions = await db.submissions.find(
         {
             "assignment_id": submission.assignment_id,
@@ -2584,22 +2584,14 @@ async def submit_assignment(submission: SubmissionCreate, request: Request):
         {"_id": 0}
     ).sort("submitted_at", -1).to_list(100)
     
-    # Calculate current state
+    # Calculate attempt number (no lives limit - unlimited attempts until they click Done)
     if previous_submissions:
-        last_submission = previous_submissions[0]
-        lives_used = sum(1 for sub in previous_submissions if not sub.get("is_passing", False))
-        lives_remaining = 3 - lives_used
         attempt_number = len(previous_submissions) + 1
-        
-        # Check if locked out
-        if lives_remaining <= 0:
-            raise HTTPException(
-                status_code=403, 
-                detail="You have used all 3 lives on this assignment. No more submissions allowed."
-            )
     else:
-        lives_remaining = 3
         attempt_number = 1
+    
+    # No lives limit - students can keep trying until they get 100% or click Done
+    lives_remaining = 999  # Effectively unlimited
     
     # Handle turtle graphics assignments differently
     if is_turtle:
