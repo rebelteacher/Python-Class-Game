@@ -6301,6 +6301,9 @@ startxref
             print("❌ Cannot proceed without test user setup")
             return False
         
+        # Test the specific teacher login and student classroom join flow from review request
+        self.test_teacher_login_and_student_classroom_flow()
+        
         # Run the specific coding test best score bug fix test (as requested in review)
         self.test_coding_test_best_score_bug_fix()
         
