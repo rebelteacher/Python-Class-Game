@@ -2275,3 +2275,35 @@ agent_communication:
 **Ready for Phase 2:**
 The system is now ready for assignment integration with flexible grading criteria.
 
+
+
+---
+## Coding Test "Best Score" Bug Fix - December 10, 2025
+
+### Bug Description:
+When a student submits the same problem twice with different scores (e.g., 40% and 100%), the system was **averaging** the scores (70%) instead of keeping the **best score** (100%).
+
+### Root Cause:
+In `/app/frontend/src/pages/CodingTestSubmissions.jsx`, the score calculation logic was:
+```javascript
+// BUGGY CODE
+const totalScore = student.submissions.reduce((sum, sub) => sum + sub.score, 0);
+const averageScore = totalScore / student.submissions.length;
+```
+
+This was dividing by total submission count instead of grouping by problem first and taking the best score for each.
+
+### Fix Applied:
+Changed the calculation to:
+1. Group submissions by `problem_id`
+2. For each problem, take the **maximum** score
+3. Then average across problems (not submissions)
+
+### Files Modified:
+- `/app/frontend/src/pages/CodingTestSubmissions.jsx` - Fixed score calculation logic
+
+### Testing Needed:
+1. Test that a student with 2 submissions on 1 problem (40%, 100%) shows 100% overall score
+2. Test that a student with 2 problems (multiple attempts each) shows correct overall score
+3. Verify the UI displays attempts correctly grouped by problem
+
