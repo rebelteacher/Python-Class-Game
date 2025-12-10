@@ -56,22 +56,29 @@ export default function TestTaking({ user }) {
 
   const startTest = async () => {
     try {
+      console.log("Starting test:", testId);
       const response = await axios.get(`${API}/mc-tests/${testId}/start`, {
         withCredentials: true
       });
       
+      console.log("Test response:", response.data);
+      
+      if (!response.data || !response.data.questions) {
+        throw new Error("Invalid test data received");
+      }
+      
       setAttemptId(response.data.attempt_id);
       setTestData({
-        title: response.data.test_title,
-        description: response.data.test_description,
-        time_limit_minutes: response.data.time_limit_minutes,
-        num_questions: response.data.num_questions
+        title: response.data.test_title || "Test",
+        description: response.data.test_description || "",
+        time_limit_minutes: response.data.time_limit_minutes || 0,
+        num_questions: response.data.num_questions || 0
       });
-      setQuestions(response.data.questions);
+      setQuestions(response.data.questions || []);
       
       // Initialize answers object
       const initialAnswers = {};
-      response.data.questions.forEach(q => {
+      (response.data.questions || []).forEach(q => {
         initialAnswers[q.id] = "";
       });
       setAnswers(initialAnswers);
@@ -79,17 +86,16 @@ export default function TestTaking({ user }) {
       console.error("Error starting test:", error);
       if (error.response?.status === 404) {
         toast.error("Test not found. It may have been deleted or the link is incorrect.");
-        navigate("/student/dashboard");
       } else if (error.response?.status === 400 && error.response?.data?.detail?.includes("already completed")) {
         toast.error("You have already completed this test");
-        navigate("/student/dashboard");
       } else if (error.response?.status === 403) {
         toast.error("Only students can take tests. Teachers should use Test Reports to view results.");
-        navigate("/teacher/dashboard");
+      } else if (error.response?.status === 401) {
+        toast.error("Please log in to take this test");
       } else {
         toast.error(error.response?.data?.detail || "Failed to start test");
-        navigate("/student/dashboard");
       }
+      // Don't navigate automatically - let the error state handle it
     } finally {
       setLoading(false);
     }
