@@ -6,7 +6,8 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Label } from "@/components/ui/label";
-import { ArrowLeft, Clock, CheckCircle, AlertCircle } from "lucide-react";
+import { Progress } from "@/components/ui/progress";
+import { ArrowLeft, ArrowRight, Clock, CheckCircle, AlertCircle } from "lucide-react";
 
 const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
 const API = `${BACKEND_URL}/api`;
@@ -23,6 +24,7 @@ export default function TestTaking({ user }) {
   const [score, setScore] = useState(null);
   const [timeRemaining, setTimeRemaining] = useState(null);
   const [attemptId, setAttemptId] = useState(null);
+  const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
   const timerRef = useRef(null);
 
   useEffect(() => {
