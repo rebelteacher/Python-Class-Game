@@ -242,89 +242,187 @@ export default function TestTaking({ user }) {
     );
   }
 
+  // Get current question
+  const currentQuestion = questions[currentQuestionIndex];
+  const progressPercent = questions.length > 0 ? ((currentQuestionIndex + 1) / questions.length) * 100 : 0;
+  const answeredCount = Object.values(answers).filter(a => a !== "").length;
+
+  const handleNext = () => {
+    if (currentQuestionIndex < questions.length - 1) {
+      setCurrentQuestionIndex(currentQuestionIndex + 1);
+    }
+  };
+
+  const handlePrevious = () => {
+    if (currentQuestionIndex > 0) {
+      setCurrentQuestionIndex(currentQuestionIndex - 1);
+    }
+  };
+
+  // Helper function to render text with line breaks
+  const renderTextWithLineBreaks = (text) => {
+    if (!text) return null;
+    return text.split('\n').map((line, index) => (
+      <span key={index}>
+        {line}
+        {index < text.split('\n').length - 1 && <br />}
+      </span>
+    ));
+  };
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50">
+      {/* Header with timer */}
       <nav className="bg-white shadow-sm border-b border-gray-200 sticky top-0 z-10">
-        <div className="container mx-auto px-6 py-4 flex justify-between items-center">
-          <div>
-            <h1 className="text-2xl font-bold text-gray-900">{testData.title}</h1>
-            {testData.description && (
-              <p className="text-sm text-gray-600">{testData.description}</p>
+        <div className="container mx-auto px-6 py-4">
+          <div className="flex justify-between items-center mb-3">
+            <div>
+              <h1 className="text-2xl font-bold text-gray-900">{testData.title}</h1>
+              {testData.description && (
+                <p className="text-sm text-gray-600">{testData.description}</p>
+              )}
+            </div>
+            
+            {timeRemaining !== null && testData.time_limit_minutes > 0 && (
+              <div className="flex items-center gap-2">
+                <Clock className={`w-5 h-5 ${getTimeColor()}`} />
+                <span className={`text-xl font-mono ${getTimeColor()}`}>
+                  {formatTime(timeRemaining)}
+                </span>
+              </div>
             )}
           </div>
           
-          {timeRemaining !== null && testData.time_limit_minutes > 0 && (
-            <div className="flex items-center gap-2">
-              <Clock className={`w-5 h-5 ${getTimeColor()}`} />
-              <span className={`text-xl font-mono ${getTimeColor()}`}>
-                {formatTime(timeRemaining)}
-              </span>
+          {/* Progress bar */}
+          <div className="space-y-2">
+            <div className="flex justify-between text-sm text-gray-600">
+              <span>Question {currentQuestionIndex + 1} of {questions.length}</span>
+              <span>{answeredCount} of {questions.length} answered</span>
             </div>
-          )}
+            <Progress value={progressPercent} className="h-2" />
+          </div>
         </div>
       </nav>
 
       <main className="container mx-auto px-6 py-10">
-        <div className="max-w-4xl mx-auto space-y-6">
-          <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-6">
-            <p className="text-sm text-blue-800">
-              <strong>Instructions:</strong> Select one answer for each question. 
-              {testData.time_limit_minutes > 0 && ` You have ${testData.time_limit_minutes} minutes to complete this test.`}
-              {" "}You will only see your final score after submission (no answer review).
-            </p>
-          </div>
-
-          {questions.map((question, index) => (
-            <Card key={question.id}>
+        <div className="max-w-3xl mx-auto">
+          {/* Current Question */}
+          {currentQuestion && (
+            <Card className="mb-6">
               <CardHeader>
-                <CardTitle className="text-lg">
-                  Question {index + 1} of {questions.length}
+                <CardTitle className="text-lg flex items-center justify-between">
+                  <span>Question {currentQuestionIndex + 1}</span>
+                  {answers[currentQuestion.id] && (
+                    <span className="text-sm font-normal text-green-600 flex items-center gap-1">
+                      <CheckCircle className="w-4 h-4" />
+                      Answered
+                    </span>
+                  )}
                 </CardTitle>
               </CardHeader>
               <CardContent>
-                <p className="text-gray-900 mb-4 text-base font-medium">{question.question_text}</p>
+                {/* Question text with line break support */}
+                <div className="text-gray-900 mb-6 text-base font-medium whitespace-pre-line">
+                  {renderTextWithLineBreaks(currentQuestion.question_text)}
+                </div>
                 
                 <RadioGroup 
-                  value={answers[question.id]} 
-                  onValueChange={(value) => setAnswers({ ...answers, [question.id]: value })}
+                  value={answers[currentQuestion.id]} 
+                  onValueChange={(value) => setAnswers({ ...answers, [currentQuestion.id]: value })}
                 >
-                  {question.choices.map((choiceText, idx) => (
-                    <div key={idx} className="flex items-center space-x-3 p-3 rounded-lg hover:bg-gray-50 transition-colors border border-gray-200">
+                  {currentQuestion.choices.map((choiceText, idx) => (
+                    <div 
+                      key={idx} 
+                      className={`flex items-center space-x-3 p-4 rounded-lg transition-colors border-2 cursor-pointer
+                        ${answers[currentQuestion.id] === idx.toString() 
+                          ? 'border-indigo-500 bg-indigo-50' 
+                          : 'border-gray-200 hover:bg-gray-50 hover:border-gray-300'}`}
+                    >
                       <RadioGroupItem 
                         value={idx.toString()} 
-                        id={`${question.id}-${idx}`}
+                        id={`${currentQuestion.id}-${idx}`}
                       />
                       <Label 
-                        htmlFor={`${question.id}-${idx}`}
-                        className="flex-1 cursor-pointer text-base"
+                        htmlFor={`${currentQuestion.id}-${idx}`}
+                        className="flex-1 cursor-pointer text-base whitespace-pre-line"
                       >
-                        {choiceText}
+                        {renderTextWithLineBreaks(choiceText)}
                       </Label>
                     </div>
                   ))}
                 </RadioGroup>
               </CardContent>
             </Card>
-          ))}
+          )}
 
-          <Card className="bg-indigo-50 border-indigo-200">
-            <CardContent className="p-6">
-              <div className="flex justify-between items-center">
-                <div>
-                  <p className="text-sm text-gray-700 mb-1">
-                    {Object.values(answers).filter(a => a).length} of {questions.length} answered
-                  </p>
-                  <p className="text-xs text-gray-500">
-                    Make sure to answer all questions before submitting
-                  </p>
-                </div>
-                <Button
-                  onClick={() => handleSubmit(false)}
-                  disabled={submitting}
-                  className="bg-indigo-600 hover:bg-indigo-700 text-lg px-8 py-6"
-                >
-                  {submitting ? "Submitting..." : "Submit Test"}
-                </Button>
+          {/* Navigation buttons */}
+          <div className="flex justify-between items-center">
+            <Button
+              onClick={handlePrevious}
+              disabled={currentQuestionIndex === 0}
+              variant="outline"
+              className="gap-2"
+            >
+              <ArrowLeft className="w-4 h-4" />
+              Previous
+            </Button>
+
+            {/* Question dots indicator */}
+            <div className="flex gap-1 flex-wrap justify-center max-w-md">
+              {questions.map((q, idx) => (
+                <button
+                  key={q.id}
+                  onClick={() => setCurrentQuestionIndex(idx)}
+                  className={`w-3 h-3 rounded-full transition-colors ${
+                    idx === currentQuestionIndex 
+                      ? 'bg-indigo-600' 
+                      : answers[q.id] 
+                        ? 'bg-green-500' 
+                        : 'bg-gray-300 hover:bg-gray-400'
+                  }`}
+                  title={`Question ${idx + 1}${answers[q.id] ? ' (answered)' : ''}`}
+                />
+              ))}
+            </div>
+
+            {currentQuestionIndex === questions.length - 1 ? (
+              <Button
+                onClick={() => handleSubmit(false)}
+                disabled={submitting}
+                className="bg-indigo-600 hover:bg-indigo-700 gap-2"
+              >
+                {submitting ? "Submitting..." : "Submit Test"}
+                <CheckCircle className="w-4 h-4" />
+              </Button>
+            ) : (
+              <Button
+                onClick={handleNext}
+                className="bg-indigo-600 hover:bg-indigo-700 gap-2"
+              >
+                Next
+                <ArrowRight className="w-4 h-4" />
+              </Button>
+            )}
+          </div>
+
+          {/* Summary card at bottom */}
+          <Card className="mt-6 bg-gray-50 border-gray-200">
+            <CardContent className="p-4">
+              <div className="flex justify-between items-center text-sm">
+                <span className="text-gray-600">
+                  {answeredCount === questions.length 
+                    ? "✓ All questions answered!" 
+                    : `${questions.length - answeredCount} question${questions.length - answeredCount !== 1 ? 's' : ''} remaining`}
+                </span>
+                {answeredCount === questions.length && currentQuestionIndex !== questions.length - 1 && (
+                  <Button
+                    onClick={() => setCurrentQuestionIndex(questions.length - 1)}
+                    variant="link"
+                    className="text-indigo-600 p-0"
+                  >
+                    Go to Submit →
+                  </Button>
+                )}
               </div>
             </CardContent>
           </Card>
