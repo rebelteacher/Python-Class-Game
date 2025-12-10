@@ -337,7 +337,7 @@ export default function AssignmentPage({ user }) {
       return;
     }
 
-    // Check if THIS PROBLEM is locked out
+    // Get current problem ID
     const problemId = assignment.problems && assignment.problems[currentProblemIndex] 
       ? assignment.problems[currentProblemIndex].id 
       : assignmentId;
@@ -345,12 +345,6 @@ export default function AssignmentPage({ user }) {
     // Check if marked as final/done
     if (problemsFinal[problemId]) {
       toast.error("This problem is marked as done. You cannot submit again!");
-      return;
-    }
-    
-    const currentProblemLives = livesPerProblem[problemId] || 3;
-    if (currentProblemLives <= 0) {
-      toast.error("You've used all 3 lives on THIS problem. Try the next one!");
       return;
     }
 
@@ -367,23 +361,19 @@ export default function AssignmentPage({ user }) {
       );
       
       const isPassing = response.data.score >= 70;
-      const newLivesRemaining = response.data.lives_remaining;
       const xpEarned = response.data.xp_earned || 0;
       const coinsEarned = response.data.coins_earned || 0;
       const rankUp = response.data.rank_up;
       const newRank = response.data.new_rank;
       
-      // Update lives for THIS problem only
-      setLivesPerProblem(prev => ({
-        ...prev,
-        [problemId]: newLivesRemaining
-      }));
-      
-      // Update status for THIS problem
-      setProblemStatuses(prev => ({
-        ...prev,
-        [problemId]: response.data.score
-      }));
+      // Update status for THIS problem (best score)
+      setProblemStatuses(prev => {
+        const currentBest = prev[problemId] || 0;
+        return {
+          ...prev,
+          [problemId]: Math.max(currentBest, response.data.score)
+        };
+      });
       
       if (rankUp) {
         toast.success(`🎉 RANK UP! You're now a ${newRank}!`, { duration: 5000 });
@@ -394,10 +384,8 @@ export default function AssignmentPage({ user }) {
           `✅ Great job! Score: ${response.data.score.toFixed(1)}% | +${xpEarned} XP | +${coinsEarned} 🪙`,
           { duration: 4000 }
         );
-      } else if (newLivesRemaining > 0) {
-        toast.warning(`Score: ${response.data.score.toFixed(1)}% - ${newLivesRemaining} ${newLivesRemaining === 1 ? 'life' : 'lives'} remaining for this problem`);
       } else {
-        toast.error(`Score: ${response.data.score.toFixed(1)}% - No lives remaining for THIS problem. Move to the next one!`);
+        toast.warning(`Score: ${response.data.score.toFixed(1)}% - Keep trying! You can submit unlimited times until you click Done.`);
       }
       
       // Reset run status for current problem after submission
