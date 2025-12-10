@@ -67,7 +67,13 @@ function AuthHandler({ children }) {
             session_id: sessionId,
           });
 
-          document.cookie = `session_token=${response.data.session_token}; path=/; max-age=${7 * 24 * 60 * 60}; secure; samesite=none`;
+          // Store session token in both cookie and localStorage for reliability
+          const maxAge = 7 * 24 * 60 * 60; // 7 days
+          document.cookie = `session_token=${response.data.session_token}; path=/; max-age=${maxAge}; secure; samesite=lax`;
+          localStorage.setItem("session_token", response.data.session_token);
+          
+          // Set default axios header for Authorization
+          axios.defaults.headers.common['Authorization'] = `Bearer ${response.data.session_token}`;
           
           setUser(response.data);
           window.location.hash = "";
