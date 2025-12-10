@@ -716,7 +716,7 @@ class CodeClassAPITester:
             
             # Run async function
             asyncio.run(create_student_data())
-            return {"id": student_id, "token": student_token, "email": f"test.student.{student_timestamp}@example.com"}
+            return {"id": student_id, "token": student_token, "email": f"test.student.{student_timestamp}@example.com", "name": f"Test Student {student_timestamp}"}
             
         except Exception as e:
             print(f"   ❌ Failed to create student user: {str(e)}")
