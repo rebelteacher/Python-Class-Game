@@ -5734,8 +5734,8 @@ startxref
             "problem_ids": problem_ids,
             "time_limit_minutes": 30,
             "classroom_ids": [classroom_id],
-            "available_date": (datetime.now(timezone.utc) - timedelta(hours=1)).isoformat(),
-            "due_date": (datetime.now(timezone.utc) + timedelta(days=7)).isoformat()
+            "available_date": (datetime.now() - timedelta(hours=1)).strftime('%Y-%m-%dT%H:%M:%S'),
+            "due_date": (datetime.now() + timedelta(days=7)).strftime('%Y-%m-%dT%H:%M:%S')
         }
         
         coding_test = self.run_test(
