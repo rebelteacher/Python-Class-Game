@@ -228,30 +228,78 @@ export default function CodingTestSubmissions({ user }) {
                     </CardHeader>
                     <CardContent>
                       <div className="space-y-3">
-                        {student.submissions.map((sub, index) => (
-                          <div key={sub.id} className="p-3 bg-gray-50 rounded-lg border">
-                            <div className="flex items-center justify-between mb-2">
-                              <span className="font-medium">Problem {index + 1}</span>
-                              <span className={`text-xl font-bold ${getScoreColor(sub.score)}`}>
-                                {Math.round(sub.score)}%
-                              </span>
-                            </div>
-                            <div className="grid grid-cols-2 gap-2 text-xs text-gray-600">
-                              <div className="flex items-center gap-1">
-                                <Clock className="w-3 h-3" />
-                                <span>{formatTime(sub.time_taken_seconds)}</span>
+                        {/* Group submissions by problem for clearer display */}
+                        {Object.entries(
+                          student.submissions.reduce((acc, sub) => {
+                            if (!acc[sub.problem_id]) acc[sub.problem_id] = [];
+                            acc[sub.problem_id].push(sub);
+                            return acc;
+                          }, {})
+                        ).map(([problemId, problemSubs], problemIndex) => {
+                          const bestScore = Math.max(...problemSubs.map(s => s.score));
+                          const sortedSubs = [...problemSubs].sort((a, b) => 
+                            new Date(a.submitted_at) - new Date(b.submitted_at)
+                          );
+                          return (
+                            <div key={problemId} className="p-3 bg-gray-50 rounded-lg border">
+                              <div className="flex items-center justify-between mb-2">
+                                <span className="font-medium">
+                                  Problem {problemIndex + 1}
+                                  {problemSubs.length > 1 && (
+                                    <span className="ml-2 text-xs text-gray-500">
+                                      ({problemSubs.length} attempts)
+                                    </span>
+                                  )}
+                                </span>
+                                <div className="text-right">
+                                  <span className={`text-xl font-bold ${getScoreColor(bestScore)}`}>
+                                    {Math.round(bestScore)}%
+                                  </span>
+                                  {problemSubs.length > 1 && (
+                                    <span className="ml-1 text-xs text-green-600">(best)</span>
+                                  )}
+                                </div>
                               </div>
-                              <div className="flex items-center gap-1">
-                                <Calendar className="w-3 h-3" />
-                                <span>{new Date(sub.submitted_at).toLocaleString()}</span>
-                              </div>
+                              {/* Show all attempts for this problem */}
+                              {sortedSubs.map((sub, attemptIndex) => (
+                                <div 
+                                  key={sub.id} 
+                                  className={`p-2 rounded text-xs mb-2 ${
+                                    sub.score === bestScore ? 'bg-green-50 border border-green-200' : 'bg-white border'
+                                  }`}
+                                >
+                                  <div className="flex justify-between items-center mb-1">
+                                    <span className="font-medium text-gray-700">
+                                      Attempt {attemptIndex + 1}
+                                      {sub.score === bestScore && problemSubs.length > 1 && (
+                                        <Trophy className="inline w-3 h-3 ml-1 text-yellow-500" />
+                                      )}
+                                    </span>
+                                    <span className={`font-semibold ${getScoreColor(sub.score)}`}>
+                                      {Math.round(sub.score)}%
+                                    </span>
+                                  </div>
+                                  <div className="grid grid-cols-2 gap-2 text-gray-600">
+                                    <div className="flex items-center gap-1">
+                                      <Clock className="w-3 h-3" />
+                                      <span>{formatTime(sub.time_taken_seconds)}</span>
+                                    </div>
+                                    <div className="flex items-center gap-1">
+                                      <Calendar className="w-3 h-3" />
+                                      <span>{new Date(sub.submitted_at).toLocaleString()}</span>
+                                    </div>
+                                  </div>
+                                  {sub.feedback && (
+                                    <div className="mt-1 text-gray-600">
+                                      <span className="font-semibold">Feedback: </span>
+                                      {sub.feedback}
+                                    </div>
+                                  )}
+                                </div>
+                              ))}
                             </div>
-                            <div className="mt-2 p-2 bg-white rounded text-xs">
-                              <p className="font-semibold text-gray-700 mb-1">Feedback:</p>
-                              <p className="text-gray-600">{sub.feedback}</p>
-                            </div>
-                          </div>
-                        ))}
+                          );
+                        })}
                       </div>
                     </CardContent>
                   </Card>
