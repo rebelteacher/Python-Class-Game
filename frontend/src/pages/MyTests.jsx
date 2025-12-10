@@ -84,7 +84,7 @@ export default function MyTests({ user }) {
 
   const handleViewResult = (testId, type) => {
     if (type === "mc") {
-      navigate(`/test-taking/${testId}`);
+      navigate(`/test/${testId}/results`);
     } else {
       navigate(`/coding-test-result/${testId}`);
     }
