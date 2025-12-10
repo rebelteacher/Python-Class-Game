@@ -920,19 +920,16 @@ export default function AssignmentPage({ user }) {
                         <Button 
                           data-testid="submit-code-btn" 
                           onClick={handleSubmit} 
-                          disabled={submitting || (livesPerProblem[getCurrentProblemId()] || 3) <= 0 || !hasRun || problemsFinal[getCurrentProblemId()]}
+                          disabled={submitting || !hasRun || problemsFinal[getCurrentProblemId()]}
                           className="bg-indigo-600 hover:bg-indigo-700 gap-2 flex-1"
                           size="sm"
                         >
                           <Send className="w-4 h-4" />
-                          {submitting ? "Submitting..." : problemsFinal[getCurrentProblemId()] ? "Done" : (livesPerProblem[getCurrentProblemId()] || 3) <= 0 ? "Locked" : !hasRun ? "Run First" : "Submit"}
+                          {submitting ? "Submitting..." : problemsFinal[getCurrentProblemId()] ? "Done" : !hasRun ? "Run First" : "Submit"}
                         </Button>
                       </div>
-                      {!hasRun && (livesPerProblem[getCurrentProblemId()] || 3) > 0 && (
+                      {!hasRun && !problemsFinal[getCurrentProblemId()] && (
                         <p className="text-xs text-amber-600">⚠️ You must run your code before submitting</p>
-                      )}
-                      {(livesPerProblem[getCurrentProblemId()] || 3) <= 0 && (
-                        <p className="text-xs text-red-600">🚫 This problem is locked. Try the next one!</p>
                       )}
                       
                       {/* Learn Button - Visible for both students and teachers */}
