@@ -2615,9 +2615,7 @@ async def submit_assignment(submission: SubmissionCreate, request: Request):
         }]
         is_passing = base_score >= 70
         
-        # Deduct life if not passing
-        if not is_passing:
-            lives_remaining -= 1
+        # No lives deduction - unlimited attempts
         
         # Check if late
         is_late = False
