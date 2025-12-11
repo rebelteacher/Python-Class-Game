@@ -1578,9 +1578,22 @@ export default function AssignmentLibrary({ user }) {
                           </div>
                           <div className="space-y-2">
                             <div>
+                              <Label className="text-sm">Test Name (students will see this)</Label>
+                              <Input
+                                placeholder="e.g., Correct login, Wrong password, Extra spaces"
+                                value={testCase.description || ""}
+                                onChange={(e) => {
+                                  const newTestCases = [...editingProblem.test_cases];
+                                  newTestCases[index].description = e.target.value;
+                                  setEditingProblem({ ...editingProblem, test_cases: newTestCases });
+                                }}
+                                className="mt-1"
+                              />
+                            </div>
+                            <div>
                               <Label className="text-sm">Input (press Enter for multiple inputs)</Label>
                               <Textarea
-                                placeholder="Example:\n50\n12"
+                                placeholder="Example:\nadmin\nsecret123"
                                 value={testCase.input}
                                 onChange={(e) => {
                                   const newTestCases = [...editingProblem.test_cases];
@@ -1594,7 +1607,7 @@ export default function AssignmentLibrary({ user }) {
                             <div>
                               <Label className="text-sm">Expected Output</Label>
                               <Input
-                                placeholder="e.g., 11"
+                                placeholder="e.g., Access granted"
                                 value={testCase.expected_output}
                                 onChange={(e) => {
                                   const newTestCases = [...editingProblem.test_cases];
