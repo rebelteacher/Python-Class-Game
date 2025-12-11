@@ -1545,7 +1545,7 @@ export default function AssignmentLibrary({ user }) {
                       onClick={() => {
                         setEditingProblem({
                           ...editingProblem,
-                          test_cases: [...(editingProblem.test_cases || []), { input: "", expected_output: "" }]
+                          test_cases: [...(editingProblem.test_cases || []), { description: "", input: "", expected_output: "" }]
                         });
                       }}
                       size="sm"
