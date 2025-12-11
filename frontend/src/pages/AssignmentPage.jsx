@@ -779,29 +779,75 @@ export default function AssignmentPage({ user }) {
               })()}
 
               <Card data-testid="test-cases-card">
-                <CardHeader>
-                  <CardTitle>Test Cases</CardTitle>
-                  <CardDescription>Your code will be tested against these cases</CardDescription>
+                <CardHeader className="pb-2">
+                  <CardTitle className="flex items-center gap-2">
+                    📋 Test Cases
+                    <span className="text-sm font-normal text-gray-500">
+                      ({(() => {
+                        const problem = assignment.problems ? assignment.problems[currentProblemIndex] : assignment;
+                        const testCases = problem?.test_cases || [];
+                        return testCases.length;
+                      })()} tests)
+                    </span>
+                  </CardTitle>
+                  <CardDescription>Your code will be graded against ALL these test cases</CardDescription>
                 </CardHeader>
                 <CardContent className="space-y-3">
-                  {(assignment.test_cases || (assignment.problems && assignment.problems[0]?.test_cases) || []).map((testCase, index) => (
-                    <div key={testCase.id} data-testid={`test-case-display-${index}`} className="p-3 bg-gray-50 rounded-lg border border-gray-200">
-                      <div className="font-semibold text-sm text-gray-900 mb-2">
-                        Test {index + 1}: {testCase.description}
-                      </div>
-                      <div className="space-y-1 text-xs">
-                        <div>
-                          <span className="font-medium text-gray-600">Input:</span>
-                          <pre className="mt-1 p-2 bg-white rounded border border-gray-200 text-gray-800">{testCase.input_data || testCase.input || "(no input)"}</pre>
-                        </div>
-                        <div>
-                          <span className="font-medium text-gray-600">Expected Output:</span>
-                          <pre className="mt-1 p-2 bg-white rounded border border-gray-200 text-gray-800">{testCase.expected_output}</pre>
-                        </div>
-                      </div>
-                    </div>
-                  ))}
+                  {/* Test Cases Table */}
+                  <div className="overflow-x-auto">
+                    <table className="w-full text-sm border-collapse">
+                      <thead>
+                        <tr className="bg-indigo-50">
+                          <th className="border border-gray-200 px-3 py-2 text-left font-semibold text-indigo-700">#</th>
+                          <th className="border border-gray-200 px-3 py-2 text-left font-semibold text-indigo-700">Test Name</th>
+                          <th className="border border-gray-200 px-3 py-2 text-left font-semibold text-indigo-700">Input</th>
+                          <th className="border border-gray-200 px-3 py-2 text-left font-semibold text-indigo-700">Expected Output</th>
+                          <th className="border border-gray-200 px-3 py-2 text-center font-semibold text-indigo-700">Points</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {(() => {
+                          const problem = assignment.problems ? assignment.problems[currentProblemIndex] : assignment;
+                          const testCases = problem?.test_cases || [];
+                          const pointsPerTest = testCases.length > 0 ? Math.round(100 / testCases.length) : 0;
+                          
+                          return testCases.map((testCase, index) => (
+                            <tr key={testCase.id || index} className={index % 2 === 0 ? 'bg-white' : 'bg-gray-50'}>
+                              <td className="border border-gray-200 px-3 py-2 text-center font-medium text-gray-600">
+                                {index + 1}
+                              </td>
+                              <td className="border border-gray-200 px-3 py-2 font-medium text-gray-900">
+                                {testCase.description || `Test ${index + 1}`}
+                              </td>
+                              <td className="border border-gray-200 px-3 py-2">
+                                <pre className="whitespace-pre-wrap font-mono text-xs bg-blue-50 p-2 rounded text-blue-800 max-w-xs overflow-x-auto">
+                                  {(testCase.input_data || testCase.input || "(no input)").split('\\n').join('\n')}
+                                </pre>
+                              </td>
+                              <td className="border border-gray-200 px-3 py-2">
+                                <pre className="whitespace-pre-wrap font-mono text-xs bg-green-50 p-2 rounded text-green-800 max-w-xs overflow-x-auto">
+                                  {(testCase.expected_output || "").split('\\n').join('\n')}
+                                </pre>
+                              </td>
+                              <td className="border border-gray-200 px-3 py-2 text-center">
+                                <span className="inline-flex items-center justify-center px-2 py-1 bg-amber-100 text-amber-800 rounded-full font-semibold text-xs">
+                                  {testCase.points || pointsPerTest} pts
+                                </span>
+                              </td>
+                            </tr>
+                          ));
+                        })()}
+                      </tbody>
+                    </table>
+                  </div>
                   
+                  {/* Helpful tip for students */}
+                  <div className="mt-3 p-3 bg-yellow-50 border border-yellow-200 rounded-lg">
+                    <p className="text-xs text-yellow-800">
+                      <strong>💡 Tip:</strong> Your output must match the expected output <strong>exactly</strong> (including spaces, capitalization, and punctuation). 
+                      Run your code first to see what your program outputs!
+                    </p>
+                  </div>
                 </CardContent>
               </Card>
 
