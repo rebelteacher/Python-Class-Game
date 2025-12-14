@@ -7287,6 +7287,403 @@ async def calculate_competition_standings(competition_id: str, competition: dict
     return standings
 
 
+
+# ==================== MICRO:BIT CURRICULUM ====================
+
+MICROBIT_CURRICULUM = {
+    "units": [
+        {
+            "id": "unit1",
+            "title": "Unit 1: Getting Started",
+            "description": "Introduction to Micro:bit and basic programming concepts",
+            "weeks": "Weeks 1-2",
+            "lessons": [
+                {
+                    "id": "lesson1",
+                    "title": "What is Micro:bit?",
+                    "type": "quiz",
+                    "duration": "45 min",
+                    "objectives": [
+                        "Identify the parts of a Micro:bit",
+                        "Understand what a microcontroller does",
+                        "Learn safety rules for handling electronics"
+                    ],
+                    "materials": ["Micro:bit (for show)", "USB cable"],
+                    "description": "Introduction to the Micro:bit microcontroller and its components."
+                },
+                {
+                    "id": "lesson2",
+                    "title": "Your First Program - Display Heart",
+                    "type": "code",
+                    "duration": "45 min",
+                    "objectives": [
+                        "Connect Micro:bit to computer",
+                        "Write your first MicroPython program",
+                        "Display an image on the LED matrix"
+                    ],
+                    "materials": ["Micro:bit", "USB cable", "Computer with Mu Editor"],
+                    "starter_code": "from microbit import *\n\n# Display a heart on the LED screen\n# Your code here:\n",
+                    "solution_code": "from microbit import *\n\n# Display a heart on the LED screen\ndisplay.show(Image.HEART)",
+                    "test_cases": [
+                        {"description": "Imports microbit module", "pattern": "from microbit import", "points": 25},
+                        {"description": "Uses display.show()", "pattern": "display.show", "points": 25},
+                        {"description": "Shows HEART image", "pattern": "Image.HEART", "points": 50}
+                    ],
+                    "wiring_instructions": "1. Connect the Micro:bit to your computer using the USB cable\n2. The Micro:bit should appear as a USB drive\n3. Open Mu Editor and select 'BBC micro:bit' mode",
+                    "description": "Learn to display images on the Micro:bit's 5x5 LED matrix."
+                },
+                {
+                    "id": "lesson3",
+                    "title": "LED Patterns & Animations",
+                    "type": "code",
+                    "duration": "90 min",
+                    "objectives": [
+                        "Create custom LED patterns",
+                        "Use loops to create animations",
+                        "Understand the sleep() function"
+                    ],
+                    "materials": ["Micro:bit", "USB cable"],
+                    "starter_code": "from microbit import *\n\n# Create an animation that shows different faces\n# Use a while True loop and sleep()\n# Your code here:\n",
+                    "solution_code": "from microbit import *\n\nwhile True:\n    display.show(Image.HAPPY)\n    sleep(500)\n    display.show(Image.SAD)\n    sleep(500)",
+                    "test_cases": [
+                        {"description": "Uses while True loop", "pattern": "while True:", "points": 25},
+                        {"description": "Uses display.show()", "pattern": "display.show", "points": 25},
+                        {"description": "Uses sleep() for timing", "pattern": "sleep(", "points": 25},
+                        {"description": "Shows multiple images", "pattern": "Image.", "points": 25}
+                    ],
+                    "wiring_instructions": "No additional wiring needed - using built-in LED display",
+                    "description": "Create animated displays using loops and timing."
+                }
+            ]
+        },
+        {
+            "id": "unit2",
+            "title": "Unit 2: Buttons & Input",
+            "description": "Learn to respond to button presses and create interactive programs",
+            "weeks": "Weeks 3-4",
+            "lessons": [
+                {
+                    "id": "lesson4",
+                    "title": "Button A & B Basics",
+                    "type": "code",
+                    "duration": "45 min",
+                    "objectives": [
+                        "Detect button presses",
+                        "Use if statements with buttons",
+                        "Create responsive programs"
+                    ],
+                    "materials": ["Micro:bit", "USB cable"],
+                    "starter_code": "from microbit import *\n\n# When button A is pressed, show 'A'\n# When button B is pressed, show 'B'\n# Your code here:\n",
+                    "solution_code": "from microbit import *\n\nwhile True:\n    if button_a.is_pressed():\n        display.show('A')\n    elif button_b.is_pressed():\n        display.show('B')\n    else:\n        display.clear()",
+                    "test_cases": [
+                        {"description": "Checks button_a", "pattern": "button_a", "points": 25},
+                        {"description": "Checks button_b", "pattern": "button_b", "points": 25},
+                        {"description": "Uses is_pressed() or was_pressed()", "pattern": "_pressed()", "points": 25},
+                        {"description": "Uses if/elif statements", "pattern": "if ", "points": 25}
+                    ],
+                    "wiring_instructions": "No additional wiring needed - using built-in buttons",
+                    "description": "Learn to detect and respond to the built-in buttons A and B."
+                },
+                {
+                    "id": "lesson5",
+                    "title": "Button Counter",
+                    "type": "code",
+                    "duration": "45 min",
+                    "objectives": [
+                        "Use variables to store data",
+                        "Increment and decrement counters",
+                        "Display numbers on LED"
+                    ],
+                    "materials": ["Micro:bit", "USB cable"],
+                    "starter_code": "from microbit import *\n\n# Create a counter:\n# Button A = add 1\n# Button B = subtract 1\n# Your code here:\n\ncount = 0\n",
+                    "solution_code": "from microbit import *\n\ncount = 0\n\nwhile True:\n    if button_a.was_pressed():\n        count = count + 1\n    if button_b.was_pressed():\n        count = count - 1\n    display.show(count)",
+                    "test_cases": [
+                        {"description": "Creates count variable", "pattern": "count", "points": 20},
+                        {"description": "Increments count", "pattern": "count + 1", "points": 20},
+                        {"description": "Decrements count", "pattern": "count - 1", "points": 20},
+                        {"description": "Uses was_pressed()", "pattern": "was_pressed()", "points": 20},
+                        {"description": "Displays the count", "pattern": "display.show", "points": 20}
+                    ],
+                    "wiring_instructions": "No additional wiring needed",
+                    "description": "Build a counter that responds to button presses."
+                },
+                {
+                    "id": "lesson6",
+                    "title": "Rock Paper Scissors Game",
+                    "type": "code",
+                    "duration": "90 min",
+                    "objectives": [
+                        "Use random numbers",
+                        "Create a simple game",
+                        "Combine buttons with display"
+                    ],
+                    "materials": ["Micro:bit", "USB cable"],
+                    "starter_code": "from microbit import *\nimport random\n\n# Shake to play Rock Paper Scissors!\n# Rock = R, Paper = P, Scissors = S\n# Your code here:\n",
+                    "solution_code": "from microbit import *\nimport random\n\nwhile True:\n    if accelerometer.was_gesture('shake'):\n        choice = random.randint(0, 2)\n        if choice == 0:\n            display.show('R')\n        elif choice == 1:\n            display.show('P')\n        else:\n            display.show('S')",
+                    "test_cases": [
+                        {"description": "Imports random module", "pattern": "import random", "points": 20},
+                        {"description": "Uses accelerometer shake", "pattern": "shake", "points": 20},
+                        {"description": "Uses random.randint()", "pattern": "random.randint", "points": 20},
+                        {"description": "Has Rock option", "pattern": "'R'", "points": 20},
+                        {"description": "Has Paper or Scissors", "pattern": "'P'|'S'", "points": 20}
+                    ],
+                    "wiring_instructions": "No additional wiring needed - using built-in accelerometer",
+                    "description": "Create a Rock Paper Scissors game using the shake gesture!"
+                }
+            ]
+        },
+        {
+            "id": "unit3",
+            "title": "Unit 3: Sensors",
+            "description": "Explore the built-in sensors: accelerometer, compass, and more",
+            "weeks": "Weeks 5-6",
+            "lessons": [
+                {
+                    "id": "lesson7",
+                    "title": "Accelerometer Basics",
+                    "type": "code",
+                    "duration": "45 min",
+                    "objectives": [
+                        "Understand X, Y, Z axes",
+                        "Read accelerometer values",
+                        "Detect tilt direction"
+                    ],
+                    "materials": ["Micro:bit", "USB cable"],
+                    "starter_code": "from microbit import *\n\n# Tilt detector:\n# Tilt left = show '<'\n# Tilt right = show '>'\n# Your code here:\n",
+                    "solution_code": "from microbit import *\n\nwhile True:\n    x = accelerometer.get_x()\n    if x < -200:\n        display.show('<')\n    elif x > 200:\n        display.show('>')\n    else:\n        display.show('-')",
+                    "test_cases": [
+                        {"description": "Gets accelerometer X value", "pattern": "accelerometer.get_x()", "points": 30},
+                        {"description": "Compares X value", "pattern": "x <|x >", "points": 30},
+                        {"description": "Shows different displays", "pattern": "display.show", "points": 40}
+                    ],
+                    "wiring_instructions": "No additional wiring needed - using built-in accelerometer",
+                    "description": "Learn to detect tilt using the accelerometer."
+                },
+                {
+                    "id": "lesson8",
+                    "title": "Step Counter Project",
+                    "type": "code",
+                    "duration": "90 min",
+                    "objectives": [
+                        "Detect shake gestures",
+                        "Count steps with variables",
+                        "Create a wearable device"
+                    ],
+                    "materials": ["Micro:bit", "USB cable", "Battery pack (optional)", "Rubber band or strap"],
+                    "starter_code": "from microbit import *\n\n# Step counter - counts shakes\n# Display the step count\n# Your code here:\n\nsteps = 0\n",
+                    "solution_code": "from microbit import *\n\nsteps = 0\n\nwhile True:\n    if accelerometer.was_gesture('shake'):\n        steps = steps + 1\n        display.scroll(steps)",
+                    "test_cases": [
+                        {"description": "Creates steps variable", "pattern": "steps", "points": 25},
+                        {"description": "Detects shake gesture", "pattern": "was_gesture", "points": 25},
+                        {"description": "Increments steps", "pattern": "steps + 1|steps +=", "points": 25},
+                        {"description": "Displays step count", "pattern": "display.scroll|display.show", "points": 25}
+                    ],
+                    "wiring_instructions": "1. Connect battery pack for portable use\n2. Attach Micro:bit to wrist or ankle with rubber band\n3. Walk around to test!",
+                    "description": "Build a step counter you can wear!"
+                },
+                {
+                    "id": "lesson9",
+                    "title": "Digital Compass",
+                    "type": "code",
+                    "duration": "45 min",
+                    "objectives": [
+                        "Use the compass sensor",
+                        "Display cardinal directions",
+                        "Calibrate the compass"
+                    ],
+                    "materials": ["Micro:bit", "USB cable"],
+                    "starter_code": "from microbit import *\n\n# Digital compass:\n# N = North, E = East, S = South, W = West\n# Your code here:\n\ncompass.calibrate()\n",
+                    "solution_code": "from microbit import *\n\ncompass.calibrate()\n\nwhile True:\n    heading = compass.heading()\n    if heading < 45 or heading > 315:\n        display.show('N')\n    elif heading < 135:\n        display.show('E')\n    elif heading < 225:\n        display.show('S')\n    else:\n        display.show('W')",
+                    "test_cases": [
+                        {"description": "Calibrates compass", "pattern": "compass.calibrate()", "points": 20},
+                        {"description": "Gets compass heading", "pattern": "compass.heading()", "points": 20},
+                        {"description": "Shows North", "pattern": "'N'", "points": 20},
+                        {"description": "Shows East or West", "pattern": "'E'|'W'", "points": 20},
+                        {"description": "Shows South", "pattern": "'S'", "points": 20}
+                    ],
+                    "wiring_instructions": "No additional wiring needed - using built-in compass\nNote: You'll need to calibrate by tilting the Micro:bit to fill the screen with dots",
+                    "description": "Build a digital compass that shows direction!"
+                }
+            ]
+        },
+        {
+            "id": "unit4",
+            "title": "Unit 4: External Components",
+            "description": "Connect external LEDs, sensors, and build circuits",
+            "weeks": "Weeks 7-8",
+            "lessons": [
+                {
+                    "id": "lesson10",
+                    "title": "External LED Circuit",
+                    "type": "code",
+                    "duration": "90 min",
+                    "objectives": [
+                        "Build a basic circuit on breadboard",
+                        "Connect LED to Micro:bit pins",
+                        "Control external LED with code"
+                    ],
+                    "materials": ["Micro:bit", "USB cable", "Breadboard", "LED (any color)", "220Ω resistor", "2 jumper wires", "Alligator clips"],
+                    "starter_code": "from microbit import *\n\n# Blink external LED on pin0\n# Your code here:\n",
+                    "solution_code": "from microbit import *\n\nwhile True:\n    pin0.write_digital(1)\n    sleep(500)\n    pin0.write_digital(0)\n    sleep(500)",
+                    "test_cases": [
+                        {"description": "Uses pin0", "pattern": "pin0", "points": 25},
+                        {"description": "Writes digital HIGH", "pattern": "write_digital(1)", "points": 25},
+                        {"description": "Writes digital LOW", "pattern": "write_digital(0)", "points": 25},
+                        {"description": "Uses sleep for timing", "pattern": "sleep(", "points": 25}
+                    ],
+                    "wiring_instructions": "1. Place LED on breadboard (long leg = positive)\n2. Connect 220Ω resistor to short leg of LED\n3. Connect resistor other end to GND on Micro:bit\n4. Connect long leg of LED to Pin 0 on Micro:bit\n5. Use alligator clips to connect to Micro:bit edge connector",
+                    "description": "Build your first external circuit with an LED!"
+                },
+                {
+                    "id": "lesson11",
+                    "title": "Traffic Light Project",
+                    "type": "code",
+                    "duration": "90 min",
+                    "objectives": [
+                        "Control multiple LEDs",
+                        "Create a sequence/state machine",
+                        "Apply timing concepts"
+                    ],
+                    "materials": ["Micro:bit", "USB cable", "Breadboard", "Red LED", "Yellow LED", "Green LED", "3x 220Ω resistors", "Jumper wires", "Alligator clips"],
+                    "starter_code": "from microbit import *\n\n# Traffic light: Red, Yellow, Green\n# Pin 0 = Red, Pin 1 = Yellow, Pin 2 = Green\n# Your code here:\n",
+                    "solution_code": "from microbit import *\n\nwhile True:\n    # Red light\n    pin0.write_digital(1)\n    pin1.write_digital(0)\n    pin2.write_digital(0)\n    sleep(3000)\n    \n    # Yellow light\n    pin0.write_digital(0)\n    pin1.write_digital(1)\n    pin2.write_digital(0)\n    sleep(1000)\n    \n    # Green light\n    pin0.write_digital(0)\n    pin1.write_digital(0)\n    pin2.write_digital(1)\n    sleep(3000)",
+                    "test_cases": [
+                        {"description": "Uses pin0 for red", "pattern": "pin0.write_digital", "points": 20},
+                        {"description": "Uses pin1 for yellow", "pattern": "pin1.write_digital", "points": 20},
+                        {"description": "Uses pin2 for green", "pattern": "pin2.write_digital", "points": 20},
+                        {"description": "Has timing with sleep", "pattern": "sleep(", "points": 20},
+                        {"description": "Uses a loop", "pattern": "while True:", "points": 20}
+                    ],
+                    "wiring_instructions": "1. Place all 3 LEDs on breadboard\n2. Connect each LED's short leg through a 220Ω resistor to GND\n3. Connect Red LED long leg to Pin 0\n4. Connect Yellow LED long leg to Pin 1\n5. Connect Green LED long leg to Pin 2\n6. Share a common GND connection",
+                    "description": "Build a working traffic light with 3 LEDs!"
+                },
+                {
+                    "id": "lesson12",
+                    "title": "Final Project: Night Light",
+                    "type": "code",
+                    "duration": "90 min",
+                    "objectives": [
+                        "Read analog sensor values",
+                        "Use conditional logic with sensors",
+                        "Build a practical device"
+                    ],
+                    "materials": ["Micro:bit", "USB cable", "Breadboard", "LED", "220Ω resistor", "Light sensor (LDR)", "10kΩ resistor", "Jumper wires"],
+                    "starter_code": "from microbit import *\n\n# Night light:\n# When it's dark, turn on LED\n# When it's bright, turn off LED\n# Read light level from pin1\n# Control LED on pin0\n# Your code here:\n",
+                    "solution_code": "from microbit import *\n\nwhile True:\n    light_level = pin1.read_analog()\n    if light_level < 500:\n        pin0.write_digital(1)\n        display.show(Image.HAPPY)\n    else:\n        pin0.write_digital(0)\n        display.clear()\n    sleep(100)",
+                    "test_cases": [
+                        {"description": "Reads analog value", "pattern": "read_analog()", "points": 25},
+                        {"description": "Compares light level", "pattern": "light_level <|light_level >", "points": 25},
+                        {"description": "Controls LED output", "pattern": "write_digital", "points": 25},
+                        {"description": "Uses conditional logic", "pattern": "if ", "points": 25}
+                    ],
+                    "wiring_instructions": "1. LED circuit: LED + 220Ω to Pin 0 and GND\n2. LDR circuit: Connect LDR between 3V and Pin 1\n3. Connect 10kΩ resistor between Pin 1 and GND\n4. This creates a voltage divider that changes with light",
+                    "description": "Build an automatic night light that turns on in the dark!"
+                }
+            ]
+        }
+    ]
+}
+
+@api_router.get("/microbit/curriculum")
+async def get_microbit_curriculum(request: Request):
+    """Get the complete Micro:bit curriculum structure"""
+    user = await get_current_user(request)
+    return MICROBIT_CURRICULUM
+
+@api_router.get("/microbit/units")
+async def get_microbit_units(request: Request):
+    """Get list of Micro:bit units"""
+    user = await get_current_user(request)
+    return [{"id": u["id"], "title": u["title"], "description": u["description"], "weeks": u["weeks"], "lesson_count": len(u["lessons"])} for u in MICROBIT_CURRICULUM["units"]]
+
+@api_router.get("/microbit/units/{unit_id}/lessons")
+async def get_microbit_lessons(unit_id: str, request: Request):
+    """Get lessons for a specific unit"""
+    user = await get_current_user(request)
+    for unit in MICROBIT_CURRICULUM["units"]:
+        if unit["id"] == unit_id:
+            return unit["lessons"]
+    raise HTTPException(status_code=404, detail="Unit not found")
+
+@api_router.post("/microbit/create-from-lesson")
+async def create_assignment_from_microbit_lesson(data: dict, request: Request):
+    """Create an assignment from a Micro:bit curriculum lesson"""
+    user = await get_current_user(request)
+    
+    if user["role"] != "teacher":
+        raise HTTPException(status_code=403, detail="Only teachers can create assignments")
+    
+    unit_id = data.get("unit_id")
+    lesson_id = data.get("lesson_id")
+    classroom_ids = data.get("classroom_ids", [])
+    
+    # Find the lesson
+    lesson = None
+    unit_data = None
+    for unit in MICROBIT_CURRICULUM["units"]:
+        if unit["id"] == unit_id:
+            unit_data = unit
+            for l in unit["lessons"]:
+                if l["id"] == lesson_id:
+                    lesson = l
+                    break
+            break
+    
+    if not lesson:
+        raise HTTPException(status_code=404, detail="Lesson not found")
+    
+    # Create problem in library
+    problem_id = str(uuid.uuid4())
+    proctor_code = ''.join([str(random.randint(0, 9)) for _ in range(6)])
+    
+    problem = {
+        "id": problem_id,
+        "title": lesson["title"],
+        "description": lesson["description"],
+        "category": "Micro:bit",
+        "difficulty": "beginner",
+        "chapter": unit_data["title"],
+        "lesson": lesson["title"],
+        "problem_type": "Micro:bit Project",
+        "assignment_type": "microbit",
+        "starter_code": lesson.get("starter_code", "from microbit import *\n\n# Your code here:\n"),
+        "solution_code": lesson.get("solution_code", ""),
+        "expected_output": "",
+        "test_cases": lesson.get("test_cases", []),
+        "materials_needed": lesson.get("materials", []),
+        "wiring_instructions": lesson.get("wiring_instructions", ""),
+        "learning_objectives": lesson.get("objectives", []),
+        "microbit_unit": unit_id,
+        "microbit_lesson": int(lesson_id.replace("lesson", "")),
+        "teacher_id": user["id"],
+        "created_at": datetime.now(timezone.utc).isoformat()
+    }
+    
+    await db.problems.insert_one(problem)
+    
+    # Create assignment if classroom_ids provided
+    if classroom_ids:
+        assignment_id = str(uuid.uuid4())
+        assignment = {
+            "id": assignment_id,
+            "title": lesson["title"],
+            "description": lesson["description"],
+            "chapter": unit_data["title"],
+            "lesson": lesson["title"],
+            "teacher_id": user["id"],
+            "problem_ids": [problem_id],
+            "classroom_ids": classroom_ids,
+            "proctor_code": proctor_code,
+            "created_at": datetime.now(timezone.utc).isoformat()
+        }
+        await db.assignments.insert_one(assignment)
+        
+        return {"message": "Assignment created from Micro:bit lesson", "assignment_id": assignment_id, "problem_id": problem_id, "proctor_code": proctor_code}
+    
+    return {"message": "Problem added to library", "problem_id": problem_id}
+
+
+
 # Include the router in the main app
 app.include_router(api_router)
 
