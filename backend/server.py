@@ -341,6 +341,12 @@ class Problem(BaseModel):
     # Partial credit rules (deterministic grading)
     partial_credit_rules: Optional[dict] = None  # {"syntax_error_penalty": 30, "logic_error_penalty": 20, etc}
     test_cases: List[dict] = []  # Test cases for auto-grading
+    # Micro:bit fields
+    materials_needed: List[str] = []  # e.g., ["Micro:bit", "USB cable", "2 LEDs", "220Ω resistors"]
+    wiring_instructions: str = ""  # Step-by-step wiring guide
+    learning_objectives: List[str] = []  # e.g., ["Understand digital output", "Control LEDs with code"]
+    microbit_unit: str = ""  # e.g., "Unit 1: Getting Started"
+    microbit_lesson: int = 0  # Lesson number within unit
     created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
 
 class ProblemCreate(BaseModel):
