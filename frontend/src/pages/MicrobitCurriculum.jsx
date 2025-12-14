@@ -149,7 +149,7 @@ export default function MicrobitCurriculum({ user }) {
                 <Cpu className="w-8 h-8" />
                 <div>
                   <h1 className="text-2xl font-bold">BBC Micro:bit Curriculum</h1>
-                  <p className="text-cyan-100 text-sm">7th Grade Python Programming</p>
+                  <p className="text-cyan-100 text-sm">Python Programming with Hardware</p>
                 </div>
               </div>
             </div>
