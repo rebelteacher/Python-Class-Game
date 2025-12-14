@@ -232,6 +232,15 @@ function App() {
               />
               
               <Route
+                path="/microbit"
+                element={
+                  <ProtectedRoute user={user}>
+                    <MicrobitCurriculum user={user} />
+                  </ProtectedRoute>
+                }
+              />
+              
+              <Route
                 path="/classroom/:classroomId"
                 element={
                   <ProtectedRoute user={user}>
