@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Textarea } from "@/components/ui/textarea";
-import { ArrowLeft, Play, Send, CheckCircle, XCircle, Code2, Lightbulb, X, BookOpen } from "lucide-react";
+import { ArrowLeft, Play, Send, CheckCircle, XCircle, Code2, Lightbulb, X, BookOpen, Cpu } from "lucide-react";
 import Editor from "@monaco-editor/react";
 import { Panel, PanelGroup, PanelResizeHandle } from "react-resizable-panels";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
@@ -14,6 +14,7 @@ import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import InteractiveInputCollector from "@/components/InteractiveInputCollector";
 import LessonModal from "@/components/LessonModal";
+import MicrobitSimulator from "@/components/MicrobitSimulator";
 
 const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
 const API = `${BACKEND_URL}/api`;
