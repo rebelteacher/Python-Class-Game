@@ -417,6 +417,22 @@ export default function AssignmentPage({ user }) {
       return;
     }
     
+    // Get best score for this problem
+    const bestScore = problemStatuses[problemId] || 0;
+    
+    // Confirmation dialog
+    const confirmed = window.confirm(
+      `⚠️ Are you sure you want to submit this assignment as DONE?\n\n` +
+      `Your current best score: ${bestScore.toFixed(0)}%\n\n` +
+      `After clicking OK:\n` +
+      `• This problem will be marked as COMPLETED\n` +
+      `• You will NOT be able to submit again\n` +
+      `• Only your teacher can unlock it with a proctor code\n\n` +
+      `Click OK to confirm, or Cancel to keep working.`
+    );
+    
+    if (!confirmed) return;
+    
     // Get latest submission
     const latestSubmission = problemSubmissions[problemSubmissions.length - 1];
     
@@ -434,7 +450,7 @@ export default function AssignmentPage({ user }) {
         [problemId]: true
       }));
       
-      toast.success("Problem marked as done! You can no longer submit to this problem.");
+      toast.success("Problem submitted as done! It will now appear in your Completed assignments.");
     } catch (error) {
       console.error("Error marking final:", error);
       toast.error(error.response?.data?.detail || "Failed to mark as done");
