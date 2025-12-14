@@ -214,6 +214,10 @@ export default function TeacherDashboard({ user, setUser }) {
               <Video className="w-4 h-4" />
               Video Library
             </Button>
+            <Button onClick={() => navigate("/microbit")} variant="outline" size="sm" className="gap-2 border-cyan-300 text-cyan-100 hover:bg-cyan-500/30 bg-cyan-500/20">
+              <Cpu className="w-4 h-4" />
+              Micro:bit
+            </Button>
             <WhatsNew />
             <Button data-testid="reports-nav-btn" onClick={() => navigate("/teacher-reports")} variant="outline" size="sm" className="gap-2 border-white/30 text-white hover:bg-white/20 bg-white/10">
               <FileSpreadsheet className="w-4 h-4" />
