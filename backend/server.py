@@ -363,12 +363,18 @@ class ProblemCreate(BaseModel):
     resources_link: str = ""
     csta_standard: str = ""
     # Turtle graphics fields
-    assignment_type: str = "code"  # "code" or "turtle"
+    assignment_type: str = "code"  # "code", "turtle", or "microbit"
     turtle_grading_criteria: Optional[dict] = None
     expected_turtle_image: str = ""
     # Partial credit rules
     partial_credit_rules: Optional[dict] = None
     test_cases: List[dict] = []
+    # Micro:bit fields
+    materials_needed: List[str] = []
+    wiring_instructions: str = ""
+    learning_objectives: List[str] = []
+    microbit_unit: str = ""
+    microbit_lesson: int = 0
 
 # Assignment model - bundle of multiple problems with unified scheduling
 class Assignment(BaseModel):
