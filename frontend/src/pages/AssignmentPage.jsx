@@ -736,6 +736,78 @@ export default function AssignmentPage({ user }) {
                 </CardContent>
               </Card>
 
+              {/* Micro:bit Specific Content */}
+              {(() => {
+                const currentProblem = assignment.problems?.[currentProblemIndex];
+                const isMicrobit = currentProblem?.assignment_type === "microbit";
+                
+                if (!isMicrobit) return null;
+                
+                return (
+                  <>
+                    {/* Learning Objectives */}
+                    {currentProblem.learning_objectives?.length > 0 && (
+                      <Card className="border-cyan-200 bg-cyan-50">
+                        <CardHeader className="pb-2">
+                          <CardTitle className="text-base flex items-center gap-2">
+                            🎯 Learning Objectives
+                          </CardTitle>
+                        </CardHeader>
+                        <CardContent>
+                          <ul className="space-y-1">
+                            {currentProblem.learning_objectives.map((obj, i) => (
+                              <li key={i} className="flex items-start gap-2 text-sm">
+                                <CheckCircle className="w-4 h-4 text-cyan-600 mt-0.5 flex-shrink-0" />
+                                <span>{obj}</span>
+                              </li>
+                            ))}
+                          </ul>
+                        </CardContent>
+                      </Card>
+                    )}
+
+                    {/* Materials Needed */}
+                    {currentProblem.materials_needed?.length > 0 && (
+                      <Card className="border-yellow-200 bg-yellow-50">
+                        <CardHeader className="pb-2">
+                          <CardTitle className="text-base flex items-center gap-2">
+                            🔧 Materials Needed
+                          </CardTitle>
+                        </CardHeader>
+                        <CardContent>
+                          <div className="flex flex-wrap gap-2">
+                            {currentProblem.materials_needed.map((mat, i) => (
+                              <span 
+                                key={i} 
+                                className="px-2 py-1 bg-white border border-yellow-300 rounded-full text-xs font-medium"
+                              >
+                                {mat}
+                              </span>
+                            ))}
+                          </div>
+                        </CardContent>
+                      </Card>
+                    )}
+
+                    {/* Wiring Instructions */}
+                    {currentProblem.wiring_instructions && (
+                      <Card className="border-orange-200 bg-orange-50">
+                        <CardHeader className="pb-2">
+                          <CardTitle className="text-base flex items-center gap-2">
+                            ⚡ Wiring Instructions
+                          </CardTitle>
+                        </CardHeader>
+                        <CardContent>
+                          <pre className="text-sm whitespace-pre-wrap font-sans text-gray-700">
+                            {currentProblem.wiring_instructions}
+                          </pre>
+                        </CardContent>
+                      </Card>
+                    )}
+                  </>
+                );
+              })()}
+
               {/* Expected Output - Text or Turtle Image */}
               {(() => {
                 const currentProblem = assignment.problems?.[currentProblemIndex];
