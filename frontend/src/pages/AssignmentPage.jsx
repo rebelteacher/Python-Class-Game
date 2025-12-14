@@ -1100,10 +1100,13 @@ export default function AssignmentPage({ user }) {
                               size="sm"
                             >
                               <CheckCircle className="w-4 h-4 mr-1" />
-                              {markingFinal ? "..." : "Done"}
+                              {markingFinal ? "..." : "Submit as Done"}
                             </Button>
                           </div>
-                          <div className="text-xs text-center space-y-1">
+                          <div className="text-xs text-center space-y-1 mt-2">
+                            <p className="text-orange-600 font-medium">
+                              ⚠️ Click "Submit as Done" only when you're finished!
+                            </p>
                             <p className="text-gray-600">
                               💡 {hintStatus.hints_remaining}/2 hints remaining for this assignment
                             </p>
