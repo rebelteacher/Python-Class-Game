@@ -154,7 +154,7 @@ export default function MicrobitCurriculum({ user }) {
               </div>
             </div>
             <Button
-              onClick={() => navigate("/assignment-library?type=microbit")}
+              onClick={() => navigate("/library?type=microbit")}
               className="bg-white text-cyan-600 hover:bg-cyan-50"
             >
               <BookOpen className="w-4 h-4 mr-2" />
