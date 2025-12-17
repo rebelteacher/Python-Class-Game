@@ -2426,3 +2426,40 @@ Changed the calculation to:
 2. Test that a student with 2 problems (multiple attempts each) shows correct overall score
 3. Verify the UI displays attempts correctly grouped by problem
 
+
+  - agent: "main"
+    message: |
+      MICRO:BIT MODULE INTEGRATION - READY FOR TESTING
+      
+      📋 CHANGES MADE:
+      1. Updated AssignmentLibrary.jsx to support URL parameters for type filtering:
+         - Added useSearchParams hook
+         - Type filter now reads from ?type=microbit URL param
+         - Type filter changes update URL (for bookmarking/sharing)
+      
+      📋 WHAT NEEDS TESTING:
+      1. Teacher Flow - Micro:bit Curriculum:
+         - Navigate to /microbit page
+         - View curriculum with units and lessons
+         - Click "Assign to Class" for a lesson
+         - Verify assignment is created with proctor code
+      
+      2. Teacher Flow - Assignment Library:
+         - Navigate to /library?type=microbit
+         - Verify filter is auto-applied (shows only Micro:bit problems)
+         - Create new Micro:bit problem via "Add to Library"
+         - Verify problem appears in list
+      
+      3. Student Flow - Assignment Page:
+         - Student navigates to a Micro:bit assignment
+         - Verify Micro:bit simulator is displayed
+         - Run code in simulator
+         - Submit code and verify pattern-based grading
+      
+      📋 TEST CREDENTIALS:
+      - Teacher: astapp@spanola.net / AlisaFaith$14
+      
+      📋 KEY URLS:
+      - /microbit - Curriculum page
+      - /library?type=microbit - Filtered library
+      - /assignment/:id - Student assignment page
