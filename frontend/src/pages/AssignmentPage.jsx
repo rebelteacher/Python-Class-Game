@@ -234,6 +234,21 @@ export default function AssignmentPage({ user }) {
     // Get current problem
     const currentProblem = assignment?.problems?.[currentProblemIndex];
     const isTurtle = currentProblem?.assignment_type === "turtle";
+    const isMicrobit = currentProblem?.assignment_type === "microbit";
+    
+    // For Micro:bit assignments, don't run on backend - use the visual simulator only
+    if (isMicrobit) {
+      // Mark as run so submit button becomes enabled
+      const currentProblemId = getCurrentProblemId();
+      setHasRunPerProblem(prev => ({
+        ...prev,
+        [currentProblemId]: true
+      }));
+      
+      // Show a helpful message
+      setOutput("✅ Use the Virtual Micro:bit simulator above to test your code!\n\nClick the 'Run' button on the simulator to see your code in action.\n\nNote: The simulator shows LED display commands. For full functionality (sensors, buttons, pins), flash your code to a real Micro:bit.");
+      return;
+    }
     
     // Check if code contains input() calls and no input provided yet (skip for turtle)
     if (!isTurtle) {
