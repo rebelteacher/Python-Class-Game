@@ -1383,18 +1383,50 @@ export default function AssignmentPage({ user }) {
                     <CardHeader className="pb-2 pt-3 flex-shrink-0">
                       <CardTitle className="flex justify-between items-center">
                         <span>
-                          {assignment.problems?.[currentProblemIndex]?.assignment_type === "turtle" ? "🐢 Turtle Output" : "Output"}
+                          {assignment.problems?.[currentProblemIndex]?.assignment_type === "turtle" 
+                            ? "🐢 Turtle Output" 
+                            : assignment.problems?.[currentProblemIndex]?.assignment_type === "microbit"
+                              ? "⚡ Virtual Micro:bit"
+                              : "Output"}
                         </span>
                         <span className="text-xs text-gray-500 font-normal">Demo mode - not graded</span>
                       </CardTitle>
                       <CardDescription className="text-xs">
                         {assignment.problems?.[currentProblemIndex]?.assignment_type === "turtle" 
                           ? "Your turtle graphics will appear here" 
-                          : "Code with input() will show interactive dialog automatically"}
+                          : assignment.problems?.[currentProblemIndex]?.assignment_type === "microbit"
+                            ? "Test your code on the virtual Micro:bit simulator"
+                            : "Code with input() will show interactive dialog automatically"}
                       </CardDescription>
                     </CardHeader>
                     <CardContent className="flex-1 overflow-auto min-h-0 p-4">
-                      {assignment.problems?.[currentProblemIndex]?.assignment_type === "turtle" ? (
+                      {assignment.problems?.[currentProblemIndex]?.assignment_type === "microbit" ? (
+                        <div className="h-full flex flex-col gap-3">
+                          {/* Micro:bit Simulator for Teacher Demo Mode */}
+                          <MicrobitSimulator 
+                            code={code} 
+                            onButtonPress={(button) => {
+                              toast.info(`Button ${button} pressed!`);
+                            }}
+                          />
+                          
+                          {/* Console output below simulator */}
+                          {output && (
+                            <div className="mt-2">
+                              <div className="text-sm font-semibold text-gray-700 mb-1">Console Output:</div>
+                              <pre className={`p-3 ${darkMode ? 'bg-gray-900 text-green-400' : 'bg-gray-100 text-gray-900'} rounded-lg font-mono text-xs whitespace-pre-wrap max-h-32 overflow-y-auto`}>
+                                {output}
+                              </pre>
+                            </div>
+                          )}
+                          
+                          {/* Helpful note */}
+                          <div className="p-3 bg-cyan-50 border border-cyan-200 rounded-lg text-xs text-cyan-800">
+                            <strong>💡 Note:</strong> This is a visual simulator for testing display commands. 
+                            For full functionality (sensors, pins), flash your code to a real Micro:bit!
+                          </div>
+                        </div>
+                      ) : assignment.problems?.[currentProblemIndex]?.assignment_type === "turtle" ? (
                         <div className="h-full flex flex-col gap-3">
                           {turtleImage ? (
                             <div className="flex justify-center items-center bg-white p-4 rounded border-2 border-gray-200">
