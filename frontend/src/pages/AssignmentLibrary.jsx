@@ -78,7 +78,11 @@ export default function AssignmentLibrary({ user }) {
       partial_pass_bonus: 10,
       close_attempt_bonus: 15
     },
-    test_cases: []
+    test_cases: [],
+    // Micro:bit specific fields
+    materials_needed: [],
+    wiring_instructions: "",
+    learning_objectives: []
   });
   
   const [turtlePreviewOpen, setTurtlePreviewOpen] = useState(false);
