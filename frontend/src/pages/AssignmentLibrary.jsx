@@ -95,7 +95,7 @@ export default function AssignmentLibrary({ user }) {
 
   useEffect(() => {
     filterProblems();
-  }, [searchTerm, categoryFilter, difficultyFilter, chapterFilter, problems]);
+  }, [searchTerm, categoryFilter, difficultyFilter, chapterFilter, typeFilter, problems]);
 
   const fetchProblems = async () => {
     try {
@@ -132,6 +132,10 @@ export default function AssignmentLibrary({ user }) {
 
     if (chapterFilter && chapterFilter !== "all") {
       filtered = filtered.filter(p => p.chapter === chapterFilter);
+    }
+
+    if (typeFilter) {
+      filtered = filtered.filter(p => p.assignment_type === typeFilter);
     }
 
     setFilteredProblems(filtered);
