@@ -19,6 +19,7 @@ const API = `${BACKEND_URL}/api`;
 
 export default function AssignmentLibrary({ user }) {
   const navigate = useNavigate();
+  const [searchParams, setSearchParams] = useSearchParams();
   const [problems, setProblems] = useState([]);
   const [filteredProblems, setFilteredProblems] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -30,7 +31,7 @@ export default function AssignmentLibrary({ user }) {
   const [categoryFilter, setCategoryFilter] = useState("all");
   const [difficultyFilter, setDifficultyFilter] = useState("all");
   const [chapterFilter, setChapterFilter] = useState("all");
-  const [typeFilter, setTypeFilter] = useState("");
+  const [typeFilter, setTypeFilter] = useState(searchParams.get("type") || "");
   
   // Multi-select mode
   const [selectionMode, setSelectionMode] = useState(false);
