@@ -1453,7 +1453,15 @@ export default function AssignmentLibrary({ user }) {
                                                     {problem.times_imported || 0}
                                                   </div>
                                                 </div>
-                                                <CardTitle className="text-lg">{problem.title}</CardTitle>
+                                                <CardTitle className="text-lg flex items-center gap-2">
+                                                  {problem.title}
+                                                  {problem.assignment_type === "turtle" && (
+                                                    <span className="px-2 py-0.5 bg-green-100 text-green-700 rounded text-xs font-medium">🐢 Turtle</span>
+                                                  )}
+                                                  {problem.assignment_type === "microbit" && (
+                                                    <span className="px-2 py-0.5 bg-cyan-100 text-cyan-700 rounded text-xs font-medium">⚡ Micro:bit</span>
+                                                  )}
+                                                </CardTitle>
                                                 <CardDescription className="line-clamp-2">{problem.description}</CardDescription>
                                               </CardHeader>
                                               <CardContent className="space-y-2">
