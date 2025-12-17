@@ -1010,7 +1010,7 @@ export default function AssignmentLibrary({ user }) {
                     </div>
                   )}
 
-                  {/* Test Cases Builder */}
+                  {/* Test Cases Builder - for Code assignments */}
                   {newProblem.assignment_type === "code" && (
                     <div className="border-2 border-yellow-200 bg-yellow-50 rounded-lg p-4">
                       <div className="flex items-center justify-between mb-3">
