@@ -584,18 +584,20 @@ export default function MicrobitSimulator({ code, onButtonPress }) {
           </div>
         </div>
         
-        {/* Console Output */}
-        {consoleOutput.length > 0 && (
-          <div className="mt-3 p-2 bg-black rounded text-xs font-mono text-green-400 max-h-16 overflow-y-auto">
-            {consoleOutput.map((line, i) => (
+        {/* Console Output - Always show */}
+        <div className="mt-3 p-2 bg-black rounded text-xs font-mono text-green-400 min-h-[60px] max-h-24 overflow-y-auto">
+          {consoleOutput.length > 0 ? (
+            consoleOutput.map((line, i) => (
               <div key={i}>&gt; {line}</div>
-            ))}
-          </div>
-        )}
+            ))
+          ) : (
+            <div className="text-gray-500">&gt; Click "Run" to simulate your code</div>
+          )}
+        </div>
         
         {/* Help text */}
-        <p className="text-xs text-gray-400 mt-3 text-center">
-          Click Run to simulate your code • Click A/B buttons to test input
+        <p className="text-xs text-gray-400 mt-2 text-center">
+          Supported: display.set_pixel(x,y,b) • display.show() • display.scroll() • sleep()
         </p>
       </CardContent>
     </Card>
