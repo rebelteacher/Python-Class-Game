@@ -94,6 +94,14 @@ export default function AssignmentLibrary({ user }) {
     fetchProblems();
   }, []);
 
+  // Sync typeFilter with URL params when URL changes
+  useEffect(() => {
+    const typeFromUrl = searchParams.get("type");
+    if (typeFromUrl && typeFromUrl !== typeFilter) {
+      setTypeFilter(typeFromUrl);
+    }
+  }, [searchParams]);
+
   useEffect(() => {
     filterProblems();
   }, [searchTerm, categoryFilter, difficultyFilter, chapterFilter, typeFilter, problems]);
