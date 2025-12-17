@@ -153,11 +153,57 @@ export default function MicrobitCurriculum({ user }) {
                 </div>
               </div>
             </div>
+            <Button
+              onClick={() => navigate("/assignment-library?type=microbit")}
+              className="bg-white text-cyan-600 hover:bg-cyan-50"
+            >
+              <BookOpen className="w-4 h-4 mr-2" />
+              Go to Micro:bit Library
+            </Button>
           </div>
         </div>
       </nav>
 
       <main className="container mx-auto px-6 py-8">
+        {/* Quick Actions */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
+          <Card className="hover:shadow-lg transition-shadow cursor-pointer" onClick={() => navigate("/assignment-library?type=microbit")}>
+            <CardContent className="p-6 flex items-center gap-4">
+              <div className="p-3 bg-cyan-100 rounded-lg">
+                <BookOpen className="w-6 h-6 text-cyan-600" />
+              </div>
+              <div>
+                <h3 className="font-semibold">Problem Library</h3>
+                <p className="text-sm text-gray-600">View & create Micro:bit problems</p>
+              </div>
+            </CardContent>
+          </Card>
+          
+          <Card className="hover:shadow-lg transition-shadow cursor-pointer" onClick={() => setShowAssignDialog(true)}>
+            <CardContent className="p-6 flex items-center gap-4">
+              <div className="p-3 bg-green-100 rounded-lg">
+                <Zap className="w-6 h-6 text-green-600" />
+              </div>
+              <div>
+                <h3 className="font-semibold">Quick Assign</h3>
+                <p className="text-sm text-gray-600">Assign a lesson to your class</p>
+              </div>
+            </CardContent>
+          </Card>
+          
+          <Card className="hover:shadow-lg transition-shadow">
+            <CardContent className="p-6 flex items-center gap-4">
+              <div className="p-3 bg-purple-100 rounded-lg">
+                <Target className="w-6 h-6 text-purple-600" />
+              </div>
+              <div>
+                <h3 className="font-semibold">Student Progress</h3>
+                <p className="text-sm text-gray-600">View in classroom page</p>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+
         {/* Introduction Card */}
         <Card className="mb-8 bg-gradient-to-r from-cyan-500 to-blue-500 text-white border-0">
           <CardContent className="p-6">
