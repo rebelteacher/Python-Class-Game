@@ -1,181 +1,171 @@
-<analysis>Here is the summary of the current session:
-
-**original_problem_statement:**
-The user's initial high-priority requests were to fix a broken Student Dashboard and a blocked teacher Assignment Page. Throughout the session, the user added numerous feature requests and bug fixes:
-1.  **Competition Logic:** Fix incorrect scoring (should count 100% scores, not Mark as Done) and incorrect status (competitions showing as Active after ending).
-2.  **Login Failures:** A persistent login failure in the production environment after deployment, which went through multiple stages of diagnosis (CORS, secure cookies, dead code).
-3.  **Interactive Code Execution:** Make the code sandbox and assignment editors support interactive  for text-based games.
-4.  **UI/UX Improvements:** Increase the output panel size in all code editors and fix a recurring  error overlay that blocked the UI.
-5.  **Natural Sorting:** Fix alphanumeric sorting in the Notes Library, Assignment Library, and Student Dashboard so that chapters/lessons appear in natural order (e.g., 1, 2, 10, not 1, 10, 2).
-6.  **Learning Materials Feature:** Create a new way to present learning materials with support for rich content like images and memes.
-7.  **Multiple Choice (MC) Test Feature Overhaul:**
-    *   Fix missing student names in test reports.
-    *   Fix an issue where teachers couldn't view or edit tests from the classroom page.
-    *   Add the ability for teachers to edit test dates/schedules.
-    *   Enhance the Test Reports page to allow filtering by multiple classrooms and multiple tests simultaneously.
-8.  **Deployment Failures:** The primary ongoing issue is that deployments to the production environment are failing or resulting in a non-functional app, specifically with login.
+<analysis>original_problem_statement:
+The user's requests during this session were:
+1.  **Best Score Bug:** Fix a bug where coding test scores were averaged instead of taking the best score for problems with multiple submissions.
+2.  **Student Login/Classroom Bug:** Fix an issue where teachers who switched their role to student were unable to log back into their account and subsequently couldn't join or load classrooms. This issue was reported to only happen in the production environment.
+3.  **Multiple-Choice Test White Page:** Fix a bug where clicking Start Test for a multiple-choice test resulted in a blank white page.
+4.  **Multiple-Choice Test UI/UX:**
+    *   Implement support for newline characters () in question text.
+    *   Change the layout to display one question per page with a progress bar.
+5.  **Remove 3 Strikes System:** Remove the attempt limit (lives/strikes) from coding assignments.
+6.  **Visible Test Cases:** Make all test cases for coding problems (input, expected output, name, points) fully visible to students.
+7.  **Proctor Codes for Old Assignments:** Generate and display proctor codes for assignments that were created before the feature existed.
+8.  **New Feature: Micro:bit Module:** Develop an educational module to teach programming the BBC Micro:bit. This includes:
+    *   A curriculum structure with pre-built lessons.
+    *   A virtual Micro:bit simulator that visually responds to student code.
+    *   Integration into the existing Assignment Library for creating and managing Micro:bit problems.
+    *   A pattern-based grading system for Micro:bit code submissions.
+9.  **Assignment Completion Bug:** Fix a bug where assignments were incorrectly moved to the Completed section for students even if they hadn't finished or submitted them.
+10. **Micro:bit Simulator Bugs:**
+    *   Fix an  error when running code.
+    *   Add support for the  command in the simulator.
 
 **User's preferred language**: English
 
 **what currently exists?**
-The application is a full-stack educational platform. Key features that were fixed or added in this session include:
--   **Student Dashboard:** To Do and Completed tabs correctly organize assignments with natural sorting.
--   **Code Editors:** All code editors (Student Sandbox, Assignments, Teacher Practice) now support mock-interactive input via a dialog for running text-based games. The UI has been optimized for maximum output space.
--   **Competition Engine:** Scoring and status logic are now correct and dynamically calculated on the backend.
--   **Learning Materials:** A new Learn This Concept feature allows teachers to create lessons with rich content (Markdown, images, memes) that students can access from the assignment page via a full-screen modal.
--   **Multiple Choice Testing:** The feature is now largely functional. Teachers can create tests, edit schedules, and view results with correct student names. The reports page supports multi-selection for classrooms and tests.
--   **Libraries:** All libraries (Notes, Assignments) now use natural sorting for chapters and lessons.
+The application is a comprehensive educational platform. Key functionalities worked on in this session include:
+-   **Coding Test Scoring:** The logic for multi-submission tests has been fixed on both the backend and the teacher-facing frontend () to correctly calculate and display the best score per problem.
+-   **Authentication:** A critical production authentication bug has been resolved. The login flow for teachers is now more robust, allowing them to log in even if their last-used role was 'student'. The OAuth login flow has also been hardened by using  and Authorization headers as a fallback for cookies, ensuring session persistence in production.
+-   **Multiple-Choice Tests:** The test-taking UI has been completely revamped. It now displays one question at a time, includes a progress bar, and correctly renders multiline question text. The routing bug causing a white page has been fixed.
+-   **Coding Assignments:** The 3 strikes attempt limit has been completely removed from both the frontend and backend. Test cases are now fully visible to students in a clear table format, and teachers can add descriptive names to each test case.
+-   **Proctor Codes:** A one-time database migration was successfully run to generate and add proctor codes to all existing assignments that were missing them.
+-   **Micro:bit Module (In Progress):** A new module for teaching Micro:bit programming has been scaffolded. This includes a new curriculum page, backend models and endpoints, a virtual simulator component, and initial integration into the  for creating Micro:bit problems.
 
 **Last working item**:
-The agent was asked to diagnose and fix production deployment failures by analyzing user-provided logs.
+The agent was in the middle of a major feature implementation: fully integrating the new Micro:bit assignment type into the existing Assignment Library and lesson framework.
 
--   **Last item agent was working:** The user provided deployment logs showing what appeared to be successful  requests, despite reporting that the deployment was failing. The agent invoked the  to analyze these logs and identify the root cause of the deployment issue.
+-   **Last item agent was working:** Updating the  page to allow teachers to create, filter, and manage Micro:bit problems alongside existing Python and Turtle problems. This involved adding a new Micro:bit assignment type, creating conditional UI for Micro:bit-specific fields (like  instead of input/output), and adding a type filter to the problems list.
 -   **Status:** IN PROGRESS
 -   **Agent Testing Done:** N
--   **Which testing method agent to use?** The agent must wait for the analysis from the . Based on the sub-agent's findings, the next steps will be to either implement code-level fixes or inform the user if the issue is confirmed to be infrastructure-related.
--   **User Testing Done:** Y (User confirmed deployments are failing).
+-   **Which testing method agent to use?** Frontend testing agent. The agent should create a test that verifies a teacher can create a new Micro:bit problem from the Assignment Library, see it in the list with the correct type badge, and filter the list to show only Micro:bit problems.
+-   **User Testing Done:** N
 
 **All Pending/In progress Issue list**:
--   Issue 1: (P0) Production deployment is failing, preventing any new fixes from reaching the user.
--   Issue 2: (P1) A recurring  error is suppressed with a workaround but not fundamentally fixed.
-
-**Issues Detail:**
--   **Issue 1: Production deployment is failing.**
-    -   **Attempted fixes:** The agent fixed multiple potential causes for production login failure: removed unreachable backend code, added  to all frontend auth requests, added the production domain to the backend  list, and implemented a conditional  flag for session cookies in the production environment. Despite these fixes, the user reports that login and other features fail after redeploying.
-    -   **Next debug checklist:**
-        1.  Await the analysis from the  based on the logs provided by the user.
-        2.  If the sub-agent provides code-level fixes, implement them.
-        3.  If the sub-agent confirms the code is correct and the issue is likely with the deployment environment (e.g., environment variable propagation, build process, caching layers), create a detailed handoff document for a support team to investigate the infrastructure.
-    -   **Why fix this issue and what will be achieved with the fix?** This is a critical blocker. No new features or fixes can be successfully delivered to the user until deployment works.
-    -   **Status:** IN PROGRESS
-    -   **Is recurring issue?** Y
-    -   **Should Test frontend/backend/both after fix?** Both
-    -   **Blocked on other issue:** This is the primary blocker.
-
--   **Issue 2: A recurring  error is suppressed.**
-    -   **Attempted fixes:** A global error handler and  component failed to suppress a UI-blocking error overlay from the  library. A  variable also failed.
-    -   **Next debug checklist:** The current working fix is a script () that intercepts the error before React's overlay can render. This is a workaround. A permanent fix would involve investigating the  layout in  and  to see why an infinite resize loop is being triggered. This is a low priority as long as the workaround holds.
-    -   **Why fix this issue and what will be achieved with the fix?** To remove the need for the hacky suppression script and improve application stability.
-    -   **Status:** RESOLVED (via workaround)
-    -   **Is recurring issue?** Y
-    -   **Should Test frontend/backend/both after fix?** Frontend
-    -   **Blocked on other issue:** No
+-   None.
 
 **In progress Task List**:
--   **Task 1: Resolve Production Deployment Failures**
-    -   **Where to resume:** Awaiting the response from the .
-    -   **What will be achieved with this?** A successful deployment pipeline, allowing the user to access all the new features and fixes.
+-   **Task 1: Complete Micro:bit Module Integration (P0)**
+
+**Task Detail:**
+-   **Task 1: Complete Micro:bit Module Integration**
+    -   **Where to resume:**
+        1.  The agent has updated  to include UI for creating and filtering Micro:bit problems. This needs to be thoroughly tested.
+        2.  The agent was in the process of refactoring  to be a gateway that links to the Assignment Library with the Micro:bit filter pre-applied. This needs to be completed and tested.
+        3.  Verify that student-side grading and progress tracking works for these newly created Micro:bit assignments.
+    -   **What will be achieved with this?** The Micro:bit feature will be fully integrated into the platform's core content management and grading system, matching the user's request for a seamless experience.
     -   **Status:** IN PROGRESS
-    -   **Should Test frontend/backend/both after fix?** Both
-    -   **Blocked on something:** Waiting for  analysis.
+    -   **Should Test frontend/backend/both after fix?** Both.
+    -   **Blocked on something:** None.
 
 **Upcoming and Future Tasks**
--   None mentioned by the user. The current focus is on getting the existing fixes deployed and working.
+-   **Upcoming Tasks:**
+    -   (P1) **Turtle Graphics - Phase 3:** Polish the turtle feature by adding example problems, a gallery of outputs, and potentially UI controls for image size/downloads.
+-   **Future Tasks:**
+    -   **Self-Paced Learning Module:** A potential new section for self-paced courses.
+    -   **Real-time Turtle Graphics:** Upgrade the turtle feature from static image output to real-time animation using WebSockets.
 
 **Completed work in this session**
--   **Student Dashboard Tabs (DONE):** Implemented and fixed To Do and Completed tabs.
--   **Competition Logic (DONE):** Fixed scoring to count 100% scores and fixed status to be dynamically calculated on the backend.
--   **Production Login Issues (ATTEMPTED FIX):** Addressed multiple issues (dead code, CORS, secure cookies). The root cause of deployment failure is still under investigation.
--   **Interactive Code Execution (DONE):** Implemented a mock-interactive dialog for  in all code editors.
--   **Code Editor UI (DONE):** Maximized output space and removed redundant manual input boxes in all editors.
--   **ResizeObserver Error (WORKAROUND):** Suppressed the UI-blocking error overlay with a pre-React script.
--   **Natural Sorting (DONE):** Implemented natural sorting in , , and .
--   **Learn This Concept Feature (DONE):**
-    -   Created backend models and endpoints for Lessons.
-    -   Created frontend Learn button and full-screen modal with Markdown rendering.
-    -   Created teacher UI to create/edit lessons with meme/image instructions.
--   **MC Test Feature Overhaul (DONE):**
-    -   Fixed missing student names in reports.
-    -   Fixed teacher View Test functionality.
-    -   Added Edit Test Schedule feature for teachers.
-    -   Refactored Test Reports page for multi-classroom and multi-test selection.
+-   **Coding Test Best Score Bug (FIXED):** Corrected the score aggregation logic in .
+-   **Production Authentication & Login Lockout (FIXED):** Reworked authentication in  and  to handle role switching and cross-domain cookie issues.
+-   **Multiple-Choice Test White Page Bug (FIXED):** Corrected a route mismatch in .
+-   **Multiple-Choice Test UI Rework (DONE):** Re-architected  to show one question at a time with a progress bar and support for newlines.
+-   **3 Strikes System Removal (DONE):** Removed attempt-limiting logic from  and .
+-   **Visible Test Cases for Students (DONE):** Updated  to display test cases and  to allow naming them.
+-   **Proctor Code Backfill (DONE):** Ran a one-time migration script to add proctor codes to all existing assignments in the database.
+-   **Assignment Completion Bug (FIXED):** Ran a migration script to fix inconsistent  fields in the database and added a confirmation dialog to the UI.
+-   **Micro:bit Module Scaffolding (DONE):** Created backend models/endpoints and frontend pages (, ).
+-   **Micro:bit Simulator Fixes (FIXED):**
+    -   Adjusted code execution flow in  to prevent backend  errors.
+    -   Enhanced the  component to support the  command.
 
 **Earlier issues found/mentioned but not fixed**
--   The root cause of the  error was not fixed, only suppressed with a workaround.
+-   **Issue 1: Fragile Layout on **
+    -   **Debug checklist:** The page's  implementation is unstable and causes layout bugs. It requires a refactor of the page's core layout structure.
+    -   **Why to solve this issue and what will be achieved with this?** This is a recurring source of UI bugs and technical debt. Fixing it will stabilize a core page of the application.
+    -   **Should Test frontend/backend/both after fix:** Frontend.
+    -   **Is recurring issue?** Y.
+-   **Issue 2: Assignment Creation  bug**
+    -   **Debug checklist:** The agent from a previous session identified that assignments might be created with empty . Logging was added to the  endpoint in , but the issue was never fully debugged. The root cause is likely in the frontend payload from  in .
+    -   **Why to solve this issue and what will be achieved with this?** This is a critical bug that can prevent teachers from assigning work to students.
+    -   **Should Test frontend/backend/both after fix:** Both.
+    -   **Is recurring issue?** N.
 
 **Known issue recurrence from previous fork**
--   **Issue recurrence in previous fork:**  error.
--   **Recurrence count:** This issue was mentioned in the initial handoff and appeared again in this session.
--   **Status:** RESOLVED (via workaround)
+-   None.
 
 **Code Architecture**
 
 
 **Key Technical Concepts**
--   FastAPI, React, MongoDB
--   Token-based Authentication
--   CORS (Cross-Origin Resource Sharing)
--   Secure Cookies (HttpOnly, Secure flag)
--   React  and State Management
--    (source of recurring error)
--    for rendering rich content
--   JavaScript  for natural sorting
+-   **Production Authentication Debugging:** Diagnosed and fixed a complex production-only auth issue by comparing cookie-based auth with a more robust  +  header approach.
+-   **One-Time Database Migration:** Wrote and executed Python scripts using  to perform data migrations on the live database (adding proctor codes, fixing missing  fields). This is a powerful technique for handling schema evolution.
+-   **Pattern-Based Grading:** Implemented a new, non-execution-based grading method for Micro:bit assignments by searching for required code patterns () in student submissions.
+-   **Component-Based Simulator:** Created a simple code simulator () within React that parses a subset of Python commands and updates its visual state, demonstrating how to create interactive learning tools.
+-   **Conditional UI Architecture:** Extensively used conditional rendering in  and  to support multiple assignment types (, , ) within the same components.
 
 **key DB schema**
--   **lessons:** 
--   **competitions:**  field added dynamically by the backend.
--   **mc_tests:** ,  fields are now updatable.
+-   **problems:**
+    -   Added  (code, turtle, or microbit).
+    -   Added Micro:bit fields: , , .
+    -    objects now include optional  and  fields.
+-   **assignments:** No schema changes, but a migration was run to populate  on all existing documents.
+-   **submissions:** A migration was run to add  to all documents that were missing the field.
 
 **changes in tech stack**
--   Added  dependency to the frontend.
+-   None.
 
-**All files**
--   : Heavily modified. Added endpoints for lessons, updating test schedules. Fixed competition status calculation. Implemented multiple fixes for production login (cookie security).
--   : Modified to add  and update .
--   : Refactored to add To-Do/Completed tabs and natural sorting.
--   , , : Refactored to add mock-interactive input, remove manual input boxes, and improve layout.
--   : Modified to add Manage Lesson UI and fix View/Edit logic for tests vs. assignments. Added Edit Test button.
--   : Major refactoring to support multi-select for classrooms and tests.
--   , : Added natural sorting.
--   : New file to forcefully suppress the ResizeObserver error.
--   : Modified to include the suppression script.
--   , : New reusable components.
--   All signup/login pages (, etc.): Modified to add .
+**All files of reference**
+-   : The heart of the application logic, modified for auth, grading, and new endpoints.
+-   : The main hub for content creation, now supporting Micro:bit.
+-   : The student-facing page for working on assignments.
+-   : The student-facing page for multiple-choice tests.
+-   : Contains the global routing and critical production authentication logic.
+-   : The new virtual Micro:bit component.
 
 **Areas that need refactoring**:
--   The layout using  in  and  should be reviewed to find a permanent fix for the  error, which would allow the removal of .
+-   **:** The layout is fragile due to .
+-   **:** This file is becoming very large and complex due to handling three different assignment types. It could be broken down into smaller components.
 
 **key api endpoints**
--   : (New) Fetches completed assignment IDs for a student.
--   : (New) Updates the start and end date for a multiple-choice test.
--   , : (New) CRUD endpoints for the new Learning Materials feature.
--   , : (Modified) Now dynamically calculate and add a  field.
--   : (Modified) Cookie setting logic was updated to be environment-aware.
+-   : Logic updated to allow teachers in student role to log in.
+-   : No change, but frontend handling was fixed for production.
+-   : **New endpoint** to fetch pre-built Micro:bit lessons.
+-   : Logic updated to include pattern-based grading for Micro:bit assignments.
+-   : Logic is correct, but underlying database issues causing incorrect behavior were fixed.
 
 **Critical Info for New Agent**
--   **The #1 priority is the failing production deployment.** The application works as expected in the preview environment but fails after being deployed to production, with login being the most prominent failure point. Multiple fixes have been attempted. You are currently waiting for an analysis from the  on user-provided logs. Do not assume the logs contain errors; they appeared to be  upon initial inspection.
--   The  error is suppressed by a workaround script (), not a root cause fix. Do not remove this script unless you are prepared to debug the  layout.
--   The user has been through many failed deployment attempts and is frustrated. Be clear and methodical in your approach to the deployment issue.
+-   **Authentication is Complex:** The app now uses a hybrid authentication strategy (cookies + localStorage/Authorization header) to support production environments with potential cross-origin issues. Be mindful of this when touching login or session-related code in , , and .
+-   **Micro:bit Grading is Pattern-Based:** Unlike regular code problems, Micro:bit submissions are *not* executed on the backend. Grading is done by checking if the student's code contains specific strings defined in the problem's .
+-   **Data Migrations May Be Needed:** The agent successfully used one-time scripts to fix data inconsistencies. If strange behavior is observed that can't be explained by code, check the database for legacy data that might be missing new fields.
+-   The current highest priority is to finish the full integration of the Micro:bit feature into the Assignment Library and grading flow.
 
 **documents created in this job**
--   /app/FIXES_SUMMARY.md
--   /app/LOGIN_FIX_SUMMARY.md
--   /app/PRODUCTION_LOGIN_FIX.md
--   /app/SUPPORT_HANDOFF.md
--   /app/HOW_TO_ADD_MEMES.md
+-   
+-   
 
-**Last 5 User Messages and any pending user messages**
--   **User:** Asked to fix the MC test feature because it couldn't produce student names with answers. (Status: COMPLETED)
--   **User:** Clarified that the View Results button should be for editing the test date, and results should be attached to a button at the top. (Status: COMPLETED - Agent added a separate Edit button for dates).
--   **User:** Requested that the Test Reports page allow selecting multiple classrooms and tests at once. (Status: COMPLETED)
--   **User:** Reported that the multi-select Test Reports page was now broken. (Status: COMPLETED - Agent fixed the follow-up bugs).
--   **User:** Provided deployment logs and asked the agent to fix deployment errors. (Status: IN PROGRESS - Agent has delegated this to ).
+**Last 10 User Messages and any pending user messages**
+1.  **User:** Reports Micro:bit simulator not working for . (Status: **FIXED**)
+2.  **Agent:** Acknowledges the issue and explains the simulator's limitations. (Status: Completed)
+3.  **User:** Asks for Micro:bit lessons to be integrated into the Assignment Library, grading system, and chapter organization, just like Python lessons. (Status: **IN PROGRESS - CURRENT TASK**)
+4.  **Agent:** Acknowledges the request and starts working on updating the Assignment Library. (Status: In Progress)
+5.  **... (Agent work messages) ...**
+6.  **Agent:** Provides a summary of the  updates for Micro:bit integration. (Status: Completed)
 
 **Project Health Check:**
--   **Broken:**
-    -   Production Deployment. The application is not functional in the user's production environment.
--   **Mocked:**
-    -   The interactive code input is a mock-interactive system that collects all inputs upfront via a dialog, not a true real-time interactive terminal.
+-   **Broken:** None.
+-   **Mocked:** None. The Micro:bit grading is a simplified pattern-based check, but it is not a mocked response.
+
+**3rd Party Integrations**
+-   OpenAI GPT-4o — uses Emergent LLM Key (For generating feedback text on coding submissions).
+-    (SheetJS) library for Excel export on the frontend.
 
 **Testing status**
--   **Testing agent used after significant changes:** NO
--   **Troubleshoot agent used after agent stuck in loop:** YES (Used multiple times for login and ResizeObserver issues).
--   **Test files created:** None.
--   **Known regressions:** The Test Reports page was temporarily broken after a major refactoring but was subsequently fixed.
+-   **Testing agent used after significant changes:** YES, for the initial best score bug fix.
+-   **Troubleshoot agent used after agent stuck in loop:** NO.
+-   **Test files created:** None permanent.
+-   **Known regressions:** None from this session.
 
 **Credentials to test flow:**
--   Credentials for teacher and student accounts are required to test the full application flow. These have not been explicitly stated but are necessary for verification.
+-   **Admin/Teacher:** , password: 
 
 **What agent forgot to execute**
--   The agent did not initially apply the natural sorting fix to all relevant library/dashboard pages, requiring a second pass after user feedback.
--   The agent's refactoring of the Test Reports page for multi-select introduced new bugs that required an immediate follow-up fix.</analysis>
+-   The agent did not address the two pre-existing issues from the initial handoff summary: the fragile layout of  and the potential  bug during assignment creation. These issues remain outstanding.</analysis>

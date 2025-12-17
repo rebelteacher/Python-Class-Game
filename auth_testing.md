@@ -28,11 +28,11 @@ print('User ID: ' + userId);
 ## Step 2: Test Backend API
 ```bash
 # Test auth endpoint
-curl -X GET "https://grading-patrol.preview.emergentagent.com/api/auth/me" \
+curl -X GET "https://bugfix-edu-platform.preview.emergentagent.com/api/auth/me" \
   -H "Authorization: Bearer YOUR_SESSION_TOKEN"
 
 # Test protected endpoints
-curl -X GET "https://grading-patrol.preview.emergentagent.com/api/classrooms" \
+curl -X GET "https://bugfix-edu-platform.preview.emergentagent.com/api/classrooms" \
   -H "Authorization: Bearer YOUR_SESSION_TOKEN"
 ```
 
