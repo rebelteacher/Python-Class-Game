@@ -430,25 +430,36 @@ export default function MicrobitSimulator({ code, onButtonPress }) {
     
     runningRef.current = false;
     setIsRunning(false);
+    setConsoleOutput(prev => [...prev, 'Done!']);
   }, []);
 
   const handleRun = () => {
     if (isRunning) {
       runningRef.current = false;
       setIsRunning(false);
+      setConsoleOutput(prev => [...prev, 'Stopped.']);
       return;
     }
     
     setIsRunning(true);
+    setConsoleOutput([]); // Clear previous output
     const commands = parseCode(code);
+    
+    if (commands.length === 0) {
+      setConsoleOutput(['No display commands found in your code.', '', 'Supported commands:', '• display.set_pixel(x, y, brightness)', '• display.show(Image.HEART)', '• display.show("A")', '• display.scroll("Hello")', '• display.clear()', '• sleep(500)']);
+      setIsRunning(false);
+      return;
+    }
+    
     executeCommands(commands);
   };
 
   const handleReset = () => {
     runningRef.current = false;
     setIsRunning(false);
-    setLeds([...EMPTY_GRID]);
-    setConsoleOutput([]);
+    ledsRef.current = copyGrid(EMPTY_GRID);
+    setLeds(copyGrid(EMPTY_GRID));
+    setConsoleOutput(['Reset. Ready to run.']);
   };
 
   const handleButtonA = () => {
