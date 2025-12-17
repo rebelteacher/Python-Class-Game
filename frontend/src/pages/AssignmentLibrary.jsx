@@ -1292,6 +1292,18 @@ export default function AssignmentLibrary({ user }) {
                 ))}
               </SelectContent>
             </Select>
+
+            <Select value={typeFilter || "all"} onValueChange={(v) => setTypeFilter(v === "all" ? "" : v)}>
+              <SelectTrigger className="w-40">
+                <SelectValue placeholder="All Types" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">All Types</SelectItem>
+                <SelectItem value="code">💻 Code</SelectItem>
+                <SelectItem value="turtle">🐢 Turtle</SelectItem>
+                <SelectItem value="microbit">⚡ Micro:bit</SelectItem>
+              </SelectContent>
+            </Select>
           </div>
 
           <div className="text-sm text-gray-600">
