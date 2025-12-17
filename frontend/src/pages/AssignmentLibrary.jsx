@@ -653,24 +653,106 @@ export default function AssignmentLibrary({ user }) {
                     <div className="flex items-center justify-between mb-3">
                       <div>
                         <Label className="text-lg font-semibold">Assignment Type</Label>
-                        <p className="text-sm text-gray-600 mt-1">Choose between traditional code or turtle graphics</p>
+                        <p className="text-sm text-gray-600 mt-1">Choose: Code, Turtle Graphics, or Micro:bit</p>
                       </div>
                       <div className="flex items-center gap-2 bg-white px-3 py-2 rounded-lg border">
-                        <span className={newProblem.assignment_type === "code" ? "font-bold" : "text-gray-500"}>Code</span>
+                        <Button
+                          type="button"
+                          variant="outline"
+                          size="sm"
+                          className={newProblem.assignment_type === "code" ? "bg-blue-500 text-white" : ""}
+                          onClick={() => setNewProblem({ ...newProblem, assignment_type: "code" })}
+                        >
+                          💻 Code
+                        </Button>
                         <Button
                           type="button"
                           variant="outline"
                           size="sm"
                           className={newProblem.assignment_type === "turtle" ? "bg-green-500 text-white" : ""}
-                          onClick={() => setNewProblem({ 
-                            ...newProblem, 
-                            assignment_type: newProblem.assignment_type === "code" ? "turtle" : "code" 
-                          })}
+                          onClick={() => setNewProblem({ ...newProblem, assignment_type: "turtle" })}
                         >
-                          {newProblem.assignment_type === "turtle" ? "🐢 Turtle" : "Switch to Turtle"}
+                          🐢 Turtle
+                        </Button>
+                        <Button
+                          type="button"
+                          variant="outline"
+                          size="sm"
+                          className={newProblem.assignment_type === "microbit" ? "bg-cyan-500 text-white" : ""}
+                          onClick={() => setNewProblem({ ...newProblem, assignment_type: "microbit" })}
+                        >
+                          ⚡ Micro:bit
                         </Button>
                       </div>
                     </div>
+
+                    {/* Micro:bit Specific Fields */}
+                    {newProblem.assignment_type === "microbit" && (
+                      <div className="space-y-4 mt-4 pt-4 border-t border-cyan-300">
+                        <div className="bg-cyan-50 border border-cyan-200 rounded-lg p-3">
+                          <p className="text-sm text-cyan-800">
+                            <strong>⚡ Micro:bit Assignment:</strong> Students will use the virtual simulator to test their code. 
+                            Grading is based on code patterns (not execution).
+                          </p>
+                        </div>
+                        
+                        <div>
+                          <Label className="font-semibold">Learning Objectives</Label>
+                          <p className="text-xs text-gray-500 mb-2">What students will learn (one per line)</p>
+                          <Textarea
+                            placeholder="Understand digital output&#10;Control LEDs with code&#10;Use loops for animation"
+                            value={newProblem.learning_objectives?.join('\n') || ""}
+                            onChange={(e) => setNewProblem({
+                              ...newProblem,
+                              learning_objectives: e.target.value.split('\n').filter(l => l.trim())
+                            })}
+                            rows={3}
+                            className="font-mono text-sm"
+                          />
+                        </div>
+                        
+                        <div>
+                          <Label className="font-semibold">Materials Needed</Label>
+                          <p className="text-xs text-gray-500 mb-2">Hardware required (one per line)</p>
+                          <Textarea
+                            placeholder="Micro:bit&#10;USB cable&#10;Breadboard&#10;LED&#10;220Ω resistor"
+                            value={newProblem.materials_needed?.join('\n') || ""}
+                            onChange={(e) => setNewProblem({
+                              ...newProblem,
+                              materials_needed: e.target.value.split('\n').filter(m => m.trim())
+                            })}
+                            rows={3}
+                            className="font-mono text-sm"
+                          />
+                        </div>
+                        
+                        <div>
+                          <Label className="font-semibold">Wiring Instructions</Label>
+                          <p className="text-xs text-gray-500 mb-2">Step-by-step circuit setup</p>
+                          <Textarea
+                            placeholder="1. Connect Micro:bit to computer via USB&#10;2. Place LED on breadboard&#10;3. Connect resistor..."
+                            value={newProblem.wiring_instructions || ""}
+                            onChange={(e) => setNewProblem({
+                              ...newProblem,
+                              wiring_instructions: e.target.value
+                            })}
+                            rows={4}
+                            className="font-mono text-sm"
+                          />
+                        </div>
+                        
+                        <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-3">
+                          <Label className="font-semibold text-yellow-800">Pattern-Based Test Cases</Label>
+                          <p className="text-xs text-yellow-700 mb-2">
+                            For Micro:bit, test cases check if code contains specific patterns (not execution).
+                            Use the Test Cases section below to define patterns to look for.
+                          </p>
+                          <p className="text-xs text-yellow-600">
+                            Example patterns: <code className="bg-yellow-100 px-1">display.show</code>, <code className="bg-yellow-100 px-1">while True:</code>, <code className="bg-yellow-100 px-1">button_a</code>
+                          </p>
+                        </div>
+                      </div>
+                    )}
 
                     {/* Turtle Grading Criteria (only show when turtle is selected) */}
                     {newProblem.assignment_type === "turtle" && (
