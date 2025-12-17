@@ -2679,6 +2679,97 @@ async def submit_assignment(submission: SubmissionCreate, request: Request):
         new_submission.pop("_id", None)
         return new_submission
     
+    # Handle Micro:bit assignments with pattern-based grading (no code execution)
+    if is_microbit:
+        test_cases = problem.get("test_cases", [])
+        test_results = []
+        total_points = 0
+        earned_points = 0
+        
+        # Pattern-based grading - check if code contains required patterns
+        for test_case in test_cases:
+            pattern = test_case.get("pattern", "")
+            description = test_case.get("description", "Code check")
+            points = test_case.get("points", 20)
+            total_points += points
+            
+            # Check if pattern exists in code (supports | for OR patterns)
+            patterns = pattern.split("|") if "|" in pattern else [pattern]
+            passed = any(p.strip() in submission.code for p in patterns)
+            
+            if passed:
+                earned_points += points
+            
+            test_results.append({
+                "test_id": test_case.get("id", f"pattern_{len(test_results)}"),
+                "description": description,
+                "passed": passed,
+                "pattern": pattern,
+                "points": points
+            })
+        
+        # Calculate score
+        base_score = (earned_points / total_points * 100) if total_points > 0 else 0
+        is_passing = base_score >= 70
+        
+        # Generate feedback
+        if base_score == 100:
+            feedback = "🎉 Perfect! Your code includes all the required elements. Now test it on a real Micro:bit!"
+        elif base_score >= 70:
+            feedback = f"✅ Good job! Score: {base_score:.0f}%. Some patterns are missing - check the test cases for hints."
+        else:
+            missing = [t["description"] for t in test_results if not t["passed"]]
+            feedback = f"Keep trying! Missing: {', '.join(missing[:3])}{'...' if len(missing) > 3 else ''}"
+        
+        # Check if late
+        is_late = False
+        try:
+            due_date = datetime.fromisoformat(assignment["due_date"]) if assignment.get("due_date") else None
+            if due_date and datetime.now(timezone.utc) > due_date:
+                is_late = True
+                if assignment.get("late_penalty_percent", 0) > 0:
+                    base_score *= (1 - assignment["late_penalty_percent"] / 100)
+        except (ValueError, TypeError):
+            pass
+        
+        # Create Micro:bit submission
+        new_submission = {
+            "id": str(uuid.uuid4()),
+            "assignment_id": submission.assignment_id,
+            "problem_id": submission.problem_id,
+            "student_id": user["id"],
+            "code": submission.code,
+            "score": base_score,
+            "feedback": feedback,
+            "test_results": test_results,
+            "attempt_number": attempt_number,
+            "lives_remaining": lives_remaining,
+            "is_passing": is_passing,
+            "is_late": is_late,
+            "is_final": False,
+            "submitted_at": datetime.now(timezone.utc).isoformat()
+        }
+        
+        await db.submissions.insert_one(new_submission)
+        
+        # Update user stats if passing
+        if is_passing:
+            xp_earned = calculate_xp_and_coins(base_score, attempt_number == 1, user.get("current_streak", 0))
+            await db.users.update_one(
+                {"id": user["id"]},
+                {"$inc": {
+                    "xp": xp_earned["xp"],
+                    "coins": xp_earned["coins"],
+                    "problems_solved": 1
+                }}
+            )
+            new_submission["xp_earned"] = xp_earned["xp"]
+            new_submission["coins_earned"] = xp_earned["coins"]
+        
+        # Remove MongoDB _id before returning
+        new_submission.pop("_id", None)
+        return new_submission
+    
     # Run test cases (if provided) - for traditional code assignments
     # Check both assignment and problem for test cases
     test_cases = assignment.get("test_cases", []) or problem.get("test_cases", [])
