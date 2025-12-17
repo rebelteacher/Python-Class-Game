@@ -1103,6 +1103,102 @@ export default function AssignmentLibrary({ user }) {
                     </div>
                   )}
 
+                  {/* Test Cases Builder - for Micro:bit assignments (Pattern-based) */}
+                  {newProblem.assignment_type === "microbit" && (
+                    <div className="border-2 border-cyan-200 bg-cyan-50 rounded-lg p-4">
+                      <div className="flex items-center justify-between mb-3">
+                        <div>
+                          <Label className="text-lg font-semibold">Pattern Test Cases</Label>
+                          <p className="text-sm text-gray-600 mt-1">Check if student code contains required patterns</p>
+                        </div>
+                        <Button
+                          type="button"
+                          onClick={() => {
+                            setNewProblem({
+                              ...newProblem,
+                              test_cases: [...newProblem.test_cases, { description: "", pattern: "", points: 20 }]
+                            });
+                          }}
+                          size="sm"
+                          className="bg-cyan-600 hover:bg-cyan-700"
+                        >
+                          + Add Pattern Check
+                        </Button>
+                      </div>
+
+                      {newProblem.test_cases.length === 0 ? (
+                        <p className="text-sm text-gray-500 text-center py-4">No pattern checks added yet. Click "Add Pattern Check" to create one.</p>
+                      ) : (
+                        <div className="space-y-3">
+                          {newProblem.test_cases.map((testCase, index) => (
+                            <div key={index} className="bg-white p-3 rounded border border-cyan-300">
+                              <div className="flex items-center justify-between mb-2">
+                                <Label className="font-semibold">Pattern Check {index + 1}</Label>
+                                <Button
+                                  type="button"
+                                  variant="outline"
+                                  size="sm"
+                                  onClick={() => {
+                                    const newTestCases = newProblem.test_cases.filter((_, i) => i !== index);
+                                    setNewProblem({ ...newProblem, test_cases: newTestCases });
+                                  }}
+                                  className="text-red-600 hover:text-red-700"
+                                >
+                                  Remove
+                                </Button>
+                              </div>
+                              <div className="grid grid-cols-3 gap-2">
+                                <div className="col-span-2">
+                                  <Label className="text-sm">Description (students see this)</Label>
+                                  <Input
+                                    placeholder="e.g., Uses display.show()"
+                                    value={testCase.description || ""}
+                                    onChange={(e) => {
+                                      const newTestCases = [...newProblem.test_cases];
+                                      newTestCases[index].description = e.target.value;
+                                      setNewProblem({ ...newProblem, test_cases: newTestCases });
+                                    }}
+                                    className="mt-1"
+                                  />
+                                </div>
+                                <div>
+                                  <Label className="text-sm">Points</Label>
+                                  <Input
+                                    type="number"
+                                    placeholder="20"
+                                    value={testCase.points || ""}
+                                    onChange={(e) => {
+                                      const newTestCases = [...newProblem.test_cases];
+                                      newTestCases[index].points = parseInt(e.target.value) || 0;
+                                      setNewProblem({ ...newProblem, test_cases: newTestCases });
+                                    }}
+                                    className="mt-1"
+                                  />
+                                </div>
+                                <div className="col-span-3">
+                                  <Label className="text-sm">Pattern to match (use | for OR)</Label>
+                                  <Input
+                                    placeholder="e.g., display.show or while True:|for "
+                                    value={testCase.pattern || ""}
+                                    onChange={(e) => {
+                                      const newTestCases = [...newProblem.test_cases];
+                                      newTestCases[index].pattern = e.target.value;
+                                      setNewProblem({ ...newProblem, test_cases: newTestCases });
+                                    }}
+                                    className="mt-1 font-mono text-sm"
+                                  />
+                                  <p className="text-xs text-gray-500 mt-1">
+                                    Examples: <code>display.show</code>, <code>button_a|button_b</code>, <code>while True:</code>
+                                  </p>
+                                </div>
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      )}
+                    </div>
+                  )}
+
                   <Button data-testid="lib-submit-btn" type="submit" className="w-full bg-indigo-600 hover:bg-indigo-700">
                     Add to Library
                   </Button>
