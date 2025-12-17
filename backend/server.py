@@ -2574,6 +2574,7 @@ async def submit_assignment(submission: SubmissionCreate, request: Request):
     
     # Check if this is a turtle graphics assignment
     is_turtle = problem.get("assignment_type") == "turtle"
+    is_microbit = problem.get("assignment_type") == "microbit"
     
     # Check if assignment is available
     now = datetime.now(timezone.utc)
