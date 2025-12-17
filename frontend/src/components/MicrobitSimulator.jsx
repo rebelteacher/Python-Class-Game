@@ -217,6 +217,9 @@ const CHAR_PATTERNS = {
 // Empty 5x5 grid
 const EMPTY_GRID = [[0,0,0,0,0],[0,0,0,0,0],[0,0,0,0,0],[0,0,0,0,0],[0,0,0,0,0]];
 
+// Deep copy helper
+const copyGrid = (grid) => grid.map(row => [...row]);
+
 export default function MicrobitSimulator({ code, onButtonPress }) {
   const [leds, setLeds] = useState(EMPTY_GRID);
   const [isRunning, setIsRunning] = useState(false);
@@ -224,7 +227,7 @@ export default function MicrobitSimulator({ code, onButtonPress }) {
   const [buttonBPressed, setButtonBPressed] = useState(false);
   const [consoleOutput, setConsoleOutput] = useState([]);
   const runningRef = useRef(false);
-  const commandQueueRef = useRef([]);
+  const ledsRef = useRef(copyGrid(EMPTY_GRID));
 
   // Parse the code and extract display commands
   const parseCode = useCallback((pythonCode) => {
@@ -232,7 +235,6 @@ export default function MicrobitSimulator({ code, onButtonPress }) {
     const lines = pythonCode.split('\n');
     
     let inWhileLoop = false;
-    let whileLoopCommands = [];
     let indentLevel = 0;
     
     for (const line of lines) {
@@ -254,7 +256,18 @@ export default function MicrobitSimulator({ code, onButtonPress }) {
         inWhileLoop = false;
       }
       
-      // Parse display commands
+      // Parse display.set_pixel(x, y, brightness)
+      if (trimmed.includes('display.set_pixel(') || trimmed.includes('set_pixel(')) {
+        const match = trimmed.match(/set_pixel\s*\(\s*(\d+)\s*,\s*(\d+)\s*,\s*(\d+)\s*\)/);
+        if (match) {
+          const x = parseInt(match[1]);
+          const y = parseInt(match[2]);
+          const brightness = parseInt(match[3]);
+          commands.push({ type: 'set_pixel', x, y, brightness, loop: inWhileLoop });
+        }
+      }
+      
+      // Parse display.show(Image.XXX) or display.show('X')
       if (trimmed.includes('display.show(')) {
         const match = trimmed.match(/display\.show\((.*?)\)/);
         if (match) {
@@ -263,6 +276,7 @@ export default function MicrobitSimulator({ code, onButtonPress }) {
         }
       }
       
+      // Parse display.scroll('text')
       if (trimmed.includes('display.scroll(')) {
         const match = trimmed.match(/display\.scroll\((.*?)\)/);
         if (match) {
@@ -271,12 +285,14 @@ export default function MicrobitSimulator({ code, onButtonPress }) {
         }
       }
       
+      // Parse display.clear()
       if (trimmed.includes('display.clear()')) {
         commands.push({ type: 'clear', loop: inWhileLoop });
       }
       
+      // Parse sleep(ms)
       if (trimmed.includes('sleep(')) {
-        const match = trimmed.match(/sleep\((\d+)\)/);
+        const match = trimmed.match(/sleep\s*\(\s*(\d+)\s*\)/);
         if (match) {
           commands.push({ type: 'sleep', duration: parseInt(match[1]), loop: inWhileLoop });
         }
