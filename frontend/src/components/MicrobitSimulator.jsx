@@ -353,6 +353,11 @@ export default function MicrobitSimulator({ code, onButtonPress }) {
   const executeCommands = useCallback(async (commands) => {
     runningRef.current = true;
     setConsoleOutput([]);
+    ledsRef.current = copyGrid(EMPTY_GRID);
+    setLeds(copyGrid(EMPTY_GRID));
+    
+    // Log what we're about to run
+    setConsoleOutput(prev => [...prev, `Running ${commands.length} command(s)...`]);
     
     const hasLoop = commands.some(cmd => cmd.loop);
     let iterations = hasLoop ? 5 : 1; // Run loop 5 times for demo
@@ -362,10 +367,23 @@ export default function MicrobitSimulator({ code, onButtonPress }) {
         if (!runningRef.current) break;
         
         switch (cmd.type) {
+          case 'set_pixel':
+            // Set individual pixel: display.set_pixel(x, y, brightness)
+            if (cmd.x >= 0 && cmd.x < 5 && cmd.y >= 0 && cmd.y < 5) {
+              const newLeds = copyGrid(ledsRef.current);
+              newLeds[cmd.y][cmd.x] = cmd.brightness > 0 ? 1 : 0;
+              ledsRef.current = newLeds;
+              setLeds(newLeds);
+              setConsoleOutput(prev => [...prev, `set_pixel(${cmd.x}, ${cmd.y}, ${cmd.brightness})`]);
+            }
+            break;
+            
           case 'show':
             const pattern = getPattern(cmd.arg);
             if (pattern) {
-              setLeds([...pattern]);
+              ledsRef.current = copyGrid(pattern);
+              setLeds(copyGrid(pattern));
+              setConsoleOutput(prev => [...prev, `show(${cmd.arg})`]);
             }
             break;
             
@@ -374,17 +392,21 @@ export default function MicrobitSimulator({ code, onButtonPress }) {
             const textMatch = cmd.arg.match(/['"](.+?)['"]/);
             if (textMatch) {
               const text = textMatch[1].toUpperCase();
+              setConsoleOutput(prev => [...prev, `scroll("${text}")`]);
               for (const char of text) {
                 if (!runningRef.current) break;
                 const charPattern = CHAR_PATTERNS[char] || EMPTY_GRID;
-                setLeds([...charPattern]);
+                ledsRef.current = copyGrid(charPattern);
+                setLeds(copyGrid(charPattern));
                 await new Promise(r => setTimeout(r, 400));
               }
             }
             break;
             
           case 'clear':
-            setLeds([...EMPTY_GRID]);
+            ledsRef.current = copyGrid(EMPTY_GRID);
+            setLeds(copyGrid(EMPTY_GRID));
+            setConsoleOutput(prev => [...prev, `clear()`]);
             break;
             
           case 'sleep':
@@ -393,6 +415,9 @@ export default function MicrobitSimulator({ code, onButtonPress }) {
             
           case 'print':
             setConsoleOutput(prev => [...prev, cmd.arg.replace(/['"]/g, '')]);
+            break;
+            
+          default:
             break;
         }
         
