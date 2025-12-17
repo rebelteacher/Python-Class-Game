@@ -296,6 +296,8 @@ class MicrobitTester:
         print(f"   ✅ Created test classroom: {classroom_id}")
         
         # Test 4: POST /api/microbit/create-from-lesson
+        # Use lesson2 which has test cases for pattern grading
+        lesson_id = "lesson2"  # "Your First Program - Display Heart" has test cases
         print(f"\n   Testing POST /api/microbit/create-from-lesson...")
         create_assignment_data = {
             "unit_id": unit_id,
