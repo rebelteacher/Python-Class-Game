@@ -1307,7 +1307,16 @@ export default function AssignmentLibrary({ user }) {
               </SelectContent>
             </Select>
 
-            <Select value={typeFilter || "all"} onValueChange={(v) => setTypeFilter(v === "all" ? "" : v)}>
+            <Select value={typeFilter || "all"} onValueChange={(v) => {
+              const newType = v === "all" ? "" : v;
+              setTypeFilter(newType);
+              // Update URL params
+              if (newType) {
+                setSearchParams({ type: newType });
+              } else {
+                setSearchParams({});
+              }
+            }}>
               <SelectTrigger className="w-40">
                 <SelectValue placeholder="All Types" />
               </SelectTrigger>
