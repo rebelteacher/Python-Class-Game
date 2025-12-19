@@ -824,50 +824,31 @@ export default function MicrobitSimulator({ code, onButtonPress }) {
           </div>
         </div>
         
-        {/* Flash Progress Bar */}
-        {isFlashing && (
-          <div className="mt-3">
-            <div className="flex justify-between text-xs mb-1">
-              <span>Flashing to micro:bit...</span>
-              <span>{flashProgress}%</span>
-            </div>
-            <div className="w-full bg-gray-700 rounded-full h-2">
-              <div 
-                className="bg-cyan-500 h-2 rounded-full transition-all duration-300"
-                style={{ width: `${flashProgress}%` }}
-              />
-            </div>
-          </div>
-        )}
-
         {/* Console Output - Always show */}
-        <div className="mt-3 p-2 bg-black rounded text-xs font-mono text-green-400 min-h-[60px] max-h-24 overflow-y-auto">
+        <div className="mt-3 p-2 bg-black rounded text-xs font-mono text-green-400 min-h-[50px] max-h-20 overflow-y-auto">
           {consoleOutput.length > 0 ? (
             consoleOutput.map((line, i) => (
               <div key={i}>&gt; {line}</div>
             ))
           ) : (
-            <div className="text-gray-500">&gt; Click <span className="text-green-400">▶</span> to simulate • Click <span className="text-cyan-400">USB</span> to flash to device</div>
+            <div className="text-gray-500">&gt; <span className="text-green-400">▶</span> Test here • <span className="text-cyan-400">⇌</span> Flash to real device</div>
           )}
         </div>
         
-        {/* Help text and actions */}
-        <div className="text-xs text-gray-400 mt-2 space-y-2">
-          <div className="flex justify-center gap-2">
-            <Button
-              size="sm"
-              variant="outline"
-              onClick={openInMicrobitEditor}
-              className="h-6 px-2 text-xs bg-gray-800 border-gray-600 hover:bg-gray-700 text-gray-300"
-            >
-              Open in Official Editor
-            </Button>
-          </div>
-          <p className="text-center text-gray-500">
-            <span className="text-green-400">▶</span> Simulate locally • 
-            <span className="text-cyan-400 ml-1">⇌</span> Download for device • 
-            Official Editor for WebUSB flash
+        {/* Help text and download option */}
+        <div className="text-xs text-gray-400 mt-2 space-y-1">
+          <p className="text-center">
+            <span className="text-green-400">▶ Simulate</span> tests code here • 
+            <span className="text-cyan-400 ml-1">⇌ Flash</span> opens editor to send to device
           </p>
+          <div className="flex justify-center">
+            <button
+              onClick={flashToMicrobit}
+              className="text-gray-500 hover:text-gray-300 underline text-xs"
+            >
+              Or download main.py for manual transfer
+            </button>
+          </div>
         </div>
       </CardContent>
     </Card>
