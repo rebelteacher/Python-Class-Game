@@ -1,7 +1,8 @@
 import { useState, useEffect, useRef, useCallback } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Play, Square, RotateCcw } from "lucide-react";
+import { Play, Square, RotateCcw, Usb, Loader2, Check, AlertCircle } from "lucide-react";
+import { toast } from "sonner";
 
 // Predefined Micro:bit images (5x5 LED patterns)
 const MICROBIT_IMAGES = {
