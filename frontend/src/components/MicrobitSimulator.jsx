@@ -856,14 +856,22 @@ export default function MicrobitSimulator({ code, onButtonPress }) {
           )}
         </div>
         
-        {/* Help text */}
-        <div className="text-xs text-gray-400 mt-2 text-center space-y-1">
-          <p>
-            <span className="text-green-400">▶ Simulate</span> runs code virtually • 
-            <span className="text-cyan-400 ml-1">⇌ Flash</span> sends to real micro:bit
-          </p>
-          <p className="text-gray-500">
-            Commands: display.show() • display.scroll() • display.set_pixel() • sleep()
+        {/* Help text and actions */}
+        <div className="text-xs text-gray-400 mt-2 space-y-2">
+          <div className="flex justify-center gap-2">
+            <Button
+              size="sm"
+              variant="outline"
+              onClick={openInMicrobitEditor}
+              className="h-6 px-2 text-xs bg-gray-800 border-gray-600 hover:bg-gray-700 text-gray-300"
+            >
+              Open in Official Editor
+            </Button>
+          </div>
+          <p className="text-center text-gray-500">
+            <span className="text-green-400">▶</span> Simulate locally • 
+            <span className="text-cyan-400 ml-1">⇌</span> Download for device • 
+            Official Editor for WebUSB flash
           </p>
         </div>
       </CardContent>
