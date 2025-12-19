@@ -178,7 +178,25 @@ export default function AssignmentLibrary({ user }) {
         lesson: "",
         problem_type: "Independent Practice",
         resources_link: "",
-        csta_standard: ""
+        csta_standard: "",
+        assignment_type: "code",
+        turtle_grading_criteria: {
+          min_lines: 0,
+          min_circles: 0,
+          required_colors: [],
+          min_distance: 0
+        },
+        expected_turtle_image: "",
+        partial_credit_rules: {
+          syntax_error_penalty: 30,
+          runtime_error_penalty: 20,
+          partial_pass_bonus: 10,
+          close_attempt_bonus: 15
+        },
+        test_cases: [],
+        materials_needed: [],
+        wiring_instructions: "",
+        learning_objectives: []
       });
       fetchProblems();
     } catch (error) {
