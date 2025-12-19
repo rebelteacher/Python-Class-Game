@@ -708,33 +708,43 @@ export default function MicrobitSimulator({ code, onButtonPress }) {
         <CardTitle className="text-base flex items-center justify-between">
           <span className="flex items-center gap-2">
             <span className="text-cyan-400">⚡</span>
-            Virtual Micro:bit
+            Micro:bit
+            {microbitConnected && (
+              <span className="flex items-center text-green-400 text-xs">
+                <Check className="w-3 h-3 mr-1" />
+                Connected
+              </span>
+            )}
           </span>
-          <div className="flex gap-2">
+          <div className="flex gap-1">
             <Button
               size="sm"
               variant="outline"
               onClick={handleReset}
               className="h-7 px-2 text-xs bg-gray-800 border-gray-600 hover:bg-gray-700"
+              title="Reset Simulator"
             >
-              <RotateCcw className="w-3 h-3 mr-1" />
-              Reset
+              <RotateCcw className="w-3 h-3" />
             </Button>
             <Button
               size="sm"
               onClick={handleRun}
-              className={`h-7 px-3 text-xs ${isRunning ? 'bg-red-600 hover:bg-red-700' : 'bg-green-600 hover:bg-green-700'}`}
+              className={`h-7 px-2 text-xs ${isRunning ? 'bg-red-600 hover:bg-red-700' : 'bg-green-600 hover:bg-green-700'}`}
+              title="Run in Simulator"
             >
-              {isRunning ? (
-                <>
-                  <Square className="w-3 h-3 mr-1" />
-                  Stop
-                </>
+              {isRunning ? <Square className="w-3 h-3" /> : <Play className="w-3 h-3" />}
+            </Button>
+            <Button
+              size="sm"
+              onClick={flashToMicrobit}
+              disabled={isFlashing}
+              className="h-7 px-2 text-xs bg-cyan-600 hover:bg-cyan-700 disabled:opacity-50"
+              title="Flash to Real Micro:bit"
+            >
+              {isFlashing ? (
+                <Loader2 className="w-3 h-3 animate-spin" />
               ) : (
-                <>
-                  <Play className="w-3 h-3 mr-1" />
-                  Run
-                </>
+                <Usb className="w-3 h-3" />
               )}
             </Button>
           </div>
