@@ -548,7 +548,13 @@ export default function AssignmentLibrary({ user }) {
                 </DialogContent>
               </Dialog>
 
-              <Dialog open={createDialogOpen} onOpenChange={setCreateDialogOpen}>
+              <Dialog open={createDialogOpen} onOpenChange={(open) => {
+                setCreateDialogOpen(open);
+                // When opening, set assignment_type based on current filter
+                if (open && typeFilter) {
+                  setNewProblem(prev => ({ ...prev, assignment_type: typeFilter }));
+                }
+              }}>
                 <DialogTrigger asChild>
                   <Button data-testid="add-to-library-btn" className="bg-indigo-600 hover:bg-indigo-700 gap-2">
                     <Plus className="w-5 h-5" />
