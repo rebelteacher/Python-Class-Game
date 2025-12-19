@@ -591,60 +591,76 @@ export default function MicrobitSimulator({ code, onButtonPress }) {
     setIsFlashing(true);
     setFlashProgress(0);
     setConnectionStatus('flashing');
+    setConsoleOutput([]);
     
     try {
-      // Step 1: Connect if not already connected
-      if (!microbitConnected) {
-        setConsoleOutput(prev => [...prev, 'Connecting to micro:bit...']);
-        const connected = await connectToMicrobit();
-        if (!connected) {
-          setIsFlashing(false);
-          return;
+      setConsoleOutput(prev => [...prev, '🔧 Preparing your code...']);
+      setFlashProgress(20);
+      
+      // Clean up the code - remove any problematic characters
+      let cleanCode = code.trim();
+      
+      // Ensure the code has the microbit import if using display functions
+      if (!cleanCode.includes('from microbit import') && !cleanCode.includes('import microbit')) {
+        if (cleanCode.includes('display.') || cleanCode.includes('Image.') || cleanCode.includes('button_')) {
+          cleanCode = 'from microbit import *\n\n' + cleanCode;
+          setConsoleOutput(prev => [...prev, '📝 Added microbit import']);
         }
       }
       
-      setFlashProgress(20);
-      
-      // Step 2: The micro:bit appears as a USB mass storage device
-      // We need to write a .hex file to it
-      // For simplicity, let's use the drag-and-drop approach by creating a downloadable hex
-      
-      setConsoleOutput(prev => [...prev, 'Preparing code for micro:bit...']);
       setFlashProgress(40);
+      setConsoleOutput(prev => [...prev, '📦 Creating Python file...']);
       
-      // Create a hex file download
-      // The micro:bit Python editor generates hex files - we'll create one
-      const hexContent = await createMicrobitHex(code);
-      
-      setFlashProgress(60);
-      setConsoleOutput(prev => [...prev, 'Hex file ready!']);
-      
-      // Download the hex file - user can drag to micro:bit drive
-      const blob = new Blob([hexContent], { type: 'application/octet-stream' });
+      // Create a .py file for the user to copy to the micro:bit
+      // The micro:bit will run main.py when it starts
+      const blob = new Blob([cleanCode], { type: 'text/x-python' });
       const url = URL.createObjectURL(blob);
       const a = document.createElement('a');
       a.href = url;
-      a.download = 'microbit_program.hex';
+      a.download = 'main.py';
       document.body.appendChild(a);
       a.click();
       document.body.removeChild(a);
       URL.revokeObjectURL(url);
       
-      setFlashProgress(100);
-      setConsoleOutput(prev => [...prev, '✅ Hex file downloaded!']);
-      setConsoleOutput(prev => [...prev, '📁 Drag the .hex file to your MICROBIT drive']);
+      setFlashProgress(70);
+      setConsoleOutput(prev => [...prev, '✅ Downloaded: main.py']);
       
-      toast.success('Hex file downloaded! Drag it to your MICROBIT drive to flash.');
+      setFlashProgress(100);
+      setConsoleOutput(prev => [...prev, '']);
+      setConsoleOutput(prev => [...prev, '📋 Next steps:']);
+      setConsoleOutput(prev => [...prev, '1. Connect micro:bit via USB']);
+      setConsoleOutput(prev => [...prev, '2. Open MICROBIT drive']);
+      setConsoleOutput(prev => [...prev, '3. Copy main.py to the drive']);
+      setConsoleOutput(prev => [...prev, '4. Press reset button']);
+      
+      toast.success(
+        <div>
+          <strong>main.py downloaded!</strong>
+          <p className="text-sm mt-1">Copy it to your MICROBIT drive to run on device.</p>
+        </div>,
+        { duration: 5000 }
+      );
+      
       setConnectionStatus('connected');
       
     } catch (error) {
       console.error('Flash error:', error);
-      setConsoleOutput(prev => [...prev, `❌ Flash failed: ${error.message}`]);
-      toast.error(`Flash failed: ${error.message}`);
+      setConsoleOutput(prev => [...prev, `❌ Error: ${error.message}`]);
+      toast.error(`Failed: ${error.message}`);
       setConnectionStatus('error');
     } finally {
       setIsFlashing(false);
     }
+  };
+
+  // Open the official micro:bit Python editor with the current code
+  const openInMicrobitEditor = () => {
+    // Encode the Python code for URL
+    const encodedCode = encodeURIComponent(code);
+    // Open the official micro:bit Python editor
+    window.open(`https://python.microbit.org/v/3?code=${encodedCode}`, '_blank');
+    toast.info('Opening micro:bit Python Editor...', { duration: 3000 });
   };
 
   // Create a micro:bit hex file with embedded Python code
