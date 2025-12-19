@@ -236,6 +236,50 @@ export default function MicrobitCurriculum({ user }) {
           </CardContent>
         </Card>
 
+        {/* Attribution & Official Resources */}
+        <Card className="mb-6 border-cyan-200 bg-cyan-50/50">
+          <CardContent className="p-4">
+            <div className="flex items-center justify-between flex-wrap gap-4">
+              <div className="flex items-center gap-3">
+                <img 
+                  src="https://microbit.org/images/microbit-logo.svg" 
+                  alt="micro:bit" 
+                  className="h-8"
+                  onError={(e) => { e.target.style.display = 'none'; }}
+                />
+                <div className="text-sm">
+                  <p className="text-gray-700">
+                    Curriculum based on <a href="https://microbit.org" target="_blank" rel="noopener noreferrer" className="text-cyan-600 hover:underline font-medium">BBC micro:bit</a> resources.
+                  </p>
+                  <p className="text-gray-500 text-xs">
+                    micro:bit is a trademark of the Micro:bit Educational Foundation.
+                  </p>
+                </div>
+              </div>
+              <div className="flex gap-2">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="text-xs"
+                  onClick={() => window.open('https://microbit.org/get-started/first-steps/introduction/', '_blank')}
+                >
+                  <BookOpen className="w-3 h-3 mr-1" />
+                  Official Tutorials
+                </Button>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="text-xs"
+                  onClick={() => window.open('https://microbit-micropython.readthedocs.io/en/latest/tutorials/introduction.html', '_blank')}
+                >
+                  <Code className="w-3 h-3 mr-1" />
+                  Python Docs
+                </Button>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+
         {/* Units */}
         <div className="space-y-6">
           {curriculum?.units?.map((unit, unitIndex) => (
