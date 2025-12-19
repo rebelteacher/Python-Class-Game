@@ -229,6 +229,13 @@ export default function MicrobitSimulator({ code, onButtonPress }) {
   const [consoleOutput, setConsoleOutput] = useState([]);
   const runningRef = useRef(false);
   const ledsRef = useRef(copyGrid(EMPTY_GRID));
+  
+  // WebUSB state for real Micro:bit
+  const [isFlashing, setIsFlashing] = useState(false);
+  const [flashProgress, setFlashProgress] = useState(0);
+  const [microbitConnected, setMicrobitConnected] = useState(false);
+  const [connectionStatus, setConnectionStatus] = useState('disconnected'); // 'disconnected', 'connecting', 'connected', 'flashing', 'error'
+  const connectionRef = useRef(null);
 
   // Parse the code and extract display commands
   const parseCode = useCallback((pythonCode) => {
