@@ -822,6 +822,22 @@ export default function MicrobitSimulator({ code, onButtonPress }) {
           </div>
         </div>
         
+        {/* Flash Progress Bar */}
+        {isFlashing && (
+          <div className="mt-3">
+            <div className="flex justify-between text-xs mb-1">
+              <span>Flashing to micro:bit...</span>
+              <span>{flashProgress}%</span>
+            </div>
+            <div className="w-full bg-gray-700 rounded-full h-2">
+              <div 
+                className="bg-cyan-500 h-2 rounded-full transition-all duration-300"
+                style={{ width: `${flashProgress}%` }}
+              />
+            </div>
+          </div>
+        )}
+
         {/* Console Output - Always show */}
         <div className="mt-3 p-2 bg-black rounded text-xs font-mono text-green-400 min-h-[60px] max-h-24 overflow-y-auto">
           {consoleOutput.length > 0 ? (
@@ -829,14 +845,20 @@ export default function MicrobitSimulator({ code, onButtonPress }) {
               <div key={i}>&gt; {line}</div>
             ))
           ) : (
-            <div className="text-gray-500">&gt; Click "Run" to simulate your code</div>
+            <div className="text-gray-500">&gt; Click <span className="text-green-400">▶</span> to simulate • Click <span className="text-cyan-400">USB</span> to flash to device</div>
           )}
         </div>
         
         {/* Help text */}
-        <p className="text-xs text-gray-400 mt-2 text-center">
-          Supported: display.set_pixel(x,y,b) • display.show() • display.scroll() • sleep()
-        </p>
+        <div className="text-xs text-gray-400 mt-2 text-center space-y-1">
+          <p>
+            <span className="text-green-400">▶ Simulate</span> runs code virtually • 
+            <span className="text-cyan-400 ml-1">⇌ Flash</span> sends to real micro:bit
+          </p>
+          <p className="text-gray-500">
+            Commands: display.show() • display.scroll() • display.set_pixel() • sleep()
+          </p>
+        </div>
       </CardContent>
     </Card>
   );
