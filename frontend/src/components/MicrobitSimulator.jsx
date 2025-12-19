@@ -743,16 +743,11 @@ export default function MicrobitSimulator({ code, onButtonPress }) {
             </Button>
             <Button
               size="sm"
-              onClick={flashToMicrobit}
-              disabled={isFlashing}
-              className="h-7 px-2 text-xs bg-cyan-600 hover:bg-cyan-700 disabled:opacity-50"
-              title="Flash to Real Micro:bit"
+              onClick={openInMicrobitEditor}
+              className="h-7 px-2 text-xs bg-cyan-600 hover:bg-cyan-700"
+              title="Flash to Real Micro:bit (opens official editor)"
             >
-              {isFlashing ? (
-                <Loader2 className="w-3 h-3 animate-spin" />
-              ) : (
-                <Usb className="w-3 h-3" />
-              )}
+              <Usb className="w-3 h-3" />
             </Button>
           </div>
         </CardTitle>
