@@ -61,6 +61,7 @@ export default function AssignmentLibrary({ user }) {
     expected_output: "",
     category: "",
     difficulty: "Easy",
+    unit: "",
     chapter: "",
     lesson: "",
     problem_type: "Independent Practice",
