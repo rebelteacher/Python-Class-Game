@@ -454,20 +454,6 @@ export default function TurtleTeaching({ user }) {
   const currentLesson = currentTopic.lessons[currentLessonIndex];
   const lessonCode = currentLesson?.code || "";
 
-  // Load code when lesson changes - using a ref to track changes
-  const prevLessonCodeRef = useRef(lessonCode);
-  if (prevLessonCodeRef.current !== lessonCode) {
-    prevLessonCodeRef.current = lessonCode;
-    // Will trigger re-render with new code
-  }
-  
-  // Initialize code state with lesson code
-  const [code, setCode] = useState(lessonCode);
-  const [highlightedLine, setHighlightedLine] = useState(-1);
-  const [isFullscreen, setIsFullscreen] = useState(false);
-  const editorRef = useRef(null);
-  const decorationsRef = useRef([]);
-
   // Reset code when lesson changes
   useEffect(() => {
     setCode(lessonCode);
