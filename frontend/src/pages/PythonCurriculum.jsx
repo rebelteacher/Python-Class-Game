@@ -792,7 +792,7 @@ export default function PythonCurriculum({ user }) {
                               variant="outline"
                               onClick={(e) => {
                                 e.stopPropagation();
-                                navigate(`/assignment-library?category=${encodeURIComponent(unit.title)}`);
+                                navigate(`/library?category=${encodeURIComponent(unit.title)}`);
                               }}
                             >
                               <Library className="w-4 h-4 mr-1" />
