@@ -674,6 +674,14 @@ export default function TurtleCurriculum({ user }) {
                           >
                             Assign to Class
                           </Button>
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            onClick={() => navigate(`/library?type=turtle&category=${encodeURIComponent(`Turtle - ${unit.title}`)}`)}
+                          >
+                            <BookOpen className="w-4 h-4 mr-1" />
+                            Problems
+                          </Button>
                         </div>
                       </div>
                     ))}
