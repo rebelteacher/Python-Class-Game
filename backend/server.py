@@ -324,6 +324,7 @@ class Problem(BaseModel):
     expected_output: str = ""
     category: str  # "Lesson 2.2 - String Concatenation"
     difficulty: str  # "Easy", "Medium", "Hard"
+    unit: str = ""  # "Unit 1", "Unit 2", etc. for high-level organization
     chapter: str = ""  # "Chapter 1", "Chapter 2", etc. for organization
     lesson: str = ""  # "Lesson 1", "Lesson 2", etc. for sub-organization
     csta_standard: str  # CSTA K-12 CS Standards
