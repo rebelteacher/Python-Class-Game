@@ -7280,6 +7280,214 @@ x = 5 + 3
         else:
             self.log_test(f"Problem unit field contains '{unit}'", False, f"Unit field: '{problem.get('unit')}'")
 
+    def test_turtle_problem_filtering(self):
+        """Test turtle problem library filtering after backend API fix"""
+        print("\n🐢 Testing Turtle Problem Library Filtering...")
+        
+        # Test credentials from the review request
+        test_email = "astapp@spanola.net"
+        test_password = "AlisaFaith$14"
+        
+        print(f"   Testing with teacher credentials: {test_email}")
+        
+        # Step 1: Login as teacher
+        login_data = {
+            "email": test_email,
+            "password": test_password
+        }
+        
+        login_response = self.run_test(
+            "Teacher login for turtle testing",
+            "POST",
+            "auth/teacher-login",
+            200,
+            login_data
+        )
+        
+        if not login_response:
+            print("❌ Cannot continue turtle testing without successful login")
+            return
+        
+        # Store the session token from login
+        teacher_session_token = login_response.get("session_token")
+        if teacher_session_token:
+            self.session_token = teacher_session_token
+            print(f"   ✅ Login successful, session token obtained")
+        
+        # Test Scenario 1: GET /api/problems with assignment_type filter
+        print("\n   SCENARIO 1: Testing assignment_type filters...")
+        
+        # Test turtle filter - should return 98 problems
+        turtle_response = self.run_test(
+            "GET /api/problems?assignment_type=turtle (expect 98 problems)",
+            "GET",
+            "problems?assignment_type=turtle",
+            200
+        )
+        
+        if turtle_response:
+            turtle_count = len(turtle_response)
+            print(f"   Found {turtle_count} turtle problems")
+            if turtle_count == 98:
+                self.log_test("Turtle problems count is 98", True)
+            else:
+                self.log_test("Turtle problems count is 98", False, f"Expected 98, got {turtle_count}")
+        
+        # Test code filter - should return 308 problems
+        code_response = self.run_test(
+            "GET /api/problems?assignment_type=code (expect 308 problems)",
+            "GET",
+            "problems?assignment_type=code",
+            200
+        )
+        
+        if code_response:
+            code_count = len(code_response)
+            print(f"   Found {code_count} code problems")
+            if code_count == 308:
+                self.log_test("Code problems count is 308", True)
+            else:
+                self.log_test("Code problems count is 308", False, f"Expected 308, got {code_count}")
+        
+        # Test microbit filter - should return 38 problems
+        microbit_response = self.run_test(
+            "GET /api/problems?assignment_type=microbit (expect 38 problems)",
+            "GET",
+            "problems?assignment_type=microbit",
+            200
+        )
+        
+        if microbit_response:
+            microbit_count = len(microbit_response)
+            print(f"   Found {microbit_count} microbit problems")
+            if microbit_count == 38:
+                self.log_test("Microbit problems count is 38", True)
+            else:
+                self.log_test("Microbit problems count is 38", False, f"Expected 38, got {microbit_count}")
+        
+        # Test Scenario 2: Combined filters
+        print("\n   SCENARIO 2: Testing combined filters...")
+        
+        # Test turtle + Unit 4 category - should return 16 problems
+        unit4_response = self.run_test(
+            "GET /api/problems?assignment_type=turtle&category=Turtle - Unit 4: Conditionals - Making Decisions (expect 16 problems)",
+            "GET",
+            "problems?assignment_type=turtle&category=Turtle - Unit 4: Conditionals - Making Decisions",
+            200
+        )
+        
+        if unit4_response:
+            unit4_count = len(unit4_response)
+            print(f"   Found {unit4_count} Unit 4 turtle problems")
+            if unit4_count == 16:
+                self.log_test("Unit 4 turtle problems count is 16", True)
+            else:
+                self.log_test("Unit 4 turtle problems count is 16", False, f"Expected 16, got {unit4_count}")
+        
+        # Test turtle + Unit 5 category - should return 16 problems
+        unit5_response = self.run_test(
+            "GET /api/problems?assignment_type=turtle&category=Turtle - Unit 5: Functions - Reusable Code (expect 16 problems)",
+            "GET",
+            "problems?assignment_type=turtle&category=Turtle - Unit 5: Functions - Reusable Code",
+            200
+        )
+        
+        if unit5_response:
+            unit5_count = len(unit5_response)
+            print(f"   Found {unit5_count} Unit 5 turtle problems")
+            if unit5_count == 16:
+                self.log_test("Unit 5 turtle problems count is 16", True)
+            else:
+                self.log_test("Unit 5 turtle problems count is 16", False, f"Expected 16, got {unit5_count}")
+        
+        # Test Scenario 3: Verify all problems have assignment_type field
+        print("\n   SCENARIO 3: Verifying all problems have assignment_type field...")
+        
+        all_problems_response = self.run_test(
+            "GET /api/problems (verify all have assignment_type)",
+            "GET",
+            "problems",
+            200
+        )
+        
+        if all_problems_response:
+            total_problems = len(all_problems_response)
+            problems_with_assignment_type = 0
+            problems_without_assignment_type = []
+            
+            for problem in all_problems_response:
+                if "assignment_type" in problem and problem["assignment_type"] in ["turtle", "code", "microbit"]:
+                    problems_with_assignment_type += 1
+                else:
+                    problems_without_assignment_type.append({
+                        "id": problem.get("id", "unknown"),
+                        "title": problem.get("title", "unknown"),
+                        "assignment_type": problem.get("assignment_type", "missing")
+                    })
+            
+            print(f"   Total problems: {total_problems}")
+            print(f"   Problems with valid assignment_type: {problems_with_assignment_type}")
+            print(f"   Problems without valid assignment_type: {len(problems_without_assignment_type)}")
+            
+            if len(problems_without_assignment_type) == 0:
+                self.log_test("All problems have valid assignment_type field", True)
+            else:
+                self.log_test("All problems have valid assignment_type field", False, f"{len(problems_without_assignment_type)} problems missing valid assignment_type")
+                print(f"   Problems without assignment_type: {problems_without_assignment_type[:5]}")  # Show first 5
+        
+        # Test Scenario 4: Test Unit 4 problems structure
+        print("\n   SCENARIO 4: Testing Unit 4 problems structure...")
+        
+        if unit4_response and len(unit4_response) >= 2:
+            # Pick first 2 Unit 4 problems
+            for i, problem in enumerate(unit4_response[:2]):
+                problem_num = i + 1
+                required_fields = ["title", "description", "starter_code", "solution_code", "category", "problem_type", "assignment_type"]
+                
+                missing_fields = []
+                for field in required_fields:
+                    if field not in problem or not problem[field]:
+                        missing_fields.append(field)
+                
+                if not missing_fields and problem.get("assignment_type") == "turtle":
+                    self.log_test(f"Unit 4 problem {problem_num} has all required fields", True)
+                    print(f"   ✅ Unit 4 Problem {problem_num}: {problem.get('title', 'Unknown')}")
+                else:
+                    self.log_test(f"Unit 4 problem {problem_num} has all required fields", False, f"Missing: {missing_fields}, assignment_type: {problem.get('assignment_type')}")
+        else:
+            self.log_test("Unit 4 has at least 2 problems for structure test", False, f"Only found {len(unit4_response) if unit4_response else 0} problems")
+        
+        # Test Scenario 5: Test Unit 5 problems structure
+        print("\n   SCENARIO 5: Testing Unit 5 problems structure...")
+        
+        if unit5_response and len(unit5_response) >= 2:
+            # Pick first 2 Unit 5 problems
+            for i, problem in enumerate(unit5_response[:2]):
+                problem_num = i + 1
+                required_fields = ["title", "description", "starter_code", "solution_code", "category", "problem_type", "assignment_type"]
+                
+                missing_fields = []
+                for field in required_fields:
+                    if field not in problem or not problem[field]:
+                        missing_fields.append(field)
+                
+                if not missing_fields and problem.get("assignment_type") == "turtle":
+                    self.log_test(f"Unit 5 problem {problem_num} has all required fields", True)
+                    print(f"   ✅ Unit 5 Problem {problem_num}: {problem.get('title', 'Unknown')}")
+                else:
+                    self.log_test(f"Unit 5 problem {problem_num} has all required fields", False, f"Missing: {missing_fields}, assignment_type: {problem.get('assignment_type')}")
+        else:
+            self.log_test("Unit 5 has at least 2 problems for structure test", False, f"Only found {len(unit5_response) if unit5_response else 0} problems")
+        
+        print("\n🎯 TURTLE PROBLEM FILTERING TEST SUMMARY:")
+        print("   - Teacher login: ✅")
+        print("   - Turtle problems filter (98 expected): ✅" if turtle_response and len(turtle_response) == 98 else "   - Turtle problems filter: ❌")
+        print("   - Code problems filter (308 expected): ✅" if code_response and len(code_response) == 308 else "   - Code problems filter: ❌")
+        print("   - Microbit problems filter (38 expected): ✅" if microbit_response and len(microbit_response) == 38 else "   - Microbit problems filter: ❌")
+        print("   - Unit 4 combined filter (16 expected): ✅" if unit4_response and len(unit4_response) == 16 else "   - Unit 4 combined filter: ❌")
+        print("   - Unit 5 combined filter (16 expected): ✅" if unit5_response and len(unit5_response) == 16 else "   - Unit 5 combined filter: ❌")
+        print("   - All problems have assignment_type: ✅" if all_problems_response and len([p for p in all_problems_response if "assignment_type" not in p or p["assignment_type"] not in ["turtle", "code", "microbit"]]) == 0 else "   - All problems have assignment_type: ❌")
+
     def run_all_tests(self):
         """Run all API tests"""
         print("🚀 Starting CodeClass API Tests...")
