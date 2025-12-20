@@ -471,11 +471,10 @@ export default function TurtleTeaching({ user }) {
   const runCode = async () => {
     setIsRunning(true);
     try {
-      const response = await axios.post(`${API}/code/execute-turtle`, { code }, { withCredentials: true });
-      if (response.data.image) {
-        setTurtleImage(response.data.image);
-      }
-      if (response.data.error) {
+      const response = await axios.post(`${API}/code/execute-turtle`, { code, test_input: "" }, { withCredentials: true });
+      if (response.data.success && response.data.image_data) {
+        setTurtleImage(response.data.image_data);
+      } else if (response.data.error) {
         toast.error(response.data.error);
       }
     } catch (error) {
