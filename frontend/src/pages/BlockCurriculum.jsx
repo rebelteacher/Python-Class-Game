@@ -29,11 +29,11 @@ import {
 const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
 const API = `${BACKEND_URL}/api`;
 
-// Unit 4: Block-Based Coding curriculum structure
+// Unit 1: Block-Based Coding curriculum structure (Foundation before text-based Python)
 const BLOCK_CURRICULUM = {
   units: [
     {
-      id: "unit4-1",
+      id: "unit1-1",
       title: "Chapter 1: Block Basics",
       description: "Introduction to visual programming with blocks",
       icon: "🧱",
