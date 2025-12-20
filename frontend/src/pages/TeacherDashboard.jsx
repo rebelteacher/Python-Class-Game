@@ -226,6 +226,10 @@ export default function TeacherDashboard({ user, setUser }) {
               <Cpu className="w-4 h-4" />
               Micro:bit
             </Button>
+            <Button onClick={() => navigate("/skill-quiz-manager")} variant="outline" size="sm" className="gap-2 border-pink-300 text-pink-100 hover:bg-pink-500/30 bg-pink-500/20">
+              🧠
+              Skill Quiz
+            </Button>
             <WhatsNew />
             <Button data-testid="reports-nav-btn" onClick={() => navigate("/teacher-reports")} variant="outline" size="sm" className="gap-2 border-white/30 text-white hover:bg-white/20 bg-white/10">
               <FileSpreadsheet className="w-4 h-4" />
