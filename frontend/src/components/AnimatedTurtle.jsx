@@ -35,6 +35,13 @@ function parseCode(code, parentVars = {}) {
   const lines = code.split('\n');
   const variables = { ...parentVars };
   
+  // Detect turtle variable name (e.g., bob = turtle.Turtle())
+  const turtleNameMatch = code.match(/(\w+)\s*=\s*(?:turtle\.)?Turtle\(\)/);
+  const turtleName = turtleNameMatch ? turtleNameMatch[1] : 't';
+  
+  // Create regex pattern that matches the turtle name, 't.', or 'turtle.'
+  const turtlePrefix = `(?:${turtleName}\\.|t\\.|turtle\\.)?`;
+  
   for (let lineNum = 0; lineNum < lines.length; lineNum++) {
     const line = lines[lineNum];
     const trimmed = line.trim();
@@ -72,12 +79,194 @@ function parseCode(code, parentVars = {}) {
       return evaluateExpression(str, variables);
     };
     
+    // Parse color() - changes both pen and turtle color
+    match = trimmed.match(new RegExp(`${turtlePrefix}color\\s*\\(\\s*['"](\\w+|#[0-9a-fA-F]{6})['"](\\s*,\\s*['"](\\w+|#[0-9a-fA-F]{6})['"])?\\s*\\)`));
+    if (match) {
+      const penColor = match[1];
+      const fillColor = match[3] || match[1];
+      commands.push({ type: 'color', penColor, fillColor, line: lineNum });
+      continue;
+    }
+    
     // Parse forward/fd with variable support
-    match = trimmed.match(/(?:t\.|turtle\.)?(?:forward|fd)\s*\(\s*([^)]+)\s*\)/);
+    match = trimmed.match(new RegExp(`${turtlePrefix}(?:forward|fd)\\s*\\(\\s*([^)]+)\\s*\\)`));
     if (match) {
       const value = getNumericValue(match[1]);
       if (value !== null) {
         commands.push({ type: 'forward', value, line: lineNum });
+      }
+      continue;
+    }
+    
+    // Parse backward/bk/back with variable support
+    match = trimmed.match(new RegExp(`${turtlePrefix}(?:backward|bk|back)\\s*\\(\\s*([^)]+)\\s*\\)`));
+    if (match) {
+      const value = getNumericValue(match[1]);
+      if (value !== null) {
+        commands.push({ type: 'backward', value, line: lineNum });
+      }
+      continue;
+    }
+    
+    // Parse right/rt with variable support
+    match = trimmed.match(new RegExp(`${turtlePrefix}(?:right|rt)\\s*\\(\\s*([^)]+)\\s*\\)`));
+    if (match) {
+      const value = getNumericValue(match[1]);
+      if (value !== null) {
+        commands.push({ type: 'right', value, line: lineNum });
+      }
+      continue;
+    }
+    
+    // Parse left/lt with variable support
+    match = trimmed.match(new RegExp(`${turtlePrefix}(?:left|lt)\\s*\\(\\s*([^)]+)\\s*\\)`));
+    if (match) {
+      const value = getNumericValue(match[1]);
+      if (value !== null) {
+        commands.push({ type: 'left', value, line: lineNum });
+      }
+      continue;
+    }
+    
+    // Parse penup/pu/up
+    if (trimmed.match(new RegExp(`${turtlePrefix}(?:penup|pu|up)\\s*\\(\\s*\\)`))) {
+      commands.push({ type: 'penup', line: lineNum });
+      continue;
+    }
+    
+    // Parse pendown/pd/down
+    if (trimmed.match(new RegExp(`${turtlePrefix}(?:pendown|pd|down)\\s*\\(\\s*\\)`))) {
+      commands.push({ type: 'pendown', line: lineNum });
+      continue;
+    }
+    
+    // Parse pencolor
+    match = trimmed.match(new RegExp(`${turtlePrefix}pencolor\\s*\\(\\s*['"](.*?)['"]\s*\\)`));
+    if (match) {
+      commands.push({ type: 'pencolor', value: match[1], line: lineNum });
+      continue;
+    }
+    
+    // Parse fillcolor
+    match = trimmed.match(new RegExp(`${turtlePrefix}fillcolor\\s*\\(\\s*['"](.*?)['"]\s*\\)`));
+    if (match) {
+      commands.push({ type: 'fillcolor', value: match[1], line: lineNum });
+      continue;
+    }
+    
+    // Parse begin_fill
+    if (trimmed.match(new RegExp(`${turtlePrefix}begin_fill\\s*\\(\\s*\\)`))) {
+      commands.push({ type: 'begin_fill', line: lineNum });
+      continue;
+    }
+    
+    // Parse end_fill
+    if (trimmed.match(new RegExp(`${turtlePrefix}end_fill\\s*\\(\\s*\\)`))) {
+      commands.push({ type: 'end_fill', line: lineNum });
+      continue;
+    }
+    
+    // Parse pensize/width with variable support
+    match = trimmed.match(new RegExp(`${turtlePrefix}(?:pensize|width)\\s*\\(\\s*([^)]+)\\s*\\)`));
+    if (match) {
+      const value = getNumericValue(match[1]);
+      if (value !== null) {
+        commands.push({ type: 'pensize', value, line: lineNum });
+      }
+      continue;
+    }
+    
+    // Parse speed with variable support
+    match = trimmed.match(new RegExp(`${turtlePrefix}speed\\s*\\(\\s*([^)]+)\\s*\\)`));
+    if (match) {
+      const value = getNumericValue(match[1]);
+      if (value !== null) {
+        commands.push({ type: 'speed', value: Math.floor(value), line: lineNum });
+      }
+      continue;
+    }
+    
+    // Parse circle with variable support
+    match = trimmed.match(new RegExp(`${turtlePrefix}circle\\s*\\(\\s*([^)]+)\\s*\\)`));
+    if (match) {
+      const value = getNumericValue(match[1]);
+      if (value !== null) {
+        commands.push({ type: 'circle', value, line: lineNum });
+      }
+      continue;
+    }
+    
+    // Parse goto/setpos/setposition with variable support
+    match = trimmed.match(new RegExp(`${turtlePrefix}(?:goto|setpos|setposition)\\s*\\(\\s*([^,]+)\\s*,\\s*([^)]+)\\s*\\)`));
+    if (match) {
+      const x = getNumericValue(match[1]);
+      const y = getNumericValue(match[2]);
+      if (x !== null && y !== null) {
+        commands.push({ type: 'goto', x, y, line: lineNum });
+      }
+      continue;
+    }
+    
+    // Parse setheading/seth with variable support
+    match = trimmed.match(new RegExp(`${turtlePrefix}(?:setheading|seth)\\s*\\(\\s*([^)]+)\\s*\\)`));
+    if (match) {
+      const value = getNumericValue(match[1]);
+      if (value !== null) {
+        commands.push({ type: 'setheading', value, line: lineNum });
+      }
+      continue;
+    }
+    
+    // Parse hideturtle/ht
+    if (trimmed.match(new RegExp(`${turtlePrefix}(?:hideturtle|ht)\\s*\\(\\s*\\)`))) {
+      commands.push({ type: 'hideturtle', line: lineNum });
+      continue;
+    }
+    
+    // Parse showturtle/st
+    if (trimmed.match(new RegExp(`${turtlePrefix}(?:showturtle|st)\\s*\\(\\s*\\)`))) {
+      commands.push({ type: 'showturtle', line: lineNum });
+      continue;
+    }
+    
+    // Parse for loop with variable or literal support
+    match = trimmed.match(/for\s+(\w+)\s+in\s+range\s*\(\s*([^)]+)\s*\)\s*:/);
+    if (match) {
+      const loopVar = match[1];
+      const rangeExpr = match[2];
+      const iterations = getNumericValue(rangeExpr);
+      
+      if (iterations !== null && iterations > 0) {
+        const loopIndent = line.search(/\S/);
+        const loopBody = [];
+        
+        // Collect loop body lines
+        for (let j = lineNum + 1; j < lines.length; j++) {
+          const bodyLine = lines[j];
+          if (bodyLine.trim() === '') continue;
+          const bodyIndent = bodyLine.search(/\S/);
+          if (bodyIndent <= loopIndent && bodyLine.trim() !== '') break;
+          loopBody.push({ code: bodyLine.trim(), lineNum: j });
+        }
+        
+        // Expand loop - execute body for each iteration
+        for (let i = 0; i < iterations; i++) {
+          const loopVars = { ...variables, [loopVar]: i };
+          for (const bodyCmd of loopBody) {
+            const parsed = parseCode(bodyCmd.code, loopVars);
+            for (const p of parsed) {
+              p.line = bodyCmd.lineNum;
+              commands.push(p);
+            }
+          }
+        }
+      }
+      continue;
+    }
+  }
+  
+  return commands;
+}
       }
       continue;
     }
