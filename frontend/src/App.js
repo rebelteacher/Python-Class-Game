@@ -260,6 +260,24 @@ function App() {
               />
               
               <Route
+                path="/turtle/teach"
+                element={
+                  <ProtectedRoute user={user}>
+                    <TurtleTeaching user={user} />
+                  </ProtectedRoute>
+                }
+              />
+              
+              <Route
+                path="/microbit/teach"
+                element={
+                  <ProtectedRoute user={user}>
+                    <MicrobitTeaching user={user} />
+                  </ProtectedRoute>
+                }
+              />
+              
+              <Route
                 path="/classroom/:classroomId"
                 element={
                   <ProtectedRoute user={user}>
