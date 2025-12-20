@@ -299,6 +299,15 @@ function App() {
               />
               
               <Route
+                path="/skill-quiz-manager"
+                element={
+                  <ProtectedRoute user={user} teacherOnly>
+                    <SkillQuizManager user={user} />
+                  </ProtectedRoute>
+                }
+              />
+              
+              <Route
                 path="/classroom/:classroomId"
                 element={
                   <ProtectedRoute user={user}>
