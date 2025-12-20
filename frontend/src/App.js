@@ -46,7 +46,9 @@ import CodingTestResult from "./pages/CodingTestResult";
 import CodingTestSubmissions from "./pages/CodingTestSubmissions";
 import TurtleGraphics from "./pages/TurtleGraphics";
 import TurtleCurriculum from "./pages/TurtleCurriculum";
+import TurtleTeaching from "./pages/TurtleTeaching";
 import MicrobitCurriculum from "./pages/MicrobitCurriculum";
+import MicrobitTeaching from "./pages/MicrobitTeaching";
 
 const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
 const API = `${BACKEND_URL}/api`;
