@@ -444,6 +444,21 @@ frontend:
         agent: "testing"
         comment: "COMPREHENSIVE HIERARCHICAL ADMIN BACKEND TESTING COMPLETE ✅ - 21/21 tests passed (100% success rate). ✅ GET /api/school-admin/dashboard: Returns stats (school_name, total_teachers, total_classrooms, total_students), teachers list, and classrooms list. School admin access only (403 for district_admin, teacher, student). ✅ GET /api/district-admin/dashboard: Returns stats (district, total_schools, total_teachers, total_classrooms, total_students), schools list with counts, and teachers list. District admin access only (403 for school_admin, teacher, student). ✅ GET /api/school-admin/teachers: Returns all teachers in school admin's school. School admin access only (403 for district_admin, teacher). ✅ GET /api/school-admin/teacher/{teacher_id}/classrooms: Returns teacher's classrooms with populated student details. Validates teacher is in same school (403 if not). School admin access only (403 for district_admin, teacher). ✅ GET /api/district-admin/schools: Returns all schools in district with teacher counts. District admin access only (403 for school_admin, teacher). ✅ GET /api/district-admin/teachers-in-school/{school_name}: Returns all teachers in specified school within district. District admin access only (403 for school_admin, teacher). All 6 hierarchical admin endpoints working perfectly with proper role-based access control."
 
+  - task: "Turtle Problem Library Filtering Backend API Fix"
+    implemented: true
+    working: true
+    file: "backend/server.py"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: false
+    status_history:
+      - working: "NA"
+        agent: "main"
+        comment: "Fixed turtle problem library filtering by ensuring all problems have assignment_type field and GET /api/problems endpoint properly filters by assignment_type parameter. Backend now correctly returns filtered results for turtle, code, and microbit assignment types."
+      - working: true
+        agent: "testing"
+        comment: "TURTLE PROBLEM LIBRARY FILTERING TESTING COMPLETE ✅ - All 5 test scenarios from review request passed (100% success rate). ✅ SCENARIO 1 - Assignment Type Filters: GET /api/problems?assignment_type=turtle returns exactly 98 problems, GET /api/problems?assignment_type=code returns exactly 308 problems, GET /api/problems?assignment_type=microbit returns exactly 38 problems. ✅ SCENARIO 2 - Combined Filters: GET /api/problems?assignment_type=turtle&category=Turtle - Unit 4: Conditionals - Making Decisions returns exactly 16 problems, GET /api/problems?assignment_type=turtle&category=Turtle - Unit 5: Functions - Reusable Code returns exactly 16 problems. ✅ SCENARIO 3 - Assignment Type Field Verification: All 444 problems in database have valid assignment_type field (turtle, code, or microbit), no problems missing this field. ✅ SCENARIO 4 - Unit 4 Problem Structure: Verified 2 Unit 4 problems have all required fields (title, description, starter_code, solution_code, category, problem_type, assignment_type='turtle'). ✅ SCENARIO 5 - Unit 5 Problem Structure: Verified 2 Unit 5 problems have all required fields with correct structure. ✅ Teacher authentication working with credentials astapp@spanola.net. The backend API fix for turtle problem filtering is working correctly and all filtering functionality is operational."
+
   - task: "Turtle Problems Units 4 and 5 Creation and Testing"
     implemented: false
     working: false
