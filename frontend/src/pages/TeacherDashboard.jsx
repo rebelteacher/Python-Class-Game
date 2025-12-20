@@ -286,34 +286,36 @@ export default function TeacherDashboard({ user, setUser }) {
         {/* Tools & Reports Row */}
         <div className="grid grid-cols-2 gap-4 mb-6">
           {/* Tools Section */}
-          <Card className="bg-white/95 backdrop-blur">
-            <CardHeader className="pb-2">
-              <CardTitle className="text-sm font-medium text-gray-600">🛠️ Tools</CardTitle>
+          <Card className="bg-white shadow-md border border-gray-200">
+            <CardHeader className="pb-3 border-b bg-gray-50">
+              <CardTitle className="text-base font-semibold text-gray-700 flex items-center gap-2">
+                🛠️ Tools
+              </CardTitle>
             </CardHeader>
-            <CardContent className="pt-0">
-              <div className="flex flex-wrap gap-2">
-                <Button variant="outline" size="sm" onClick={() => navigate("/question-bank")} className="text-xs">
-                  <FileQuestion className="w-3 h-3 mr-1" />
+            <CardContent className="pt-4">
+              <div className="grid grid-cols-2 gap-2">
+                <Button variant="outline" size="sm" onClick={() => navigate("/question-bank")} className="justify-start text-sm h-9">
+                  <FileQuestion className="w-4 h-4 mr-2 text-blue-500" />
                   Question Bank
                 </Button>
-                <Button variant="outline" size="sm" onClick={() => navigate("/test-builder")} className="text-xs">
-                  <FileQuestion className="w-3 h-3 mr-1" />
+                <Button variant="outline" size="sm" onClick={() => navigate("/test-builder")} className="justify-start text-sm h-9">
+                  <FileQuestion className="w-4 h-4 mr-2 text-purple-500" />
                   MC Test Builder
                 </Button>
-                <Button variant="outline" size="sm" onClick={() => navigate("/coding-tests")} className="text-xs">
-                  <Code2 className="w-3 h-3 mr-1" />
+                <Button variant="outline" size="sm" onClick={() => navigate("/coding-tests")} className="justify-start text-sm h-9">
+                  <Code2 className="w-4 h-4 mr-2 text-green-500" />
                   Coding Tests
                 </Button>
-                <Button variant="outline" size="sm" onClick={() => navigate("/skill-quiz-manager")} className="text-xs">
-                  🧠
+                <Button variant="outline" size="sm" onClick={() => navigate("/skill-quiz-manager")} className="justify-start text-sm h-9">
+                  <span className="mr-2">🧠</span>
                   Skill Quizzes
                 </Button>
-                <Button variant="outline" size="sm" onClick={() => navigate("/notes")} className="text-xs">
-                  <FileText className="w-3 h-3 mr-1" />
+                <Button variant="outline" size="sm" onClick={() => navigate("/notes")} className="justify-start text-sm h-9">
+                  <FileText className="w-4 h-4 mr-2 text-orange-500" />
                   Notes
                 </Button>
-                <Button variant="outline" size="sm" onClick={() => navigate("/video-library")} className="text-xs">
-                  <Video className="w-3 h-3 mr-1" />
+                <Button variant="outline" size="sm" onClick={() => navigate("/video-library")} className="justify-start text-sm h-9">
+                  <Video className="w-4 h-4 mr-2 text-red-500" />
                   Videos
                 </Button>
               </div>
@@ -321,26 +323,28 @@ export default function TeacherDashboard({ user, setUser }) {
           </Card>
 
           {/* Reports Section */}
-          <Card className="bg-white/95 backdrop-blur">
-            <CardHeader className="pb-2">
-              <CardTitle className="text-sm font-medium text-gray-600">📊 Reports & Competitions</CardTitle>
+          <Card className="bg-white shadow-md border border-gray-200">
+            <CardHeader className="pb-3 border-b bg-gray-50">
+              <CardTitle className="text-base font-semibold text-gray-700 flex items-center gap-2">
+                📊 Reports & Competitions
+              </CardTitle>
             </CardHeader>
-            <CardContent className="pt-0">
-              <div className="flex flex-wrap gap-2">
-                <Button variant="outline" size="sm" onClick={() => navigate("/teacher-reports")} className="text-xs">
-                  <FileSpreadsheet className="w-3 h-3 mr-1" />
+            <CardContent className="pt-4">
+              <div className="grid grid-cols-2 gap-2">
+                <Button variant="outline" size="sm" onClick={() => navigate("/teacher-reports")} className="justify-start text-sm h-9">
+                  <FileSpreadsheet className="w-4 h-4 mr-2 text-blue-500" />
                   Student Reports
                 </Button>
-                <Button variant="outline" size="sm" onClick={() => navigate("/test-reports")} className="text-xs">
-                  <FileSpreadsheet className="w-3 h-3 mr-1" />
+                <Button variant="outline" size="sm" onClick={() => navigate("/test-reports")} className="justify-start text-sm h-9">
+                  <FileSpreadsheet className="w-4 h-4 mr-2 text-green-500" />
                   Test Reports
                 </Button>
-                <Button variant="outline" size="sm" onClick={() => navigate("/teacher/competitions")} className="text-xs">
-                  <Trophy className="w-3 h-3 mr-1" />
+                <Button variant="outline" size="sm" onClick={() => navigate("/teacher/competitions")} className="justify-start text-sm h-9">
+                  <Trophy className="w-4 h-4 mr-2 text-yellow-500" />
                   Competitions
                 </Button>
-                <Button variant="outline" size="sm" onClick={() => navigate("/teacher/challenge-pool")} className="text-xs">
-                  <Trophy className="w-3 h-3 mr-1" />
+                <Button variant="outline" size="sm" onClick={() => navigate("/teacher/challenge-pool")} className="justify-start text-sm h-9">
+                  <Trophy className="w-4 h-4 mr-2 text-purple-500" />
                   Challenge Pool
                 </Button>
               </div>
