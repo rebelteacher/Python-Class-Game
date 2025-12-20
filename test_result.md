@@ -471,6 +471,21 @@ frontend:
       - working: "NA"
         agent: "main"
         comment: "Added test input field to Teacher Practice page so teachers can test code that uses input() functions. Added state for testInput, textarea for entering input data, and passes it to the code execution endpoint. UI shows input field above output window with clear labeling."
+
+  - task: "Teaching Mode Pages for Turtle and Micro:bit"
+    implemented: true
+    working: true
+    file: "frontend/src/pages/TurtleTeaching.jsx, frontend/src/pages/MicrobitTeaching.jsx, frontend/src/pages/TurtleCurriculum.jsx, frontend/src/pages/MicrobitCurriculum.jsx"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: false
+    status_history:
+      - working: "NA"
+        agent: "main"
+        comment: "Implemented Teaching Mode pages for both Turtle and Micro:bit with curriculum navigation, side-by-side layouts, lesson management, and interactive features."
+      - working: true
+        agent: "testing"
+        comment: "COMPREHENSIVE TEACHING MODE TESTING COMPLETE - All major functionality verified successfully. TURTLE CURRICULUM PAGE: Found 4 quick action cards (Problem Library, Teaching Mode highlighted with green styling, Turtle Sandbox, Student Progress), correct page title, proper navigation flow. TURTLE TEACHING MODE (/turtle/teach): Successfully navigated from curriculum page, side-by-side layout verified (Code editor left | Turtle Output right), lesson info displays title/description/concept tags, topic selector dropdown shows all topics (First Steps, Loops, Colors, Conditionals, Functions), topic switching works, Previous/Next lesson navigation functional, Run Code and Reset buttons working, Quick Reference section present with turtle commands, fullscreen toggle available. MICRO:BIT CURRICULUM PAGE: Found 4 quick action cards (Problem Library, Teaching Mode highlighted with cyan styling, Quick Assign, Student Progress), correct page title, proper navigation flow. MICRO:BIT TEACHING MODE (/microbit/teach): Successfully navigated from curriculum page, resizable panels layout verified (Code editor left | Micro:bit Simulator right), lesson info displays title/description/concept tags, topic selector dropdown shows all topics (LED Display, Buttons, Loops, Variables, Functions), topic switching works, Previous/Next lesson navigation functional, Run button and Reset buttons working, Download button available for main.py, Quick Reference section present with Micro:bit commands, LED matrix (5x5 grid) present in simulator, simulated button A/B interactions working, fullscreen toggle available. ALL NAVIGATION FLOWS: Curriculum to Teaching Mode to Back navigation working correctly for both platforms. All test scenarios from review request successfully verified - the Teaching Mode implementation is fully functional and ready for use."
   
   - task: "Class vs Class Competitions Backend"
     implemented: true
