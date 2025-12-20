@@ -458,8 +458,7 @@ export default function TurtleTeaching({ user }) {
   useEffect(() => {
     setCode(lessonCode);
     setHighlightedLine(-1);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [selectedTopic, currentLessonIndex]);
+  }, [lessonCode]);
 
   // Handle line highlighting from AnimatedTurtle
   const handleLineHighlight = useCallback((lineNum) => {

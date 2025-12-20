@@ -284,8 +284,7 @@ export default function AnimatedTurtle({ code, onLineHighlight, width = 400, hei
       setCommands(parsed);
       resetTurtle();
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [code]);
+  }, [code, resetTurtle]);
   
   // Initial draw
   useEffect(() => {
