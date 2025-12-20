@@ -7,7 +7,7 @@ import asyncio
 from motor.motor_asyncio import AsyncIOMotorClient
 
 class HierarchicalAdminTester:
-    def __init__(self, base_url="https://microbit-turtle-edu.preview.emergentagent.com"):
+    def __init__(self, base_url="https://codecrafters-7.preview.emergentagent.com"):
         self.base_url = base_url
         self.api_url = f"{base_url}/api"
         self.tests_run = 0
