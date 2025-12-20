@@ -361,7 +361,7 @@ export default function SkillQuizManager({ user }) {
                         <SelectValue placeholder="All classrooms..." />
                       </SelectTrigger>
                       <SelectContent>
-                        <SelectItem value="">All Classrooms</SelectItem>
+                        <SelectItem value="all">All Classrooms</SelectItem>
                         {classrooms.map(c => (
                           <SelectItem key={c.id} value={c.id}>{c.name}</SelectItem>
                         ))}
