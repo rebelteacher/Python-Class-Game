@@ -214,6 +214,10 @@ export default function TeacherDashboard({ user, setUser }) {
               <Video className="w-4 h-4" />
               Video Library
             </Button>
+            <Button onClick={() => navigate("/turtle-curriculum")} variant="outline" size="sm" className="gap-2 border-green-300 text-green-100 hover:bg-green-500/30 bg-green-500/20">
+              🐢
+              Turtle
+            </Button>
             <Button onClick={() => navigate("/microbit")} variant="outline" size="sm" className="gap-2 border-cyan-300 text-cyan-100 hover:bg-cyan-500/30 bg-cyan-500/20">
               <Cpu className="w-4 h-4" />
               Micro:bit
