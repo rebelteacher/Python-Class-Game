@@ -496,7 +496,7 @@ export default function TurtleCurriculum({ user }) {
 
       <div className="container mx-auto px-6 py-8">
         {/* Quick Actions */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
           <Card className="hover:shadow-lg transition-shadow cursor-pointer" onClick={() => navigate("/library?type=turtle")}>
             <CardContent className="p-6 flex items-center gap-4">
               <div className="p-3 bg-green-100 rounded-lg">
@@ -505,6 +505,18 @@ export default function TurtleCurriculum({ user }) {
               <div>
                 <h3 className="font-semibold">Problem Library</h3>
                 <p className="text-sm text-gray-600">View & create Turtle problems</p>
+              </div>
+            </CardContent>
+          </Card>
+          
+          <Card className="hover:shadow-lg transition-shadow cursor-pointer border-2 border-green-500 bg-green-50" onClick={() => navigate("/turtle/teach")}>
+            <CardContent className="p-6 flex items-center gap-4">
+              <div className="p-3 bg-green-500 rounded-lg">
+                <Target className="w-6 h-6 text-white" />
+              </div>
+              <div>
+                <h3 className="font-semibold text-green-700">Teaching Mode</h3>
+                <p className="text-sm text-green-600">Live demo with simulator</p>
               </div>
             </CardContent>
           </Card>
@@ -524,7 +536,7 @@ export default function TurtleCurriculum({ user }) {
           <Card className="hover:shadow-lg transition-shadow cursor-pointer" onClick={() => navigate("/teacher/dashboard")}>
             <CardContent className="p-6 flex items-center gap-4">
               <div className="p-3 bg-purple-100 rounded-lg">
-                <Target className="w-6 h-6 text-purple-600" />
+                <Clock className="w-6 h-6 text-purple-600" />
               </div>
               <div>
                 <h3 className="font-semibold">Student Progress</h3>
