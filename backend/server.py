@@ -358,6 +358,7 @@ class ProblemCreate(BaseModel):
     expected_output: str = ""
     category: str
     difficulty: str
+    unit: str = ""
     chapter: str = ""
     lesson: str = ""
     problem_type: str = "Independent Practice"
