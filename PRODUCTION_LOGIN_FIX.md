@@ -59,7 +59,7 @@ response.set_cookie(
 ENVIRONMENT="production"
 MONGO_URL="mongodb://localhost:27017"
 DB_NAME="test_database"
-CORS_ORIGINS="https://codecrafters-7.preview.emergentagent.com,https://byte-dashboard.emergent.host,http://localhost:3000"
+CORS_ORIGINS="https://learn-py-platform.preview.emergentagent.com,https://byte-dashboard.emergent.host,http://localhost:3000"
 EMERGENT_LLM_KEY=sk-emergent-6BbB19f9c6f63CfB05
 ```
 
