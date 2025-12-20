@@ -349,32 +349,17 @@ export default function AnimatedTurtle({ code, onLineHighlight, width = 400, hei
     }
   }, [width, height, toCanvasCoords, drawTurtle]);
   
-  // Reset turtle state (refs only, no setState)
-  const resetTurtleRefs = useCallback(() => {
+  // Reset turtle
+  const resetTurtle = useCallback(() => {
     playingRef.current = false;
+    setIsPlaying(false);
+    setCurrentStep(-1);
+    
     turtleRef.current = getInitialTurtleState();
     pathsRef.current = [];
     drawCanvas();
     if (onLineHighlight) onLineHighlight(-1);
   }, [drawCanvas, onLineHighlight]);
-  
-  // Full reset including state
-  const resetTurtle = useCallback(() => {
-    resetTurtleRefs();
-    setIsPlaying(false);
-    setCurrentStep(-1);
-  }, [resetTurtleRefs]);
-  
-  // Reset refs when code changes (don't call setState in effect)
-  const prevCodeRef = useRef(code);
-  useEffect(() => {
-    if (prevCodeRef.current !== code) {
-      prevCodeRef.current = code;
-      resetTurtleRefs();
-      setIsPlaying(false);
-      setCurrentStep(-1);
-    }
-  }, [code, resetTurtleRefs]);
   
   // Initial draw
   useEffect(() => {
