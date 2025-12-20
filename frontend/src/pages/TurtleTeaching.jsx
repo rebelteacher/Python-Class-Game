@@ -674,7 +674,7 @@ export default function TurtleTeaching({ user }) {
             ) : (
               <div className="text-center text-gray-500">
                 <div className="text-6xl mb-4">🐢</div>
-                <p>Click "Run Code" to see the turtle draw!</p>
+                <p>Click &quot;Run Code&quot; to see the turtle draw!</p>
                 <p className="text-sm mt-2 text-gray-600">Students see this output in real-time</p>
               </div>
             )}
