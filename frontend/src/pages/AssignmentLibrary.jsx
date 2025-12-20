@@ -1518,6 +1518,11 @@ export default function AssignmentLibrary({ user }) {
                                               </CardHeader>
                                               <CardContent className="space-y-2">
                                                 <div className="flex flex-wrap gap-2">
+                                                  {problem.unit && (
+                                                    <span className="px-2 py-1 bg-amber-100 text-amber-800 rounded text-xs font-bold border border-amber-300">
+                                                      📦 {problem.unit}
+                                                    </span>
+                                                  )}
                                                   {problem.chapter && (
                                                     <span className="px-2 py-1 bg-blue-100 text-blue-700 rounded text-xs font-medium">
                                                       📚 {problem.chapter}
