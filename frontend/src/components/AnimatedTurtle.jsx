@@ -15,8 +15,8 @@ function evaluateExpression(expr, variables) {
   try {
     // Only allow numbers, operators, parentheses, and spaces
     if (/^[\d\s+\-*/().]+$/.test(evaluated)) {
-      // eslint-disable-next-line no-eval
-      return eval(evaluated);
+      const fn = new Function(`return ${evaluated}`);
+      return fn();
     }
   } catch (e) {
     // Fall through
