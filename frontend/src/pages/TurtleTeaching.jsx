@@ -587,160 +587,135 @@ export default function TurtleTeaching({ user }) {
         </div>
       </div>
 
-      {/* Main Content */}
-      <div className="flex h-[calc(100vh-52px)]">
+      {/* Main Content with Resizable Panels */}
+      <ResizablePanelGroup direction="horizontal" className="h-[calc(100vh-52px)]">
         {/* Left: Code Editor */}
-        <div className="w-1/2 flex flex-col border-r border-gray-700">
-          {/* Lesson Info */}
-          <div className="p-4 bg-gray-800 border-b border-gray-700">
-            <div className="flex items-center justify-between mb-2">
-              <h2 className="text-lg font-bold text-green-400">{currentLesson.title}</h2>
-              <div className="flex items-center gap-2 text-sm text-gray-400">
-                <span>{currentLessonIndex + 1} / {currentTopic.lessons.length}</span>
+        <ResizablePanel defaultSize={50} minSize={30}>
+          <div className="h-full flex flex-col border-r border-gray-700">
+            {/* Lesson Info */}
+            <div className="p-4 bg-gray-800 border-b border-gray-700">
+              <div className="flex items-center justify-between mb-2">
+                <h2 className="text-lg font-bold text-green-400">{currentLesson.title}</h2>
+                <div className="flex items-center gap-2 text-sm text-gray-400">
+                  <span>{currentLessonIndex + 1} / {currentTopic.lessons.length}</span>
+                </div>
+              </div>
+              <p className="text-gray-300 text-sm mb-2">{currentLesson.description}</p>
+              <div className="flex gap-2 flex-wrap">
+                {currentLesson.concepts.map((concept, i) => (
+                  <span key={i} className="px-2 py-0.5 bg-green-900/50 text-green-300 rounded text-xs">
+                    {concept}
+                  </span>
+                ))}
               </div>
             </div>
-            <p className="text-gray-300 text-sm mb-2">{currentLesson.description}</p>
-            <div className="flex gap-2">
-              {currentLesson.concepts.map((concept, i) => (
-                <span key={i} className="px-2 py-0.5 bg-green-900/50 text-green-300 rounded text-xs">
-                  {concept}
-                </span>
-              ))}
-            </div>
-          </div>
 
-          {/* Editor */}
-          <div className="flex-1">
-            <Editor
-              height="100%"
-              defaultLanguage="python"
-              theme="vs-dark"
-              value={code}
-              onChange={setCode}
-              onMount={handleEditorMount}
-              options={{
-                minimap: { enabled: false },
-                fontSize: 16,
-                lineNumbers: "on",
-                scrollBeyondLastLine: false,
-                automaticLayout: true,
-              }}
-            />
-          </div>
-
-          {/* Controls */}
-          <div className="p-3 bg-gray-800 border-t border-gray-700 flex items-center justify-between">
-            <div className="flex gap-2">
-              <Button
-                onClick={prevLesson}
-                disabled={currentLessonIndex === 0}
-                variant="outline"
-                size="sm"
-                className="bg-gray-700 border-gray-600"
-              >
-                <ChevronLeft className="w-4 h-4 mr-1" />
-                Previous
-              </Button>
-              <Button
-                onClick={nextLesson}
-                disabled={currentLessonIndex === currentTopic.lessons.length - 1}
-                variant="outline"
-                size="sm"
-                className="bg-gray-700 border-gray-600"
-              >
-                Next
-                <ChevronRight className="w-4 h-4 ml-1" />
-              </Button>
+            {/* Editor */}
+            <div className="flex-1">
+              <Editor
+                height="100%"
+                defaultLanguage="python"
+                theme="vs-dark"
+                value={code}
+                onChange={setCode}
+                onMount={handleEditorMount}
+                options={{
+                  minimap: { enabled: false },
+                  fontSize: 16,
+                  lineNumbers: "on",
+                  scrollBeyondLastLine: false,
+                  automaticLayout: true,
+                  glyphMargin: true,
+                }}
+              />
             </div>
-            
-            <div className="flex gap-2">
+
+            {/* Controls */}
+            <div className="p-3 bg-gray-800 border-t border-gray-700 flex items-center justify-between">
+              <div className="flex gap-2">
+                <Button
+                  onClick={prevLesson}
+                  disabled={currentLessonIndex === 0}
+                  variant="outline"
+                  size="sm"
+                  className="bg-gray-700 border-gray-600 hover:bg-gray-600"
+                >
+                  <ChevronLeft className="w-4 h-4 mr-1" />
+                  Previous
+                </Button>
+                <Button
+                  onClick={nextLesson}
+                  disabled={currentLessonIndex === currentTopic.lessons.length - 1}
+                  variant="outline"
+                  size="sm"
+                  className="bg-gray-700 border-gray-600 hover:bg-gray-600"
+                >
+                  Next
+                  <ChevronRight className="w-4 h-4 ml-1" />
+                </Button>
+              </div>
+              
               <Button
                 onClick={resetCode}
                 variant="outline"
                 size="sm"
-                className="bg-gray-700 border-gray-600"
+                className="bg-gray-700 border-gray-600 hover:bg-gray-600"
               >
                 <RotateCcw className="w-4 h-4 mr-1" />
-                Reset
-              </Button>
-              <Button
-                onClick={runCode}
-                disabled={isRunning}
-                className="bg-green-600 hover:bg-green-700"
-              >
-                <Play className="w-4 h-4 mr-1" />
-                {isRunning ? "Running..." : "Run Code"}
+                Reset Code
               </Button>
             </div>
           </div>
-        </div>
+        </ResizablePanel>
 
-        {/* Right: Turtle Output */}
-        <div className="w-1/2 flex flex-col bg-gray-950">
-          <div className="p-3 bg-gray-800 border-b border-gray-700 flex items-center justify-between">
-            <span className="font-medium text-green-400">🐢 Turtle Output</span>
-            {turtleImage && (
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={() => {
-                  const link = document.createElement('a');
-                  link.href = `data:image/png;base64,${turtleImage}`;
-                  link.download = 'turtle_drawing.png';
-                  link.click();
-                }}
-                className="text-gray-400 hover:text-white"
-              >
-                <Download className="w-4 h-4 mr-1" />
-                Save
-              </Button>
-            )}
-          </div>
-          
-          <div className="flex-1 flex items-center justify-center p-4">
-            {turtleImage ? (
-              <div className="bg-white rounded-lg p-4 shadow-2xl">
-                <img 
-                  src={`data:image/png;base64,${turtleImage}`}
-                  alt="Turtle output"
-                  className="max-w-full max-h-[60vh]"
-                />
-              </div>
-            ) : (
-              <div className="text-center text-gray-500">
-                <div className="text-6xl mb-4">🐢</div>
-                <p>Click &quot;Run Code&quot; to see the turtle draw!</p>
-                <p className="text-sm mt-2 text-gray-600">Students see this output in real-time</p>
-              </div>
-            )}
-          </div>
+        <ResizableHandle withHandle className="bg-gray-700" />
 
-          {/* Quick Reference */}
-          <div className="p-4 bg-gray-800 border-t border-gray-700">
-            <h3 className="text-sm font-medium text-gray-400 mb-2">Quick Reference</h3>
-            <div className="grid grid-cols-2 gap-2 text-xs">
-              <div className="text-gray-500">
-                <code className="text-green-400">forward(n)</code> - move forward
-              </div>
-              <div className="text-gray-500">
-                <code className="text-green-400">backward(n)</code> - move back
-              </div>
-              <div className="text-gray-500">
-                <code className="text-green-400">right(°)</code> - turn right
-              </div>
-              <div className="text-gray-500">
-                <code className="text-green-400">left(°)</code> - turn left
-              </div>
-              <div className="text-gray-500">
-                <code className="text-green-400">pencolor(c)</code> - line color
-              </div>
-              <div className="text-gray-500">
-                <code className="text-green-400">fillcolor(c)</code> - fill color
+        {/* Right: Animated Turtle Output */}
+        <ResizablePanel defaultSize={50} minSize={30}>
+          <div className="h-full flex flex-col bg-gray-950">
+            <div className="p-3 bg-gray-800 border-b border-gray-700 flex items-center justify-between">
+              <span className="font-medium text-green-400">🐢 Animated Turtle</span>
+              <span className="text-xs text-gray-400">
+                {highlightedLine >= 0 ? `Line ${highlightedLine + 1} executing...` : 'Press Play to animate'}
+              </span>
+            </div>
+            
+            <div className="flex-1 flex items-center justify-center p-4">
+              <AnimatedTurtle 
+                code={code} 
+                onLineHighlight={handleLineHighlight}
+                width={450}
+                height={450}
+              />
+            </div>
+
+            {/* Quick Reference */}
+            <div className="p-4 bg-gray-800 border-t border-gray-700">
+              <h3 className="text-sm font-medium text-gray-400 mb-2">Quick Reference</h3>
+              <div className="grid grid-cols-2 gap-2 text-xs">
+                <div className="text-gray-500">
+                  <code className="text-green-400">forward(n)</code> - move forward
+                </div>
+                <div className="text-gray-500">
+                  <code className="text-green-400">backward(n)</code> - move back
+                </div>
+                <div className="text-gray-500">
+                  <code className="text-green-400">right(°)</code> - turn right
+                </div>
+                <div className="text-gray-500">
+                  <code className="text-green-400">left(°)</code> - turn left
+                </div>
+                <div className="text-gray-500">
+                  <code className="text-green-400">pencolor(c)</code> - line color
+                </div>
+                <div className="text-gray-500">
+                  <code className="text-green-400">fillcolor(c)</code> - fill color
+                </div>
               </div>
             </div>
           </div>
-        </div>
-      </div>
+        </ResizablePanel>
+      </ResizablePanelGroup>
     </div>
   );
 }
