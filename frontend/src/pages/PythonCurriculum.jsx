@@ -530,12 +530,6 @@ export default function PythonCurriculum({ user }) {
   const [classrooms, setClassrooms] = useState([]);
   const [problemCounts, setProblemCounts] = useState({});
 
-  useEffect(() => {
-    fetchClassrooms();
-    fetchProblemCounts();
-    loadCustomCurriculum();
-  }, []);
-
   const loadCustomCurriculum = async () => {
     // Load any custom chapters from localStorage or API
     const saved = localStorage.getItem('python_curriculum_custom');
@@ -576,6 +570,12 @@ export default function PythonCurriculum({ user }) {
       console.error("Error fetching problem counts:", error);
     }
   };
+
+  useEffect(() => {
+    fetchClassrooms();
+    fetchProblemCounts();
+    loadCustomCurriculum();
+  }, []);
 
   const toggleUnit = (unitId) => {
     setExpandedUnits(prev => ({
