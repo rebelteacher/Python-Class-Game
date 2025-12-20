@@ -339,7 +339,6 @@ export default function MicrobitSimulator({ code, onButtonPress }) {
       if (inButtonABlock && !buttonAState) continue;
       if (inButtonBBlock && !buttonBState) continue;
       if (inElseBlock && (buttonAState || buttonBState)) continue;
-      }
       
       // Parse display.set_pixel(x, y, brightness)
       if (trimmed.includes('display.set_pixel(') || trimmed.includes('set_pixel(')) {
