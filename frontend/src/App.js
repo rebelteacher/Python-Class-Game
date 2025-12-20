@@ -51,6 +51,7 @@ import MicrobitCurriculum from "./pages/MicrobitCurriculum";
 import MicrobitTeaching from "./pages/MicrobitTeaching";
 import BlockCurriculum from "./pages/BlockCurriculum";
 import BlockTeaching from "./pages/BlockTeaching";
+import SkillQuizManager from "./pages/SkillQuizManager";
 
 const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
 const API = `${BACKEND_URL}/api`;
