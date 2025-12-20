@@ -452,13 +452,28 @@ export default function TurtleTeaching({ user }) {
 
   const currentTopic = TEACHING_EXAMPLES[selectedTopic];
   const currentLesson = currentTopic.lessons[currentLessonIndex];
-
   const lessonCode = currentLesson?.code || "";
+
+  // Load code when lesson changes - using a ref to track changes
+  const prevLessonCodeRef = useRef(lessonCode);
+  if (prevLessonCodeRef.current !== lessonCode) {
+    prevLessonCodeRef.current = lessonCode;
+    // Will trigger re-render with new code
+  }
+  
+  // Initialize code state with lesson code
+  const [code, setCode] = useState(lessonCode);
+  const [highlightedLine, setHighlightedLine] = useState(-1);
+  const [isFullscreen, setIsFullscreen] = useState(false);
+  const editorRef = useRef(null);
+  const decorationsRef = useRef([]);
+
+  // Reset code when lesson changes
   useEffect(() => {
-    // Load the code for current lesson
     setCode(lessonCode);
     setHighlightedLine(-1);
-  }, [lessonCode]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [selectedTopic, currentLessonIndex]);
 
   // Handle line highlighting from AnimatedTurtle
   const handleLineHighlight = useCallback((lineNum) => {
