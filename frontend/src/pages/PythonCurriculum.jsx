@@ -641,7 +641,7 @@ export default function PythonCurriculum({ user }) {
             <Button
               variant="ghost"
               size="sm"
-              onClick={() => navigate("/teacher")}
+              onClick={() => navigate("/teacher/dashboard")}
               className="text-white hover:bg-white/20"
             >
               <ArrowLeft className="w-4 h-4 mr-1" />
