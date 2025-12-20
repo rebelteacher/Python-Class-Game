@@ -471,6 +471,21 @@ export default function AssignmentPage({ user }) {
       }));
       
       toast.success("Problem submitted as done! It will now appear in your Completed assignments.");
+      
+      // Check if this was the last problem - trigger skill quiz
+      if (assignment && assignment.problems) {
+        const totalProblems = assignment.problems.length;
+        const updatedFinalMap = { ...problemsFinal, [problemId]: true };
+        const completedCount = Object.values(updatedFinalMap).filter(Boolean).length;
+        
+        // If all problems are done, show the skill quiz
+        if (completedCount === totalProblems && totalProblems > 0) {
+          // Use the assignment's category as the skill category
+          const skillCategory = assignment.category || assignment.problems[0]?.category || "General";
+          setQuizSkillCategory(skillCategory);
+          setShowSkillQuiz(true);
+        }
+      }
     } catch (error) {
       console.error("Error marking final:", error);
       toast.error(error.response?.data?.detail || "Failed to mark as done");
