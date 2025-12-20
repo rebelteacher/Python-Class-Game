@@ -528,7 +528,9 @@ export default function MicrobitSimulator({ code, onButtonPress }) {
     
     setIsRunning(true);
     setConsoleOutput([]); // Clear previous output
-    const commands = parseCode(code);
+    buttonARef.current = false;
+    buttonBRef.current = false;
+    const commands = parseCode(code, false, false);
     
     if (commands.length === 0) {
       setConsoleOutput(['No display commands found in your code.', '', 'Supported commands:', '• display.set_pixel(x, y, brightness)', '• display.show(Image.HEART)', '• display.show("A")', '• display.scroll("Hello")', '• display.clear()', '• sleep(500)']);
@@ -542,6 +544,8 @@ export default function MicrobitSimulator({ code, onButtonPress }) {
   const handleReset = () => {
     runningRef.current = false;
     setIsRunning(false);
+    buttonARef.current = false;
+    buttonBRef.current = false;
     ledsRef.current = copyGrid(EMPTY_GRID);
     setLeds(copyGrid(EMPTY_GRID));
     setConsoleOutput(['Reset. Ready to run.']);
@@ -549,13 +553,39 @@ export default function MicrobitSimulator({ code, onButtonPress }) {
 
   const handleButtonA = () => {
     setButtonAPressed(true);
-    setTimeout(() => setButtonAPressed(false), 200);
+    buttonARef.current = true;
+    
+    // Parse and execute code with button A pressed
+    setConsoleOutput(prev => [...prev, 'Button A pressed!']);
+    const commands = parseCode(code, true, false);
+    if (commands.length > 0) {
+      executeCommands(commands);
+    }
+    
+    setTimeout(() => {
+      setButtonAPressed(false);
+      buttonARef.current = false;
+    }, 200);
+    
     if (onButtonPress) onButtonPress('A');
   };
 
   const handleButtonB = () => {
     setButtonBPressed(true);
-    setTimeout(() => setButtonBPressed(false), 200);
+    buttonBRef.current = true;
+    
+    // Parse and execute code with button B pressed
+    setConsoleOutput(prev => [...prev, 'Button B pressed!']);
+    const commands = parseCode(code, false, true);
+    if (commands.length > 0) {
+      executeCommands(commands);
+    }
+    
+    setTimeout(() => {
+      setButtonBPressed(false);
+      buttonBRef.current = false;
+    }, 200);
+    
     if (onButtonPress) onButtonPress('B');
   };
 
