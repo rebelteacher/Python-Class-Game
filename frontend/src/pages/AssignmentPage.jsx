@@ -60,6 +60,10 @@ export default function AssignmentPage({ user }) {
   const [showProctorDialog, setShowProctorDialog] = useState(false);
   const [proctorCode, setProctorCode] = useState("");
   const [unlockingProblem, setUnlockingProblem] = useState(false);
+  
+  // Skill quiz state
+  const [showSkillQuiz, setShowSkillQuiz] = useState(false);
+  const [quizSkillCategory, setQuizSkillCategory] = useState("");
 
   // Get current problem's ID
   const getCurrentProblemId = () => {
