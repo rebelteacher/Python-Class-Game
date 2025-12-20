@@ -2603,3 +2603,19 @@ Changed the calculation to:
       - /microbit - Curriculum page
       - /library?type=microbit - Filtered library
       - /assignment/:id - Student assignment page
+
+  - task: "Skill Quiz Feature"
+    implemented: true
+    working: true
+    file: "backend/server.py, frontend/src/components/SkillQuizPopup.jsx, frontend/src/pages/SkillQuizManager.jsx"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: false
+    status_history:
+      - working: true
+        agent: "main"
+        comment: "Implemented complete Skill Quiz feature including: Backend - SkillQuizQuestion and SkillQuizAttempt models, CRUD endpoints for quiz questions, quiz submission and grading, results endpoint for teachers. Frontend - SkillQuizPopup component triggered after completing all problems in an assignment, SkillQuizManager page for teachers to manage questions and view results. Quiz popup shows after marking last problem as done, students see immediate results with explanations, teachers can export results to Excel."
+
+agent_communication:
+  - agent: "main"
+    message: "Implemented Skill Quiz feature as requested. Quiz popup triggers after student completes all problems in an assignment. Teachers can manage quiz questions via /skill-quiz-manager page. Created PROBLEM_TEMPLATE.md with templates for adding problems (16 per skill: 4 Class Practice, 4 Paired Programming, 4 Independent Practice, 4 Debugging). Backend endpoints tested and working."
