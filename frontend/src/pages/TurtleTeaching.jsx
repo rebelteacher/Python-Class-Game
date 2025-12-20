@@ -1,27 +1,18 @@
 import { useState, useEffect, useRef, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
-import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { 
   ArrowLeft, 
-  Play, 
   RotateCcw,
   Monitor,
-  Users,
   ChevronLeft,
   ChevronRight,
-  Download,
-  Maximize2,
-  BookOpen
+  Maximize2
 } from "lucide-react";
 import Editor from "@monaco-editor/react";
 import AnimatedTurtle from "@/components/AnimatedTurtle";
 import { ResizablePanelGroup, ResizablePanel, ResizableHandle } from "@/components/ui/resizable";
-
-const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
-const API = `${BACKEND_URL}/api`;
 
 // Teaching examples organized by concept
 const TEACHING_EXAMPLES = {
