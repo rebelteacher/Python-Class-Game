@@ -38,6 +38,105 @@ const defineCustomBlocks = () => {
     return `print(${value})\n`;
   };
 
+  // Custom comparison block with Python operators
+  Blockly.Blocks['compare_python'] = {
+    init: function() {
+      this.appendValueInput("A")
+          .setCheck(["Number", "String"]);
+      this.appendDummyInput()
+          .appendField(new Blockly.FieldDropdown([
+            ["==", "EQ"],
+            ["!=", "NEQ"],
+            ["<", "LT"],
+            ["<=", "LTE"],
+            [">", "GT"],
+            [">=", "GTE"]
+          ]), "OP");
+      this.appendValueInput("B")
+          .setCheck(["Number", "String"]);
+      this.setInputsInline(true);
+      this.setOutput(true, "Boolean");
+      this.setColour(210);
+      this.setTooltip("Compare two values using Python operators");
+    }
+  };
+
+  pythonGenerator.forBlock['compare_python'] = function(block, generator) {
+    const operators = {
+      'EQ': '==',
+      'NEQ': '!=',
+      'LT': '<',
+      'LTE': '<=',
+      'GT': '>',
+      'GTE': '>='
+    };
+    const op = operators[block.getFieldValue('OP')];
+    const a = generator.valueToCode(block, 'A', pythonGenerator.ORDER_RELATIONAL) || '0';
+    const b = generator.valueToCode(block, 'B', pythonGenerator.ORDER_RELATIONAL) || '0';
+    return [`${a} ${op} ${b}`, pythonGenerator.ORDER_RELATIONAL];
+  };
+
+  // Custom AND/OR block with Python keywords
+  Blockly.Blocks['logic_python'] = {
+    init: function() {
+      this.appendValueInput("A")
+          .setCheck("Boolean");
+      this.appendDummyInput()
+          .appendField(new Blockly.FieldDropdown([
+            ["and", "AND"],
+            ["or", "OR"]
+          ]), "OP");
+      this.appendValueInput("B")
+          .setCheck("Boolean");
+      this.setInputsInline(true);
+      this.setOutput(true, "Boolean");
+      this.setColour(210);
+      this.setTooltip("Combine conditions with and/or");
+    }
+  };
+
+  pythonGenerator.forBlock['logic_python'] = function(block, generator) {
+    const op = block.getFieldValue('OP') === 'AND' ? 'and' : 'or';
+    const a = generator.valueToCode(block, 'A', pythonGenerator.ORDER_LOGICAL_AND) || 'False';
+    const b = generator.valueToCode(block, 'B', pythonGenerator.ORDER_LOGICAL_AND) || 'False';
+    return [`${a} ${op} ${b}`, pythonGenerator.ORDER_LOGICAL_AND];
+  };
+
+  // Custom NOT block
+  Blockly.Blocks['not_python'] = {
+    init: function() {
+      this.appendValueInput("VALUE")
+          .setCheck("Boolean")
+          .appendField("not");
+      this.setOutput(true, "Boolean");
+      this.setColour(210);
+      this.setTooltip("Negate a boolean value");
+    }
+  };
+
+  pythonGenerator.forBlock['not_python'] = function(block, generator) {
+    const value = generator.valueToCode(block, 'VALUE', pythonGenerator.ORDER_LOGICAL_NOT) || 'False';
+    return [`not ${value}`, pythonGenerator.ORDER_LOGICAL_NOT];
+  };
+
+  // True/False block
+  Blockly.Blocks['boolean_python'] = {
+    init: function() {
+      this.appendDummyInput()
+          .appendField(new Blockly.FieldDropdown([
+            ["True", "TRUE"],
+            ["False", "FALSE"]
+          ]), "VALUE");
+      this.setOutput(true, "Boolean");
+      this.setColour(210);
+      this.setTooltip("True or False value");
+    }
+  };
+
+  pythonGenerator.forBlock['boolean_python'] = function(block) {
+    return [block.getFieldValue('VALUE') === 'TRUE' ? 'True' : 'False', pythonGenerator.ORDER_ATOMIC];
+  };
+
   // Input block
   Blockly.Blocks['input_text'] = {
     init: function() {
