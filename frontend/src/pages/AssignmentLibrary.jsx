@@ -614,6 +614,19 @@ export default function AssignmentLibrary({ user }) {
                     </div>
 
                     <div>
+                      <Label htmlFor="unit">Unit</Label>
+                      <Input
+                        data-testid="lib-unit-input"
+                        id="unit"
+                        placeholder="e.g., Unit 1, Unit 5"
+                        value={newProblem.unit}
+                        onChange={(e) => setNewProblem({ ...newProblem, unit: e.target.value })}
+                        className="mt-1"
+                      />
+                      <p className="text-xs text-gray-500 mt-1">High-level curriculum unit</p>
+                    </div>
+
+                    <div>
                       <Label htmlFor="chapter">Chapter (Optional)</Label>
                       <Input
                         data-testid="lib-chapter-input"
