@@ -7195,7 +7195,7 @@ x = 5 + 3
         quiz_response = self.run_test(
             "Get skill quiz questions",
             "GET",
-            "skill-quiz-questions",
+            "skill-quiz/questions",
             200
         )
         
