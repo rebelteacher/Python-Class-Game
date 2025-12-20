@@ -100,6 +100,7 @@ export default function AssignmentLibrary({ user }) {
   useEffect(() => {
     const typeFromUrl = searchParams.get("type");
     const categoryFromUrl = searchParams.get("category");
+    const chapterFromUrl = searchParams.get("chapter");
     
     if (typeFromUrl && typeFromUrl !== typeFilter) {
       setTypeFilter(typeFromUrl);
@@ -111,6 +112,10 @@ export default function AssignmentLibrary({ user }) {
     
     if (categoryFromUrl && categoryFromUrl !== categoryFilter) {
       setCategoryFilter(categoryFromUrl);
+    }
+    
+    if (chapterFromUrl && chapterFromUrl !== chapterFilter) {
+      setChapterFilter(chapterFromUrl);
     }
   }, [searchParams]);
 
