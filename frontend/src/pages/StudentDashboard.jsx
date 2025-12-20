@@ -496,6 +496,18 @@ export default function StudentDashboard({ user, setUser, refreshUser }) {
     return null; // Return null for default/no theme
   };
 
+  // Guard against undefined user - show loading state
+  if (!user || !userProfile) {
+    return (
+      <div data-testid="student-dashboard-loading" className="min-h-screen flex items-center justify-center bg-gradient-to-br from-green-50 via-teal-50 to-blue-50">
+        <div className="text-center">
+          <div className="text-xl text-gray-600 mb-2">Loading your dashboard...</div>
+          <div className="animate-spin w-8 h-8 border-4 border-teal-600 border-t-transparent rounded-full mx-auto"></div>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div 
       data-testid="student-dashboard" 
