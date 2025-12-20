@@ -79,7 +79,7 @@ const BLOCK_CURRICULUM = {
       ]
     },
     {
-      id: "unit4-2",
+      id: "unit1-2",
       title: "Chapter 2: Loops & Repetition",
       description: "Making code repeat with loop blocks",
       icon: "🔄",
@@ -125,7 +125,7 @@ const BLOCK_CURRICULUM = {
       ]
     },
     {
-      id: "unit4-3",
+      id: "unit1-3",
       title: "Chapter 3: Decisions & Logic",
       description: "Making programs that choose",
       icon: "🔀",
@@ -171,7 +171,7 @@ const BLOCK_CURRICULUM = {
       ]
     },
     {
-      id: "unit4-4",
+      id: "unit1-4",
       title: "Chapter 4: Variables & Data",
       description: "Storing and using information",
       icon: "📦",
@@ -217,7 +217,7 @@ const BLOCK_CURRICULUM = {
       ]
     },
     {
-      id: "unit4-5",
+      id: "unit1-5",
       title: "Chapter 5: Blocks to Text",
       description: "Preparing for text-based programming",
       icon: "🔄",
@@ -267,7 +267,7 @@ const BLOCK_CURRICULUM = {
 
 export default function BlockCurriculum({ user }) {
   const navigate = useNavigate();
-  const [expandedUnits, setExpandedUnits] = useState(new Set(["unit4-1"]));
+  const [expandedUnits, setExpandedUnits] = useState(new Set(["unit1-1"]));
   const [classrooms, setClassrooms] = useState([]);
   const [showAssignDialog, setShowAssignDialog] = useState(false);
   const [selectedLesson, setSelectedLesson] = useState(null);
