@@ -396,28 +396,27 @@ export default function TeacherDashboard({ user, setUser }) {
             </CardContent>
           </Card>
         </div>
-      </div>
 
-      {/* Classrooms Section - moved below curriculum cards */}
-      <main className="max-w-6xl mx-auto px-4">
-        <div className="flex justify-between items-center mb-8">
-          <div>
-            <h1 className="text-4xl font-bold text-gray-900 mb-2">My Classrooms</h1>
-            <p className="text-gray-600">Manage your classrooms and assignments</p>
-          </div>
-          <Dialog open={createDialogOpen} onOpenChange={setCreateDialogOpen}>
-            <DialogTrigger asChild>
-              <Button data-testid="create-classroom-btn" className="bg-gradient-to-r from-orange-500 to-pink-500 hover:from-orange-600 hover:to-pink-600 gap-2 shadow-lg">
-                <Plus className="w-5 h-5" />
-                Create Classroom
-              </Button>
-            </DialogTrigger>
-            <DialogContent data-testid="create-classroom-dialog">
-              <DialogHeader>
-                <DialogTitle>Create New Classroom</DialogTitle>
-                <DialogDescription>
-                  Enter a name for your new classroom. A unique class code will be generated.
-                </DialogDescription>
+        {/* Classrooms Section */}
+        <div className="mt-6">
+          <div className="flex justify-between items-center mb-8">
+            <div>
+              <h1 className="text-3xl font-bold text-gray-900 mb-2">My Classrooms</h1>
+              <p className="text-gray-600">Manage your classrooms and assignments</p>
+            </div>
+            <Dialog open={createDialogOpen} onOpenChange={setCreateDialogOpen}>
+              <DialogTrigger asChild>
+                <Button data-testid="create-classroom-btn" className="bg-gradient-to-r from-orange-500 to-pink-500 hover:from-orange-600 hover:to-pink-600 gap-2 shadow-lg">
+                  <Plus className="w-5 h-5" />
+                  Create Classroom
+                </Button>
+              </DialogTrigger>
+              <DialogContent data-testid="create-classroom-dialog">
+                <DialogHeader>
+                  <DialogTitle>Create New Classroom</DialogTitle>
+                  <DialogDescription>
+                    Enter a name for your new classroom. A unique class code will be generated.
+                  </DialogDescription>
               </DialogHeader>
               <form onSubmit={handleCreateClassroom} className="space-y-4">
                 <div>
