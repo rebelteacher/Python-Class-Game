@@ -361,14 +361,10 @@ export default function AnimatedTurtle({ code, onLineHighlight, width = 400, hei
     if (onLineHighlight) onLineHighlight(-1);
   }, [drawCanvas, onLineHighlight]);
   
-  // Parse code into commands (memoized)
-  const parsedCommands = useMemo(() => parseCode(code), [code]);
-  
-  // Update commands and reset when code changes
+  // Reset when code changes
   useEffect(() => {
-    setCommands(parsedCommands);
     resetTurtle();
-  }, [parsedCommands, resetTurtle]);
+  }, [code, resetTurtle]);
   
   // Initial draw
   useEffect(() => {
