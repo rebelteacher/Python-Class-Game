@@ -182,7 +182,7 @@ export default function TeacherDashboard({ user, setUser }) {
             <span className="text-lg font-medium text-white">{user.name}</span>
           </div>
           
-          {/* Row 2: Navigation Buttons */}
+          {/* Row 2: Essential Navigation */}
           <div className="flex items-center justify-end space-x-2 flex-wrap gap-y-2">
             {user.is_admin && (
               <Button data-testid="admin-nav-btn" onClick={() => navigate("/admin-dashboard")} variant="outline" size="sm" className="gap-2 border-white/30 text-white hover:bg-white/20 bg-white/10">
@@ -194,63 +194,11 @@ export default function TeacherDashboard({ user, setUser }) {
               <BookOpen className="w-4 h-4" />
               Library
             </Button>
-            <Button onClick={() => navigate("/question-bank")} variant="outline" size="sm" className="gap-2 border-white/30 text-white hover:bg-white/20 bg-white/10">
-              <FileQuestion className="w-4 h-4" />
-              Question Bank
-            </Button>
-            <Button onClick={() => navigate("/test-builder")} variant="outline" size="sm" className="gap-2 border-white/30 text-white hover:bg-white/20 bg-white/10">
-              <FileQuestion className="w-4 h-4" />
-              MC Test Builder
-            </Button>
-            <Button onClick={() => navigate("/coding-tests")} variant="outline" size="sm" className="gap-2 border-white/30 text-white hover:bg-white/20 bg-white/10">
-              <Code2 className="w-4 h-4" />
-              Coding Tests
-            </Button>
-            <Button onClick={() => navigate("/notes")} variant="outline" size="sm" className="gap-2 border-white/30 text-white hover:bg-white/20 bg-white/10">
-              <FileText className="w-4 h-4" />
-              Notes
-            </Button>
-            <Button onClick={() => navigate("/video-library")} variant="outline" size="sm" className="gap-2 border-white/30 text-white hover:bg-white/20 bg-white/10">
-              <Video className="w-4 h-4" />
-              Video Library
-            </Button>
-            <Button onClick={() => navigate("/python-curriculum")} variant="outline" size="sm" className="gap-2 border-blue-300 text-blue-100 hover:bg-blue-500/30 bg-blue-500/20">
-              🐍
-              Python
-            </Button>
-            <Button onClick={() => navigate("/blocks-curriculum")} variant="outline" size="sm" className="gap-2 border-purple-300 text-purple-100 hover:bg-purple-500/30 bg-purple-500/20">
-              🧱
-              Blocks
-            </Button>
-            <Button onClick={() => navigate("/turtle-curriculum")} variant="outline" size="sm" className="gap-2 border-green-300 text-green-100 hover:bg-green-500/30 bg-green-500/20">
-              🐢
-              Turtle
-            </Button>
-            <Button onClick={() => navigate("/microbit")} variant="outline" size="sm" className="gap-2 border-cyan-300 text-cyan-100 hover:bg-cyan-500/30 bg-cyan-500/20">
-              <Cpu className="w-4 h-4" />
-              Micro:bit
-            </Button>
-            <Button onClick={() => navigate("/skill-quiz-manager")} variant="outline" size="sm" className="gap-2 border-pink-300 text-pink-100 hover:bg-pink-500/30 bg-pink-500/20">
-              🧠
-              Skill Quiz
-            </Button>
-            <WhatsNew />
             <Button data-testid="reports-nav-btn" onClick={() => navigate("/teacher-reports")} variant="outline" size="sm" className="gap-2 border-white/30 text-white hover:bg-white/20 bg-white/10">
               <FileSpreadsheet className="w-4 h-4" />
               Reports
             </Button>
-            <Button onClick={() => navigate("/test-reports")} variant="outline" size="sm" className="gap-2 border-white/30 text-white hover:bg-white/20 bg-white/10">
-              <FileSpreadsheet className="w-4 h-4" />
-              Test Reports
-            </Button>
-            <Button onClick={() => navigate("/teacher/competitions")} variant="outline" size="sm" className="gap-2 border-white/30 text-white hover:bg-white/20 bg-white/10">
-              <Trophy className="w-4 h-4" />
-              Competitions
-            </Button>
-            <Button onClick={() => navigate("/teacher/challenge-pool")} variant="outline" size="sm" className="gap-2 border-white/30 text-white hover:bg-white/20 bg-white/10">
-              <Trophy className="w-4 h-4" />
-              Challenge Pool
-            </Button>
+            <WhatsNew />
             {user?.is_admin && (
               <Button 
                 onClick={() => navigate("/admin/messages")} 
@@ -269,7 +217,7 @@ export default function TeacherDashboard({ user, setUser }) {
             )}
             <Button data-testid="switch-role-btn" onClick={handleSwitchToStudent} variant="outline" size="sm" className="gap-2 border-white/30 text-white hover:bg-white/20 bg-white/10">
               <RefreshCw className="w-4 h-4" />
-              Switch to Student
+              Student View
             </Button>
             <Button data-testid="logout-btn" onClick={handleLogout} variant="outline" size="sm" className="gap-2 border-white/30 text-white hover:bg-white/20 bg-white/10">
               <LogOut className="w-4 h-4" />
@@ -279,7 +227,131 @@ export default function TeacherDashboard({ user, setUser }) {
         </div>
       </nav>
 
-      <main className="container mx-auto px-6 py-10">
+      {/* Curriculum Cards Section */}
+      <div className="max-w-6xl mx-auto px-4 -mt-8 relative z-10">
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
+          {/* Unit 1: Blocks */}
+          <Card 
+            className="bg-gradient-to-br from-purple-500 to-indigo-600 text-white cursor-pointer hover:shadow-xl transition-all hover:scale-105 border-0"
+            onClick={() => navigate("/blocks-curriculum")}
+          >
+            <CardContent className="p-6 text-center">
+              <div className="text-4xl mb-2">🧱</div>
+              <h3 className="font-bold text-lg">Unit 1</h3>
+              <p className="text-purple-100 text-sm">Block-Based Coding</p>
+              <p className="text-xs text-purple-200 mt-2">Visual Programming</p>
+            </CardContent>
+          </Card>
+
+          {/* Unit 2: Python */}
+          <Card 
+            className="bg-gradient-to-br from-blue-500 to-blue-700 text-white cursor-pointer hover:shadow-xl transition-all hover:scale-105 border-0"
+            onClick={() => navigate("/python-curriculum")}
+          >
+            <CardContent className="p-6 text-center">
+              <div className="text-4xl mb-2">🐍</div>
+              <h3 className="font-bold text-lg">Unit 2</h3>
+              <p className="text-blue-100 text-sm">Python Text</p>
+              <p className="text-xs text-blue-200 mt-2">Text-Based Programming</p>
+            </CardContent>
+          </Card>
+
+          {/* Unit 3: Turtle */}
+          <Card 
+            className="bg-gradient-to-br from-green-500 to-emerald-600 text-white cursor-pointer hover:shadow-xl transition-all hover:scale-105 border-0"
+            onClick={() => navigate("/turtle-curriculum")}
+          >
+            <CardContent className="p-6 text-center">
+              <div className="text-4xl mb-2">🐢</div>
+              <h3 className="font-bold text-lg">Unit 3</h3>
+              <p className="text-green-100 text-sm">Turtle Graphics</p>
+              <p className="text-xs text-green-200 mt-2">Visual Output</p>
+            </CardContent>
+          </Card>
+
+          {/* Unit 4: Micro:bit */}
+          <Card 
+            className="bg-gradient-to-br from-cyan-500 to-teal-600 text-white cursor-pointer hover:shadow-xl transition-all hover:scale-105 border-0"
+            onClick={() => navigate("/microbit")}
+          >
+            <CardContent className="p-6 text-center">
+              <div className="text-4xl mb-2">⚡</div>
+              <h3 className="font-bold text-lg">Unit 4</h3>
+              <p className="text-cyan-100 text-sm">Micro:bit</p>
+              <p className="text-xs text-cyan-200 mt-2">Physical Computing</p>
+            </CardContent>
+          </Card>
+        </div>
+
+        {/* Tools & Reports Row */}
+        <div className="grid grid-cols-2 gap-4 mb-6">
+          {/* Tools Section */}
+          <Card className="bg-white/95 backdrop-blur">
+            <CardHeader className="pb-2">
+              <CardTitle className="text-sm font-medium text-gray-600">🛠️ Tools</CardTitle>
+            </CardHeader>
+            <CardContent className="pt-0">
+              <div className="flex flex-wrap gap-2">
+                <Button variant="outline" size="sm" onClick={() => navigate("/question-bank")} className="text-xs">
+                  <FileQuestion className="w-3 h-3 mr-1" />
+                  Question Bank
+                </Button>
+                <Button variant="outline" size="sm" onClick={() => navigate("/test-builder")} className="text-xs">
+                  <FileQuestion className="w-3 h-3 mr-1" />
+                  MC Test Builder
+                </Button>
+                <Button variant="outline" size="sm" onClick={() => navigate("/coding-tests")} className="text-xs">
+                  <Code2 className="w-3 h-3 mr-1" />
+                  Coding Tests
+                </Button>
+                <Button variant="outline" size="sm" onClick={() => navigate("/skill-quiz-manager")} className="text-xs">
+                  🧠
+                  Skill Quizzes
+                </Button>
+                <Button variant="outline" size="sm" onClick={() => navigate("/notes")} className="text-xs">
+                  <FileText className="w-3 h-3 mr-1" />
+                  Notes
+                </Button>
+                <Button variant="outline" size="sm" onClick={() => navigate("/video-library")} className="text-xs">
+                  <Video className="w-3 h-3 mr-1" />
+                  Videos
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Reports Section */}
+          <Card className="bg-white/95 backdrop-blur">
+            <CardHeader className="pb-2">
+              <CardTitle className="text-sm font-medium text-gray-600">📊 Reports & Competitions</CardTitle>
+            </CardHeader>
+            <CardContent className="pt-0">
+              <div className="flex flex-wrap gap-2">
+                <Button variant="outline" size="sm" onClick={() => navigate("/teacher-reports")} className="text-xs">
+                  <FileSpreadsheet className="w-3 h-3 mr-1" />
+                  Student Reports
+                </Button>
+                <Button variant="outline" size="sm" onClick={() => navigate("/test-reports")} className="text-xs">
+                  <FileSpreadsheet className="w-3 h-3 mr-1" />
+                  Test Reports
+                </Button>
+                <Button variant="outline" size="sm" onClick={() => navigate("/teacher/competitions")} className="text-xs">
+                  <Trophy className="w-3 h-3 mr-1" />
+                  Competitions
+                </Button>
+                <Button variant="outline" size="sm" onClick={() => navigate("/teacher/challenge-pool")} className="text-xs">
+                  <Trophy className="w-3 h-3 mr-1" />
+                  Challenge Pool
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+      </div>
+
+      {/* Classrooms Section - moved below curriculum cards */}
+      <div className="max-w-6xl mx-auto px-4">
+        <main className="container mx-auto px-6 py-10">
         <div className="flex justify-between items-center mb-8">
           <div>
             <h1 className="text-4xl font-bold text-gray-900 mb-2">My Classrooms</h1>
