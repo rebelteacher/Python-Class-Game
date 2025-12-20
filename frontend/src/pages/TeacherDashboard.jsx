@@ -167,72 +167,119 @@ export default function TeacherDashboard({ user, setUser }) {
   };
 
   return (
-    <div data-testid="teacher-dashboard" className="min-h-screen bg-gradient-to-br from-teal-50 via-orange-50 to-pink-50">
-      <nav className="bg-gradient-to-r from-teal-600 via-cyan-600 to-blue-600 shadow-lg">
-        <div className="px-6 py-3">
-          {/* Row 1: Branding and User Info */}
-          <div className="flex justify-between items-center mb-3">
-            <div className="flex items-center space-x-2">
-              <Code2 className="w-7 h-7 text-white" />
-              <span className="text-xl font-bold text-white">ByteBattles Arena</span>
-              <span className="ml-4 px-3 py-1 bg-white/20 backdrop-blur-sm text-white text-sm font-medium rounded-full border border-white/30">
+    <div data-testid="teacher-dashboard" className="min-h-screen bg-gradient-to-br from-teal-50 via-orange-50 to-pink-50 flex">
+      {/* Left Sidebar */}
+      <aside className="w-48 bg-gradient-to-b from-teal-700 via-cyan-700 to-blue-700 min-h-screen flex flex-col py-4 px-3 shadow-lg">
+        {/* Logo */}
+        <div className="flex items-center gap-2 mb-6 px-2">
+          <Code2 className="w-6 h-6 text-white" />
+          <span className="text-sm font-bold text-white">ByteBattles</span>
+        </div>
+        
+        {/* Nav Links */}
+        <nav className="flex-1 space-y-1">
+          {user.is_admin && (
+            <Button 
+              data-testid="admin-nav-btn" 
+              onClick={() => navigate("/admin-dashboard")} 
+              variant="ghost"
+              className="w-full justify-start gap-2 text-white hover:bg-white/20 text-sm"
+            >
+              <Shield className="w-4 h-4 text-yellow-300" />
+              Admin
+            </Button>
+          )}
+          <Button 
+            data-testid="library-nav-btn" 
+            onClick={() => navigate("/library")} 
+            variant="ghost"
+            className="w-full justify-start gap-2 text-white hover:bg-white/20 text-sm"
+          >
+            <BookOpen className="w-4 h-4" />
+            Library
+          </Button>
+          <Button 
+            data-testid="reports-nav-btn" 
+            onClick={() => navigate("/teacher-reports")} 
+            variant="ghost"
+            className="w-full justify-start gap-2 text-white hover:bg-white/20 text-sm"
+          >
+            <FileSpreadsheet className="w-4 h-4" />
+            Reports
+          </Button>
+          {user?.is_admin && (
+            <Button 
+              onClick={() => navigate("/admin/messages")} 
+              variant="ghost"
+              className="w-full justify-start gap-2 text-white hover:bg-white/20 text-sm relative"
+            >
+              <Bell className="w-4 h-4" />
+              Messages
+              {unreadCount > 0 && (
+                <span className="ml-auto bg-red-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center">
+                  {unreadCount}
+                </span>
+              )}
+            </Button>
+          )}
+          
+          <div className="border-t border-white/20 my-3"></div>
+          
+          <Button 
+            data-testid="switch-role-btn" 
+            onClick={handleSwitchToStudent} 
+            variant="ghost"
+            className="w-full justify-start gap-2 text-white hover:bg-white/20 text-sm"
+          >
+            <RefreshCw className="w-4 h-4" />
+            Student View
+          </Button>
+        </nav>
+        
+        {/* Bottom - User & Logout */}
+        <div className="border-t border-white/20 pt-3 mt-auto">
+          <div className="px-2 mb-2">
+            <p className="text-white/70 text-xs">Logged in as</p>
+            <p className="text-white text-sm font-medium truncate">{user.name}</p>
+          </div>
+          <Button 
+            data-testid="logout-btn" 
+            onClick={handleLogout} 
+            variant="ghost"
+            className="w-full justify-start gap-2 text-red-300 hover:bg-red-500/20 hover:text-red-200 text-sm"
+          >
+            <LogOut className="w-4 h-4" />
+            Logout
+          </Button>
+        </div>
+      </aside>
+
+      {/* Main Content */}
+      <div className="flex-1 overflow-auto">
+        {/* Header */}
+        <header className="bg-gradient-to-r from-teal-600 via-cyan-600 to-blue-600 shadow-lg px-6 py-4">
+          <div className="flex justify-between items-center">
+            <div>
+              <h1 className="text-2xl font-bold text-white">Teacher Dashboard</h1>
+              <p className="text-teal-100 text-sm">Manage your classes and curriculum</p>
+            </div>
+            <div className="flex items-center gap-3">
+              <WhatsNew />
+              <span className="px-3 py-1 bg-white/20 backdrop-blur-sm text-white text-sm font-medium rounded-full border border-white/30">
                 Teacher
               </span>
             </div>
-            <span className="text-lg font-medium text-white">{user.name}</span>
           </div>
-          
-          {/* Row 2: Essential Navigation */}
-          <div className="flex items-center justify-end space-x-3 flex-wrap gap-y-2">
-            {user.is_admin && (
-              <Button data-testid="admin-nav-btn" onClick={() => navigate("/admin-dashboard")} className="gap-2 bg-yellow-500/80 hover:bg-yellow-600 text-white border-0 font-medium">
-                <Shield className="w-4 h-4" />
-                Admin
-              </Button>
-            )}
-            <Button data-testid="library-nav-btn" onClick={() => navigate("/library")} className="gap-2 bg-white/20 hover:bg-white/30 text-white border-0 font-medium">
-              <BookOpen className="w-4 h-4" />
-              Library
-            </Button>
-            <Button data-testid="reports-nav-btn" onClick={() => navigate("/teacher-reports")} className="gap-2 bg-white/20 hover:bg-white/30 text-white border-0 font-medium">
-              <FileSpreadsheet className="w-4 h-4" />
-              Reports
-            </Button>
-            <WhatsNew />
-            {user?.is_admin && (
-              <Button 
-                onClick={() => navigate("/admin/messages")} 
-                className="gap-2 bg-white/20 hover:bg-white/30 text-white border-0 font-medium relative"
-              >
-                <Bell className="w-4 h-4" />
-                Messages
-                {unreadCount > 0 && (
-                  <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center">
-                    {unreadCount}
-                  </span>
-                )}
-              </Button>
-            )}
-            <Button data-testid="switch-role-btn" onClick={handleSwitchToStudent} className="gap-2 bg-white/20 hover:bg-white/30 text-white border-0 font-medium">
-              <RefreshCw className="w-4 h-4" />
-              Student View
-            </Button>
-            <Button data-testid="logout-btn" onClick={handleLogout} className="gap-2 bg-red-500/80 hover:bg-red-600 text-white border-0 font-medium">
-              <LogOut className="w-4 h-4" />
-              Logout
-            </Button>
-          </div>
-        </div>
-      </nav>
+        </header>
 
-      {/* Curriculum Cards Section */}
-      <div className="max-w-6xl mx-auto px-4 -mt-8 relative z-10">
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
-          {/* Unit 1: Blocks */}
-          <Card 
-            className="bg-gradient-to-br from-purple-500 to-indigo-600 text-white cursor-pointer hover:shadow-xl transition-all hover:scale-105 border-0"
-            onClick={() => navigate("/blocks-curriculum")}
-          >
+        {/* Curriculum Cards Section */}
+        <div className="max-w-6xl mx-auto px-6 py-6">
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
+            {/* Unit 1: Blocks */}
+            <Card 
+              className="bg-gradient-to-br from-purple-500 to-indigo-600 text-white cursor-pointer hover:shadow-xl transition-all hover:scale-105 border-0"
+              onClick={() => navigate("/blocks-curriculum")}
+            >
             <CardContent className="p-6 text-center">
               <div className="text-4xl mb-2">🧱</div>
               <h3 className="font-bold text-lg">Unit 1</h3>
