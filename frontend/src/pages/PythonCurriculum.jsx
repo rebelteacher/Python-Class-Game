@@ -33,121 +33,513 @@ import {
 const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
 const API = `${BACKEND_URL}/api`;
 
-// Python curriculum structure - can be extended with new chapters
+// Python curriculum structure - matching Python Library curriculum
 const DEFAULT_PYTHON_CURRICULUM = {
   units: [
     {
       id: "chapter1",
-      title: "Chapter 1: Output & Print",
-      description: "Learn to display text and communicate with the user",
+      title: "Chapter 1: Printing",
+      description: "Master the print() function and output formatting",
       icon: "🖨️",
       color: "from-blue-500 to-indigo-500",
-      weeks: "Week 1-2",
+      weeks: "Week 1-3",
       lessons: [
         {
           id: "lesson1",
-          title: "Your First Program",
+          title: "Intro to Print",
           type: "Introduction",
           duration: "30 min",
-          objectives: [
-            "Understand what programming is",
-            "Write your first print statement",
-            "Run a Python program"
-          ],
+          objectives: ["Write your first print statement", "Understand print() syntax", "Display text on screen"],
           dokLevel: 1
         },
         {
           id: "lesson2",
-          title: "Print Multiple Lines",
+          title: "Numbers",
           type: "Code",
-          duration: "45 min",
-          objectives: [
-            "Use multiple print statements",
-            "Understand program flow (top to bottom)",
-            "Format output with blank lines"
-          ],
-          dokLevel: 2
+          duration: "30 min",
+          objectives: ["Print numbers without quotes", "Understand integers vs strings", "Perform basic calculations in print"],
+          dokLevel: 1
         },
         {
           id: "lesson3",
-          title: "Print with Strings",
-          type: "Practice",
-          duration: "45 min",
-          objectives: [
-            "Use single and double quotes",
-            "Print special characters",
-            "Combine text in print statements"
-          ],
+          title: "Multi Line Print",
+          type: "Code",
+          duration: "30 min",
+          objectives: ["Use multiple print statements", "Understand program flow", "Create multi-line output"],
           dokLevel: 2
         },
         {
           id: "lesson4",
-          title: "Debugging Print Errors",
-          type: "Debugging",
+          title: "Multiple Print Arguments",
+          type: "Code",
           duration: "30 min",
-          objectives: [
-            "Identify common syntax errors",
-            "Fix missing quotes and parentheses",
-            "Read error messages"
-          ],
+          objectives: ["Use commas to separate arguments", "Understand automatic spacing", "Mix text and numbers"],
+          dokLevel: 2
+        },
+        {
+          id: "lesson5",
+          title: "Variables",
+          type: "Code",
+          duration: "45 min",
+          objectives: ["Store values in variables", "Print variable values", "Use descriptive variable names"],
+          dokLevel: 2
+        },
+        {
+          id: "lesson6",
+          title: "New Line Escape",
+          type: "Code",
+          duration: "30 min",
+          objectives: ["Use \\n for new lines", "Create formatted output", "Understand escape sequences"],
+          dokLevel: 2
+        },
+        {
+          id: "lesson7",
+          title: "Tab Escape",
+          type: "Code",
+          duration: "30 min",
+          objectives: ["Use \\t for tabs", "Align output in columns", "Format data tables"],
+          dokLevel: 2
+        },
+        {
+          id: "lesson8",
+          title: "Escape Quotations",
+          type: "Code",
+          duration: "30 min",
+          objectives: ["Use \\\\ to escape quotes", "Print quotes inside strings", "Mix quote styles"],
+          dokLevel: 2
+        },
+        {
+          id: "lesson9",
+          title: "Triple Quotes",
+          type: "Code",
+          duration: "30 min",
+          objectives: ["Use triple quotes for multi-line strings", "Preserve formatting", "Create text blocks"],
+          dokLevel: 2
+        },
+        {
+          id: "lesson10",
+          title: "end, sep, custom",
+          type: "Code",
+          duration: "45 min",
+          objectives: ["Use end parameter", "Use sep parameter", "Customize print output"],
+          dokLevel: 3
+        },
+        {
+          id: "lesson11",
+          title: "Concatenation",
+          type: "Code",
+          duration: "30 min",
+          objectives: ["Join strings with +", "Combine variables and text", "Build dynamic messages"],
+          dokLevel: 2
+        },
+        {
+          id: "lesson12",
+          title: "f-strings",
+          type: "Code",
+          duration: "45 min",
+          objectives: ["Use f-string syntax", "Embed variables in strings", "Format expressions inline"],
           dokLevel: 3
         }
       ]
     },
     {
       id: "chapter2",
-      title: "Chapter 2: Strings & Text",
-      description: "Work with text data and string manipulation",
+      title: "Chapter 2: Variables and Input",
+      description: "Work with variables, data types, and user input",
       icon: "📝",
       color: "from-green-500 to-emerald-500",
-      weeks: "Week 3-4",
+      weeks: "Week 4-5",
       lessons: [
         {
           id: "lesson1",
-          title: "String Basics",
-          type: "Code",
+          title: "Intro to Variables",
+          type: "Introduction",
           duration: "45 min",
-          objectives: [
-            "Create and store strings",
-            "Understand string data type",
-            "Use variables with strings"
-          ],
+          objectives: ["Understand variable assignment", "Use = operator", "Store different types of data"],
           dokLevel: 2
         },
         {
           id: "lesson2",
-          title: "String Concatenation",
-          type: "Practice",
+          title: "Data Types",
+          type: "Code",
           duration: "45 min",
-          objectives: [
-            "Join strings with +",
-            "Combine strings and variables",
-            "Build dynamic messages"
-          ],
+          objectives: ["Identify int, str, float, bool", "Use type() function", "Understand type differences"],
           dokLevel: 2
         },
         {
           id: "lesson3",
-          title: "Multiple Print Arguments",
+          title: "String Conversion",
           type: "Code",
-          duration: "45 min",
-          objectives: [
-            "Use commas in print()",
-            "Mix strings and variables",
-            "Understand automatic spacing"
-          ],
+          duration: "30 min",
+          objectives: ["Convert between types", "Use int(), str(), float()", "Handle conversion errors"],
           dokLevel: 2
         },
         {
           id: "lesson4",
-          title: "Custom Separator (sep)",
+          title: "upper, lower, title",
+          type: "Code",
+          duration: "30 min",
+          objectives: ["Use .upper() method", "Use .lower() method", "Use .title() method"],
+          dokLevel: 2
+        },
+        {
+          id: "lesson5",
+          title: "strip, lstrip, rstrip",
+          type: "Code",
+          duration: "30 min",
+          objectives: ["Remove whitespace with strip()", "Use lstrip() for left side", "Use rstrip() for right side"],
+          dokLevel: 2
+        },
+        {
+          id: "lesson6",
+          title: "replace, count, capitalize",
+          type: "Code",
+          duration: "30 min",
+          objectives: ["Use .replace() to swap text", "Use .count() to find occurrences", "Use .capitalize()"],
+          dokLevel: 2
+        },
+        {
+          id: "lesson7",
+          title: "Chaining Methods",
+          type: "Practice",
+          duration: "30 min",
+          objectives: ["Chain multiple methods together", "Understand method order", "Create efficient code"],
+          dokLevel: 3
+        },
+        {
+          id: "lesson8",
+          title: "Input",
+          type: "Code",
+          duration: "45 min",
+          objectives: ["Use input() function", "Store user responses", "Create interactive programs"],
+          dokLevel: 2
+        }
+      ]
+    },
+    {
+      id: "chapter3",
+      title: "Chapter 3: Python Math",
+      description: "Perform calculations and mathematical operations",
+      icon: "🔢",
+      color: "from-orange-500 to-red-500",
+      weeks: "Week 6-7",
+      lessons: [
+        {
+          id: "lesson1",
+          title: "Variable Math",
+          type: "Code",
+          duration: "45 min",
+          objectives: ["Add, subtract, multiply, divide", "Use variables in calculations", "Store results in variables"],
+          dokLevel: 2
+        },
+        {
+          id: "lesson2",
+          title: "Type Conversion",
+          type: "Code",
+          duration: "30 min",
+          objectives: ["Convert strings to numbers", "Handle input for math", "Avoid type errors"],
+          dokLevel: 2
+        },
+        {
+          id: "lesson3",
+          title: "String Math",
+          type: "Code",
+          duration: "30 min",
+          objectives: ["Multiply strings", "Understand string repetition", "Combine with numbers"],
+          dokLevel: 2
+        },
+        {
+          id: "lesson4",
+          title: "Reassignment",
+          type: "Code",
+          duration: "30 min",
+          objectives: ["Change variable values", "Update based on current value", "Track value changes"],
+          dokLevel: 2
+        },
+        {
+          id: "lesson5",
+          title: "Augmentation",
+          type: "Code",
+          duration: "30 min",
+          objectives: ["Use += operator", "Use -=, *=, /= operators", "Write shorter code"],
+          dokLevel: 2
+        },
+        {
+          id: "lesson6",
+          title: "Booleans",
+          type: "Code",
+          duration: "30 min",
+          objectives: ["Understand True and False", "Use comparison operators", "Evaluate boolean expressions"],
+          dokLevel: 2
+        }
+      ]
+    },
+    {
+      id: "chapter4",
+      title: "Chapter 4: Conditionals",
+      description: "Make decisions in your code with if statements",
+      icon: "🔀",
+      color: "from-cyan-500 to-blue-500",
+      weeks: "Week 8-9",
+      lessons: [
+        {
+          id: "lesson1",
+          title: "if only",
+          type: "Introduction",
+          duration: "45 min",
+          objectives: ["Write basic if statements", "Use comparison operators", "Understand indentation"],
+          dokLevel: 2
+        },
+        {
+          id: "lesson2",
+          title: "if/else",
+          type: "Code",
+          duration: "45 min",
+          objectives: ["Add else clause", "Handle two outcomes", "Create branching logic"],
+          dokLevel: 2
+        },
+        {
+          id: "lesson3",
+          title: "if/elif/else",
+          type: "Code",
+          duration: "45 min",
+          objectives: ["Use elif for multiple conditions", "Check conditions in order", "Create grading programs"],
+          dokLevel: 3
+        },
+        {
+          id: "lesson4a",
+          title: "if with AND pt 1",
+          type: "Code",
+          duration: "30 min",
+          objectives: ["Use 'and' operator", "Require multiple conditions", "Build complex checks"],
+          dokLevel: 3
+        },
+        {
+          id: "lesson4b",
+          title: "if with AND pt 2",
+          type: "Practice",
+          duration: "30 min",
+          objectives: ["Practice AND conditions", "Combine multiple checks", "Debug AND logic"],
+          dokLevel: 3
+        },
+        {
+          id: "lesson5",
+          title: "if with OR",
+          type: "Code",
+          duration: "30 min",
+          objectives: ["Use 'or' operator", "Allow alternative conditions", "Create flexible checks"],
+          dokLevel: 3
+        },
+        {
+          id: "lesson6",
+          title: "if with AND/OR",
+          type: "Code",
+          duration: "45 min",
+          objectives: ["Combine AND and OR", "Use parentheses for clarity", "Build complex logic"],
+          dokLevel: 3
+        },
+        {
+          id: "lesson7",
+          title: "if/elif/else with AND/OR",
           type: "Practice",
           duration: "45 min",
-          objectives: [
-            "Use sep parameter",
-            "Create formatted output",
-            "Customize output appearance"
-          ],
+          objectives: ["Combine all conditional concepts", "Create decision trees", "Build real-world programs"],
+          dokLevel: 4
+        },
+        {
+          id: "lesson8",
+          title: "Chained Comparison",
+          type: "Code",
+          duration: "30 min",
+          objectives: ["Use chained comparisons", "Check ranges efficiently", "Write cleaner code"],
+          dokLevel: 3
+        }
+      ]
+    },
+    {
+      id: "chapter5",
+      title: "Chapter 5: Lists",
+      description: "Store and manage collections of data",
+      icon: "📋",
+      color: "from-violet-500 to-purple-500",
+      weeks: "Week 10-11",
+      lessons: [
+        {
+          id: "lesson1",
+          title: "Intro to Lists",
+          type: "Introduction",
+          duration: "45 min",
+          objectives: ["Create lists with []", "Store multiple values", "Understand list structure"],
+          dokLevel: 2
+        },
+        {
+          id: "lesson2",
+          title: "Get a list element",
+          type: "Code",
+          duration: "30 min",
+          objectives: ["Use index notation []", "Access by position", "Understand zero-indexing"],
+          dokLevel: 2
+        },
+        {
+          id: "lesson3",
+          title: "Change a list element",
+          type: "Code",
+          duration: "30 min",
+          objectives: ["Modify list items", "Assign new values by index", "Update list contents"],
+          dokLevel: 2
+        },
+        {
+          id: "lesson4",
+          title: "Add elements",
+          type: "Code",
+          duration: "30 min",
+          objectives: ["Use append() method", "Use insert() method", "Grow lists dynamically"],
+          dokLevel: 2
+        },
+        {
+          id: "lesson5",
+          title: "Remove elements",
+          type: "Code",
+          duration: "30 min",
+          objectives: ["Use remove() method", "Use pop() method", "Delete by value or index"],
+          dokLevel: 2
+        },
+        {
+          id: "lesson6",
+          title: "Sorting",
+          type: "Code",
+          duration: "30 min",
+          objectives: ["Use sort() method", "Use reverse() method", "Organize list data"],
+          dokLevel: 2
+        },
+        {
+          id: "lesson7",
+          title: "List Length",
+          type: "Code",
+          duration: "30 min",
+          objectives: ["Use len() function", "Count list items", "Check list size"],
+          dokLevel: 2
+        },
+        {
+          id: "lesson8",
+          title: "Count occurrences in lists",
+          type: "Code",
+          duration: "30 min",
+          objectives: ["Use count() method", "Find duplicates", "Analyze list contents"],
+          dokLevel: 2
+        }
+      ]
+    },
+    {
+      id: "chapter6",
+      title: "Chapter 6: Loops",
+      description: "Repeat actions efficiently with for and while loops",
+      icon: "🔁",
+      color: "from-teal-500 to-green-500",
+      weeks: "Week 12-13",
+      lessons: [
+        {
+          id: "lesson1",
+          title: "Intro to loops",
+          type: "Introduction",
+          duration: "45 min",
+          objectives: ["Understand loop concept", "Identify repetition patterns", "Recognize loop benefits"],
+          dokLevel: 2
+        },
+        {
+          id: "lesson2",
+          title: "for + range()",
+          type: "Code",
+          duration: "45 min",
+          objectives: ["Use for loop syntax", "Use range() function", "Control loop iterations"],
+          dokLevel: 2
+        },
+        {
+          id: "lesson3",
+          title: "while infinite",
+          type: "Code",
+          duration: "30 min",
+          objectives: ["Create while True loops", "Understand infinite loops", "Use break to exit"],
+          dokLevel: 3
+        },
+        {
+          id: "lesson4",
+          title: "while conditional",
+          type: "Code",
+          duration: "45 min",
+          objectives: ["Use while with conditions", "Create countdown loops", "Avoid infinite loops"],
+          dokLevel: 3
+        },
+        {
+          id: "lesson5",
+          title: "Nested Loops",
+          type: "Code",
+          duration: "45 min",
+          objectives: ["Put loops inside loops", "Create grids and patterns", "Understand iteration order"],
+          dokLevel: 4
+        },
+        {
+          id: "lesson6",
+          title: "Breaking out",
+          type: "Code",
+          duration: "30 min",
+          objectives: ["Use break statement", "Use continue statement", "Control loop flow"],
+          dokLevel: 3
+        }
+      ]
+    },
+    {
+      id: "chapter7",
+      title: "Chapter 7: Functions",
+      description: "Create reusable blocks of code",
+      icon: "📦",
+      color: "from-amber-500 to-orange-500",
+      weeks: "Week 14-15",
+      lessons: [
+        {
+          id: "lesson1",
+          title: "Intro to Functions",
+          type: "Introduction",
+          duration: "45 min",
+          objectives: ["Use def keyword", "Call functions", "Understand function structure"],
+          dokLevel: 2
+        },
+        {
+          id: "lesson2",
+          title: "Parameters",
+          type: "Code",
+          duration: "45 min",
+          objectives: ["Pass values to functions", "Use multiple parameters", "Create flexible functions"],
+          dokLevel: 3
+        },
+        {
+          id: "lesson3",
+          title: "Return",
+          type: "Code",
+          duration: "45 min",
+          objectives: ["Use return statement", "Get values from functions", "Store returned results"],
+          dokLevel: 3
+        },
+        {
+          id: "lesson4",
+          title: "Scope of Variables: Global",
+          type: "Code",
+          duration: "30 min",
+          objectives: ["Understand global scope", "Use global keyword", "Access variables anywhere"],
+          dokLevel: 3
+        },
+        {
+          id: "lesson5",
+          title: "Scope of Variables: Local",
+          type: "Code",
+          duration: "30 min",
+          objectives: ["Understand local scope", "Variables inside functions", "Avoid scope conflicts"],
+          dokLevel: 3
+        }
+      ]
+    }
+  ]
+};
           dokLevel: 3
         },
         {
