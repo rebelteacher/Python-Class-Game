@@ -166,7 +166,7 @@ export default function MicrobitCurriculum({ user }) {
 
       <main className="container mx-auto px-6 py-8">
         {/* Quick Actions */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
           <Card className="hover:shadow-lg transition-shadow cursor-pointer" onClick={() => navigate("/library?type=microbit")}>
             <CardContent className="p-6 flex items-center gap-4">
               <div className="p-3 bg-cyan-100 rounded-lg">
@@ -175,6 +175,18 @@ export default function MicrobitCurriculum({ user }) {
               <div>
                 <h3 className="font-semibold">Problem Library</h3>
                 <p className="text-sm text-gray-600">View & create Micro:bit problems</p>
+              </div>
+            </CardContent>
+          </Card>
+          
+          <Card className="hover:shadow-lg transition-shadow cursor-pointer border-2 border-cyan-500 bg-cyan-50" onClick={() => navigate("/microbit/teach")}>
+            <CardContent className="p-6 flex items-center gap-4">
+              <div className="p-3 bg-cyan-500 rounded-lg">
+                <Target className="w-6 h-6 text-white" />
+              </div>
+              <div>
+                <h3 className="font-semibold text-cyan-700">Teaching Mode</h3>
+                <p className="text-sm text-cyan-600">Live demo with simulator</p>
               </div>
             </CardContent>
           </Card>
