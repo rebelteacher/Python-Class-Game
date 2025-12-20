@@ -256,7 +256,7 @@ const BLOCK_CURRICULUM = {
           objectives: [
             "Convert block programs to Python",
             "Apply all learned concepts",
-            "Prepare for Unit 5: Text-Based Programming"
+            "Prepare for Unit 2: Text-Based Python Programming"
           ],
           dokLevel: 3
         }
