@@ -390,7 +390,7 @@ export default function BlockCurriculum({ user }) {
             </CardContent>
           </Card>
           
-          <Card className="hover:shadow-lg transition-shadow cursor-pointer" onClick={() => navigate("/blocks")}>
+          <Card className="hover:shadow-lg transition-shadow cursor-pointer" onClick={() => navigate("/blocks/teach")}>
             <CardContent className="p-6 flex items-center gap-4">
               <div className="p-3 bg-blue-100 rounded-lg">
                 <Play className="w-6 h-6 text-blue-600" />
