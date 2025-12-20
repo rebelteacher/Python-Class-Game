@@ -366,7 +366,7 @@ export default function BlockCurriculum({ user }) {
       <div className="max-w-6xl mx-auto px-6 py-8">
         {/* Quick Actions */}
         <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
-          <Card className="hover:shadow-lg transition-shadow cursor-pointer" onClick={() => navigate("/library?type=block")}>
+          <Card className="hover:shadow-lg transition-shadow cursor-pointer" onClick={() => navigate("/library?type=code&chapter=Chapter%201%3A%20Block%20Basics")}>
             <CardContent className="p-6 flex items-center gap-4">
               <div className="p-3 bg-purple-100 rounded-lg">
                 <BookOpen className="w-6 h-6 text-purple-600" />
