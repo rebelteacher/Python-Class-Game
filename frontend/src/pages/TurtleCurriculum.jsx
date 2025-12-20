@@ -677,7 +677,7 @@ export default function TurtleCurriculum({ user }) {
                           <Button
                             size="sm"
                             variant="outline"
-                            onClick={() => navigate(`/library?type=turtle&category=${encodeURIComponent(`Turtle - ${unit.title}`)}`)}
+                            onClick={() => navigate(`/library?type=turtle&chapter=${encodeURIComponent(unit.title)}`)}
                           >
                             <BookOpen className="w-4 h-4 mr-1" />
                             Problems
