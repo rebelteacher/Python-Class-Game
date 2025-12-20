@@ -248,10 +248,17 @@ const TOOLBOX = {
       contents: [
         { kind: "block", type: "controls_if" },
         { kind: "block", type: "controls_ifelse" },
-        { kind: "block", type: "logic_compare" },
-        { kind: "block", type: "logic_operation" },
-        { kind: "block", type: "logic_negate" },
-        { kind: "block", type: "logic_boolean" }
+        { 
+          kind: "block", 
+          type: "compare_python",
+          inputs: {
+            A: { shadow: { type: "math_number", fields: { NUM: 10 } } },
+            B: { shadow: { type: "math_number", fields: { NUM: 5 } } }
+          }
+        },
+        { kind: "block", type: "logic_python" },
+        { kind: "block", type: "not_python" },
+        { kind: "block", type: "boolean_python" }
       ]
     },
     {
