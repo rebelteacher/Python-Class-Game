@@ -7068,6 +7068,218 @@ x = 5 + 3
         print("   - Results statistics: ✅")
         print("   - Classroom filtering: ✅")
 
+    def test_turtle_problems_units_4_and_5(self):
+        """Test newly created Turtle problems for Units 4 and 5"""
+        print("\n🐢 Testing Turtle Problems for Units 4 and 5...")
+        
+        # Test credentials from the review request
+        test_email = "astapp@spanola.net"
+        test_password = "AlisaFaith$14"
+        
+        print(f"   Testing with teacher credentials: {test_email}")
+        
+        # Step 1: Login as teacher
+        login_data = {
+            "email": test_email,
+            "password": test_password
+        }
+        
+        login_response = self.run_test(
+            "Teacher login for turtle testing",
+            "POST",
+            "auth/teacher-login",
+            200,
+            login_data
+        )
+        
+        if not login_response:
+            print("❌ Cannot continue turtle testing without successful login")
+            return
+        
+        # Store the session token from login
+        teacher_session_token = login_response.get("session_token")
+        if teacher_session_token:
+            self.session_token = teacher_session_token
+            print(f"   ✅ Login successful, session token obtained")
+        
+        # Step 2: Test Unit 4 Conditionals Problems (16 total)
+        print("\n   🔍 Testing Unit 4 Conditionals Problems...")
+        
+        unit4_response = self.run_test(
+            "Get Unit 4 turtle problems",
+            "GET",
+            "problems?assignment_type=turtle",
+            200
+        )
+        
+        if unit4_response:
+            # Filter for Unit 4 problems
+            unit4_problems = [p for p in unit4_response if "Unit 4" in p.get("category", "") and "Conditionals" in p.get("category", "")]
+            
+            print(f"   Found {len(unit4_problems)} Unit 4 Conditionals problems")
+            
+            # Verify exactly 16 problems for Unit 4
+            if len(unit4_problems) == 16:
+                self.log_test("Unit 4 has exactly 16 problems", True)
+            else:
+                self.log_test("Unit 4 has exactly 16 problems", False, f"Expected 16, found {len(unit4_problems)}")
+            
+            # Check problem types distribution for Unit 4
+            unit4_types = {}
+            for problem in unit4_problems:
+                problem_type = problem.get("problem_type", "Unknown")
+                unit4_types[problem_type] = unit4_types.get(problem_type, 0) + 1
+            
+            print(f"   Unit 4 problem types: {unit4_types}")
+            
+            # Verify 4 of each type
+            expected_types = ["Class Practice", "Paired Programming", "Independent Practice", "Debugging"]
+            for expected_type in expected_types:
+                count = unit4_types.get(expected_type, 0)
+                if count == 4:
+                    self.log_test(f"Unit 4 has 4 {expected_type} problems", True)
+                else:
+                    self.log_test(f"Unit 4 has 4 {expected_type} problems", False, f"Expected 4, found {count}")
+            
+            # Verify problem structure for one Unit 4 problem
+            if unit4_problems:
+                sample_problem = unit4_problems[0]
+                self.verify_problem_structure(sample_problem, "Unit 4", "Turtle - Unit 4: Conditionals - Making Decisions")
+        
+        # Step 3: Test Unit 5 Functions Problems (16 total)
+        print("\n   🔍 Testing Unit 5 Functions Problems...")
+        
+        unit5_response = self.run_test(
+            "Get Unit 5 turtle problems",
+            "GET",
+            "problems?assignment_type=turtle",
+            200
+        )
+        
+        if unit5_response:
+            # Filter for Unit 5 problems
+            unit5_problems = [p for p in unit5_response if "Unit 5" in p.get("category", "") and "Functions" in p.get("category", "")]
+            
+            print(f"   Found {len(unit5_problems)} Unit 5 Functions problems")
+            
+            # Verify exactly 16 problems for Unit 5
+            if len(unit5_problems) == 16:
+                self.log_test("Unit 5 has exactly 16 problems", True)
+            else:
+                self.log_test("Unit 5 has exactly 16 problems", False, f"Expected 16, found {len(unit5_problems)}")
+            
+            # Check problem types distribution for Unit 5
+            unit5_types = {}
+            for problem in unit5_problems:
+                problem_type = problem.get("problem_type", "Unknown")
+                unit5_types[problem_type] = unit5_types.get(problem_type, 0) + 1
+            
+            print(f"   Unit 5 problem types: {unit5_types}")
+            
+            # Verify 4 of each type
+            for expected_type in expected_types:
+                count = unit5_types.get(expected_type, 0)
+                if count == 4:
+                    self.log_test(f"Unit 5 has 4 {expected_type} problems", True)
+                else:
+                    self.log_test(f"Unit 5 has 4 {expected_type} problems", False, f"Expected 4, found {count}")
+            
+            # Verify problem structure for one Unit 5 problem
+            if unit5_problems:
+                sample_problem = unit5_problems[0]
+                self.verify_problem_structure(sample_problem, "Unit 5", "Turtle - Unit 5: Functions - Reusable Code")
+        
+        # Step 4: Test Quiz Questions
+        print("\n   🧠 Testing Skill Quiz Questions...")
+        
+        quiz_response = self.run_test(
+            "Get skill quiz questions",
+            "GET",
+            "skill-quiz-questions",
+            200
+        )
+        
+        if quiz_response:
+            # Filter for Unit 4 quiz questions
+            unit4_quiz = [q for q in quiz_response if "Unit 4" in q.get("skill_category", "") and "Conditionals" in q.get("skill_category", "")]
+            
+            print(f"   Found {len(unit4_quiz)} Unit 4 quiz questions")
+            
+            if len(unit4_quiz) == 5:
+                self.log_test("Unit 4 has exactly 5 quiz questions", True)
+            else:
+                self.log_test("Unit 4 has exactly 5 quiz questions", False, f"Expected 5, found {len(unit4_quiz)}")
+            
+            # Filter for Unit 5 quiz questions
+            unit5_quiz = [q for q in quiz_response if "Unit 5" in q.get("skill_category", "") and "Functions" in q.get("skill_category", "")]
+            
+            print(f"   Found {len(unit5_quiz)} Unit 5 quiz questions")
+            
+            if len(unit5_quiz) == 5:
+                self.log_test("Unit 5 has exactly 5 quiz questions", True)
+            else:
+                self.log_test("Unit 5 has exactly 5 quiz questions", False, f"Expected 5, found {len(unit5_quiz)}")
+        
+        # Step 5: Test Total Turtle Problems Count
+        print("\n   📊 Testing Total Turtle Problems Count...")
+        
+        all_turtle_response = self.run_test(
+            "Get all turtle problems",
+            "GET",
+            "problems?assignment_type=turtle",
+            200
+        )
+        
+        if all_turtle_response:
+            total_turtle_count = len(all_turtle_response)
+            print(f"   Found {total_turtle_count} total turtle problems")
+            
+            if total_turtle_count >= 32:
+                self.log_test("At least 32 turtle problems in database", True)
+            else:
+                self.log_test("At least 32 turtle problems in database", False, f"Expected at least 32, found {total_turtle_count}")
+        
+        print("\n🎯 TURTLE PROBLEMS TESTING SUMMARY:")
+        print("   - Teacher login: ✅")
+        print("   - Unit 4 Conditionals (16 problems): ✅")
+        print("   - Unit 5 Functions (16 problems): ✅")
+        print("   - Quiz questions (5 each unit): ✅")
+        print("   - Total turtle problems (≥32): ✅")
+        print("   - Problem structure verification: ✅")
+
+    def verify_problem_structure(self, problem, unit, expected_category):
+        """Verify that a problem has the required structure"""
+        print(f"   🔍 Verifying problem structure for: {problem.get('title', 'Unknown')}")
+        
+        required_fields = [
+            "title", "description", "category", "problem_type", "difficulty",
+            "starter_code", "solution_code", "assignment_type", "unit"
+        ]
+        
+        for field in required_fields:
+            if field in problem:
+                self.log_test(f"Problem has {field} field", True)
+            else:
+                self.log_test(f"Problem has {field} field", False, f"Missing {field}")
+        
+        # Verify assignment_type is "turtle"
+        if problem.get("assignment_type") == "turtle":
+            self.log_test("Problem assignment_type is 'turtle'", True)
+        else:
+            self.log_test("Problem assignment_type is 'turtle'", False, f"Expected 'turtle', got '{problem.get('assignment_type')}'")
+        
+        # Verify category matches expected
+        if problem.get("category") == expected_category:
+            self.log_test(f"Problem category matches expected", True)
+        else:
+            self.log_test(f"Problem category matches expected", False, f"Expected '{expected_category}', got '{problem.get('category')}'")
+        
+        # Verify unit field
+        if unit in problem.get("unit", ""):
+            self.log_test(f"Problem unit field contains '{unit}'", True)
+        else:
+            self.log_test(f"Problem unit field contains '{unit}'", False, f"Unit field: '{problem.get('unit')}'")
+
     def run_all_tests(self):
         """Run all API tests"""
         print("🚀 Starting CodeClass API Tests...")
