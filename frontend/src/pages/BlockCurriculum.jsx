@@ -354,9 +354,9 @@ export default function BlockCurriculum({ user }) {
               <Boxes className="w-10 h-10" />
             </div>
             <div>
-              <h1 className="text-3xl font-bold">Unit 4: Block-Based Coding</h1>
+              <h1 className="text-3xl font-bold">Unit 1: Block-Based Coding</h1>
               <p className="text-purple-100 mt-1">
-                Visual programming fundamentals • Preparing for text-based coding
+                Visual programming fundamentals • Foundation for text-based Python
               </p>
             </div>
           </div>
