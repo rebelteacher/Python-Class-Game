@@ -569,11 +569,21 @@ export default function AnimatedTurtle({ code, onLineHighlight, width = 400, hei
           
         case 'pencolor':
           turtle.penColor = cmd.value;
+          turtle.turtleColor = cmd.value; // Also change turtle color
+          drawCanvas();
           resolve();
           break;
           
         case 'fillcolor':
           turtle.fillColor = cmd.value;
+          resolve();
+          break;
+          
+        case 'color':
+          turtle.penColor = cmd.penColor;
+          turtle.fillColor = cmd.fillColor;
+          turtle.turtleColor = cmd.penColor; // Change turtle body color
+          drawCanvas();
           resolve();
           break;
           
