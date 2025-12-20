@@ -1,93 +1,126 @@
-<analysis>original_problem_statement:
-The user's requests during this session were:
-1.  **Best Score Bug:** Fix a bug where coding test scores were averaged instead of taking the best score for problems with multiple submissions.
-2.  **Student Login/Classroom Bug:** Fix an issue where teachers who switched their role to student were unable to log back into their account and subsequently couldn't join or load classrooms. This issue was reported to only happen in the production environment.
-3.  **Multiple-Choice Test White Page:** Fix a bug where clicking Start Test for a multiple-choice test resulted in a blank white page.
-4.  **Multiple-Choice Test UI/UX:**
-    *   Implement support for newline characters () in question text.
-    *   Change the layout to display one question per page with a progress bar.
-5.  **Remove 3 Strikes System:** Remove the attempt limit (lives/strikes) from coding assignments.
-6.  **Visible Test Cases:** Make all test cases for coding problems (input, expected output, name, points) fully visible to students.
-7.  **Proctor Codes for Old Assignments:** Generate and display proctor codes for assignments that were created before the feature existed.
-8.  **New Feature: Micro:bit Module:** Develop an educational module to teach programming the BBC Micro:bit. This includes:
-    *   A curriculum structure with pre-built lessons.
-    *   A virtual Micro:bit simulator that visually responds to student code.
-    *   Integration into the existing Assignment Library for creating and managing Micro:bit problems.
-    *   A pattern-based grading system for Micro:bit code submissions.
-9.  **Assignment Completion Bug:** Fix a bug where assignments were incorrectly moved to the Completed section for students even if they hadn't finished or submitted them.
-10. **Micro:bit Simulator Bugs:**
-    *   Fix an  error when running code.
-    *   Add support for the  command in the simulator.
+<analysis>An analysis of the user's request and the agent's actions has been completed. The following summary will be used to hand over the work to the next agent.
+
+**original_problem_statement:**
+The user's overall goal is to build a comprehensive, 105-hour curriculum for teaching Python, progressively integrating Turtle Graphics and Micro:bit to make coding concepts more tangible and engaging for students.
+
+Initial requests from the previous session included:
+1.  Fixing various bugs related to scoring, authentication, and UI.
+2.  Implementing a full Micro:bit educational module with a virtual simulator.
+
+Recent user requests in this session:
+1.  **White Page Bug:** Fix an issue where buttons on the Micro:bit curriculum page led to a blank white page.
+2.  **Hardware Connectivity:** Implement a way for code from the app's editor to be run on a physical Micro:bit device, not just the virtual simulator. The solution needs to be user-friendly for students using Chromebooks.
+3.  **Problem Library Bug:** Fix a bug where new Micro:bit problems were not appearing in the filtered Micro:bit library view after being created.
+4.  **Curriculum Integration:** Integrate official BBC micro:bit tutorial content into the app for learning, but use the app's own problem library and pattern-based grading for student assessment. The user wants the library pre-populated with problems that match the official tutorials, and these problems must be editable.
+5.  **Simulator Button Bug:** Fix a bug where pressing buttons on the virtual Micro:bit simulator was detected but did not trigger the corresponding code execution (e.g., ).
+6.  **Student Login White Page Bug:** Fix an issue where the page loads white after a student logs in, requiring a manual refresh to load the dashboard correctly.
+7.  **Comprehensive Curriculum Enhancement (Current Major Task):**
+    *   Expand the Turtle and Micro:bit problem libraries to include 12 problems for each concept, categorized as Class Practice (4), Paired Programming (4), and Independent Work (4).
+    *   Create a Teaching Mode for Turtle and Micro:bit. This should be a dedicated page where teachers can demonstrate concepts with a live-coding editor and a real-time simulator view side-by-side.
+    *   Enable adding problems from the curriculum pages directly to assignments.
+    *   The user also provided a detailed 105-hour curriculum outline covering Units 5 through 11 and an Enhancement Unit, including topics like Networking, Cybersecurity, AI, Data Science, and Physical Computing.
 
 **User's preferred language**: English
 
 **what currently exists?**
-The application is a comprehensive educational platform. Key functionalities worked on in this session include:
--   **Coding Test Scoring:** The logic for multi-submission tests has been fixed on both the backend and the teacher-facing frontend () to correctly calculate and display the best score per problem.
--   **Authentication:** A critical production authentication bug has been resolved. The login flow for teachers is now more robust, allowing them to log in even if their last-used role was 'student'. The OAuth login flow has also been hardened by using  and Authorization headers as a fallback for cookies, ensuring session persistence in production.
--   **Multiple-Choice Tests:** The test-taking UI has been completely revamped. It now displays one question at a time, includes a progress bar, and correctly renders multiline question text. The routing bug causing a white page has been fixed.
--   **Coding Assignments:** The 3 strikes attempt limit has been completely removed from both the frontend and backend. Test cases are now fully visible to students in a clear table format, and teachers can add descriptive names to each test case.
--   **Proctor Codes:** A one-time database migration was successfully run to generate and add proctor codes to all existing assignments that were missing them.
--   **Micro:bit Module (In Progress):** A new module for teaching Micro:bit programming has been scaffolded. This includes a new curriculum page, backend models and endpoints, a virtual simulator component, and initial integration into the  for creating Micro:bit problems.
+The application is an educational platform for teaching Python.
+-   **Micro:bit Module:** Is functionally complete. It includes a curriculum page, an extensive library of 33 pre-built problems, a virtual simulator that supports display commands and button presses, and a Chromebook-friendly workflow for flashing code to physical devices via the official Micro:bit web editor.
+-   **Turtle Graphics Module:** A new curriculum page () has been created and populated with a structure mirroring the user's pedagogical goals (Basics, Loops, Logic, etc.). The library has been seeded with an initial 15 problems. Backend and frontend routing are in place.
+-   **Core Functionality:** The assignment library, problem creation/editing forms, and student assignment pages have been updated to support three distinct types: , , and .
+-   **Teaching Mode:** The initial file for a turtle-specific teaching page () has been created, but it is empty.
 
 **Last working item**:
-The agent was in the middle of a major feature implementation: fully integrating the new Micro:bit assignment type into the existing Assignment Library and lesson framework.
+The agent was at the very beginning of implementing the user's request for a Teaching Mode and expanding the curriculum content.
 
--   **Last item agent was working:** Updating the  page to allow teachers to create, filter, and manage Micro:bit problems alongside existing Python and Turtle problems. This involved adding a new Micro:bit assignment type, creating conditional UI for Micro:bit-specific fields (like  instead of input/output), and adding a type filter to the problems list.
+-   **Last item agent was working:** Scaffolding the new Teaching Mode pages. The agent successfully created  and was about to create the corresponding .
 -   **Status:** IN PROGRESS
 -   **Agent Testing Done:** N
--   **Which testing method agent to use?** Frontend testing agent. The agent should create a test that verifies a teacher can create a new Micro:bit problem from the Assignment Library, see it in the list with the correct type badge, and filter the list to show only Micro:bit problems.
+-   **Which testing method agent to use?** Frontend testing agent. The test should verify that a teacher can navigate to the new teaching page ( or ), that the layout correctly shows a code editor and a simulator, and that live code changes in the editor are reflected in the simulator in real-time.
 -   **User Testing Done:** N
 
 **All Pending/In progress Issue list**:
--   None.
+-   **Issue 1: Student Login White Page (P0)**
+    -   **Attempted fixes:** The agent identified a missing  call in the OAuth flow in  and a potential race condition. A fix was implemented by adding the call and a short  before navigation. A loading guard was also added to .
+    -   **Next debug checklist:** The fix has not been verified by the user. The next agent should ask the user to test the student login flow. If the issue persists, investigate React's state update lifecycle and navigation timing in  more deeply.
+    -   **Why fix this issue and what will be achieved with the fix?** This is a critical usability bug that prevents students from accessing their dashboard smoothly after logging in.
+    -   **Status:** USER VERIFICATION PENDING
+    -   **Is recurring issue?** N
+    -   **Should Test frontend/backend/both after fix?** Frontend
+    -   **Blocked on other issue:** None
+-   **Issue 2: Fragile Layout on  (P2)**
+    -   **Attempted fixes:** None in this session. This is a known issue from a previous fork.
+    -   **Next debug checklist:** The page's  implementation is unstable. It requires a refactor of the page's core layout structure in .
+    -   **Why fix this issue and what will be achieved with this?** This is a source of recurring UI bugs and technical debt. Fixing it will improve the stability of a core student-facing page.
+    -   **Status:** NOT STARTED
+    -   **Is recurring issue?** Y
+    -   **Should Test frontend/backend/both after fix?** Frontend
+    -   **Blocked on other issue:** None
+-   **Issue 3: Assignment Creation  bug (P2)**
+    -   **Attempted fixes:** None in this session. This is a known issue from a previous fork.
+    -   **Next debug checklist:** The bug is suspected to be in the frontend payload creation within the  component inside . Investigate the  function and the data it sends to the  endpoint.
+    -   **Why fix this issue and what will be achieved with this?** This is a critical bug that can prevent teachers from assigning work to students, making a core feature unusable.
+    -   **Status:** NOT STARTED
+    -   **Is recurring issue?** N
+    -   **Should Test frontend/backend/both after fix?** Both
+    -   **Blocked on other issue:** None
 
 **In progress Task List**:
--   **Task 1: Complete Micro:bit Module Integration (P0)**
-
-**Task Detail:**
--   **Task 1: Complete Micro:bit Module Integration**
+-   **Task 1: Build Comprehensive Curriculum & Teaching Mode (P0)**
     -   **Where to resume:**
-        1.  The agent has updated  to include UI for creating and filtering Micro:bit problems. This needs to be thoroughly tested.
-        2.  The agent was in the process of refactoring  to be a gateway that links to the Assignment Library with the Micro:bit filter pre-applied. This needs to be completed and tested.
-        3.  Verify that student-side grading and progress tracking works for these newly created Micro:bit assignments.
-    -   **What will be achieved with this?** The Micro:bit feature will be fully integrated into the platform's core content management and grading system, matching the user's request for a seamless experience.
+        1.  Create the file .
+        2.  Implement the UI for both  and . This should include a code editor, a live simulator panel, and potentially controls for the teacher.
+        3.  Add routes for these new pages in .
+        4.  Create a large number of new problems in the database for both Turtle and Micro:bit, ensuring they are categorized by unit and type (Class Practice, Paired, Independent).
+        5.  Implement the functionality to allow teachers to add problems to an assignment directly from the curriculum pages (, ).
+    -   **What will be achieved with this?** This will complete a major feature request, providing teachers with powerful tools for live demonstrations and a rich, well-structured problem library that aligns with their curriculum goals.
     -   **Status:** IN PROGRESS
-    -   **Should Test frontend/backend/both after fix?** Both.
-    -   **Blocked on something:** None.
+    -   **Should Test frontend/backend/both after fix?** Both
+    -   **Blocked on something:** None
 
 **Upcoming and Future Tasks**
 -   **Upcoming Tasks:**
-    -   (P1) **Turtle Graphics - Phase 3:** Polish the turtle feature by adding example problems, a gallery of outputs, and potentially UI controls for image size/downloads.
+    -   (P1) **Data Migration for Old Problems:** Write and run a one-time migration script to set  for the ~290 problems in the database that are missing this field. This will improve data integrity and prevent potential filtering/rendering bugs.
 -   **Future Tasks:**
-    -   **Self-Paced Learning Module:** A potential new section for self-paced courses.
-    -   **Real-time Turtle Graphics:** Upgrade the turtle feature from static image output to real-time animation using WebSockets.
+    -   (P2) **Build Out Full Curriculum:** Implement the remaining curriculum units outlined by the user: Networking, Cybersecurity, AI, Data Science, Physical Computing (VEX, Arduino), and Ethics.
+    -   (P3) **Real-time Turtle Graphics:** Upgrade the Turtle feature from static image output to real-time animation, possibly using WebSockets for a more interactive experience.
+    -   (P3) **Self-Paced Learning Module:** Design and build a new section of the application for student-led courses.
 
 **Completed work in this session**
--   **Coding Test Best Score Bug (FIXED):** Corrected the score aggregation logic in .
--   **Production Authentication & Login Lockout (FIXED):** Reworked authentication in  and  to handle role switching and cross-domain cookie issues.
--   **Multiple-Choice Test White Page Bug (FIXED):** Corrected a route mismatch in .
--   **Multiple-Choice Test UI Rework (DONE):** Re-architected  to show one question at a time with a progress bar and support for newlines.
--   **3 Strikes System Removal (DONE):** Removed attempt-limiting logic from  and .
--   **Visible Test Cases for Students (DONE):** Updated  to display test cases and  to allow naming them.
--   **Proctor Code Backfill (DONE):** Ran a one-time migration script to add proctor codes to all existing assignments in the database.
--   **Assignment Completion Bug (FIXED):** Ran a migration script to fix inconsistent  fields in the database and added a confirmation dialog to the UI.
--   **Micro:bit Module Scaffolding (DONE):** Created backend models/endpoints and frontend pages (, ).
--   **Micro:bit Simulator Fixes (FIXED):**
-    -   Adjusted code execution flow in  to prevent backend  errors.
-    -   Enhanced the  component to support the  command.
+-   **Micro:bit Module Integration (DONE):**
+    -   Fixed URL parameter filtering in .
+    -   Fixed simulator visibility in Demo mode on .
+    -   Fixed broken navigation links on .
+-   **Physical Micro:bit Flashing (DONE):**
+    -   Integrated the  library.
+    -   Added a Chromebook-friendly workflow to open code in the official web editor for one-click WebUSB flashing in .
+-   **Problem Library Bug Fix (DONE):**
+    -   Fixed a bug in  where newly created Micro:bit problems were not saving with the correct type and not appearing in the filtered view.
+-   **Micro:bit Curriculum Population (DONE):**
+    -   Added proper attribution to the BBC micro:bit foundation.
+    -   Programmatically created and added 33 diverse Micro:bit problems to the database, aligned with official tutorials.
+-   **Micro:bit Simulator Button Fix (DONE):**
+    -   Updated  to correctly parse  conditions and re-run code on button clicks, enabling interactive programs.
+-   **Turtle Graphics Scaffolding (DONE):**
+    -   Created  with a full unit structure.
+    -   Added backend endpoint (), frontend route, and dashboard link.
+    -   Programmatically created and added 15 initial Turtle problems to the database.
 
 **Earlier issues found/mentioned but not fixed**
 -   **Issue 1: Fragile Layout on **
-    -   **Debug checklist:** The page's  implementation is unstable and causes layout bugs. It requires a refactor of the page's core layout structure.
-    -   **Why to solve this issue and what will be achieved with this?** This is a recurring source of UI bugs and technical debt. Fixing it will stabilize a core page of the application.
+    -   **Debug checklist:** Refactor the  implementation in .
+    -   **Why to solve this issue and what will be achieved with this?** Stabilize the UI on a core student-facing page and reduce technical debt.
     -   **Should Test frontend/backend/both after fix:** Frontend.
-    -   **Is recurring issue?** Y.
+    -   **Is recurring issue?** Y
 -   **Issue 2: Assignment Creation  bug**
-    -   **Debug checklist:** The agent from a previous session identified that assignments might be created with empty . Logging was added to the  endpoint in , but the issue was never fully debugged. The root cause is likely in the frontend payload from  in .
-    -   **Why to solve this issue and what will be achieved with this?** This is a critical bug that can prevent teachers from assigning work to students.
+    -   **Debug checklist:** Investigate the payload created by the  in  before it's sent to the  endpoint.
+    -   **Why to solve this issue and what will be achieved with this?** Fixes a critical bug preventing teachers from assigning work.
     -   **Should Test frontend/backend/both after fix:** Both.
-    -   **Is recurring issue?** N.
+    -   **Is recurring issue?** N
+-   **Issue 3: Inconsistent  in Database**
+    -   **Debug checklist:** Write a one-time migration script to find all problems in the  collection where  is null or does not exist, and set it to .
+    -   **Why to solve this issue and what will be achieved with this?** Ensures data consistency, which will make filtering and conditional rendering logic throughout the app more reliable.
+    -   **Should Test frontend/backend/both after fix:** Backend (verify script) and Frontend (verify filters).
+    -   **Is recurring issue?** N
 
 **Known issue recurrence from previous fork**
 -   None.
@@ -96,70 +129,69 @@ The agent was in the middle of a major feature implementation: fully integrating
 
 
 **Key Technical Concepts**
--   **Production Authentication Debugging:** Diagnosed and fixed a complex production-only auth issue by comparing cookie-based auth with a more robust  +  header approach.
--   **One-Time Database Migration:** Wrote and executed Python scripts using  to perform data migrations on the live database (adding proctor codes, fixing missing  fields). This is a powerful technique for handling schema evolution.
--   **Pattern-Based Grading:** Implemented a new, non-execution-based grading method for Micro:bit assignments by searching for required code patterns () in student submissions.
--   **Component-Based Simulator:** Created a simple code simulator () within React that parses a subset of Python commands and updates its visual state, demonstrating how to create interactive learning tools.
--   **Conditional UI Architecture:** Extensively used conditional rendering in  and  to support multiple assignment types (, , ) within the same components.
+-   **Hardware Integration (WebUSB):** Implemented a user-friendly workflow for flashing code to physical hardware (Micro:bit) from a web app, adapting the solution for specific user environments like Chromebooks by leveraging an external official editor.
+-   **Live Simulator Development:** Enhanced the React-based  to be more interactive by parsing conditional logic () and re-rendering on simulated hardware events (button clicks).
+-   **Dynamic Content Generation:** Used backend scripts to programmatically create and seed the database with dozens of curriculum-aligned problems for both Micro:bit and Turtle, saving significant manual effort.
+-   **State Synchronization:** Refined the connection between URL query parameters () and React component state in  to create a seamless user experience for filtering and content creation.
+-   **React Rendering Debugging:** Diagnosed and fixed several UI bugs related to conditional rendering, stale state, and component lifecycle race conditions, particularly the white screen issues on the assignment page and after student login.
 
 **key DB schema**
--   **problems:**
-    -   Added  (code, turtle, or microbit).
-    -   Added Micro:bit fields: , , .
-    -    objects now include optional  and  fields.
--   **assignments:** No schema changes, but a migration was run to populate  on all existing documents.
--   **submissions:** A migration was run to add  to all documents that were missing the field.
+-   **problems:** No schema changes, but a large number of documents were added with  or . Many older documents still lack an .
 
 **changes in tech stack**
--   None.
+-   Added frontend dependency: .
 
 **All files of reference**
--   : The heart of the application logic, modified for auth, grading, and new endpoints.
--   : The main hub for content creation, now supporting Micro:bit.
--   : The student-facing page for working on assignments.
--   : The student-facing page for multiple-choice tests.
--   : Contains the global routing and critical production authentication logic.
--   : The new virtual Micro:bit component.
+-   : Central hub for creating/managing problems; heavily modified for bug fixes and UX improvements.
+-   : The virtual Micro:bit; heavily modified for button interactivity and hardware flashing.
+-   : Student-facing page for assignments; modified to fix simulator visibility.
+-   : Main router; modified for new routes and auth flow fix.
+-   : New curriculum page.
+-   : New, empty teaching page scaffold.
+-   : Main backend file; updated with new endpoints for turtle curriculum.
 
 **Areas that need refactoring**:
--   **:** The layout is fragile due to .
--   **:** This file is becoming very large and complex due to handling three different assignment types. It could be broken down into smaller components.
+-   : The layout is fragile and a source of UI bugs due to its  implementation.
+-   : This component is very large and handles logic for three different assignment types. It should be broken down into smaller, more manageable sub-components.
 
 **key api endpoints**
--   : Logic updated to allow teachers in student role to log in.
--   : No change, but frontend handling was fixed for production.
--   : **New endpoint** to fetch pre-built Micro:bit lessons.
--   : Logic updated to include pattern-based grading for Micro:bit assignments.
--   : Logic is correct, but underlying database issues causing incorrect behavior were fixed.
+-   : **New endpoint** to create a turtle assignment from a pre-defined lesson.
+-   : **New endpoint** to fetch the structured turtle curriculum data.
+-   : Logic for this endpoint is correct, but the frontend was sending incorrect data, which has now been fixed.
 
 **Critical Info for New Agent**
--   **Authentication is Complex:** The app now uses a hybrid authentication strategy (cookies + localStorage/Authorization header) to support production environments with potential cross-origin issues. Be mindful of this when touching login or session-related code in , , and .
--   **Micro:bit Grading is Pattern-Based:** Unlike regular code problems, Micro:bit submissions are *not* executed on the backend. Grading is done by checking if the student's code contains specific strings defined in the problem's .
--   **Data Migrations May Be Needed:** The agent successfully used one-time scripts to fix data inconsistencies. If strange behavior is observed that can't be explained by code, check the database for legacy data that might be missing new fields.
--   The current highest priority is to finish the full integration of the Micro:bit feature into the Assignment Library and grading flow.
+-   The highest priority is **Task 1: Build Comprehensive Curriculum & Teaching Mode**. This is a large feature that involves creating new pages, seeding more database content, and implementing new UI functionality.
+-   The **student login white screen fix** is implemented but unverified. You must confirm with the user if the fix works before closing the issue.
+-   The **WebUSB workflow for Micro:bit** intentionally redirects to the official editor as the primary method for Chromebook compatibility. The download .py file is a fallback. Do not try to implement direct WebUSB flashing unless the user explicitly asks for it again.
+-   There are **~290 problems in the database without an **. This is a known data integrity issue that should be fixed with a migration script to prevent future bugs.
 
-**documents created in this job**
+**documents and test_reports created in this job**
 -   
 -   
 
-**Last 10 User Messages and any pending user messages**
-1.  **User:** Reports Micro:bit simulator not working for . (Status: **FIXED**)
-2.  **Agent:** Acknowledges the issue and explains the simulator's limitations. (Status: Completed)
-3.  **User:** Asks for Micro:bit lessons to be integrated into the Assignment Library, grading system, and chapter organization, just like Python lessons. (Status: **IN PROGRESS - CURRENT TASK**)
-4.  **Agent:** Acknowledges the request and starts working on updating the Assignment Library. (Status: In Progress)
-5.  **... (Agent work messages) ...**
-6.  **Agent:** Provides a summary of the  updates for Micro:bit integration. (Status: Completed)
+**Last 10 User Messages and any pending HUMAN messages**
+-   User: on the simulator, it records that button a is pressed but nothing happens on the screen, no led picture.
+-   Agent: I see the issue! The simulator is detecting the button press but the code isn't re-running with the button state. Let me check and fix the simulator:
+-   User: before redeploying, whenever students log in, the page loads white but then if students press refresh, the page will load. Can you fix this
+-   Agent: Let me investigate the student login flow to find and fix this issue.
+-   User: Let's get started on the turtle graphics piece. I'm ready to put it all together.
+-   Agent: Let me first explore what currently exists for Turtle Graphics, then we'll plan the enhancements.
+-   User: Here's my idea for the whole project: I would like to incorporate the use of the turtle and microbit within the teaching of python so that it's not just plain old coding... [detailed curriculum provided]
+-   Agent: This is an excellent pedagogical approach! Making coding tangible through Turtle and Micro:bit will significantly improve student engagement and understanding. Let me map out how I'll structure this... I'll start building now.
+-   User: Yes, I'd like more problems. I need them to be: 4 for class practice(teaching), 4 for paired programming(work with a friend) and 4 that they work independently. While you are at it, turtle and microbit teaching needs to be set up like python teaching. They need to have a simulator to show students as they code in the class practice part.They also need the ability to add problems to their assignments
+-   Agent: Got it! This is a substantial enhancement. Let me break it down: 1. More problems... 2. Teaching Mode pages... 3. Add problems to assignments... Let me start building:
 
 **Project Health Check:**
--   **Broken:** None.
--   **Mocked:** None. The Micro:bit grading is a simplified pattern-based check, but it is not a mocked response.
+-   **Broken:** None confirmed, but the student login flow may still be buggy.
+-   **Mocked:** None.
 
 **3rd Party Integrations**
 -   OpenAI GPT-4o — uses Emergent LLM Key (For generating feedback text on coding submissions).
 -    (SheetJS) library for Excel export on the frontend.
+-    — Used for the hardware flashing workflow.
 
 **Testing status**
--   **Testing agent used after significant changes:** YES, for the initial best score bug fix.
+-   **Testing agent used after significant changes:** YES, for both backend and frontend changes related to the Micro:bit module.
 -   **Troubleshoot agent used after agent stuck in loop:** NO.
 -   **Test files created:** None permanent.
 -   **Known regressions:** None from this session.
@@ -168,4 +200,5 @@ The agent was in the middle of a major feature implementation: fully integrating
 -   **Admin/Teacher:** , password: 
 
 **What agent forgot to execute**
--   The agent did not address the two pre-existing issues from the initial handoff summary: the fragile layout of  and the potential  bug during assignment creation. These issues remain outstanding.</analysis>
+-   The agent was in the middle of scaffolding the Teaching Mode and did not create the  file after creating the Turtle version.
+-   The agent identified that ~290 problems are missing an  but did not create a migration script to fix this data integrity issue.</analysis>

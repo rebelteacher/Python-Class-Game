@@ -6,7 +6,7 @@ import json
 def test_admin_protection():
     """Test that admin accounts are properly protected from role switching"""
     
-    base_url = "https://bugfix-edu-platform.preview.emergentagent.com"
+    base_url = "https://microbit-turtle-edu.preview.emergentagent.com"
     api_url = f"{base_url}/api"
     
     # Get the admin session token from database
