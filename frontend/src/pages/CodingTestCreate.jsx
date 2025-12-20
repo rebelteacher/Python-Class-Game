@@ -80,7 +80,7 @@ export default function CodingTestCreate({ user }) {
       });
       
       toast.success("Coding test created successfully!");
-      navigate("/teacher");
+      navigate("/teacher/dashboard");
     } catch (error) {
       console.error("Error creating test:", error);
       toast.error(error.response?.data?.detail || "Failed to create test");
