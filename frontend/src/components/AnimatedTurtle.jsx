@@ -359,15 +359,19 @@ export default function AnimatedTurtle({ code, onLineHighlight, width = 400, hei
     if (onLineHighlight) onLineHighlight(-1);
   }, [drawCanvas, onLineHighlight]);
   
-  // Parse code when it changes
+  // Parse and update commands when code changes
   const prevCodeRef = useRef(code);
+  const parsedCommands = useRef([]);
+  
+  if (prevCodeRef.current !== code) {
+    prevCodeRef.current = code;
+    parsedCommands.current = parseCode(code);
+  }
+  
+  // Sync commands state with parsed commands
   useEffect(() => {
-    if (prevCodeRef.current !== code) {
-      prevCodeRef.current = code;
-      const parsed = parseCode(code);
-      setCommands(parsed);
-      resetTurtle();
-    }
+    setCommands(parsedCommands.current);
+    resetTurtle();
   }, [code, resetTurtle]);
   
   // Initial draw
