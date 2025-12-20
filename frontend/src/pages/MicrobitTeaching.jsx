@@ -411,12 +411,11 @@ export default function MicrobitTeaching({ user }) {
   const currentTopic = TEACHING_EXAMPLES[selectedTopic];
   const currentLesson = currentTopic.lessons[currentLessonIndex];
 
+  // Initialize code when lesson changes
+  const lessonCode = currentLesson?.code || "";
   useEffect(() => {
-    // Load the code for current lesson
-    if (currentLesson) {
-      setCode(currentLesson.code);
-    }
-  }, [selectedTopic, currentLessonIndex, currentLesson]);
+    setCode(lessonCode);
+  }, [lessonCode]);
 
   const resetCode = () => {
     setCode(currentLesson.code);
