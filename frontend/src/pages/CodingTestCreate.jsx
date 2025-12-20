@@ -268,7 +268,7 @@ export default function CodingTestCreate({ user }) {
                 <Button
                   type="button"
                   variant="outline"
-                  onClick={() => navigate("/teacher")}
+                  onClick={() => navigate("/teacher/dashboard")}
                   className="flex-1"
                 >
                   Cancel
