@@ -289,15 +289,13 @@ export default function AnimatedTurtle({ code, onLineHighlight, width = 400, hei
   const [isPlaying, setIsPlaying] = useState(false);
   const [currentStep, setCurrentStep] = useState(-1);
   const [speed, setSpeed] = useState(5);
-  const [turtleName, setTurtleName] = useState('t');
-  const [turtleColor, setTurtleColor] = useState('#228B22');
   
   const turtleRef = useRef(getInitialTurtleState());
   const pathsRef = useRef([]);
   const playingRef = useRef(false);
   
-  // Parse code into commands (memoized) and extract turtle name
-  const { commands, detectedName, detectedColor } = useMemo(() => {
+  // Parse code into commands (memoized) and extract turtle name/color
+  const { commands, turtleName, turtleColor } = useMemo(() => {
     const result = parseCode(code);
     
     // Detect turtle variable name from code
@@ -308,16 +306,8 @@ export default function AnimatedTurtle({ code, onLineHighlight, width = 400, hei
     const colorMatch = code.match(/(?:\w+\.)?color\s*\(\s*['"]([\w#]+)['"]\s*\)/);
     const color = colorMatch ? colorMatch[1] : '#228B22';
     
-    return { commands: result, detectedName: name, detectedColor: color };
+    return { commands: result, turtleName: name, turtleColor: color };
   }, [code]);
-  
-  // Update turtle name and color when code changes
-  useEffect(() => {
-    setTurtleName(detectedName);
-    setTurtleColor(detectedColor);
-    turtleRef.current.name = detectedName;
-    turtleRef.current.turtleColor = detectedColor;
-  }, [detectedName, detectedColor]);
   
   // Convert turtle coordinates to canvas coordinates
   const toCanvasCoords = useCallback((x, y) => ({
