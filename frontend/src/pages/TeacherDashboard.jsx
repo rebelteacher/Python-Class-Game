@@ -183,9 +183,9 @@ export default function TeacherDashboard({ user, setUser }) {
           </div>
           
           {/* Row 2: Essential Navigation */}
-          <div className="flex items-center justify-end space-x-2 flex-wrap gap-y-2">
+          <div className="flex items-center justify-end space-x-3 flex-wrap gap-y-2">
             {user.is_admin && (
-              <Button data-testid="admin-nav-btn" onClick={() => navigate("/admin-dashboard")} variant="outline" size="sm" className="gap-2 border-white/30 text-white hover:bg-white/20 bg-white/10">
+              <Button data-testid="admin-nav-btn" onClick={() => navigate("/admin-dashboard")} className="gap-2 bg-yellow-500/80 hover:bg-yellow-600 text-white border-0 font-medium">
                 <Shield className="w-4 h-4" />
                 Admin
               </Button>
