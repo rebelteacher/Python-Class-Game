@@ -310,6 +310,24 @@ function App() {
               />
               
               <Route
+                path="/python-curriculum"
+                element={
+                  <ProtectedRoute user={user} teacherOnly>
+                    <PythonCurriculum user={user} />
+                  </ProtectedRoute>
+                }
+              />
+              
+              <Route
+                path="/python/teach"
+                element={
+                  <ProtectedRoute user={user}>
+                    <PythonTeaching user={user} />
+                  </ProtectedRoute>
+                }
+              />
+              
+              <Route
                 path="/classroom/:classroomId"
                 element={
                   <ProtectedRoute user={user}>
