@@ -85,20 +85,26 @@ function AuthHandler({ children }) {
           // Set default axios header for Authorization
           axios.defaults.headers.common['Authorization'] = `Bearer ${response.data.session_token}`;
           
-          setUser(response.data);
-          setLoading(false); // Important: Set loading to false after successful OAuth
+          // Clear hash first
           window.location.hash = "";
           
-          // Redirect based on role
-          if (response.data.role === "teacher") {
-            navigate("/teacher/dashboard");
-          } else if (response.data.role === "school_admin") {
-            navigate("/school-admin/dashboard");
-          } else if (response.data.role === "district_admin") {
-            navigate("/district-admin/dashboard");
-          } else {
-            navigate("/student/dashboard");
-          }
+          // Set user and loading state
+          setUser(response.data);
+          setLoading(false); // Important: Set loading to false after successful OAuth
+          
+          // Use setTimeout to ensure state updates are processed before navigation
+          setTimeout(() => {
+            // Redirect based on role
+            if (response.data.role === "teacher") {
+              navigate("/teacher/dashboard", { replace: true });
+            } else if (response.data.role === "school_admin") {
+              navigate("/school-admin/dashboard", { replace: true });
+            } else if (response.data.role === "district_admin") {
+              navigate("/district-admin/dashboard", { replace: true });
+            } else {
+              navigate("/student/dashboard", { replace: true });
+            }
+          }, 100);
         } catch (error) {
           console.error("Auth error:", error);
           toast.error("Authentication failed");
