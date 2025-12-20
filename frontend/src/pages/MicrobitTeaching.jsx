@@ -616,7 +616,7 @@ export default function MicrobitTeaching({ user }) {
                   <code className="text-cyan-400">display.show(Image.X)</code> - show image
                 </div>
                 <div className="text-gray-500">
-                  <code className="text-cyan-400">display.scroll("text")</code> - scroll text
+                  <code className="text-cyan-400">display.scroll(&quot;text&quot;)</code> - scroll text
                 </div>
                 <div className="text-gray-500">
                   <code className="text-cyan-400">button_a.is_pressed()</code> - check button
