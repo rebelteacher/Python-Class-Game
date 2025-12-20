@@ -1624,6 +1624,18 @@ export default function AssignmentPage({ user }) {
           </div>
         </DialogContent>
       </Dialog>
+      
+      {/* Skill Quiz Popup - triggered after completing all problems */}
+      <SkillQuizPopup
+        isOpen={showSkillQuiz}
+        onClose={() => setShowSkillQuiz(false)}
+        skillCategory={quizSkillCategory}
+        assignmentId={assignmentId}
+        classroomId={classroomIdFromNav || ""}
+        onQuizComplete={(results) => {
+          toast.success(`Quiz completed! Score: ${results.score?.toFixed(0)}%`);
+        }}
+      />
     </div>
   );
 }
