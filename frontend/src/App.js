@@ -280,6 +280,24 @@ function App() {
               />
               
               <Route
+                path="/blocks-curriculum"
+                element={
+                  <ProtectedRoute user={user}>
+                    <BlockCurriculum user={user} />
+                  </ProtectedRoute>
+                }
+              />
+              
+              <Route
+                path="/blocks/teach"
+                element={
+                  <ProtectedRoute user={user}>
+                    <BlockTeaching user={user} />
+                  </ProtectedRoute>
+                }
+              />
+              
+              <Route
                 path="/classroom/:classroomId"
                 element={
                   <ProtectedRoute user={user}>
