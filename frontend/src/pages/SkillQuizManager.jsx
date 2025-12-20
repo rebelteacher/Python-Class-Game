@@ -113,7 +113,9 @@ export default function SkillQuizManager({ user }) {
     
     try {
       const params = new URLSearchParams();
-      if (selectedClassroom) params.append("classroom_id", selectedClassroom);
+      if (selectedClassroom && selectedClassroom !== "all") {
+        params.append("classroom_id", selectedClassroom);
+      }
       
       const response = await axios.get(
         `${API}/skill-quiz/results/${encodeURIComponent(selectedCategory)}?${params.toString()}`,
