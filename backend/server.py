@@ -692,6 +692,55 @@ class CodingTestSubmit(BaseModel):
     code: str
     time_taken_seconds: int = 0
 
+# Skill Quiz Models - Quiz questions tied to skills/categories
+class SkillQuizQuestion(BaseModel):
+    model_config = ConfigDict(extra="ignore")
+    id: str = Field(default_factory=lambda: str(uuid.uuid4()))
+    skill_category: str  # e.g., "Turtle - Loops", "Micro:bit - LED Display"
+    question_text: str
+    choice_a: str
+    choice_b: str
+    choice_c: str
+    choice_d: str
+    correct_answer: str  # "A", "B", "C", or "D"
+    explanation: str = ""  # Why this answer is correct
+    concept_tags: List[str] = []  # e.g., ["for loop", "range()"]
+    creator_id: str = ""
+    creator_name: str = ""
+    created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+
+class SkillQuizQuestionCreate(BaseModel):
+    skill_category: str
+    question_text: str
+    choice_a: str
+    choice_b: str
+    choice_c: str
+    choice_d: str
+    correct_answer: str
+    explanation: str = ""
+    concept_tags: List[str] = []
+
+class SkillQuizAttempt(BaseModel):
+    model_config = ConfigDict(extra="ignore")
+    id: str = Field(default_factory=lambda: str(uuid.uuid4()))
+    student_id: str
+    student_name: str
+    skill_category: str
+    assignment_id: str  # The assignment this quiz was triggered from
+    classroom_id: str = ""
+    questions: List[dict]  # [{question_id, question_text, choices, correct_answer}]
+    student_answers: dict  # {question_id: selected_answer}
+    score: float  # Percentage
+    total_questions: int
+    correct_count: int
+    submitted_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+
+class SkillQuizSubmit(BaseModel):
+    skill_category: str
+    assignment_id: str
+    classroom_id: str = ""
+    answers: dict  # {question_id: selected_answer}
+
 # PDF Note model for library resources
 class PDFNote(BaseModel):
     model_config = ConfigDict(extra="ignore")
