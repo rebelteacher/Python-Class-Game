@@ -444,6 +444,18 @@ frontend:
         agent: "testing"
         comment: "COMPREHENSIVE HIERARCHICAL ADMIN BACKEND TESTING COMPLETE ✅ - 21/21 tests passed (100% success rate). ✅ GET /api/school-admin/dashboard: Returns stats (school_name, total_teachers, total_classrooms, total_students), teachers list, and classrooms list. School admin access only (403 for district_admin, teacher, student). ✅ GET /api/district-admin/dashboard: Returns stats (district, total_schools, total_teachers, total_classrooms, total_students), schools list with counts, and teachers list. District admin access only (403 for school_admin, teacher, student). ✅ GET /api/school-admin/teachers: Returns all teachers in school admin's school. School admin access only (403 for district_admin, teacher). ✅ GET /api/school-admin/teacher/{teacher_id}/classrooms: Returns teacher's classrooms with populated student details. Validates teacher is in same school (403 if not). School admin access only (403 for district_admin, teacher). ✅ GET /api/district-admin/schools: Returns all schools in district with teacher counts. District admin access only (403 for school_admin, teacher). ✅ GET /api/district-admin/teachers-in-school/{school_name}: Returns all teachers in specified school within district. District admin access only (403 for school_admin, teacher). All 6 hierarchical admin endpoints working perfectly with proper role-based access control."
 
+  - task: "Turtle Problems Units 4 and 5 Creation and Testing"
+    implemented: false
+    working: false
+    file: "backend/server.py"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: false
+    status_history:
+      - working: false
+        agent: "testing"
+        comment: "TURTLE PROBLEMS UNITS 4 & 5 TESTING COMPLETE ❌ - Critical findings: Units 4 & 5 turtle problems have NOT been created yet. ✅ Teacher login successful with credentials astapp@spanola.net. ✅ Total turtle problems found: 412 (exceeds minimum requirement of 32). ✅ Existing turtle units: Unit 1 (17 problems), Unit 2 (16 problems), Unit 3 (16 problems). ❌ Unit 4 Conditionals: Found only 1 problem (expected 16 with category 'Turtle - Unit 4: Conditionals - Making Decisions'). ❌ Unit 5 Functions: Found only 3 problems (expected 16 with category 'Turtle - Unit 5: Functions - Reusable Code'). ❌ Problem type distribution: Unit 4 missing all required types (4 Class Practice, 4 Paired Programming, 4 Independent Practice, 4 Debugging). Unit 5 missing most types (has 3 Paired Programming, missing others). ✅ Skill quiz questions endpoint working (/api/skill-quiz/questions). ❌ Unit 4 quiz questions: Found 0 (expected 5 for 'Turtle - Unit 4: Conditionals - Making Decisions'). ❌ Unit 5 quiz questions: Found 0 (expected 5 for 'Turtle - Unit 5: Functions - Reusable Code'). ✅ Existing quiz categories: Turtle - First Steps (10 questions), Turtle - Unit 2: Loops (4 questions), Turtle - Unit 3: Colors (3 questions), plus Micro:bit and Block categories. ✅ Problem structure verification: All required fields present (title, description, category, problem_type, difficulty, starter_code, solution_code, assignment_type='turtle'). CONCLUSION: The turtle curriculum is incomplete - Units 4 & 5 need to be created with the specified problems and quiz questions."
+
 
   - task: "Improve grading consistency and output comparison"
     implemented: true
