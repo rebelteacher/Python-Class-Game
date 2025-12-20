@@ -486,7 +486,7 @@ export default function AnimatedTurtle({ code, onLineHighlight, width = 400, hei
     // Draw turtle if visible
     const turtle = turtleRef.current;
     if (turtle.visible) {
-      drawTurtle(ctx, turtle.x, turtle.y, turtle.heading);
+      drawTurtle(ctx, turtle.x, turtle.y, turtle.heading, turtle.turtleColor);
     }
   }, [width, height, toCanvasCoords, drawTurtle]);
   
