@@ -1684,7 +1684,7 @@ export default function AssignmentLibrary({ user }) {
                   />
                 </div>
 
-                <div className="grid grid-cols-3 gap-4">
+                <div className="grid grid-cols-4 gap-4">
                   <div>
                     <Label htmlFor="edit-category">Category *</Label>
                     <Input
@@ -1697,7 +1697,18 @@ export default function AssignmentLibrary({ user }) {
                   </div>
 
                   <div>
-                    <Label htmlFor="edit-chapter">Chapter (Optional)</Label>
+                    <Label htmlFor="edit-unit">Unit</Label>
+                    <Input
+                      id="edit-unit"
+                      placeholder="e.g., Unit 1"
+                      value={editingProblem.unit || ""}
+                      onChange={(e) => setEditingProblem({ ...editingProblem, unit: e.target.value })}
+                      className="mt-1"
+                    />
+                  </div>
+
+                  <div>
+                    <Label htmlFor="edit-chapter">Chapter</Label>
                     <Input
                       id="edit-chapter"
                       placeholder="e.g., Chapter 1"
@@ -1708,7 +1719,7 @@ export default function AssignmentLibrary({ user }) {
                   </div>
 
                   <div>
-                    <Label htmlFor="edit-lesson">Lesson (Optional)</Label>
+                    <Label htmlFor="edit-lesson">Lesson</Label>
                     <Input
                       id="edit-lesson"
                       placeholder="e.g., Lesson 1"
