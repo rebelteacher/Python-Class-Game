@@ -7290,6 +7290,9 @@ x = 5 + 3
             print("❌ Cannot proceed without test user setup")
             return False
         
+        # PRIORITY: Test turtle problem library filtering (from review request)
+        self.test_turtle_problem_filtering()
+        
         # PRIORITY: Test the newly created Turtle problems for Units 4 and 5 (main focus)
         self.test_turtle_problems_units_4_and_5()
         
