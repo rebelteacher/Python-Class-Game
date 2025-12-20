@@ -350,8 +350,7 @@ export default function TeacherDashboard({ user, setUser }) {
       </div>
 
       {/* Classrooms Section - moved below curriculum cards */}
-      <div className="max-w-6xl mx-auto px-4">
-        <main className="container mx-auto px-6 py-10">
+      <main className="max-w-6xl mx-auto px-4">
         <div className="flex justify-between items-center mb-8">
           <div>
             <h1 className="text-4xl font-bold text-gray-900 mb-2">My Classrooms</h1>
