@@ -168,81 +168,44 @@ function parseCode(code) {
   return commands;
 }
 
+// Initial turtle state
+const getInitialTurtleState = () => ({
+  x: 0,
+  y: 0,
+  heading: 0,
+  penDown: true,
+  penColor: 'black',
+  fillColor: 'black',
+  penSize: 1,
+  visible: true,
+  filling: false,
+  fillPath: []
+});
+
 export default function AnimatedTurtle({ code, onLineHighlight, width = 400, height = 400 }) {
   const canvasRef = useRef(null);
   const [isPlaying, setIsPlaying] = useState(false);
-  const [isPaused, setIsPaused] = useState(false);
   const [currentStep, setCurrentStep] = useState(-1);
-  const [speed, setSpeed] = useState(5); // 1-10 scale
+  const [speed, setSpeed] = useState(5);
   const [commands, setCommands] = useState([]);
   
-  // Turtle state
-  const turtleRef = useRef({
-    x: 0,
-    y: 0,
-    heading: 0, // 0 = East, 90 = North
-    penDown: true,
-    penColor: 'black',
-    fillColor: 'black',
-    penSize: 1,
-    visible: true,
-    filling: false,
-    fillPath: []
-  });
-  
-  // Drawing state
+  const turtleRef = useRef(getInitialTurtleState());
   const pathsRef = useRef([]);
-  const animationRef = useRef(null);
-  
-  // Parse code when it changes
-  useEffect(() => {
-    const parsed = parseCode(code);
-    setCommands(parsed);
-    resetTurtle();
-  }, [code]);
-  
-  const resetTurtle = useCallback(() => {
-    setIsPlaying(false);
-    setIsPaused(false);
-    setCurrentStep(-1);
-    if (animationRef.current) {
-      cancelAnimationFrame(animationRef.current);
-    }
-    
-    turtleRef.current = {
-      x: 0,
-      y: 0,
-      heading: 0,
-      penDown: true,
-      penColor: 'black',
-      fillColor: 'black',
-      penSize: 1,
-      visible: true,
-      filling: false,
-      fillPath: []
-    };
-    
-    pathsRef.current = [];
-    drawCanvas();
-    if (onLineHighlight) onLineHighlight(-1);
-  }, [onLineHighlight]);
+  const playingRef = useRef(false);
   
   // Convert turtle coordinates to canvas coordinates
-  const toCanvasCoords = (x, y) => {
-    return {
-      x: width / 2 + x,
-      y: height / 2 - y
-    };
-  };
+  const toCanvasCoords = useCallback((x, y) => ({
+    x: width / 2 + x,
+    y: height / 2 - y
+  }), [width, height]);
   
   // Draw turtle shape
-  const drawTurtle = (ctx, x, y, heading) => {
+  const drawTurtle = useCallback((ctx, x, y, heading) => {
     const pos = toCanvasCoords(x, y);
     ctx.save();
     ctx.translate(pos.x, pos.y);
     ctx.rotate(-heading * Math.PI / 180 + Math.PI / 2);
     
-    // Draw turtle shape
     ctx.fillStyle = '#228B22';
     ctx.beginPath();
     ctx.moveTo(0, -12);
@@ -256,7 +219,7 @@ export default function AnimatedTurtle({ code, onLineHighlight, width = 400, hei
     ctx.stroke();
     
     ctx.restore();
-  };
+  }, [toCanvasCoords]);
   
   // Draw the canvas
   const drawCanvas = useCallback(() => {
@@ -298,14 +261,38 @@ export default function AnimatedTurtle({ code, onLineHighlight, width = 400, hei
     if (turtle.visible) {
       drawTurtle(ctx, turtle.x, turtle.y, turtle.heading);
     }
-  }, [width, height]);
+  }, [width, height, toCanvasCoords, drawTurtle]);
+  
+  // Reset turtle
+  const resetTurtle = useCallback(() => {
+    playingRef.current = false;
+    setIsPlaying(false);
+    setCurrentStep(-1);
+    
+    turtleRef.current = getInitialTurtleState();
+    pathsRef.current = [];
+    drawCanvas();
+    if (onLineHighlight) onLineHighlight(-1);
+  }, [drawCanvas, onLineHighlight]);
+  
+  // Parse code when it changes
+  useEffect(() => {
+    const parsed = parseCode(code);
+    setCommands(parsed);
+    resetTurtle();
+  }, [code, resetTurtle]);
+  
+  // Initial draw
+  useEffect(() => {
+    drawCanvas();
+  }, [drawCanvas]);
   
   // Execute a single command with animation
   const executeCommand = useCallback((cmd, animate = true) => {
     const turtle = turtleRef.current;
     
     return new Promise((resolve) => {
-      const baseDelay = animate ? (11 - speed) * 50 : 0; // 50ms to 500ms based on speed
+      const baseDelay = animate ? (11 - speed) * 50 : 0;
       
       switch (cmd.type) {
         case 'forward':
@@ -320,10 +307,8 @@ export default function AnimatedTurtle({ code, onLineHighlight, width = 400, hei
           if (turtle.penDown) {
             pathsRef.current.push({
               type: 'line',
-              x1: turtle.x,
-              y1: turtle.y,
-              x2: newX,
-              y2: newY,
+              x1: turtle.x, y1: turtle.y,
+              x2: newX, y2: newY,
               color: turtle.penColor,
               width: turtle.penSize
             });
@@ -398,7 +383,6 @@ export default function AnimatedTurtle({ code, onLineHighlight, width = 400, hei
           break;
           
         case 'speed':
-          // Speed is handled by the animation delay
           resolve();
           break;
           
@@ -424,10 +408,8 @@ export default function AnimatedTurtle({ code, onLineHighlight, width = 400, hei
             if (turtle.penDown) {
               pathsRef.current.push({
                 type: 'line',
-                x1: turtle.x,
-                y1: turtle.y,
-                x2: newX,
-                y2: newY,
+                x1: turtle.x, y1: turtle.y,
+                x2: newX, y2: newY,
                 color: turtle.penColor,
                 width: turtle.penSize
               });
@@ -448,10 +430,8 @@ export default function AnimatedTurtle({ code, onLineHighlight, width = 400, hei
           if (turtle.penDown) {
             pathsRef.current.push({
               type: 'line',
-              x1: turtle.x,
-              y1: turtle.y,
-              x2: cmd.x,
-              y2: cmd.y,
+              x1: turtle.x, y1: turtle.y,
+              x2: cmd.x, y2: cmd.y,
               color: turtle.penColor,
               width: turtle.penSize
             });
@@ -488,16 +468,11 @@ export default function AnimatedTurtle({ code, onLineHighlight, width = 400, hei
   
   // Play animation
   const play = useCallback(async () => {
+    playingRef.current = true;
     setIsPlaying(true);
-    setIsPaused(false);
     
-    const startStep = currentStep < 0 ? 0 : currentStep;
-    
-    for (let i = startStep; i < commands.length; i++) {
-      // Check if paused or stopped
-      if (!isPlaying && !isPaused) {
-        break;
-      }
+    for (let i = 0; i < commands.length; i++) {
+      if (!playingRef.current) break;
       
       const cmd = commands[i];
       setCurrentStep(i);
@@ -506,27 +481,30 @@ export default function AnimatedTurtle({ code, onLineHighlight, width = 400, hei
       await executeCommand(cmd, true);
     }
     
+    playingRef.current = false;
     setIsPlaying(false);
     if (onLineHighlight) onLineHighlight(-1);
-  }, [commands, currentStep, isPlaying, isPaused, executeCommand, onLineHighlight]);
+  }, [commands, executeCommand, onLineHighlight]);
   
   // Run instantly (no animation)
   const runInstant = useCallback(async () => {
     resetTurtle();
+    await new Promise(r => setTimeout(r, 50)); // Let reset complete
     
     for (const cmd of commands) {
       await executeCommand(cmd, false);
     }
   }, [commands, executeCommand, resetTurtle]);
   
-  // Initial draw
-  useEffect(() => {
-    drawCanvas();
-  }, [drawCanvas]);
+  // Stop animation
+  const stop = useCallback(() => {
+    playingRef.current = false;
+    setIsPlaying(false);
+    if (onLineHighlight) onLineHighlight(-1);
+  }, [onLineHighlight]);
   
   return (
     <div className="flex flex-col items-center gap-3">
-      {/* Canvas */}
       <div className="bg-white rounded-lg shadow-lg p-2">
         <canvas
           ref={canvasRef}
@@ -536,20 +514,20 @@ export default function AnimatedTurtle({ code, onLineHighlight, width = 400, hei
         />
       </div>
       
-      {/* Controls */}
       <div className="flex items-center gap-3 w-full max-w-md">
         <Button
           size="sm"
           variant="outline"
           onClick={resetTurtle}
           className="bg-gray-700 border-gray-600 hover:bg-gray-600"
+          title="Reset"
         >
           <RotateCcw className="w-4 h-4" />
         </Button>
         
         <Button
           size="sm"
-          onClick={isPlaying ? () => setIsPaused(true) : play}
+          onClick={isPlaying ? stop : play}
           className={isPlaying ? "bg-yellow-600 hover:bg-yellow-700" : "bg-green-600 hover:bg-green-700"}
         >
           {isPlaying ? <Pause className="w-4 h-4" /> : <Play className="w-4 h-4" />}
@@ -579,7 +557,6 @@ export default function AnimatedTurtle({ code, onLineHighlight, width = 400, hei
         </div>
       </div>
       
-      {/* Status */}
       <div className="text-xs text-gray-500">
         {isPlaying ? `Running step ${currentStep + 1}/${commands.length}` : 
          commands.length > 0 ? `${commands.length} commands ready` : 'No commands parsed'}
