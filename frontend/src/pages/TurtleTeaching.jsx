@@ -461,13 +461,12 @@ export default function TurtleTeaching({ user }) {
   const currentTopic = TEACHING_EXAMPLES[selectedTopic];
   const currentLesson = currentTopic.lessons[currentLessonIndex];
 
+  const lessonCode = currentLesson?.code || "";
   useEffect(() => {
     // Load the code for current lesson
-    if (currentLesson) {
-      setCode(currentLesson.code);
-      setTurtleImage(null);
-    }
-  }, [selectedTopic, currentLessonIndex]);
+    setCode(lessonCode);
+    setTurtleImage(null);
+  }, [lessonCode]);
 
   const runCode = async () => {
     setIsRunning(true);
