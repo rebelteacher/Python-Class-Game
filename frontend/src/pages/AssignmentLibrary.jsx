@@ -2470,7 +2470,7 @@ function CodingTestBuilder({ open, onOpenChange, selectedProblems, problems, onS
                   const problem = problems.find(p => p.id === problemId);
                   return problem ? (
                     <li key={problemId}>
-                      {problem.title} <span className="text-xs text-blue-600">({problem.difficulty})</span>
+                      {problem.title}
                     </li>
                   ) : null;
                 })}
