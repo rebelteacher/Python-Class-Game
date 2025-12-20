@@ -260,10 +260,12 @@ const getInitialTurtleState = () => ({
   penDown: true,
   penColor: 'black',
   fillColor: 'black',
+  turtleColor: '#228B22', // Default green turtle
   penSize: 1,
   visible: true,
   filling: false,
-  fillPath: []
+  fillPath: [],
+  name: 't' // Default name
 });
 
 export default function AnimatedTurtle({ code, onLineHighlight, width = 400, height = 400 }) {
@@ -271,13 +273,35 @@ export default function AnimatedTurtle({ code, onLineHighlight, width = 400, hei
   const [isPlaying, setIsPlaying] = useState(false);
   const [currentStep, setCurrentStep] = useState(-1);
   const [speed, setSpeed] = useState(5);
+  const [turtleName, setTurtleName] = useState('t');
+  const [turtleColor, setTurtleColor] = useState('#228B22');
   
   const turtleRef = useRef(getInitialTurtleState());
   const pathsRef = useRef([]);
   const playingRef = useRef(false);
   
-  // Parse code into commands (memoized)
-  const commands = useMemo(() => parseCode(code), [code]);
+  // Parse code into commands (memoized) and extract turtle name
+  const { commands, detectedName, detectedColor } = useMemo(() => {
+    const result = parseCode(code);
+    
+    // Detect turtle variable name from code
+    const nameMatch = code.match(/(\w+)\s*=\s*turtle\.Turtle\(\)|(\w+)\s*=\s*Turtle\(\)/);
+    const name = nameMatch ? (nameMatch[1] || nameMatch[2]) : 't';
+    
+    // Detect turtle color from code (color() call)
+    const colorMatch = code.match(/(?:\w+\.)?color\s*\(\s*['"]([\w#]+)['"]\s*\)/);
+    const color = colorMatch ? colorMatch[1] : '#228B22';
+    
+    return { commands: result, detectedName: name, detectedColor: color };
+  }, [code]);
+  
+  // Update turtle name and color when code changes
+  useEffect(() => {
+    setTurtleName(detectedName);
+    setTurtleColor(detectedColor);
+    turtleRef.current.name = detectedName;
+    turtleRef.current.turtleColor = detectedColor;
+  }, [detectedName, detectedColor]);
   
   // Convert turtle coordinates to canvas coordinates
   const toCanvasCoords = useCallback((x, y) => ({
@@ -285,27 +309,128 @@ export default function AnimatedTurtle({ code, onLineHighlight, width = 400, hei
     y: height / 2 - y
   }), [width, height]);
   
-  // Draw turtle shape
-  const drawTurtle = useCallback((ctx, x, y, heading) => {
+  // Draw a cute turtle shape!
+  const drawTurtle = useCallback((ctx, x, y, heading, color) => {
     const pos = toCanvasCoords(x, y);
     ctx.save();
     ctx.translate(pos.x, pos.y);
     ctx.rotate(-heading * Math.PI / 180 + Math.PI / 2);
     
-    ctx.fillStyle = '#228B22';
+    const turtleCol = color || turtleColor;
+    
+    // Darken color for outline
+    const darkenColor = (col) => {
+      if (col.startsWith('#')) {
+        const r = Math.max(0, parseInt(col.slice(1, 3), 16) - 40);
+        const g = Math.max(0, parseInt(col.slice(3, 5), 16) - 40);
+        const b = Math.max(0, parseInt(col.slice(5, 7), 16) - 40);
+        return `rgb(${r},${g},${b})`;
+      }
+      return col;
+    };
+    
+    const outlineColor = darkenColor(turtleCol);
+    
+    // Draw legs (4 little ovals)
+    ctx.fillStyle = turtleCol;
+    ctx.strokeStyle = outlineColor;
+    ctx.lineWidth = 1;
+    
+    // Front left leg
     ctx.beginPath();
-    ctx.moveTo(0, -12);
-    ctx.lineTo(-8, 8);
-    ctx.lineTo(0, 4);
-    ctx.lineTo(8, 8);
+    ctx.ellipse(-10, -6, 4, 6, -0.5, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.stroke();
+    
+    // Front right leg
+    ctx.beginPath();
+    ctx.ellipse(10, -6, 4, 6, 0.5, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.stroke();
+    
+    // Back left leg
+    ctx.beginPath();
+    ctx.ellipse(-10, 6, 4, 6, 0.5, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.stroke();
+    
+    // Back right leg
+    ctx.beginPath();
+    ctx.ellipse(10, 6, 4, 6, -0.5, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.stroke();
+    
+    // Draw tail
+    ctx.beginPath();
+    ctx.moveTo(0, 14);
+    ctx.lineTo(-3, 20);
+    ctx.lineTo(3, 20);
     ctx.closePath();
     ctx.fill();
-    ctx.strokeStyle = '#006400';
+    ctx.stroke();
+    
+    // Draw shell (main body - oval)
+    ctx.beginPath();
+    ctx.ellipse(0, 0, 14, 16, 0, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.stroke();
+    
+    // Shell pattern (hexagon-ish pattern)
+    ctx.strokeStyle = outlineColor;
+    ctx.lineWidth = 0.5;
+    ctx.beginPath();
+    ctx.moveTo(0, -10);
+    ctx.lineTo(8, -5);
+    ctx.lineTo(8, 5);
+    ctx.lineTo(0, 10);
+    ctx.lineTo(-8, 5);
+    ctx.lineTo(-8, -5);
+    ctx.closePath();
+    ctx.stroke();
+    
+    // Inner hexagon
+    ctx.beginPath();
+    ctx.moveTo(0, -5);
+    ctx.lineTo(4, -2.5);
+    ctx.lineTo(4, 2.5);
+    ctx.lineTo(0, 5);
+    ctx.lineTo(-4, 2.5);
+    ctx.lineTo(-4, -2.5);
+    ctx.closePath();
+    ctx.stroke();
+    
+    // Draw head
+    ctx.fillStyle = turtleCol;
+    ctx.strokeStyle = outlineColor;
     ctx.lineWidth = 1;
+    ctx.beginPath();
+    ctx.ellipse(0, -20, 6, 7, 0, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.stroke();
+    
+    // Eyes
+    ctx.fillStyle = 'white';
+    ctx.beginPath();
+    ctx.arc(-2.5, -21, 2, 0, Math.PI * 2);
+    ctx.arc(2.5, -21, 2, 0, Math.PI * 2);
+    ctx.fill();
+    
+    // Pupils
+    ctx.fillStyle = 'black';
+    ctx.beginPath();
+    ctx.arc(-2.5, -21.5, 1, 0, Math.PI * 2);
+    ctx.arc(2.5, -21.5, 1, 0, Math.PI * 2);
+    ctx.fill();
+    
+    // Smile
+    ctx.strokeStyle = outlineColor;
+    ctx.lineWidth = 0.8;
+    ctx.beginPath();
+    ctx.arc(0, -18, 2.5, 0.2, Math.PI - 0.2);
     ctx.stroke();
     
     ctx.restore();
-  }, [toCanvasCoords]);
+  }, [toCanvasCoords, turtleColor]);
   
   // Draw the canvas
   const drawCanvas = useCallback(() => {
