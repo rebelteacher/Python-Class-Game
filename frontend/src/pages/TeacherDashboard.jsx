@@ -521,7 +521,8 @@ export default function TeacherDashboard({ user, setUser }) {
             })}
           </div>
         )}
-      </main>
+        </div>
+      </div>
     </div>
   );
 }
