@@ -245,6 +245,8 @@ export default function MicrobitSimulator({ code, onButtonPress }) {
   const [consoleOutput, setConsoleOutput] = useState([]);
   const runningRef = useRef(false);
   const ledsRef = useRef(copyGrid(EMPTY_GRID));
+  const buttonARef = useRef(false);
+  const buttonBRef = useRef(false);
   
   // WebUSB state for real Micro:bit
   const [isFlashing, setIsFlashing] = useState(false);
@@ -254,12 +256,16 @@ export default function MicrobitSimulator({ code, onButtonPress }) {
   const connectionRef = useRef(null);
 
   // Parse the code and extract display commands
-  const parseCode = useCallback((pythonCode) => {
+  const parseCode = useCallback((pythonCode, buttonAState = false, buttonBState = false) => {
     const commands = [];
     const lines = pythonCode.split('\n');
     
     let inWhileLoop = false;
     let indentLevel = 0;
+    let inButtonABlock = false;
+    let inButtonBBlock = false;
+    let inElseBlock = false;
+    let buttonBlockIndent = 0;
     
     for (const line of lines) {
       const trimmed = line.trim();
@@ -274,10 +280,65 @@ export default function MicrobitSimulator({ code, onButtonPress }) {
         continue;
       }
       
-      // Check if we're inside the while loop
+      // Check current indentation
       const currentIndent = line.search(/\S/);
+      
+      // Check if we're exiting the while loop
       if (inWhileLoop && currentIndent <= indentLevel && trimmed !== '') {
         inWhileLoop = false;
+      }
+      
+      // Check if we're exiting button blocks
+      if ((inButtonABlock || inButtonBBlock || inElseBlock) && currentIndent <= buttonBlockIndent && trimmed !== '') {
+        inButtonABlock = false;
+        inButtonBBlock = false;
+        inElseBlock = false;
+      }
+      
+      // Detect button_a.is_pressed() condition
+      if (trimmed.includes('button_a.is_pressed()') || trimmed.includes('button_a.was_pressed()')) {
+        inButtonABlock = true;
+        inButtonBBlock = false;
+        inElseBlock = false;
+        buttonBlockIndent = currentIndent;
+        continue;
+      }
+      
+      // Detect button_b.is_pressed() condition
+      if (trimmed.includes('button_b.is_pressed()') || trimmed.includes('button_b.was_pressed()')) {
+        inButtonBBlock = true;
+        inButtonABlock = false;
+        inElseBlock = false;
+        buttonBlockIndent = currentIndent;
+        continue;
+      }
+      
+      // Detect else block
+      if (trimmed === 'else:' || trimmed.startsWith('else:')) {
+        inElseBlock = true;
+        inButtonABlock = false;
+        inButtonBBlock = false;
+        continue;
+      }
+      
+      // Detect elif block (treat like else for now)
+      if (trimmed.startsWith('elif')) {
+        if (trimmed.includes('button_a')) {
+          inButtonABlock = true;
+          inButtonBBlock = false;
+          inElseBlock = false;
+        } else if (trimmed.includes('button_b')) {
+          inButtonBBlock = true;
+          inButtonABlock = false;
+          inElseBlock = false;
+        }
+        continue;
+      }
+      
+      // Skip commands if we're in a button block that doesn't match current button state
+      if (inButtonABlock && !buttonAState) continue;
+      if (inButtonBBlock && !buttonBState) continue;
+      if (inElseBlock && (buttonAState || buttonBState)) continue;
       }
       
       // Parse display.set_pixel(x, y, brightness)
