@@ -20,6 +20,24 @@ const TEACHING_EXAMPLES = {
     title: "🐢 First Steps",
     lessons: [
       {
+        id: "name_turtle",
+        title: "Name Your Turtle!",
+        description: "You can give your turtle any name you like! Change 't' to your name or a fun name like 'bob' or 'sally'.",
+        code: `import turtle
+
+# Give your turtle a name!
+bob = turtle.Turtle()
+
+# Change the turtle's color
+bob.color("purple")
+
+# Now your turtle moves with its new name
+bob.forward(100)
+bob.right(90)
+bob.forward(50)`,
+        concepts: ["naming variables", "color()", "personalization"]
+      },
+      {
         id: "forward",
         title: "Moving Forward",
         description: "The turtle starts in the center, facing right. forward(100) moves it 100 pixels.",
