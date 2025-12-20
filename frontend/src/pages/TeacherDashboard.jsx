@@ -190,11 +190,11 @@ export default function TeacherDashboard({ user, setUser }) {
                 Admin
               </Button>
             )}
-            <Button data-testid="library-nav-btn" onClick={() => navigate("/library")} variant="outline" size="sm" className="gap-2 border-white/30 text-white hover:bg-white/20 bg-white/10">
+            <Button data-testid="library-nav-btn" onClick={() => navigate("/library")} className="gap-2 bg-white/20 hover:bg-white/30 text-white border-0 font-medium">
               <BookOpen className="w-4 h-4" />
               Library
             </Button>
-            <Button data-testid="reports-nav-btn" onClick={() => navigate("/teacher-reports")} variant="outline" size="sm" className="gap-2 border-white/30 text-white hover:bg-white/20 bg-white/10">
+            <Button data-testid="reports-nav-btn" onClick={() => navigate("/teacher-reports")} className="gap-2 bg-white/20 hover:bg-white/30 text-white border-0 font-medium">
               <FileSpreadsheet className="w-4 h-4" />
               Reports
             </Button>
@@ -202,9 +202,7 @@ export default function TeacherDashboard({ user, setUser }) {
             {user?.is_admin && (
               <Button 
                 onClick={() => navigate("/admin/messages")} 
-                variant="outline" 
-                size="sm" 
-                className="gap-2 border-white/30 text-white hover:bg-white/20 bg-white/10 relative"
+                className="gap-2 bg-white/20 hover:bg-white/30 text-white border-0 font-medium relative"
               >
                 <Bell className="w-4 h-4" />
                 Messages
@@ -215,11 +213,11 @@ export default function TeacherDashboard({ user, setUser }) {
                 )}
               </Button>
             )}
-            <Button data-testid="switch-role-btn" onClick={handleSwitchToStudent} variant="outline" size="sm" className="gap-2 border-white/30 text-white hover:bg-white/20 bg-white/10">
+            <Button data-testid="switch-role-btn" onClick={handleSwitchToStudent} className="gap-2 bg-white/20 hover:bg-white/30 text-white border-0 font-medium">
               <RefreshCw className="w-4 h-4" />
               Student View
             </Button>
-            <Button data-testid="logout-btn" onClick={handleLogout} variant="outline" size="sm" className="gap-2 border-white/30 text-white hover:bg-white/20 bg-white/10">
+            <Button data-testid="logout-btn" onClick={handleLogout} className="gap-2 bg-red-500/80 hover:bg-red-600 text-white border-0 font-medium">
               <LogOut className="w-4 h-4" />
               Logout
             </Button>
