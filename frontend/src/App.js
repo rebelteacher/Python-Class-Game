@@ -86,6 +86,7 @@ function AuthHandler({ children }) {
           axios.defaults.headers.common['Authorization'] = `Bearer ${response.data.session_token}`;
           
           setUser(response.data);
+          setLoading(false); // Important: Set loading to false after successful OAuth
           window.location.hash = "";
           
           // Redirect based on role
