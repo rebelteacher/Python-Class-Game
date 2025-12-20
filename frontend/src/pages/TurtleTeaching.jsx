@@ -454,10 +454,10 @@ export default function TurtleTeaching({ user }) {
   const [selectedTopic, setSelectedTopic] = useState("basics");
   const [currentLessonIndex, setCurrentLessonIndex] = useState(0);
   const [code, setCode] = useState("");
-  const [turtleImage, setTurtleImage] = useState(null);
-  const [isRunning, setIsRunning] = useState(false);
+  const [highlightedLine, setHighlightedLine] = useState(-1);
   const [isFullscreen, setIsFullscreen] = useState(false);
   const editorRef = useRef(null);
+  const decorationsRef = useRef([]);
 
   const currentTopic = TEACHING_EXAMPLES[selectedTopic];
   const currentLesson = currentTopic.lessons[currentLessonIndex];
@@ -466,28 +466,49 @@ export default function TurtleTeaching({ user }) {
   useEffect(() => {
     // Load the code for current lesson
     setCode(lessonCode);
-    setTurtleImage(null);
+    setHighlightedLine(-1);
   }, [lessonCode]);
 
-  const runCode = async () => {
-    setIsRunning(true);
-    try {
-      const response = await axios.post(`${API}/code/execute-turtle`, { code, test_input: "" }, { withCredentials: true });
-      if (response.data.success && response.data.image_data) {
-        setTurtleImage(response.data.image_data);
-      } else if (response.data.error) {
-        toast.error(response.data.error);
+  // Handle line highlighting from AnimatedTurtle
+  const handleLineHighlight = useCallback((lineNum) => {
+    setHighlightedLine(lineNum);
+    
+    if (editorRef.current && lineNum >= 0) {
+      const editor = editorRef.current;
+      const monaco = window.monaco;
+      
+      // Clear previous decorations
+      if (decorationsRef.current.length > 0) {
+        decorationsRef.current = editor.deltaDecorations(decorationsRef.current, []);
       }
-    } catch (error) {
-      toast.error("Error running code");
-    } finally {
-      setIsRunning(false);
+      
+      // Add new highlight (lineNum is 0-indexed, Monaco is 1-indexed)
+      const monacoLine = lineNum + 1;
+      decorationsRef.current = editor.deltaDecorations([], [
+        {
+          range: new monaco.Range(monacoLine, 1, monacoLine, 1),
+          options: {
+            isWholeLine: true,
+            className: 'highlighted-line',
+            glyphMarginClassName: 'highlighted-glyph'
+          }
+        }
+      ]);
+      
+      // Scroll to the line
+      editor.revealLineInCenter(monacoLine);
+    } else if (editorRef.current && lineNum < 0) {
+      // Clear highlights when done
+      decorationsRef.current = editorRef.current.deltaDecorations(decorationsRef.current, []);
     }
-  };
+  }, []);
 
   const resetCode = () => {
     setCode(currentLesson.code);
-    setTurtleImage(null);
+    setHighlightedLine(-1);
+    if (editorRef.current && decorationsRef.current.length > 0) {
+      decorationsRef.current = editorRef.current.deltaDecorations(decorationsRef.current, []);
+    }
   };
 
   const nextLesson = () => {
@@ -502,8 +523,22 @@ export default function TurtleTeaching({ user }) {
     }
   };
 
-  const handleEditorMount = (editor) => {
+  const handleEditorMount = (editor, monaco) => {
     editorRef.current = editor;
+    
+    // Add CSS for line highlighting
+    const style = document.createElement('style');
+    style.textContent = `
+      .highlighted-line {
+        background-color: rgba(34, 197, 94, 0.3) !important;
+        border-left: 3px solid #22c55e !important;
+      }
+      .highlighted-glyph {
+        background-color: #22c55e;
+        margin-left: 3px;
+      }
+    `;
+    document.head.appendChild(style);
   };
 
   return (
