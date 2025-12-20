@@ -3,10 +3,37 @@ import { Button } from "@/components/ui/button";
 import { Slider } from "@/components/ui/slider";
 import { Play, Pause, RotateCcw, FastForward } from "lucide-react";
 
+// Simple expression evaluator for variables
+function evaluateExpression(expr, variables) {
+  // Replace variable names with their values
+  let evaluated = expr;
+  for (const [name, value] of Object.entries(variables)) {
+    evaluated = evaluated.replace(new RegExp(`\\b${name}\\b`, 'g'), value);
+  }
+  
+  // Try to evaluate simple math expressions
+  try {
+    // Only allow numbers, operators, parentheses, and spaces
+    if (/^[\d\s+\-*/().]+$/.test(evaluated)) {
+      // eslint-disable-next-line no-eval
+      return eval(evaluated);
+    }
+  } catch (e) {
+    // Fall through
+  }
+  
+  // Try parsing as number
+  const num = parseFloat(evaluated);
+  if (!isNaN(num)) return num;
+  
+  return null;
+}
+
 // Parse Python turtle code into commands
-function parseCode(code) {
+function parseCode(code, parentVars = {}) {
   const commands = [];
   const lines = code.split('\n');
+  const variables = { ...parentVars };
   
   for (let lineNum = 0; lineNum < lines.length; lineNum++) {
     const line = lines[lineNum];
@@ -22,31 +49,66 @@ function parseCode(code) {
       continue;
     }
     
-    // Parse forward/fd
-    let match = trimmed.match(/(?:t\.|turtle\.)?(?:forward|fd)\s*\(\s*(-?\d+(?:\.\d+)?)\s*\)/);
-    if (match) {
-      commands.push({ type: 'forward', value: parseFloat(match[1]), line: lineNum });
+    // Parse variable assignments (e.g., sides = 6, angle = 360 / sides)
+    let match = trimmed.match(/^(\w+)\s*=\s*(.+)$/);
+    if (match && !trimmed.includes('turtle') && !trimmed.includes('Turtle')) {
+      const varName = match[1];
+      const varExpr = match[2];
+      const value = evaluateExpression(varExpr, variables);
+      if (value !== null) {
+        variables[varName] = value;
+      }
       continue;
     }
     
-    // Parse backward/bk/back
-    match = trimmed.match(/(?:t\.|turtle\.)?(?:backward|bk|back)\s*\(\s*(-?\d+(?:\.\d+)?)\s*\)/);
+    // Helper to get numeric value (either literal or variable)
+    const getNumericValue = (str) => {
+      if (!str) return null;
+      str = str.trim();
+      // Try as number first
+      const num = parseFloat(str);
+      if (!isNaN(num)) return num;
+      // Try as variable or expression
+      return evaluateExpression(str, variables);
+    };
+    
+    // Parse forward/fd with variable support
+    match = trimmed.match(/(?:t\.|turtle\.)?(?:forward|fd)\s*\(\s*([^)]+)\s*\)/);
     if (match) {
-      commands.push({ type: 'backward', value: parseFloat(match[1]), line: lineNum });
+      const value = getNumericValue(match[1]);
+      if (value !== null) {
+        commands.push({ type: 'forward', value, line: lineNum });
+      }
       continue;
     }
     
-    // Parse right/rt
-    match = trimmed.match(/(?:t\.|turtle\.)?(?:right|rt)\s*\(\s*(-?\d+(?:\.\d+)?)\s*\)/);
+    // Parse backward/bk/back with variable support
+    match = trimmed.match(/(?:t\.|turtle\.)?(?:backward|bk|back)\s*\(\s*([^)]+)\s*\)/);
     if (match) {
-      commands.push({ type: 'right', value: parseFloat(match[1]), line: lineNum });
+      const value = getNumericValue(match[1]);
+      if (value !== null) {
+        commands.push({ type: 'backward', value, line: lineNum });
+      }
       continue;
     }
     
-    // Parse left/lt
-    match = trimmed.match(/(?:t\.|turtle\.)?(?:left|lt)\s*\(\s*(-?\d+(?:\.\d+)?)\s*\)/);
+    // Parse right/rt with variable support
+    match = trimmed.match(/(?:t\.|turtle\.)?(?:right|rt)\s*\(\s*([^)]+)\s*\)/);
     if (match) {
-      commands.push({ type: 'left', value: parseFloat(match[1]), line: lineNum });
+      const value = getNumericValue(match[1]);
+      if (value !== null) {
+        commands.push({ type: 'right', value, line: lineNum });
+      }
+      continue;
+    }
+    
+    // Parse left/lt with variable support
+    match = trimmed.match(/(?:t\.|turtle\.)?(?:left|lt)\s*\(\s*([^)]+)\s*\)/);
+    if (match) {
+      const value = getNumericValue(match[1]);
+      if (value !== null) {
+        commands.push({ type: 'left', value, line: lineNum });
+      }
       continue;
     }
     
@@ -88,38 +150,54 @@ function parseCode(code) {
       continue;
     }
     
-    // Parse pensize/width
-    match = trimmed.match(/(?:t\.|turtle\.)?(?:pensize|width)\s*\(\s*(\d+(?:\.\d+)?)\s*\)/);
+    // Parse pensize/width with variable support
+    match = trimmed.match(/(?:t\.|turtle\.)?(?:pensize|width)\s*\(\s*([^)]+)\s*\)/);
     if (match) {
-      commands.push({ type: 'pensize', value: parseFloat(match[1]), line: lineNum });
+      const value = getNumericValue(match[1]);
+      if (value !== null) {
+        commands.push({ type: 'pensize', value, line: lineNum });
+      }
       continue;
     }
     
-    // Parse speed
-    match = trimmed.match(/(?:t\.|turtle\.)?speed\s*\(\s*(\d+)\s*\)/);
+    // Parse speed with variable support
+    match = trimmed.match(/(?:t\.|turtle\.)?speed\s*\(\s*([^)]+)\s*\)/);
     if (match) {
-      commands.push({ type: 'speed', value: parseInt(match[1]), line: lineNum });
+      const value = getNumericValue(match[1]);
+      if (value !== null) {
+        commands.push({ type: 'speed', value: Math.floor(value), line: lineNum });
+      }
       continue;
     }
     
-    // Parse circle
-    match = trimmed.match(/(?:t\.|turtle\.)?circle\s*\(\s*(-?\d+(?:\.\d+)?)\s*\)/);
+    // Parse circle with variable support
+    match = trimmed.match(/(?:t\.|turtle\.)?circle\s*\(\s*([^)]+)\s*\)/);
     if (match) {
-      commands.push({ type: 'circle', value: parseFloat(match[1]), line: lineNum });
+      const value = getNumericValue(match[1]);
+      if (value !== null) {
+        commands.push({ type: 'circle', value, line: lineNum });
+      }
       continue;
     }
     
-    // Parse goto/setpos/setposition
-    match = trimmed.match(/(?:t\.|turtle\.)?(?:goto|setpos|setposition)\s*\(\s*(-?\d+(?:\.\d+)?)\s*,\s*(-?\d+(?:\.\d+)?)\s*\)/);
+    // Parse goto/setpos/setposition with variable support
+    match = trimmed.match(/(?:t\.|turtle\.)?(?:goto|setpos|setposition)\s*\(\s*([^,]+)\s*,\s*([^)]+)\s*\)/);
     if (match) {
-      commands.push({ type: 'goto', x: parseFloat(match[1]), y: parseFloat(match[2]), line: lineNum });
+      const x = getNumericValue(match[1]);
+      const y = getNumericValue(match[2]);
+      if (x !== null && y !== null) {
+        commands.push({ type: 'goto', x, y, line: lineNum });
+      }
       continue;
     }
     
-    // Parse setheading/seth
-    match = trimmed.match(/(?:t\.|turtle\.)?(?:setheading|seth)\s*\(\s*(-?\d+(?:\.\d+)?)\s*\)/);
+    // Parse setheading/seth with variable support
+    match = trimmed.match(/(?:t\.|turtle\.)?(?:setheading|seth)\s*\(\s*([^)]+)\s*\)/);
     if (match) {
-      commands.push({ type: 'setheading', value: parseFloat(match[1]), line: lineNum });
+      const value = getNumericValue(match[1]);
+      if (value !== null) {
+        commands.push({ type: 'setheading', value, line: lineNum });
+      }
       continue;
     }
     
@@ -135,29 +213,35 @@ function parseCode(code) {
       continue;
     }
     
-    // Parse for loop - expand it
-    match = trimmed.match(/for\s+\w+\s+in\s+range\s*\(\s*(\d+)\s*\)\s*:/);
+    // Parse for loop with variable or literal support
+    match = trimmed.match(/for\s+(\w+)\s+in\s+range\s*\(\s*([^)]+)\s*\)\s*:/);
     if (match) {
-      const iterations = parseInt(match[1]);
-      const loopIndent = line.search(/\S/);
-      const loopCommands = [];
+      const loopVar = match[1];
+      const rangeExpr = match[2];
+      const iterations = getNumericValue(rangeExpr);
       
-      // Collect loop body
-      for (let j = lineNum + 1; j < lines.length; j++) {
-        const bodyLine = lines[j];
-        if (bodyLine.trim() === '') continue;
-        const bodyIndent = bodyLine.search(/\S/);
-        if (bodyIndent <= loopIndent && bodyLine.trim() !== '') break;
-        loopCommands.push({ code: bodyLine.trim(), lineNum: j });
-      }
-      
-      // Expand loop
-      for (let i = 0; i < iterations; i++) {
-        for (const cmd of loopCommands) {
-          const parsed = parseCode(cmd.code);
-          for (const p of parsed) {
-            p.line = cmd.lineNum;
-            commands.push(p);
+      if (iterations !== null && iterations > 0) {
+        const loopIndent = line.search(/\S/);
+        const loopBody = [];
+        
+        // Collect loop body lines
+        for (let j = lineNum + 1; j < lines.length; j++) {
+          const bodyLine = lines[j];
+          if (bodyLine.trim() === '') continue;
+          const bodyIndent = bodyLine.search(/\S/);
+          if (bodyIndent <= loopIndent && bodyLine.trim() !== '') break;
+          loopBody.push({ code: bodyLine.trim(), lineNum: j });
+        }
+        
+        // Expand loop - execute body for each iteration
+        for (let i = 0; i < iterations; i++) {
+          const loopVars = { ...variables, [loopVar]: i };
+          for (const bodyCmd of loopBody) {
+            const parsed = parseCode(bodyCmd.code, loopVars);
+            for (const p of parsed) {
+              p.line = bodyCmd.lineNum;
+              commands.push(p);
+            }
           }
         }
       }
