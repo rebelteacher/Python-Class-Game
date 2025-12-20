@@ -271,11 +271,13 @@ export default function AnimatedTurtle({ code, onLineHighlight, width = 400, hei
   const [isPlaying, setIsPlaying] = useState(false);
   const [currentStep, setCurrentStep] = useState(-1);
   const [speed, setSpeed] = useState(5);
-  const [commands, setCommands] = useState([]);
   
   const turtleRef = useRef(getInitialTurtleState());
   const pathsRef = useRef([]);
   const playingRef = useRef(false);
+  
+  // Parse code into commands (memoized)
+  const commands = useMemo(() => parseCode(code), [code]);
   
   // Convert turtle coordinates to canvas coordinates
   const toCanvasCoords = useCallback((x, y) => ({
