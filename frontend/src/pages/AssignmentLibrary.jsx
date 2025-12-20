@@ -2169,7 +2169,6 @@ function AssignmentBuilder({ open, onOpenChange, selectedProblems, problems, onS
                 <div key={problem.id} className="text-sm flex items-center gap-2">
                   <span className="font-semibold text-gray-600">{index + 1}.</span>
                   <span>{problem.title}</span>
-                  <span className="text-xs text-gray-500">({problem.difficulty})</span>
                 </div>
               ))}
             </div>
