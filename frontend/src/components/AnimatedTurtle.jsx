@@ -787,9 +787,17 @@ export default function AnimatedTurtle({ code, onLineHighlight, width = 400, hei
         </div>
       </div>
       
-      <div className="text-xs text-gray-500">
-        {isPlaying ? `Running step ${currentStep + 1}/${commands.length}` : 
-         commands.length > 0 ? `${commands.length} commands ready` : 'No commands parsed'}
+      <div className="flex items-center gap-2 text-xs text-gray-500">
+        <span 
+          className="px-2 py-1 rounded font-mono"
+          style={{ backgroundColor: turtleColor, color: 'white', textShadow: '0 0 2px black' }}
+        >
+          🐢 {turtleName}
+        </span>
+        <span>
+          {isPlaying ? `Running step ${currentStep + 1}/${commands.length}` : 
+           commands.length > 0 ? `${commands.length} commands ready` : 'No commands parsed'}
+        </span>
       </div>
     </div>
   );
