@@ -1630,7 +1630,8 @@ async def get_problems(
     difficulty: Optional[str] = None,
     chapter: Optional[str] = None,
     csta_standard: Optional[str] = None,
-    search: Optional[str] = None
+    search: Optional[str] = None,
+    assignment_type: Optional[str] = None
 ):
     """Get all problems with optional filters"""
     await get_current_user(request)
@@ -1644,6 +1645,8 @@ async def get_problems(
         query["chapter"] = chapter
     if csta_standard:
         query["csta_standard"] = {"$regex": csta_standard, "$options": "i"}
+    if assignment_type:
+        query["assignment_type"] = assignment_type
     if search:
         query["$or"] = [
             {"title": {"$regex": search, "$options": "i"}},
