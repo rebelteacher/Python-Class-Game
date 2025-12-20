@@ -274,17 +274,16 @@ export default function BlockCurriculum({ user }) {
   const [selectedClassroom, setSelectedClassroom] = useState("");
 
   useEffect(() => {
+    const fetchClassrooms = async () => {
+      try {
+        const response = await axios.get(`${API}/classrooms`, { withCredentials: true });
+        setClassrooms(response.data);
+      } catch (error) {
+        console.error("Error fetching classrooms:", error);
+      }
+    };
     fetchClassrooms();
   }, []);
-
-  const fetchClassrooms = async () => {
-    try {
-      const response = await axios.get(`${API}/classrooms`, { withCredentials: true });
-      setClassrooms(response.data);
-    } catch (error) {
-      console.error("Error fetching classrooms:", error);
-    }
-  };
 
   const toggleUnit = (unitId) => {
     const newExpanded = new Set(expandedUnits);
