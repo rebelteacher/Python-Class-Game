@@ -6313,6 +6313,270 @@ async def delete_mc_test(test_id: str, request: Request):
     return {"success": True, "message": "Test deleted successfully"}
 
 
+# ==================== SKILL QUIZ ====================
+
+@api_router.post("/skill-quiz/questions")
+async def create_skill_quiz_question(question: SkillQuizQuestionCreate, request: Request):
+    """Create a skill quiz question (teacher only)"""
+    user = await get_current_user(request)
+    
+    if user["role"] != "teacher":
+        raise HTTPException(status_code=403, detail="Only teachers can create quiz questions")
+    
+    question_doc = {
+        "id": str(uuid.uuid4()),
+        "skill_category": question.skill_category,
+        "question_text": question.question_text,
+        "choice_a": question.choice_a,
+        "choice_b": question.choice_b,
+        "choice_c": question.choice_c,
+        "choice_d": question.choice_d,
+        "correct_answer": question.correct_answer.upper(),
+        "explanation": question.explanation,
+        "concept_tags": question.concept_tags,
+        "creator_id": user["id"],
+        "creator_name": user.get("name", "Unknown"),
+        "created_at": datetime.now(timezone.utc).isoformat()
+    }
+    
+    await db.skill_quiz_questions.insert_one(question_doc)
+    return {"success": True, "question_id": question_doc["id"]}
+
+@api_router.post("/skill-quiz/questions/bulk")
+async def bulk_create_skill_quiz_questions(questions: List[SkillQuizQuestionCreate], request: Request):
+    """Bulk create skill quiz questions (teacher only)"""
+    user = await get_current_user(request)
+    
+    if user["role"] != "teacher":
+        raise HTTPException(status_code=403, detail="Only teachers can create quiz questions")
+    
+    created_ids = []
+    for q in questions:
+        question_doc = {
+            "id": str(uuid.uuid4()),
+            "skill_category": q.skill_category,
+            "question_text": q.question_text,
+            "choice_a": q.choice_a,
+            "choice_b": q.choice_b,
+            "choice_c": q.choice_c,
+            "choice_d": q.choice_d,
+            "correct_answer": q.correct_answer.upper(),
+            "explanation": q.explanation,
+            "concept_tags": q.concept_tags,
+            "creator_id": user["id"],
+            "creator_name": user.get("name", "Unknown"),
+            "created_at": datetime.now(timezone.utc).isoformat()
+        }
+        await db.skill_quiz_questions.insert_one(question_doc)
+        created_ids.append(question_doc["id"])
+    
+    return {"success": True, "created_count": len(created_ids), "question_ids": created_ids}
+
+@api_router.get("/skill-quiz/questions")
+async def get_skill_quiz_questions(request: Request, skill_category: str = None):
+    """Get all skill quiz questions (teacher only)"""
+    user = await get_current_user(request)
+    
+    if user["role"] != "teacher":
+        raise HTTPException(status_code=403, detail="Only teachers can view quiz questions")
+    
+    query = {}
+    if skill_category:
+        query["skill_category"] = skill_category
+    
+    questions = await db.skill_quiz_questions.find(query, {"_id": 0}).to_list(1000)
+    
+    # Group by skill category
+    by_category = {}
+    for q in questions:
+        cat = q.get("skill_category", "Uncategorized")
+        if cat not in by_category:
+            by_category[cat] = []
+        by_category[cat].append(q)
+    
+    return {"questions": questions, "by_category": by_category}
+
+@api_router.get("/skill-quiz/{skill_category}")
+async def get_skill_quiz(skill_category: str, assignment_id: str, request: Request):
+    """Get quiz questions for a specific skill (for students taking quiz)"""
+    user = await get_current_user(request)
+    
+    # Check if student already completed this quiz for this assignment
+    existing_attempt = await db.skill_quiz_attempts.find_one({
+        "student_id": user["id"],
+        "skill_category": skill_category,
+        "assignment_id": assignment_id
+    }, {"_id": 0})
+    
+    if existing_attempt:
+        return {
+            "already_completed": True,
+            "score": existing_attempt["score"],
+            "correct_count": existing_attempt["correct_count"],
+            "total_questions": existing_attempt["total_questions"]
+        }
+    
+    # Get questions for this skill category
+    questions = await db.skill_quiz_questions.find(
+        {"skill_category": skill_category},
+        {"_id": 0}
+    ).to_list(100)
+    
+    if len(questions) < 3:
+        return {"questions": [], "message": "Not enough quiz questions for this skill"}
+    
+    # Randomly select up to 5 questions
+    import random
+    selected = random.sample(questions, min(5, len(questions)))
+    
+    # Prepare questions for student (without correct answer)
+    quiz_questions = []
+    for q in selected:
+        quiz_questions.append({
+            "id": q["id"],
+            "question_text": q["question_text"],
+            "choice_a": q["choice_a"],
+            "choice_b": q["choice_b"],
+            "choice_c": q["choice_c"],
+            "choice_d": q["choice_d"],
+            "concept_tags": q.get("concept_tags", [])
+        })
+    
+    return {"questions": quiz_questions, "skill_category": skill_category}
+
+@api_router.post("/skill-quiz/submit")
+async def submit_skill_quiz(submission: SkillQuizSubmit, request: Request):
+    """Submit skill quiz answers"""
+    user = await get_current_user(request)
+    
+    # Check for existing attempt
+    existing = await db.skill_quiz_attempts.find_one({
+        "student_id": user["id"],
+        "skill_category": submission.skill_category,
+        "assignment_id": submission.assignment_id
+    })
+    
+    if existing:
+        return {
+            "already_completed": True,
+            "score": existing["score"],
+            "message": "You have already completed this quiz"
+        }
+    
+    # Get questions and grade
+    question_ids = list(submission.answers.keys())
+    questions = await db.skill_quiz_questions.find(
+        {"id": {"$in": question_ids}},
+        {"_id": 0}
+    ).to_list(100)
+    
+    correct_count = 0
+    results = []
+    
+    for q in questions:
+        student_answer = submission.answers.get(q["id"], "")
+        is_correct = student_answer.upper() == q["correct_answer"].upper()
+        if is_correct:
+            correct_count += 1
+        results.append({
+            "question_id": q["id"],
+            "question_text": q["question_text"],
+            "student_answer": student_answer,
+            "correct_answer": q["correct_answer"],
+            "is_correct": is_correct,
+            "explanation": q.get("explanation", "")
+        })
+    
+    total_questions = len(questions)
+    score = (correct_count / total_questions * 100) if total_questions > 0 else 0
+    
+    # Store attempt
+    attempt_doc = {
+        "id": str(uuid.uuid4()),
+        "student_id": user["id"],
+        "student_name": user.get("name", "Unknown"),
+        "skill_category": submission.skill_category,
+        "assignment_id": submission.assignment_id,
+        "classroom_id": submission.classroom_id,
+        "questions": results,
+        "student_answers": submission.answers,
+        "score": score,
+        "total_questions": total_questions,
+        "correct_count": correct_count,
+        "submitted_at": datetime.now(timezone.utc).isoformat()
+    }
+    
+    await db.skill_quiz_attempts.insert_one(attempt_doc)
+    
+    return {
+        "success": True,
+        "score": score,
+        "correct_count": correct_count,
+        "total_questions": total_questions,
+        "results": results
+    }
+
+@api_router.get("/skill-quiz/results/{skill_category}")
+async def get_skill_quiz_results(skill_category: str, classroom_id: str = None, request: Request = None):
+    """Get quiz results for a skill category (teacher view)"""
+    user = await get_current_user(request)
+    
+    if user["role"] != "teacher":
+        raise HTTPException(status_code=403, detail="Only teachers can view quiz results")
+    
+    query = {"skill_category": skill_category}
+    if classroom_id:
+        query["classroom_id"] = classroom_id
+    
+    attempts = await db.skill_quiz_attempts.find(query, {"_id": 0}).to_list(1000)
+    
+    # Calculate stats
+    if attempts:
+        scores = [a["score"] for a in attempts]
+        stats = {
+            "average_score": sum(scores) / len(scores),
+            "highest_score": max(scores),
+            "lowest_score": min(scores),
+            "total_attempts": len(attempts)
+        }
+    else:
+        stats = {
+            "average_score": 0,
+            "highest_score": 0,
+            "lowest_score": 0,
+            "total_attempts": 0
+        }
+    
+    return {"attempts": attempts, "stats": stats}
+
+@api_router.get("/skill-quiz/student-history")
+async def get_student_quiz_history(request: Request):
+    """Get quiz history for current student"""
+    user = await get_current_user(request)
+    
+    attempts = await db.skill_quiz_attempts.find(
+        {"student_id": user["id"]},
+        {"_id": 0}
+    ).sort("submitted_at", -1).to_list(100)
+    
+    return {"attempts": attempts}
+
+@api_router.delete("/skill-quiz/questions/{question_id}")
+async def delete_skill_quiz_question(question_id: str, request: Request):
+    """Delete a skill quiz question (teacher only)"""
+    user = await get_current_user(request)
+    
+    if user["role"] != "teacher":
+        raise HTTPException(status_code=403, detail="Only teachers can delete quiz questions")
+    
+    result = await db.skill_quiz_questions.delete_one({"id": question_id})
+    
+    if result.deleted_count == 0:
+        raise HTTPException(status_code=404, detail="Question not found")
+    
+    return {"success": True, "message": "Question deleted"}
+
+
 # ==================== CODING TESTS ====================
 
 @api_router.post("/coding-tests")
