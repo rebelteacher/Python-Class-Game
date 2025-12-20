@@ -234,6 +234,7 @@ export default function AssignmentLibrary({ user }) {
           expected_output: editingProblem.expected_output,
           category: editingProblem.category,
           difficulty: editingProblem.difficulty,
+          unit: editingProblem.unit || "",
           chapter: editingProblem.chapter || "",
           lesson: editingProblem.lesson || "",
           problem_type: editingProblem.problem_type,
