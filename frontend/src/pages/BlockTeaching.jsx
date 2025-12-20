@@ -532,7 +532,7 @@ export default function BlockTeaching({ user }) {
                 {output ? (
                   <pre className="text-yellow-300 whitespace-pre-wrap">{output}</pre>
                 ) : (
-                  <span className="text-gray-500">Click "Run" to see output...</span>
+                  <span className="text-gray-500">Click &quot;Run&quot; to see output...</span>
                 )}
               </div>
             </div>
