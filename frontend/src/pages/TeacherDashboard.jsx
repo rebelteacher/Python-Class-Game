@@ -214,6 +214,10 @@ export default function TeacherDashboard({ user, setUser }) {
               <Video className="w-4 h-4" />
               Video Library
             </Button>
+            <Button onClick={() => navigate("/blocks-curriculum")} variant="outline" size="sm" className="gap-2 border-purple-300 text-purple-100 hover:bg-purple-500/30 bg-purple-500/20">
+              🧱
+              Blocks
+            </Button>
             <Button onClick={() => navigate("/turtle-curriculum")} variant="outline" size="sm" className="gap-2 border-green-300 text-green-100 hover:bg-green-500/30 bg-green-500/20">
               🐢
               Turtle
