@@ -663,12 +663,13 @@ metadata:
   backend_test_completion: "2024-12-28"
 
 test_plan:
-  current_focus: []
+  current_focus:
+    - "Teaching Mode Pages for Turtle and Micro:bit"
   stuck_tasks: []
   test_all: false
   test_priority: "high_first"
-  testing_complete: true
-  latest_test: "Micro:bit Module Integration - PASSED"
+  testing_complete: false
+  latest_test: "Teaching Mode Implementation - IN PROGRESS"
 
 agent_communication:
   - agent: "testing"
