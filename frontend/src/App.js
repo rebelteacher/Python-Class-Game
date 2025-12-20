@@ -45,6 +45,7 @@ import CodingTestTaking from "./pages/CodingTestTaking";
 import CodingTestResult from "./pages/CodingTestResult";
 import CodingTestSubmissions from "./pages/CodingTestSubmissions";
 import TurtleGraphics from "./pages/TurtleGraphics";
+import TurtleCurriculum from "./pages/TurtleCurriculum";
 import MicrobitCurriculum from "./pages/MicrobitCurriculum";
 
 const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
