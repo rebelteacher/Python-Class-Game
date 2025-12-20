@@ -249,6 +249,15 @@ function App() {
               />
               
               <Route
+                path="/turtle-curriculum"
+                element={
+                  <ProtectedRoute user={user}>
+                    <TurtleCurriculum user={user} />
+                  </ProtectedRoute>
+                }
+              />
+              
+              <Route
                 path="/classroom/:classroomId"
                 element={
                   <ProtectedRoute user={user}>
