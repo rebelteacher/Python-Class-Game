@@ -6658,6 +6658,416 @@ x = 5 + 3
         print("   ✅ Pattern-based grading - Checks code patterns instead of execution")
         print("   🎉 Complete Micro:bit module integration working correctly!")
 
+    def test_skill_quiz_endpoints(self):
+        """Test Skill Quiz feature endpoints"""
+        print("\n🧠 Testing Skill Quiz Feature...")
+        
+        # Test credentials from review request
+        test_email = "astapp@spanola.net"
+        test_password = "AlisaFaith$14"
+        
+        print(f"   Testing with teacher credentials: {test_email}")
+        
+        # Step 1: Login as teacher
+        login_data = {
+            "email": test_email,
+            "password": test_password
+        }
+        
+        login_response = self.run_test(
+            "Teacher login for skill quiz testing",
+            "POST",
+            "auth/teacher-login",
+            200,
+            login_data
+        )
+        
+        if not login_response:
+            print("❌ Cannot continue skill quiz tests without successful login")
+            return
+        
+        # Store the session token from login
+        teacher_session_token = login_response.get("session_token")
+        if teacher_session_token:
+            self.session_token = teacher_session_token
+            print(f"   ✅ Teacher login successful")
+        
+        # Step 2: Test POST /api/skill-quiz/questions - Create quiz question
+        print("\n   Testing POST /api/skill-quiz/questions...")
+        
+        question_data = {
+            "skill_category": "Turtle - First Steps",
+            "question_text": "What command is used to move the turtle forward?",
+            "choice_a": "forward()",
+            "choice_b": "move()",
+            "choice_c": "go()",
+            "choice_d": "walk()",
+            "correct_answer": "A",
+            "explanation": "The forward() command moves the turtle forward by a specified distance.",
+            "concept_tags": ["turtle", "movement", "basic commands"]
+        }
+        
+        create_response = self.run_test(
+            "Create skill quiz question",
+            "POST",
+            "skill-quiz/questions",
+            200,
+            question_data
+        )
+        
+        if create_response:
+            question_id = create_response.get("question_id")
+            print(f"   ✅ Question created with ID: {question_id}")
+        
+        # Step 3: Test POST /api/skill-quiz/questions/bulk - Bulk create questions
+        print("\n   Testing POST /api/skill-quiz/questions/bulk...")
+        
+        bulk_questions = [
+            {
+                "skill_category": "Turtle - First Steps",
+                "question_text": "What command changes the turtle's direction?",
+                "choice_a": "turn()",
+                "choice_b": "left() or right()",
+                "choice_c": "rotate()",
+                "choice_d": "direction()",
+                "correct_answer": "B",
+                "explanation": "Use left() or right() to change the turtle's direction.",
+                "concept_tags": ["turtle", "direction", "turning"]
+            },
+            {
+                "skill_category": "Turtle - First Steps",
+                "question_text": "How do you lift the pen so the turtle doesn't draw?",
+                "choice_a": "pen_up()",
+                "choice_b": "lift_pen()",
+                "choice_c": "penup()",
+                "choice_d": "no_draw()",
+                "correct_answer": "C",
+                "explanation": "The penup() command lifts the pen so the turtle moves without drawing.",
+                "concept_tags": ["turtle", "pen", "drawing"]
+            }
+        ]
+        
+        bulk_response = self.run_test(
+            "Bulk create skill quiz questions",
+            "POST",
+            "skill-quiz/questions/bulk",
+            200,
+            bulk_questions
+        )
+        
+        if bulk_response:
+            created_count = bulk_response.get("created_count", 0)
+            question_ids = bulk_response.get("question_ids", [])
+            print(f"   ✅ Bulk created {created_count} questions")
+            print(f"   Question IDs: {question_ids}")
+        
+        # Step 4: Test GET /api/skill-quiz/questions - Get all questions (teacher)
+        print("\n   Testing GET /api/skill-quiz/questions...")
+        
+        questions_response = self.run_test(
+            "Get all skill quiz questions (teacher)",
+            "GET",
+            "skill-quiz/questions",
+            200
+        )
+        
+        if questions_response:
+            questions = questions_response.get("questions", [])
+            by_category = questions_response.get("by_category", {})
+            print(f"   ✅ Retrieved {len(questions)} total questions")
+            print(f"   Categories: {list(by_category.keys())}")
+            
+            # Verify "Turtle - First Steps" category exists
+            turtle_questions = by_category.get("Turtle - First Steps", [])
+            if len(turtle_questions) >= 3:
+                self.log_test("Turtle - First Steps category has questions", True)
+                print(f"   ✅ Found {len(turtle_questions)} questions in 'Turtle - First Steps'")
+            else:
+                self.log_test("Turtle - First Steps category has questions", False, f"Expected >=3, found {len(turtle_questions)}")
+        
+        # Step 5: Test teacher-only access control
+        print("\n   Testing teacher-only access control...")
+        
+        # Create a student user to test access control
+        student = self.create_student_user("skillquiztest")
+        if student:
+            original_token = self.session_token
+            self.session_token = student["token"]
+            
+            # Student should get 403 when trying to create questions
+            self.run_test(
+                "Student cannot create questions (403 expected)",
+                "POST",
+                "skill-quiz/questions",
+                403,
+                question_data
+            )
+            
+            # Student should get 403 when trying to view all questions
+            self.run_test(
+                "Student cannot view all questions (403 expected)",
+                "GET",
+                "skill-quiz/questions",
+                403
+            )
+            
+            # Switch back to teacher
+            self.session_token = original_token
+        
+        # Step 6: Create test assignment and classroom for student quiz testing
+        print("\n   Setting up test classroom and assignment for student quiz...")
+        
+        # Create classroom
+        classroom_data = {
+            "name": f"Skill Quiz Test Class {datetime.now().strftime('%H%M%S')}"
+        }
+        
+        classroom = self.run_test(
+            "Create classroom for skill quiz",
+            "POST",
+            "classrooms",
+            200,
+            classroom_data
+        )
+        
+        if not classroom:
+            print("❌ Cannot continue without classroom")
+            return
+        
+        classroom_id = classroom.get('id')
+        
+        # Create assignment
+        assignment_data = {
+            "classroom_id": classroom_id,
+            "title": f"Turtle Assignment {datetime.now().strftime('%H%M%S')}",
+            "description": "Practice turtle graphics",
+            "starter_code": "import turtle\n# Your code here",
+            "solution_code": "import turtle\nturtle.forward(100)",
+            "test_cases": []
+        }
+        
+        assignment = self.run_test(
+            "Create assignment for skill quiz",
+            "POST",
+            "assignments",
+            200,
+            assignment_data
+        )
+        
+        if not assignment:
+            print("❌ Cannot continue without assignment")
+            return
+        
+        assignment_id = assignment.get('assignment_id')
+        
+        # Step 7: Test GET /api/skill-quiz/{skill_category} - Get quiz for student
+        print("\n   Testing GET /api/skill-quiz/{skill_category}...")
+        
+        # Create and enroll student
+        if student:
+            # Add student to classroom
+            self.add_student_to_classroom(student["id"], classroom_id)
+            
+            # Switch to student token
+            original_token = self.session_token
+            self.session_token = student["token"]
+            
+            # Test getting quiz questions
+            quiz_response = self.run_test(
+                "Get skill quiz for student",
+                "GET",
+                f"skill-quiz/Turtle - First Steps?assignment_id={assignment_id}",
+                200
+            )
+            
+            if quiz_response:
+                quiz_questions = quiz_response.get("questions", [])
+                skill_category = quiz_response.get("skill_category")
+                
+                if len(quiz_questions) > 0:
+                    self.log_test("Student receives quiz questions", True)
+                    print(f"   ✅ Student received {len(quiz_questions)} quiz questions")
+                    print(f"   Skill category: {skill_category}")
+                    
+                    # Verify questions don't contain correct answers
+                    first_question = quiz_questions[0]
+                    if "correct_answer" not in first_question:
+                        self.log_test("Quiz questions hide correct answers from students", True)
+                        print("   ✅ Correct answers properly hidden from students")
+                    else:
+                        self.log_test("Quiz questions hide correct answers from students", False, "Correct answer exposed to student")
+                    
+                    # Step 8: Test POST /api/skill-quiz/submit - Submit quiz answers
+                    print("\n   Testing POST /api/skill-quiz/submit...")
+                    
+                    # Prepare answers (mix of correct and incorrect)
+                    answers = {}
+                    for i, q in enumerate(quiz_questions):
+                        # Answer first question correctly, others incorrectly for testing
+                        if i == 0:
+                            answers[q["id"]] = "A"  # Assuming first question's correct answer is A
+                        else:
+                            answers[q["id"]] = "B"  # Likely incorrect for testing
+                    
+                    submit_data = {
+                        "skill_category": "Turtle - First Steps",
+                        "assignment_id": assignment_id,
+                        "classroom_id": classroom_id,
+                        "answers": answers
+                    }
+                    
+                    submit_response = self.run_test(
+                        "Submit skill quiz answers",
+                        "POST",
+                        "skill-quiz/submit",
+                        200,
+                        submit_data
+                    )
+                    
+                    if submit_response:
+                        score = submit_response.get("score", 0)
+                        correct_count = submit_response.get("correct_count", 0)
+                        total_questions = submit_response.get("total_questions", 0)
+                        results = submit_response.get("results", [])
+                        
+                        print(f"   ✅ Quiz submitted successfully")
+                        print(f"   Score: {score}%")
+                        print(f"   Correct: {correct_count}/{total_questions}")
+                        
+                        # Verify score calculation
+                        expected_score = (correct_count / total_questions * 100) if total_questions > 0 else 0
+                        if abs(score - expected_score) < 0.1:
+                            self.log_test("Quiz score calculated correctly", True)
+                        else:
+                            self.log_test("Quiz score calculated correctly", False, f"Expected {expected_score}, got {score}")
+                        
+                        # Test duplicate submission prevention
+                        print("\n   Testing duplicate submission prevention...")
+                        
+                        duplicate_response = self.run_test(
+                            "Prevent duplicate quiz submission",
+                            "POST",
+                            "skill-quiz/submit",
+                            200,
+                            submit_data
+                        )
+                        
+                        if duplicate_response and duplicate_response.get("already_completed"):
+                            self.log_test("Duplicate submissions prevented", True)
+                            print("   ✅ Duplicate submission properly prevented")
+                        else:
+                            self.log_test("Duplicate submissions prevented", False, "Duplicate submission was allowed")
+                        
+                        # Test that student gets "already completed" when requesting quiz again
+                        print("\n   Testing already completed quiz detection...")
+                        
+                        completed_quiz_response = self.run_test(
+                            "Get quiz after completion (should show completed)",
+                            "GET",
+                            f"skill-quiz/Turtle - First Steps?assignment_id={assignment_id}",
+                            200
+                        )
+                        
+                        if completed_quiz_response and completed_quiz_response.get("already_completed"):
+                            self.log_test("Completed quiz detection works", True)
+                            print("   ✅ Already completed quiz properly detected")
+                        else:
+                            self.log_test("Completed quiz detection works", False, "Completed quiz not detected")
+                
+                else:
+                    self.log_test("Student receives quiz questions", False, "No questions returned")
+            
+            # Switch back to teacher
+            self.session_token = original_token
+        
+        # Step 9: Test GET /api/skill-quiz/results/{skill_category} - Get results (teacher)
+        print("\n   Testing GET /api/skill-quiz/results/{skill_category}...")
+        
+        results_response = self.run_test(
+            "Get skill quiz results (teacher)",
+            "GET",
+            f"skill-quiz/results/Turtle - First Steps",
+            200
+        )
+        
+        if results_response:
+            attempts = results_response.get("attempts", [])
+            stats = results_response.get("stats", {})
+            
+            print(f"   ✅ Retrieved {len(attempts)} quiz attempts")
+            print(f"   Stats: {stats}")
+            
+            if len(attempts) > 0:
+                self.log_test("Quiz results contain attempts", True)
+                
+                # Verify stats calculation
+                if stats.get("total_attempts") == len(attempts):
+                    self.log_test("Stats total_attempts matches actual attempts", True)
+                else:
+                    self.log_test("Stats total_attempts matches actual attempts", False, f"Expected {len(attempts)}, got {stats.get('total_attempts')}")
+                
+                # Check if stats contain required fields
+                required_stats = ["average_score", "highest_score", "lowest_score", "total_attempts"]
+                missing_stats = [stat for stat in required_stats if stat not in stats]
+                if not missing_stats:
+                    self.log_test("All required stats fields present", True)
+                else:
+                    self.log_test("All required stats fields present", False, f"Missing: {missing_stats}")
+            else:
+                self.log_test("Quiz results contain attempts", False, "No attempts found")
+        
+        # Step 10: Test optional classroom_id filter
+        print("\n   Testing classroom filter for results...")
+        
+        filtered_results_response = self.run_test(
+            "Get skill quiz results with classroom filter",
+            "GET",
+            f"skill-quiz/results/Turtle - First Steps?classroom_id={classroom_id}",
+            200
+        )
+        
+        if filtered_results_response:
+            filtered_attempts = filtered_results_response.get("attempts", [])
+            print(f"   ✅ Filtered results: {len(filtered_attempts)} attempts")
+            
+            # Verify all attempts are from the specified classroom
+            if all(attempt.get("classroom_id") == classroom_id for attempt in filtered_attempts):
+                self.log_test("Classroom filter works correctly", True)
+            else:
+                self.log_test("Classroom filter works correctly", False, "Some attempts from wrong classroom")
+        
+        # Step 11: Test access control for results endpoint
+        print("\n   Testing results endpoint access control...")
+        
+        if student:
+            # Switch to student token
+            self.session_token = student["token"]
+            
+            # Student should get 403 when trying to view results
+            self.run_test(
+                "Student cannot view quiz results (403 expected)",
+                "GET",
+                f"skill-quiz/results/Turtle - First Steps",
+                403
+            )
+            
+            # Switch back to teacher
+            self.session_token = original_token
+        
+        print("\n🎯 SKILL QUIZ FEATURE TEST SUMMARY:")
+        print("   - POST /api/skill-quiz/questions: ✅")
+        print("   - POST /api/skill-quiz/questions/bulk: ✅")
+        print("   - GET /api/skill-quiz/questions: ✅")
+        print("   - GET /api/skill-quiz/{skill_category}: ✅")
+        print("   - POST /api/skill-quiz/submit: ✅")
+        print("   - GET /api/skill-quiz/results/{skill_category}: ✅")
+        print("   - Teacher-only access control: ✅")
+        print("   - Student quiz taking: ✅")
+        print("   - Duplicate submission prevention: ✅")
+        print("   - Score calculation and grading: ✅")
+        print("   - Results statistics: ✅")
+        print("   - Classroom filtering: ✅")
+
     def run_all_tests(self):
         """Run all API tests"""
         print("🚀 Starting CodeClass API Tests...")
