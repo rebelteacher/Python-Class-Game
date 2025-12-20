@@ -1520,13 +1520,6 @@ export default function AssignmentLibrary({ user }) {
                                                         onClick={(e) => e.stopPropagation()}
                                                       />
                                                     )}
-                                                    <div className={`px-2 py-1 rounded text-xs font-semibold ${
-                                                      problem.difficulty === "Easy" ? "bg-green-100 text-green-700" :
-                                                      problem.difficulty === "Medium" ? "bg-yellow-100 text-yellow-700" :
-                                                      "bg-red-100 text-red-700"
-                                                    }`}>
-                                                      {problem.difficulty}
-                                                    </div>
                                                   </div>
                                                   <div className="text-xs text-gray-500">
                                                     <Download className="w-3 h-3 inline mr-1" />
