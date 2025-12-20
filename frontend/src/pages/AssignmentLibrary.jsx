@@ -1341,6 +1341,20 @@ export default function AssignmentLibrary({ user }) {
               </SelectContent>
             </Select>
 
+            <Select value={unitFilter} onValueChange={setUnitFilter}>
+              <SelectTrigger className="w-40" data-testid="filter-unit">
+                <SelectValue placeholder="All Units" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">All Units</SelectItem>
+                {[...new Set(problems.map(p => p.unit).filter(Boolean))].sort().map((unit) => (
+                  <SelectItem key={unit} value={unit}>
+                    {unit}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+
             <Select value={chapterFilter} onValueChange={setChapterFilter}>
               <SelectTrigger className="w-40" data-testid="filter-chapter">
                 <SelectValue placeholder="All Chapters" />
