@@ -110,7 +110,7 @@ export default function AssignmentLibrary({ user }) {
 
   useEffect(() => {
     filterProblems();
-  }, [searchTerm, categoryFilter, difficultyFilter, chapterFilter, typeFilter, problems]);
+  }, [searchTerm, categoryFilter, difficultyFilter, chapterFilter, unitFilter, typeFilter, problems]);
 
   const fetchProblems = async () => {
     try {
