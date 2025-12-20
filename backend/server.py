@@ -7775,6 +7775,333 @@ async def create_assignment_from_microbit_lesson(data: dict, request: Request):
     return {"message": "Problem added to library", "problem_id": problem_id}
 
 
+# Turtle Graphics Curriculum Structure
+TURTLE_CURRICULUM = {
+    "units": [
+        {
+            "id": "unit1",
+            "title": "Unit 1: First Steps with Turtle",
+            "lessons": [
+                {
+                    "id": "lesson1",
+                    "title": "Meet the Turtle",
+                    "description": "Introduction to turtle graphics and basic movement commands",
+                    "objectives": ["Understand what turtle graphics is", "Create your first turtle program", "Use forward() and backward() commands"],
+                    "starter_code": "import turtle\n\n# Create a turtle\nt = turtle.Turtle()\n\n# Move forward 100 pixels\nt.forward(100)\n\nt.hideturtle()",
+                    "solution_code": "import turtle\n\nt = turtle.Turtle()\nt.forward(100)\nt.hideturtle()",
+                    "test_cases": [
+                        {"pattern": "forward", "description": "Uses forward() command", "points": 50},
+                        {"pattern": "turtle.Turtle", "description": "Creates a turtle", "points": 50}
+                    ]
+                },
+                {
+                    "id": "lesson2",
+                    "title": "Turning & Direction",
+                    "description": "Learn to turn the turtle using right() and left() commands",
+                    "objectives": ["Use right() and left() to turn", "Understand angles and degrees", "Draw simple angled lines"],
+                    "starter_code": "import turtle\n\nt = turtle.Turtle()\n\n# Draw an L shape\nt.forward(100)\n# Add a turn here\n# Then go forward again\n\nt.hideturtle()",
+                    "solution_code": "import turtle\n\nt = turtle.Turtle()\nt.forward(100)\nt.right(90)\nt.forward(100)\nt.hideturtle()",
+                    "test_cases": [
+                        {"pattern": "right", "description": "Uses right() to turn", "points": 50},
+                        {"pattern": "forward", "description": "Uses forward() command", "points": 50}
+                    ]
+                },
+                {
+                    "id": "lesson3",
+                    "title": "Your First Shape - Square",
+                    "description": "Combine movement and turning to draw a complete square",
+                    "objectives": ["Combine movement and turning", "Draw a complete square", "Understand the concept of a closed shape"],
+                    "starter_code": "import turtle\n\nt = turtle.Turtle()\n\n# Draw a square:\n# 1. Go forward\n# 2. Turn right 90 degrees\n# 3. Repeat 4 times\n\nt.hideturtle()",
+                    "solution_code": "import turtle\n\nt = turtle.Turtle()\nfor i in range(4):\n    t.forward(100)\n    t.right(90)\nt.hideturtle()",
+                    "test_cases": [
+                        {"pattern": "forward", "description": "Uses forward() command", "points": 25},
+                        {"pattern": "right", "description": "Uses right() to turn", "points": 25},
+                        {"pattern": "range(4)", "description": "Repeats 4 times for square", "points": 50}
+                    ]
+                }
+            ]
+        },
+        {
+            "id": "unit2",
+            "title": "Unit 2: Loops - The Power of Repetition",
+            "lessons": [
+                {
+                    "id": "lesson1",
+                    "title": "For Loops Introduction",
+                    "description": "Learn to use for loops to repeat commands efficiently",
+                    "objectives": ["Understand the for loop syntax", "Use range() function", "Draw shapes using loops"],
+                    "starter_code": "import turtle\n\nt = turtle.Turtle()\n\n# Use a for loop to draw a triangle\n# for i in range(3):\n#     forward, turn\n\nt.hideturtle()",
+                    "solution_code": "import turtle\n\nt = turtle.Turtle()\nfor i in range(3):\n    t.forward(100)\n    t.left(120)\nt.hideturtle()",
+                    "test_cases": [
+                        {"pattern": "for", "description": "Uses for loop", "points": 40},
+                        {"pattern": "range", "description": "Uses range()", "points": 30},
+                        {"pattern": "120", "description": "Correct angle for triangle", "points": 30}
+                    ]
+                },
+                {
+                    "id": "lesson2",
+                    "title": "Polygons with Loops",
+                    "description": "Create any regular polygon using the angle formula",
+                    "objectives": ["Calculate angles for regular polygons", "Draw triangles, pentagons, hexagons", "Understand the relationship between sides and angles"],
+                    "starter_code": "import turtle\n\nt = turtle.Turtle()\n\n# Draw a hexagon (6 sides)\n# Angle = 360 / number_of_sides\nsides = 6\nangle = 360 / sides\n\n# Use a for loop\n\nt.hideturtle()",
+                    "solution_code": "import turtle\n\nt = turtle.Turtle()\nsides = 6\nangle = 360 / sides\nfor i in range(sides):\n    t.forward(60)\n    t.right(angle)\nt.hideturtle()",
+                    "test_cases": [
+                        {"pattern": "360", "description": "Uses 360 for full rotation", "points": 25},
+                        {"pattern": "for", "description": "Uses for loop", "points": 25},
+                        {"pattern": "range(sides)", "description": "Loop based on sides", "points": 25},
+                        {"pattern": "angle", "description": "Uses calculated angle", "points": 25}
+                    ]
+                },
+                {
+                    "id": "lesson3",
+                    "title": "Nested Loops - Grids and Patterns",
+                    "description": "Use loops inside loops to create grids and complex patterns",
+                    "objectives": ["Understand nested loop structure", "Create grids and patterns", "Draw multiple shapes systematically"],
+                    "starter_code": "import turtle\n\nt = turtle.Turtle()\nt.speed(0)\n\n# Draw a row of 5 squares\n# Then move to next row\n# Repeat for 3 rows\n\nt.hideturtle()",
+                    "solution_code": "import turtle\n\nt = turtle.Turtle()\nt.speed(0)\n\nfor row in range(3):\n    for col in range(5):\n        for i in range(4):\n            t.forward(20)\n            t.right(90)\n        t.penup()\n        t.forward(30)\n        t.pendown()\n    t.penup()\n    t.goto(-100, t.ycor() - 30)\n    t.pendown()\n\nt.hideturtle()",
+                    "test_cases": [
+                        {"pattern": "for row", "description": "Outer loop for rows", "points": 25},
+                        {"pattern": "for col", "description": "Inner loop for columns", "points": 25},
+                        {"pattern": "range(4)", "description": "Loop for square", "points": 25},
+                        {"pattern": "penup", "description": "Lifts pen to move", "points": 25}
+                    ]
+                },
+                {
+                    "id": "lesson4",
+                    "title": "Spirals with While Loops",
+                    "description": "Use while loops to create expanding spiral patterns",
+                    "objectives": ["Use while loops for unknown iterations", "Create spiral patterns", "Understand loop control variables"],
+                    "starter_code": "import turtle\n\nt = turtle.Turtle()\nt.speed(0)\n\n# Create a spiral:\n# Start with distance = 5\n# Each time: forward(distance), turn, increase distance\n# Stop when distance > 200\n\nt.hideturtle()",
+                    "solution_code": "import turtle\n\nt = turtle.Turtle()\nt.speed(0)\n\ndistance = 5\nwhile distance < 200:\n    t.forward(distance)\n    t.right(90)\n    distance = distance + 5\n\nt.hideturtle()",
+                    "test_cases": [
+                        {"pattern": "while", "description": "Uses while loop", "points": 40},
+                        {"pattern": "distance", "description": "Uses distance variable", "points": 30},
+                        {"pattern": "distance + 5", "description": "Increases distance", "points": 30}
+                    ]
+                }
+            ]
+        },
+        {
+            "id": "unit3",
+            "title": "Unit 3: Colors & Style",
+            "lessons": [
+                {
+                    "id": "lesson1",
+                    "title": "Pen Colors",
+                    "description": "Change the color of your turtle's pen",
+                    "objectives": ["Use pencolor() to change line color", "Understand color names and RGB values", "Create colorful patterns"],
+                    "starter_code": "import turtle\n\nt = turtle.Turtle()\n\n# Draw a red square\n# Use t.pencolor('red')\n\nt.hideturtle()",
+                    "solution_code": "import turtle\n\nt = turtle.Turtle()\nt.pencolor('red')\nfor i in range(4):\n    t.forward(100)\n    t.right(90)\nt.hideturtle()",
+                    "test_cases": [
+                        {"pattern": "pencolor", "description": "Uses pencolor()", "points": 50},
+                        {"pattern": "red", "description": "Sets red color", "points": 50}
+                    ]
+                },
+                {
+                    "id": "lesson2",
+                    "title": "Fill Colors",
+                    "description": "Fill shapes with solid colors",
+                    "objectives": ["Use begin_fill() and end_fill()", "Fill shapes with color", "Combine outline and fill colors"],
+                    "starter_code": "import turtle\n\nt = turtle.Turtle()\n\n# Draw a filled blue circle\n# Use begin_fill() before drawing\n# Use end_fill() after drawing\n\nt.hideturtle()",
+                    "solution_code": "import turtle\n\nt = turtle.Turtle()\nt.fillcolor('blue')\nt.begin_fill()\nt.circle(50)\nt.end_fill()\nt.hideturtle()",
+                    "test_cases": [
+                        {"pattern": "fillcolor", "description": "Sets fill color", "points": 25},
+                        {"pattern": "begin_fill", "description": "Starts fill", "points": 25},
+                        {"pattern": "end_fill", "description": "Ends fill", "points": 25},
+                        {"pattern": "circle", "description": "Draws circle", "points": 25}
+                    ]
+                },
+                {
+                    "id": "lesson3",
+                    "title": "Rainbow Pattern",
+                    "description": "Create a colorful rainbow using multiple colors in a loop",
+                    "objectives": ["Use a list of colors", "Change colors inside a loop", "Create rainbow effects"],
+                    "starter_code": "import turtle\n\nt = turtle.Turtle()\nt.speed(0)\n\ncolors = ['red', 'orange', 'yellow', 'green', 'blue', 'purple']\n\n# Draw a spiral with changing colors\n\nt.hideturtle()",
+                    "solution_code": "import turtle\n\nt = turtle.Turtle()\nt.speed(0)\n\ncolors = ['red', 'orange', 'yellow', 'green', 'blue', 'purple']\n\nfor i in range(36):\n    t.pencolor(colors[i % 6])\n    t.forward(i * 5)\n    t.right(60)\n\nt.hideturtle()",
+                    "test_cases": [
+                        {"pattern": "colors", "description": "Uses color list", "points": 25},
+                        {"pattern": "pencolor", "description": "Changes pen color", "points": 25},
+                        {"pattern": "% 6", "description": "Cycles through colors", "points": 25},
+                        {"pattern": "for", "description": "Uses for loop", "points": 25}
+                    ]
+                }
+            ]
+        },
+        {
+            "id": "unit4",
+            "title": "Unit 4: Conditionals - Making Decisions",
+            "lessons": [
+                {
+                    "id": "lesson1",
+                    "title": "If Statements",
+                    "description": "Use if statements to make decisions in your code",
+                    "objectives": ["Understand if statement syntax", "Make decisions based on conditions", "Change colors based on position"],
+                    "starter_code": "import turtle\n\nt = turtle.Turtle()\nt.speed(0)\n\n# Draw a line, change color when x > 0\nfor i in range(200):\n    # Check if position is positive\n    # Change color accordingly\n    t.forward(1)\n    t.right(1)\n\nt.hideturtle()",
+                    "solution_code": "import turtle\n\nt = turtle.Turtle()\nt.speed(0)\n\nfor i in range(360):\n    if t.xcor() > 0:\n        t.pencolor('red')\n    t.forward(2)\n    t.right(1)\n\nt.hideturtle()",
+                    "test_cases": [
+                        {"pattern": "if", "description": "Uses if statement", "points": 40},
+                        {"pattern": "xcor", "description": "Checks x position", "points": 30},
+                        {"pattern": "pencolor", "description": "Changes color", "points": 30}
+                    ]
+                },
+                {
+                    "id": "lesson2",
+                    "title": "If-Else for Alternating",
+                    "description": "Use if-else to alternate between two options",
+                    "objectives": ["Use else for alternative actions", "Create alternating patterns", "Draw checkerboard patterns"],
+                    "starter_code": "import turtle\n\nt = turtle.Turtle()\nt.speed(0)\n\n# Draw squares that alternate between filled and empty\n# Use if i % 2 == 0 to check even/odd\n\nt.hideturtle()",
+                    "solution_code": "import turtle\n\nt = turtle.Turtle()\nt.speed(0)\n\nfor i in range(8):\n    if i % 2 == 0:\n        t.fillcolor('black')\n        t.begin_fill()\n    for j in range(4):\n        t.forward(30)\n        t.right(90)\n    if i % 2 == 0:\n        t.end_fill()\n    t.penup()\n    t.forward(40)\n    t.pendown()\n\nt.hideturtle()",
+                    "test_cases": [
+                        {"pattern": "if", "description": "Uses if statement", "points": 25},
+                        {"pattern": "% 2", "description": "Checks even/odd", "points": 25},
+                        {"pattern": "begin_fill", "description": "Fills shapes", "points": 25},
+                        {"pattern": "for", "description": "Uses loops", "points": 25}
+                    ]
+                },
+                {
+                    "id": "lesson3",
+                    "title": "Multiple Conditions with Elif",
+                    "description": "Handle multiple conditions with elif",
+                    "objectives": ["Use elif for multiple conditions", "Create rainbow patterns", "Complex decision making in loops"],
+                    "starter_code": "import turtle\n\nt = turtle.Turtle()\nt.speed(0)\n\n# Change color based on angle:\n# 0-60: red, 61-120: orange, 121-180: yellow, etc.\n\nt.hideturtle()",
+                    "solution_code": "import turtle\n\nt = turtle.Turtle()\nt.speed(0)\nt.pensize(3)\n\nfor angle in range(360):\n    if angle < 60:\n        t.pencolor('red')\n    elif angle < 120:\n        t.pencolor('orange')\n    elif angle < 180:\n        t.pencolor('yellow')\n    elif angle < 240:\n        t.pencolor('green')\n    elif angle < 300:\n        t.pencolor('blue')\n    else:\n        t.pencolor('purple')\n    t.forward(1)\n    t.right(1)\n\nt.hideturtle()",
+                    "test_cases": [
+                        {"pattern": "if", "description": "Uses if statement", "points": 20},
+                        {"pattern": "elif", "description": "Uses elif", "points": 30},
+                        {"pattern": "else", "description": "Uses else", "points": 20},
+                        {"pattern": "angle", "description": "Checks angle", "points": 30}
+                    ]
+                }
+            ]
+        },
+        {
+            "id": "unit5",
+            "title": "Unit 5: Functions - Reusable Code",
+            "lessons": [
+                {
+                    "id": "lesson1",
+                    "title": "Defining Functions",
+                    "description": "Create your own reusable commands with def",
+                    "objectives": ["Understand function syntax", "Create reusable shape functions", "Call functions multiple times"],
+                    "starter_code": "import turtle\n\nt = turtle.Turtle()\n\n# Define a function to draw a square\ndef draw_square():\n    # Add code here\n    pass\n\n# Call the function 3 times\ndraw_square()\n\nt.hideturtle()",
+                    "solution_code": "import turtle\n\nt = turtle.Turtle()\n\ndef draw_square():\n    for i in range(4):\n        t.forward(50)\n        t.right(90)\n\ndraw_square()\nt.right(120)\ndraw_square()\nt.right(120)\ndraw_square()\n\nt.hideturtle()",
+                    "test_cases": [
+                        {"pattern": "def draw_square", "description": "Defines function", "points": 40},
+                        {"pattern": "draw_square()", "description": "Calls function", "points": 30},
+                        {"pattern": "for", "description": "Uses loop in function", "points": 30}
+                    ]
+                },
+                {
+                    "id": "lesson2",
+                    "title": "Parameters - Customizable Functions",
+                    "description": "Add parameters to make functions flexible",
+                    "objectives": ["Add parameters to functions", "Create scalable shapes", "Pass different values to functions"],
+                    "starter_code": "import turtle\n\nt = turtle.Turtle()\n\n# Define a function that takes size as parameter\ndef draw_square(size):\n    # Use size instead of a fixed number\n    pass\n\n# Draw squares of different sizes\ndraw_square(50)\ndraw_square(100)\n\nt.hideturtle()",
+                    "solution_code": "import turtle\n\nt = turtle.Turtle()\n\ndef draw_square(size):\n    for i in range(4):\n        t.forward(size)\n        t.right(90)\n\ndraw_square(30)\nt.penup()\nt.forward(50)\nt.pendown()\ndraw_square(60)\nt.penup()\nt.forward(80)\nt.pendown()\ndraw_square(90)\n\nt.hideturtle()",
+                    "test_cases": [
+                        {"pattern": "def draw_square(size)", "description": "Function with parameter", "points": 40},
+                        {"pattern": "t.forward(size)", "description": "Uses parameter", "points": 30},
+                        {"pattern": "draw_square(", "description": "Calls with different values", "points": 30}
+                    ]
+                },
+                {
+                    "id": "lesson3",
+                    "title": "Multiple Parameters",
+                    "description": "Use multiple parameters for full control",
+                    "objectives": ["Use multiple parameters", "Create customizable drawings", "Control size, color, and position"],
+                    "starter_code": "import turtle\n\nt = turtle.Turtle()\n\n# Define a function with size and color\ndef draw_square(size, color):\n    # Set color and draw square\n    pass\n\n# Draw different colored squares\ndraw_square(50, 'red')\ndraw_square(70, 'blue')\n\nt.hideturtle()",
+                    "solution_code": "import turtle\n\nt = turtle.Turtle()\n\ndef draw_square(size, color):\n    t.pencolor(color)\n    t.fillcolor(color)\n    t.begin_fill()\n    for i in range(4):\n        t.forward(size)\n        t.right(90)\n    t.end_fill()\n\ndraw_square(50, 'red')\nt.penup()\nt.forward(70)\nt.pendown()\ndraw_square(70, 'blue')\nt.penup()\nt.forward(90)\nt.pendown()\ndraw_square(40, 'green')\n\nt.hideturtle()",
+                    "test_cases": [
+                        {"pattern": "def draw_square(size, color)", "description": "Multiple parameters", "points": 30},
+                        {"pattern": "pencolor(color)", "description": "Uses color parameter", "points": 25},
+                        {"pattern": "forward(size)", "description": "Uses size parameter", "points": 25},
+                        {"pattern": "begin_fill", "description": "Fills with color", "points": 20}
+                    ]
+                }
+            ]
+        }
+    ]
+}
+
+@api_router.post("/turtle/create-from-lesson")
+async def create_assignment_from_turtle_lesson(data: dict, request: Request):
+    """Create an assignment from a Turtle curriculum lesson"""
+    user = await get_current_user(request)
+    
+    if user["role"] != "teacher":
+        raise HTTPException(status_code=403, detail="Only teachers can create assignments")
+    
+    unit_id = data.get("unit_id")
+    lesson_id = data.get("lesson_id")
+    classroom_ids = data.get("classroom_ids", [])
+    
+    # Find the lesson
+    lesson = None
+    unit_data = None
+    for unit in TURTLE_CURRICULUM["units"]:
+        if unit["id"] == unit_id:
+            unit_data = unit
+            for l in unit["lessons"]:
+                if l["id"] == lesson_id:
+                    lesson = l
+                    break
+            break
+    
+    if not lesson:
+        raise HTTPException(status_code=404, detail="Lesson not found")
+    
+    # Create problem in library
+    problem_id = str(uuid.uuid4())
+    proctor_code = ''.join([str(random.randint(0, 9)) for _ in range(6)])
+    
+    problem = {
+        "id": problem_id,
+        "title": lesson["title"],
+        "description": lesson["description"],
+        "category": "Turtle Graphics",
+        "difficulty": "beginner",
+        "chapter": unit_data["title"],
+        "lesson": lesson["title"],
+        "problem_type": "Turtle Graphics",
+        "assignment_type": "turtle",
+        "starter_code": lesson.get("starter_code", "import turtle\n\nt = turtle.Turtle()\n\n# Your code here:\n\nt.hideturtle()"),
+        "solution_code": lesson.get("solution_code", ""),
+        "expected_output": "",
+        "test_cases": lesson.get("test_cases", []),
+        "learning_objectives": lesson.get("objectives", []),
+        "teacher_id": user["id"],
+        "created_at": datetime.now(timezone.utc).isoformat()
+    }
+    
+    await db.problems.insert_one(problem)
+    
+    # Create assignment if classroom_ids provided
+    if classroom_ids:
+        assignment_id = str(uuid.uuid4())
+        assignment = {
+            "id": assignment_id,
+            "title": lesson["title"],
+            "description": lesson["description"],
+            "chapter": unit_data["title"],
+            "lesson": lesson["title"],
+            "teacher_id": user["id"],
+            "problem_ids": [problem_id],
+            "classroom_ids": classroom_ids,
+            "proctor_code": proctor_code,
+            "created_at": datetime.now(timezone.utc).isoformat()
+        }
+        await db.assignments.insert_one(assignment)
+        
+        return {"message": "Assignment created from Turtle lesson", "assignment_id": assignment_id, "problem_id": problem_id, "proctor_code": proctor_code}
+    
+    return {"message": "Problem added to library", "problem_id": problem_id}
+
+@api_router.get("/turtle/curriculum")
+async def get_turtle_curriculum(request: Request):
+    """Get the turtle graphics curriculum structure"""
+    await get_current_user(request)
+    return TURTLE_CURRICULUM
+
 
 # Include the router in the main app
 app.include_router(api_router)
