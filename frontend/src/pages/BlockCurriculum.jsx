@@ -421,7 +421,7 @@ export default function BlockCurriculum({ user }) {
             <div className="flex items-start gap-4">
               <Lightbulb className="w-8 h-8 text-purple-600 flex-shrink-0 mt-1" />
               <div>
-                <h3 className="font-bold text-purple-900 mb-2">Unit 4 Competencies (DOK 2-3)</h3>
+                <h3 className="font-bold text-purple-900 mb-2">Unit 1 Competencies (DOK 2-3)</h3>
                 <ul className="text-sm text-purple-800 space-y-1">
                   <li>✓ Reinforce and apply block-based programming concepts</li>
                   <li>✓ Review, revisit, and remediate key programming concepts</li>
