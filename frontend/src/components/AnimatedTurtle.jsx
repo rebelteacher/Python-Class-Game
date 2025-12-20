@@ -276,11 +276,16 @@ export default function AnimatedTurtle({ code, onLineHighlight, width = 400, hei
   }, [drawCanvas, onLineHighlight]);
   
   // Parse code when it changes
+  const prevCodeRef = useRef(code);
   useEffect(() => {
-    const parsed = parseCode(code);
-    setCommands(parsed);
-    resetTurtle();
-  }, [code, resetTurtle]);
+    if (prevCodeRef.current !== code) {
+      prevCodeRef.current = code;
+      const parsed = parseCode(code);
+      setCommands(parsed);
+      resetTurtle();
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [code]);
   
   // Initial draw
   useEffect(() => {
