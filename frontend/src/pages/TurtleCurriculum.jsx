@@ -28,7 +28,7 @@ import {
 const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
 const API = `${BACKEND_URL}/api`;
 
-// Turtle curriculum structure aligned with Unit 5: Text-Based Programming
+// Turtle curriculum structure - Unit 3: Visual Python with Turtle Graphics
 const TURTLE_CURRICULUM = {
   units: [
     {
@@ -480,7 +480,7 @@ export default function TurtleCurriculum({ user }) {
                 <h1 className="text-3xl font-bold flex items-center gap-3">
                   🐢 Turtle Graphics Curriculum
                 </h1>
-                <p className="text-green-100 mt-1">Visual Python Programming - Unit 5: Text-Based Programming</p>
+                <p className="text-green-100 mt-1">Unit 3: Visual Python Programming</p>
               </div>
             </div>
             <Button
@@ -585,7 +585,7 @@ export default function TurtleCurriculum({ user }) {
               <div className="flex items-center gap-3">
                 <div className="text-sm">
                   <p className="text-gray-700 font-medium">
-                    📚 Aligned with <span className="text-green-600">Unit 5: Text-Based Programming</span> curriculum
+                    📚 Part of <span className="text-green-600">Unit 3: Turtle Graphics</span> curriculum
                   </p>
                   <p className="text-gray-500 text-xs">
                     Covers: Variables, Loops, Conditionals, Functions, Debugging
