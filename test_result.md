@@ -679,12 +679,13 @@ metadata:
 
 test_plan:
   current_focus:
-    - "Teaching Mode Pages for Turtle and Micro:bit"
+    - "Python Curriculum and Teaching Mode Pages"
+    - "Skill Quiz Manager"
   stuck_tasks: []
   test_all: false
   test_priority: "high_first"
   testing_complete: true
-  latest_test: "Teaching Mode Implementation - COMPLETED"
+  latest_test: "Python Curriculum and Teaching Mode Implementation - COMPLETED"
 
   - task: "Teaching Mode Pages for Turtle and Micro:bit"
     implemented: true
