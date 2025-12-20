@@ -673,6 +673,7 @@ export default function TurtleTeaching({ user }) {
             
             <div className="flex-1 flex items-center justify-center p-4">
               <AnimatedTurtle 
+                key={`${selectedTopic}-${currentLessonIndex}`}
                 code={code} 
                 onLineHighlight={handleLineHighlight}
                 width={450}
