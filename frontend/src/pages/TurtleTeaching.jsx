@@ -471,7 +471,7 @@ export default function TurtleTeaching({ user }) {
   const runCode = async () => {
     setIsRunning(true);
     try {
-      const response = await axios.post(`${API}/execute-turtle`, { code }, { withCredentials: true });
+      const response = await axios.post(`${API}/code/execute-turtle`, { code }, { withCredentials: true });
       if (response.data.image) {
         setTurtleImage(response.data.image);
       }
