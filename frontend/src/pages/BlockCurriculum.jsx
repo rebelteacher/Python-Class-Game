@@ -320,7 +320,7 @@ export default function BlockCurriculum({ user }) {
         classroom_ids: [selectedClassroom],
         problem_ids: [],
         due_date: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString(),
-        chapter: "Unit 4: Block-Based Coding",
+        chapter: "Unit 1: Block-Based Coding",
         lesson: selectedLesson.title
       }, { withCredentials: true });
 
