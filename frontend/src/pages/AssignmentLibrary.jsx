@@ -99,12 +99,18 @@ export default function AssignmentLibrary({ user }) {
   // Sync typeFilter with URL params when URL changes
   useEffect(() => {
     const typeFromUrl = searchParams.get("type");
+    const categoryFromUrl = searchParams.get("category");
+    
     if (typeFromUrl && typeFromUrl !== typeFilter) {
       setTypeFilter(typeFromUrl);
       // Also set the default assignment_type for new problems based on the filter
       if (typeFromUrl === "microbit" || typeFromUrl === "turtle" || typeFromUrl === "code") {
         setNewProblem(prev => ({ ...prev, assignment_type: typeFromUrl }));
       }
+    }
+    
+    if (categoryFromUrl && categoryFromUrl !== categoryFilter) {
+      setCategoryFilter(categoryFromUrl);
     }
   }, [searchParams]);
 
