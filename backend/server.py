@@ -348,6 +348,17 @@ class Problem(BaseModel):
     learning_objectives: List[str] = []  # e.g., ["Understand digital output", "Control LEDs with code"]
     microbit_unit: str = ""  # e.g., "Unit 1: Getting Started"
     microbit_lesson: int = 0  # Lesson number within unit
+    # Turtle Maze/Background fields
+    background_type: str = "none"  # "none", "maze", "raceway", "grid", "custom"
+    background_image: str = ""  # URL for custom background
+    background_color: str = "#ffffff"  # Background color
+    maze_data: Optional[dict] = None  # {walls: [[x1,y1,x2,y2], ...], paths: [...]}
+    goals: List[dict] = []  # [{x, y, radius, label, order}]
+    checkpoints: List[dict] = []  # [{x, y, radius, required: bool}]
+    collision_enabled: bool = False
+    challenge_mode: bool = False  # If true, track completion and leaderboard
+    time_limit: int = 0  # Seconds, 0 = no limit
+    optimal_path_length: float = 0  # For accuracy scoring
     created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
 
 class ProblemCreate(BaseModel):
