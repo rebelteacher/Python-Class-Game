@@ -3,7 +3,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Trophy, Clock, Code, Target } from "lucide-react";
 
-export default function MazeLeaderboard({ problemId, classroomId = null }) {
+export default function MazeLeaderboard({ problemId, classroomId = null, currentUserId = null, compact = false }) {
   const [leaderboard, setLeaderboard] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -46,139 +46,133 @@ export default function MazeLeaderboard({ problemId, classroomId = null }) {
     if (index === 0) return "🥇";
     if (index === 1) return "🥈";
     if (index === 2) return "🥉";
-    return `${index + 1}.`;
+    return `#${index + 1}`;
   };
 
   if (loading) {
     return (
-      <Card>
-        <CardContent className="p-6 text-center text-gray-500">
-          Loading leaderboard...
-        </CardContent>
-      </Card>
+      <div className={`${compact ? 'p-4' : 'p-6'} text-center text-gray-500`}>
+        Loading leaderboard...
+      </div>
     );
   }
 
   if (error) {
     return (
-      <Card>
-        <CardContent className="p-6 text-center text-red-500">
-          Error: {error}
-        </CardContent>
-      </Card>
+      <div className={`${compact ? 'p-4' : 'p-6'} text-center text-red-500`}>
+        Error: {error}
+      </div>
     );
   }
 
   if (!leaderboard || leaderboard.total_completions === 0) {
     return (
-      <Card>
-        <CardContent className="p-6 text-center text-gray-500">
-          <Trophy className="w-12 h-12 mx-auto mb-2 text-gray-300" />
-          <p>No completions yet!</p>
-          <p className="text-sm">Be the first to complete this challenge!</p>
-        </CardContent>
-      </Card>
+      <div className={`${compact ? 'p-4' : 'p-6'} text-center text-gray-500`}>
+        <Trophy className={`${compact ? 'w-8 h-8' : 'w-12 h-12'} mx-auto mb-2 text-gray-300`} />
+        <p className="font-medium">No completions yet!</p>
+        <p className="text-sm">Be the first to complete this challenge!</p>
+      </div>
     );
   }
 
-  return (
-    <Card>
-      <CardHeader className="pb-2">
-        <CardTitle className="flex items-center gap-2">
-          <Trophy className="w-5 h-5 text-yellow-500" />
-          Leaderboard
-          <span className="text-sm font-normal text-gray-500">
-            ({leaderboard.total_completions} completions)
+  const LeaderboardRow = ({ entry, index, colorScheme }) => {
+    const isCurrentUser = currentUserId && entry.user_id === currentUserId;
+    const bgColors = {
+      yellow: i => i === 0 ? 'bg-yellow-50 border border-yellow-200' : i === 1 ? 'bg-gray-50' : i === 2 ? 'bg-orange-50/50' : 'bg-white',
+      purple: i => i === 0 ? 'bg-purple-50 border border-purple-200' : i === 1 ? 'bg-gray-50' : i === 2 ? 'bg-purple-50/50' : 'bg-white',
+      green: i => i === 0 ? 'bg-green-50 border border-green-200' : i === 1 ? 'bg-gray-50' : i === 2 ? 'bg-green-50/50' : 'bg-white',
+    };
+    
+    return (
+      <div 
+        className={`flex items-center justify-between ${compact ? 'p-1.5 text-sm' : 'p-2'} rounded ${bgColors[colorScheme](index)} ${isCurrentUser ? 'ring-2 ring-indigo-400' : ''}`}
+      >
+        <div className="flex items-center gap-2">
+          <span className={`${compact ? 'w-5 text-xs' : 'w-6'} text-center font-medium`}>{getMedalEmoji(index)}</span>
+          <span className={`font-medium ${compact ? 'text-xs' : ''} truncate max-w-[120px]`}>
+            {entry.student_name}
+            {isCurrentUser && <span className="ml-1 text-indigo-600">(You)</span>}
           </span>
-        </CardTitle>
-      </CardHeader>
-      <CardContent>
-        <Tabs defaultValue="time" className="w-full">
-          <TabsList className="grid w-full grid-cols-3">
-            <TabsTrigger value="time" className="text-xs">
-              <Clock className="w-3 h-3 mr-1" />
-              Fastest
-            </TabsTrigger>
-            <TabsTrigger value="efficiency" className="text-xs">
-              <Code className="w-3 h-3 mr-1" />
-              Efficient
-            </TabsTrigger>
-            <TabsTrigger value="accuracy" className="text-xs">
-              <Target className="w-3 h-3 mr-1" />
-              Accurate
-            </TabsTrigger>
-          </TabsList>
-          
-          <TabsContent value="time" className="mt-2">
-            <div className="space-y-2">
-              {leaderboard.by_time.map((entry, i) => (
-                <div 
-                  key={entry.id || i} 
-                  className={`flex items-center justify-between p-2 rounded ${
-                    i === 0 ? 'bg-yellow-50 border border-yellow-200' :
-                    i === 1 ? 'bg-gray-100' :
-                    i === 2 ? 'bg-orange-50' : 'bg-white'
-                  }`}
-                >
-                  <div className="flex items-center gap-2">
-                    <span className="w-6 text-center">{getMedalEmoji(i)}</span>
-                    <span className="font-medium">{entry.student_name}</span>
-                  </div>
-                  <span className="text-sm font-mono text-blue-600">
-                    {formatTime(entry.completion_time)}
-                  </span>
-                </div>
-              ))}
-            </div>
-          </TabsContent>
-          
-          <TabsContent value="efficiency" className="mt-2">
-            <div className="space-y-2">
-              {leaderboard.by_efficiency.map((entry, i) => (
-                <div 
-                  key={entry.id || i} 
-                  className={`flex items-center justify-between p-2 rounded ${
-                    i === 0 ? 'bg-purple-50 border border-purple-200' :
-                    i === 1 ? 'bg-gray-100' :
-                    i === 2 ? 'bg-purple-50/50' : 'bg-white'
-                  }`}
-                >
-                  <div className="flex items-center gap-2">
-                    <span className="w-6 text-center">{getMedalEmoji(i)}</span>
-                    <span className="font-medium">{entry.student_name}</span>
-                  </div>
-                  <span className="text-sm font-mono text-purple-600">
-                    {entry.code_lines} lines
-                  </span>
-                </div>
-              ))}
-            </div>
-          </TabsContent>
-          
-          <TabsContent value="accuracy" className="mt-2">
-            <div className="space-y-2">
-              {leaderboard.by_accuracy.map((entry, i) => (
-                <div 
-                  key={entry.id || i} 
-                  className={`flex items-center justify-between p-2 rounded ${
-                    i === 0 ? 'bg-green-50 border border-green-200' :
-                    i === 1 ? 'bg-gray-100' :
-                    i === 2 ? 'bg-green-50/50' : 'bg-white'
-                  }`}
-                >
-                  <div className="flex items-center gap-2">
-                    <span className="w-6 text-center">{getMedalEmoji(i)}</span>
-                    <span className="font-medium">{entry.student_name}</span>
-                  </div>
-                  <span className="text-sm font-mono text-green-600">
-                    {entry.path_accuracy.toFixed(1)}%
-                  </span>
-                </div>
-              ))}
-            </div>
-          </TabsContent>
-        </Tabs>
-      </CardContent>
-    </Card>
+        </div>
+        {entry.value}
+      </div>
+    );
+  };
+
+  return (
+    <div className={compact ? 'max-w-sm' : 'max-w-md'}>
+      <div className={`flex items-center gap-2 ${compact ? 'mb-2' : 'mb-3'}`}>
+        <Trophy className={`${compact ? 'w-4 h-4' : 'w-5 h-5'} text-yellow-500`} />
+        <span className={`font-semibold ${compact ? 'text-sm' : ''}`}>Maze Leaderboard</span>
+        <span className={`${compact ? 'text-xs' : 'text-sm'} text-gray-500`}>
+          ({leaderboard.total_completions} completions)
+        </span>
+      </div>
+      
+      <Tabs defaultValue="time" className="w-full">
+        <TabsList className={`grid w-full grid-cols-3 ${compact ? 'h-8' : ''}`}>
+          <TabsTrigger value="time" className={compact ? 'text-xs py-1' : 'text-xs'}>
+            <Clock className={`${compact ? 'w-3 h-3' : 'w-3 h-3'} mr-1`} />
+            Fastest
+          </TabsTrigger>
+          <TabsTrigger value="efficiency" className={compact ? 'text-xs py-1' : 'text-xs'}>
+            <Code className={`${compact ? 'w-3 h-3' : 'w-3 h-3'} mr-1`} />
+            Efficient
+          </TabsTrigger>
+          <TabsTrigger value="accuracy" className={compact ? 'text-xs py-1' : 'text-xs'}>
+            <Target className={`${compact ? 'w-3 h-3' : 'w-3 h-3'} mr-1`} />
+            Accurate
+          </TabsTrigger>
+        </TabsList>
+        
+        <TabsContent value="time" className={compact ? 'mt-1.5' : 'mt-2'}>
+          <div className={compact ? 'space-y-1' : 'space-y-2'}>
+            {leaderboard.by_time.slice(0, compact ? 5 : 10).map((entry, i) => (
+              <LeaderboardRow
+                key={entry.id || i}
+                entry={{
+                  ...entry,
+                  value: <span className={`${compact ? 'text-xs' : 'text-sm'} font-mono text-blue-600`}>{formatTime(entry.completion_time)}</span>
+                }}
+                index={i}
+                colorScheme="yellow"
+              />
+            ))}
+          </div>
+        </TabsContent>
+        
+        <TabsContent value="efficiency" className={compact ? 'mt-1.5' : 'mt-2'}>
+          <div className={compact ? 'space-y-1' : 'space-y-2'}>
+            {leaderboard.by_efficiency.slice(0, compact ? 5 : 10).map((entry, i) => (
+              <LeaderboardRow
+                key={entry.id || i}
+                entry={{
+                  ...entry,
+                  value: <span className={`${compact ? 'text-xs' : 'text-sm'} font-mono text-purple-600`}>{entry.code_lines} lines</span>
+                }}
+                index={i}
+                colorScheme="purple"
+              />
+            ))}
+          </div>
+        </TabsContent>
+        
+        <TabsContent value="accuracy" className={compact ? 'mt-1.5' : 'mt-2'}>
+          <div className={compact ? 'space-y-1' : 'space-y-2'}>
+            {leaderboard.by_accuracy.slice(0, compact ? 5 : 10).map((entry, i) => (
+              <LeaderboardRow
+                key={entry.id || i}
+                entry={{
+                  ...entry,
+                  value: <span className={`${compact ? 'text-xs' : 'text-sm'} font-mono text-green-600`}>{entry.path_accuracy?.toFixed(1) || 0}%</span>
+                }}
+                index={i}
+                colorScheme="green"
+              />
+            ))}
+          </div>
+        </TabsContent>
+      </Tabs>
+    </div>
   );
 }
