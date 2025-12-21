@@ -8023,10 +8023,10 @@ x = 5 + 3
         if maze_attempt_response:
             print(f"   ✅ Maze attempt submitted successfully")
             # Check if response contains expected fields
-            if "id" in maze_attempt_response:
-                self.log_test("Maze attempt returns attempt ID", True)
+            if "attempt_id" in maze_attempt_response:
+                self.log_test("Maze attempt returns attempt_id", True)
             else:
-                self.log_test("Maze attempt returns attempt ID", False, "No ID in response")
+                self.log_test("Maze attempt returns attempt_id", False, "No attempt_id in response")
         else:
             print("   ❌ Maze attempt submission failed")
         
