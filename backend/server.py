@@ -2490,6 +2490,20 @@ except Exception as e:
                     score -= 15
                     feedback_parts.append(f"Need to travel at least {min_distance} pixels (traveled {actual_distance:.0f})")
         
+        else:
+            # No maze config and no grading criteria - check if any code was executed
+            lines_drawn = tracking_data.get("lines_drawn", 0)
+            total_distance = tracking_data.get("total_distance", 0)
+            
+            if lines_drawn > 0 or total_distance > 0:
+                # Student drew something - give partial credit
+                score = 50
+                feedback_parts.append("Code executed - submit when complete for full credit")
+            else:
+                # No drawing detected
+                score = 0
+                feedback_parts.append("No turtle movement detected. Try adding some turtle commands!")
+        
         score = max(0, score)
         
         if feedback_parts:
