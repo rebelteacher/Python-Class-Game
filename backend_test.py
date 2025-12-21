@@ -8029,6 +8029,9 @@ x = 5 + 3
         # Test Class vs Class Competitions endpoints
         self.test_competitions_endpoints()
         
+        # Test Maze Challenge API endpoints (NEW - from review request)
+        self.test_maze_challenge_api_endpoints()
+        
         # Print summary
         print(f"\n📊 Test Summary:")
         print(f"   Total tests: {self.tests_run}")
