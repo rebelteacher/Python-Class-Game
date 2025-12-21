@@ -444,7 +444,7 @@ export default function AssignmentLibrary({ user }) {
     const updates = {};
     if (bulkUpdateChapter) updates.chapter = bulkUpdateChapter;
     if (bulkUpdateLesson) updates.lesson = bulkUpdateLesson;
-    if (bulkUpdateType) updates.assignment_type = bulkUpdateType;
+    if (bulkUpdateType && bulkUpdateType !== "keep") updates.assignment_type = bulkUpdateType;
 
     if (Object.keys(updates).length === 0) {
       toast.error("Please select at least one field to update");
