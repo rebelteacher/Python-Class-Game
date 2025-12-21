@@ -498,13 +498,8 @@ export default function AnimatedTurtle({
 
   // Draw maze walls
   const drawMaze = useCallback((ctx) => {
-    console.log("drawMaze called, mazeData:", mazeData);
-    if (!mazeData || !mazeData.walls) {
-      console.log("No maze data or walls to draw");
-      return;
-    }
+    if (!mazeData || !mazeData.walls) return;
     
-    console.log("Drawing", mazeData.walls.length, "walls");
     ctx.strokeStyle = mazeData.wallColor || '#333';
     ctx.lineWidth = mazeData.wallWidth || 4;
     ctx.lineCap = 'round';
@@ -513,7 +508,6 @@ export default function AnimatedTurtle({
       const [x1, y1, x2, y2] = wall;
       const start = toCanvasCoords(x1, y1);
       const end = toCanvasCoords(x2, y2);
-      console.log(`Wall: (${x1},${y1}) -> (${x2},${y2}) | Canvas: (${start.x},${start.y}) -> (${end.x},${end.y})`);
       ctx.beginPath();
       ctx.moveTo(start.x, start.y);
       ctx.lineTo(end.x, end.y);
