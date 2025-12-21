@@ -1452,6 +1452,20 @@ export default function AssignmentLibrary({ user }) {
               </SelectContent>
             </Select>
 
+            <Select value={lessonFilter} onValueChange={setLessonFilter}>
+              <SelectTrigger className="w-48" data-testid="filter-lesson">
+                <SelectValue placeholder="All Lessons" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">All Lessons</SelectItem>
+                {lessons.map((lesson) => (
+                  <SelectItem key={lesson} value={lesson}>
+                    {lesson}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+
             <Select value={typeFilter || "all"} onValueChange={(v) => {
               const newType = v === "all" ? "" : v;
               setTypeFilter(newType);
