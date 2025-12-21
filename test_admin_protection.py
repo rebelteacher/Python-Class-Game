@@ -6,7 +6,7 @@ import json
 def test_admin_protection():
     """Test that admin accounts are properly protected from role switching"""
     
-    base_url = "https://learn-py-platform.preview.emergentagent.com"
+    base_url = "https://mazenav.preview.emergentagent.com"
     api_url = f"{base_url}/api"
     
     # Get the admin session token from database
