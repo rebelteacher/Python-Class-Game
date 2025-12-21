@@ -1296,23 +1296,124 @@ export default function AssignmentPage({ user }) {
                       </div>
                     ) : assignment.problems?.[currentProblemIndex]?.assignment_type === "turtle" ? (
                       <div className="h-full flex flex-col gap-3">
-                        {turtleImage ? (
-                          <div className="flex justify-center items-center bg-white p-4 rounded border-2 border-gray-200">
-                            <img 
-                              src={`data:image/png;base64,${turtleImage}`}
-                              alt="Turtle output"
-                              className="max-w-full h-auto"
-                              style={{ maxHeight: "500px" }}
-                            />
-                          </div>
-                        ) : (
-                          <div className="flex items-center justify-center h-64 bg-gray-50 rounded border-2 border-dashed border-gray-300 text-gray-500">
-                            <div className="text-center">
-                              <div className="text-4xl mb-2">🐢</div>
-                              <div>Run your turtle code to see the output here...</div>
-                            </div>
-                          </div>
-                        )}
+                        {/* Check if this problem has maze/background settings */}
+                        {(() => {
+                          const currentProblem = assignment.problems?.[currentProblemIndex];
+                          const hasMaze = currentProblem?.background_type && currentProblem.background_type !== "none";
+                          
+                          if (hasMaze || useLiveTurtle) {
+                            return (
+                              <div className="flex flex-col gap-3">
+                                {/* Live Turtle Canvas with Maze */}
+                                <div className="bg-white rounded-lg shadow p-2">
+                                  <AnimatedTurtle
+                                    code={code}
+                                    width={400}
+                                    height={400}
+                                    backgroundType={currentProblem?.background_type || "none"}
+                                    backgroundColor={currentProblem?.background_color || "#ffffff"}
+                                    backgroundImage={currentProblem?.background_image}
+                                    mazeData={currentProblem?.maze_data}
+                                    goals={currentProblem?.goals || []}
+                                    checkpoints={currentProblem?.checkpoints || []}
+                                    collisionEnabled={currentProblem?.collision_enabled || false}
+                                    challengeMode={currentProblem?.challenge_mode || false}
+                                    onGoalReached={(index, goal) => {
+                                      toast.success(`🎯 Goal ${index + 1} reached!`);
+                                    }}
+                                    onCollision={() => {
+                                      toast.error("💥 Wall collision!");
+                                    }}
+                                    onComplete={async (stats) => {
+                                      // If challenge mode, submit the attempt
+                                      if (currentProblem?.challenge_mode) {
+                                        const completionTime = mazeStartTime 
+                                          ? (Date.now() - mazeStartTime) / 1000 
+                                          : stats.pathLength / 100; // Estimate if no start time
+                                        
+                                        try {
+                                          await axios.post(`${API}/maze/attempt`, {
+                                            problem_id: currentProblem.id,
+                                            completed: true,
+                                            completion_time: completionTime,
+                                            code_lines: code.split('\n').filter(l => l.trim() && !l.trim().startsWith('#')).length,
+                                            path_length: stats.pathLength,
+                                            goals_reached: stats.goalsReached,
+                                            total_goals: stats.totalGoals,
+                                            collisions: stats.collisions,
+                                            code: code
+                                          }, { withCredentials: true });
+                                          
+                                          toast.success(`🏆 Challenge completed! Time: ${completionTime.toFixed(1)}s`);
+                                        } catch (err) {
+                                          console.error("Failed to submit maze attempt:", err);
+                                        }
+                                      } else {
+                                        toast.success(`✅ All goals reached! Distance: ${stats.pathLength.toFixed(0)}px`);
+                                      }
+                                    }}
+                                  />
+                                </div>
+                                
+                                {/* Challenge Mode Extras */}
+                                {currentProblem?.challenge_mode && (
+                                  <div className="flex gap-2">
+                                    <Button
+                                      size="sm"
+                                      variant="outline"
+                                      onClick={() => {
+                                        setMazeStartTime(Date.now());
+                                        toast.info("⏱️ Timer started! Navigate to all goals.");
+                                      }}
+                                    >
+                                      ⏱️ Start Timer
+                                    </Button>
+                                    <Button
+                                      size="sm"
+                                      variant="outline"
+                                      onClick={() => setShowLeaderboard(true)}
+                                    >
+                                      🏆 Leaderboard
+                                    </Button>
+                                  </div>
+                                )}
+                                
+                                {/* Toggle for static vs live preview */}
+                                {!hasMaze && (
+                                  <div className="flex items-center gap-2 text-xs text-gray-500">
+                                    <input
+                                      type="checkbox"
+                                      id="useLiveTurtle"
+                                      checked={useLiveTurtle}
+                                      onChange={(e) => setUseLiveTurtle(e.target.checked)}
+                                      className="rounded"
+                                    />
+                                    <label htmlFor="useLiveTurtle">Use live animated preview</label>
+                                  </div>
+                                )}
+                              </div>
+                            );
+                          } else {
+                            // Fallback to static image for non-maze problems
+                            return turtleImage ? (
+                              <div className="flex justify-center items-center bg-white p-4 rounded border-2 border-gray-200">
+                                <img 
+                                  src={`data:image/png;base64,${turtleImage}`}
+                                  alt="Turtle output"
+                                  className="max-w-full h-auto"
+                                  style={{ maxHeight: "500px" }}
+                                />
+                              </div>
+                            ) : (
+                              <div className="flex items-center justify-center h-64 bg-gray-50 rounded border-2 border-dashed border-gray-300 text-gray-500">
+                                <div className="text-center">
+                                  <div className="text-4xl mb-2">🐢</div>
+                                  <div>Run your turtle code to see the output here...</div>
+                                </div>
+                              </div>
+                            );
+                          }
+                        })()}
                         {output && (
                           <div className="mt-2">
                             <div className="text-sm font-semibold text-gray-700 mb-1">Console Output:</div>
