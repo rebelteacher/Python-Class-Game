@@ -1351,6 +1351,13 @@ export default function AssignmentLibrary({ user }) {
                     Cancel
                   </Button>
                   <Button 
+                    onClick={() => setBulkUpdateDialogOpen(true)}
+                    disabled={selectedProblems.length === 0}
+                    className="bg-orange-600 hover:bg-orange-700"
+                  >
+                    Bulk Update ({selectedProblems.length} selected)
+                  </Button>
+                  <Button 
                     onClick={handleCreateAssignment}
                     disabled={selectedProblems.length === 0}
                     className="bg-purple-600 hover:bg-purple-700"
