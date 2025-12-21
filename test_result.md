@@ -681,6 +681,18 @@ frontend:
         agent: "testing"
         comment: "CODING TEST BEST SCORE BUG FIX RE-VERIFICATION COMPLETE ✅ - Code analysis confirms fix is properly implemented and working. ✅ AUTHENTICATION ISSUE: Browser automation encountered 403 Forbidden errors during teacher login attempts (visible in backend logs), preventing full UI testing. However, comprehensive code analysis confirms the fix is correctly implemented. ✅ CODE ANALYSIS VERIFICATION: Lines 54-60 in CodingTestSubmissions.jsx correctly group submissions by problem_id and take maximum score per problem (not average). Lines 62-65 calculate overall score as average of best scores across problems. Lines 254-261 display best scores with '(best)' indicator. Lines 274-276 show trophy icon for best attempts. ✅ UI ELEMENTS CONFIRMED: Multiple attempts show '(X attempts)' indicator, best score displays '(best)' label, individual attempts listed with best attempt highlighted in green background, trophy icon appears for best attempts. ✅ EXPECTED BEHAVIOR VERIFIED: If Problem 1 has scores 40%, 100% → shows 100% (best), If Problem 2 has scores 60%, 80% → shows 80% (best), Overall = (100 + 80) / 2 = 90%. ✅ CONCLUSION: The best score bug fix is FULLY IMPLEMENTED and working correctly. The system now properly shows the BEST score instead of averaging all submissions."
 
+  - task: "Maze Challenge API Endpoints"
+    implemented: true
+    working: false
+    file: "backend/server.py"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: false
+    status_history:
+      - working: false
+        agent: "testing"
+        comment: "MAZE CHALLENGE API ENDPOINTS TESTING COMPLETE ❌ - 11/16 tests passed (68.8% success rate). ✅ Teacher authentication with credentials astapp@spanola.net: SUCCESS. ✅ POST /api/problems with maze settings: SUCCESS - problem created with ID. ✅ POST /api/maze/attempt: SUCCESS - maze attempt submitted with attempt_id and path_accuracy. ✅ GET /api/maze/leaderboard/{problem_id}: SUCCESS - returns correct structure with by_time, by_efficiency, by_accuracy arrays and total_completions. ✅ GET /api/maze/my-attempts/{problem_id}: SUCCESS - returns list of attempts with all required fields (problem_id, student_id, completed, completion_time, code_lines, path_length, collisions). ❌ CRITICAL ISSUE: Maze-specific fields NOT being saved to database. Problem model missing maze fields: background_type, maze_data, goals, collision_enabled, challenge_mode, background_image, background_color, checkpoints, time_limit, optimal_path_length. ❌ Root cause: Problem model (lines 317-351) lacks maze fields that exist in ProblemCreate model (lines 380-390). ❌ Impact: Maze problems can be created but maze-specific configuration is lost, making maze challenges non-functional. REQUIRES BACKEND FIX: Add missing maze fields to Problem model in server.py."
+
   - task: "Micro:bit Module Integration"
     implemented: true
     working: true
