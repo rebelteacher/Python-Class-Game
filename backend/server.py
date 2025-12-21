@@ -2271,8 +2271,14 @@ async def execute_code(execute_req: CodeExecuteRequest, request: Request):
         )
 
 
-async def grade_turtle_submission(code: str, grading_criteria: dict, expected_image: str = "") -> dict:
+async def grade_turtle_submission(code: str, grading_criteria: dict, expected_image: str = "", maze_config: dict = None) -> dict:
     """Grade a turtle graphics submission based on criteria
+    
+    Args:
+        code: Student's turtle code
+        grading_criteria: Dict with min_lines, min_circles, required_colors, min_distance
+        expected_image: Optional expected output image for comparison
+        maze_config: Dict with goals, collision_enabled, challenge_mode for maze grading
     
     Returns: {
         "score": float,
