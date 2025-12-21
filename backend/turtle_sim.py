@@ -230,6 +230,9 @@ class TurtleSim:
     
     def get_tracking_data(self) -> Dict[str, Any]:
         """Return tracking data for auto-grading"""
+        # Calculate turtle coordinates (0,0 at center)
+        turtle_x = self.x - self.width / 2
+        turtle_y = self.y - self.height / 2
         return {
             "total_commands": len(self.commands_used),
             "unique_commands": len(set(cmd.split('(')[0] for cmd in self.commands_used)),
@@ -239,10 +242,11 @@ class TurtleSim:
             "positions_count": len(self.positions_visited),
             "colors_used": list(self.colors_used),
             "final_position": {
-                "x": round(self.xcor(), 2),
-                "y": round(self.ycor(), 2)
+                "x": round(turtle_x, 2),
+                "y": round(turtle_y, 2)
             },
-            "final_heading": round(self.heading, 2)
+            "final_heading": round(self.heading, 2),
+            "path_history": self.path_history  # For maze goal checking
         }
 
 
