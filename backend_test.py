@@ -8569,6 +8569,9 @@ t.forward(100)
             print("❌ Cannot proceed without test user setup")
             return False
         
+        # PRIORITY: Test the updated turtle/maze scoring system (main focus from review request)
+        self.test_turtle_scoring_system()
+        
         # PRIORITY: Test problem library filtering (from review request)
         self.test_problem_library_filtering()
         
