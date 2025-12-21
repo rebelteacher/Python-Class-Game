@@ -145,7 +145,18 @@ class MazeChallengeTester:
                     created_problem = problem
                     break
             
+        if problem_details and isinstance(problem_details, list):
+            # Find our created problem
+            created_problem = None
+            for problem in problem_details:
+                if problem.get("id") == problem_id:
+                    created_problem = problem
+                    break
+            
             if created_problem:
+                print(f"   📋 Found created problem with fields: {list(created_problem.keys())}")
+                print(f"   📋 Problem data: {created_problem}")
+                
                 # Verify maze-specific fields
                 maze_data = created_problem.get("maze_data")
                 goals = created_problem.get("goals")
