@@ -667,6 +667,7 @@ export default function TurtleCurriculum({ user }) {
                               </ul>
                             </div>
                           </div>
+                        <div className="flex items-center gap-2">
                           <Button
                             size="sm"
                             onClick={() => handleAssignLesson(lesson, unit)}
@@ -677,11 +678,12 @@ export default function TurtleCurriculum({ user }) {
                           <Button
                             size="sm"
                             variant="outline"
-                            onClick={() => navigate(`/library?type=turtle&chapter=${encodeURIComponent(unit.title)}`)}
+                            onClick={() => navigate(`/library?type=turtle&chapter=${encodeURIComponent(unit.title)}&lesson=${encodeURIComponent(lesson.title)}`)}
                           >
                             <BookOpen className="w-4 h-4 mr-1" />
                             Problems
                           </Button>
+                        </div>
                         </div>
                       </div>
                     ))}
