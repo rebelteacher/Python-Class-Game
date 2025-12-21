@@ -2492,6 +2492,7 @@ export default function AssignmentLibrary({ user }) {
             onChange={(data) => {
               setNewProblem({
                 ...newProblem,
+                background_type: data.backgroundType || "maze",  // Set background_type from MazeBuilder
                 maze_data: {
                   walls: data.walls,
                   wallColor: data.wallColor,
