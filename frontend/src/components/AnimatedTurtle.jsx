@@ -284,11 +284,32 @@ const getInitialTurtleState = () => ({
   name: 't' // Default name
 });
 
-export default function AnimatedTurtle({ code, onLineHighlight, width = 400, height = 400 }) {
+export default function AnimatedTurtle({ 
+  code, 
+  onLineHighlight, 
+  width = 400, 
+  height = 400,
+  // Maze/Background props
+  backgroundType = "none",  // "none", "maze", "raceway", "grid", "custom"
+  backgroundColor = "#ffffff",
+  backgroundImage = "",
+  mazeData = null,  // {walls: [[x1,y1,x2,y2], ...], wallColor: "#000"}
+  goals = [],  // [{x, y, radius, label, color}]
+  checkpoints = [],
+  collisionEnabled = false,
+  challengeMode = false,
+  onGoalReached = null,
+  onCollision = null,
+  onComplete = null
+}) {
   const canvasRef = useRef(null);
+  const bgCanvasRef = useRef(null);  // Separate canvas for background
   const [isPlaying, setIsPlaying] = useState(false);
   const [currentStep, setCurrentStep] = useState(-1);
   const [speed, setSpeed] = useState(5);
+  const [collisionCount, setCollisionCount] = useState(0);
+  const [goalsReached, setGoalsReached] = useState(new Set());
+  const [pathLength, setPathLength] = useState(0);
   
   const turtleRef = useRef(getInitialTurtleState());
   const pathsRef = useRef([]);
