@@ -2078,6 +2078,82 @@ export default function AssignmentLibrary({ user }) {
         )}
       </main>
       
+      {/* Bulk Update Dialog */}
+      <Dialog open={bulkUpdateDialogOpen} onOpenChange={setBulkUpdateDialogOpen}>
+        <DialogContent className="max-w-lg">
+          <DialogHeader>
+            <DialogTitle>Bulk Update Problems</DialogTitle>
+            <DialogDescription>
+              Update {selectedProblems.length} selected problem(s). Leave fields empty to keep current values.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div>
+              <Label>Assignment Type</Label>
+              <Select value={bulkUpdateType} onValueChange={setBulkUpdateType}>
+                <SelectTrigger className="mt-1">
+                  <SelectValue placeholder="Keep current type" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="">Keep current type</SelectItem>
+                  <SelectItem value="code">Code (Python Text)</SelectItem>
+                  <SelectItem value="turtle">Turtle Graphics</SelectItem>
+                  <SelectItem value="microbit">Micro:bit</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div>
+              <Label>Chapter</Label>
+              <Input
+                placeholder="e.g., Chapter 1: Printing"
+                value={bulkUpdateChapter}
+                onChange={(e) => setBulkUpdateChapter(e.target.value)}
+                className="mt-1"
+              />
+              <p className="text-xs text-gray-500 mt-1">
+                Examples: "Chapter 1: Printing", "Unit 1: First Steps with Turtle"
+              </p>
+            </div>
+            <div>
+              <Label>Lesson</Label>
+              <Input
+                placeholder="e.g., Lesson 1 Intro to Print"
+                value={bulkUpdateLesson}
+                onChange={(e) => setBulkUpdateLesson(e.target.value)}
+                className="mt-1"
+              />
+              <p className="text-xs text-gray-500 mt-1">
+                Examples: "Lesson 1 Intro to Print", "Lesson 2 Numbers"
+              </p>
+            </div>
+            
+            {/* Preview of selected problems */}
+            <div className="border rounded-lg p-3 bg-gray-50 max-h-40 overflow-y-auto">
+              <Label className="text-sm text-gray-600">Selected Problems Preview:</Label>
+              <ul className="mt-2 space-y-1">
+                {problems.filter(p => selectedProblems.includes(p.id)).slice(0, 10).map(p => (
+                  <li key={p.id} className="text-xs text-gray-700 truncate">
+                    • {p.title}
+                  </li>
+                ))}
+                {selectedProblems.length > 10 && (
+                  <li className="text-xs text-gray-500">... and {selectedProblems.length - 10} more</li>
+                )}
+              </ul>
+            </div>
+            
+            <div className="flex gap-2">
+              <Button onClick={() => setBulkUpdateDialogOpen(false)} variant="outline" className="flex-1">
+                Cancel
+              </Button>
+              <Button onClick={handleBulkUpdateProblems} className="flex-1 bg-orange-600 hover:bg-orange-700">
+                Update {selectedProblems.length} Problems
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+      
       {/* Turtle Preview Dialog */}
       <Dialog open={turtlePreviewOpen} onOpenChange={setTurtlePreviewOpen}>
         <DialogContent className="max-w-3xl">
