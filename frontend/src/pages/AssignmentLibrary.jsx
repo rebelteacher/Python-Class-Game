@@ -1271,6 +1271,7 @@ export default function AssignmentLibrary({ user }) {
                             Live Preview with Maze
                           </Button>
                         )}
+                      </>
                       )}
                     </div>
                     <Textarea
