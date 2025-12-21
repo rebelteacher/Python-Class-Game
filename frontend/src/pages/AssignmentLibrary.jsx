@@ -443,6 +443,7 @@ export default function AssignmentLibrary({ user }) {
     }
 
     const updates = {};
+    if (bulkUpdateUnit) updates.unit = bulkUpdateUnit;
     if (bulkUpdateChapter) updates.chapter = bulkUpdateChapter;
     if (bulkUpdateLesson) updates.lesson = bulkUpdateLesson;
     if (bulkUpdateType && bulkUpdateType !== "keep") updates.assignment_type = bulkUpdateType;
@@ -468,6 +469,7 @@ export default function AssignmentLibrary({ user }) {
       const result = await response.json();
       toast.success(`Updated ${result.modified_count} problems`);
       setBulkUpdateDialogOpen(false);
+      setBulkUpdateUnit("");
       setBulkUpdateChapter("");
       setBulkUpdateLesson("");
       setBulkUpdateType("");
