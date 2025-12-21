@@ -1742,6 +1742,26 @@ export default function AssignmentPage({ user }) {
           toast.success(`Quiz completed! Score: ${results.score?.toFixed(0)}%`);
         }}
       />
+      
+      {/* Maze Leaderboard Dialog */}
+      <Dialog open={showLeaderboard} onOpenChange={setShowLeaderboard}>
+        <DialogContent className="max-w-sm">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              🏆 Maze Challenge Leaderboard
+            </DialogTitle>
+            <DialogDescription>
+              See who completed this maze fastest and most efficiently
+            </DialogDescription>
+          </DialogHeader>
+          <MazeLeaderboard 
+            problemId={getCurrentProblemId()} 
+            classroomId={classroomIdFromNav}
+            currentUserId={user?.id}
+            compact={true}
+          />
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
