@@ -2847,6 +2847,7 @@ async def submit_assignment(submission: SubmissionCreate, request: Request):
                 "challenge_mode": problem.get("challenge_mode", False),
                 "maze_data": problem.get("maze_data", {})
             }
+            logging.info(f"Maze config for problem {problem.get('id')}: goals={len(maze_config['goals'])} items, collision_enabled={maze_config['collision_enabled']}")
         
         # Grade turtle submission
         turtle_result = await grade_turtle_submission(
@@ -2855,6 +2856,7 @@ async def submit_assignment(submission: SubmissionCreate, request: Request):
             expected_image,
             maze_config
         )
+        logging.info(f"Turtle grading result: score={turtle_result['score']}, feedback={turtle_result['feedback']}")
         
         base_score = turtle_result["score"]
         feedback = turtle_result["feedback"]
