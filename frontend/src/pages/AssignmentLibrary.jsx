@@ -94,9 +94,21 @@ export default function AssignmentLibrary({ user }) {
     // Micro:bit specific fields
     materials_needed: [],
     wiring_instructions: "",
-    learning_objectives: []
+    learning_objectives: [],
+    // Maze/Background fields
+    background_type: "none",
+    background_color: "#ffffff",
+    background_image: "",
+    maze_data: null,
+    goals: [],
+    checkpoints: [],
+    collision_enabled: false,
+    challenge_mode: false,
+    time_limit: 0,
+    optimal_path_length: 0
   });
   
+  const [mazeBuilderOpen, setMazeBuilderOpen] = useState(false);
   const [turtlePreviewOpen, setTurtlePreviewOpen] = useState(false);
   const [turtlePreviewImage, setTurtlePreviewImage] = useState("");
 
