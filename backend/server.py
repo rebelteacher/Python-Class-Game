@@ -2397,10 +2397,66 @@ except Exception as e:
             }
         
         # Grade based on criteria
-        score = 100
+        score = 0  # Start at 0 instead of 100 - must earn the score
         feedback_parts = []
+        goals_reached = 0
+        total_goals = 0
         
-        if grading_criteria:
+        # Check if this is a maze challenge with goals
+        if maze_config and maze_config.get("goals"):
+            total_goals = len(maze_config["goals"])
+            goal_radius = 15  # Default goal radius
+            
+            # Get the final turtle position from tracking data
+            final_pos = tracking_data.get("final_position", {"x": 0, "y": 0})
+            turtle_x = final_pos.get("x", 0)
+            turtle_y = final_pos.get("y", 0)
+            
+            # Also check path history for goals passed through
+            path_history = tracking_data.get("path_history", [])
+            
+            # Check each goal
+            for i, goal in enumerate(maze_config["goals"]):
+                goal_x = goal.get("x", 0)
+                goal_y = goal.get("y", 0)
+                goal_r = goal.get("radius", goal_radius)
+                
+                # Check if turtle's final position is within the goal
+                distance_to_goal = ((turtle_x - goal_x) ** 2 + (turtle_y - goal_y) ** 2) ** 0.5
+                if distance_to_goal <= goal_r:
+                    goals_reached += 1
+                else:
+                    # Also check if turtle passed through the goal during its path
+                    for pos in path_history:
+                        px, py = pos.get("x", 0), pos.get("y", 0)
+                        dist = ((px - goal_x) ** 2 + (py - goal_y) ** 2) ** 0.5
+                        if dist <= goal_r:
+                            goals_reached += 1
+                            break
+            
+            # Score based on goals reached
+            if total_goals > 0:
+                score = (goals_reached / total_goals) * 100
+                
+                if goals_reached == total_goals:
+                    feedback_parts.append(f"🎉 All {total_goals} goal(s) reached!")
+                elif goals_reached > 0:
+                    feedback_parts.append(f"Reached {goals_reached}/{total_goals} goals")
+                else:
+                    feedback_parts.append(f"No goals reached yet. Keep trying!")
+            
+            # Bonus/penalty for collision (if enabled)
+            if maze_config.get("collision_enabled"):
+                collisions = tracking_data.get("collisions", 0)
+                if collisions > 0:
+                    score = max(0, score - (collisions * 5))  # -5 points per collision
+                    feedback_parts.append(f"⚠️ {collisions} wall collision(s)")
+                else:
+                    feedback_parts.append("✅ No collisions!")
+        
+        elif grading_criteria:
+            # Traditional turtle grading (non-maze problems)
+            score = 100  # Start at 100 for non-maze problems
             # Check minimum lines
             if "min_lines" in grading_criteria:
                 min_lines = grading_criteria["min_lines"]
