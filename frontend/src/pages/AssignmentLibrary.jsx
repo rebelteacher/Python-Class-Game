@@ -2392,25 +2392,73 @@ export default function AssignmentLibrary({ user }) {
         </DialogContent>
       </Dialog>
       
-      {/* Turtle Preview Dialog */}
+      {/* Turtle Preview Dialog - Shows live AnimatedTurtle with maze or static image */}
       <Dialog open={turtlePreviewOpen} onOpenChange={setTurtlePreviewOpen}>
-        <DialogContent className="max-w-3xl">
+        <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle>🐢 Turtle Graphics Preview</DialogTitle>
             <DialogDescription>
-              This is what students will see as the expected output
+              {newProblem.background_type !== "none" 
+                ? "Live preview with maze/background - Run your code to test!"
+                : "This is what students will see as the expected output"
+              }
             </DialogDescription>
           </DialogHeader>
-          <div className="flex justify-center">
-            {turtlePreviewImage && (
-              <img 
-                src={`data:image/png;base64,${turtlePreviewImage}`}
-                alt="Turtle preview"
-                className="border-2 border-gray-300 rounded"
-                style={{ maxWidth: "100%", height: "auto" }}
+          
+          {/* Show AnimatedTurtle with maze when background is set */}
+          {newProblem.background_type !== "none" ? (
+            <div className="flex flex-col items-center gap-4">
+              <AnimatedTurtle
+                code={newProblem.solution_code || ""}
+                width={400}
+                height={400}
+                backgroundType={newProblem.background_type}
+                backgroundColor={newProblem.background_color || "#ffffff"}
+                backgroundImage={newProblem.background_image}
+                mazeData={newProblem.maze_data}
+                goals={newProblem.goals || []}
+                checkpoints={newProblem.checkpoints || []}
+                collisionEnabled={newProblem.collision_enabled}
+                challengeMode={newProblem.challenge_mode}
+                onGoalReached={(index, goal) => {
+                  toast.success(`Goal ${index + 1} reached!`);
+                }}
+                onCollision={() => {
+                  toast.error("Collision detected!");
+                }}
+                onComplete={(stats) => {
+                  toast.success(`Completed! Distance: ${stats.pathLength.toFixed(0)}px`);
+                }}
               />
-            )}
-          </div>
+              <div className="text-sm text-gray-600 bg-gray-100 rounded-lg p-3 w-full">
+                <p><strong>Maze Settings:</strong></p>
+                <ul className="list-disc list-inside text-xs mt-1">
+                  <li>Background: {newProblem.background_type}</li>
+                  <li>Walls: {newProblem.maze_data?.walls?.length || 0}</li>
+                  <li>Goals: {newProblem.goals?.length || 0}</li>
+                  <li>Collision: {newProblem.collision_enabled ? "Enabled" : "Disabled"}</li>
+                  <li>Challenge Mode: {newProblem.challenge_mode ? "On" : "Off"}</li>
+                </ul>
+              </div>
+            </div>
+          ) : (
+            /* Show static image for non-maze problems */
+            <div className="flex justify-center">
+              {turtlePreviewImage ? (
+                <img 
+                  src={`data:image/png;base64,${turtlePreviewImage}`}
+                  alt="Turtle preview"
+                  className="border-2 border-gray-300 rounded"
+                  style={{ maxWidth: "100%", height: "auto" }}
+                />
+              ) : (
+                <div className="text-gray-500 text-center py-8">
+                  Click "Preview Turtle Output" to generate a preview image
+                </div>
+              )}
+            </div>
+          )}
+          
           <Button onClick={() => setTurtlePreviewOpen(false)}>
             Close
           </Button>
