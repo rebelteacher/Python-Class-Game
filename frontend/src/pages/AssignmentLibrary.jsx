@@ -995,6 +995,131 @@ export default function AssignmentLibrary({ user }) {
                             />
                           </div>
                         </div>
+                        
+                        {/* Maze/Background Options */}
+                        <div className="mt-4 pt-4 border-t border-green-300">
+                          <Label className="font-semibold flex items-center gap-2">
+                            <Map className="w-4 h-4" />
+                            Maze & Background Options
+                          </Label>
+                          <p className="text-sm text-gray-600 mb-3">Add interactive backgrounds to turtle challenges</p>
+                          
+                          <div className="space-y-4">
+                            <div>
+                              <Label className="text-sm">Background Type</Label>
+                              <Select 
+                                value={newProblem.background_type} 
+                                onValueChange={(val) => setNewProblem({ ...newProblem, background_type: val })}
+                              >
+                                <SelectTrigger className="mt-1">
+                                  <SelectValue placeholder="Select background" />
+                                </SelectTrigger>
+                                <SelectContent>
+                                  <SelectItem value="none">None (White)</SelectItem>
+                                  <SelectItem value="grid">Grid</SelectItem>
+                                  <SelectItem value="maze">Maze</SelectItem>
+                                  <SelectItem value="raceway">Raceway/Track</SelectItem>
+                                  <SelectItem value="custom">Custom Image</SelectItem>
+                                </SelectContent>
+                              </Select>
+                            </div>
+                            
+                            {newProblem.background_type !== "none" && (
+                              <>
+                                <div className="flex items-center justify-between">
+                                  <Label className="text-sm">Enable Collision Detection</Label>
+                                  <Switch
+                                    checked={newProblem.collision_enabled}
+                                    onCheckedChange={(checked) => setNewProblem({ ...newProblem, collision_enabled: checked })}
+                                  />
+                                </div>
+                                
+                                <div className="flex items-center justify-between">
+                                  <Label className="text-sm">Challenge Mode (Track & Leaderboard)</Label>
+                                  <Switch
+                                    checked={newProblem.challenge_mode}
+                                    onCheckedChange={(checked) => setNewProblem({ ...newProblem, challenge_mode: checked })}
+                                  />
+                                </div>
+                                
+                                {newProblem.challenge_mode && (
+                                  <div className="grid grid-cols-2 gap-3">
+                                    <div>
+                                      <Label className="text-sm">Time Limit (seconds, 0 = none)</Label>
+                                      <Input
+                                        type="number"
+                                        min="0"
+                                        placeholder="e.g., 60"
+                                        value={newProblem.time_limit || ""}
+                                        onChange={(e) => setNewProblem({ ...newProblem, time_limit: parseInt(e.target.value) || 0 })}
+                                        className="mt-1"
+                                      />
+                                    </div>
+                                    <div>
+                                      <Label className="text-sm">Optimal Path Length</Label>
+                                      <Input
+                                        type="number"
+                                        min="0"
+                                        placeholder="e.g., 400"
+                                        value={newProblem.optimal_path_length || ""}
+                                        onChange={(e) => setNewProblem({ ...newProblem, optimal_path_length: parseFloat(e.target.value) || 0 })}
+                                        className="mt-1"
+                                      />
+                                    </div>
+                                  </div>
+                                )}
+                                
+                                {(newProblem.background_type === "maze" || newProblem.background_type === "raceway") && (
+                                  <Button
+                                    type="button"
+                                    variant="outline"
+                                    onClick={() => setMazeBuilderOpen(true)}
+                                    className="w-full"
+                                  >
+                                    <Target className="w-4 h-4 mr-2" />
+                                    Open Maze Builder
+                                  </Button>
+                                )}
+                                
+                                {newProblem.background_type === "custom" && (
+                                  <div>
+                                    <Label className="text-sm">Background Image URL</Label>
+                                    <Input
+                                      placeholder="https://..."
+                                      value={newProblem.background_image || ""}
+                                      onChange={(e) => setNewProblem({ ...newProblem, background_image: e.target.value })}
+                                      className="mt-1"
+                                    />
+                                  </div>
+                                )}
+                                
+                                <div>
+                                  <Label className="text-sm">Background Color</Label>
+                                  <div className="flex gap-2 mt-1">
+                                    <Input
+                                      type="color"
+                                      value={newProblem.background_color || "#ffffff"}
+                                      onChange={(e) => setNewProblem({ ...newProblem, background_color: e.target.value })}
+                                      className="w-16 h-9 p-1"
+                                    />
+                                    <Input
+                                      value={newProblem.background_color || "#ffffff"}
+                                      onChange={(e) => setNewProblem({ ...newProblem, background_color: e.target.value })}
+                                      className="flex-1"
+                                    />
+                                  </div>
+                                </div>
+                                
+                                {/* Show maze data summary if set */}
+                                {newProblem.maze_data && (
+                                  <div className="p-2 bg-green-100 rounded text-sm">
+                                    ✅ Maze configured: {newProblem.maze_data.walls?.length || 0} walls, {newProblem.goals?.length || 0} goals
+                                  </div>
+                                )}
+                              </>
+                            )}
+                          </div>
+                        </div>
                       </div>
                     )}
                   </div>
