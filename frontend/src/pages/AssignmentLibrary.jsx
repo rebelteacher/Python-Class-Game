@@ -170,6 +170,10 @@ export default function AssignmentLibrary({ user }) {
       filtered = filtered.filter(p => p.chapter === chapterFilter);
     }
 
+    if (lessonFilter && lessonFilter !== "all") {
+      filtered = filtered.filter(p => p.lesson === lessonFilter);
+    }
+
     if (typeFilter) {
       filtered = filtered.filter(p => p.assignment_type === typeFilter);
     }
