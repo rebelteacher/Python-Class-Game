@@ -154,9 +154,13 @@ export default function AssignmentLibrary({ user }) {
     let filtered = [...problems];
 
     if (searchTerm) {
+      const term = searchTerm.toLowerCase();
       filtered = filtered.filter(p => 
-        p.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        p.description.toLowerCase().includes(searchTerm.toLowerCase())
+        (p.title && p.title.toLowerCase().includes(term)) ||
+        (p.description && p.description.toLowerCase().includes(term)) ||
+        (p.chapter && p.chapter.toLowerCase().includes(term)) ||
+        (p.lesson && p.lesson.toLowerCase().includes(term)) ||
+        (p.category && p.category.toLowerCase().includes(term))
       );
     }
 
