@@ -55,6 +55,12 @@ export default function AssignmentLibrary({ user }) {
   const [moveToChapter, setMoveToChapter] = useState("");
   const [moveToLesson, setMoveToLesson] = useState("");
   
+  // Bulk update mode
+  const [bulkUpdateDialogOpen, setBulkUpdateDialogOpen] = useState(false);
+  const [bulkUpdateChapter, setBulkUpdateChapter] = useState("");
+  const [bulkUpdateLesson, setBulkUpdateLesson] = useState("");
+  const [bulkUpdateType, setBulkUpdateType] = useState("");
+
   const [newProblem, setNewProblem] = useState({
     title: "",
     description: "",
