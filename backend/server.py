@@ -6402,6 +6402,143 @@ async def delete_mc_test(test_id: str, request: Request):
     return {"success": True, "message": "Test deleted successfully"}
 
 
+# ==================== MAZE CHALLENGES ====================
+
+@api_router.post("/maze/attempt")
+async def submit_maze_attempt(attempt: MazeAttemptCreate, request: Request):
+    """Submit a maze challenge attempt"""
+    user = await get_current_user(request)
+    
+    # Get the problem to check if it's a challenge mode problem
+    problem = await db.problems.find_one({"id": attempt.problem_id})
+    if not problem:
+        raise HTTPException(status_code=404, detail="Problem not found")
+    
+    # Calculate path accuracy if optimal path is defined
+    path_accuracy = 0
+    if problem.get("optimal_path_length") and problem["optimal_path_length"] > 0:
+        if attempt.path_length > 0:
+            path_accuracy = min(100, (problem["optimal_path_length"] / attempt.path_length) * 100)
+    
+    # Create the attempt record
+    attempt_doc = {
+        "id": str(uuid.uuid4()),
+        "problem_id": attempt.problem_id,
+        "student_id": user["id"],
+        "student_name": user.get("name", user.get("email", "Unknown")),
+        "classroom_id": user.get("classroom_id", ""),
+        "completed": attempt.completed,
+        "completion_time": attempt.completion_time,
+        "code_lines": attempt.code_lines,
+        "path_length": attempt.path_length,
+        "path_accuracy": path_accuracy,
+        "goals_reached": attempt.goals_reached,
+        "total_goals": attempt.total_goals,
+        "collisions": attempt.collisions,
+        "code": attempt.code,
+        "started_at": datetime.now(timezone.utc).isoformat(),
+        "completed_at": datetime.now(timezone.utc).isoformat() if attempt.completed else None
+    }
+    
+    await db.maze_attempts.insert_one(attempt_doc)
+    
+    return {
+        "success": True,
+        "attempt_id": attempt_doc["id"],
+        "path_accuracy": path_accuracy
+    }
+
+@api_router.get("/maze/leaderboard/{problem_id}")
+async def get_maze_leaderboard(problem_id: str, request: Request, classroom_id: str = None):
+    """Get leaderboard for a maze challenge"""
+    await get_current_user(request)
+    
+    query = {"problem_id": problem_id, "completed": True}
+    if classroom_id:
+        query["classroom_id"] = classroom_id
+    
+    # Get all completed attempts
+    attempts = await db.maze_attempts.find(query, {"_id": 0}).to_list(1000)
+    
+    # Group by student and get best attempt for each
+    best_attempts = {}
+    for attempt in attempts:
+        student_id = attempt["student_id"]
+        if student_id not in best_attempts:
+            best_attempts[student_id] = attempt
+        else:
+            # Compare by completion time (lower is better)
+            if attempt["completion_time"] < best_attempts[student_id]["completion_time"]:
+                best_attempts[student_id] = attempt
+    
+    # Sort by different criteria
+    leaderboard = list(best_attempts.values())
+    
+    # Sort by time (fastest first)
+    by_time = sorted(leaderboard, key=lambda x: x["completion_time"])[:10]
+    
+    # Sort by code efficiency (fewer lines first)
+    by_efficiency = sorted(leaderboard, key=lambda x: x["code_lines"])[:10]
+    
+    # Sort by accuracy (highest first)
+    by_accuracy = sorted(leaderboard, key=lambda x: -x["path_accuracy"])[:10]
+    
+    return {
+        "by_time": by_time,
+        "by_efficiency": by_efficiency,
+        "by_accuracy": by_accuracy,
+        "total_completions": len(leaderboard)
+    }
+
+@api_router.get("/maze/my-attempts/{problem_id}")
+async def get_my_maze_attempts(problem_id: str, request: Request):
+    """Get current user's attempts for a maze challenge"""
+    user = await get_current_user(request)
+    
+    attempts = await db.maze_attempts.find(
+        {"problem_id": problem_id, "student_id": user["id"]},
+        {"_id": 0}
+    ).sort("started_at", -1).to_list(20)
+    
+    return attempts
+
+@api_router.get("/maze/classroom-stats/{problem_id}/{classroom_id}")
+async def get_classroom_maze_stats(problem_id: str, classroom_id: str, request: Request):
+    """Get maze statistics for a classroom (teacher only)"""
+    user = await get_current_user(request)
+    
+    if user["role"] != "teacher":
+        raise HTTPException(status_code=403, detail="Only teachers can view classroom stats")
+    
+    # Get all attempts for this problem and classroom
+    attempts = await db.maze_attempts.find(
+        {"problem_id": problem_id, "classroom_id": classroom_id},
+        {"_id": 0}
+    ).to_list(1000)
+    
+    # Calculate stats
+    total_attempts = len(attempts)
+    completed_attempts = [a for a in attempts if a["completed"]]
+    unique_completers = len(set(a["student_id"] for a in completed_attempts))
+    
+    avg_time = 0
+    avg_lines = 0
+    avg_accuracy = 0
+    if completed_attempts:
+        avg_time = sum(a["completion_time"] for a in completed_attempts) / len(completed_attempts)
+        avg_lines = sum(a["code_lines"] for a in completed_attempts) / len(completed_attempts)
+        avg_accuracy = sum(a["path_accuracy"] for a in completed_attempts) / len(completed_attempts)
+    
+    return {
+        "total_attempts": total_attempts,
+        "total_completions": len(completed_attempts),
+        "unique_completers": unique_completers,
+        "average_time": round(avg_time, 2),
+        "average_code_lines": round(avg_lines, 1),
+        "average_accuracy": round(avg_accuracy, 1)
+    }
+
+
 # ==================== SKILL QUIZ ====================
 
 @api_router.post("/skill-quiz/questions")
