@@ -13,8 +13,9 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Switch } from "@/components/ui/switch";
-import { BookOpen, Plus, Search, Filter, Code2, ArrowLeft, Download, Edit, Folder, FolderOpen, ChevronRight, ChevronDown, Trash2, FolderInput, CheckSquare, Map, Target } from "lucide-react";
+import { BookOpen, Plus, Search, Filter, Code2, ArrowLeft, Download, Edit, Folder, FolderOpen, ChevronRight, ChevronDown, Trash2, FolderInput, CheckSquare, Map, Target, Play } from "lucide-react";
 import MazeBuilder from "@/components/MazeBuilder";
+import AnimatedTurtle from "@/components/AnimatedTurtle";
 
 const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
 const API = `${BACKEND_URL}/api`;
