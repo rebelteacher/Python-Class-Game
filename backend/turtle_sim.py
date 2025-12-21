@@ -36,6 +36,7 @@ class TurtleSim:
         # Tracking data for auto-grading
         self.commands_used = []
         self.positions_visited = [(self.x, self.y)]
+        self.path_history = [{"x": 0, "y": 0}]  # Track turtle coordinates for maze goal checking
         self.lines_drawn = 0
         self.circles_drawn = 0
         self.total_distance = 0
