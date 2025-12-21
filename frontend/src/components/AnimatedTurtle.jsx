@@ -754,6 +754,24 @@ export default function AnimatedTurtle({
           const newX = turtle.x + dx;
           const newY = turtle.y + dy;
           
+          // Check for collision before moving
+          if (collisionEnabled && checkCollision(newX, newY)) {
+            setCollisionCount(prev => prev + 1);
+            if (onCollision) {
+              onCollision({ x: newX, y: newY });
+            }
+            // Flash the canvas red briefly
+            const canvas = canvasRef.current;
+            if (canvas) {
+              const ctx = canvas.getContext('2d');
+              ctx.fillStyle = 'rgba(255, 0, 0, 0.3)';
+              ctx.fillRect(0, 0, width, height);
+              setTimeout(() => drawCanvas(), 200);
+            }
+            setTimeout(resolve, baseDelay);
+            break;
+          }
+          
           if (turtle.penDown) {
             pathsRef.current.push({
               type: 'line',
@@ -768,8 +786,15 @@ export default function AnimatedTurtle({
             turtle.fillPath.push({ x: newX, y: newY });
           }
           
+          // Update path length
+          setPathLength(prev => prev + Math.abs(distance));
+          
           turtle.x = newX;
           turtle.y = newY;
+          
+          // Check if turtle reached any goals
+          checkGoals(newX, newY);
+          
           drawCanvas();
           setTimeout(resolve, baseDelay);
           break;
