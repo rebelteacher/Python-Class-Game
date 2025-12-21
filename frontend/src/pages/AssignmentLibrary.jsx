@@ -1224,54 +1224,56 @@ export default function AssignmentLibrary({ user }) {
                     <div className="flex items-center justify-between mb-2">
                       <Label htmlFor="solutionCode">Solution Code *</Label>
                       {newProblem.assignment_type === "turtle" && (
-                        <Button
-                          type="button"
-                          size="sm"
-                          variant="outline"
-                          onClick={async () => {
-                            if (!newProblem.solution_code.trim()) {
-                              toast.error("Please enter solution code first");
-                              return;
-                            }
-                            try {
-                              const response = await axios.post(`${API}/code/execute-turtle`, {
-                                code: newProblem.solution_code,
-                                test_input: ""
-                              });
-                              if (response.data.success && response.data.image_data) {
-                                setTurtlePreviewImage(response.data.image_data);
-                                setTurtlePreviewOpen(true);
-                                // Store the expected image
-                                setNewProblem({
-                                  ...newProblem,
-                                  expected_turtle_image: response.data.image_data
-                                });
-                                toast.success("Preview generated!");
-                              } else {
-                                toast.error("Failed to generate preview: " + (response.data.error || "Unknown error"));
-                              }
-                            } catch (error) {
-                              toast.error("Failed to preview: " + (error.response?.data?.detail || error.message));
-                            }
-                          }}
-                          className="bg-green-600 hover:bg-green-700 text-white"
-                        >
-                          🐢 Preview Turtle Output
-                        </Button>
-                        
-                        {/* Live Preview with Maze Button */}
-                        {newProblem.background_type !== "none" && (
+                        <div className="flex gap-2">
                           <Button
                             type="button"
+                            size="sm"
                             variant="outline"
-                            onClick={() => setTurtlePreviewOpen(true)}
-                            className="bg-blue-50 border-blue-300 hover:bg-blue-100"
+                            onClick={async () => {
+                              if (!newProblem.solution_code.trim()) {
+                                toast.error("Please enter solution code first");
+                                return;
+                              }
+                              try {
+                                const response = await axios.post(`${API}/code/execute-turtle`, {
+                                  code: newProblem.solution_code,
+                                  test_input: ""
+                                });
+                                if (response.data.success && response.data.image_data) {
+                                  setTurtlePreviewImage(response.data.image_data);
+                                  setTurtlePreviewOpen(true);
+                                  // Store the expected image
+                                  setNewProblem({
+                                    ...newProblem,
+                                    expected_turtle_image: response.data.image_data
+                                  });
+                                  toast.success("Preview generated!");
+                                } else {
+                                  toast.error("Failed to generate preview: " + (response.data.error || "Unknown error"));
+                                }
+                              } catch (error) {
+                                toast.error("Failed to preview: " + (error.response?.data?.detail || error.message));
+                              }
+                            }}
+                            className="bg-green-600 hover:bg-green-700 text-white"
                           >
-                            <Play className="w-4 h-4 mr-1" />
-                            Live Preview with Maze
+                            🐢 Preview Turtle Output
                           </Button>
-                        )}
-                      </>
+                          
+                          {/* Live Preview with Maze Button */}
+                          {newProblem.background_type !== "none" && (
+                            <Button
+                              type="button"
+                              size="sm"
+                              variant="outline"
+                              onClick={() => setTurtlePreviewOpen(true)}
+                              className="bg-blue-50 border-blue-300 hover:bg-blue-100"
+                            >
+                              <Play className="w-4 h-4 mr-1" />
+                              Live Preview
+                            </Button>
+                          )}
+                        </div>
                       )}
                     </div>
                     <Textarea
