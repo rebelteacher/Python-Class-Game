@@ -546,6 +546,7 @@ export default function AssignmentLibrary({ user }) {
 
   const categories = [...new Set(problems.map(p => p.category))].filter(Boolean);
   const chapters = [...new Set(problems.map(p => p.chapter))].filter(Boolean).sort(naturalSort);
+  const lessons = [...new Set(problems.map(p => p.lesson))].filter(Boolean).sort(naturalSort);
   const groupedProblems = groupProblemsByChapterLessonType();
 
   return (
