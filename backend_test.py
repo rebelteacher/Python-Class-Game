@@ -8919,6 +8919,26 @@ x = 5 + 3
         
         return self.tests_passed == self.tests_run
 
+    def run_turtle_maze_challenge_tests_only(self):
+        """Run only Turtle Maze Challenge API tests (for review request)"""
+        print("🚀 Starting Turtle Maze Challenge API Tests...")
+        print(f"Testing against: {self.base_url}")
+        print("📋 Testing Turtle Maze Challenge backend APIs as specified in review request")
+        print("🎯 APIs to test: GET /api/problems, POST /api/maze/attempt, GET /api/maze/leaderboard, GET /api/maze/my-attempts")
+        print("🔧 Using provided credentials: astapp@spanola.net / AlisaFaith$14")
+        
+        # Test the turtle maze challenge APIs
+        self.test_turtle_maze_challenge_apis()
+        
+        # Print summary
+        print(f"\n📊 Turtle Maze Challenge API Test Summary:")
+        print(f"   Total tests: {self.tests_run}")
+        print(f"   Passed: {self.tests_passed}")
+        print(f"   Failed: {self.tests_run - self.tests_passed}")
+        print(f"   Success rate: {(self.tests_passed/self.tests_run)*100:.1f}%")
+        
+        return self.tests_passed == self.tests_run
+
 def main():
     import sys
     if len(sys.argv) > 1:
