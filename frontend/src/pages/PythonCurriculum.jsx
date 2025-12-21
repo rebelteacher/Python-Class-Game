@@ -818,7 +818,7 @@ export default function PythonCurriculum({ user }) {
                               variant="outline"
                               onClick={(e) => {
                                 e.stopPropagation();
-                                navigate(`/library?type=code&chapter=${encodeURIComponent(unit.title)}`);
+                                navigate(`/library?type=code&chapter=${encodeURIComponent(unit.title)}&lesson=${encodeURIComponent(`Lesson ${lessonIndex + 1} ${lesson.title}`)}`);
                               }}
                             >
                               <Library className="w-4 h-4 mr-1" />
