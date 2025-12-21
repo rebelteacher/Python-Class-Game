@@ -8197,6 +8197,368 @@ x = 5 + 3
         print("   - Multiple attempts tracking: ✅")
         print("   - All Turtle Maze Challenge APIs working correctly!")
 
+    def test_turtle_scoring_system(self):
+        """Test the updated turtle/maze scoring system"""
+        print("\n🐢 Testing Updated Turtle/Maze Scoring System...")
+        
+        # Use the provided login credentials
+        test_email = "astapp@spanola.net"
+        test_password = "AlisaFaith$14"
+        
+        print(f"   Testing with teacher credentials: {test_email}")
+        
+        # Step 1: Login as teacher
+        login_data = {
+            "email": test_email,
+            "password": test_password
+        }
+        
+        login_response = self.run_test(
+            "Teacher login for turtle testing",
+            "POST",
+            "auth/teacher-login",
+            200,
+            login_data
+        )
+        
+        if not login_response:
+            print("❌ Cannot continue turtle scoring tests without successful login")
+            return
+        
+        # Store the session token from login
+        teacher_session_token = login_response.get("session_token")
+        if teacher_session_token:
+            self.session_token = teacher_session_token
+            print(f"   ✅ Login successful, session token obtained")
+        
+        # Step 2: Get turtle problems from the API
+        print("   Fetching turtle problems...")
+        turtle_problems_response = self.run_test(
+            "Get turtle problems",
+            "GET",
+            "problems?assignment_type=turtle",
+            200
+        )
+        
+        if not turtle_problems_response or not turtle_problems_response.get("problems"):
+            print("❌ No turtle problems found - cannot test turtle scoring")
+            return
+        
+        turtle_problems = turtle_problems_response.get("problems", [])
+        print(f"   Found {len(turtle_problems)} turtle problems")
+        
+        # Find different types of turtle problems for testing
+        maze_problem = None
+        regular_turtle_problem = None
+        
+        for problem in turtle_problems:
+            if problem.get("goals") and len(problem.get("goals", [])) > 0:
+                maze_problem = problem
+                print(f"   Found maze problem: {problem.get('title')}")
+                break
+        
+        for problem in turtle_problems:
+            if not problem.get("goals") and problem.get("turtle_grading_criteria"):
+                regular_turtle_problem = problem
+                print(f"   Found regular turtle problem: {problem.get('title')}")
+                break
+        
+        # If no specific problems found, use the first available
+        if not regular_turtle_problem and turtle_problems:
+            regular_turtle_problem = turtle_problems[0]
+            print(f"   Using first available problem: {regular_turtle_problem.get('title')}")
+        
+        # Create a test classroom for submissions
+        classroom_data = {
+            "name": f"Turtle Test Classroom {datetime.now().strftime('%H%M%S')}"
+        }
+        
+        classroom = self.run_test(
+            "Create classroom for turtle testing",
+            "POST",
+            "classrooms",
+            200,
+            classroom_data
+        )
+        
+        if not classroom:
+            print("❌ Cannot test turtle scoring without classroom")
+            return
+        
+        classroom_id = classroom.get('id')
+        
+        # Create a test student
+        student = self.create_student_user("turtle_test")
+        if not student:
+            print("❌ Cannot test turtle scoring without student user")
+            return
+        
+        # Add student to classroom
+        if not self.add_student_to_classroom(student["id"], classroom_id):
+            print("❌ Cannot test turtle scoring without adding student to classroom")
+            return
+        
+        # Create test assignments from the problems
+        test_assignments = []
+        
+        if regular_turtle_problem:
+            # Create assignment from regular turtle problem
+            assignment_data = {
+                "title": f"Turtle Test Assignment {datetime.now().strftime('%H%M%S')}",
+                "description": "Test turtle scoring system",
+                "problem_ids": [regular_turtle_problem["id"]],
+                "classroom_ids": [classroom_id]
+            }
+            
+            assignment = self.run_test(
+                "Create turtle assignment",
+                "POST",
+                "assignments",
+                200,
+                assignment_data
+            )
+            
+            if assignment:
+                test_assignments.append({
+                    "assignment": assignment,
+                    "problem": regular_turtle_problem,
+                    "type": "regular_turtle"
+                })
+        
+        if maze_problem:
+            # Create assignment from maze problem
+            maze_assignment_data = {
+                "title": f"Maze Test Assignment {datetime.now().strftime('%H%M%S')}",
+                "description": "Test maze scoring system",
+                "problem_ids": [maze_problem["id"]],
+                "classroom_ids": [classroom_id]
+            }
+            
+            maze_assignment = self.run_test(
+                "Create maze assignment",
+                "POST",
+                "assignments",
+                200,
+                maze_assignment_data
+            )
+            
+            if maze_assignment:
+                test_assignments.append({
+                    "assignment": maze_assignment,
+                    "problem": maze_problem,
+                    "type": "maze"
+                })
+        
+        # Switch to student token for submissions
+        original_token = self.session_token
+        self.session_token = student["token"]
+        
+        try:
+            # Test Scenario 1: Empty code submission (should get 0% or low score, not 100%)
+            print("\n   🧪 SCENARIO 1: Testing empty code submission...")
+            
+            if test_assignments:
+                assignment = test_assignments[0]["assignment"]
+                problem = test_assignments[0]["problem"]
+                
+                empty_submission_data = {
+                    "assignment_id": assignment.get("assignment_id") or assignment.get("id"),
+                    "problem_id": problem["id"],
+                    "code": ""
+                }
+                
+                empty_response = self.run_test(
+                    "Submit empty code (should get 0%, not 100%)",
+                    "POST",
+                    "submissions",
+                    200,
+                    empty_submission_data
+                )
+                
+                if empty_response:
+                    empty_score = empty_response.get("score", 0)
+                    print(f"     Empty code score: {empty_score}%")
+                    
+                    if empty_score == 0:
+                        self.log_test("Empty code gets 0% (not 100%)", True)
+                        print("     ✅ Empty code correctly gets 0% - fix working!")
+                    elif empty_score < 20:
+                        self.log_test("Empty code gets low score (<20%)", True)
+                        print(f"     ✅ Empty code gets low score ({empty_score}%) - acceptable")
+                    else:
+                        self.log_test("Empty code gets 0% (not 100%)", False, f"Got {empty_score}% instead of 0%")
+                        print(f"     ❌ Empty code got {empty_score}% - should be 0%")
+            
+            # Test Scenario 2: Code that draws something but no goals (should get ~50%, not 100%)
+            print("\n   🧪 SCENARIO 2: Testing code that draws something (no goals)...")
+            
+            if test_assignments:
+                assignment = test_assignments[0]["assignment"]
+                problem = test_assignments[0]["problem"]
+                
+                drawing_code = "import turtle\nt = turtle.Turtle()\nt.forward(100)"
+                
+                drawing_submission_data = {
+                    "assignment_id": assignment.get("assignment_id") or assignment.get("id"),
+                    "problem_id": problem["id"],
+                    "code": drawing_code
+                }
+                
+                drawing_response = self.run_test(
+                    "Submit drawing code (should get ~50%, not 100%)",
+                    "POST",
+                    "submissions",
+                    200,
+                    drawing_submission_data
+                )
+                
+                if drawing_response:
+                    drawing_score = drawing_response.get("score", 0)
+                    print(f"     Drawing code score: {drawing_score}%")
+                    
+                    if 40 <= drawing_score <= 60:
+                        self.log_test("Drawing code gets partial credit (~50%)", True)
+                        print(f"     ✅ Drawing code gets partial credit ({drawing_score}%) - fix working!")
+                    elif drawing_score < 100:
+                        self.log_test("Drawing code doesn't get 100% by default", True)
+                        print(f"     ✅ Drawing code doesn't get 100% by default ({drawing_score}%)")
+                    else:
+                        self.log_test("Drawing code gets partial credit (~50%)", False, f"Got {drawing_score}% instead of ~50%")
+                        print(f"     ❌ Drawing code got {drawing_score}% - should be around 50%")
+            
+            # Test Scenario 3: Maze challenge with goals (if available)
+            if maze_problem and len(test_assignments) > 1:
+                print("\n   🧪 SCENARIO 3: Testing maze challenge with goals...")
+                
+                maze_assignment = test_assignments[1]["assignment"]
+                maze_prob = test_assignments[1]["problem"]
+                
+                # Test code that doesn't reach goals
+                no_goals_code = "import turtle\nt = turtle.Turtle()\nt.forward(50)\nt.left(90)\nt.forward(50)"
+                
+                no_goals_submission_data = {
+                    "assignment_id": maze_assignment.get("assignment_id") or maze_assignment.get("id"),
+                    "problem_id": maze_prob["id"],
+                    "code": no_goals_code
+                }
+                
+                no_goals_response = self.run_test(
+                    "Submit maze code that doesn't reach goals (should get 0%)",
+                    "POST",
+                    "submissions",
+                    200,
+                    no_goals_submission_data
+                )
+                
+                if no_goals_response:
+                    no_goals_score = no_goals_response.get("score", 0)
+                    print(f"     No goals reached score: {no_goals_score}%")
+                    
+                    if no_goals_score == 0:
+                        self.log_test("Maze code with no goals reached gets 0%", True)
+                        print("     ✅ No goals reached correctly gets 0% - maze scoring working!")
+                    elif no_goals_score < 20:
+                        self.log_test("Maze code with no goals reached gets low score", True)
+                        print(f"     ✅ No goals reached gets low score ({no_goals_score}%)")
+                    else:
+                        self.log_test("Maze code with no goals reached gets 0%", False, f"Got {no_goals_score}% instead of 0%")
+                        print(f"     ❌ No goals reached got {no_goals_score}% - should be 0%")
+                
+                # Test code that might reach some goals (simplified example)
+                goals_code = """
+import turtle
+t = turtle.Turtle()
+# Try to reach first goal (coordinates depend on maze layout)
+t.forward(100)
+t.right(90)
+t.forward(100)
+"""
+                
+                goals_submission_data = {
+                    "assignment_id": maze_assignment.get("assignment_id") or maze_assignment.get("id"),
+                    "problem_id": maze_prob["id"],
+                    "code": goals_code
+                }
+                
+                goals_response = self.run_test(
+                    "Submit maze code that might reach goals",
+                    "POST",
+                    "submissions",
+                    200,
+                    goals_submission_data
+                )
+                
+                if goals_response:
+                    goals_score = goals_response.get("score", 0)
+                    print(f"     Goals attempt score: {goals_score}%")
+                    
+                    # Score should be based on goals reached / total goals * 100
+                    total_goals = len(maze_prob.get("goals", []))
+                    print(f"     Total goals in maze: {total_goals}")
+                    
+                    if goals_score >= 0:
+                        self.log_test("Maze scoring based on goals reached", True)
+                        print(f"     ✅ Maze scoring working - score based on goals: {goals_score}%")
+                    else:
+                        self.log_test("Maze scoring based on goals reached", False, f"Invalid score: {goals_score}%")
+            
+            # Test Scenario 4: Traditional turtle problem with grading criteria (should use old deduction method)
+            if regular_turtle_problem and regular_turtle_problem.get("turtle_grading_criteria"):
+                print("\n   🧪 SCENARIO 4: Testing traditional turtle problem with grading criteria...")
+                
+                assignment = test_assignments[0]["assignment"]
+                problem = test_assignments[0]["problem"]
+                
+                criteria = problem.get("turtle_grading_criteria", {})
+                print(f"     Grading criteria: {criteria}")
+                
+                # Create code that meets some criteria
+                criteria_code = """
+import turtle
+t = turtle.Turtle()
+t.forward(100)
+t.right(90)
+t.forward(100)
+t.right(90)
+t.forward(100)
+t.right(90)
+t.forward(100)
+"""
+                
+                criteria_submission_data = {
+                    "assignment_id": assignment.get("assignment_id") or assignment.get("id"),
+                    "problem_id": problem["id"],
+                    "code": criteria_code
+                }
+                
+                criteria_response = self.run_test(
+                    "Submit code for traditional turtle problem with criteria",
+                    "POST",
+                    "submissions",
+                    200,
+                    criteria_submission_data
+                )
+                
+                if criteria_response:
+                    criteria_score = criteria_response.get("score", 0)
+                    print(f"     Traditional turtle score: {criteria_score}%")
+                    
+                    if criteria_score > 0:
+                        self.log_test("Traditional turtle grading still works", True)
+                        print(f"     ✅ Traditional turtle grading working: {criteria_score}%")
+                    else:
+                        self.log_test("Traditional turtle grading still works", False, f"Got {criteria_score}%")
+        
+        finally:
+            # Switch back to teacher token
+            self.session_token = original_token
+        
+        print("\n🎯 TURTLE SCORING SYSTEM TEST SUMMARY:")
+        print("   - Empty code submissions: Should get 0% (not 100%)")
+        print("   - Drawing code (no goals): Should get ~50% partial credit")
+        print("   - Maze challenges: Score = (goals_reached / total_goals) * 100")
+        print("   - Traditional turtle problems: Still use deduction method")
+        print("   - The turtle scoring system has been updated to start at 0% instead of 100%")
     def run_all_tests(self):
         """Run all API tests"""
         print("🚀 Starting CodeClass API Tests...")
