@@ -2838,11 +2838,22 @@ async def submit_assignment(submission: SubmissionCreate, request: Request):
         grading_criteria = problem.get("turtle_grading_criteria", {})
         expected_image = problem.get("expected_turtle_image", "")
         
+        # Build maze config for maze challenges
+        maze_config = None
+        if problem.get("goals") or problem.get("challenge_mode") or problem.get("background_type") == "maze":
+            maze_config = {
+                "goals": problem.get("goals", []),
+                "collision_enabled": problem.get("collision_enabled", False),
+                "challenge_mode": problem.get("challenge_mode", False),
+                "maze_data": problem.get("maze_data", {})
+            }
+        
         # Grade turtle submission
         turtle_result = await grade_turtle_submission(
             submission.code,
             grading_criteria,
-            expected_image
+            expected_image,
+            maze_config
         )
         
         base_score = turtle_result["score"]
