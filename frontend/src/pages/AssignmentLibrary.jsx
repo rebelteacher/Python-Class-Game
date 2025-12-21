@@ -102,6 +102,7 @@ export default function AssignmentLibrary({ user }) {
     const typeFromUrl = searchParams.get("type");
     const categoryFromUrl = searchParams.get("category");
     const chapterFromUrl = searchParams.get("chapter");
+    const lessonFromUrl = searchParams.get("lesson");
     
     if (typeFromUrl && typeFromUrl !== typeFilter) {
       setTypeFilter(typeFromUrl);
@@ -118,11 +119,15 @@ export default function AssignmentLibrary({ user }) {
     if (chapterFromUrl && chapterFromUrl !== chapterFilter) {
       setChapterFilter(chapterFromUrl);
     }
+    
+    if (lessonFromUrl && lessonFromUrl !== lessonFilter) {
+      setLessonFilter(lessonFromUrl);
+    }
   }, [searchParams]);
 
   useEffect(() => {
     filterProblems();
-  }, [searchTerm, categoryFilter, difficultyFilter, chapterFilter, unitFilter, typeFilter, problems]);
+  }, [searchTerm, categoryFilter, difficultyFilter, chapterFilter, lessonFilter, unitFilter, typeFilter, problems]);
 
   const fetchProblems = async () => {
     try {
