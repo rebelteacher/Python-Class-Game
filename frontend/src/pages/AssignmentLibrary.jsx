@@ -1471,7 +1471,49 @@ export default function AssignmentLibrary({ user }) {
                 <SelectItem value="microbit">⚡ Micro:bit</SelectItem>
               </SelectContent>
             </Select>
+
+            {/* Clear Filters Button */}
+            {(searchTerm || categoryFilter !== "all" || difficultyFilter !== "all" || 
+              chapterFilter !== "all" || lessonFilter !== "all" || typeFilter) && (
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => {
+                  setSearchTerm("");
+                  setCategoryFilter("all");
+                  setDifficultyFilter("all");
+                  setChapterFilter("all");
+                  setLessonFilter("all");
+                  setTypeFilter("");
+                  setSearchParams({});
+                }}
+                className="text-red-600 border-red-300 hover:bg-red-50"
+              >
+                Clear Filters
+              </Button>
+            )}
           </div>
+
+          {/* Active Filters Display */}
+          {(chapterFilter !== "all" || lessonFilter !== "all" || typeFilter) && (
+            <div className="flex flex-wrap gap-2 text-sm">
+              {typeFilter && (
+                <span className="px-2 py-1 bg-blue-100 text-blue-800 rounded">
+                  Type: {typeFilter}
+                </span>
+              )}
+              {chapterFilter !== "all" && (
+                <span className="px-2 py-1 bg-green-100 text-green-800 rounded">
+                  Chapter: {chapterFilter}
+                </span>
+              )}
+              {lessonFilter !== "all" && (
+                <span className="px-2 py-1 bg-purple-100 text-purple-800 rounded">
+                  Lesson: {lessonFilter}
+                </span>
+              )}
+            </div>
+          )}
 
           <div className="text-sm text-gray-600">
             Showing {filteredProblems.length} of {problems.length} problems
