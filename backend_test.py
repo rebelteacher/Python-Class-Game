@@ -8966,6 +8966,10 @@ def main():
             tester = CodeClassAPITester()
             success = tester.run_video_library_upload_test_only()
             return 0 if success else 1
+        elif sys.argv[1] == "turtle-maze":
+            tester = CodeClassAPITester()
+            success = tester.run_turtle_maze_challenge_tests_only()
+            return 0 if success else 1
     else:
         tester = CodeClassAPITester()
         success = tester.run_all_tests()
