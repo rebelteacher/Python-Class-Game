@@ -1629,6 +1629,7 @@ async def get_problems(
     category: Optional[str] = None,
     difficulty: Optional[str] = None,
     chapter: Optional[str] = None,
+    lesson: Optional[str] = None,
     csta_standard: Optional[str] = None,
     search: Optional[str] = None,
     assignment_type: Optional[str] = None
@@ -1643,6 +1644,8 @@ async def get_problems(
         query["difficulty"] = difficulty
     if chapter:
         query["chapter"] = chapter
+    if lesson:
+        query["lesson"] = lesson
     if csta_standard:
         query["csta_standard"] = {"$regex": csta_standard, "$options": "i"}
     if assignment_type:
