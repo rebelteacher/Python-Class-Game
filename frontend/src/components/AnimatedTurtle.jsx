@@ -272,7 +272,7 @@ function parseCode(code, parentVars = {}) {
 const getInitialTurtleState = () => ({
   x: 0,
   y: 0,
-  heading: 0,
+  heading: 90,  // Match Python turtle default (90 = UP)
   penDown: true,
   penColor: 'black',
   fillColor: 'black',
