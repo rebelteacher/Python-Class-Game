@@ -2412,8 +2412,12 @@ except Exception as e:
             turtle_x = final_pos.get("x", 0)
             turtle_y = final_pos.get("y", 0)
             
+            logging.info(f"Maze grading: {total_goals} goals, final_pos=({turtle_x}, {turtle_y})")
+            logging.info(f"Goals: {maze_config['goals']}")
+            
             # Also check path history for goals passed through
             path_history = tracking_data.get("path_history", [])
+            logging.info(f"Path history has {len(path_history)} points")
             
             # Check each goal
             for i, goal in enumerate(maze_config["goals"]):
@@ -2423,8 +2427,10 @@ except Exception as e:
                 
                 # Check if turtle's final position is within the goal
                 distance_to_goal = ((turtle_x - goal_x) ** 2 + (turtle_y - goal_y) ** 2) ** 0.5
+                logging.info(f"Goal {i+1} at ({goal_x}, {goal_y}) radius={goal_r}: distance={distance_to_goal:.2f}")
                 if distance_to_goal <= goal_r:
                     goals_reached += 1
+                    logging.info(f"  -> Goal {i+1} reached via final position!")
                 else:
                     # Also check if turtle passed through the goal during its path
                     for pos in path_history:
@@ -2432,6 +2438,7 @@ except Exception as e:
                         dist = ((px - goal_x) ** 2 + (py - goal_y) ** 2) ** 0.5
                         if dist <= goal_r:
                             goals_reached += 1
+                            logging.info(f"  -> Goal {i+1} reached via path at ({px}, {py})!")
                             break
             
             # Score based on goals reached
