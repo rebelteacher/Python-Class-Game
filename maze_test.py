@@ -128,47 +128,61 @@ class MazeChallengeTester:
         # Step 3: Verify problem fields are saved correctly
         print("\n   SCENARIO 5: Verify problem fields are saved correctly...")
         
+        # Since there's no GET /api/problems/{id} endpoint, we'll verify by listing problems
+        # and finding our created problem
         problem_details = self.run_test(
-            "Get problem details to verify maze fields",
+            "Get problems list to verify maze fields",
             "GET",
-            f"problems/{problem_id}",
+            f"problems?category=Turtle - Test",
             200
         )
         
-        if problem_details:
-            # Verify maze-specific fields
-            maze_data = problem_details.get("maze_data")
-            goals = problem_details.get("goals")
-            collision_enabled = problem_details.get("collision_enabled")
-            challenge_mode = problem_details.get("challenge_mode")
-            background_type = problem_details.get("background_type")
+        if problem_details and isinstance(problem_details, list):
+            # Find our created problem
+            created_problem = None
+            for problem in problem_details:
+                if problem.get("id") == problem_id:
+                    created_problem = problem
+                    break
             
-            if maze_data and maze_data.get("walls") == [[0, 50, 100, 50]]:
-                self.log_test("Maze data saved correctly", True)
-                print(f"   ✅ Maze data verified: {maze_data}")
+            if created_problem:
+                # Verify maze-specific fields
+                maze_data = created_problem.get("maze_data")
+                goals = created_problem.get("goals")
+                collision_enabled = created_problem.get("collision_enabled")
+                challenge_mode = created_problem.get("challenge_mode")
+                background_type = created_problem.get("background_type")
+                
+                if maze_data and maze_data.get("walls") == [[0, 50, 100, 50]]:
+                    self.log_test("Maze data saved correctly", True)
+                    print(f"   ✅ Maze data verified: {maze_data}")
+                else:
+                    self.log_test("Maze data saved correctly", False, f"Expected maze data, got {maze_data}")
+                
+                if goals and len(goals) == 1 and goals[0].get("x") == 100:
+                    self.log_test("Goals saved correctly", True)
+                    print(f"   ✅ Goals verified: {goals}")
+                else:
+                    self.log_test("Goals saved correctly", False, f"Expected goals, got {goals}")
+                
+                if collision_enabled is True:
+                    self.log_test("Collision enabled saved correctly", True)
+                else:
+                    self.log_test("Collision enabled saved correctly", False, f"Expected True, got {collision_enabled}")
+                
+                if challenge_mode is True:
+                    self.log_test("Challenge mode saved correctly", True)
+                else:
+                    self.log_test("Challenge mode saved correctly", False, f"Expected True, got {challenge_mode}")
+                
+                if background_type == "maze":
+                    self.log_test("Background type saved correctly", True)
+                else:
+                    self.log_test("Background type saved correctly", False, f"Expected 'maze', got {background_type}")
             else:
-                self.log_test("Maze data saved correctly", False, f"Expected maze data, got {maze_data}")
-            
-            if goals and len(goals) == 1 and goals[0].get("x") == 100:
-                self.log_test("Goals saved correctly", True)
-                print(f"   ✅ Goals verified: {goals}")
-            else:
-                self.log_test("Goals saved correctly", False, f"Expected goals, got {goals}")
-            
-            if collision_enabled is True:
-                self.log_test("Collision enabled saved correctly", True)
-            else:
-                self.log_test("Collision enabled saved correctly", False, f"Expected True, got {collision_enabled}")
-            
-            if challenge_mode is True:
-                self.log_test("Challenge mode saved correctly", True)
-            else:
-                self.log_test("Challenge mode saved correctly", False, f"Expected True, got {challenge_mode}")
-            
-            if background_type == "maze":
-                self.log_test("Background type saved correctly", True)
-            else:
-                self.log_test("Background type saved correctly", False, f"Expected 'maze', got {background_type}")
+                self.log_test("Created problem found in list", False, "Problem not found in problems list")
+        else:
+            self.log_test("Problems list retrieved", False, "Failed to get problems list")
         
         # Step 4: Submit maze attempt
         print("\n   SCENARIO 2: Submit maze attempt...")
