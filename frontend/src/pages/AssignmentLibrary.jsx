@@ -2176,6 +2176,18 @@ export default function AssignmentLibrary({ user }) {
               </Select>
             </div>
             <div>
+              <Label>Unit</Label>
+              <Input
+                placeholder="e.g., Unit 2: Python Text"
+                value={bulkUpdateUnit}
+                onChange={(e) => setBulkUpdateUnit(e.target.value)}
+                className="mt-1"
+              />
+              <p className="text-xs text-gray-500 mt-1">
+                Examples: "Unit 1: Block-Based", "Unit 2: Python Text", "Unit 3: Turtle Graphics"
+              </p>
+            </div>
+            <div>
               <Label>Chapter</Label>
               <Input
                 placeholder="e.g., Chapter 1: Printing"
@@ -2184,7 +2196,7 @@ export default function AssignmentLibrary({ user }) {
                 className="mt-1"
               />
               <p className="text-xs text-gray-500 mt-1">
-                Examples: "Chapter 1: Printing", "Unit 1: First Steps with Turtle"
+                Examples: "Chapter 1: Printing", "Chapter 2: Variables and Input"
               </p>
             </div>
             <div>
