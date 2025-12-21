@@ -431,6 +431,50 @@ export default function AssignmentLibrary({ user }) {
     setAssignmentBuilderOpen(true);
   };
 
+  const handleBulkUpdateProblems = async () => {
+    if (selectedProblems.length === 0) {
+      toast.error("Please select at least one problem");
+      return;
+    }
+
+    const updates = {};
+    if (bulkUpdateChapter) updates.chapter = bulkUpdateChapter;
+    if (bulkUpdateLesson) updates.lesson = bulkUpdateLesson;
+    if (bulkUpdateType) updates.assignment_type = bulkUpdateType;
+
+    if (Object.keys(updates).length === 0) {
+      toast.error("Please select at least one field to update");
+      return;
+    }
+
+    try {
+      const response = await fetch(`${process.env.REACT_APP_BACKEND_URL}/api/problems/bulk-update`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        credentials: "include",
+        body: JSON.stringify({
+          problem_ids: selectedProblems,
+          updates: updates
+        })
+      });
+
+      if (!response.ok) throw new Error("Failed to update problems");
+      
+      const result = await response.json();
+      toast.success(`Updated ${result.modified_count} problems`);
+      setBulkUpdateDialogOpen(false);
+      setBulkUpdateChapter("");
+      setBulkUpdateLesson("");
+      setBulkUpdateType("");
+      setSelectedProblems([]);
+      setSelectionMode(false);
+      fetchProblems();
+    } catch (error) {
+      console.error("Bulk update error:", error);
+      toast.error("Failed to update problems");
+    }
+  };
+
   const toggleChapter = (chapter) => {
     setExpandedChapters(prev => {
       const newSet = new Set(prev);
