@@ -8240,11 +8240,12 @@ x = 5 + 3
             200
         )
         
-        if not turtle_problems_response or not turtle_problems_response.get("problems"):
+        if not turtle_problems_response:
             print("❌ No turtle problems found - cannot test turtle scoring")
             return
         
-        turtle_problems = turtle_problems_response.get("problems", [])
+        # The API returns a list directly, not a dict with "problems" key
+        turtle_problems = turtle_problems_response if isinstance(turtle_problems_response, list) else turtle_problems_response.get("problems", [])
         print(f"   Found {len(turtle_problems)} turtle problems")
         
         # Find different types of turtle problems for testing
