@@ -2402,6 +2402,52 @@ export default function AssignmentLibrary({ user }) {
           </Button>
         </DialogContent>
       </Dialog>
+      
+      {/* Maze Builder Dialog */}
+      <Dialog open={mazeBuilderOpen} onOpenChange={setMazeBuilderOpen}>
+        <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Map className="w-5 h-5" />
+              Maze Builder
+            </DialogTitle>
+            <DialogDescription>
+              Draw walls, place goals, and design your maze challenge
+            </DialogDescription>
+          </DialogHeader>
+          <MazeBuilder
+            width={400}
+            height={400}
+            initialData={{
+              walls: newProblem.maze_data?.walls || [],
+              goals: newProblem.goals || [],
+              checkpoints: newProblem.checkpoints || [],
+              backgroundColor: newProblem.background_color || "#f0f9ff"
+            }}
+            onChange={(data) => {
+              setNewProblem({
+                ...newProblem,
+                maze_data: {
+                  walls: data.walls,
+                  wallColor: data.wallColor,
+                  wallWidth: data.wallWidth
+                },
+                goals: data.goals,
+                checkpoints: data.checkpoints,
+                background_color: data.backgroundColor
+              });
+            }}
+          />
+          <div className="flex justify-end gap-2 mt-4">
+            <Button variant="outline" onClick={() => setMazeBuilderOpen(false)}>
+              Cancel
+            </Button>
+            <Button onClick={() => setMazeBuilderOpen(false)}>
+              Save Maze
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
