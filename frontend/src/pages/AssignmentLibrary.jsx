@@ -57,6 +57,7 @@ export default function AssignmentLibrary({ user }) {
   
   // Bulk update mode
   const [bulkUpdateDialogOpen, setBulkUpdateDialogOpen] = useState(false);
+  const [bulkUpdateUnit, setBulkUpdateUnit] = useState("");
   const [bulkUpdateChapter, setBulkUpdateChapter] = useState("");
   const [bulkUpdateLesson, setBulkUpdateLesson] = useState("");
   const [bulkUpdateType, setBulkUpdateType] = useState("");
