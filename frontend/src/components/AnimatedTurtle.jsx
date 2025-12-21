@@ -1054,6 +1054,30 @@ export default function AnimatedTurtle({
            commands.length > 0 ? `${commands.length} commands ready` : 'No commands parsed'}
         </span>
       </div>
+      
+      {/* Challenge Mode Stats */}
+      {challengeMode && (
+        <div className="flex items-center gap-4 text-sm bg-gray-100 rounded-lg px-4 py-2">
+          <div className="flex items-center gap-1">
+            <span className="text-yellow-600">🎯</span>
+            <span>{goalsReached.size}/{goals.length} Goals</span>
+          </div>
+          <div className="flex items-center gap-1">
+            <span className="text-blue-600">📏</span>
+            <span>{pathLength.toFixed(0)} px traveled</span>
+          </div>
+          {collisionEnabled && (
+            <div className="flex items-center gap-1">
+              <span className="text-red-600">💥</span>
+              <span>{collisionCount} collisions</span>
+            </div>
+          )}
+          <div className="flex items-center gap-1">
+            <span className="text-purple-600">📝</span>
+            <span>{code.split('\n').filter(l => l.trim() && !l.trim().startsWith('#')).length} lines</span>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
