@@ -573,6 +573,15 @@ export default function AssignmentLibrary({ user }) {
                       setSelectedProblems([]);
                     }}
                     variant="outline" 
+                    className="gap-2 bg-orange-50 border-orange-300 hover:bg-orange-100"
+                  >
+                    <CheckSquare className="w-5 h-5" />
+                    Select Problems
+                  </Button>
+
+                  <Button 
+                    onClick={() => setCreateDialogOpen(true)}
+                    variant="outline" 
                     className="gap-2 bg-purple-50 border-purple-300 hover:bg-purple-100"
                   >
                     <Plus className="w-5 h-5" />
