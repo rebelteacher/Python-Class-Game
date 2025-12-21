@@ -1258,6 +1258,19 @@ export default function AssignmentLibrary({ user }) {
                         >
                           🐢 Preview Turtle Output
                         </Button>
+                        
+                        {/* Live Preview with Maze Button */}
+                        {newProblem.background_type !== "none" && (
+                          <Button
+                            type="button"
+                            variant="outline"
+                            onClick={() => setTurtlePreviewOpen(true)}
+                            className="bg-blue-50 border-blue-300 hover:bg-blue-100"
+                          >
+                            <Play className="w-4 h-4 mr-1" />
+                            Live Preview with Maze
+                          </Button>
+                        )}
                       )}
                     </div>
                     <Textarea
