@@ -1741,6 +1741,43 @@ async def move_problem(problem_id: str, data: dict, request: Request):
     return {"success": True, "message": "Problem moved successfully"}
 
 
+class BulkUpdateRequest(BaseModel):
+    problem_ids: List[str]
+    updates: dict
+
+@api_router.put("/problems/bulk-update")
+async def bulk_update_problems(data: BulkUpdateRequest, request: Request):
+    """Bulk update multiple problems with the same values"""
+    user = await get_current_user(request)
+    
+    if user["role"] != "teacher":
+        raise HTTPException(status_code=403, detail="Only teachers can update problems")
+    
+    if not data.problem_ids:
+        raise HTTPException(status_code=400, detail="No problems selected")
+    
+    if not data.updates:
+        raise HTTPException(status_code=400, detail="No updates provided")
+    
+    # Filter allowed fields
+    allowed_fields = {"chapter", "lesson", "assignment_type", "category", "difficulty", "unit"}
+    filtered_updates = {k: v for k, v in data.updates.items() if k in allowed_fields and v}
+    
+    if not filtered_updates:
+        raise HTTPException(status_code=400, detail="No valid updates provided")
+    
+    # Update all selected problems
+    result = await db.problems.update_many(
+        {"id": {"$in": data.problem_ids}},
+        {"$set": filtered_updates}
+    )
+    
+    return {
+        "success": True,
+        "modified_count": result.modified_count,
+        "message": f"Updated {result.modified_count} problems"
+    }
+
 
 @api_router.post("/assignments")
 async def create_assignment(assignment: AssignmentCreate, request: Request):
