@@ -12,7 +12,9 @@ import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Checkbox } from "@/components/ui/checkbox";
-import { BookOpen, Plus, Search, Filter, Code2, ArrowLeft, Download, Edit, Folder, FolderOpen, ChevronRight, ChevronDown, Trash2, FolderInput, CheckSquare } from "lucide-react";
+import { Switch } from "@/components/ui/switch";
+import { BookOpen, Plus, Search, Filter, Code2, ArrowLeft, Download, Edit, Folder, FolderOpen, ChevronRight, ChevronDown, Trash2, FolderInput, CheckSquare, Map, Target } from "lucide-react";
+import MazeBuilder from "@/components/MazeBuilder";
 
 const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
 const API = `${BACKEND_URL}/api`;
