@@ -703,6 +703,40 @@ class CodingTestSubmit(BaseModel):
     code: str
     time_taken_seconds: int = 0
 
+# Maze Challenge Attempt - for tracking maze completions and leaderboards
+class MazeAttempt(BaseModel):
+    model_config = ConfigDict(extra="ignore")
+    id: str = Field(default_factory=lambda: str(uuid.uuid4()))
+    problem_id: str
+    student_id: str
+    student_name: str
+    classroom_id: str = ""
+    # Performance metrics
+    completed: bool = False
+    completion_time: float = 0  # Seconds
+    code_lines: int = 0
+    path_length: float = 0  # Total distance traveled
+    path_accuracy: float = 0  # Percentage compared to optimal
+    goals_reached: int = 0
+    total_goals: int = 0
+    collisions: int = 0
+    # The code used
+    code: str = ""
+    # Timestamps
+    started_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+    completed_at: Optional[datetime] = None
+
+class MazeAttemptCreate(BaseModel):
+    problem_id: str
+    completed: bool = False
+    completion_time: float = 0
+    code_lines: int = 0
+    path_length: float = 0
+    goals_reached: int = 0
+    total_goals: int = 0
+    collisions: int = 0
+    code: str = ""
+
 # Skill Quiz Models - Quiz questions tied to skills/categories
 class SkillQuizQuestion(BaseModel):
     model_config = ConfigDict(extra="ignore")
