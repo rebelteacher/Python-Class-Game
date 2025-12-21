@@ -2156,7 +2156,7 @@ export default function AssignmentLibrary({ user }) {
                   <SelectValue placeholder="Keep current type" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="">Keep current type</SelectItem>
+                  <SelectItem value="keep">Keep current type</SelectItem>
                   <SelectItem value="code">Code (Python Text)</SelectItem>
                   <SelectItem value="turtle">Turtle Graphics</SelectItem>
                   <SelectItem value="microbit">Micro:bit</SelectItem>
