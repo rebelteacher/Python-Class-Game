@@ -57,6 +57,9 @@ export default function AssignmentPage({ user }) {
   
   // Turtle graphics state
   const [turtleImage, setTurtleImage] = useState("");
+  const [useLiveTurtle, setUseLiveTurtle] = useState(true); // Use AnimatedTurtle instead of static image
+  const [mazeStartTime, setMazeStartTime] = useState(null); // Track time for maze challenges
+  const [showLeaderboard, setShowLeaderboard] = useState(false);
   
   // Proctor code for unlocking done problems (kept for teacher override)
   const [showProctorDialog, setShowProctorDialog] = useState(false);
