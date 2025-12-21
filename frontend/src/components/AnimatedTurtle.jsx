@@ -458,6 +458,206 @@ export default function AnimatedTurtle({
     
     ctx.restore();
   }, [toCanvasCoords, turtleColor]);
+
+  // Draw grid background
+  const drawGrid = useCallback((ctx) => {
+    const gridSize = 20;
+    ctx.strokeStyle = '#e0e0e0';
+    ctx.lineWidth = 0.5;
+    
+    // Vertical lines
+    for (let x = 0; x <= width; x += gridSize) {
+      ctx.beginPath();
+      ctx.moveTo(x, 0);
+      ctx.lineTo(x, height);
+      ctx.stroke();
+    }
+    
+    // Horizontal lines
+    for (let y = 0; y <= height; y += gridSize) {
+      ctx.beginPath();
+      ctx.moveTo(0, y);
+      ctx.lineTo(width, y);
+      ctx.stroke();
+    }
+    
+    // Draw axes (thicker)
+    ctx.strokeStyle = '#999';
+    ctx.lineWidth = 1;
+    // X axis
+    ctx.beginPath();
+    ctx.moveTo(0, height / 2);
+    ctx.lineTo(width, height / 2);
+    ctx.stroke();
+    // Y axis
+    ctx.beginPath();
+    ctx.moveTo(width / 2, 0);
+    ctx.lineTo(width / 2, height);
+    ctx.stroke();
+  }, [width, height]);
+
+  // Draw maze walls
+  const drawMaze = useCallback((ctx) => {
+    if (!mazeData || !mazeData.walls) return;
+    
+    ctx.strokeStyle = mazeData.wallColor || '#333';
+    ctx.lineWidth = mazeData.wallWidth || 4;
+    ctx.lineCap = 'round';
+    
+    for (const wall of mazeData.walls) {
+      const [x1, y1, x2, y2] = wall;
+      const start = toCanvasCoords(x1, y1);
+      const end = toCanvasCoords(x2, y2);
+      ctx.beginPath();
+      ctx.moveTo(start.x, start.y);
+      ctx.lineTo(end.x, end.y);
+      ctx.stroke();
+    }
+  }, [mazeData, toCanvasCoords]);
+
+  // Draw raceway/track
+  const drawRaceway = useCallback((ctx) => {
+    if (!mazeData || !mazeData.track) return;
+    
+    // Draw track outline
+    ctx.strokeStyle = mazeData.trackColor || '#666';
+    ctx.lineWidth = mazeData.trackWidth || 40;
+    ctx.lineCap = 'round';
+    ctx.lineJoin = 'round';
+    
+    const track = mazeData.track;
+    if (track.length < 2) return;
+    
+    ctx.beginPath();
+    const first = toCanvasCoords(track[0].x, track[0].y);
+    ctx.moveTo(first.x, first.y);
+    for (let i = 1; i < track.length; i++) {
+      const pt = toCanvasCoords(track[i].x, track[i].y);
+      ctx.lineTo(pt.x, pt.y);
+    }
+    if (mazeData.closedTrack) {
+      ctx.closePath();
+    }
+    ctx.stroke();
+    
+    // Draw center line (dashed)
+    ctx.strokeStyle = '#fff';
+    ctx.lineWidth = 2;
+    ctx.setLineDash([10, 10]);
+    ctx.beginPath();
+    ctx.moveTo(first.x, first.y);
+    for (let i = 1; i < track.length; i++) {
+      const pt = toCanvasCoords(track[i].x, track[i].y);
+      ctx.lineTo(pt.x, pt.y);
+    }
+    if (mazeData.closedTrack) {
+      ctx.closePath();
+    }
+    ctx.stroke();
+    ctx.setLineDash([]);
+  }, [mazeData, toCanvasCoords]);
+
+  // Draw goals/checkpoints
+  const drawGoals = useCallback((ctx) => {
+    for (let i = 0; i < goals.length; i++) {
+      const goal = goals[i];
+      const pos = toCanvasCoords(goal.x, goal.y);
+      const radius = goal.radius || 15;
+      const isReached = goalsReached.has(i);
+      
+      // Draw goal circle
+      ctx.beginPath();
+      ctx.arc(pos.x, pos.y, radius, 0, Math.PI * 2);
+      
+      if (isReached) {
+        ctx.fillStyle = '#4ade80';  // Green for reached
+        ctx.fill();
+        ctx.strokeStyle = '#22c55e';
+      } else {
+        ctx.fillStyle = goal.color || '#fbbf24';  // Yellow/gold default
+        ctx.fill();
+        ctx.strokeStyle = '#f59e0b';
+      }
+      ctx.lineWidth = 2;
+      ctx.stroke();
+      
+      // Draw label or number
+      ctx.fillStyle = '#000';
+      ctx.font = 'bold 12px Arial';
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+      ctx.fillText(goal.label || `${i + 1}`, pos.x, pos.y);
+    }
+    
+    // Draw checkpoints (smaller, optional)
+    for (let i = 0; i < checkpoints.length; i++) {
+      const cp = checkpoints[i];
+      const pos = toCanvasCoords(cp.x, cp.y);
+      const radius = cp.radius || 8;
+      
+      ctx.beginPath();
+      ctx.arc(pos.x, pos.y, radius, 0, Math.PI * 2);
+      ctx.fillStyle = cp.required ? '#60a5fa' : '#94a3b8';
+      ctx.fill();
+      ctx.strokeStyle = '#3b82f6';
+      ctx.lineWidth = 1;
+      ctx.stroke();
+    }
+  }, [goals, checkpoints, goalsReached, toCanvasCoords]);
+
+  // Check collision with maze walls
+  const checkCollision = useCallback((x, y) => {
+    if (!collisionEnabled || !mazeData || !mazeData.walls) return false;
+    
+    const collisionRadius = 5;  // How close to wall counts as collision
+    
+    for (const wall of mazeData.walls) {
+      const [x1, y1, x2, y2] = wall;
+      
+      // Calculate distance from point to line segment
+      const dx = x2 - x1;
+      const dy = y2 - y1;
+      const lenSq = dx * dx + dy * dy;
+      
+      let t = Math.max(0, Math.min(1, ((x - x1) * dx + (y - y1) * dy) / lenSq));
+      const closestX = x1 + t * dx;
+      const closestY = y1 + t * dy;
+      
+      const distSq = (x - closestX) ** 2 + (y - closestY) ** 2;
+      if (distSq < collisionRadius ** 2) {
+        return true;
+      }
+    }
+    return false;
+  }, [collisionEnabled, mazeData]);
+
+  // Check if turtle reached a goal
+  const checkGoals = useCallback((x, y) => {
+    for (let i = 0; i < goals.length; i++) {
+      if (goalsReached.has(i)) continue;
+      
+      const goal = goals[i];
+      const dist = Math.sqrt((x - goal.x) ** 2 + (y - goal.y) ** 2);
+      const radius = goal.radius || 15;
+      
+      if (dist < radius) {
+        setGoalsReached(prev => new Set([...prev, i]));
+        if (onGoalReached) {
+          onGoalReached(i, goal);
+        }
+        
+        // Check if all goals reached
+        if (goalsReached.size + 1 === goals.length && onComplete) {
+          onComplete({
+            goalsReached: goals.length,
+            totalGoals: goals.length,
+            pathLength,
+            collisions: collisionCount
+          });
+        }
+      }
+    }
+  }, [goals, goalsReached, onGoalReached, onComplete, pathLength, collisionCount]);
   
   // Draw the canvas
   const drawCanvas = useCallback(() => {
@@ -465,8 +665,24 @@ export default function AnimatedTurtle({
     if (!canvas) return;
     
     const ctx = canvas.getContext('2d');
-    ctx.fillStyle = 'white';
+    
+    // Draw background color
+    ctx.fillStyle = backgroundColor;
     ctx.fillRect(0, 0, width, height);
+    
+    // Draw background based on type
+    if (backgroundType === 'grid') {
+      drawGrid(ctx);
+    } else if (backgroundType === 'maze') {
+      drawMaze(ctx);
+    } else if (backgroundType === 'raceway') {
+      drawRaceway(ctx);
+    }
+    
+    // Draw goals and checkpoints
+    if (goals.length > 0 || checkpoints.length > 0) {
+      drawGoals(ctx);
+    }
     
     // Draw all paths
     for (const path of pathsRef.current) {
@@ -499,13 +715,16 @@ export default function AnimatedTurtle({
     if (turtle.visible) {
       drawTurtle(ctx, turtle.x, turtle.y, turtle.heading, turtle.turtleColor);
     }
-  }, [width, height, toCanvasCoords, drawTurtle]);
+  }, [width, height, toCanvasCoords, drawTurtle, backgroundColor, backgroundType, drawGrid, drawMaze, drawRaceway, drawGoals, goals, checkpoints]);
   
   // Reset turtle
   const resetTurtle = useCallback(() => {
     playingRef.current = false;
     setIsPlaying(false);
     setCurrentStep(-1);
+    setGoalsReached(new Set());
+    setCollisionCount(0);
+    setPathLength(0);
     
     turtleRef.current = getInitialTurtleState();
     pathsRef.current = [];
