@@ -70,9 +70,11 @@ class TurtleSim:
         self.x = new_x
         self.y = new_y
         self.positions_visited.append((self.x, self.y))
-        # Track in turtle coordinates (0,0 at center)
+        # Track in turtle coordinates (0,0 at center, Y-up)
+        # Canvas: (0,0) top-left, Y increases down
+        # Turtle: (0,0) center, Y increases up
         turtle_x = self.x - self.width / 2
-        turtle_y = self.y - self.height / 2
+        turtle_y = self.height / 2 - self.y  # Flip Y axis
         self.path_history.append({"x": round(turtle_x, 2), "y": round(turtle_y, 2)})
         self.total_distance += abs(distance)
     
