@@ -105,6 +105,8 @@ class TurtleSim:
         self.x = x + self.width / 2
         self.y = y + self.height / 2
         self.positions_visited.append((self.x, self.y))
+        # Track in turtle coordinates for maze goal checking
+        self.path_history.append({"x": round(x, 2), "y": round(y, 2)})
     
     def setx(self, x: float):
         """Set turtle's X coordinate"""
