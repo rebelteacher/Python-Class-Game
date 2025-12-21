@@ -677,6 +677,7 @@ export default function AnimatedTurtle({
     ctx.fillRect(0, 0, width, height);
     
     // Draw background based on type
+    console.log("drawCanvas - backgroundType:", backgroundType, "mazeData:", mazeData);
     if (backgroundType === 'grid') {
       drawGrid(ctx);
     } else if (backgroundType === 'maze') {
