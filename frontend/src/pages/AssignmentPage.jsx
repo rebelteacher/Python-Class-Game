@@ -1231,23 +1231,39 @@ export default function AssignmentPage({ user }) {
                     </CardTitle>
                   </CardHeader>
                   <CardContent className="p-0">
-                    <Editor
-                      height="600px"
-                      defaultLanguage="python"
-                      value={code}
-                      onChange={(value) => !problemsFinal[getCurrentProblemId()] && setCode(value || "")}
-                      theme={darkMode ? "vs-dark" : "vs-light"}
-                      options={{
-                        minimap: { enabled: false },
-                        fontSize: 14,
-                        lineNumbers: "on",
-                        scrollBeyondLastLine: false,
-                        automaticLayout: true,
-                        wordWrap: "on",
-                        wrappingIndent: "indent",
-                        readOnly: problemsFinal[getCurrentProblemId()],
-                      }}
-                    />
+                    {assignment.problems?.[currentProblemIndex]?.assignment_type === "block" ? (
+                      /* Block-Based Editor */
+                      <div className="h-[600px]">
+                        <BlockEditor
+                          ref={blockEditorRef}
+                          initialXml={blockXml}
+                          onBlocksChange={(xml) => {
+                            setBlockXml(xml);
+                            setCode(xml); // Store XML as code for submission
+                          }}
+                          height={600}
+                        />
+                      </div>
+                    ) : (
+                      /* Regular Code Editor */
+                      <Editor
+                        height="600px"
+                        defaultLanguage="python"
+                        value={code}
+                        onChange={(value) => !problemsFinal[getCurrentProblemId()] && setCode(value || "")}
+                        theme={darkMode ? "vs-dark" : "vs-light"}
+                        options={{
+                          minimap: { enabled: false },
+                          fontSize: 14,
+                          lineNumbers: "on",
+                          scrollBeyondLastLine: false,
+                          automaticLayout: true,
+                          wordWrap: "on",
+                          wrappingIndent: "indent",
+                          readOnly: problemsFinal[getCurrentProblemId()],
+                        }}
+                      />
+                    )}
                   </CardContent>
                 </Card>
                 </div>
