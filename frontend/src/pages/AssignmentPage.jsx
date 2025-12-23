@@ -1329,54 +1329,47 @@ export default function AssignmentPage({ user }) {
                   </CardHeader>
                   <CardContent className="flex-1 overflow-auto min-h-0 p-4">
                     {assignment.problems?.[currentProblemIndex]?.assignment_type === "block" ? (
-                      /* Block-Based Sprite Canvas */
+                      /* Block-Based - Scratch Preview */
                       <div className="h-full flex flex-col gap-3">
-                        <div className="flex justify-center">
-                          <SpriteCanvas
-                            ref={spriteCanvasRef}
-                            width={400}
-                            height={300}
-                            backgroundColor="#1a1a2e"
-                          />
-                        </div>
+                        {/* Scratch Project Preview */}
+                        {code && code.includes('scratch.mit.edu/projects/') ? (
+                          <div className="flex-1 flex flex-col">
+                            <div className="text-sm font-medium text-gray-700 mb-2">📺 Your Scratch Project:</div>
+                            <iframe
+                              src={code.replace('/projects/', '/projects/embed/').replace(/\/$/, '') + '/?autostart=false'}
+                              className="w-full flex-1 rounded-lg border"
+                              allowFullScreen
+                              allow="autoplay"
+                            />
+                            <a 
+                              href={code} 
+                              target="_blank" 
+                              rel="noopener noreferrer"
+                              className="text-orange-600 hover:underline text-sm mt-2 text-center"
+                            >
+                              Open in Scratch →
+                            </a>
+                          </div>
+                        ) : (
+                          <div className="flex-1 flex flex-col items-center justify-center bg-gray-50 rounded-lg border-2 border-dashed border-gray-300 p-6">
+                            <div className="text-6xl mb-4">🐱</div>
+                            <h3 className="text-lg font-semibold text-gray-700 mb-2">No Project Yet</h3>
+                            <p className="text-gray-500 text-center text-sm max-w-sm">
+                              Create your project in Scratch, save it, click "Share", and paste the URL in the input box on the left.
+                            </p>
+                          </div>
+                        )}
                         
-                        <div className="flex gap-2 justify-center">
-                          <Button
-                            onClick={() => {
-                              if (blockEditorRef.current && spriteCanvasRef.current) {
-                                const commands = blockEditorRef.current.getCommands();
-                                if (commands.length === 0) {
-                                  toast.error("Add some blocks first!");
-                                  return;
-                                }
-                                setIsBlockRunning(true);
-                                spriteCanvasRef.current.runCommands(commands);
-                                // Mark as run for submit button
-                                setHasRunPerProblem(prev => ({
-                                  ...prev,
-                                  [getCurrentProblemId()]: true
-                                }));
-                                setTimeout(() => setIsBlockRunning(false), commands.length * 100 + 500);
-                              }
-                            }}
-                            disabled={isBlockRunning}
-                            className="bg-green-600 hover:bg-green-700"
-                          >
-                            <Play className="w-4 h-4 mr-2" />
-                            {isBlockRunning ? "Running..." : "Run Blocks"}
-                          </Button>
-                          <Button
-                            variant="outline"
-                            onClick={() => spriteCanvasRef.current?.reset()}
-                          >
-                            <RotateCcw className="w-4 h-4 mr-2" />
-                            Reset Stage
-                          </Button>
-                        </div>
-                        
-                        <div className="p-3 bg-purple-50 border border-purple-200 rounded-lg text-xs text-purple-800">
-                          <strong>💡 Tip:</strong> Drag blocks from the left toolbox and connect them. 
-                          Click &quot;Run Blocks&quot; to see your sprite move!
+                        {/* Instructions */}
+                        <div className="p-3 bg-orange-50 border border-orange-200 rounded-lg text-xs text-orange-800">
+                          <strong>💡 How to Submit:</strong>
+                          <ol className="mt-1 ml-4 list-decimal">
+                            <li>Create your project in Scratch</li>
+                            <li>Click "Share" in Scratch (top right)</li>
+                            <li>Copy the project URL from your browser</li>
+                            <li>Paste the URL in the input box</li>
+                            <li>Click "Submit" when done!</li>
+                          </ol>
                         </div>
                       </div>
                     ) : assignment.problems?.[currentProblemIndex]?.assignment_type === "microbit" ? (
