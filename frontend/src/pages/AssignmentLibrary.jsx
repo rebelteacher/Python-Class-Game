@@ -818,9 +818,18 @@ export default function AssignmentLibrary({ user }) {
                     <div className="flex items-center justify-between mb-3">
                       <div>
                         <Label className="text-lg font-semibold">Assignment Type</Label>
-                        <p className="text-sm text-gray-600 mt-1">Choose: Code, Turtle Graphics, or Micro:bit</p>
+                        <p className="text-sm text-gray-600 mt-1">Choose the type of problem</p>
                       </div>
                       <div className="flex items-center gap-2 bg-white px-3 py-2 rounded-lg border">
+                        <Button
+                          type="button"
+                          variant="outline"
+                          size="sm"
+                          className={newProblem.assignment_type === "block" ? "bg-purple-500 text-white" : ""}
+                          onClick={() => setNewProblem({ ...newProblem, assignment_type: "block" })}
+                        >
+                          🧩 Block
+                        </Button>
                         <Button
                           type="button"
                           variant="outline"
