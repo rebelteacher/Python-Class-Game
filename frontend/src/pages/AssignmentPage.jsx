@@ -1410,14 +1410,70 @@ export default function AssignmentPage({ user }) {
                   </CardHeader>
                   <CardContent className="flex-1 overflow-auto min-h-0 p-4">
                     {assignment.problems?.[currentProblemIndex]?.assignment_type === "block" ? (
-                      /* Block-Based - Scratch Preview */
-                      <div className="h-full flex flex-col gap-3">
-                        {/* Scratch Project Preview */}
-                        {code && code.includes('scratch.mit.edu/projects/') ? (
-                          <div className="flex-1 flex flex-col">
-                            <div className="text-sm font-medium text-gray-700 mb-2">📺 Your Scratch Project:</div>
-                            <iframe
-                              src={code.replace('/projects/', '/projects/embed/').replace(/\/$/, '') + '/?autostart=false'}
+                      /* Block-Based - Problem Info & Grading Feedback */
+                      <div className="h-full flex flex-col gap-4">
+                        {/* Problem Description */}
+                        <div className="p-4 bg-gradient-to-r from-orange-50 to-yellow-50 rounded-lg border border-orange-200">
+                          <h3 className="font-bold text-orange-800 mb-2">📋 Challenge:</h3>
+                          <p className="text-gray-700">
+                            {assignment.problems?.[currentProblemIndex]?.description || "Complete this Scratch challenge!"}
+                          </p>
+                        </div>
+                        
+                        {/* Grading Requirements */}
+                        <div className="p-4 bg-blue-50 rounded-lg border border-blue-200">
+                          <h3 className="font-bold text-blue-800 mb-2">✅ What We're Looking For:</h3>
+                          <ul className="text-sm text-gray-700 space-y-1">
+                            {assignment.problems?.[currentProblemIndex]?.block_requirements ? (
+                              assignment.problems[currentProblemIndex].block_requirements.map((req, i) => (
+                                <li key={i} className="flex items-center gap-2">
+                                  <span className="text-blue-500">•</span> {req}
+                                </li>
+                              ))
+                            ) : (
+                              <>
+                                <li className="flex items-center gap-2"><span className="text-blue-500">•</span> Correct use of blocks</li>
+                                <li className="flex items-center gap-2"><span className="text-blue-500">•</span> Code organization</li>
+                                <li className="flex items-center gap-2"><span className="text-blue-500">•</span> Problem completion</li>
+                              </>
+                            )}
+                          </ul>
+                        </div>
+                        
+                        {/* Latest Submission Feedback */}
+                        {submissions.length > 0 && submissions[submissions.length - 1]?.problem_id === getCurrentProblemId() && (
+                          <div className={`p-4 rounded-lg border ${
+                            submissions[submissions.length - 1].score >= 70 
+                              ? 'bg-green-50 border-green-200' 
+                              : 'bg-yellow-50 border-yellow-200'
+                          }`}>
+                            <h3 className={`font-bold mb-2 ${
+                              submissions[submissions.length - 1].score >= 70 ? 'text-green-800' : 'text-yellow-800'
+                            }`}>
+                              📊 Latest Feedback:
+                            </h3>
+                            <div className="text-2xl font-bold mb-2">
+                              {submissions[submissions.length - 1].score?.toFixed(0)}%
+                            </div>
+                            <p className="text-sm text-gray-700 whitespace-pre-wrap">
+                              {submissions[submissions.length - 1].feedback}
+                            </p>
+                          </div>
+                        )}
+                        
+                        {/* Instructions if no submission yet */}
+                        {(!submissions.length || submissions[submissions.length - 1]?.problem_id !== getCurrentProblemId()) && (
+                          <div className="p-4 bg-gray-50 rounded-lg border border-gray-200">
+                            <h3 className="font-bold text-gray-700 mb-2">📸 How to Submit:</h3>
+                            <ol className="text-sm text-gray-600 space-y-1 list-decimal list-inside">
+                              <li>Create your project in Scratch</li>
+                              <li>Take a screenshot of your code blocks</li>
+                              <li>Upload the screenshot on the left</li>
+                              <li>Click Submit for AI grading</li>
+                            </ol>
+                          </div>
+                        )}
+                      </div>
                               className="w-full flex-1 rounded-lg border"
                               allowFullScreen
                               allow="autoplay"
