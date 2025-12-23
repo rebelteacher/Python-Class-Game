@@ -1355,7 +1355,7 @@ export default function AssignmentPage({ user }) {
                             <div className="text-6xl mb-4">🐱</div>
                             <h3 className="text-lg font-semibold text-gray-700 mb-2">No Project Yet</h3>
                             <p className="text-gray-500 text-center text-sm max-w-sm">
-                              Create your project in Scratch, save it, click "Share", and paste the URL in the input box on the left.
+                              Create your project in Scratch, save it, click &quot;Share&quot;, and paste the URL in the input box on the left.
                             </p>
                           </div>
                         )}
@@ -1365,10 +1365,10 @@ export default function AssignmentPage({ user }) {
                           <strong>💡 How to Submit:</strong>
                           <ol className="mt-1 ml-4 list-decimal">
                             <li>Create your project in Scratch</li>
-                            <li>Click "Share" in Scratch (top right)</li>
+                            <li>Click &quot;Share&quot; in Scratch (top right)</li>
                             <li>Copy the project URL from your browser</li>
                             <li>Paste the URL in the input box</li>
-                            <li>Click "Submit" when done!</li>
+                            <li>Click &quot;Submit&quot; when done!</li>
                           </ol>
                         </div>
                       </div>
