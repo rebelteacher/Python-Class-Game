@@ -1281,18 +1281,69 @@ export default function AssignmentPage({ user }) {
                         ? "🐢 Your Turtle Output" 
                         : assignment.problems?.[currentProblemIndex]?.assignment_type === "microbit"
                           ? "⚡ Virtual Micro:bit"
-                          : "Output"}
+                          : assignment.problems?.[currentProblemIndex]?.assignment_type === "block"
+                            ? "🎮 Sprite Stage"
+                            : "Output"}
                     </CardTitle>
                     <CardDescription className="text-xs">
                       {assignment.problems?.[currentProblemIndex]?.assignment_type === "turtle" 
                         ? "Your turtle graphics will appear here" 
                         : assignment.problems?.[currentProblemIndex]?.assignment_type === "microbit"
                           ? "Test your code on the virtual Micro:bit before using real hardware"
-                          : "Code with input() will show interactive dialog automatically"}
+                          : assignment.problems?.[currentProblemIndex]?.assignment_type === "block"
+                            ? "Watch your sprite follow your block commands"
+                            : "Code with input() will show interactive dialog automatically"}
                     </CardDescription>
                   </CardHeader>
                   <CardContent className="flex-1 overflow-auto min-h-0 p-4">
-                    {assignment.problems?.[currentProblemIndex]?.assignment_type === "microbit" ? (
+                    {assignment.problems?.[currentProblemIndex]?.assignment_type === "block" ? (
+                      /* Block-Based Sprite Canvas */
+                      <div className="h-full flex flex-col gap-3">
+                        <div className="flex justify-center">
+                          <SpriteCanvas
+                            ref={spriteCanvasRef}
+                            width={400}
+                            height={300}
+                            backgroundColor="#1a1a2e"
+                          />
+                        </div>
+                        
+                        <div className="flex gap-2 justify-center">
+                          <Button
+                            onClick={() => {
+                              if (blockEditorRef.current && spriteCanvasRef.current) {
+                                const commands = blockEditorRef.current.getCommands();
+                                if (commands.length === 0) {
+                                  toast.error("Add some blocks first!");
+                                  return;
+                                }
+                                setIsBlockRunning(true);
+                                spriteCanvasRef.current.runCommands(commands);
+                                setHasRun(true);
+                                setTimeout(() => setIsBlockRunning(false), commands.length * 100 + 500);
+                              }
+                            }}
+                            disabled={isBlockRunning}
+                            className="bg-green-600 hover:bg-green-700"
+                          >
+                            <Play className="w-4 h-4 mr-2" />
+                            {isBlockRunning ? "Running..." : "Run Blocks"}
+                          </Button>
+                          <Button
+                            variant="outline"
+                            onClick={() => spriteCanvasRef.current?.reset()}
+                          >
+                            <RotateCcw className="w-4 h-4 mr-2" />
+                            Reset Stage
+                          </Button>
+                        </div>
+                        
+                        <div className="p-3 bg-purple-50 border border-purple-200 rounded-lg text-xs text-purple-800">
+                          <strong>💡 Tip:</strong> Drag blocks from the left toolbox and connect them. 
+                          Click "Run Blocks" to see your sprite move!
+                        </div>
+                      </div>
+                    ) : assignment.problems?.[currentProblemIndex]?.assignment_type === "microbit" ? (
                       <div className="h-full flex flex-col gap-3">
                         {/* Micro:bit Simulator */}
                         <MicrobitSimulator 
