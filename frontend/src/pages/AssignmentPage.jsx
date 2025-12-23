@@ -1797,6 +1797,7 @@ export default function AssignmentPage({ user }) {
                   </Card>
                 </Panel>
               </PanelGroup>
+              )
             )}
 
             {isTeacher && submissions.length > 0 && (
