@@ -8751,6 +8751,283 @@ async def get_turtle_curriculum(request: Request):
     return TURTLE_CURRICULUM
 
 
+# ----- Sprite Generation Routes -----
+
+class SpriteGenerateRequest(BaseModel):
+    prompt: str
+    style: str = "pixel-art"  # pixel-art, cartoon, simple
+
+@api_router.post("/sprites/generate")
+async def generate_sprite(req: SpriteGenerateRequest, request: Request):
+    """Generate a custom sprite using AI"""
+    import base64
+    from emergentintegrations.llm.openai.image_generation import OpenAIImageGeneration
+    
+    user = await get_current_user(request)
+    
+    # Build the prompt for kid-friendly sprites
+    style_prompts = {
+        "pixel-art": "pixel art style, 64x64 pixels, retro game aesthetic",
+        "cartoon": "cartoon style, friendly and colorful, suitable for children",
+        "simple": "simple flat design, clean lines, minimal details"
+    }
+    
+    style_desc = style_prompts.get(req.style, style_prompts["cartoon"])
+    full_prompt = f"{req.prompt}, {style_desc}, transparent background, game sprite, centered, no text"
+    
+    try:
+        api_key = os.environ.get("EMERGENT_LLM_KEY")
+        image_gen = OpenAIImageGeneration(api_key=api_key)
+        
+        images = await image_gen.generate_images(
+            prompt=full_prompt,
+            model="gpt-image-1",
+            number_of_images=1
+        )
+        
+        if images and len(images) > 0:
+            image_base64 = base64.b64encode(images[0]).decode('utf-8')
+            
+            # Save to database
+            sprite_id = str(uuid.uuid4())
+            sprite_data = {
+                "id": sprite_id,
+                "name": req.prompt[:50],
+                "prompt": req.prompt,
+                "style": req.style,
+                "image_data": f"data:image/png;base64,{image_base64}",
+                "created_by": user["id"],
+                "created_at": datetime.now(timezone.utc).isoformat(),
+                "is_public": False
+            }
+            await db.sprites.insert_one(sprite_data)
+            
+            return {
+                "success": True,
+                "sprite_id": sprite_id,
+                "image_data": f"data:image/png;base64,{image_base64}"
+            }
+        else:
+            raise HTTPException(status_code=500, detail="No image was generated")
+    except Exception as e:
+        logging.error(f"Sprite generation error: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"Failed to generate sprite: {str(e)}")
+
+@api_router.get("/sprites")
+async def get_sprites(request: Request, include_public: bool = True):
+    """Get all sprites (user's own + public library)"""
+    user = await get_current_user(request)
+    
+    query = {"$or": [{"created_by": user["id"]}]}
+    if include_public:
+        query["$or"].append({"is_public": True})
+    
+    sprites = await db.sprites.find(query, {"_id": 0}).to_list(100)
+    return sprites
+
+@api_router.get("/sprites/library")
+async def get_sprite_library(request: Request):
+    """Get pre-made sprite library for block-based coding"""
+    await get_current_user(request)
+    
+    # Return built-in sprite library
+    return SPRITE_LIBRARY
+
+# Pre-made sprite library for common use cases
+SPRITE_LIBRARY = {
+    "space": [
+        {"id": "rocket-1", "name": "Rocket", "category": "space", "emoji": "🚀"},
+        {"id": "alien-1", "name": "Alien", "category": "space", "emoji": "👽"},
+        {"id": "planet-1", "name": "Planet", "category": "space", "emoji": "🪐"},
+        {"id": "star-1", "name": "Star", "category": "space", "emoji": "⭐"},
+        {"id": "asteroid-1", "name": "Asteroid", "category": "space", "emoji": "☄️"},
+        {"id": "ufo-1", "name": "UFO", "category": "space", "emoji": "🛸"},
+    ],
+    "animals": [
+        {"id": "cat-1", "name": "Cat", "category": "animals", "emoji": "🐱"},
+        {"id": "dog-1", "name": "Dog", "category": "animals", "emoji": "🐕"},
+        {"id": "bird-1", "name": "Bird", "category": "animals", "emoji": "🐦"},
+        {"id": "fish-1", "name": "Fish", "category": "animals", "emoji": "🐠"},
+    ],
+    "characters": [
+        {"id": "robot-1", "name": "Robot", "category": "characters", "emoji": "🤖"},
+        {"id": "wizard-1", "name": "Wizard", "category": "characters", "emoji": "🧙"},
+        {"id": "ninja-1", "name": "Ninja", "category": "characters", "emoji": "🥷"},
+        {"id": "astronaut-1", "name": "Astronaut", "category": "characters", "emoji": "👨‍🚀"},
+    ],
+    "objects": [
+        {"id": "ball-1", "name": "Ball", "category": "objects", "emoji": "⚽"},
+        {"id": "coin-1", "name": "Coin", "category": "objects", "emoji": "🪙"},
+        {"id": "gem-1", "name": "Gem", "category": "objects", "emoji": "💎"},
+        {"id": "heart-1", "name": "Heart", "category": "objects", "emoji": "❤️"},
+    ],
+    "shapes": [
+        {"id": "circle-red", "name": "Red Circle", "category": "shapes", "color": "#EF4444"},
+        {"id": "circle-blue", "name": "Blue Circle", "category": "shapes", "color": "#3B82F6"},
+        {"id": "square-green", "name": "Green Square", "category": "shapes", "color": "#22C55E"},
+        {"id": "triangle-yellow", "name": "Yellow Triangle", "category": "shapes", "color": "#EAB308"},
+    ]
+}
+
+# Block-Based Curriculum Structure
+BLOCK_CURRICULUM = {
+    "units": [
+        {
+            "id": "unit-1",
+            "title": "Unit 1: Foundations of Programming",
+            "description": "Understanding how programming solves problems",
+            "chapters": [
+                {
+                    "id": "ch-1-1",
+                    "title": "Chapter 1: What is Programming?",
+                    "lessons": [
+                        {"id": "l-1-1-1", "title": "Lesson 1: Computers and Code", "competency": "1a"},
+                        {"id": "l-1-1-2", "title": "Lesson 2: Breaking Down Problems", "competency": "1b"},
+                        {"id": "l-1-1-3", "title": "Lesson 3: Introduction to Pseudocode", "competency": "1c"}
+                    ]
+                },
+                {
+                    "id": "ch-1-2",
+                    "title": "Chapter 2: Block-Based Environments",
+                    "lessons": [
+                        {"id": "l-1-2-1", "title": "Lesson 1: Navigating the Interface", "competency": "2a"},
+                        {"id": "l-1-2-2", "title": "Lesson 2: Your First Blocks", "competency": "2a"},
+                        {"id": "l-1-2-3", "title": "Lesson 3: Running Programs", "competency": "2d"}
+                    ]
+                }
+            ]
+        },
+        {
+            "id": "unit-2",
+            "title": "Unit 2: Sprites and Motion",
+            "description": "Creating and controlling visual objects",
+            "chapters": [
+                {
+                    "id": "ch-2-1",
+                    "title": "Chapter 1: Working with Sprites",
+                    "lessons": [
+                        {"id": "l-2-1-1", "title": "Lesson 1: Creating Sprites", "competency": "2b"},
+                        {"id": "l-2-1-2", "title": "Lesson 2: Moving Sprites", "competency": "2c"},
+                        {"id": "l-2-1-3", "title": "Lesson 3: Turning and Positioning", "competency": "2c"}
+                    ]
+                },
+                {
+                    "id": "ch-2-2",
+                    "title": "Chapter 2: Sprite Appearance",
+                    "lessons": [
+                        {"id": "l-2-2-1", "title": "Lesson 1: Changing Looks", "competency": "2b"},
+                        {"id": "l-2-2-2", "title": "Lesson 2: Size and Visibility", "competency": "2c"}
+                    ]
+                }
+            ]
+        },
+        {
+            "id": "unit-3",
+            "title": "Unit 3: Loops and Patterns",
+            "description": "Creating repetition and animations",
+            "chapters": [
+                {
+                    "id": "ch-3-1",
+                    "title": "Chapter 1: Repeat Loops",
+                    "lessons": [
+                        {"id": "l-3-1-1", "title": "Lesson 1: Basic Loops", "competency": "3d"},
+                        {"id": "l-3-1-2", "title": "Lesson 2: Drawing Patterns", "competency": "3d"},
+                        {"id": "l-3-1-3", "title": "Lesson 3: Nested Loops", "competency": "3d"}
+                    ]
+                },
+                {
+                    "id": "ch-3-2",
+                    "title": "Chapter 2: Animations (Draw Loop)",
+                    "lessons": [
+                        {"id": "l-3-2-1", "title": "Lesson 1: The Draw Loop", "competency": "3d"},
+                        {"id": "l-3-2-2", "title": "Lesson 2: Smooth Animations", "competency": "3a"}
+                    ]
+                }
+            ]
+        },
+        {
+            "id": "unit-4",
+            "title": "Unit 4: Variables and Data",
+            "description": "Storing and manipulating information",
+            "chapters": [
+                {
+                    "id": "ch-4-1",
+                    "title": "Chapter 1: Understanding Variables",
+                    "lessons": [
+                        {"id": "l-4-1-1", "title": "Lesson 1: What are Variables?", "competency": "3c"},
+                        {"id": "l-4-1-2", "title": "Lesson 2: Creating Variables", "competency": "3c"},
+                        {"id": "l-4-1-3", "title": "Lesson 3: Using Variables", "competency": "3c"}
+                    ]
+                },
+                {
+                    "id": "ch-4-2",
+                    "title": "Chapter 2: Counter Patterns",
+                    "lessons": [
+                        {"id": "l-4-2-1", "title": "Lesson 1: Counting Up and Down", "competency": "3e"},
+                        {"id": "l-4-2-2", "title": "Lesson 2: Velocity and Speed", "competency": "3e"}
+                    ]
+                }
+            ]
+        },
+        {
+            "id": "unit-5",
+            "title": "Unit 5: Logic and Decisions",
+            "description": "Making programs respond intelligently",
+            "chapters": [
+                {
+                    "id": "ch-5-1",
+                    "title": "Chapter 1: Booleans and Conditionals",
+                    "lessons": [
+                        {"id": "l-5-1-1", "title": "Lesson 1: True and False", "competency": "3f"},
+                        {"id": "l-5-1-2", "title": "Lesson 2: If Statements", "competency": "3f"},
+                        {"id": "l-5-1-3", "title": "Lesson 3: If-Else Logic", "competency": "3f"}
+                    ]
+                },
+                {
+                    "id": "ch-5-2",
+                    "title": "Chapter 2: User Interactions",
+                    "lessons": [
+                        {"id": "l-5-2-1", "title": "Lesson 1: Keyboard Events", "competency": "3b"},
+                        {"id": "l-5-2-2", "title": "Lesson 2: Mouse Events", "competency": "3b"}
+                    ]
+                }
+            ]
+        },
+        {
+            "id": "unit-6",
+            "title": "Unit 6: Projects and Debugging",
+            "description": "Building complete projects",
+            "chapters": [
+                {
+                    "id": "ch-6-1",
+                    "title": "Chapter 1: Space Game Project",
+                    "lessons": [
+                        {"id": "l-6-1-1", "title": "Lesson 1: Game Setup", "competency": "3a"},
+                        {"id": "l-6-1-2", "title": "Lesson 2: Player Controls", "competency": "3b"},
+                        {"id": "l-6-1-3", "title": "Lesson 3: Enemies and Collisions", "competency": "3a"},
+                        {"id": "l-6-1-4", "title": "Lesson 4: Scoring System", "competency": "3c"}
+                    ]
+                },
+                {
+                    "id": "ch-6-2",
+                    "title": "Chapter 2: Debugging Skills",
+                    "lessons": [
+                        {"id": "l-6-2-1", "title": "Lesson 1: Finding Bugs", "competency": "3g"},
+                        {"id": "l-6-2-2", "title": "Lesson 2: Testing Strategies", "competency": "3i"}
+                    ]
+                }
+            ]
+        }
+    ]
+}
+
+@api_router.get("/block/curriculum")
+async def get_block_curriculum(request: Request):
+    """Get the block-based programming curriculum structure"""
+    await get_current_user(request)
+    return BLOCK_CURRICULUM
+
+
 # Include the router in the main app
 app.include_router(api_router)
 
