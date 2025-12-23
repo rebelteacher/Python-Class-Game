@@ -1649,6 +1649,7 @@ export default function AssignmentLibrary({ user }) {
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="all">All Types</SelectItem>
+                <SelectItem value="block">🧩 Block-Based</SelectItem>
                 <SelectItem value="code">💻 Code</SelectItem>
                 <SelectItem value="turtle">🐢 Turtle</SelectItem>
                 <SelectItem value="microbit">⚡ Micro:bit</SelectItem>
