@@ -1,521 +1,337 @@
-import { useState, useEffect, useRef, useCallback } from "react";
+import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { 
   ArrowLeft, 
-  Play, 
-  RotateCcw,
+  ExternalLink,
+  Play,
+  BookOpen,
+  Lightbulb,
   Monitor,
-  Code,
-  Maximize2,
-  Trash2,
-  Copy,
-  Terminal
+  Users,
+  Target,
+  Copy
 } from "lucide-react";
-import { ResizablePanelGroup, ResizablePanel, ResizableHandle } from "@/components/ui/resizable";
 import { toast } from "sonner";
-import * as Blockly from 'blockly';
-import { pythonGenerator } from 'blockly/python';
 
-// Custom block definitions for teaching
-const defineCustomBlocks = () => {
-  // Print block
-  Blockly.Blocks['print_text'] = {
-    init: function() {
-      this.appendValueInput("TEXT")
-          .setCheck(null)
-          .appendField("print");
-      this.setPreviousStatement(true, null);
-      this.setNextStatement(true, null);
-      this.setColour(160);
-      this.setTooltip("Print text to the output");
-    }
-  };
-
-  pythonGenerator.forBlock['print_text'] = function(block, generator) {
-    const value = generator.valueToCode(block, 'TEXT', pythonGenerator.ORDER_NONE) || '""';
-    return `print(${value})\n`;
-  };
-
-  // Custom comparison block with Python operators
-  Blockly.Blocks['compare_python'] = {
-    init: function() {
-      this.appendValueInput("A")
-          .setCheck(["Number", "String"]);
-      this.appendDummyInput()
-          .appendField(new Blockly.FieldDropdown([
-            ["==", "EQ"],
-            ["!=", "NEQ"],
-            ["<", "LT"],
-            ["<=", "LTE"],
-            [">", "GT"],
-            [">=", "GTE"]
-          ]), "OP");
-      this.appendValueInput("B")
-          .setCheck(["Number", "String"]);
-      this.setInputsInline(true);
-      this.setOutput(true, "Boolean");
-      this.setColour(210);
-      this.setTooltip("Compare two values using Python operators");
-    }
-  };
-
-  pythonGenerator.forBlock['compare_python'] = function(block, generator) {
-    const operators = {
-      'EQ': '==',
-      'NEQ': '!=',
-      'LT': '<',
-      'LTE': '<=',
-      'GT': '>',
-      'GTE': '>='
-    };
-    const op = operators[block.getFieldValue('OP')];
-    const a = generator.valueToCode(block, 'A', pythonGenerator.ORDER_RELATIONAL) || '0';
-    const b = generator.valueToCode(block, 'B', pythonGenerator.ORDER_RELATIONAL) || '0';
-    return [`${a} ${op} ${b}`, pythonGenerator.ORDER_RELATIONAL];
-  };
-
-  // Custom AND/OR block with Python keywords
-  Blockly.Blocks['logic_python'] = {
-    init: function() {
-      this.appendValueInput("A")
-          .setCheck("Boolean");
-      this.appendDummyInput()
-          .appendField(new Blockly.FieldDropdown([
-            ["and", "AND"],
-            ["or", "OR"]
-          ]), "OP");
-      this.appendValueInput("B")
-          .setCheck("Boolean");
-      this.setInputsInline(true);
-      this.setOutput(true, "Boolean");
-      this.setColour(210);
-      this.setTooltip("Combine conditions with and/or");
-    }
-  };
-
-  pythonGenerator.forBlock['logic_python'] = function(block, generator) {
-    const op = block.getFieldValue('OP') === 'AND' ? 'and' : 'or';
-    const a = generator.valueToCode(block, 'A', pythonGenerator.ORDER_LOGICAL_AND) || 'False';
-    const b = generator.valueToCode(block, 'B', pythonGenerator.ORDER_LOGICAL_AND) || 'False';
-    return [`${a} ${op} ${b}`, pythonGenerator.ORDER_LOGICAL_AND];
-  };
-
-  // Custom NOT block
-  Blockly.Blocks['not_python'] = {
-    init: function() {
-      this.appendValueInput("VALUE")
-          .setCheck("Boolean")
-          .appendField("not");
-      this.setOutput(true, "Boolean");
-      this.setColour(210);
-      this.setTooltip("Negate a boolean value");
-    }
-  };
-
-  pythonGenerator.forBlock['not_python'] = function(block, generator) {
-    const value = generator.valueToCode(block, 'VALUE', pythonGenerator.ORDER_LOGICAL_NOT) || 'False';
-    return [`not ${value}`, pythonGenerator.ORDER_LOGICAL_NOT];
-  };
-
-  // True/False block
-  Blockly.Blocks['boolean_python'] = {
-    init: function() {
-      this.appendDummyInput()
-          .appendField(new Blockly.FieldDropdown([
-            ["True", "TRUE"],
-            ["False", "FALSE"]
-          ]), "VALUE");
-      this.setOutput(true, "Boolean");
-      this.setColour(210);
-      this.setTooltip("True or False value");
-    }
-  };
-
-  pythonGenerator.forBlock['boolean_python'] = function(block) {
-    return [block.getFieldValue('VALUE') === 'TRUE' ? 'True' : 'False', pythonGenerator.ORDER_ATOMIC];
-  };
-
-  // Input block
-  Blockly.Blocks['input_text'] = {
-    init: function() {
-      this.appendValueInput("PROMPT")
-          .setCheck("String")
-          .appendField("input");
-      this.setOutput(true, "String");
-      this.setColour(160);
-      this.setTooltip("Get input from user");
-    }
-  };
-
-  pythonGenerator.forBlock['input_text'] = function(block, generator) {
-    const prompt = generator.valueToCode(block, 'PROMPT', pythonGenerator.ORDER_NONE) || '""';
-    return [`input(${prompt})`, pythonGenerator.ORDER_FUNCTION_CALL];
-  };
-
-  // Wait/Sleep block
-  Blockly.Blocks['wait_seconds'] = {
-    init: function() {
-      this.appendValueInput("SECONDS")
-          .setCheck("Number")
-          .appendField("wait");
-      this.appendDummyInput()
-          .appendField("seconds");
-      this.setPreviousStatement(true, null);
-      this.setNextStatement(true, null);
-      this.setColour(120);
-      this.setTooltip("Wait for specified seconds");
-    }
-  };
-
-  pythonGenerator.forBlock['wait_seconds'] = function(block, generator) {
-    const seconds = generator.valueToCode(block, 'SECONDS', pythonGenerator.ORDER_NONE) || '1';
-    return `time.sleep(${seconds})\n`;
-  };
-};
-
-// Toolbox configuration
-const TOOLBOX = {
-  kind: "categoryToolbox",
-  contents: [
-    {
-      kind: "category",
-      name: "💬 Output",
-      colour: "#9966ff",
-      contents: [
-        {
-          kind: "block",
-          type: "print_text",
-          inputs: {
-            TEXT: {
-              shadow: {
-                type: "text",
-                fields: { TEXT: "Hello, World!" }
-              }
-            }
-          }
-        },
-        {
-          kind: "block",
-          type: "text"
-        },
-        {
-          kind: "block",
-          type: "text_join"
-        }
-      ]
-    },
-    {
-      kind: "category",
-      name: "🔢 Math",
-      colour: "#5ba55b",
-      contents: [
-        { kind: "block", type: "math_number" },
-        { kind: "block", type: "math_arithmetic" },
-        { kind: "block", type: "math_random_int" }
-      ]
-    },
-    {
-      kind: "category",
-      name: "📦 Variables",
-      colour: "#a55b80",
-      custom: "VARIABLE"
-    },
-    {
-      kind: "category",
-      name: "🔄 Loops",
-      colour: "#5ba580",
-      contents: [
-        {
-          kind: "block",
-          type: "controls_repeat_ext",
-          inputs: {
-            TIMES: {
-              shadow: { type: "math_number", fields: { NUM: 4 } }
-            }
-          }
-        },
-        { kind: "block", type: "controls_whileUntil" },
-        { kind: "block", type: "controls_for" },
-        { kind: "block", type: "controls_forEach" }
-      ]
-    },
-    {
-      kind: "category",
-      name: "❓ Logic",
-      colour: "#5b80a5",
-      contents: [
-        { kind: "block", type: "controls_if" },
-        { kind: "block", type: "controls_ifelse" },
-        { 
-          kind: "block", 
-          type: "compare_python",
-          inputs: {
-            A: { shadow: { type: "math_number", fields: { NUM: 10 } } },
-            B: { shadow: { type: "math_number", fields: { NUM: 5 } } }
-          }
-        },
-        { kind: "block", type: "logic_python" },
-        { kind: "block", type: "not_python" },
-        { kind: "block", type: "boolean_python" }
-      ]
-    },
-    {
-      kind: "category",
-      name: "📝 Text",
-      colour: "#5ba58c",
-      contents: [
-        { kind: "block", type: "text" },
-        { kind: "block", type: "text_join" },
-        { kind: "block", type: "text_length" },
-        { kind: "block", type: "text_isEmpty" },
-        { kind: "block", type: "text_charAt" }
-      ]
-    },
-    {
-      kind: "category",
-      name: "📋 Lists",
-      colour: "#745ba5",
-      contents: [
-        { kind: "block", type: "lists_create_empty" },
-        { kind: "block", type: "lists_create_with" },
-        { kind: "block", type: "lists_length" },
-        { kind: "block", type: "lists_getIndex" },
-        { kind: "block", type: "lists_setIndex" }
-      ]
-    },
-    {
-      kind: "category",
-      name: "⚙️ Functions",
-      colour: "#995ba5",
-      custom: "PROCEDURE"
-    }
-  ]
-};
-
-// Lesson presets for teaching
-const LESSON_PRESETS = {
-  hello: {
-    name: "Hello World",
-    description: "Your first program - print a message!",
-    blocks: `<xml><block type="print_text" x="50" y="50"><value name="TEXT"><shadow type="text"><field name="TEXT">Hello, World!</field></shadow></value></block></xml>`
+// Lesson content aligned with curriculum chapters
+const LESSONS = {
+  chapter1: {
+    title: "Chapter 1: Block Basics",
+    color: "from-purple-500 to-indigo-500",
+    lessons: [
+      {
+        id: "1-1",
+        name: "Lesson 1: What are Blocks?",
+        scratchProject: "https://scratch.mit.edu/projects/editor/",
+        objectives: [
+          "Understand what programming blocks are",
+          "Connect blocks together in sequence",
+          "Use the 'say' block to display messages"
+        ],
+        demoSteps: [
+          "Show students the Scratch interface",
+          "Explain the block categories (Events, Looks, Motion)",
+          "Drag a 'when green flag clicked' event",
+          "Add a 'say Hello!' block",
+          "Click the green flag to run"
+        ],
+        studentActivity: "Have students make the cat say their name"
+      },
+      {
+        id: "1-2",
+        name: "Lesson 2: Motion & Actions",
+        scratchProject: "https://scratch.mit.edu/projects/editor/",
+        objectives: [
+          "Use motion blocks to move sprites",
+          "Understand coordinates (x, y)",
+          "Make sprites glide and turn"
+        ],
+        demoSteps: [
+          "Show the motion blocks category",
+          "Demonstrate 'move 10 steps'",
+          "Show 'turn' blocks for rotation",
+          "Explain x,y coordinates on the stage",
+          "Create a simple square path"
+        ],
+        studentActivity: "Make the cat walk in a square pattern"
+      },
+      {
+        id: "1-3",
+        name: "Lesson 3: Events & Triggers",
+        scratchProject: "https://scratch.mit.edu/projects/editor/",
+        objectives: [
+          "Understand event-driven programming",
+          "Use different event blocks",
+          "React to keyboard and mouse input"
+        ],
+        demoSteps: [
+          "Explain what events are",
+          "Show 'when green flag clicked'",
+          "Show 'when key pressed' blocks",
+          "Demonstrate 'when this sprite clicked'",
+          "Build interactive keyboard controls"
+        ],
+        studentActivity: "Create arrow key controls to move the cat"
+      }
+    ]
   },
-  variables: {
-    name: "Using Variables",
-    description: "Store and use data with variables",
-    blocks: `<xml>
-      <variables><variable>name</variable><variable>age</variable></variables>
-      <block type="variables_set" x="50" y="50"><field name="VAR">name</field><value name="VALUE"><block type="text"><field name="TEXT">Alice</field></block></value><next>
-      <block type="variables_set"><field name="VAR">age</field><value name="VALUE"><block type="math_number"><field name="NUM">15</field></block></value><next>
-      <block type="print_text"><value name="TEXT"><block type="variables_get"><field name="VAR">name</field></block></value><next>
-      <block type="print_text"><value name="TEXT"><block type="variables_get"><field name="VAR">age</field></block></value></block></next></block></next></block></next></block>
-    </xml>`
+  chapter2: {
+    title: "Chapter 2: Loops & Repetition",
+    color: "from-blue-500 to-cyan-500",
+    lessons: [
+      {
+        id: "2-1",
+        name: "Lesson 4: Repeat Blocks",
+        scratchProject: "https://scratch.mit.edu/projects/editor/",
+        objectives: [
+          "Understand why loops are useful",
+          "Use 'repeat' blocks",
+          "Create patterns with loops"
+        ],
+        demoSteps: [
+          "Show code duplication problem",
+          "Introduce the 'repeat' block",
+          "Draw a square with repeat",
+          "Create a star pattern",
+          "Discuss efficiency"
+        ],
+        studentActivity: "Draw a pentagon using a repeat loop"
+      },
+      {
+        id: "2-2",
+        name: "Lesson 5: Forever Loops",
+        scratchProject: "https://scratch.mit.edu/projects/editor/",
+        objectives: [
+          "Understand continuous loops",
+          "Create animations",
+          "Build interactive programs"
+        ],
+        demoSteps: [
+          "Introduce 'forever' block",
+          "Create a spinning animation",
+          "Make a bouncing ball",
+          "Discuss when to use forever vs repeat"
+        ],
+        studentActivity: "Create an animated fish swimming back and forth"
+      },
+      {
+        id: "2-3",
+        name: "Lesson 6: Nested Loops",
+        scratchProject: "https://scratch.mit.edu/projects/editor/",
+        objectives: [
+          "Understand loops inside loops",
+          "Create complex patterns",
+          "Build grids and matrices"
+        ],
+        demoSteps: [
+          "Review single loops",
+          "Show loop inside loop concept",
+          "Create a row of dots",
+          "Create a grid of dots",
+          "Build a spiral pattern"
+        ],
+        studentActivity: "Create a 3x3 grid of stamps"
+      }
+    ]
   },
-  loop: {
-    name: "Repeat Loop",
-    description: "Make code run multiple times",
-    blocks: `<xml><block type="controls_repeat_ext" x="50" y="50"><value name="TIMES"><shadow type="math_number"><field name="NUM">5</field></shadow></value><statement name="DO"><block type="print_text"><value name="TEXT"><shadow type="text"><field name="TEXT">Hello!</field></shadow></value></block></statement></block></xml>`
+  chapter3: {
+    title: "Chapter 3: Decisions & Logic",
+    color: "from-green-500 to-emerald-500",
+    lessons: [
+      {
+        id: "3-1",
+        name: "Lesson 7: If Blocks",
+        scratchProject: "https://scratch.mit.edu/projects/editor/",
+        objectives: [
+          "Understand conditional logic",
+          "Use 'if' blocks",
+          "Check conditions"
+        ],
+        demoSteps: [
+          "Explain decision making in programs",
+          "Show 'if' block structure",
+          "Use 'touching edge?' condition",
+          "Make sprite turn at edges",
+          "Use sensing blocks"
+        ],
+        studentActivity: "Make the cat change color when touching the edge"
+      },
+      {
+        id: "3-2",
+        name: "Lesson 8: If-Else Blocks",
+        scratchProject: "https://scratch.mit.edu/projects/editor/",
+        objectives: [
+          "Understand two-way decisions",
+          "Use 'if-else' blocks",
+          "Handle both cases"
+        ],
+        demoSteps: [
+          "Review 'if' blocks",
+          "Introduce 'if-else'",
+          "Build a day/night checker",
+          "Create a guessing game"
+        ],
+        studentActivity: "Create a number guessing game with feedback"
+      },
+      {
+        id: "3-3",
+        name: "Lesson 9: Comparison & Logic",
+        scratchProject: "https://scratch.mit.edu/projects/editor/",
+        objectives: [
+          "Use comparison operators",
+          "Combine conditions with AND/OR",
+          "Build complex logic"
+        ],
+        demoSteps: [
+          "Show <, >, = operators",
+          "Introduce 'and' and 'or' blocks",
+          "Build multi-condition checks",
+          "Create a grade checker"
+        ],
+        studentActivity: "Create a program that checks if a number is between 1 and 10"
+      }
+    ]
   },
-  conditional: {
-    name: "If-Else Decision",
-    description: "Make your program choose",
-    blocks: `<xml>
-      <variables><variable>score</variable></variables>
-      <block type="variables_set" x="50" y="50"><field name="VAR">score</field><value name="VALUE"><block type="math_number"><field name="NUM">85</field></block></value><next>
-      <block type="controls_ifelse"><value name="IF0"><block type="logic_compare"><field name="OP">GTE</field><value name="A"><block type="variables_get"><field name="VAR">score</field></block></value><value name="B"><block type="math_number"><field name="NUM">70</field></block></value></block></value><statement name="DO0"><block type="print_text"><value name="TEXT"><shadow type="text"><field name="TEXT">You passed!</field></shadow></value></block></statement><statement name="ELSE"><block type="print_text"><value name="TEXT"><shadow type="text"><field name="TEXT">Keep trying!</field></shadow></value></block></statement></block></next></block>
-    </xml>`
+  chapter4: {
+    title: "Chapter 4: Variables & Data",
+    color: "from-orange-500 to-amber-500",
+    lessons: [
+      {
+        id: "4-1",
+        name: "Lesson 10: What are Variables?",
+        scratchProject: "https://scratch.mit.edu/projects/editor/",
+        objectives: [
+          "Understand what variables are",
+          "Create and name variables",
+          "Set and display variable values"
+        ],
+        demoSteps: [
+          "Explain variables as 'storage boxes'",
+          "Create a variable named 'score'",
+          "Set the variable to a value",
+          "Display the variable on stage"
+        ],
+        studentActivity: "Create a variable for your name and display it"
+      },
+      {
+        id: "4-2",
+        name: "Lesson 11: Using Variables",
+        scratchProject: "https://scratch.mit.edu/projects/editor/",
+        objectives: [
+          "Change variable values",
+          "Use variables in calculations",
+          "Build a counter"
+        ],
+        demoSteps: [
+          "Review creating variables",
+          "Show 'change by' block",
+          "Build a click counter",
+          "Create a simple calculator"
+        ],
+        studentActivity: "Create a click counter that adds 1 each time you click the cat"
+      },
+      {
+        id: "4-3",
+        name: "Lesson 12: Variables in Games",
+        scratchProject: "https://scratch.mit.edu/projects/editor/",
+        objectives: [
+          "Use variables for game mechanics",
+          "Track scores and lives",
+          "Create game over conditions"
+        ],
+        demoSteps: [
+          "Create score and lives variables",
+          "Increase score on events",
+          "Decrease lives on collision",
+          "Check for game over"
+        ],
+        studentActivity: "Add a scoring system to a simple catching game"
+      }
+    ]
   },
-  counting: {
-    name: "Counting Loop",
-    description: "Use a for loop to count",
-    blocks: `<xml><block type="controls_for" x="50" y="50"><field name="VAR">i</field><value name="FROM"><shadow type="math_number"><field name="NUM">1</field></shadow></value><value name="TO"><shadow type="math_number"><field name="NUM">10</field></shadow></value><value name="BY"><shadow type="math_number"><field name="NUM">1</field></shadow></value><statement name="DO"><block type="print_text"><value name="TEXT"><block type="variables_get"><field name="VAR">i</field></block></value></block></statement></block></xml>`
-  },
-  math: {
-    name: "Math Operations",
-    description: "Do calculations with blocks",
-    blocks: `<xml>
-      <variables><variable>result</variable></variables>
-      <block type="variables_set" x="50" y="50"><field name="VAR">result</field><value name="VALUE"><block type="math_arithmetic"><field name="OP">ADD</field><value name="A"><shadow type="math_number"><field name="NUM">10</field></shadow></value><value name="B"><shadow type="math_number"><field name="NUM">5</field></shadow></value></block></value><next>
-      <block type="print_text"><value name="TEXT"><block type="variables_get"><field name="VAR">result</field></block></value></block></next></block>
-    </xml>`
-  },
-  blank: {
-    name: "Empty Canvas",
-    description: "Start from scratch!",
-    blocks: `<xml></xml>`
+  chapter5: {
+    title: "Chapter 5: Blocks to Text",
+    color: "from-pink-500 to-rose-500",
+    lessons: [
+      {
+        id: "5-1",
+        name: "Lesson 13: Blocks → Python",
+        scratchProject: "https://scratch.mit.edu/projects/editor/",
+        objectives: [
+          "Compare blocks to Python code",
+          "Understand the transition",
+          "See the similarities"
+        ],
+        demoSteps: [
+          "Show a block program",
+          "Show equivalent Python code",
+          "Highlight similarities",
+          "Discuss text syntax"
+        ],
+        studentActivity: "Match block programs to their Python equivalents"
+      },
+      {
+        id: "5-2",
+        name: "Lesson 14: Writing Your First Python",
+        scratchProject: null,
+        objectives: [
+          "Write a print statement",
+          "Understand Python syntax",
+          "Debug simple errors"
+        ],
+        demoSteps: [
+          "Open the Python coding page",
+          "Write print('Hello!')",
+          "Explain quotation marks",
+          "Show common errors",
+          "Practice fixing bugs"
+        ],
+        studentActivity: "Write your first Python program with print()"
+      },
+      {
+        id: "5-3",
+        name: "Lesson 15: Transition Challenge",
+        scratchProject: null,
+        objectives: [
+          "Convert blocks to Python",
+          "Apply programming concepts",
+          "Complete the transition"
+        ],
+        demoSteps: [
+          "Review key concepts",
+          "Show block to Python conversions",
+          "Practice loop conversion",
+          "Practice conditional conversion"
+        ],
+        studentActivity: "Convert 3 block programs to Python code"
+      }
+    ]
   }
 };
 
 export default function BlockTeaching({ user }) {
   const navigate = useNavigate();
-  const blocklyRef = useRef(null);
-  const workspaceRef = useRef(null);
-  const [pythonCode, setPythonCode] = useState("# Your Python code will appear here\n# Start adding blocks!");
-  const [output, setOutput] = useState("");
-  const [isRunning, setIsRunning] = useState(false);
-  const [selectedPreset, setSelectedPreset] = useState("hello");
-  const [isFullscreen, setIsFullscreen] = useState(false);
+  const [selectedChapter, setSelectedChapter] = useState("chapter1");
+  const [selectedLesson, setSelectedLesson] = useState(LESSONS.chapter1.lessons[0]);
 
-  // Initialize Blockly workspace
-  useEffect(() => {
-    if (blocklyRef.current && !workspaceRef.current) {
-      defineCustomBlocks();
-      
-      workspaceRef.current = Blockly.inject(blocklyRef.current, {
-        toolbox: TOOLBOX,
-        grid: {
-          spacing: 20,
-          length: 3,
-          colour: '#ccc',
-          snap: true
-        },
-        zoom: {
-          controls: true,
-          wheel: true,
-          startScale: 1.0,
-          maxScale: 3,
-          minScale: 0.3,
-          scaleSpeed: 1.2
-        },
-        trashcan: true,
-        move: {
-          scrollbars: true,
-          drag: true,
-          wheel: true
-        }
-      });
-
-      // Update Python code when blocks change
-      workspaceRef.current.addChangeListener(() => {
-        try {
-          const code = pythonGenerator.workspaceToCode(workspaceRef.current);
-          setPythonCode(code || "# No blocks yet - drag some from the toolbox!");
-        } catch (e) {
-          console.error("Code generation error:", e);
-        }
-      });
-
-      // Load default preset
-      loadPreset("hello");
-    }
-
-    return () => {
-      if (workspaceRef.current) {
-        workspaceRef.current.dispose();
-        workspaceRef.current = null;
-      }
-    };
-  }, []);
-
-  const loadPreset = useCallback((presetKey) => {
-    if (!workspaceRef.current) return;
-    
-    const preset = LESSON_PRESETS[presetKey];
-    if (preset) {
-      workspaceRef.current.clear();
-      try {
-        const xml = Blockly.utils.xml.textToDom(preset.blocks);
-        Blockly.Xml.domToWorkspace(xml, workspaceRef.current);
-        setSelectedPreset(presetKey);
-        setOutput("");
-      } catch (e) {
-        console.error("Error loading preset:", e);
-      }
-    }
-  }, []);
-
-  const clearWorkspace = () => {
-    if (workspaceRef.current) {
-      workspaceRef.current.clear();
-      setOutput("");
-      setPythonCode("# Workspace cleared - start building!");
-    }
+  const openScratch = () => {
+    window.open('https://scratch.mit.edu/projects/editor/', '_blank');
   };
 
-  const copyCode = () => {
-    navigator.clipboard.writeText(pythonCode);
-    toast.success("Python code copied!");
+  const copyObjectives = () => {
+    const text = selectedLesson.objectives.join('\n• ');
+    navigator.clipboard.writeText('• ' + text);
+    toast.success("Objectives copied!");
   };
-
-  // Simple Python interpreter for basic operations
-  const runCode = useCallback(() => {
-    setIsRunning(true);
-    setOutput("");
-    
-    let outputLines = [];
-    let variables = {};
-
-    try {
-      // Simple line-by-line interpretation
-      const lines = pythonCode.split('\n').filter(l => l.trim() && !l.trim().startsWith('#'));
-      
-      for (const line of lines) {
-        const trimmed = line.trim();
-        
-        // Handle print statements
-        const printMatch = trimmed.match(/^print\((.+)\)$/);
-        if (printMatch) {
-          let value = printMatch[1];
-          // Replace variable references
-          for (const [varName, varValue] of Object.entries(variables)) {
-            value = value.replace(new RegExp(`\\b${varName}\\b`, 'g'), JSON.stringify(varValue));
-          }
-          // Remove quotes for string literals
-          value = value.replace(/^["']|["']$/g, '');
-          try {
-            // Try to evaluate expressions
-            const result = eval(value);
-            outputLines.push(String(result));
-          } catch {
-            outputLines.push(value);
-          }
-          continue;
-        }
-
-        // Handle variable assignments
-        const assignMatch = trimmed.match(/^(\w+)\s*=\s*(.+)$/);
-        if (assignMatch) {
-          const varName = assignMatch[1];
-          let varValue = assignMatch[2];
-          // Replace variable references in the value
-          for (const [name, val] of Object.entries(variables)) {
-            varValue = varValue.replace(new RegExp(`\\b${name}\\b`, 'g'), JSON.stringify(val));
-          }
-          try {
-            variables[varName] = eval(varValue);
-          } catch {
-            variables[varName] = varValue.replace(/^["']|["']$/g, '');
-          }
-          continue;
-        }
-
-        // Handle for loops (simplified)
-        const forMatch = trimmed.match(/^for\s+(\w+)\s+in\s+range\((\d+)(?:,\s*(\d+))?\):$/);
-        if (forMatch) {
-          // This is simplified - just note we found a loop
-          outputLines.push(`[Loop detected - use a real Python interpreter for full execution]`);
-          continue;
-        }
-      }
-
-      if (outputLines.length === 0) {
-        outputLines.push("[No output - try adding a print block!]");
-      }
-
-      setOutput(outputLines.join('\n'));
-    } catch (error) {
-      setOutput(`Error: ${error.message}\n\n[Note: This is a simplified interpreter. For full Python, use the Turtle or regular coding pages!]`);
-    } finally {
-      setIsRunning(false);
-    }
-  }, [pythonCode]);
 
   return (
-    <div className={`min-h-screen bg-gray-900 text-white ${isFullscreen ? 'fixed inset-0 z-50' : ''}`}>
+    <div className="min-h-screen bg-gradient-to-br from-orange-50 via-white to-yellow-50">
       {/* Header */}
-      <div className="bg-gradient-to-r from-purple-600 to-indigo-600 py-3 px-6">
-        <div className="flex items-center justify-between">
+      <div className="bg-gradient-to-r from-orange-500 to-yellow-500 text-white py-4 px-6">
+        <div className="max-w-7xl mx-auto flex items-center justify-between">
           <div className="flex items-center gap-4">
             <Button
               variant="ghost"
@@ -524,127 +340,214 @@ export default function BlockTeaching({ user }) {
               className="text-white hover:bg-white/20"
             >
               <ArrowLeft className="w-4 h-4 mr-1" />
-              Back
+              Back to Curriculum
             </Button>
             <div className="flex items-center gap-2">
-              <Monitor className="w-5 h-5" />
-              <span className="font-bold">Block Editor</span>
+              <Monitor className="w-6 h-6" />
+              <span className="text-xl font-bold">Teaching Mode</span>
             </div>
           </div>
           
-          <div className="flex items-center gap-3">
-            <Select value={selectedPreset} onValueChange={loadPreset}>
-              <SelectTrigger className="w-48 bg-white/10 border-white/30 text-white">
-                <SelectValue placeholder="Load Example" />
-              </SelectTrigger>
-              <SelectContent>
-                {Object.entries(LESSON_PRESETS).map(([key, preset]) => (
-                  <SelectItem key={key} value={key}>
-                    {preset.name}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-            
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={clearWorkspace}
-              className="text-white hover:bg-white/20"
-            >
-              <Trash2 className="w-4 h-4 mr-1" />
-              Clear
-            </Button>
-            
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={() => setIsFullscreen(!isFullscreen)}
-              className="text-white hover:bg-white/20"
-            >
-              <Maximize2 className="w-4 h-4" />
-            </Button>
-          </div>
+          <Button
+            onClick={openScratch}
+            className="bg-white text-orange-600 hover:bg-orange-50"
+          >
+            <ExternalLink className="w-4 h-4 mr-2" />
+            Open Scratch Editor
+          </Button>
         </div>
       </div>
 
-      {/* Lesson description bar */}
-      <div className="bg-purple-900/50 px-6 py-2 text-sm">
-        <span className="text-purple-300 font-medium">{LESSON_PRESETS[selectedPreset]?.name}:</span>
-        <span className="text-purple-200 ml-2">{LESSON_PRESETS[selectedPreset]?.description}</span>
+      <div className="max-w-7xl mx-auto px-6 py-6">
+        {/* Chapter Tabs */}
+        <Tabs value={selectedChapter} onValueChange={(v) => {
+          setSelectedChapter(v);
+          setSelectedLesson(LESSONS[v].lessons[0]);
+        }}>
+          <TabsList className="w-full flex flex-wrap h-auto gap-2 bg-transparent mb-6">
+            {Object.entries(LESSONS).map(([key, chapter]) => (
+              <TabsTrigger 
+                key={key} 
+                value={key}
+                className={`flex-1 min-w-[150px] py-3 data-[state=active]:bg-gradient-to-r data-[state=active]:${chapter.color} data-[state=active]:text-white`}
+              >
+                {chapter.title}
+              </TabsTrigger>
+            ))}
+          </TabsList>
+
+          {Object.entries(LESSONS).map(([chapterKey, chapter]) => (
+            <TabsContent key={chapterKey} value={chapterKey}>
+              <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                {/* Lesson Selector */}
+                <div className="lg:col-span-1">
+                  <Card>
+                    <CardHeader className={`bg-gradient-to-r ${chapter.color} text-white rounded-t-lg`}>
+                      <CardTitle className="flex items-center gap-2">
+                        <BookOpen className="w-5 h-5" />
+                        Lessons
+                      </CardTitle>
+                    </CardHeader>
+                    <CardContent className="p-0">
+                      {chapter.lessons.map((lesson, idx) => (
+                        <button
+                          key={lesson.id}
+                          onClick={() => setSelectedLesson(lesson)}
+                          className={`w-full text-left px-4 py-3 border-b hover:bg-gray-50 transition-colors ${
+                            selectedLesson.id === lesson.id ? 'bg-orange-50 border-l-4 border-l-orange-500' : ''
+                          }`}
+                        >
+                          <div className="font-medium">{lesson.name}</div>
+                        </button>
+                      ))}
+                    </CardContent>
+                  </Card>
+
+                  {/* Quick Actions */}
+                  <Card className="mt-4">
+                    <CardHeader>
+                      <CardTitle className="text-lg flex items-center gap-2">
+                        <Play className="w-5 h-5 text-green-600" />
+                        Quick Actions
+                      </CardTitle>
+                    </CardHeader>
+                    <CardContent className="space-y-2">
+                      <Button onClick={openScratch} className="w-full bg-orange-500 hover:bg-orange-600">
+                        <ExternalLink className="w-4 h-4 mr-2" />
+                        Open Scratch (Demo)
+                      </Button>
+                      <Button onClick={() => navigate("/library?type=block")} variant="outline" className="w-full">
+                        <BookOpen className="w-4 h-4 mr-2" />
+                        View Problems
+                      </Button>
+                      <Button onClick={copyObjectives} variant="outline" className="w-full">
+                        <Copy className="w-4 h-4 mr-2" />
+                        Copy Objectives
+                      </Button>
+                    </CardContent>
+                  </Card>
+                </div>
+
+                {/* Lesson Details */}
+                <div className="lg:col-span-2 space-y-4">
+                  {/* Lesson Header */}
+                  <Card className={`bg-gradient-to-r ${chapter.color}`}>
+                    <CardContent className="py-6 text-white">
+                      <h2 className="text-2xl font-bold mb-2">{selectedLesson.name}</h2>
+                      <p className="opacity-90">Block-Based Programming • {chapter.title}</p>
+                    </CardContent>
+                  </Card>
+
+                  {/* Learning Objectives */}
+                  <Card>
+                    <CardHeader>
+                      <CardTitle className="flex items-center gap-2">
+                        <Target className="w-5 h-5 text-blue-600" />
+                        Learning Objectives
+                      </CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                      <ul className="space-y-2">
+                        {selectedLesson.objectives.map((obj, idx) => (
+                          <li key={idx} className="flex items-start gap-2">
+                            <span className="text-green-500 mt-1">✓</span>
+                            <span>{obj}</span>
+                          </li>
+                        ))}
+                      </ul>
+                    </CardContent>
+                  </Card>
+
+                  {/* Demo Steps */}
+                  <Card>
+                    <CardHeader>
+                      <CardTitle className="flex items-center gap-2">
+                        <Monitor className="w-5 h-5 text-purple-600" />
+                        Teacher Demo Steps
+                      </CardTitle>
+                      <CardDescription>Follow these steps while screen sharing Scratch</CardDescription>
+                    </CardHeader>
+                    <CardContent>
+                      <ol className="space-y-3">
+                        {selectedLesson.demoSteps.map((step, idx) => (
+                          <li key={idx} className="flex items-start gap-3">
+                            <span className="flex-shrink-0 w-6 h-6 rounded-full bg-purple-100 text-purple-600 flex items-center justify-center text-sm font-bold">
+                              {idx + 1}
+                            </span>
+                            <span>{step}</span>
+                          </li>
+                        ))}
+                      </ol>
+                    </CardContent>
+                  </Card>
+
+                  {/* Student Activity */}
+                  <Card className="border-2 border-green-200 bg-green-50">
+                    <CardHeader>
+                      <CardTitle className="flex items-center gap-2">
+                        <Users className="w-5 h-5 text-green-600" />
+                        Student Activity
+                      </CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                      <div className="flex items-start gap-3">
+                        <Lightbulb className="w-6 h-6 text-yellow-500 flex-shrink-0 mt-1" />
+                        <p className="text-lg">{selectedLesson.studentActivity}</p>
+                      </div>
+                    </CardContent>
+                  </Card>
+
+                  {/* Scratch Link */}
+                  {selectedLesson.scratchProject && (
+                    <Card className="bg-gradient-to-r from-orange-100 to-yellow-100 border-orange-200">
+                      <CardContent className="py-6">
+                        <div className="flex items-center justify-between">
+                          <div className="flex items-center gap-4">
+                            <img 
+                              src="https://scratch.mit.edu/images/logo_sm.png" 
+                              alt="Scratch" 
+                              className="h-10"
+                            />
+                            <div>
+                              <h3 className="font-bold text-orange-800">Ready to Demo?</h3>
+                              <p className="text-sm text-orange-600">Open Scratch and share your screen with students</p>
+                            </div>
+                          </div>
+                          <Button onClick={openScratch} className="bg-orange-500 hover:bg-orange-600">
+                            <ExternalLink className="w-4 h-4 mr-2" />
+                            Open Scratch
+                          </Button>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  )}
+
+                  {/* Python Transition Note */}
+                  {!selectedLesson.scratchProject && (
+                    <Card className="bg-gradient-to-r from-blue-100 to-indigo-100 border-blue-200">
+                      <CardContent className="py-6">
+                        <div className="flex items-center justify-between">
+                          <div className="flex items-center gap-4">
+                            <span className="text-4xl">🐍</span>
+                            <div>
+                              <h3 className="font-bold text-blue-800">Python Transition Lesson</h3>
+                              <p className="text-sm text-blue-600">This lesson uses the Python coding environment</p>
+                            </div>
+                          </div>
+                          <Button onClick={() => navigate("/python-curriculum")} className="bg-blue-500 hover:bg-blue-600">
+                            <ExternalLink className="w-4 h-4 mr-2" />
+                            Go to Python
+                          </Button>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  )}
+                </div>
+              </div>
+            </TabsContent>
+          ))}
+        </Tabs>
       </div>
-
-      {/* Main Content */}
-      <ResizablePanelGroup direction="horizontal" className="h-[calc(100vh-100px)]">
-        {/* Left: Blockly Workspace */}
-        <ResizablePanel defaultSize={55} minSize={40}>
-          <div className="h-full flex flex-col">
-            <div className="p-2 bg-gray-800 border-b border-gray-700 flex items-center justify-between">
-              <span className="text-sm text-gray-300 flex items-center gap-2">
-                🧱 Drag blocks from the toolbox on the left
-              </span>
-            </div>
-            <div ref={blocklyRef} className="flex-1" style={{ minHeight: '400px' }} />
-          </div>
-        </ResizablePanel>
-
-        <ResizableHandle withHandle className="bg-gray-700" />
-
-        {/* Right: Code & Output */}
-        <ResizablePanel defaultSize={45} minSize={30}>
-          <div className="h-full flex flex-col">
-            {/* Python Code Section */}
-            <div className="flex-1 flex flex-col border-b border-gray-700">
-              <div className="p-2 bg-gray-800 border-b border-gray-700 flex items-center justify-between">
-                <span className="text-sm text-green-400 flex items-center gap-2">
-                  <Code className="w-4 h-4" />
-                  Python Code (auto-generated)
-                </span>
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={copyCode}
-                  className="text-gray-400 hover:text-white h-7"
-                >
-                  <Copy className="w-3 h-3 mr-1" />
-                  Copy
-                </Button>
-              </div>
-              <div className="flex-1 overflow-auto p-4 bg-gray-950">
-                <pre className="text-green-400 font-mono text-sm whitespace-pre-wrap">
-                  {pythonCode}
-                </pre>
-              </div>
-            </div>
-
-            {/* Output Section */}
-            <div className="h-48 flex flex-col">
-              <div className="p-2 bg-gray-800 border-b border-gray-700 flex items-center justify-between">
-                <span className="text-sm text-yellow-400 flex items-center gap-2">
-                  <Terminal className="w-4 h-4" />
-                  Output
-                </span>
-                <Button
-                  onClick={runCode}
-                  disabled={isRunning}
-                  size="sm"
-                  className="bg-green-600 hover:bg-green-700 h-7"
-                >
-                  <Play className="w-3 h-3 mr-1" />
-                  {isRunning ? "Running..." : "Run"}
-                </Button>
-              </div>
-              <div className="flex-1 overflow-auto p-4 bg-black font-mono text-sm">
-                {output ? (
-                  <pre className="text-yellow-300 whitespace-pre-wrap">{output}</pre>
-                ) : (
-                  <span className="text-gray-500">Click &quot;Run&quot; to see output...</span>
-                )}
-              </div>
-            </div>
-          </div>
-        </ResizablePanel>
-      </ResizablePanelGroup>
     </div>
   );
 }
