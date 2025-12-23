@@ -1232,17 +1232,49 @@ export default function AssignmentPage({ user }) {
                   </CardHeader>
                   <CardContent className="p-0">
                     {assignment.problems?.[currentProblemIndex]?.assignment_type === "block" ? (
-                      /* Block-Based Editor */
-                      <div className="h-[600px]">
-                        <BlockEditor
-                          ref={blockEditorRef}
-                          initialXml={blockXml}
-                          onBlocksChange={(xml) => {
-                            setBlockXml(xml);
-                            setCode(xml); // Store XML as code for submission
-                          }}
-                          height={600}
-                        />
+                      /* Block-Based - Scratch Integration */
+                      <div className="h-[600px] flex flex-col">
+                        {/* Scratch Embed or Link */}
+                        <div className="flex-1 flex flex-col items-center justify-center bg-gradient-to-br from-orange-50 to-yellow-50 rounded-lg border-2 border-orange-200 p-6">
+                          <img 
+                            src="https://scratch.mit.edu/images/logo_sm.png" 
+                            alt="Scratch" 
+                            className="h-16 mb-4"
+                          />
+                          <h3 className="text-xl font-bold text-orange-700 mb-2">Create with Scratch!</h3>
+                          <p className="text-gray-600 text-center mb-4 max-w-md">
+                            {assignment.problems?.[currentProblemIndex]?.description || 
+                              "Open Scratch to complete this block-based programming challenge."}
+                          </p>
+                          <Button
+                            onClick={() => window.open('https://scratch.mit.edu/projects/editor/', '_blank')}
+                            className="bg-orange-500 hover:bg-orange-600 text-white px-6 py-3 text-lg"
+                          >
+                            <ExternalLink className="w-5 h-5 mr-2" />
+                            Open Scratch Editor
+                          </Button>
+                          <p className="text-xs text-gray-500 mt-4">
+                            Opens in a new tab • Save your project and copy the URL below
+                          </p>
+                        </div>
+                        
+                        {/* Project URL Input */}
+                        <div className="mt-4 p-4 bg-white rounded-lg border">
+                          <label className="block text-sm font-medium text-gray-700 mb-2">
+                            📎 Paste your Scratch Project URL:
+                          </label>
+                          <input
+                            type="text"
+                            placeholder="https://scratch.mit.edu/projects/..."
+                            value={code}
+                            onChange={(e) => !problemsFinal[getCurrentProblemId()] && setCode(e.target.value)}
+                            className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-orange-500"
+                            disabled={problemsFinal[getCurrentProblemId()]}
+                          />
+                          <p className="text-xs text-gray-500 mt-1">
+                            After saving your Scratch project, click "Share" and paste the project URL here
+                          </p>
+                        </div>
                       </div>
                     ) : (
                       /* Regular Code Editor */
