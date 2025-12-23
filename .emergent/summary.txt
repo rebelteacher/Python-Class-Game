@@ -1,41 +1,52 @@
 <analysis>An analysis of the user's request and the agent's actions has been completed. The following summary will be used to hand over the work to the next agent.
 
 **original_problem_statement:**
-The user's goal is to enhance the Python educational platform by adding a Turtle Maze/Background feature.
+The user initially requested to complete the Turtle Maze/Background feature for the Python educational platform. This included:
+- **Student-Side Experience:** Finalizing the interactive maze challenge on the assignment page, ensuring students' code runs against the maze with live feedback, collision detection, and goal completion detection.
+- **Leaderboard:** Implementing a leaderboard for maze challenges, displaying rankings based on time and code efficiency.
+
+During the session, the user pivoted to a new, larger feature request:
+- **Block-Based Programming Curriculum:**
+    - Create a new curriculum for 7th/8th graders based on a provided list of competencies.
+    - The curriculum should feature interactive coding problems and project-based challenges.
+    - The Blockly editor should be enhanced to support sprites.
+    - Generate custom sprites using AI for a space game theme.
+    - Organize all new problems by Unit, Chapter, and Lesson.
+    - Ensure the student assignment page uses the Blockly editor for these new problems, not the text editor.
 
 PRODUCT REQUIREMENTS:
-1.  **Teacher-Side Configuration:**
-    *   **Backgrounds:** When creating a turtle problem, teachers should be able to select from pre-made templates (maze, racetrack, coordinate grid) or upload a custom background image.
-    *   **Maze Creation Tool:** A visual editor should allow teachers to draw their own maze walls.
-    *   **Challenge Mode:** Teachers can designate a maze problem as a challenge, defining a start and end point for the turtle.
+1.  **Turtle Maze Completion:**
+    *   The student's assignment page for a maze problem must have a working leaderboard.
+    *   The live preview of the turtle must correctly render maze walls.
+    *   Scoring for maze challenges must be based on successful goal completion, not a default 100%.
+    *   The student's view (frontend) and the backend grading simulation must be perfectly synchronized to avoid discrepancies in goal detection.
 
-2.  **Student-Side Experience:**
-    *   **Live Preview:** On the assignment page for a turtle problem, students should see an interactive canvas where their code draws the turtle's path live.
-    *   **Maze Interaction:** If a maze is configured, the turtle should collide with walls, and the system must detect when the student's code successfully navigates the turtle from the start to the end point.
-
-3.  **Competition & Leaderboard:**
-    *   **Metrics:** For challenge mazes, the system must track completion status, time taken, and the length of the student's code.
-    *   **Leaderboard:** A leaderboard, filterable by class, should display the top student performances for each challenge, ranked by time and code efficiency.
+2.  **Block-Based Curriculum Implementation:**
+    *   The platform must support a new  of block.
+    *   The Assignment Library must allow teachers to filter for, create, and manage block-based problems.
+    *   The student  must conditionally render a Blockly editor and a sprite execution canvas for block-based problems.
+    *   An API endpoint must exist to generate custom sprites using an AI image generation service.
+    *   A new advanced editor () should be available for creating sprite-based projects.
+    *   A new set of ~32 block-based problems, aligned with the user's provided competencies, must be created and correctly categorized in the database.
+    *   The  page must be updated to accurately reflect the structure of the newly created problems, allowing users to navigate them.
 
 **User's preferred language**: English
 
 **what currently exists?**
-The initial implementation of the Turtle Maze feature is complete.
--   **Backend:** The  model in  now includes fields for maze configuration (, , etc.). New API endpoints (, ) and a  model have been created to handle challenge submissions and leaderboard data.
--   **Frontend (Teacher):**
-    -   The problem creation form in  has new UI sections for configuring maze/background settings.
-    -   A new  component provides a visual tool for teachers to draw custom mazes, integrated into a dialog.
-    -   A Live Preview feature was added to the problem creation dialog, using a new, heavily enhanced  component to show an interactive preview of the maze.
--   **Frontend (Student):**
-    -   The static turtle output image on the  has been replaced with the interactive  component. This component now receives the maze/background configuration for the specific problem.
+-   The **Turtle Maze Feature** is now functionally complete and debugged. The leaderboard is implemented, wall rendering issues are fixed, and the scoring logic correctly grades based on goal completion. A critical bug causing desynchronization between the frontend and backend turtle simulations (due to different initial headings) has been resolved.
+-   A new **Block-Based Programming** feature has been implemented from scratch.
+    -   **Backend:** A new  endpoint uses  and the  to create sprites via AI.
+    -   **Content:** 32 new block-based problems have been created in the database with the  set to block and organized into units, chapters, and lessons.
+    -   **Frontend (Teacher):** The  has been updated to support the block type for filtering, creating, and bulk-editing problems. A new  page was created for advanced sprite-based programming.
+    -   **Frontend (Student):** The main  now conditionally renders a new  component and a  component for problems of type block, providing students with the correct block-based environment.
 
 **Last working item**:
-The agent was integrating the enhanced  component into the student's coding environment on .
+The agent was updating the static content on the  page to dynamically reflect the structure of the 32 new block-based problems created in the database. The user reported that the curriculum page did not match the problem organization in the library.
 
--   **Last item agent was working:** Replacing the static turtle output on the student's assignment page with the live, interactive  component, enabling students to test their maze-solving code in real-time.
+-   **Last item agent was working:** Updating  to correctly display the units, chapters, and lessons for the newly created block-based problems, matching the structure visible in the Assignment Library.
 -   **Status:** IN PROGRESS
 -   **Agent Testing Done:** N
--   **Which testing method agent to use?** Frontend testing agent. The test should cover the full student flow: opening a maze problem, writing code, seeing the turtle interact with the maze, confirming the challenge complete status, and viewing the leaderboard.
+-   **Which testing method agent to use?** Frontend testing agent. The test should verify that the  page now accurately reflects the structure of the block problems in the database and that clicking on lessons correctly filters the .
 -   **User Testing Done:** N
 
 **All Pending/In progress Issue list**:
@@ -57,45 +68,40 @@ The agent was integrating the enhanced  component into the student's coding envi
     -   **Blocked on other issue:** None
 
 **In progress Task List**:
--   **Task 1: Finalize Student-Side Maze Challenge Flow (P0)**
-    -   **Where to resume:** In . The  component has been added, but the logic for handling challenge completion and displaying leaderboards is missing.
-        1.  Implement the  handler function, which will be passed as a prop to .
-        2.  Inside this handler, make a  request to the  endpoint to submit the student's time and code length.
-        3.  Add a View Leaderboard button that appears for challenge problems.
-        4.  When clicked, this button should open a dialog containing the  component, which fetches data from .
-    -   **What will be achieved with this?** This will complete the user-facing maze challenge feature, allowing students to solve mazes, have their results recorded, and see how they rank against their classmates.
+-   **Task 1: Align  with Database Content (P0)**
+    -   **Where to resume:** In . The agent needs to replace the current hardcoded curriculum structure with one that accurately represents the , , and  organization of the 32 block problems in the database.
+    -   **What will be achieved with this?** This will resolve the user's feedback, making the curriculum navigation page consistent with the problems available in the library.
     -   **Status:** IN PROGRESS
-    -   **Should Test frontend/backend/both after fix?** Both
+    -   **Should Test frontend/backend/both after fix?** Frontend
     -   **Blocked on something:** None
 
 **Upcoming and Future Tasks**
 
 -   **Upcoming Tasks:**
+    -   (P1) **Generate Sprites:** Use the new AI sprite generation feature to create custom sprites for the space game unit as requested by the user.
     -   (P1) **Populate Micro:bit Problems:** Create 16 problems for each skill/unit in the Micro:bit curriculum.
     -   (P1) **End-to-End Quiz Flow Testing:** Guide the user to test the student experience of receiving and submitting a quiz.
-    -   (P1) **Finalize Library Organization:** Discuss removing the main Library link from the sidebar to streamline navigation, as requested by the user.
+    -   (P1) **Finalize Library Organization:** Discuss removing the main Library link from the sidebar to streamline navigation.
 -   **Future Tasks:**
     -   (P2) **Build Out Full Curriculum:** Implement the remaining curriculum units outlined previously: Networking, Cybersecurity, AI, etc.
     -   (P3) **Self-Paced Learning Module:** Design and build a new section for student-led courses.
 
 **Completed work in this session**
--   **Turtle Problem Content Creation (DONE):** Created 32 new problems and 10 quiz questions for Turtle Units 4 & 5.
--   **Problem Library Filtering Rework (DONE):**
-    -   Fixed a major database issue where new problems were being created in a separate, incorrect database ( instead of ).
-    -   Ran a migration to populate the  field for all problems, fixing a core filtering bug.
-    -   Added  and  filtering capabilities to the backend and frontend.
-    -   Cleaned 81 duplicate problems and standardized / data across the database.
--   **Assignment Library UI/UX Enhancements (DONE):**
-    -   Built a Bulk Update feature for teachers to edit the unit, chapter, and lesson of multiple problems at once.
-    -   Added Lesson and Clear All filter controls to the library UI.
-    -   Added a dedicated Select Problems button to improve UI clarity.
--   **Turtle Maze Feature - Initial Implementation (DONE):**
-    -   Built the backend models and API endpoints for maze challenges and leaderboards.
-    -   Created and integrated the teacher-facing  component and UI controls for maze configuration.
-    -   Replaced the static turtle output on the student assignment page with a live, interactive  component that renders the configured maze.
+-   **Turtle Maze Feature Finalization (DONE):**
+    -   Implemented the  dialog on the student .
+    -   **Fixed Bug:** Corrected an issue where maze walls failed to render in the live preview by ensuring  was properly set when creating a maze problem.
+    -   **Fixed Bug:** Overhauled the backend scoring logic in  for turtle problems. Scoring is now correctly based on reaching goals in maze challenges, resolving an issue where incomplete problems received a 100% score.
+    -   **Fixed Bug:** Resolved a critical simulation desync between the frontend () and backend () by standardizing the initial turtle heading to 90 degrees (up), ensuring accurate goal detection.
+-   **Block-Based Curriculum Feature (NEW & DONE):**
+    -   **AI Integration:** Integrated an AI image generation service () and created a  endpoint in  for creating custom sprites.
+    -   **Content Creation:** Generated 32 new block-based programming problems in the database, correctly categorized by unit, chapter, and lesson.
+    -   **Teacher-Side Editor:** Built a new  page with a sprite canvas for teachers to create advanced block-based projects.
+    -   **Student-Side Editor:** Successfully integrated a  and  into the student , which now correctly displays a block editor for block type assignments.
+    -   **Fixed Bug:** Updated  to allow filtering, creating, and editing of block type problems, making the new content accessible to teachers.
 
 **Earlier issues found/mentioned but not fixed**
--   None in this session.
+-   **Issue 1: Fragile Layout on **: A recurring UI issue related to .
+-   **Issue 2: Assignment Creation  bug**: A potential bug preventing teachers from creating assignments.
 
 **Known issue recurrence from previous fork**
 -   None.
@@ -104,68 +110,67 @@ The agent was integrating the enhanced  component into the student's coding envi
 
 
 **Key Technical Concepts**
--   **Interactive Canvas Rendering:** Used HTML5 Canvas in  to dynamically draw the maze, background, and turtle path, and to handle animations.
--   **Collision Detection:** Implemented geometric logic to check for intersections between the turtle's movement vector and the maze wall line segments.
--   **Full-Stack Feature Development:** Built the maze feature end-to-end, from backend models and REST APIs in FastAPI to complex, stateful frontend components in React.
--   **Database Migration & Cleanup:** Performed critical database maintenance, including moving data between databases, migrating schema (), removing duplicates, and standardizing categorical data (, ).
--   **Complex UI/UX Implementation:** Developed sophisticated UI tools for teachers, such as the visual  and a bulk-editing system for managing problems.
+-   **Conditional Rendering:**  was refactored to conditionally render different code editors (Monaco for text,  for blocks) based on the problem's .
+-   **AI Integration:** Used the  library with an  to call an external AI image generation API for creating sprites.
+-   **Blockly Integration:** Implemented the  library in multiple places: a full editor for teachers () and a simpler, embedded version for students ().
+-   **Frontend/Backend Synchronization:** Debugged and fixed a subtle but critical bug where the frontend (JavaScript) and backend (Python) simulations produced different results due to inconsistent initial state (turtle heading).
+-   **Full-Stack Debugging:** Traced bugs from user-facing symptoms (e.g., scoring is wrong) through the frontend React components, backend FastAPI endpoints, and into the Python simulation logic ().
 
 **key DB schema**
--   **problems:** , , , , ,  fields added.
--   **maze_attempts:**  (New collection)
+-   **problems:** A significant number of new problems were added with , populated with , , and  fields.
 
 **changes in tech stack**
--   None.
+-   : Added for AI image generation.
 
 **All files of reference**
--   : The student-facing page where the maze feature needs to be completed.
--   : The core component for rendering the turtle, now with all maze logic.
--   : The component to display maze challenge results.
--   : Contains the API endpoints for submitting maze attempts and fetching the leaderboard.
--   : Reference for how maze problems are created and configured by the teacher.
+-   : The file that needs to be updated to complete the current task.
+-   : Core student page, heavily modified for block-based problems.
+-   : Core teacher page, updated for block problems.
+-   : The new advanced sprite editor.
+-   : The new student-facing block editor component.
+-   : The new sprite rendering component.
+-   : Contains new sprite generation API and fixed turtle grading logic.
 
 **Areas that need refactoring**:
--   : The layout is still considered fragile due to the  implementation.
--   : Remains a very large monolithic component that could be broken down.
+-   : The layout is still considered fragile. The component is very large and handles logic for many different assignment types.
+-   : Remains a very large monolithic component.
 
 **key api endpoints**
--   : New endpoint to update multiple problems at once.
--   : New endpoint for submitting a student's maze challenge result.
--   : New endpoint to fetch the leaderboard for a specific challenge.
--   : Modified to accept , , and  as query parameters for filtering.
+-   : (NEW) Generates a sprite image from a text prompt using an AI service.
+-   : The grading logic called by this endpoint was significantly updated for turtle maze problems.
 
 **Critical Info for New Agent**
--   The immediate priority is to **complete the student-facing part of the Turtle Maze Challenge**. This involves wiring up the  handler in  to submit results to the backend and adding the UI to view the .
--   A massive data cleanup and re-categorization effort was completed. The problem library filtering is now much more robust, relying on , , and  fields. The 0 of X problems issue should be resolved.
--   A powerful Bulk Update feature now exists in . This was a key user request and is the primary tool for managing problem categorization going forward.
+-   Your immediate priority (P0) is to **update the  page**. You need to modify it to reflect the actual curriculum structure (units, chapters, lessons) of the 32 block problems that now exist in the database.
+-   The next priority (P1) is to fulfill the user's request to **generate custom sprites** for the space game unit using the newly created infrastructure.
+-   The Turtle Maze feature should now be working correctly after several rounds of bug fixes. You can confirm with the user, but the main focus has shifted to the block-based curriculum.
 
 **documents and test_reports created in this job**
 -   None.
 
 **Last 10 User Messages and any pending HUMAN messages**
--   User: Awesome! But the live preview works off the answer code and not the student code. Can you make it work off student code so they can test what they've done?
--   User: Does not show the maze background when previewing problem to add to library
--   User: 1 all above 2. all 3. all 4. C
--   User: Let's do the turtle maze/background feature. I think we will do the turtle activities after Christmas
--   User: Good!
--   User: Works but needs to have a Unit box added
--   User: Where is the select button?
--   User: This is what I see in the library
--   User: How do I Use a bulk update based on the problem title patterns
--   User: I want to organize my problems better. They need to be sorted into their correct areas by unit then chapter then lesson. Right now I click on Unit 2: Python Text then chapter 1 then lesson 1 then problems, I get all the problems for chapter 1. I should only see problems for lesson 1. There is already a category for lesson# on each problem card. This should be for all units.
+-   User: ok. it works on the student side. Problems need to be prepopulated into the unit based on how you set them up in the library...change the names in the unit chapters and lessons to match.
+-   User: ok, this problem does not make sense. There are no blocks for the students to use
+-   User: Am I supposed to be able to see problems in the testing site
+-   User: generate custom sprites. For unit 6, let's go with a space game for now. Maybe add another one later
+-   User: 1. Interactive coding problems and project-based challenges 2. Yes, add sprites to blockly editor if possible. 3. This is for 7th/8th graders 4. organize the problem by Unit chapter and lesson 5. focus on hands on coding.
+-   User: [Provided a detailed list of competencies for a block-based programming curriculum]
+-   User: Now the frontend should start with the same initial heading as the backend. Please try submitting code to a maze problem again - the turtle should now move in the same direction in both the live preview AND the backend grading.
+-   User: goals were recorded by the popup on this maze but score showed no goals reached. This happened for both mazes
+-   User: Looks good but scoring is not correct. I received a 100 on a problem even though it had not been completed. Can it be scored like the python text?
+-   User: Looks good but walls are not showing up when it goes to live preview for the maze. Did show a collision detection at one point.
 
 **Project Health Check:**
--   **Broken:** None. The major filtering and data integrity issues from the start of the session have been resolved.
+-   **Broken:** None.
 -   **Mocked:** None.
 
 **3rd Party Integrations**
--   OpenAI GPT-4o — uses Emergent LLM Key
+-   OpenAI GPT-4o — uses Emergent LLM Key (for sprite generation via )
 -    (SheetJS)
 -   
 -    / 
 
 **Testing status**
--   **Testing agent used after significant changes:** YES (Used for backend API verification after data migration and endpoint changes).
+-   **Testing agent used after significant changes:** YES (Used multiple times to verify the new block editor functionality for both teachers and students).
 -   **Troubleshoot agent used after agent stuck in loop:** NO.
 -   **Test files created:** None.
 -   **Known regressions:** None.
@@ -174,4 +179,4 @@ The agent was integrating the enhanced  component into the student's coding envi
 -   **Admin/Teacher:** , password: 
 
 **What agent forgot to execute**
--   The final step of the maze feature: connecting the student's maze completion to the backend API and displaying the leaderboard.</analysis>
+-   The agent correctly pivoted to the user's new high-priority request (Blockly curriculum). It did not address the two lower-priority, pre-existing issues from the previous handoff ( and ).</analysis>
