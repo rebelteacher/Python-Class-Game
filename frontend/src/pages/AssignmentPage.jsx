@@ -63,6 +63,12 @@ export default function AssignmentPage({ user }) {
   const [mazeStartTime, setMazeStartTime] = useState(null); // Track time for maze challenges
   const [showLeaderboard, setShowLeaderboard] = useState(false);
   
+  // Block-based programming state
+  const blockEditorRef = useRef(null);
+  const spriteCanvasRef = useRef(null);
+  const [blockXml, setBlockXml] = useState("");
+  const [isBlockRunning, setIsBlockRunning] = useState(false);
+  
   // Proctor code for unlocking done problems (kept for teacher override)
   const [showProctorDialog, setShowProctorDialog] = useState(false);
   const [proctorCode, setProctorCode] = useState("");
