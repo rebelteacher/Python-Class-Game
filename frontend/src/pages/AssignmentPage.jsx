@@ -1232,48 +1232,108 @@ export default function AssignmentPage({ user }) {
                   </CardHeader>
                   <CardContent className="p-0">
                     {assignment.problems?.[currentProblemIndex]?.assignment_type === "block" ? (
-                      /* Block-Based - Scratch Integration */
-                      <div className="h-[600px] flex flex-col">
-                        {/* Scratch Embed or Link */}
-                        <div className="flex-1 flex flex-col items-center justify-center bg-gradient-to-br from-orange-50 to-yellow-50 rounded-lg border-2 border-orange-200 p-6">
-                          <img 
-                            src="https://scratch.mit.edu/images/logo_sm.png" 
-                            alt="Scratch" 
-                            className="h-16 mb-4"
-                          />
-                          <h3 className="text-xl font-bold text-orange-700 mb-2">Create with Scratch!</h3>
-                          <p className="text-gray-600 text-center mb-4 max-w-md">
-                            {assignment.problems?.[currentProblemIndex]?.description || 
-                              "Open Scratch to complete this block-based programming challenge."}
-                          </p>
+                      /* Block-Based - Scratch Integration with Screenshot Upload */
+                      <div className="h-[600px] flex flex-col overflow-y-auto">
+                        {/* Scratch Link */}
+                        <div className="flex items-center justify-between bg-gradient-to-r from-orange-100 to-yellow-100 rounded-lg border border-orange-200 p-4 mb-4">
+                          <div className="flex items-center gap-3">
+                            <img 
+                              src="https://scratch.mit.edu/images/logo_sm.png" 
+                              alt="Scratch" 
+                              className="h-10"
+                            />
+                            <div>
+                              <h3 className="font-bold text-orange-700">Create with Scratch!</h3>
+                              <p className="text-xs text-gray-600">Complete your project, then upload a screenshot</p>
+                            </div>
+                          </div>
                           <Button
                             onClick={() => window.open('https://scratch.mit.edu/projects/editor/', '_blank')}
-                            className="bg-orange-500 hover:bg-orange-600 text-white px-6 py-3 text-lg"
+                            className="bg-orange-500 hover:bg-orange-600 text-white"
+                            size="sm"
                           >
-                            <ExternalLink className="w-5 h-5 mr-2" />
-                            Open Scratch Editor
+                            <ExternalLink className="w-4 h-4 mr-1" />
+                            Open Scratch
                           </Button>
-                          <p className="text-xs text-gray-500 mt-4">
-                            Opens in a new tab • Save your project and copy the URL below
-                          </p>
                         </div>
                         
-                        {/* Project URL Input */}
-                        <div className="mt-4 p-4 bg-white rounded-lg border">
+                        {/* Screenshot Upload Area */}
+                        <div className="flex-1 flex flex-col">
                           <label className="block text-sm font-medium text-gray-700 mb-2">
-                            📎 Paste your Scratch Project URL:
+                            📸 Upload Screenshot of Your Code Blocks:
+                          </label>
+                          
+                          {!scratchScreenshot ? (
+                            <div 
+                              className="flex-1 border-2 border-dashed border-orange-300 rounded-lg bg-orange-50 flex flex-col items-center justify-center cursor-pointer hover:bg-orange-100 transition-colors"
+                              onClick={() => document.getElementById('scratch-screenshot-input')?.click()}
+                            >
+                              <div className="text-5xl mb-3">📷</div>
+                              <p className="text-lg font-medium text-orange-700">Click to Upload Screenshot</p>
+                              <p className="text-sm text-gray-500 mt-1">Take a screenshot of your Scratch code blocks</p>
+                              <p className="text-xs text-gray-400 mt-2">PNG, JPG up to 5MB</p>
+                              <input
+                                id="scratch-screenshot-input"
+                                type="file"
+                                accept="image/*"
+                                className="hidden"
+                                onChange={(e) => {
+                                  const file = e.target.files?.[0];
+                                  if (file) {
+                                    if (file.size > 5 * 1024 * 1024) {
+                                      toast.error("Image must be less than 5MB");
+                                      return;
+                                    }
+                                    const reader = new FileReader();
+                                    reader.onload = (event) => {
+                                      setScratchScreenshot(event.target?.result);
+                                    };
+                                    reader.readAsDataURL(file);
+                                  }
+                                }}
+                                disabled={problemsFinal[getCurrentProblemId()]}
+                              />
+                            </div>
+                          ) : (
+                            <div className="flex-1 flex flex-col">
+                              <div className="relative flex-1 border rounded-lg overflow-hidden bg-gray-100">
+                                <img 
+                                  src={scratchScreenshot} 
+                                  alt="Scratch screenshot" 
+                                  className="w-full h-full object-contain"
+                                />
+                                {!problemsFinal[getCurrentProblemId()] && (
+                                  <Button
+                                    variant="destructive"
+                                    size="sm"
+                                    className="absolute top-2 right-2"
+                                    onClick={() => setScratchScreenshot(null)}
+                                  >
+                                    <X className="w-4 h-4 mr-1" />
+                                    Remove
+                                  </Button>
+                                )}
+                              </div>
+                              <p className="text-xs text-green-600 mt-2 text-center">
+                                ✓ Screenshot uploaded - Click Submit when ready!
+                              </p>
+                            </div>
+                          )}
+                        </div>
+                        
+                        {/* Optional Project URL */}
+                        <div className="mt-3 p-3 bg-gray-50 rounded-lg border">
+                          <label className="block text-xs font-medium text-gray-600 mb-1">
+                            📎 Optional: Scratch Project URL (for teacher reference)
                           </label>
                           <input
                             type="text"
                             placeholder="https://scratch.mit.edu/projects/..."
                             value={code}
                             onChange={(e) => !problemsFinal[getCurrentProblemId()] && setCode(e.target.value)}
-                            className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-orange-500"
+                            className="w-full px-3 py-1.5 text-sm border rounded focus:ring-2 focus:ring-orange-500 focus:border-orange-500"
                             disabled={problemsFinal[getCurrentProblemId()]}
                           />
-                          <p className="text-xs text-gray-500 mt-1">
-                            After saving your Scratch project, click &quot;Share&quot; and paste the project URL here
-                          </p>
                         </div>
                       </div>
                     ) : (
