@@ -3101,10 +3101,27 @@ Be encouraging but fair. Give partial credit for good attempts."""
                 
                 response = await vision_chat.send_message(grading_message)
                 
-                # Parse AI response
+                # Parse AI response - handle markdown code blocks
                 import json
+                import re
+                
+                # Clean up the response - remove markdown code blocks if present
+                clean_response = response.strip()
+                
+                # Remove ```json ... ``` wrapper if present
+                json_match = re.search(r'```(?:json)?\s*([\s\S]*?)\s*```', clean_response)
+                if json_match:
+                    clean_response = json_match.group(1).strip()
+                
+                # Also try to find JSON object directly
+                if not clean_response.startswith('{'):
+                    json_start = clean_response.find('{')
+                    json_end = clean_response.rfind('}') + 1
+                    if json_start != -1 and json_end > json_start:
+                        clean_response = clean_response[json_start:json_end]
+                
                 try:
-                    grading_result = json.loads(response)
+                    grading_result = json.loads(clean_response)
                     base_score = float(grading_result.get("score", 70))
                     blocks_found = grading_result.get("blocks_found", [])
                     strengths = grading_result.get("strengths", [])
@@ -3131,8 +3148,9 @@ Be encouraging but fair. Give partial credit for good attempts."""
                         {"test_id": "blocks_used", "description": "Block types detected", "passed": len(blocks_found) > 0, "expected": "Relevant blocks", "actual": ", ".join(blocks_found) if blocks_found else "None detected"}
                     ]
                     
-                except json.JSONDecodeError:
-                    # AI response wasn't valid JSON, use the raw text
+                except json.JSONDecodeError as je:
+                    # AI response wasn't valid JSON, try to extract score from text
+                    logger.warning(f"JSON parse error: {je}. Response: {clean_response[:200]}")
                     base_score = 75.0
                     feedback = f"✅ Screenshot received and analyzed.\n\nAI Analysis: {response[:500]}"
                     test_results = [{"test_id": "ai_grading", "description": "AI Vision Analysis", "passed": True, "expected": "Screenshot analysis", "actual": "Completed"}]
