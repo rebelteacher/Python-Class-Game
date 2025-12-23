@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef, useCallback, forwardRef, useImperativeHandle } from "react";
 import { Button } from "@/components/ui/button";
-import { Play, Pause, RotateCcw, Plus, Trash2 } from "lucide-react";
+import { Pause, RotateCcw } from "lucide-react";
 
 // Sprite Canvas Component - Displays and animates sprites based on block commands
 const SpriteCanvas = forwardRef(({ 
@@ -14,7 +14,6 @@ const SpriteCanvas = forwardRef(({
   const [sprites, setSprites] = useState([]);
   const [isRunning, setIsRunning] = useState(false);
   const [selectedSprite, setSelectedSprite] = useState(null);
-  const animationRef = useRef(null);
   const commandQueueRef = useRef([]);
 
   // Initialize default sprite
@@ -37,22 +36,187 @@ const SpriteCanvas = forwardRef(({
         penDown: false,
         penColor: "#000000",
         penSize: 2,
-        sayText: "",
-        sayTimeout: null
+        sayText: ""
       }]);
     }
   }, [initialSprites, width, height]);
 
+  const sleep = (ms) => new Promise(resolve => setTimeout(resolve, ms));
+
+  // Glide sprite smoothly
+  const glideSprite = useCallback(async (spriteId, targetX, targetY, duration, currentSprites) => {
+    const sprite = currentSprites.find(s => s.id === spriteId);
+    if (!sprite) return;
+    
+    const startX = sprite.x;
+    const startY = sprite.y;
+    const steps = duration * 60; // 60fps
+    
+    for (let i = 0; i <= steps; i++) {
+      const progress = i / steps;
+      const newX = startX + (targetX - startX) * progress;
+      const newY = startY + (targetY - startY) * progress;
+      
+      setSprites(prev => prev.map(s => 
+        s.id === spriteId ? { ...s, x: newX, y: newY } : s
+      ));
+      
+      await sleep(1000 / 60);
+    }
+  }, []);
+
+  // Execute a single command
+  const executeCommand = useCallback(async (cmd, currentSprites) => {
+    const spriteId = cmd.spriteId || currentSprites[0]?.id;
+    
+    setSprites(prev => prev.map(sprite => {
+      if (sprite.id !== spriteId) return sprite;
+      
+      switch (cmd.type) {
+        case 'move':
+          const radians = (sprite.direction - 90) * Math.PI / 180;
+          return {
+            ...sprite,
+            x: sprite.x + cmd.value * Math.cos(radians),
+            y: sprite.y + cmd.value * Math.sin(radians)
+          };
+        
+        case 'turn_right':
+          return { ...sprite, direction: (sprite.direction + cmd.value) % 360 };
+        
+        case 'turn_left':
+          return { ...sprite, direction: (sprite.direction - cmd.value + 360) % 360 };
+        
+        case 'goto':
+          return { ...sprite, x: cmd.x, y: cmd.y };
+        
+        case 'set_x':
+          return { ...sprite, x: cmd.value };
+        
+        case 'set_y':
+          return { ...sprite, y: cmd.value };
+        
+        case 'point_direction':
+          return { ...sprite, direction: cmd.value };
+        
+        case 'change_size':
+          return { ...sprite, size: Math.max(10, sprite.size + cmd.value) };
+        
+        case 'set_size':
+          return { ...sprite, size: Math.max(10, cmd.value) };
+        
+        case 'show':
+          return { ...sprite, visible: true };
+        
+        case 'hide':
+          return { ...sprite, visible: false };
+        
+        case 'set_costume':
+          return { ...sprite, costume: cmd.value };
+        
+        case 'say':
+          return { ...sprite, sayText: cmd.value };
+        
+        case 'say_clear':
+          return { ...sprite, sayText: "" };
+        
+        default:
+          return sprite;
+      }
+    }));
+    
+    // Handle glide (smooth movement)
+    if (cmd.type === 'glide') {
+      await glideSprite(spriteId, cmd.x, cmd.y, cmd.duration || 1, currentSprites);
+    }
+    
+    // Handle wait
+    if (cmd.type === 'wait') {
+      await sleep(cmd.duration || 1000);
+    }
+  }, [glideSprite]);
+
+  // Execute commands
+  const executeCommands = useCallback(async (commands) => {
+    setIsRunning(true);
+    commandQueueRef.current = [...commands];
+    
+    for (const cmd of commands) {
+      await executeCommand(cmd, sprites);
+      await sleep(50); // Small delay between commands
+    }
+    
+    setIsRunning(false);
+  }, [executeCommand, sprites]);
+
+  // Stop execution
+  const stopExecution = useCallback(() => {
+    setIsRunning(false);
+    commandQueueRef.current = [];
+  }, []);
+
+  // Reset canvas
+  const resetCanvas = useCallback(() => {
+    stopExecution();
+    setSprites([{
+      id: "sprite-1",
+      name: "Rocket",
+      x: width / 2,
+      y: height / 2,
+      direction: 0,
+      size: 50,
+      visible: true,
+      costume: "🚀",
+      color: "#3B82F6",
+      type: "emoji",
+      penDown: false,
+      penColor: "#000000",
+      penSize: 2,
+      sayText: ""
+    }]);
+  }, [stopExecution, width, height]);
+
+  // Add sprite
+  const addSprite = useCallback((spriteConfig) => {
+    const newSprite = {
+      id: `sprite-${Date.now()}`,
+      name: spriteConfig.name || "Sprite",
+      x: spriteConfig.x || width / 2,
+      y: spriteConfig.y || height / 2,
+      direction: 0,
+      size: spriteConfig.size || 50,
+      visible: true,
+      costume: spriteConfig.costume || spriteConfig.emoji || "⭐",
+      color: spriteConfig.color || "#3B82F6",
+      type: spriteConfig.type || "emoji",
+      imageData: spriteConfig.imageData,
+      penDown: false,
+      penColor: "#000000",
+      penSize: 2,
+      sayText: ""
+    };
+    setSprites(prev => [...prev, newSprite]);
+    return newSprite.id;
+  }, [width, height]);
+
+  // Remove sprite
+  const removeSprite = useCallback((id) => {
+    setSprites(prev => prev.filter(s => s.id !== id));
+    if (selectedSprite === id) {
+      setSelectedSprite(null);
+    }
+  }, [selectedSprite]);
+
   // Expose methods to parent via ref
   useImperativeHandle(ref, () => ({
-    runCommands: (commands) => executeCommands(commands),
-    stop: () => stopExecution(),
-    reset: () => resetCanvas(),
-    addSprite: (sprite) => addSprite(sprite),
-    removeSprite: (id) => removeSprite(id),
+    runCommands: executeCommands,
+    stop: stopExecution,
+    reset: resetCanvas,
+    addSprite: addSprite,
+    removeSprite: removeSprite,
     getSprites: () => sprites,
     setSelectedSprite: (id) => setSelectedSprite(id)
-  }));
+  }), [executeCommands, stopExecution, resetCanvas, addSprite, removeSprite, sprites]);
 
   // Draw the canvas
   const drawCanvas = useCallback(() => {
@@ -148,162 +312,6 @@ const SpriteCanvas = forwardRef(({
   useEffect(() => {
     drawCanvas();
   }, [drawCanvas]);
-
-  // Execute commands
-  const executeCommands = async (commands) => {
-    setIsRunning(true);
-    commandQueueRef.current = [...commands];
-    
-    for (const cmd of commands) {
-      if (!isRunning) break;
-      await executeCommand(cmd);
-      await sleep(50); // Small delay between commands
-    }
-    
-    setIsRunning(false);
-  };
-
-  const executeCommand = async (cmd) => {
-    const spriteId = cmd.spriteId || sprites[0]?.id;
-    
-    setSprites(prev => prev.map(sprite => {
-      if (sprite.id !== spriteId) return sprite;
-      
-      switch (cmd.type) {
-        case 'move':
-          const radians = (sprite.direction - 90) * Math.PI / 180;
-          return {
-            ...sprite,
-            x: sprite.x + cmd.value * Math.cos(radians),
-            y: sprite.y + cmd.value * Math.sin(radians)
-          };
-        
-        case 'turn_right':
-          return { ...sprite, direction: (sprite.direction + cmd.value) % 360 };
-        
-        case 'turn_left':
-          return { ...sprite, direction: (sprite.direction - cmd.value + 360) % 360 };
-        
-        case 'goto':
-          return { ...sprite, x: cmd.x, y: cmd.y };
-        
-        case 'set_x':
-          return { ...sprite, x: cmd.value };
-        
-        case 'set_y':
-          return { ...sprite, y: cmd.value };
-        
-        case 'point_direction':
-          return { ...sprite, direction: cmd.value };
-        
-        case 'change_size':
-          return { ...sprite, size: Math.max(10, sprite.size + cmd.value) };
-        
-        case 'set_size':
-          return { ...sprite, size: Math.max(10, cmd.value) };
-        
-        case 'show':
-          return { ...sprite, visible: true };
-        
-        case 'hide':
-          return { ...sprite, visible: false };
-        
-        case 'set_costume':
-          return { ...sprite, costume: cmd.value };
-        
-        case 'say':
-          return { ...sprite, sayText: cmd.value };
-        
-        case 'say_clear':
-          return { ...sprite, sayText: "" };
-        
-        default:
-          return sprite;
-      }
-    }));
-    
-    // Handle glide (smooth movement)
-    if (cmd.type === 'glide') {
-      await glideSprite(spriteId, cmd.x, cmd.y, cmd.duration || 1);
-    }
-  };
-
-  const glideSprite = async (spriteId, targetX, targetY, duration) => {
-    const sprite = sprites.find(s => s.id === spriteId);
-    if (!sprite) return;
-    
-    const startX = sprite.x;
-    const startY = sprite.y;
-    const steps = duration * 60; // 60fps
-    
-    for (let i = 0; i <= steps; i++) {
-      const progress = i / steps;
-      const newX = startX + (targetX - startX) * progress;
-      const newY = startY + (targetY - startY) * progress;
-      
-      setSprites(prev => prev.map(s => 
-        s.id === spriteId ? { ...s, x: newX, y: newY } : s
-      ));
-      
-      await sleep(1000 / 60);
-    }
-  };
-
-  const sleep = (ms) => new Promise(resolve => setTimeout(resolve, ms));
-
-  const stopExecution = () => {
-    setIsRunning(false);
-    commandQueueRef.current = [];
-  };
-
-  const resetCanvas = () => {
-    stopExecution();
-    setSprites([{
-      id: "sprite-1",
-      name: "Rocket",
-      x: width / 2,
-      y: height / 2,
-      direction: 0,
-      size: 50,
-      visible: true,
-      costume: "🚀",
-      color: "#3B82F6",
-      type: "emoji",
-      penDown: false,
-      penColor: "#000000",
-      penSize: 2,
-      sayText: ""
-    }]);
-  };
-
-  const addSprite = (spriteConfig) => {
-    const newSprite = {
-      id: `sprite-${Date.now()}`,
-      name: spriteConfig.name || "Sprite",
-      x: spriteConfig.x || width / 2,
-      y: spriteConfig.y || height / 2,
-      direction: 0,
-      size: spriteConfig.size || 50,
-      visible: true,
-      costume: spriteConfig.costume || spriteConfig.emoji || "⭐",
-      color: spriteConfig.color || "#3B82F6",
-      type: spriteConfig.type || "emoji",
-      imageData: spriteConfig.imageData,
-      penDown: false,
-      penColor: "#000000",
-      penSize: 2,
-      sayText: ""
-    };
-    setSprites(prev => [...prev, newSprite]);
-    return newSprite.id;
-  };
-
-  const removeSprite = (id) => {
-    setSprites(prev => prev.filter(s => s.id !== id));
-    if (selectedSprite === id) {
-      setSelectedSprite(null);
-    }
-  };
 
   // Handle canvas click for sprite selection
   const handleCanvasClick = (e) => {
