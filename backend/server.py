@@ -9073,6 +9073,89 @@ async def initialize_admin_account():
     except Exception as e:
         logger.error(f"Error initializing admin account: {str(e)}")
 
+@app.on_event("startup")
+async def seed_block_problems():
+    """Seed block-based curriculum problems if they don't exist"""
+    try:
+        # Check if block problems already exist
+        existing_count = await db.problems.count_documents({"assignment_type": "block"})
+        if existing_count >= 30:
+            logger.info(f"✅ Block problems already exist: {existing_count}")
+            return
+        
+        logger.info("🔄 Seeding block problems...")
+        
+        block_problems = [
+            # Chapter 1: Block Basics
+            {"title": "Hello Blocks!", "description": "Create your first block program! Use the 'say' block to make the sprite say 'Hello, World!'", "unit": "Unit 1: Block-Based Coding", "chapter": "Chapter 1: Block Basics", "lesson": "Lesson 1: What are Blocks?", "difficulty": "Easy", "problem_type": "Class Practice"},
+            {"title": "Block Connections", "description": "Connect multiple blocks together to make the sprite say two different messages in sequence.", "unit": "Unit 1: Block-Based Coding", "chapter": "Chapter 1: Block Basics", "lesson": "Lesson 1: What are Blocks?", "difficulty": "Easy", "problem_type": "Independent Practice"},
+            {"title": "Move Right", "description": "Use motion blocks to move the sprite 100 steps to the right.", "unit": "Unit 1: Block-Based Coding", "chapter": "Chapter 1: Block Basics", "lesson": "Lesson 2: Motion & Actions", "difficulty": "Easy", "problem_type": "Class Practice"},
+            {"title": "Square Walk", "description": "Make the sprite walk in a square pattern using move and turn blocks.", "unit": "Unit 1: Block-Based Coding", "chapter": "Chapter 1: Block Basics", "lesson": "Lesson 2: Motion & Actions", "difficulty": "Medium", "problem_type": "Independent Practice"},
+            {"title": "Click to Move", "description": "Use the 'when clicked' event block to make the sprite move when you click on it.", "unit": "Unit 1: Block-Based Coding", "chapter": "Chapter 1: Block Basics", "lesson": "Lesson 3: Events & Triggers", "difficulty": "Easy", "problem_type": "Class Practice"},
+            {"title": "Keyboard Controls", "description": "Use 'when key pressed' events to move the sprite with arrow keys.", "unit": "Unit 1: Block-Based Coding", "chapter": "Chapter 1: Block Basics", "lesson": "Lesson 3: Events & Triggers", "difficulty": "Medium", "problem_type": "Independent Practice"},
+            # Chapter 2: Loops & Repetition
+            {"title": "Repeat 4 Times", "description": "Use a repeat block to draw a square by repeating 'move' and 'turn' 4 times.", "unit": "Unit 1: Block-Based Coding", "chapter": "Chapter 2: Loops & Repetition", "lesson": "Lesson 4: Repeat Blocks", "difficulty": "Easy", "problem_type": "Class Practice"},
+            {"title": "Star Pattern", "description": "Use a repeat block to draw a 5-pointed star pattern.", "unit": "Unit 1: Block-Based Coding", "chapter": "Chapter 2: Loops & Repetition", "lesson": "Lesson 4: Repeat Blocks", "difficulty": "Medium", "problem_type": "Independent Practice"},
+            {"title": "Spinning Forever", "description": "Use a forever loop to make the sprite spin continuously.", "unit": "Unit 1: Block-Based Coding", "chapter": "Chapter 2: Loops & Repetition", "lesson": "Lesson 5: Forever Loops", "difficulty": "Easy", "problem_type": "Class Practice"},
+            {"title": "Bouncing Ball", "description": "Create an animation where the sprite bounces back and forth using a forever loop.", "unit": "Unit 1: Block-Based Coding", "chapter": "Chapter 2: Loops & Repetition", "lesson": "Lesson 5: Forever Loops", "difficulty": "Medium", "problem_type": "Independent Practice"},
+            {"title": "Grid of Dots", "description": "Use nested loops to create a 3x3 grid pattern.", "unit": "Unit 1: Block-Based Coding", "chapter": "Chapter 2: Loops & Repetition", "lesson": "Lesson 6: Nested Loops", "difficulty": "Hard", "problem_type": "Challenge"},
+            {"title": "Spiral Pattern", "description": "Create a spiral pattern using nested loops with increasing step sizes.", "unit": "Unit 1: Block-Based Coding", "chapter": "Chapter 2: Loops & Repetition", "lesson": "Lesson 6: Nested Loops", "difficulty": "Hard", "problem_type": "Independent Practice"},
+            # Chapter 3: Decisions & Logic
+            {"title": "Edge Detection", "description": "Use an if block to make the sprite turn around when it touches the edge.", "unit": "Unit 1: Block-Based Coding", "chapter": "Chapter 3: Decisions & Logic", "lesson": "Lesson 7: If Blocks", "difficulty": "Easy", "problem_type": "Class Practice"},
+            {"title": "Color Sensor", "description": "Make the sprite react differently when touching different colors.", "unit": "Unit 1: Block-Based Coding", "chapter": "Chapter 3: Decisions & Logic", "lesson": "Lesson 7: If Blocks", "difficulty": "Medium", "problem_type": "Independent Practice"},
+            {"title": "Day or Night", "description": "Use if-else to show different messages based on a time variable.", "unit": "Unit 1: Block-Based Coding", "chapter": "Chapter 3: Decisions & Logic", "lesson": "Lesson 8: If-Else Blocks", "difficulty": "Easy", "problem_type": "Class Practice"},
+            {"title": "Guess the Number", "description": "Create a simple guessing game using if-else blocks.", "unit": "Unit 1: Block-Based Coding", "chapter": "Chapter 3: Decisions & Logic", "lesson": "Lesson 8: If-Else Blocks", "difficulty": "Medium", "problem_type": "Independent Practice"},
+            {"title": "Number Comparisons", "description": "Use comparison operators to check if a number is greater than, less than, or equal to 10.", "unit": "Unit 1: Block-Based Coding", "chapter": "Chapter 3: Decisions & Logic", "lesson": "Lesson 9: Comparison & Logic", "difficulty": "Medium", "problem_type": "Class Practice"},
+            {"title": "AND/OR Logic", "description": "Combine multiple conditions using AND and OR operators.", "unit": "Unit 1: Block-Based Coding", "chapter": "Chapter 3: Decisions & Logic", "lesson": "Lesson 9: Comparison & Logic", "difficulty": "Hard", "problem_type": "Independent Practice"},
+            # Chapter 4: Variables & Data
+            {"title": "Create a Counter", "description": "Create a variable called 'counter' and set it to 0.", "unit": "Unit 1: Block-Based Coding", "chapter": "Chapter 4: Variables & Data", "lesson": "Lesson 10: What are Variables?", "difficulty": "Easy", "problem_type": "Class Practice"},
+            {"title": "Name Storage", "description": "Create a variable to store and display a name.", "unit": "Unit 1: Block-Based Coding", "chapter": "Chapter 4: Variables & Data", "lesson": "Lesson 10: What are Variables?", "difficulty": "Easy", "problem_type": "Independent Practice"},
+            {"title": "Click Counter", "description": "Increase a counter variable by 1 each time the sprite is clicked.", "unit": "Unit 1: Block-Based Coding", "chapter": "Chapter 4: Variables & Data", "lesson": "Lesson 11: Using Variables", "difficulty": "Easy", "problem_type": "Class Practice"},
+            {"title": "Simple Calculator", "description": "Use variables to add two numbers together and display the result.", "unit": "Unit 1: Block-Based Coding", "chapter": "Chapter 4: Variables & Data", "lesson": "Lesson 11: Using Variables", "difficulty": "Medium", "problem_type": "Independent Practice"},
+            {"title": "Score Tracker", "description": "Create a score variable that increases when you collect items.", "unit": "Unit 1: Block-Based Coding", "chapter": "Chapter 4: Variables & Data", "lesson": "Lesson 12: Variables in Games", "difficulty": "Medium", "problem_type": "Class Practice"},
+            {"title": "Lives System", "description": "Create a lives variable that decreases and shows 'Game Over' when it reaches 0.", "unit": "Unit 1: Block-Based Coding", "chapter": "Chapter 4: Variables & Data", "lesson": "Lesson 12: Variables in Games", "difficulty": "Medium", "problem_type": "Project"},
+            # Chapter 5: Blocks to Text
+            {"title": "Blocks vs Code", "description": "Compare a block program with its Python equivalent. Match the blocks to code.", "unit": "Unit 1: Block-Based Coding", "chapter": "Chapter 5: Blocks to Text", "lesson": "Lesson 13: Blocks → Python", "difficulty": "Easy", "problem_type": "Class Practice"},
+            {"title": "Translate to Python", "description": "Convert a simple repeat block program into Python code.", "unit": "Unit 1: Block-Based Coding", "chapter": "Chapter 5: Blocks to Text", "lesson": "Lesson 13: Blocks → Python", "difficulty": "Medium", "problem_type": "Independent Practice"},
+            {"title": "First Print Statement", "description": "Write your first Python print() statement to display 'Hello, Python!'", "unit": "Unit 1: Block-Based Coding", "chapter": "Chapter 5: Blocks to Text", "lesson": "Lesson 14: Writing Your First Python", "difficulty": "Easy", "problem_type": "Class Practice"},
+            {"title": "Fix the Syntax", "description": "Debug a Python program with a missing quotation mark.", "unit": "Unit 1: Block-Based Coding", "chapter": "Chapter 5: Blocks to Text", "lesson": "Lesson 14: Writing Your First Python", "difficulty": "Medium", "problem_type": "Debugging"},
+            {"title": "Loop Conversion", "description": "Convert a repeat 5 times block into a Python for loop.", "unit": "Unit 1: Block-Based Coding", "chapter": "Chapter 5: Blocks to Text", "lesson": "Lesson 15: Transition Challenge", "difficulty": "Medium", "problem_type": "Assessment"},
+            {"title": "Conditional Conversion", "description": "Convert an if-else block program into Python code.", "unit": "Unit 1: Block-Based Coding", "chapter": "Chapter 5: Blocks to Text", "lesson": "Lesson 15: Transition Challenge", "difficulty": "Medium", "problem_type": "Assessment"},
+            {"title": "Variable Conversion", "description": "Convert a block program with variables into Python code.", "unit": "Unit 1: Block-Based Coding", "chapter": "Chapter 5: Blocks to Text", "lesson": "Lesson 15: Transition Challenge", "difficulty": "Hard", "problem_type": "Assessment"},
+            {"title": "Full Program Conversion", "description": "Convert a complete block program using loops, conditions, and variables into Python.", "unit": "Unit 1: Block-Based Coding", "chapter": "Chapter 5: Blocks to Text", "lesson": "Lesson 15: Transition Challenge", "difficulty": "Hard", "problem_type": "Assessment"},
+        ]
+        
+        for problem in block_problems:
+            # Check if this specific problem already exists
+            existing = await db.problems.find_one({"title": problem["title"], "assignment_type": "block"})
+            if not existing:
+                problem_doc = {
+                    "id": str(uuid.uuid4()),
+                    "title": problem["title"],
+                    "description": problem["description"],
+                    "starter_code": "<xml xmlns=\"https://developers.google.com/blockly/xml\"></xml>",
+                    "solution_code": "",
+                    "expected_output": "",
+                    "category": "Block Programming",
+                    "difficulty": problem["difficulty"],
+                    "unit": problem["unit"],
+                    "chapter": problem["chapter"],
+                    "lesson": problem["lesson"],
+                    "problem_type": problem["problem_type"],
+                    "assignment_type": "block",
+                    "resources_link": "",
+                    "csta_standard": "",
+                    "creator_id": "system",
+                    "creator_name": "System",
+                    "created_at": datetime.now(timezone.utc).isoformat()
+                }
+                await db.problems.insert_one(problem_doc)
+        
+        final_count = await db.problems.count_documents({"assignment_type": "block"})
+        logger.info(f"✅ Block problems seeded: {final_count}")
+    except Exception as e:
+        logger.error(f"Error seeding block problems: {str(e)}")
+
 
 @app.on_event("shutdown")
 async def shutdown_db_client():
