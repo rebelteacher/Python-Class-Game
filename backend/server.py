@@ -3074,49 +3074,32 @@ Respond in this exact JSON format:
 
 Be encouraging but fair. Give partial credit for good attempts."""
 
-                # Initialize LLM with vision capability
-                import httpx
-                import base64
+                # Initialize LLM with vision capability using emergentintegrations
+                from emergentintegrations.llm.chat import ImageContent
                 
                 # Extract base64 data from data URL if needed
-                image_data = screenshot_data
+                image_base64 = screenshot_data
                 if screenshot_data.startswith('data:'):
                     # Extract the base64 part after the comma
-                    image_data = screenshot_data.split(',')[1] if ',' in screenshot_data else screenshot_data
+                    image_base64 = screenshot_data.split(',')[1] if ',' in screenshot_data else screenshot_data
                 
-                # Call OpenAI Vision API directly
-                async with httpx.AsyncClient(timeout=60.0) as client:
-                    vision_response = await client.post(
-                        "https://api.openai.com/v1/chat/completions",
-                        headers={
-                            "Authorization": f"Bearer {api_key}",
-                            "Content-Type": "application/json"
-                        },
-                        json={
-                            "model": "gpt-4o",
-                            "messages": [
-                                {
-                                    "role": "user",
-                                    "content": [
-                                        {"type": "text", "text": grading_prompt},
-                                        {
-                                            "type": "image_url",
-                                            "image_url": {
-                                                "url": f"data:image/png;base64,{image_data}"
-                                            }
-                                        }
-                                    ]
-                                }
-                            ],
-                            "max_tokens": 1000
-                        }
-                    )
-                    
-                    if vision_response.status_code != 200:
-                        raise Exception(f"Vision API error: {vision_response.status_code} - {vision_response.text}")
-                    
-                    vision_result = vision_response.json()
-                    response = vision_result["choices"][0]["message"]["content"]
+                # Create image content
+                image_content = ImageContent(image_base64=image_base64)
+                
+                # Initialize chat with proper parameters
+                vision_chat = LlmChat(
+                    api_key=api_key,
+                    session_id=f"scratch_grading_{submission.assignment_id}_{user['id']}_{uuid.uuid4().hex[:8]}",
+                    system_message="You are an expert Scratch programming instructor who grades student code screenshots. Analyze the visual blocks and provide fair, encouraging feedback."
+                ).with_model("openai", "gpt-4o")
+                
+                # Send message with image
+                grading_message = UserMessage(
+                    text=grading_prompt,
+                    file_contents=[image_content]
+                )
+                
+                response = await vision_chat.send_message(grading_message)
                 
                 # Parse AI response
                 import json
