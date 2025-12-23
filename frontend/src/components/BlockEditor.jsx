@@ -394,29 +394,8 @@ const BlockEditor = forwardRef(({
         workspaceRef.current = null;
       }
     };
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
-
-  // Expose methods via ref
-  useImperativeHandle(ref, () => ({
-    getXml: () => {
-      if (!workspaceRef.current) return '';
-      const xml = Blockly.Xml.workspaceToDom(workspaceRef.current);
-      return Blockly.Xml.domToText(xml);
-    },
-    setXml: (xmlText) => {
-      if (!workspaceRef.current || !xmlText) return;
-      workspaceRef.current.clear();
-      Blockly.Xml.domToWorkspace(Blockly.utils.xml.textToDom(xmlText), workspaceRef.current);
-    },
-    getCommands: () => {
-      return blocksToCommands();
-    },
-    clear: () => {
-      if (workspaceRef.current) {
-        workspaceRef.current.clear();
-      }
-    }
-  }), []);
 
   // Convert blocks to executable commands
   const blocksToCommands = useCallback(() => {
@@ -440,6 +419,30 @@ const BlockEditor = forwardRef(({
       }
       
       return defaultValue;
+    };
+
+    const processBlockForCommands = (block, cmds) => {
+      if (!block) return;
+      const type = block.type;
+      switch (type) {
+        case 'sprite_move':
+          cmds.push({ type: 'move', value: getBlockValue(block, 'STEPS', 10) });
+          break;
+        case 'sprite_turn_right':
+          cmds.push({ type: 'turn_right', value: getBlockValue(block, 'DEGREES', 15) });
+          break;
+        case 'sprite_turn_left':
+          cmds.push({ type: 'turn_left', value: getBlockValue(block, 'DEGREES', 15) });
+          break;
+        case 'sprite_say':
+          cmds.push({ type: 'say', value: getBlockValue(block, 'TEXT', 'Hello!') });
+          break;
+        case 'control_wait':
+          cmds.push({ type: 'wait', duration: getBlockValue(block, 'SECS', 1) * 1000 });
+          break;
+        default:
+          break;
+      }
     };
 
     const processBlock = (block) => {
@@ -504,33 +507,13 @@ const BlockEditor = forwardRef(({
             commands.push(...repeatCommands);
           }
           break;
+        default:
+          break;
       }
       
       // Process next block in sequence
       if (block.getNextBlock()) {
         processBlock(block.getNextBlock());
-      }
-    };
-
-    const processBlockForCommands = (block, cmds) => {
-      if (!block) return;
-      const type = block.type;
-      switch (type) {
-        case 'sprite_move':
-          cmds.push({ type: 'move', value: getBlockValue(block, 'STEPS', 10) });
-          break;
-        case 'sprite_turn_right':
-          cmds.push({ type: 'turn_right', value: getBlockValue(block, 'DEGREES', 15) });
-          break;
-        case 'sprite_turn_left':
-          cmds.push({ type: 'turn_left', value: getBlockValue(block, 'DEGREES', 15) });
-          break;
-        case 'sprite_say':
-          cmds.push({ type: 'say', value: getBlockValue(block, 'TEXT', 'Hello!') });
-          break;
-        case 'control_wait':
-          cmds.push({ type: 'wait', duration: getBlockValue(block, 'SECS', 1) * 1000 });
-          break;
       }
     };
 
@@ -541,6 +524,26 @@ const BlockEditor = forwardRef(({
 
     return commands;
   }, []);
+
+  // Expose methods via ref
+  useImperativeHandle(ref, () => ({
+    getXml: () => {
+      if (!workspaceRef.current) return '';
+      const xml = Blockly.Xml.workspaceToDom(workspaceRef.current);
+      return Blockly.Xml.domToText(xml);
+    },
+    setXml: (xmlText) => {
+      if (!workspaceRef.current || !xmlText) return;
+      workspaceRef.current.clear();
+      Blockly.Xml.domToWorkspace(Blockly.utils.xml.textToDom(xmlText), workspaceRef.current);
+    },
+    getCommands: blocksToCommands,
+    clear: () => {
+      if (workspaceRef.current) {
+        workspaceRef.current.clear();
+      }
+    }
+  }), [blocksToCommands]);
 
   return (
     <div className="w-full h-full">
