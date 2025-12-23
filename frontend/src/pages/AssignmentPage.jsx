@@ -1538,6 +1538,110 @@ export default function AssignmentPage({ user }) {
               </PanelGroup>
             ) : (
               // Teacher Demo/Sandbox Mode - Interactive coding without submissions
+              assignment.problems?.[currentProblemIndex]?.assignment_type === "block" ? (
+                /* Block-Based Teacher Demo - Scratch Integration */
+                <div className="h-full flex flex-col gap-4 p-4">
+                  <Card className="border-2 border-orange-200 bg-gradient-to-br from-orange-50 to-yellow-50">
+                    <CardHeader>
+                      <CardTitle className="flex justify-between items-center">
+                        <div className="flex items-center gap-2">
+                          <img 
+                            src="https://scratch.mit.edu/images/logo_sm.png" 
+                            alt="Scratch" 
+                            className="h-8"
+                          />
+                          <span className="text-orange-700">Block-Based Teaching Mode</span>
+                        </div>
+                        <span className="text-sm text-green-600 font-semibold">
+                          🎓 Teacher Demo
+                        </span>
+                      </CardTitle>
+                    </CardHeader>
+                    <CardContent className="space-y-4">
+                      <p className="text-gray-600">
+                        {assignment.problems?.[currentProblemIndex]?.description || 
+                          "Open Scratch to demonstrate this block-based programming challenge."}
+                      </p>
+                      
+                      <div className="flex gap-3">
+                        <Button
+                          onClick={() => window.open('https://scratch.mit.edu/projects/editor/', '_blank')}
+                          className="bg-orange-500 hover:bg-orange-600 text-white flex-1"
+                        >
+                          <ExternalLink className="w-4 h-4 mr-2" />
+                          Open Scratch Editor (Demo)
+                        </Button>
+                        <Button
+                          onClick={() => navigate('/blocks/teach')}
+                          variant="outline"
+                          className="border-orange-300 text-orange-700 hover:bg-orange-100"
+                        >
+                          <BookOpen className="w-4 h-4 mr-2" />
+                          Teaching Guide
+                        </Button>
+                      </div>
+
+                      <div className="p-4 bg-orange-100 rounded-lg text-sm">
+                        <strong className="text-orange-800">💡 Teaching Tips:</strong>
+                        <ul className="mt-2 text-orange-700 space-y-1 ml-4 list-disc">
+                          <li>Share your screen while demonstrating in Scratch</li>
+                          <li>Have students follow along on their own computers</li>
+                          <li>Use the Teaching Guide for step-by-step instructions</li>
+                        </ul>
+                      </div>
+                    </CardContent>
+                  </Card>
+                  
+                  {/* Quick Links */}
+                  <Card>
+                    <CardHeader>
+                      <CardTitle className="text-lg">Quick Resources</CardTitle>
+                    </CardHeader>
+                    <CardContent className="grid grid-cols-2 gap-3">
+                      <Button 
+                        variant="outline" 
+                        className="h-auto py-3"
+                        onClick={() => window.open('https://scratch.mit.edu/ideas', '_blank')}
+                      >
+                        <div className="text-center">
+                          <div className="text-2xl mb-1">💡</div>
+                          <div className="text-xs">Scratch Ideas</div>
+                        </div>
+                      </Button>
+                      <Button 
+                        variant="outline" 
+                        className="h-auto py-3"
+                        onClick={() => window.open('https://scratch.mit.edu/explore/projects/all', '_blank')}
+                      >
+                        <div className="text-center">
+                          <div className="text-2xl mb-1">🎨</div>
+                          <div className="text-xs">Example Projects</div>
+                        </div>
+                      </Button>
+                      <Button 
+                        variant="outline" 
+                        className="h-auto py-3"
+                        onClick={() => navigate('/blocks-curriculum')}
+                      >
+                        <div className="text-center">
+                          <div className="text-2xl mb-1">📚</div>
+                          <div className="text-xs">Curriculum</div>
+                        </div>
+                      </Button>
+                      <Button 
+                        variant="outline" 
+                        className="h-auto py-3"
+                        onClick={() => navigate('/library?type=block')}
+                      >
+                        <div className="text-center">
+                          <div className="text-2xl mb-1">📋</div>
+                          <div className="text-xs">All Block Problems</div>
+                        </div>
+                      </Button>
+                    </CardContent>
+                  </Card>
+                </div>
+              ) : (
               <PanelGroup direction="horizontal" style={{ height: '100%' }}>
                 {/* Code Editor - Left */}
                 <Panel defaultSize={50} minSize={30}>
