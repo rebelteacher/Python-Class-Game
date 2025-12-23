@@ -68,6 +68,7 @@ export default function AssignmentPage({ user }) {
   const spriteCanvasRef = useRef(null);
   const [blockXml, setBlockXml] = useState("");
   const [isBlockRunning, setIsBlockRunning] = useState(false);
+  const [scratchScreenshot, setScratchScreenshot] = useState(null); // Screenshot for Scratch grading
   
   // Proctor code for unlocking done problems (kept for teacher override)
   const [showProctorDialog, setShowProctorDialog] = useState(false);
