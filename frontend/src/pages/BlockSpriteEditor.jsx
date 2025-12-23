@@ -802,6 +802,32 @@ export default function BlockSpriteEditor() {
   const [isGenerating, setIsGenerating] = useState(false);
   const [customSprites, setCustomSprites] = useState([]);
 
+  // Fetch custom sprites from backend
+  useEffect(() => {
+    const fetchCustomSprites = async () => {
+      try {
+        const response = await fetch(`${process.env.REACT_APP_BACKEND_URL}/api/sprites`, {
+          credentials: 'include'
+        });
+        if (response.ok) {
+          const data = await response.json();
+          // Transform backend data to match expected format
+          const transformed = data.map(sprite => ({
+            id: sprite.id,
+            name: sprite.name || sprite.prompt?.substring(0, 30) || 'Custom Sprite',
+            imageData: sprite.image_data,
+            prompt: sprite.prompt,
+            style: sprite.style
+          }));
+          setCustomSprites(transformed);
+        }
+      } catch (error) {
+        console.error('Error fetching custom sprites:', error);
+      }
+    };
+    fetchCustomSprites();
+  }, []);
+
   // Initialize Blockly
   useEffect(() => {
     if (!blocklyDiv.current || workspaceRef.current) return;
