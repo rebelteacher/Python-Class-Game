@@ -243,6 +243,18 @@ frontend:
       - working: "NA"
         agent: "main"
         comment: "Created complete QuestionBank component with: MC question creation form (question text, 4 choices, correct answer selection, chapter, lesson, difficulty), bulk CSV upload dialog with template example, 3-level folder structure (Chapter > Lesson > Questions), question cards showing all choices and correct answer, edit/delete functionality for questions. Organized questions by chapter and lesson with expandable folders."
+
+  - task: "Block Curriculum Page Testing"
+    implemented: true
+    working: false
+    file: "frontend/src/pages/BlockCurriculum.jsx"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: false
+    status_history:
+      - working: false
+        agent: "testing"
+        comment: "BLOCK CURRICULUM PAGE TESTING COMPLETE ❌ - Critical authentication and routing issues identified. ✅ Backend API working: Found 33 block problems available via GET /api/problems?assignment_type=block with proper authentication. ✅ Teacher login API working: POST /api/auth/teacher-login returns valid session token. ❌ CRITICAL ISSUE: Frontend authentication flow broken - login form submission not working in browser automation, causing redirects to landing page instead of teacher dashboard. ❌ ROUTE ACCESS ISSUE: /blocks-curriculum route redirects to landing page due to authentication failure, preventing access to the Block Curriculum page. ✅ Component structure verified: BlockCurriculum.jsx properly implemented with header, quick action cards, learning objectives banner, chapter organization, lesson expansion, and problem details. ✅ Backend data confirmed: Block problems properly organized by chapters (Chapter 1: What is Programming?, Chapter 2: Block-Based Environments, etc.) with lesson structure and problem details including titles, types, difficulty badges. ❌ TESTING BLOCKED: Cannot complete UI testing scenarios (header verification, quick action cards, chapter expansion, lesson expansion, problem details, View in Library button) due to authentication/routing issues preventing page access."
   
   - task: "Add Question Bank route and navigation"
     implemented: true
