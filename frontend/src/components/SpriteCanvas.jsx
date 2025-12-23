@@ -17,29 +17,31 @@ const SpriteCanvas = forwardRef(({
   const commandQueueRef = useRef([]);
 
   // Initialize default sprite
-  useEffect(() => {
+  const getInitialSprites = useCallback(() => {
     if (initialSprites.length > 0) {
-      setSprites(initialSprites);
-    } else {
-      // Default sprite (rocket for space theme)
-      setSprites([{
-        id: "sprite-1",
-        name: "Rocket",
-        x: width / 2,
-        y: height / 2,
-        direction: 0, // 0 = right, 90 = up, 180 = left, 270 = down
-        size: 50,
-        visible: true,
-        costume: "🚀",
-        color: "#3B82F6",
-        type: "emoji",
-        penDown: false,
-        penColor: "#000000",
-        penSize: 2,
-        sayText: ""
-      }]);
+      return initialSprites;
     }
+    // Default sprite (rocket for space theme)
+    return [{
+      id: "sprite-1",
+      name: "Rocket",
+      x: width / 2,
+      y: height / 2,
+      direction: 0, // 0 = right, 90 = up, 180 = left, 270 = down
+      size: 50,
+      visible: true,
+      costume: "🚀",
+      color: "#3B82F6",
+      type: "emoji",
+      penDown: false,
+      penColor: "#000000",
+      penSize: 2,
+      sayText: ""
+    }];
   }, [initialSprites, width, height]);
+
+  // Set initial sprites on mount
+  const [sprites, setSprites] = useState(getInitialSprites);
 
   const sleep = (ms) => new Promise(resolve => setTimeout(resolve, ms));
 
