@@ -1272,7 +1272,7 @@ export default function AssignmentPage({ user }) {
                             disabled={problemsFinal[getCurrentProblemId()]}
                           />
                           <p className="text-xs text-gray-500 mt-1">
-                            After saving your Scratch project, click "Share" and paste the project URL here
+                            After saving your Scratch project, click &quot;Share&quot; and paste the project URL here
                           </p>
                         </div>
                       </div>
