@@ -473,6 +473,7 @@ class SubmissionCreate(BaseModel):
     assignment_id: str
     problem_id: Optional[str] = None  # Optional for backward compatibility
     code: str
+    screenshot: Optional[str] = None  # Base64 encoded screenshot for Scratch grading
 
 
 class HintUsage(BaseModel):
