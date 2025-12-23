@@ -3075,21 +3075,48 @@ Respond in this exact JSON format:
 Be encouraging but fair. Give partial credit for good attempts."""
 
                 # Initialize LLM with vision capability
-                llm = LlmChat(api_key=api_key)
+                import httpx
+                import base64
                 
-                # Create message with image
-                response = await llm.chat_async(
-                    model="gpt-4o",
-                    messages=[
-                        UserMessage(
-                            content=[
-                                {"type": "text", "text": grading_prompt},
-                                {"type": "image_url", "image_url": {"url": screenshot_data}}
-                            ]
-                        )
-                    ],
-                    response_format="json"
-                )
+                # Extract base64 data from data URL if needed
+                image_data = screenshot_data
+                if screenshot_data.startswith('data:'):
+                    # Extract the base64 part after the comma
+                    image_data = screenshot_data.split(',')[1] if ',' in screenshot_data else screenshot_data
+                
+                # Call OpenAI Vision API directly
+                async with httpx.AsyncClient(timeout=60.0) as client:
+                    vision_response = await client.post(
+                        "https://api.openai.com/v1/chat/completions",
+                        headers={
+                            "Authorization": f"Bearer {api_key}",
+                            "Content-Type": "application/json"
+                        },
+                        json={
+                            "model": "gpt-4o",
+                            "messages": [
+                                {
+                                    "role": "user",
+                                    "content": [
+                                        {"type": "text", "text": grading_prompt},
+                                        {
+                                            "type": "image_url",
+                                            "image_url": {
+                                                "url": f"data:image/png;base64,{image_data}"
+                                            }
+                                        }
+                                    ]
+                                }
+                            ],
+                            "max_tokens": 1000
+                        }
+                    )
+                    
+                    if vision_response.status_code != 200:
+                        raise Exception(f"Vision API error: {vision_response.status_code} - {vision_response.text}")
+                    
+                    vision_result = vision_response.json()
+                    response = vision_result["choices"][0]["message"]["content"]
                 
                 # Parse AI response
                 import json
