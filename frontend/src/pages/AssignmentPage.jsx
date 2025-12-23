@@ -1344,7 +1344,7 @@ export default function AssignmentPage({ user }) {
                         
                         <div className="p-3 bg-purple-50 border border-purple-200 rounded-lg text-xs text-purple-800">
                           <strong>💡 Tip:</strong> Drag blocks from the left toolbox and connect them. 
-                          Click "Run Blocks" to see your sprite move!
+                          Click &quot;Run Blocks&quot; to see your sprite move!
                         </div>
                       </div>
                     ) : assignment.problems?.[currentProblemIndex]?.assignment_type === "microbit" ? (
