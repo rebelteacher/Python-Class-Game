@@ -3017,6 +3017,104 @@ async def submit_assignment(submission: SubmissionCreate, request: Request):
         new_submission.pop("_id", None)
         return new_submission
     
+    # Handle Block-Based (Scratch) assignments - URL-based grading
+    is_block = problem.get("assignment_type") == "block"
+    if is_block:
+        # Check if student submitted a valid Scratch project URL
+        code = submission.code.strip()
+        is_valid_scratch_url = (
+            "scratch.mit.edu/projects/" in code or 
+            "turbowarp.org/embed" in code or
+            "turbowarp.org/" in code
+        )
+        
+        # Score based on submission validity
+        if is_valid_scratch_url:
+            # Valid Scratch URL submitted - give completion credit
+            base_score = 100.0
+            feedback = "✅ Great job! Your Scratch project has been submitted successfully. Your teacher will review your work."
+            test_results = [{
+                "test_id": "scratch_submission",
+                "description": "Scratch project URL submitted",
+                "passed": True,
+                "expected": "Valid Scratch project URL",
+                "actual": "Valid URL provided"
+            }]
+        elif code and len(code) > 10:
+            # Something was submitted but not a Scratch URL
+            base_score = 50.0
+            feedback = "⚠️ Partial credit: We received your submission, but it doesn't appear to be a Scratch project URL. Please submit your project URL from scratch.mit.edu (click 'Share' in Scratch, then copy the URL)."
+            test_results = [{
+                "test_id": "scratch_submission",
+                "description": "Scratch project URL submitted",
+                "passed": False,
+                "expected": "Valid Scratch project URL (e.g., https://scratch.mit.edu/projects/...)",
+                "actual": "URL does not match expected format"
+            }]
+        else:
+            # Empty or very short submission
+            base_score = 0.0
+            feedback = "❌ No Scratch project URL submitted. Please:\n1. Create your project in Scratch\n2. Click 'Share' (top right)\n3. Copy the project URL\n4. Paste it here and submit again."
+            test_results = [{
+                "test_id": "scratch_submission",
+                "description": "Scratch project URL submitted",
+                "passed": False,
+                "expected": "Valid Scratch project URL",
+                "actual": "No URL provided"
+            }]
+        
+        is_passing = base_score >= 70
+        
+        # Check if late
+        is_late = False
+        try:
+            due_date = datetime.fromisoformat(assignment["due_date"]) if assignment.get("due_date") else None
+            if due_date and datetime.now(timezone.utc) > due_date:
+                is_late = True
+                if assignment.get("late_penalty_percent", 0) > 0:
+                    base_score *= (1 - assignment["late_penalty_percent"] / 100)
+        except (ValueError, TypeError):
+            pass
+        
+        # Create block submission
+        new_submission = {
+            "id": str(uuid.uuid4()),
+            "assignment_id": submission.assignment_id,
+            "problem_id": submission.problem_id,
+            "student_id": user["id"],
+            "code": code,  # The Scratch URL
+            "score": base_score,
+            "feedback": feedback,
+            "test_results": test_results,
+            "attempt_number": attempt_number,
+            "lives_remaining": lives_remaining,
+            "is_passing": is_passing,
+            "is_late": is_late,
+            "is_final": False,
+            "submission_type": "scratch_url",
+            "submitted_at": datetime.now(timezone.utc).isoformat()
+        }
+        
+        await db.submissions.insert_one(new_submission)
+        
+        # Update user stats if passing
+        if is_passing:
+            xp_earned = calculate_xp_and_coins(base_score, attempt_number == 1, user.get("current_streak", 0))
+            await db.users.update_one(
+                {"id": user["id"]},
+                {"$inc": {
+                    "xp": xp_earned["xp"],
+                    "coins": xp_earned["coins"],
+                    "problems_solved": 1
+                }}
+            )
+            new_submission["xp_earned"] = xp_earned["xp"]
+            new_submission["coins_earned"] = xp_earned["coins"]
+        
+        # Remove MongoDB _id before returning
+        new_submission.pop("_id", None)
+        return new_submission
+    
     # Run test cases (if provided) - for traditional code assignments
     # Check both assignment and problem for test cases
     test_cases = assignment.get("test_cases", []) or problem.get("test_cases", [])
