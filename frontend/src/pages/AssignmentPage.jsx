@@ -1319,7 +1319,11 @@ export default function AssignmentPage({ user }) {
                                 }
                                 setIsBlockRunning(true);
                                 spriteCanvasRef.current.runCommands(commands);
-                                setHasRun(true);
+                                // Mark as run for submit button
+                                setHasRunPerProblem(prev => ({
+                                  ...prev,
+                                  [getCurrentProblemId()]: true
+                                }));
                                 setTimeout(() => setIsBlockRunning(false), commands.length * 100 + 500);
                               }
                             }}
