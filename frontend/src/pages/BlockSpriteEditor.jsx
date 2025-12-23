@@ -806,6 +806,9 @@ export default function BlockSpriteEditor() {
   useEffect(() => {
     const fetchCustomSprites = async () => {
       try {
+        // Small delay to allow session to be established
+        await new Promise(resolve => setTimeout(resolve, 500));
+        
         const response = await fetch(`${process.env.REACT_APP_BACKEND_URL}/api/sprites`, {
           credentials: 'include'
         });
@@ -817,9 +820,11 @@ export default function BlockSpriteEditor() {
             name: sprite.name || sprite.prompt?.substring(0, 30) || 'Custom Sprite',
             imageData: sprite.image_data,
             prompt: sprite.prompt,
-            style: sprite.style
+            style: sprite.style,
+            type: 'image'
           }));
           setCustomSprites(transformed);
+          console.log('Loaded custom sprites:', transformed.length);
         }
       } catch (error) {
         console.error('Error fetching custom sprites:', error);
