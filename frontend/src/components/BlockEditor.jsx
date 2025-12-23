@@ -394,8 +394,7 @@ const BlockEditor = forwardRef(({
         workspaceRef.current = null;
       }
     };
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [initialXml, onBlocksChange]);
 
   // Convert blocks to executable commands
   const blocksToCommands = useCallback(() => {
