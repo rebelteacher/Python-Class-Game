@@ -1474,41 +1474,6 @@ export default function AssignmentPage({ user }) {
                           </div>
                         )}
                       </div>
-                              className="w-full flex-1 rounded-lg border"
-                              allowFullScreen
-                              allow="autoplay"
-                            />
-                            <a 
-                              href={code} 
-                              target="_blank" 
-                              rel="noopener noreferrer"
-                              className="text-orange-600 hover:underline text-sm mt-2 text-center"
-                            >
-                              Open in Scratch →
-                            </a>
-                          </div>
-                        ) : (
-                          <div className="flex-1 flex flex-col items-center justify-center bg-gray-50 rounded-lg border-2 border-dashed border-gray-300 p-6">
-                            <div className="text-6xl mb-4">🐱</div>
-                            <h3 className="text-lg font-semibold text-gray-700 mb-2">No Project Yet</h3>
-                            <p className="text-gray-500 text-center text-sm max-w-sm">
-                              Create your project in Scratch, save it, click &quot;Share&quot;, and paste the URL in the input box on the left.
-                            </p>
-                          </div>
-                        )}
-                        
-                        {/* Instructions */}
-                        <div className="p-3 bg-orange-50 border border-orange-200 rounded-lg text-xs text-orange-800">
-                          <strong>💡 How to Submit:</strong>
-                          <ol className="mt-1 ml-4 list-decimal">
-                            <li>Create your project in Scratch</li>
-                            <li>Click &quot;Share&quot; in Scratch (top right)</li>
-                            <li>Copy the project URL from your browser</li>
-                            <li>Paste the URL in the input box</li>
-                            <li>Click &quot;Submit&quot; when done!</li>
-                          </ol>
-                        </div>
-                      </div>
                     ) : assignment.problems?.[currentProblemIndex]?.assignment_type === "microbit" ? (
                       <div className="h-full flex flex-col gap-3">
                         {/* Micro:bit Simulator */}
