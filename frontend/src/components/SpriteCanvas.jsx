@@ -11,13 +11,12 @@ const SpriteCanvas = forwardRef(({
   initialSprites = []
 }, ref) => {
   const canvasRef = useRef(null);
-  const [sprites, setSprites] = useState([]);
   const [isRunning, setIsRunning] = useState(false);
   const [selectedSprite, setSelectedSprite] = useState(null);
   const commandQueueRef = useRef([]);
 
   // Initialize default sprite
-  const getInitialSprites = useCallback(() => {
+  const getDefaultSprites = () => {
     if (initialSprites.length > 0) {
       return initialSprites;
     }
@@ -38,10 +37,10 @@ const SpriteCanvas = forwardRef(({
       penSize: 2,
       sayText: ""
     }];
-  }, [initialSprites, width, height]);
+  };
 
   // Set initial sprites on mount
-  const [sprites, setSprites] = useState(getInitialSprites);
+  const [sprites, setSprites] = useState(getDefaultSprites);
 
   const sleep = (ms) => new Promise(resolve => setTimeout(resolve, ms));
 
