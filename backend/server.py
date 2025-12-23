@@ -3017,51 +3017,121 @@ async def submit_assignment(submission: SubmissionCreate, request: Request):
         new_submission.pop("_id", None)
         return new_submission
     
-    # Handle Block-Based (Scratch) assignments - URL-based grading
+    # Handle Block-Based (Scratch) assignments - Screenshot AI Vision grading
     is_block = problem.get("assignment_type") == "block"
     if is_block:
-        # Check if student submitted a valid Scratch project URL
-        code = submission.code.strip()
-        is_valid_scratch_url = (
-            "scratch.mit.edu/projects/" in code or 
-            "turbowarp.org/embed" in code or
-            "turbowarp.org/" in code
-        )
+        from emergentintegrations.llm.chat import LlmChat, UserMessage
         
-        # Score based on submission validity
-        if is_valid_scratch_url:
-            # Valid Scratch URL submitted - give completion credit
-            base_score = 100.0
-            feedback = "✅ Great job! Your Scratch project has been submitted successfully. Your teacher will review your work."
-            test_results = [{
-                "test_id": "scratch_submission",
-                "description": "Scratch project URL submitted",
-                "passed": True,
-                "expected": "Valid Scratch project URL",
-                "actual": "Valid URL provided"
-            }]
-        elif code and len(code) > 10:
-            # Something was submitted but not a Scratch URL
-            base_score = 50.0
-            feedback = "⚠️ Partial credit: We received your submission, but it doesn't appear to be a Scratch project URL. Please submit your project URL from scratch.mit.edu (click 'Share' in Scratch, then copy the URL)."
-            test_results = [{
-                "test_id": "scratch_submission",
-                "description": "Scratch project URL submitted",
-                "passed": False,
-                "expected": "Valid Scratch project URL (e.g., https://scratch.mit.edu/projects/...)",
-                "actual": "URL does not match expected format"
-            }]
+        screenshot_data = submission.screenshot if hasattr(submission, 'screenshot') else None
+        scratch_url = submission.code.strip() if submission.code else ""
+        
+        # If no screenshot provided, check for URL fallback
+        if not screenshot_data:
+            if scratch_url and ("scratch.mit.edu/projects/" in scratch_url or "turbowarp.org" in scratch_url):
+                # URL provided but no screenshot - give partial credit
+                base_score = 50.0
+                feedback = "⚠️ Partial credit: You submitted a Scratch project URL, but no screenshot for AI grading. Please upload a screenshot of your code blocks for full credit."
+                test_results = [{"test_id": "screenshot", "description": "Screenshot uploaded", "passed": False, "expected": "Screenshot of code blocks", "actual": "Only URL provided"}]
+            else:
+                base_score = 0.0
+                feedback = "❌ No screenshot uploaded. Please:\n1. Create your project in Scratch\n2. Take a screenshot of your code blocks\n3. Upload the screenshot and submit again."
+                test_results = [{"test_id": "screenshot", "description": "Screenshot uploaded", "passed": False, "expected": "Screenshot of code blocks", "actual": "No screenshot"}]
         else:
-            # Empty or very short submission
-            base_score = 0.0
-            feedback = "❌ No Scratch project URL submitted. Please:\n1. Create your project in Scratch\n2. Click 'Share' (top right)\n3. Copy the project URL\n4. Paste it here and submit again."
-            test_results = [{
-                "test_id": "scratch_submission",
-                "description": "Scratch project URL submitted",
-                "passed": False,
-                "expected": "Valid Scratch project URL",
-                "actual": "No URL provided"
-            }]
+            # Use AI Vision to analyze the screenshot
+            try:
+                api_key = os.environ.get("EMERGENT_LLM_KEY")
+                if not api_key:
+                    raise Exception("AI key not configured")
+                
+                # Get problem requirements
+                problem_title = problem.get("title", "Scratch Challenge")
+                problem_desc = problem.get("description", "Complete the challenge")
+                block_requirements = problem.get("block_requirements", [])
+                
+                # Build grading prompt
+                grading_prompt = f"""You are grading a student's Scratch code blocks screenshot. 
+
+PROBLEM: {problem_title}
+DESCRIPTION: {problem_desc}
+
+{"REQUIRED BLOCKS/CONCEPTS: " + ", ".join(block_requirements) if block_requirements else ""}
+
+Analyze the screenshot and grade based on:
+1. Does the code attempt to solve the problem? (40 points)
+2. Are the correct block types used (loops, conditionals, variables, events, etc.)? (30 points)
+3. Is the code organized and logical? (20 points)
+4. Is the solution complete? (10 points)
+
+Respond in this exact JSON format:
+{{
+  "score": <number 0-100>,
+  "blocks_found": ["list", "of", "block", "types", "seen"],
+  "strengths": ["what the student did well"],
+  "improvements": ["suggestions for improvement"],
+  "feedback": "A brief, encouraging 2-3 sentence feedback for the student"
+}}
+
+Be encouraging but fair. Give partial credit for good attempts."""
+
+                # Initialize LLM with vision capability
+                llm = LlmChat(api_key=api_key)
+                
+                # Create message with image
+                response = await llm.chat_async(
+                    model="gpt-4o",
+                    messages=[
+                        UserMessage(
+                            content=[
+                                {"type": "text", "text": grading_prompt},
+                                {"type": "image_url", "image_url": {"url": screenshot_data}}
+                            ]
+                        )
+                    ],
+                    response_format="json"
+                )
+                
+                # Parse AI response
+                import json
+                try:
+                    grading_result = json.loads(response)
+                    base_score = float(grading_result.get("score", 70))
+                    blocks_found = grading_result.get("blocks_found", [])
+                    strengths = grading_result.get("strengths", [])
+                    improvements = grading_result.get("improvements", [])
+                    ai_feedback = grading_result.get("feedback", "Good effort!")
+                    
+                    # Build detailed feedback
+                    feedback_parts = [f"🎯 Score: {base_score:.0f}%\n"]
+                    feedback_parts.append(f"💬 {ai_feedback}\n")
+                    
+                    if blocks_found:
+                        feedback_parts.append(f"\n📦 Blocks detected: {', '.join(blocks_found)}")
+                    
+                    if strengths:
+                        feedback_parts.append(f"\n\n✅ Strengths:\n• " + "\n• ".join(strengths))
+                    
+                    if improvements and base_score < 90:
+                        feedback_parts.append(f"\n\n💡 To improve:\n• " + "\n• ".join(improvements))
+                    
+                    feedback = "".join(feedback_parts)
+                    
+                    test_results = [
+                        {"test_id": "ai_grading", "description": "AI Vision Analysis", "passed": base_score >= 70, "expected": "70% or higher", "actual": f"{base_score:.0f}%"},
+                        {"test_id": "blocks_used", "description": "Block types detected", "passed": len(blocks_found) > 0, "expected": "Relevant blocks", "actual": ", ".join(blocks_found) if blocks_found else "None detected"}
+                    ]
+                    
+                except json.JSONDecodeError:
+                    # AI response wasn't valid JSON, use the raw text
+                    base_score = 75.0
+                    feedback = f"✅ Screenshot received and analyzed.\n\nAI Analysis: {response[:500]}"
+                    test_results = [{"test_id": "ai_grading", "description": "AI Vision Analysis", "passed": True, "expected": "Screenshot analysis", "actual": "Completed"}]
+                    
+            except Exception as e:
+                logger.error(f"AI Vision grading error: {str(e)}")
+                # Fallback: give credit for submitting screenshot
+                base_score = 70.0
+                feedback = f"✅ Screenshot received! AI grading temporarily unavailable, but your submission has been recorded. Your teacher will review it."
+                test_results = [{"test_id": "screenshot", "description": "Screenshot uploaded", "passed": True, "expected": "Screenshot", "actual": "Received"}]
         
         is_passing = base_score >= 70
         
@@ -3082,7 +3152,8 @@ async def submit_assignment(submission: SubmissionCreate, request: Request):
             "assignment_id": submission.assignment_id,
             "problem_id": submission.problem_id,
             "student_id": user["id"],
-            "code": code,  # The Scratch URL
+            "code": scratch_url,
+            "screenshot": screenshot_data[:100] + "..." if screenshot_data and len(screenshot_data) > 100 else None,  # Store truncated reference
             "score": base_score,
             "feedback": feedback,
             "test_results": test_results,
@@ -3091,7 +3162,7 @@ async def submit_assignment(submission: SubmissionCreate, request: Request):
             "is_passing": is_passing,
             "is_late": is_late,
             "is_final": False,
-            "submission_type": "scratch_url",
+            "submission_type": "scratch_screenshot",
             "submitted_at": datetime.now(timezone.utc).isoformat()
         }
         
