@@ -302,6 +302,15 @@ function App() {
               />
               
               <Route
+                path="/blocks/sprites"
+                element={
+                  <ProtectedRoute user={user}>
+                    <BlockSpriteEditor user={user} />
+                  </ProtectedRoute>
+                }
+              />
+              
+              <Route
                 path="/skill-quiz-manager"
                 element={
                   <ProtectedRoute user={user} teacherOnly>
