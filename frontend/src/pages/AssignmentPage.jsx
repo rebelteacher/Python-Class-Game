@@ -18,6 +18,8 @@ import MicrobitSimulator from "@/components/MicrobitSimulator";
 import SkillQuizPopup from "@/components/SkillQuizPopup";
 import AnimatedTurtle from "@/components/AnimatedTurtle";
 import MazeLeaderboard from "@/components/MazeLeaderboard";
+import BlockEditor from "@/components/BlockEditor";
+import SpriteCanvas from "@/components/SpriteCanvas";
 
 const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
 const API = `${BACKEND_URL}/api`;
