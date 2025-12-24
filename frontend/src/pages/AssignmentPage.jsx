@@ -1643,63 +1643,75 @@ export default function AssignmentPage({ user }) {
               assignment.problems?.[currentProblemIndex]?.assignment_type === "block" ? (
                 /* Block-Based Teacher Demo - Scratch Integration */
                 <div className="h-full flex flex-col">
-                  {/* Header with Open in New Tab button */}
-                  <div className="flex items-center justify-between bg-gradient-to-r from-orange-500 to-yellow-500 text-white p-3 rounded-t-lg">
+                  {/* Header */}
+                  <div className="flex items-center justify-between bg-gradient-to-r from-orange-500 to-yellow-500 text-white p-4 rounded-t-lg">
                     <div className="flex items-center gap-3">
                       <img 
                         src="https://scratch.mit.edu/images/logo_sm.png" 
                         alt="Scratch" 
-                        className="h-8 bg-white rounded p-1"
+                        className="h-10 bg-white rounded p-1"
                       />
                       <div>
-                        <span className="font-bold text-lg">Scratch Teaching Mode</span>
-                        <p className="text-xs text-orange-100">Demo to students - they'll upload screenshots to submit</p>
+                        <span className="font-bold text-xl">Scratch Teaching Mode</span>
+                        <p className="text-sm text-orange-100">🎓 Teacher Demo - Students upload screenshots to submit</p>
                       </div>
-                    </div>
-                    <div className="flex gap-2">
-                      <Button
-                        onClick={() => navigate('/blocks/teach')}
-                        variant="outline"
-                        size="sm"
-                        className="bg-white/20 border-white/50 text-white hover:bg-white/30"
-                      >
-                        <BookOpen className="w-4 h-4 mr-1" />
-                        Teaching Guide
-                      </Button>
-                      <Button
-                        onClick={() => window.open('https://scratch.mit.edu/projects/editor/', '_blank')}
-                        variant="outline"
-                        size="sm"
-                        className="bg-white text-orange-600 hover:bg-orange-50"
-                      >
-                        <ExternalLink className="w-4 h-4 mr-1" />
-                        Open in New Tab
-                      </Button>
                     </div>
                   </div>
                   
-                  {/* Problem description banner */}
-                  <div className="bg-orange-50 border-b border-orange-200 p-3">
-                    <p className="text-sm text-gray-700">
-                      <strong className="text-orange-700">📋 Challenge:</strong>{" "}
+                  {/* Problem info */}
+                  <div className="bg-orange-50 border-b border-orange-200 p-4">
+                    <h3 className="font-bold text-orange-800 mb-1">📋 Challenge:</h3>
+                    <p className="text-gray-700">
                       {assignment.problems?.[currentProblemIndex]?.description || "Complete the Scratch challenge"}
                     </p>
                   </div>
                   
-                  {/* Embedded Scratch Editor */}
-                  <div className="flex-1 bg-gray-100">
-                    <iframe
-                      src="https://scratch.mit.edu/projects/editor/?tutorial=getStarted"
-                      className="w-full h-full border-0"
-                      allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope"
-                      allowFullScreen
-                    />
+                  {/* Main content area */}
+                  <div className="flex-1 flex flex-col items-center justify-center bg-gradient-to-br from-orange-100 to-yellow-100 p-8">
+                    <div className="text-center max-w-lg">
+                      <div className="text-8xl mb-6">🐱</div>
+                      <h2 className="text-2xl font-bold text-orange-800 mb-4">Ready to Teach with Scratch!</h2>
+                      <p className="text-gray-600 mb-6">
+                        Click the button below to open the Scratch editor. Share your screen with students while you demonstrate the solution.
+                      </p>
+                      
+                      <Button
+                        onClick={() => window.open('https://scratch.mit.edu/projects/editor/', '_blank')}
+                        className="bg-orange-500 hover:bg-orange-600 text-white px-8 py-4 text-lg h-auto"
+                      >
+                        <ExternalLink className="w-5 h-5 mr-2" />
+                        Open Scratch Editor
+                      </Button>
+                      
+                      <div className="mt-8 grid grid-cols-2 gap-4">
+                        <Button
+                          onClick={() => navigate('/blocks/teach')}
+                          variant="outline"
+                          className="border-orange-300 text-orange-700 hover:bg-orange-100"
+                        >
+                          <BookOpen className="w-4 h-4 mr-2" />
+                          Teaching Guide
+                        </Button>
+                        <Button
+                          onClick={() => navigate('/blocks-curriculum')}
+                          variant="outline"
+                          className="border-orange-300 text-orange-700 hover:bg-orange-100"
+                        >
+                          📚 Curriculum
+                        </Button>
+                      </div>
+                    </div>
                   </div>
                   
-                  {/* Footer with tips */}
-                  <div className="bg-orange-100 p-2 text-xs text-orange-700 flex items-center justify-between">
-                    <span>💡 Tip: Share your screen while teaching. Students will create their own projects and upload screenshots.</span>
-                    <span className="text-green-600 font-semibold">🎓 Teacher Mode</span>
+                  {/* Footer tips */}
+                  <div className="bg-orange-200 p-3">
+                    <div className="flex items-center justify-between">
+                      <div className="text-sm text-orange-800">
+                        <strong>💡 Teaching Tips:</strong>
+                        <span className="ml-2">Share your screen • Students follow along • They submit screenshots for grading</span>
+                      </div>
+                      <span className="text-green-700 font-semibold text-sm">🎓 Teacher Mode</span>
+                    </div>
                   </div>
                 </div>
               ) : (
