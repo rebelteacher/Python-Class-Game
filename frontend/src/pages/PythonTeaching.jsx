@@ -2033,7 +2033,7 @@ export default function PythonTeaching({ user }) {
                               setSelectedLesson(lesson);
                             }}
                             className={`w-full text-left px-6 py-2 text-sm border-b border-gray-100 hover:bg-blue-50 transition-colors ${
-                              selectedLesson.id === lesson.id ? 'bg-blue-100 border-l-4 border-l-blue-500' : ''
+                              selectedLesson?.id === lesson.id ? 'bg-blue-100 border-l-4 border-l-blue-500' : ''
                             }`}
                           >
                             {lesson.name}
