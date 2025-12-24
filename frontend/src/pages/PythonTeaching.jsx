@@ -1,419 +1,262 @@
-import { useState, useEffect, useCallback } from "react";
+import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import axios from "axios";
-import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent } from "@/components/ui/card";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { 
   ArrowLeft, 
-  Play, 
-  RotateCcw,
-  ChevronLeft,
-  ChevronRight,
-  Maximize2,
-  Minimize2,
-  Terminal,
+  ExternalLink,
+  Play,
   BookOpen,
-  Code,
-  Lightbulb
+  Lightbulb,
+  Monitor,
+  Users,
+  Target,
+  Copy,
+  Code2,
+  Terminal
 } from "lucide-react";
-import Editor from "@monaco-editor/react";
-import { Panel, PanelGroup, PanelResizeHandle } from "react-resizable-panels";
+import { toast } from "sonner";
 
-const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
-const API = `${BACKEND_URL}/api`;
-
-// Python teaching lessons organized by topic
-const PYTHON_LESSONS = {
-  output: {
-    title: "Output & Print",
-    icon: "🖨️",
+// Python curriculum lessons aligned with standards
+const LESSONS = {
+  chapter1: {
+    title: "Chapter 1: Python Basics",
+    color: "from-blue-500 to-indigo-500",
     lessons: [
       {
-        title: "Your First Program",
-        description: "Learn to use the print() function to display text on the screen.",
-        concepts: ["print()", "strings", "quotation marks"],
-        code: `# Your First Python Program
-# The print() function displays text on the screen
-
+        id: "1-1",
+        name: "Lesson 1: Hello World",
+        objectives: [
+          "Write your first Python program",
+          "Understand the print() function",
+          "Learn about syntax and quotation marks"
+        ],
+        demoCode: `# Your first Python program!
 print("Hello, World!")
 
-# You can print any text inside quotes
-print("Welcome to Python!")
-print("Let's learn to code!")`,
-        explanation: "The print() function is how Python displays output. Put your text inside parentheses and quotation marks."
+# You can print anything in quotes
+print("My name is [Teacher Name]")
+print("Welcome to Python!")`,
+        demoSteps: [
+          "Open the Python coding environment",
+          "Type: print(\"Hello, World!\")",
+          "Explain the print() function - it displays text",
+          "Show that text must be in quotation marks",
+          "Run the code and show the output"
+        ],
+        studentActivity: "Have students print their own name and a greeting message",
+        commonErrors: [
+          "Forgetting quotation marks around text",
+          "Using the wrong type of quotes",
+          "Misspelling 'print'"
+        ],
+        keyTerms: ["print()", "string", "syntax", "output"]
       },
       {
-        title: "Multiple Print Statements",
-        description: "Print multiple lines by using multiple print() statements.",
-        concepts: ["multiple prints", "program flow", "line by line"],
-        code: `# Multiple Print Statements
-# Python runs code from top to bottom
-
-print("Line 1: Hello")
-print("Line 2: How are you?")
-print("Line 3: Goodbye!")
-
-# Each print() creates a new line
-print("First")
-print("Second")
-print("Third")`,
-        explanation: "Each print() statement creates a new line. Python runs code from top to bottom, one line at a time."
-      },
-      {
-        title: "Blank Lines & Formatting",
-        description: "Use empty print() to create spacing in your output.",
-        concepts: ["empty print()", "formatting", "readability"],
-        code: `# Creating Blank Lines
-print("Section 1")
-print("This is important info")
-print()  # Empty print creates a blank line
-print("Section 2")
-print("More information here")
-print()
-print()  # Two blank lines
-print("The End!")`,
-        explanation: "An empty print() with no text inside creates a blank line. This helps organize your output."
-      },
-      {
-        title: "Special Characters",
-        description: "Use escape characters for special formatting.",
-        concepts: ["\\n newline", "\\t tab", "escape characters"],
-        code: `# Special Characters in Strings
-
-# \\n creates a new line INSIDE a string
-print("Hello\\nWorld")
-
-# \\t creates a tab (indent)
-print("Name:\\tAlice")
-print("Age:\\t12")
-
-# Combine them
-print("Item 1\\n\\tSub-item A\\n\\tSub-item B")`,
-        explanation: "Escape characters start with backslash (\\). \\n means 'new line' and \\t means 'tab'."
-      }
-    ]
-  },
-  strings: {
-    title: "Strings & Text",
-    icon: "📝",
-    lessons: [
-      {
-        title: "String Basics",
-        description: "Strings are text data in Python, created with quotes.",
-        concepts: ["strings", "single quotes", "double quotes"],
-        code: `# String Basics
-# Strings are text enclosed in quotes
-
-# Single quotes work
-print('Hello with single quotes')
-
-# Double quotes work too
-print("Hello with double quotes")
-
-# Store strings in variables
+        id: "1-2",
+        name: "Lesson 2: Variables",
+        objectives: [
+          "Understand what variables are",
+          "Create and name variables",
+          "Store different types of data"
+        ],
+        demoCode: `# Variables are like labeled boxes that store data
 name = "Alice"
-greeting = 'Hello'
+age = 14
+grade = 8.5
 
-print(greeting)
-print(name)`,
-        explanation: "Strings can use single quotes (') or double quotes (\"). Both work the same way."
-      },
-      {
-        title: "String Concatenation",
-        description: "Join strings together using the + operator.",
-        concepts: ["concatenation", "+ operator", "joining strings"],
-        code: `# String Concatenation (Joining Strings)
-# Use + to combine strings together
-
-first_name = "Alice"
-last_name = "Smith"
-
-# Join strings with +
-full_name = first_name + " " + last_name
-print(full_name)
-
-# Build messages
-greeting = "Hello, " + first_name + "!"
-print(greeting)
-
-# Multiple concatenations
-message = "My name is " + first_name + " " + last_name + "."
-print(message)`,
-        explanation: "The + operator joins strings together. Remember to add spaces where needed!"
-      },
-      {
-        title: "Print with Multiple Arguments",
-        description: "Pass multiple items to print(), separated by commas.",
-        concepts: ["multiple arguments", "automatic spacing", "commas"],
-        code: `# Print with Multiple Arguments
-# Separate items with commas - Python adds spaces automatically!
-
-name = "Bob"
-age = 12
-
-# Multiple items separated by commas
-print("Name:", name)
-print("Age:", age)
-
-# Mix strings and variables
-print("Hello,", name, "you are", age, "years old")
-
-# Numbers work too
-x = 5
-y = 10
-print("Sum of", x, "and", y, "is", x + y)`,
-        explanation: "When you use commas in print(), Python automatically adds spaces between items."
-      },
-      {
-        title: "The sep Parameter",
-        description: "Customize what goes between items with sep.",
-        concepts: ["sep parameter", "custom separator", "formatting"],
-        code: `# The sep Parameter
-# sep controls what goes BETWEEN items
-
-# Default separator is a space
-print("A", "B", "C")
-
-# Custom separator: dash
-print("A", "B", "C", sep="-")
-
-# Custom separator: arrow
-print("Start", "Middle", "End", sep=" -> ")
-
-# No separator
-print("A", "B", "C", sep="")
-
-# Newline separator
-print("Line 1", "Line 2", "Line 3", sep="\\n")`,
-        explanation: "The sep parameter changes what appears between items. Default is a space."
-      },
-      {
-        title: "The end Parameter",
-        description: "Control what happens at the end of print().",
-        concepts: ["end parameter", "same line", "no newline"],
-        code: `# The end Parameter
-# end controls what happens AFTER the print
-
-# Default end is newline (\\n)
-print("Line 1")
-print("Line 2")
-
-print("---")
-
-# Custom end: stay on same line
-print("Hello ", end="")
-print("World!")
-
-# Custom end: add something specific
-print("Loading", end="...")
-print("Done!")
-
-# Create a countdown
-print("3", end=" ")
-print("2", end=" ")
-print("1", end=" ")
-print("GO!")`,
-        explanation: "The end parameter controls what comes after the printed text. Default is a new line."
-      }
-    ]
-  },
-  variables: {
-    title: "Variables & Math",
-    icon: "🔢",
-    lessons: [
-      {
-        title: "Creating Variables",
-        description: "Variables store data that you can use later.",
-        concepts: ["variables", "assignment", "naming"],
-        code: `# Creating Variables
-# Variables are like labeled boxes that store data
-
-# Create a variable with =
-name = "Alice"
-age = 12
-grade = 7
-
-# Use variables in print
+# Print the variables
 print(name)
 print(age)
 print(grade)
 
-# Variables can change
-score = 0
-print("Starting score:", score)
-score = 10
-print("New score:", score)`,
-        explanation: "Variables store values. Use = to assign a value. Choose descriptive names!"
+# You can use variables in print statements
+print("Hello, " + name)`,
+        demoSteps: [
+          "Explain variables as 'storage boxes' with labels",
+          "Show how to create a variable: name = \"value\"",
+          "Create different types: text (strings), numbers (int), decimals (float)",
+          "Print variables to show their values",
+          "Show how to combine variables with text"
+        ],
+        studentActivity: "Create variables for their name, age, and favorite color, then print them",
+        commonErrors: [
+          "Using spaces in variable names",
+          "Starting variable names with numbers",
+          "Forgetting the = sign"
+        ],
+        keyTerms: ["variable", "assignment", "string", "integer", "float"]
       },
       {
-        title: "Math Operations",
-        description: "Python can do math with numbers and variables.",
-        concepts: ["+", "-", "*", "/", "math"],
-        code: `# Math Operations
-
-# Addition
-print(5 + 3)
-
-# Subtraction
-print(10 - 4)
-
-# Multiplication
-print(6 * 7)
-
-# Division
-print(20 / 4)
-
-# Using variables
-a = 10
-b = 3
-print("a + b =", a + b)
-print("a - b =", a - b)
-print("a * b =", a * b)
-print("a / b =", a / b)`,
-        explanation: "Use + for add, - for subtract, * for multiply, / for divide."
-      },
-      {
-        title: "More Math Operators",
-        description: "Learn floor division, modulo, and exponents.",
-        concepts: ["//", "%", "**", "floor division", "modulo"],
-        code: `# More Math Operators
-
-# Floor division // (rounds down)
-print("17 // 5 =", 17 // 5)  # Result: 3
-
-# Modulo % (remainder)
-print("17 % 5 =", 17 % 5)   # Result: 2
-
-# Exponent ** (power)
-print("2 ** 3 =", 2 ** 3)   # Result: 8 (2*2*2)
-print("5 ** 2 =", 5 ** 2)   # Result: 25 (5*5)
-
-# Practical example: Is a number even or odd?
-number = 7
-remainder = number % 2
-print(number, "divided by 2 has remainder", remainder)
-# If remainder is 0, it's even. If 1, it's odd.`,
-        explanation: "// gives whole number division, % gives the remainder, ** is for exponents (powers)."
-      },
-      {
-        title: "Order of Operations",
-        description: "Python follows math order: PEMDAS.",
-        concepts: ["PEMDAS", "parentheses", "order"],
-        code: `# Order of Operations (PEMDAS)
-# Parentheses, Exponents, Multiply/Divide, Add/Subtract
-
-# Without parentheses
-result1 = 2 + 3 * 4
-print("2 + 3 * 4 =", result1)  # 14 (multiply first)
-
-# With parentheses
-result2 = (2 + 3) * 4
-print("(2 + 3) * 4 =", result2)  # 20 (parentheses first)
-
-# Complex example
-a = 10
-b = 2
-c = 3
-result = a + b * c
-print("10 + 2 * 3 =", result)
-
-result = (a + b) * c
-print("(10 + 2) * 3 =", result)`,
-        explanation: "Use parentheses to control the order. Python follows standard math rules (PEMDAS)."
-      }
-    ]
-  },
-  input: {
-    title: "User Input",
-    icon: "⌨️",
-    lessons: [
-      {
-        title: "Getting Input",
-        description: "Use input() to get information from the user.",
-        concepts: ["input()", "user input", "prompts"],
-        code: `# Getting User Input
-# input() waits for the user to type something
-
-# Simple input
+        id: "1-3",
+        name: "Lesson 3: Input",
+        objectives: [
+          "Get user input with input()",
+          "Store input in variables",
+          "Create interactive programs"
+        ],
+        demoCode: `# Getting input from the user
 name = input("What is your name? ")
-print("Hello,", name)
+print("Hello, " + name + "!")
 
-# More inputs
-color = input("What is your favorite color? ")
-print("Cool!", color, "is a great color!")
-
-# The prompt is optional
-print("Enter something:")
-response = input()
-print("You entered:", response)`,
-        explanation: "input() pauses the program and waits for the user to type. The text in parentheses is the prompt."
-      },
-      {
-        title: "Input is Always a String",
-        description: "Everything from input() is text, even numbers.",
-        concepts: ["string input", "type", "data types"],
-        code: `# Input is Always a String!
-# Even if the user types a number, it's stored as text
-
-age_text = input("How old are you? ")
-print("You entered:", age_text)
-print("Type:", type(age_text))
-
-# This won't work for math!
-# print(age_text + 5)  # Error! Can't add string and number
-
-# You need to convert it first
-age_number = int(age_text)
-print("In 5 years you'll be:", age_number + 5)`,
-        explanation: "input() always returns a string. Use int() to convert to a number for math."
-      },
-      {
-        title: "Converting Input",
-        description: "Convert input to numbers using int() or float().",
-        concepts: ["int()", "float()", "type conversion"],
-        code: `# Converting Input to Numbers
-
-# For whole numbers, use int()
-age = int(input("Enter your age: "))
-print("Next year you'll be", age + 1)
-
-# For decimal numbers, use float()
-price = float(input("Enter the price: $"))
-tax = price * 0.08
-total = price + tax
-print("Total with tax: $", total)
-
-# Calculator example
-num1 = int(input("Enter first number: "))
-num2 = int(input("Enter second number: "))
-print("Sum:", num1 + num2)
-print("Product:", num1 * num2)`,
-        explanation: "int() converts to whole numbers, float() converts to decimal numbers."
+# Getting numbers (need to convert)
+age = input("How old are you? ")
+print("You are " + age + " years old")`,
+        demoSteps: [
+          "Introduce input() as a way to ask questions",
+          "Show the prompt appears and waits for typing",
+          "Store the answer in a variable",
+          "Use the variable in a response",
+          "Explain that input always returns text"
+        ],
+        studentActivity: "Create a program that asks for name and favorite food, then prints a response",
+        commonErrors: [
+          "Forgetting to store input in a variable",
+          "Missing the prompt message",
+          "Trying to do math with text input"
+        ],
+        keyTerms: ["input()", "prompt", "user input", "interactive"]
       }
     ]
   },
-  conditionals: {
-    title: "Conditionals",
-    icon: "🔀",
+  chapter2: {
+    title: "Chapter 2: Data Types & Math",
+    color: "from-green-500 to-emerald-500",
     lessons: [
       {
-        title: "If Statements",
-        description: "Make decisions in your code with if.",
-        concepts: ["if", "condition", "indentation"],
-        code: `# If Statements
-# Run code only when a condition is True
+        id: "2-1",
+        name: "Lesson 4: Numbers & Math",
+        objectives: [
+          "Perform math operations in Python",
+          "Understand order of operations",
+          "Use different number types"
+        ],
+        demoCode: `# Basic math operations
+print(5 + 3)   # Addition: 8
+print(10 - 4)  # Subtraction: 6
+print(6 * 7)   # Multiplication: 42
+print(20 / 4)  # Division: 5.0
 
+# Order of operations (PEMDAS)
+print(2 + 3 * 4)   # = 14 (not 20!)
+print((2 + 3) * 4) # = 20
+
+# Using variables in math
+price = 10
+quantity = 3
+total = price * quantity
+print(total)`,
+        demoSteps: [
+          "Show the four basic operations: +, -, *, /",
+          "Explain that Python follows PEMDAS",
+          "Demonstrate with and without parentheses",
+          "Show how to store math results in variables",
+          "Introduce // (floor division) and % (modulo)"
+        ],
+        studentActivity: "Create a simple calculator that computes the area of a rectangle",
+        commonErrors: [
+          "Using x instead of * for multiplication",
+          "Forgetting order of operations",
+          "Integer vs float division confusion"
+        ],
+        keyTerms: ["operators", "PEMDAS", "integer", "float", "modulo"]
+      },
+      {
+        id: "2-2",
+        name: "Lesson 5: Strings",
+        objectives: [
+          "Manipulate text strings",
+          "Concatenate strings",
+          "Use string methods"
+        ],
+        demoCode: `# Strings are text in quotes
+greeting = "Hello"
+name = "World"
+
+# Concatenation (joining strings)
+message = greeting + ", " + name + "!"
+print(message)
+
+# String methods
+text = "python is fun"
+print(text.upper())      # PYTHON IS FUN
+print(text.capitalize()) # Python is fun
+print(len(text))         # 13 (length)`,
+        demoSteps: [
+          "Review that strings are text in quotes",
+          "Show concatenation with + operator",
+          "Introduce common string methods: upper(), lower(), capitalize()",
+          "Explain len() to get string length",
+          "Show how to access individual characters with []"
+        ],
+        studentActivity: "Create a program that takes a name and prints it in all caps, all lowercase, and with proper capitalization",
+        commonErrors: [
+          "Forgetting quotes around strings",
+          "Trying to add strings and numbers directly",
+          "Forgetting parentheses on methods"
+        ],
+        keyTerms: ["string", "concatenation", "method", "len()"]
+      },
+      {
+        id: "2-3",
+        name: "Lesson 6: Type Conversion",
+        objectives: [
+          "Convert between data types",
+          "Handle input as numbers",
+          "Avoid type errors"
+        ],
+        demoCode: `# Converting types
+num_string = "42"
+num_int = int(num_string)
+print(num_int + 8)  # 50
+
+# Getting number input
+age = int(input("Enter your age: "))
+next_year = age + 1
+print("Next year you'll be " + str(next_year))
+
+# Float conversion
+price = float("19.99")
+print(price * 2)`,
+        demoSteps: [
+          "Explain why type conversion is needed",
+          "Show int() to convert to integer",
+          "Show float() to convert to decimal",
+          "Show str() to convert to string",
+          "Demonstrate converting user input to do math"
+        ],
+        studentActivity: "Create a program that asks for birth year and calculates current age",
+        commonErrors: [
+          "Forgetting to convert input for math",
+          "Converting non-numeric strings to int",
+          "Forgetting str() when combining numbers with text"
+        ],
+        keyTerms: ["int()", "float()", "str()", "type conversion", "casting"]
+      }
+    ]
+  },
+  chapter3: {
+    title: "Chapter 3: Conditionals",
+    color: "from-purple-500 to-pink-500",
+    lessons: [
+      {
+        id: "3-1",
+        name: "Lesson 7: If Statements",
+        objectives: [
+          "Write conditional statements",
+          "Use comparison operators",
+          "Understand indentation"
+        ],
+        demoCode: `# Basic if statement
 age = 15
 
 if age >= 13:
     print("You are a teenager!")
-    print("Welcome to the teen club!")
 
-# Comparison operators:
-# == equals
-# != not equals
+# Comparison operators
+# == equal to
+# != not equal to
 # > greater than
 # < less than
 # >= greater than or equal
@@ -422,185 +265,329 @@ if age >= 13:
 score = 85
 if score >= 70:
     print("You passed!")`,
-        explanation: "Code inside an if block runs only when the condition is True. Notice the indentation!"
+        demoSteps: [
+          "Introduce the concept of making decisions",
+          "Show the if keyword and colon",
+          "EMPHASIZE indentation (4 spaces or tab)",
+          "Explain comparison operators",
+          "Run examples with different values"
+        ],
+        studentActivity: "Create a program that checks if a number is positive",
+        commonErrors: [
+          "Forgetting the colon after the condition",
+          "Wrong indentation",
+          "Using = instead of == for comparison"
+        ],
+        keyTerms: ["if", "condition", "comparison", "indentation", "boolean"]
       },
       {
-        title: "If-Else",
-        description: "Handle both True and False cases.",
-        concepts: ["if", "else", "two paths"],
-        code: `# If-Else Statements
-# else runs when the if condition is False
+        id: "3-2",
+        name: "Lesson 8: If-Else",
+        objectives: [
+          "Handle two possible outcomes",
+          "Use else blocks",
+          "Create two-way decisions"
+        ],
+        demoCode: `# If-else for two options
+temperature = 75
 
-temperature = 30
-
-if temperature >= 32:
-    print("It's above freezing")
-    print("No ice today!")
+if temperature > 80:
+    print("It's hot outside!")
 else:
-    print("It's below freezing")
-    print("Watch out for ice!")
+    print("It's not too hot.")
 
 # Another example
-password = "secret123"
-guess = input("Enter password: ")
-
-if guess == password:
+password = input("Enter password: ")
+if password == "secret123":
     print("Access granted!")
 else:
     print("Wrong password!")`,
-        explanation: "else provides an alternative path when the if condition is False."
+        demoSteps: [
+          "Review if statements",
+          "Introduce else as 'otherwise'",
+          "Show that else has no condition",
+          "Demonstrate indentation for both blocks",
+          "Test with different inputs"
+        ],
+        studentActivity: "Create a program that checks if a number is even or odd",
+        commonErrors: [
+          "Putting a condition after else",
+          "Mismatched indentation",
+          "Forgetting colon after else"
+        ],
+        keyTerms: ["else", "two-way decision", "branch"]
       },
       {
-        title: "Elif - Multiple Conditions",
-        description: "Check multiple conditions with elif.",
-        concepts: ["elif", "multiple conditions", "grading"],
-        code: `# Elif - Multiple Conditions
-# Check several conditions in order
+        id: "3-3",
+        name: "Lesson 9: Elif (Multiple Conditions)",
+        objectives: [
+          "Handle multiple conditions",
+          "Use elif statements",
+          "Create multi-way decisions"
+        ],
+        demoCode: `# Multiple conditions with elif
+grade = 85
 
-score = 85
-
-if score >= 90:
-    print("Grade: A")
-elif score >= 80:
-    print("Grade: B")
-elif score >= 70:
-    print("Grade: C")
-elif score >= 60:
-    print("Grade: D")
+if grade >= 90:
+    print("A - Excellent!")
+elif grade >= 80:
+    print("B - Good job!")
+elif grade >= 70:
+    print("C - Satisfactory")
+elif grade >= 60:
+    print("D - Needs improvement")
 else:
-    print("Grade: F")
-
-# Temperature example
-temp = 75
-if temp >= 90:
-    print("It's hot!")
-elif temp >= 70:
-    print("It's nice out!")
-elif temp >= 50:
-    print("It's cool")
-else:
-    print("It's cold!")`,
-        explanation: "elif lets you check multiple conditions. Python checks them in order and runs the first True one."
-      },
-      {
-        title: "Logical Operators",
-        description: "Combine conditions with and, or, not.",
-        concepts: ["and", "or", "not", "compound conditions"],
-        code: `# Logical Operators
-
-age = 15
-has_permission = True
-
-# and - both must be True
-if age >= 13 and has_permission:
-    print("You can join!")
-
-# or - at least one must be True
-day = "Saturday"
-if day == "Saturday" or day == "Sunday":
-    print("It's the weekend!")
-
-# not - reverses True/False
-is_raining = False
-if not is_raining:
-    print("Let's go outside!")
-
-# Combining them
-score = 85
-attempts = 2
-if score >= 80 and attempts <= 3:
-    print("Great job on your", attempts, "attempt(s)!")`,
-        explanation: "and requires both conditions True, or requires at least one, not reverses the condition."
+    print("F - See me after class")`,
+        demoSteps: [
+          "Explain when we need more than 2 options",
+          "Introduce elif (else if)",
+          "Show the order matters - first match wins",
+          "Walk through with different grade values",
+          "End with else as catch-all"
+        ],
+        studentActivity: "Create a program that gives different messages based on time of day (morning, afternoon, evening, night)",
+        commonErrors: [
+          "Wrong order of conditions",
+          "Forgetting elif goes between if and else",
+          "Using multiple if instead of elif"
+        ],
+        keyTerms: ["elif", "multi-way decision", "chained conditionals"]
       }
     ]
   },
-  loops: {
-    title: "Loops",
-    icon: "🔁",
+  chapter4: {
+    title: "Chapter 4: Loops",
+    color: "from-orange-500 to-red-500",
     lessons: [
       {
-        title: "For Loops",
-        description: "Repeat code a specific number of times.",
-        concepts: ["for", "range()", "iteration"],
-        code: `# For Loops
-# Repeat code a specific number of times
-
-# Basic for loop
+        id: "4-1",
+        name: "Lesson 10: For Loops",
+        objectives: [
+          "Repeat code a specific number of times",
+          "Use range() function",
+          "Iterate through sequences"
+        ],
+        demoCode: `# Basic for loop with range
 for i in range(5):
-    print("Hello!", i)
+    print("Hello!")
 
-print("---")
+# Using the loop variable
+for i in range(1, 6):
+    print("Count:", i)
 
-# Count from 1 to 5
-for num in range(1, 6):
-    print(num)
-
-print("---")
-
-# Practical example: Countdown
-print("Countdown:")
-for i in range(5, 0, -1):
-    print(i)
-print("Blast off!")`,
-        explanation: "for loops repeat code. range(5) gives numbers 0,1,2,3,4. range(1,6) gives 1,2,3,4,5."
+# Looping through a string
+for letter in "Python":
+    print(letter)`,
+        demoSteps: [
+          "Explain why loops are useful (avoid repetition)",
+          "Introduce for keyword and range()",
+          "Show range(5) means 0 to 4",
+          "Demonstrate range(start, stop)",
+          "Loop through strings and lists"
+        ],
+        studentActivity: "Create a program that prints a multiplication table for a number",
+        commonErrors: [
+          "Off-by-one errors with range",
+          "Forgetting the colon",
+          "Wrong indentation inside loop"
+        ],
+        keyTerms: ["for", "range()", "iteration", "loop variable"]
       },
       {
-        title: "While Loops",
-        description: "Repeat while a condition is True.",
-        concepts: ["while", "condition", "infinite loops"],
-        code: `# While Loops
-# Keep going while condition is True
+        id: "4-2",
+        name: "Lesson 11: While Loops",
+        objectives: [
+          "Create condition-based loops",
+          "Know when to use while vs for",
+          "Avoid infinite loops"
+        ],
+        demoCode: `# While loop - repeat while condition is true
+count = 1
+while count <= 5:
+    print(count)
+    count = count + 1
 
+# User input loop
+password = ""
+while password != "secret":
+    password = input("Enter password: ")
+print("Welcome!")`,
+        demoSteps: [
+          "Compare while to for loops",
+          "Explain 'while condition is true'",
+          "EMPHASIZE updating the condition variable",
+          "Show what happens without update (infinite loop)",
+          "Demonstrate input validation use case"
+        ],
+        studentActivity: "Create a guessing game that keeps asking until correct",
+        commonErrors: [
+          "Forgetting to update condition variable",
+          "Creating infinite loops",
+          "Using while when for is simpler"
+        ],
+        keyTerms: ["while", "condition", "infinite loop", "counter"]
+      },
+      {
+        id: "4-3",
+        name: "Lesson 12: Loop Patterns",
+        objectives: [
+          "Use accumulators in loops",
+          "Build strings in loops",
+          "Create counted loops"
+        ],
+        demoCode: `# Accumulator pattern - sum numbers
+total = 0
+for i in range(1, 11):
+    total = total + i
+print("Sum of 1-10:", total)
+
+# Building a string
+stars = ""
+for i in range(5):
+    stars = stars + "*"
+print(stars)  # *****
+
+# Counting pattern
 count = 0
-while count < 5:
-    print("Count is:", count)
-    count = count + 1  # Don't forget this!
+for char in "hello world":
+    if char == "o":
+        count = count + 1
+print("Number of o's:", count)`,
+        demoSteps: [
+          "Introduce accumulator pattern",
+          "Show summing numbers in a loop",
+          "Demonstrate building strings",
+          "Show counting with conditions",
+          "Explain each pattern's use case"
+        ],
+        studentActivity: "Create a program that calculates factorial of a number",
+        commonErrors: [
+          "Not initializing accumulator before loop",
+          "Initializing inside the loop",
+          "Wrong accumulator operation"
+        ],
+        keyTerms: ["accumulator", "counter", "pattern", "sum"]
+      }
+    ]
+  },
+  chapter5: {
+    title: "Chapter 5: Functions",
+    color: "from-teal-500 to-cyan-500",
+    lessons: [
+      {
+        id: "5-1",
+        name: "Lesson 13: Defining Functions",
+        objectives: [
+          "Create reusable code blocks",
+          "Define and call functions",
+          "Understand function structure"
+        ],
+        demoCode: `# Defining a function
+def greet():
+    print("Hello!")
+    print("Welcome to Python!")
 
-print("Done!")
+# Calling the function
+greet()
+greet()  # Can call multiple times
 
-# Countdown with while
-print("---")
-num = 3
-while num > 0:
-    print(num)
-    num = num - 1
-print("Go!")
+# Function with a purpose
+def draw_line():
+    print("-" * 20)
 
-# Sum numbers
-total = 0
-n = 1
-while n <= 5:
-    total = total + n
-    n = n + 1
-print("Sum of 1-5:", total)`,
-        explanation: "while loops run as long as the condition is True. Make sure to update your variable!"
+draw_line()
+print("My Report")
+draw_line()`,
+        demoSteps: [
+          "Explain functions as 'recipes' or 'mini-programs'",
+          "Show def keyword and naming",
+          "Emphasize the colon and indentation",
+          "Demonstrate calling a function",
+          "Show reusability - call multiple times"
+        ],
+        studentActivity: "Create a function that prints a greeting box around text",
+        commonErrors: [
+          "Forgetting parentheses when calling",
+          "Not indenting function body",
+          "Defining but never calling"
+        ],
+        keyTerms: ["def", "function", "call", "define"]
       },
       {
-        title: "Loop with Lists",
-        description: "Loop through items in a list.",
-        concepts: ["for in list", "iteration", "each item"],
-        code: `# Looping Through Lists
+        id: "5-2",
+        name: "Lesson 14: Parameters",
+        objectives: [
+          "Pass data to functions",
+          "Use parameters and arguments",
+          "Create flexible functions"
+        ],
+        demoCode: `# Function with parameter
+def greet(name):
+    print("Hello, " + name + "!")
 
-fruits = ["apple", "banana", "cherry"]
+greet("Alice")
+greet("Bob")
 
-# Loop through each item
-for fruit in fruits:
-    print("I like", fruit)
+# Multiple parameters
+def add(a, b):
+    result = a + b
+    print(result)
 
-print("---")
+add(5, 3)
+add(10, 20)`,
+        demoSteps: [
+          "Explain parameters as 'inputs' to functions",
+          "Show single parameter example",
+          "Demonstrate multiple parameters",
+          "Explain arguments vs parameters",
+          "Show how order matters"
+        ],
+        studentActivity: "Create a function that takes a name and age, then prints a birthday message",
+        commonErrors: [
+          "Wrong number of arguments",
+          "Arguments in wrong order",
+          "Confusing parameter names"
+        ],
+        keyTerms: ["parameter", "argument", "pass"]
+      },
+      {
+        id: "5-3",
+        name: "Lesson 15: Return Values",
+        objectives: [
+          "Return data from functions",
+          "Use return statement",
+          "Store function results"
+        ],
+        demoCode: `# Function that returns a value
+def add(a, b):
+    return a + b
 
-# Numbers in a list
-scores = [85, 92, 78, 95, 88]
-for score in scores:
-    print("Score:", score)
+result = add(5, 3)
+print(result)  # 8
 
-# Calculate total
-total = 0
-for score in scores:
-    total = total + score
-print("Total:", total)
-print("Average:", total / len(scores))`,
-        explanation: "for item in list gives you each item one at a time. The variable name (like 'fruit') is your choice."
+# Using return value directly
+print(add(10, 20))
+
+# Return vs print
+def square(n):
+    return n * n
+
+answer = square(5)
+print("5 squared is", answer)`,
+        demoSteps: [
+          "Explain difference between print and return",
+          "Show return sends value back",
+          "Demonstrate storing return value",
+          "Show using return value in expressions",
+          "Compare function with/without return"
+        ],
+        studentActivity: "Create a function that calculates and returns the area of a circle",
+        commonErrors: [
+          "Using print instead of return",
+          "Forgetting to store return value",
+          "Code after return (never runs)"
+        ],
+        keyTerms: ["return", "return value", "None"]
       }
     ]
   }
@@ -608,70 +595,25 @@ print("Average:", total / len(scores))`,
 
 export default function PythonTeaching({ user }) {
   const navigate = useNavigate();
-  const [selectedTopic, setSelectedTopic] = useState("output");
-  const [currentLessonIndex, setCurrentLessonIndex] = useState(0);
-  const [code, setCode] = useState("");
-  const [output, setOutput] = useState("");
-  const [isRunning, setIsRunning] = useState(false);
-  const [isFullscreen, setIsFullscreen] = useState(false);
+  const [selectedChapter, setSelectedChapter] = useState("chapter1");
+  const [selectedLesson, setSelectedLesson] = useState(LESSONS.chapter1.lessons[0]);
 
-  const topics = Object.keys(PYTHON_LESSONS);
-  const currentTopic = PYTHON_LESSONS[selectedTopic];
-  const lessons = currentTopic?.lessons || [];
-  const currentLesson = lessons[currentLessonIndex];
-
-  useEffect(() => {
-    if (currentLesson) {
-      setCode(currentLesson.code);
-      setOutput("");
-    }
-  }, [selectedTopic, currentLessonIndex]);
-
-  const handleRunCode = async () => {
-    setIsRunning(true);
-    try {
-      const response = await axios.post(
-        `${API}/code/execute`,
-        { code },
-        { withCredentials: true }
-      );
-      setOutput(response.data.output || response.data.error || "No output");
-    } catch (error) {
-      setOutput(error.response?.data?.detail || "Error running code");
-    } finally {
-      setIsRunning(false);
-    }
+  const copyCode = () => {
+    navigator.clipboard.writeText(selectedLesson.demoCode);
+    toast.success("Demo code copied!");
   };
 
-  const handleReset = () => {
-    if (currentLesson) {
-      setCode(currentLesson.code);
-      setOutput("");
-    }
-  };
-
-  const handlePrevLesson = () => {
-    if (currentLessonIndex > 0) {
-      setCurrentLessonIndex(currentLessonIndex - 1);
-    }
-  };
-
-  const handleNextLesson = () => {
-    if (currentLessonIndex < lessons.length - 1) {
-      setCurrentLessonIndex(currentLessonIndex + 1);
-    }
-  };
-
-  const handleTopicChange = (topic) => {
-    setSelectedTopic(topic);
-    setCurrentLessonIndex(0);
+  const copyObjectives = () => {
+    const text = selectedLesson.objectives.join('\n• ');
+    navigator.clipboard.writeText('• ' + text);
+    toast.success("Objectives copied!");
   };
 
   return (
-    <div className={`min-h-screen bg-gray-900 ${isFullscreen ? 'fixed inset-0 z-50' : ''}`}>
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-indigo-50">
       {/* Header */}
-      <div className="bg-gradient-to-r from-blue-600 to-indigo-600 text-white py-3 px-4">
-        <div className="flex items-center justify-between">
+      <div className="bg-gradient-to-r from-blue-600 to-indigo-600 text-white py-4 px-6">
+        <div className="max-w-7xl mx-auto flex items-center justify-between">
           <div className="flex items-center gap-4">
             <Button
               variant="ghost"
@@ -680,194 +622,227 @@ export default function PythonTeaching({ user }) {
               className="text-white hover:bg-white/20"
             >
               <ArrowLeft className="w-4 h-4 mr-1" />
-              Back
+              Back to Curriculum
             </Button>
             <div className="flex items-center gap-2">
-              <Terminal className="w-5 h-5" />
-              <span className="font-bold">Python Teaching Mode</span>
+              <Code2 className="w-6 h-6" />
+              <span className="text-xl font-bold">Python Teaching Mode</span>
             </div>
           </div>
           
-          <div className="flex items-center gap-4">
-            {/* Topic Selector */}
-            <Select value={selectedTopic} onValueChange={handleTopicChange}>
-              <SelectTrigger className="w-48 bg-white/10 border-white/20 text-white">
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                {topics.map(topic => (
-                  <SelectItem key={topic} value={topic}>
-                    {PYTHON_LESSONS[topic].icon} {PYTHON_LESSONS[topic].title}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-
-            {/* Lesson Navigation */}
-            <div className="flex items-center gap-2">
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={handlePrevLesson}
-                disabled={currentLessonIndex === 0}
-                className="text-white hover:bg-white/20"
-              >
-                <ChevronLeft className="w-4 h-4" />
-              </Button>
-              <span className="text-sm">
-                {currentLessonIndex + 1} / {lessons.length}
-              </span>
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={handleNextLesson}
-                disabled={currentLessonIndex === lessons.length - 1}
-                className="text-white hover:bg-white/20"
-              >
-                <ChevronRight className="w-4 h-4" />
-              </Button>
-            </div>
-
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={() => setIsFullscreen(!isFullscreen)}
-              className="text-white hover:bg-white/20"
-            >
-              {isFullscreen ? <Minimize2 className="w-4 h-4" /> : <Maximize2 className="w-4 h-4" />}
-            </Button>
-          </div>
+          <Button
+            onClick={() => navigate("/library?type=text")}
+            className="bg-white text-blue-600 hover:bg-blue-50"
+          >
+            <BookOpen className="w-4 h-4 mr-2" />
+            View Problems
+          </Button>
         </div>
       </div>
 
-      {/* Lesson Info Bar */}
-      {currentLesson && (
-        <div className="bg-gray-800 border-b border-gray-700 px-4 py-3">
-          <div className="flex items-start justify-between">
-            <div>
-              <h2 className="text-white font-bold text-lg">{currentLesson.title}</h2>
-              <p className="text-gray-400 text-sm mt-1">{currentLesson.description}</p>
-            </div>
-            <div className="flex gap-2">
-              {currentLesson.concepts.map((concept, i) => (
-                <span 
-                  key={i} 
-                  className="px-2 py-1 bg-blue-500/20 text-blue-300 rounded text-xs font-mono"
-                >
-                  {concept}
-                </span>
-              ))}
-            </div>
-          </div>
-        </div>
-      )}
+      <div className="max-w-7xl mx-auto px-6 py-6">
+        {/* Chapter Tabs */}
+        <Tabs value={selectedChapter} onValueChange={(v) => {
+          setSelectedChapter(v);
+          setSelectedLesson(LESSONS[v].lessons[0]);
+        }}>
+          <TabsList className="w-full flex flex-wrap h-auto gap-2 bg-transparent mb-6">
+            {Object.entries(LESSONS).map(([key, chapter]) => (
+              <TabsTrigger 
+                key={key} 
+                value={key}
+                className={`flex-1 min-w-[120px] py-3 data-[state=active]:bg-gradient-to-r data-[state=active]:${chapter.color} data-[state=active]:text-white`}
+              >
+                {chapter.title}
+              </TabsTrigger>
+            ))}
+          </TabsList>
 
-      {/* Main Content */}
-      <PanelGroup direction="horizontal" className="h-[calc(100vh-140px)]">
-        {/* Code Editor Panel */}
-        <Panel defaultSize={50} minSize={30}>
-          <div className="h-full flex flex-col bg-gray-900">
-            {/* Editor Toolbar */}
-            <div className="flex items-center justify-between px-4 py-2 bg-gray-800 border-b border-gray-700">
-              <div className="flex items-center gap-2 text-gray-400 text-sm">
-                <Code className="w-4 h-4" />
-                <span>Code Editor</span>
-              </div>
-              <div className="flex gap-2">
-                <Button
-                  size="sm"
-                  variant="outline"
-                  onClick={handleReset}
-                  className="border-gray-600 text-gray-300 hover:bg-gray-700"
-                >
-                  <RotateCcw className="w-4 h-4 mr-1" />
-                  Reset
-                </Button>
-                <Button
-                  size="sm"
-                  onClick={handleRunCode}
-                  disabled={isRunning}
-                  className="bg-green-600 hover:bg-green-700"
-                >
-                  <Play className="w-4 h-4 mr-1" />
-                  {isRunning ? "Running..." : "Run"}
-                </Button>
-              </div>
-            </div>
-            
-            {/* Monaco Editor */}
-            <div className="flex-1">
-              <Editor
-                height="100%"
-                language="python"
-                theme="vs-dark"
-                value={code}
-                onChange={(value) => setCode(value || "")}
-                options={{
-                  minimap: { enabled: false },
-                  fontSize: 14,
-                  lineNumbers: "on",
-                  scrollBeyondLastLine: false,
-                  automaticLayout: true,
-                  tabSize: 4,
-                  wordWrap: "on"
-                }}
-              />
-            </div>
-          </div>
-        </Panel>
+          {Object.entries(LESSONS).map(([chapterKey, chapter]) => (
+            <TabsContent key={chapterKey} value={chapterKey}>
+              <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                {/* Left Sidebar - Lesson Selector & Quick Actions */}
+                <div className="lg:col-span-1 space-y-4">
+                  {/* Lessons */}
+                  <Card>
+                    <CardHeader className={`bg-gradient-to-r ${chapter.color} text-white rounded-t-lg`}>
+                      <CardTitle className="flex items-center gap-2">
+                        <BookOpen className="w-5 h-5" />
+                        Lessons
+                      </CardTitle>
+                    </CardHeader>
+                    <CardContent className="p-0">
+                      {chapter.lessons.map((lesson) => (
+                        <button
+                          key={lesson.id}
+                          onClick={() => setSelectedLesson(lesson)}
+                          className={`w-full text-left px-4 py-3 border-b hover:bg-gray-50 transition-colors ${
+                            selectedLesson.id === lesson.id ? 'bg-blue-50 border-l-4 border-l-blue-500' : ''
+                          }`}
+                        >
+                          <div className="font-medium">{lesson.name}</div>
+                        </button>
+                      ))}
+                    </CardContent>
+                  </Card>
 
-        <PanelResizeHandle className="w-1 bg-gray-700 hover:bg-blue-500 transition-colors" />
+                  {/* Quick Actions */}
+                  <Card>
+                    <CardHeader>
+                      <CardTitle className="text-lg flex items-center gap-2">
+                        <Play className="w-5 h-5 text-green-600" />
+                        Quick Actions
+                      </CardTitle>
+                    </CardHeader>
+                    <CardContent className="space-y-2">
+                      <Button onClick={copyCode} className="w-full bg-blue-500 hover:bg-blue-600">
+                        <Terminal className="w-4 h-4 mr-2" />
+                        Copy Demo Code
+                      </Button>
+                      <Button onClick={() => navigate("/library?type=text")} variant="outline" className="w-full">
+                        <BookOpen className="w-4 h-4 mr-2" />
+                        View Problems
+                      </Button>
+                      <Button onClick={copyObjectives} variant="outline" className="w-full">
+                        <Copy className="w-4 h-4 mr-2" />
+                        Copy Objectives
+                      </Button>
+                    </CardContent>
+                  </Card>
 
-        {/* Output & Explanation Panel */}
-        <Panel defaultSize={50} minSize={30}>
-          <div className="h-full flex flex-col bg-gray-900">
-            {/* Output Section */}
-            <div className="flex-1 flex flex-col">
-              <div className="flex items-center gap-2 px-4 py-2 bg-gray-800 border-b border-gray-700 text-gray-400 text-sm">
-                <Terminal className="w-4 h-4" />
-                <span>Output</span>
-              </div>
-              <div className="flex-1 bg-black p-4 font-mono text-sm overflow-auto">
-                {output ? (
-                  <pre className="text-green-400 whitespace-pre-wrap">{output}</pre>
-                ) : (
-                  <span className="text-gray-500">Run your code to see output here...</span>
-                )}
-              </div>
-            </div>
-
-            {/* Explanation Section */}
-            {currentLesson && (
-              <div className="border-t border-gray-700">
-                <div className="flex items-center gap-2 px-4 py-2 bg-gray-800 text-gray-400 text-sm">
-                  <Lightbulb className="w-4 h-4 text-yellow-400" />
-                  <span>Key Concept</span>
+                  {/* Key Terms */}
+                  <Card>
+                    <CardHeader>
+                      <CardTitle className="text-lg">📚 Key Terms</CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                      <div className="flex flex-wrap gap-2">
+                        {selectedLesson.keyTerms?.map((term, idx) => (
+                          <span key={idx} className="px-2 py-1 bg-blue-100 text-blue-700 rounded text-sm font-mono">
+                            {term}
+                          </span>
+                        ))}
+                      </div>
+                    </CardContent>
+                  </Card>
                 </div>
-                <div className="p-4 bg-gray-800/50">
-                  <p className="text-gray-300 text-sm">{currentLesson.explanation}</p>
+
+                {/* Main Content Area */}
+                <div className="lg:col-span-2 space-y-4">
+                  {/* Lesson Header */}
+                  <Card className={`bg-gradient-to-r ${chapter.color}`}>
+                    <CardContent className="py-6 text-white">
+                      <h2 className="text-2xl font-bold mb-2">{selectedLesson.name}</h2>
+                      <p className="opacity-90">Python Text Programming • {chapter.title}</p>
+                    </CardContent>
+                  </Card>
+
+                  {/* Learning Objectives */}
+                  <Card>
+                    <CardHeader>
+                      <CardTitle className="flex items-center gap-2">
+                        <Target className="w-5 h-5 text-blue-600" />
+                        Learning Objectives
+                      </CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                      <ul className="space-y-2">
+                        {selectedLesson.objectives.map((obj, idx) => (
+                          <li key={idx} className="flex items-start gap-2">
+                            <span className="text-green-500 mt-1">✓</span>
+                            <span>{obj}</span>
+                          </li>
+                        ))}
+                      </ul>
+                    </CardContent>
+                  </Card>
+
+                  {/* Demo Code */}
+                  <Card>
+                    <CardHeader>
+                      <CardTitle className="flex items-center justify-between">
+                        <div className="flex items-center gap-2">
+                          <Terminal className="w-5 h-5 text-green-600" />
+                          Demo Code
+                        </div>
+                        <Button size="sm" variant="outline" onClick={copyCode}>
+                          <Copy className="w-4 h-4 mr-1" />
+                          Copy
+                        </Button>
+                      </CardTitle>
+                      <CardDescription>Copy this code to demonstrate to students</CardDescription>
+                    </CardHeader>
+                    <CardContent>
+                      <pre className="p-4 bg-gray-900 text-green-400 rounded-lg font-mono text-sm overflow-x-auto whitespace-pre-wrap">
+                        {selectedLesson.demoCode}
+                      </pre>
+                    </CardContent>
+                  </Card>
+
+                  {/* Demo Steps */}
+                  <Card>
+                    <CardHeader>
+                      <CardTitle className="flex items-center gap-2">
+                        <Monitor className="w-5 h-5 text-purple-600" />
+                        Teacher Demo Steps
+                      </CardTitle>
+                      <CardDescription>Follow these steps while screen sharing</CardDescription>
+                    </CardHeader>
+                    <CardContent>
+                      <ol className="space-y-3">
+                        {selectedLesson.demoSteps.map((step, idx) => (
+                          <li key={idx} className="flex items-start gap-3">
+                            <span className="flex-shrink-0 w-6 h-6 rounded-full bg-purple-100 text-purple-600 flex items-center justify-center text-sm font-bold">
+                              {idx + 1}
+                            </span>
+                            <span>{step}</span>
+                          </li>
+                        ))}
+                      </ol>
+                    </CardContent>
+                  </Card>
+
+                  {/* Student Activity */}
+                  <Card className="border-2 border-green-200 bg-green-50">
+                    <CardHeader>
+                      <CardTitle className="flex items-center gap-2">
+                        <Users className="w-5 h-5 text-green-600" />
+                        Student Activity
+                      </CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                      <div className="flex items-start gap-3">
+                        <Lightbulb className="w-6 h-6 text-yellow-500 flex-shrink-0 mt-1" />
+                        <p className="text-lg">{selectedLesson.studentActivity}</p>
+                      </div>
+                    </CardContent>
+                  </Card>
+
+                  {/* Common Errors */}
+                  <Card className="border-2 border-red-200 bg-red-50">
+                    <CardHeader>
+                      <CardTitle className="flex items-center gap-2 text-red-700">
+                        ⚠️ Common Student Errors
+                      </CardTitle>
+                      <CardDescription>Watch out for these mistakes</CardDescription>
+                    </CardHeader>
+                    <CardContent>
+                      <ul className="space-y-2">
+                        {selectedLesson.commonErrors?.map((error, idx) => (
+                          <li key={idx} className="flex items-start gap-2 text-red-700">
+                            <span className="text-red-500">✗</span>
+                            <span>{error}</span>
+                          </li>
+                        ))}
+                      </ul>
+                    </CardContent>
+                  </Card>
                 </div>
               </div>
-            )}
-
-            {/* Quick Reference */}
-            <div className="border-t border-gray-700">
-              <div className="flex items-center gap-2 px-4 py-2 bg-gray-800 text-gray-400 text-sm">
-                <BookOpen className="w-4 h-4" />
-                <span>Quick Reference</span>
-              </div>
-              <div className="p-4 bg-gray-800/50 text-xs font-mono text-gray-400 grid grid-cols-2 gap-2">
-                <div><span className="text-blue-400">print()</span> - Display output</div>
-                <div><span className="text-blue-400">input()</span> - Get user input</div>
-                <div><span className="text-blue-400">int()</span> - Convert to integer</div>
-                <div><span className="text-blue-400">str()</span> - Convert to string</div>
-                <div><span className="text-blue-400">len()</span> - Get length</div>
-                <div><span className="text-blue-400">range()</span> - Number sequence</div>
-              </div>
-            </div>
-          </div>
-        </Panel>
-      </PanelGroup>
+            </TabsContent>
+          ))}
+        </Tabs>
+      </div>
     </div>
   );
 }
