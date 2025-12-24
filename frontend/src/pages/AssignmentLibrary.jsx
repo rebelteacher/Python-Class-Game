@@ -189,7 +189,26 @@ export default function AssignmentLibrary({ user }) {
     }
 
     if (unitFilter && unitFilter !== "all") {
-      filtered = filtered.filter(p => p.unit === unitFilter);
+      // Map standardized unit names to database values
+      const unitMappings = {
+        "Unit 1: Block-Based Coding": ["Unit 1: Block-Based Coding", "Unit 1 Blocks", "Unit 1"],
+        "Unit 2: Python Text": ["Unit 2: Python Text", "Unit 1: Python Text", "Unit 2", "Unit 1"],
+        "Unit 3: Turtle Graphics": ["Unit 3: Turtle Graphics", "Unit 3"],
+        "Unit 4: Micro:bit": ["Unit 4: Micro:bit", "Unit 4", "Unit 4: Microbit"]
+      };
+      
+      const matchingUnits = unitMappings[unitFilter] || [unitFilter];
+      
+      // Also filter by assignment_type if it's a specific unit
+      if (unitFilter === "Unit 1: Block-Based Coding") {
+        filtered = filtered.filter(p => p.assignment_type === "block" || matchingUnits.includes(p.unit));
+      } else if (unitFilter === "Unit 3: Turtle Graphics") {
+        filtered = filtered.filter(p => p.assignment_type === "turtle" || matchingUnits.includes(p.unit));
+      } else if (unitFilter === "Unit 4: Micro:bit") {
+        filtered = filtered.filter(p => p.assignment_type === "microbit" || matchingUnits.includes(p.unit));
+      } else {
+        filtered = filtered.filter(p => matchingUnits.includes(p.unit));
+      }
     }
 
     if (chapterFilter && chapterFilter !== "all") {
