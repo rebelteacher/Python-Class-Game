@@ -1642,106 +1642,65 @@ export default function AssignmentPage({ user }) {
               // Teacher Demo/Sandbox Mode - Interactive coding without submissions
               assignment.problems?.[currentProblemIndex]?.assignment_type === "block" ? (
                 /* Block-Based Teacher Demo - Scratch Integration */
-                <div className="h-full flex flex-col gap-4 p-4">
-                  <Card className="border-2 border-orange-200 bg-gradient-to-br from-orange-50 to-yellow-50">
-                    <CardHeader>
-                      <CardTitle className="flex justify-between items-center">
-                        <div className="flex items-center gap-2">
-                          <img 
-                            src="https://scratch.mit.edu/images/logo_sm.png" 
-                            alt="Scratch" 
-                            className="h-8"
-                          />
-                          <span className="text-orange-700">Block-Based Teaching Mode</span>
-                        </div>
-                        <span className="text-sm text-green-600 font-semibold">
-                          🎓 Teacher Demo
-                        </span>
-                      </CardTitle>
-                    </CardHeader>
-                    <CardContent className="space-y-4">
-                      <p className="text-gray-600">
-                        {assignment.problems?.[currentProblemIndex]?.description || 
-                          "Open Scratch to demonstrate this block-based programming challenge."}
-                      </p>
-                      
-                      <div className="flex gap-3">
-                        <Button
-                          onClick={() => window.open('https://scratch.mit.edu/projects/editor/', '_blank')}
-                          className="bg-orange-500 hover:bg-orange-600 text-white flex-1"
-                        >
-                          <ExternalLink className="w-4 h-4 mr-2" />
-                          Open Scratch Editor (Demo)
-                        </Button>
-                        <Button
-                          onClick={() => navigate('/blocks/teach')}
-                          variant="outline"
-                          className="border-orange-300 text-orange-700 hover:bg-orange-100"
-                        >
-                          <BookOpen className="w-4 h-4 mr-2" />
-                          Teaching Guide
-                        </Button>
+                <div className="h-full flex flex-col">
+                  {/* Header with Open in New Tab button */}
+                  <div className="flex items-center justify-between bg-gradient-to-r from-orange-500 to-yellow-500 text-white p-3 rounded-t-lg">
+                    <div className="flex items-center gap-3">
+                      <img 
+                        src="https://scratch.mit.edu/images/logo_sm.png" 
+                        alt="Scratch" 
+                        className="h-8 bg-white rounded p-1"
+                      />
+                      <div>
+                        <span className="font-bold text-lg">Scratch Teaching Mode</span>
+                        <p className="text-xs text-orange-100">Demo to students - they'll upload screenshots to submit</p>
                       </div>
-
-                      <div className="p-4 bg-orange-100 rounded-lg text-sm">
-                        <strong className="text-orange-800">💡 Teaching Tips:</strong>
-                        <ul className="mt-2 text-orange-700 space-y-1 ml-4 list-disc">
-                          <li>Share your screen while demonstrating in Scratch</li>
-                          <li>Have students follow along on their own computers</li>
-                          <li>Use the Teaching Guide for step-by-step instructions</li>
-                        </ul>
-                      </div>
-                    </CardContent>
-                  </Card>
+                    </div>
+                    <div className="flex gap-2">
+                      <Button
+                        onClick={() => navigate('/blocks/teach')}
+                        variant="outline"
+                        size="sm"
+                        className="bg-white/20 border-white/50 text-white hover:bg-white/30"
+                      >
+                        <BookOpen className="w-4 h-4 mr-1" />
+                        Teaching Guide
+                      </Button>
+                      <Button
+                        onClick={() => window.open('https://scratch.mit.edu/projects/editor/', '_blank')}
+                        variant="outline"
+                        size="sm"
+                        className="bg-white text-orange-600 hover:bg-orange-50"
+                      >
+                        <ExternalLink className="w-4 h-4 mr-1" />
+                        Open in New Tab
+                      </Button>
+                    </div>
+                  </div>
                   
-                  {/* Quick Links */}
-                  <Card>
-                    <CardHeader>
-                      <CardTitle className="text-lg">Quick Resources</CardTitle>
-                    </CardHeader>
-                    <CardContent className="grid grid-cols-2 gap-3">
-                      <Button 
-                        variant="outline" 
-                        className="h-auto py-3"
-                        onClick={() => window.open('https://scratch.mit.edu/ideas', '_blank')}
-                      >
-                        <div className="text-center">
-                          <div className="text-2xl mb-1">💡</div>
-                          <div className="text-xs">Scratch Ideas</div>
-                        </div>
-                      </Button>
-                      <Button 
-                        variant="outline" 
-                        className="h-auto py-3"
-                        onClick={() => window.open('https://scratch.mit.edu/explore/projects/all', '_blank')}
-                      >
-                        <div className="text-center">
-                          <div className="text-2xl mb-1">🎨</div>
-                          <div className="text-xs">Example Projects</div>
-                        </div>
-                      </Button>
-                      <Button 
-                        variant="outline" 
-                        className="h-auto py-3"
-                        onClick={() => navigate('/blocks-curriculum')}
-                      >
-                        <div className="text-center">
-                          <div className="text-2xl mb-1">📚</div>
-                          <div className="text-xs">Curriculum</div>
-                        </div>
-                      </Button>
-                      <Button 
-                        variant="outline" 
-                        className="h-auto py-3"
-                        onClick={() => navigate('/library?type=block')}
-                      >
-                        <div className="text-center">
-                          <div className="text-2xl mb-1">📋</div>
-                          <div className="text-xs">All Block Problems</div>
-                        </div>
-                      </Button>
-                    </CardContent>
-                  </Card>
+                  {/* Problem description banner */}
+                  <div className="bg-orange-50 border-b border-orange-200 p-3">
+                    <p className="text-sm text-gray-700">
+                      <strong className="text-orange-700">📋 Challenge:</strong>{" "}
+                      {assignment.problems?.[currentProblemIndex]?.description || "Complete the Scratch challenge"}
+                    </p>
+                  </div>
+                  
+                  {/* Embedded Scratch Editor */}
+                  <div className="flex-1 bg-gray-100">
+                    <iframe
+                      src="https://scratch.mit.edu/projects/editor/?tutorial=getStarted"
+                      className="w-full h-full border-0"
+                      allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope"
+                      allowFullScreen
+                    />
+                  </div>
+                  
+                  {/* Footer with tips */}
+                  <div className="bg-orange-100 p-2 text-xs text-orange-700 flex items-center justify-between">
+                    <span>💡 Tip: Share your screen while teaching. Students will create their own projects and upload screenshots.</span>
+                    <span className="text-green-600 font-semibold">🎓 Teacher Mode</span>
+                  </div>
                 </div>
               ) : (
               <PanelGroup direction="horizontal" style={{ height: '100%' }}>
