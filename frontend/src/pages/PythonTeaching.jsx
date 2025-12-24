@@ -1936,15 +1936,28 @@ export default function PythonTeaching({ user }) {
   const [expandedChapter, setExpandedChapter] = useState("chapter1");
 
   const copyCode = () => {
-    navigator.clipboard.writeText(selectedLesson.demoCode);
-    toast.success("Demo code copied!");
+    if (selectedLesson?.demoCode) {
+      navigator.clipboard.writeText(selectedLesson.demoCode);
+      toast.success("Demo code copied!");
+    }
   };
 
   const copyObjectives = () => {
-    const text = selectedLesson.objectives.join('\n• ');
-    navigator.clipboard.writeText('• ' + text);
-    toast.success("Objectives copied!");
+    if (selectedLesson?.objectives) {
+      const text = selectedLesson.objectives.join('\n• ');
+      navigator.clipboard.writeText('• ' + text);
+      toast.success("Objectives copied!");
+    }
   };
+
+  // Guard against rendering before state is initialized
+  if (!selectedLesson) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="text-center">Loading...</div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-indigo-50">
