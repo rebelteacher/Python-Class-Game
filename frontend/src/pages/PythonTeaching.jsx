@@ -1211,7 +1211,7 @@ elif is_member:
 else:
     price = 15
 
-print(f"Your ticket price: ${price}")`,
+print(f"Your ticket price: $" + str(price))`,
         demoSteps: [
           "Walk through complete example",
           "Show real-world application",
