@@ -1602,16 +1602,15 @@ export default function AssignmentLibrary({ user }) {
             </Select>
 
             <Select value={unitFilter} onValueChange={setUnitFilter}>
-              <SelectTrigger className="w-40" data-testid="filter-unit">
+              <SelectTrigger className="w-48" data-testid="filter-unit">
                 <SelectValue placeholder="All Units" />
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="all">All Units</SelectItem>
-                {[...new Set(problems.map(p => p.unit).filter(Boolean))].sort().map((unit) => (
-                  <SelectItem key={unit} value={unit}>
-                    {unit}
-                  </SelectItem>
-                ))}
+                <SelectItem value="Unit 1: Block-Based Coding">Unit 1: Block-Based Coding</SelectItem>
+                <SelectItem value="Unit 2: Python Text">Unit 2: Python Text</SelectItem>
+                <SelectItem value="Unit 3: Turtle Graphics">Unit 3: Turtle Graphics</SelectItem>
+                <SelectItem value="Unit 4: Micro:bit">Unit 4: Micro:bit</SelectItem>
               </SelectContent>
             </Select>
 
