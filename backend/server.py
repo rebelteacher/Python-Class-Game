@@ -3425,12 +3425,14 @@ Test Results:
 
 Failed Test Details:{failed_details if failed_details else " None - all tests passed!"}
 
-INSTRUCTIONS:
-- Provide 2-3 sentences of constructive feedback
-- If tests failed, EXPLAIN WHY they failed (e.g., type mismatch, wrong output format)
-- If the student's output has strings like ['1', '2'] but expected integers like [1, 2], explain they need to convert input to int
-- Focus on specific fixes needed to pass the tests
-- Be encouraging but accurate about what went wrong
+CRITICAL INSTRUCTIONS:
+- If score is 0% or tests failed, you MUST explain what went wrong - do NOT say the code is correct
+- Compare the expected output vs actual output carefully
+- If output shows '[1, 2, 3]' but expected '[1, 2, 3, 4]', the student is missing elements
+- If output shows "['1', '2']" (strings) but expected "[1, 2]" (integers), explain int() conversion needed
+- Be specific about the exact difference between expected and actual output
+- Provide 2-3 sentences of actionable feedback to help fix the issue
+- DO NOT say code is "perfect" or "correct" if tests failed
 - DO NOT assign a score - that's already been calculated
 
 Just provide the feedback text (no JSON, no score):
