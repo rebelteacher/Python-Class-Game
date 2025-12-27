@@ -3573,7 +3573,14 @@ Just provide the feedback text (no JSON, no score):
     response_dict["rank_up"] = rank_up
     response_dict["new_rank"] = calculate_rank(user.get("xp", 0) + xp_earned)["name"] if is_passing else old_rank
     
+    logging.info(f"📝 SUBMISSION: Success! Score={final_score}, is_passing={is_passing}")
     return response_dict
+    
+    except HTTPException:
+        raise
+    except Exception as e:
+        logging.error(f"📝 SUBMISSION: Unhandled error: {str(e)}", exc_info=True)
+        raise HTTPException(status_code=500, detail=f"Submission error: {str(e)}")
 
 @api_router.get("/submissions/assignment/{assignment_id}")
 async def get_submissions(assignment_id: str, request: Request, classroom_id: str = None):
