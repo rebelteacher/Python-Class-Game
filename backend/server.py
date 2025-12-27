@@ -3397,6 +3397,12 @@ Be encouraging but fair. Give partial credit for good attempts."""
     
     if total_tests > 0 and len(assignment.get("test_cases", [])) > 0:
         # Traditional test case prompt - FEEDBACK ONLY
+        # Include specific details about what failed
+        failed_details = ""
+        for tr in test_results:
+            if not tr.get('passed'):
+                failed_details += f"\n- Test '{tr.get('description', 'Unknown')}': Expected '{tr.get('expected')}' but got '{tr.get('actual')}'"
+        
         prompt = f"""
 Provide helpful feedback for this Python code submission:
 
@@ -3417,14 +3423,14 @@ Test Results:
 - Passed: {passed_tests}/{total_tests}
 - Score: {final_score}% (already calculated)
 
-Test Details:
-{json.dumps(test_results, indent=2)}
+Failed Test Details:{failed_details if failed_details else " None - all tests passed!"}
 
 INSTRUCTIONS:
 - Provide 2-3 sentences of constructive feedback
-- Focus on what they did well and what to improve
-- Give specific suggestions (e.g., "Try using a for loop instead of while")
-- Be encouraging and helpful
+- If tests failed, EXPLAIN WHY they failed (e.g., type mismatch, wrong output format)
+- If the student's output has strings like ['1', '2'] but expected integers like [1, 2], explain they need to convert input to int
+- Focus on specific fixes needed to pass the tests
+- Be encouraging but accurate about what went wrong
 - DO NOT assign a score - that's already been calculated
 
 Just provide the feedback text (no JSON, no score):
