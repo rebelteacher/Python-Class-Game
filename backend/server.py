@@ -3260,6 +3260,20 @@ Be encouraging but fair. Give partial credit for good attempts."""
             for test_case in test_cases:
                 # Support both 'input_data' (old) and 'input' (new) field names
                 test_input = test_case.get("input_data") or test_case.get("input", "")
+                
+                # Normalize input: handle comma-separated values on multiple lines
+                # Convert "10,\n20,\n30" or "10, 20, 30" to "10\n20\n30"
+                if test_input:
+                    # First, replace any newlines with a placeholder
+                    # Then split by comma and/or newline
+                    import re
+                    # Split by comma or newline, strip whitespace from each value
+                    values = re.split(r'[,\n]+', test_input)
+                    values = [v.strip() for v in values if v.strip()]
+                    test_input = '\n'.join(values)
+                
+                logging.info(f"📊 TEST INPUT (normalized): '{test_input}'")
+                
                 result = run_python_code(submission.code, test_input)
                 expected = normalize_output(test_case.get("expected_output", ""))
                 actual = normalize_output(result["output"]) if result["success"] else ""
