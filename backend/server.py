@@ -3032,8 +3032,6 @@ async def submit_assignment(submission: SubmissionCreate, request: Request):
     # Handle Block-Based (Scratch) assignments - Screenshot AI Vision grading
     is_block = problem.get("assignment_type") == "block"
     if is_block:
-        from emergentintegrations.llm.chat import LlmChat, UserMessage
-        
         screenshot_data = submission.screenshot if hasattr(submission, 'screenshot') else None
         scratch_url = submission.code.strip() if submission.code else ""
         
