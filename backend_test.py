@@ -8830,6 +8830,9 @@ t.forward(100)
             print("❌ Cannot proceed without test user setup")
             return False
         
+        # PRIORITY: Test the submission endpoint 500 error (main focus from review request)
+        self.test_submission_endpoint_500_error()
+        
         # PRIORITY: Test the updated turtle/maze scoring system (main focus from review request)
         self.test_turtle_scoring_system()
         
