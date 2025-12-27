@@ -2759,14 +2759,20 @@ except Exception as e:
 @api_router.post("/submissions")
 async def submit_assignment(submission: SubmissionCreate, request: Request):
     """Submit assignment and get AI evaluation"""
-    user = await get_current_user(request)
-    
-    if user["role"] != "student":
-        raise HTTPException(status_code=403, detail="Only students can submit assignments")
-    
-    assignment = await db.assignments.find_one({"id": submission.assignment_id})
-    if not assignment:
-        raise HTTPException(status_code=404, detail="Assignment not found")
+    try:
+        logging.info(f"📝 SUBMISSION: Starting submission for assignment_id={submission.assignment_id}, problem_id={submission.problem_id}")
+        user = await get_current_user(request)
+        logging.info(f"📝 SUBMISSION: User={user.get('id')}, role={user.get('role')}")
+        
+        if user["role"] != "student":
+            raise HTTPException(status_code=403, detail="Only students can submit assignments")
+        
+        assignment = await db.assignments.find_one({"id": submission.assignment_id})
+        if not assignment:
+            logging.error(f"📝 SUBMISSION: Assignment not found: {submission.assignment_id}")
+            raise HTTPException(status_code=404, detail="Assignment not found")
+        
+        logging.info(f"📝 SUBMISSION: Assignment found, type={assignment.get('assignment_type')}, problem_ids={assignment.get('problem_ids', [])[:3]}")
     
     # Handle both old (classroom_id) and new (classroom_ids) structure
     if "classroom_ids" in assignment:
