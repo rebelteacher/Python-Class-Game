@@ -2779,8 +2779,6 @@ async def submit_assignment(submission: SubmissionCreate, request: Request):
     
     logging.info(f"📝 SUBMISSION: Assignment found, type={assignment.get('assignment_type')}, problem_ids={assignment.get('problem_ids', [])[:3]}")
     
-    try:
-    
     # Handle both old (classroom_id) and new (classroom_ids) structure
     if "classroom_ids" in assignment:
         # New structure: check if student is in any of the classrooms
