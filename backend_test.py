@@ -8560,6 +8560,266 @@ t.forward(100)
         print("   - Maze challenges: Score = (goals_reached / total_goals) * 100")
         print("   - Traditional turtle problems: Still use deduction method")
         print("   - The turtle scoring system has been updated to start at 0% instead of 100%")
+
+    def test_submission_endpoint_500_error(self):
+        """Test the specific submission endpoint 500 error reported by user"""
+        print("\n🚨 Testing Submission Endpoint 500 Error (User Reported Issue)...")
+        
+        # Step 1: Login as teacher to check existing students
+        print("   Step 1: Login as teacher to check existing students...")
+        test_email = "astapp@spanola.net"
+        test_password = "AlisaFaith$14"
+        
+        login_data = {
+            "email": test_email,
+            "password": test_password
+        }
+        
+        login_response = self.run_test(
+            "Teacher login to check students",
+            "POST",
+            "auth/teacher-login",
+            200,
+            login_data
+        )
+        
+        if not login_response:
+            print("❌ Cannot continue without teacher login")
+            return
+        
+        teacher_session_token = login_response.get("session_token")
+        if teacher_session_token:
+            self.session_token = teacher_session_token
+            print(f"   ✅ Teacher login successful")
+        
+        # Step 2: Get teacher's classrooms to find students
+        print("   Step 2: Getting teacher's classrooms...")
+        classrooms_response = self.run_test(
+            "Get teacher classrooms",
+            "GET",
+            "classrooms",
+            200
+        )
+        
+        if not classrooms_response or len(classrooms_response) == 0:
+            print("❌ No classrooms found for teacher")
+            return
+        
+        # Find a classroom with students
+        target_classroom = None
+        target_student = None
+        
+        for classroom in classrooms_response:
+            students = classroom.get("students", [])
+            if len(students) > 0:
+                target_classroom = classroom
+                target_student = students[0]  # Use first student
+                break
+        
+        if not target_classroom or not target_student:
+            print("❌ No classroom with students found")
+            return
+        
+        classroom_id = target_classroom.get("id")
+        student_id = target_student.get("id")
+        student_name = target_student.get("name", "Unknown")
+        
+        print(f"   ✅ Found classroom: {target_classroom.get('name')} with student: {student_name}")
+        
+        # Step 3: Get assignments for the student
+        print("   Step 3: Getting assignments for the student...")
+        
+        # Create a student session for this existing student
+        student_session_token = f"test_session_student_{int(datetime.now().timestamp())}"
+        
+        try:
+            from motor.motor_asyncio import AsyncIOMotorClient
+            import asyncio
+            
+            async def create_student_session():
+                client = AsyncIOMotorClient("mongodb://localhost:27017")
+                db = client["test_database"]
+                
+                # Create session for existing student
+                session_doc = {
+                    "user_id": student_id,
+                    "session_token": student_session_token,
+                    "expires_at": datetime.now(timezone.utc) + timedelta(days=7),
+                    "created_at": datetime.now(timezone.utc).isoformat()
+                }
+                await db.sessions.insert_one(session_doc)
+                
+                client.close()
+                return True
+            
+            asyncio.run(create_student_session())
+            print(f"   ✅ Created session for student: {student_name}")
+            
+        except Exception as e:
+            print(f"   ❌ Failed to create student session: {str(e)}")
+            return
+        
+        # Switch to student session
+        original_token = self.session_token
+        self.session_token = student_session_token
+        
+        try:
+            # Get assignments for this classroom
+            assignments_response = self.run_test(
+                "Get assignments for student",
+                "GET",
+                f"assignments/classroom/{classroom_id}",
+                200
+            )
+            
+            if not assignments_response or len(assignments_response) == 0:
+                print("   ⚠️  No assignments found - creating a test assignment...")
+                
+                # Switch back to teacher to create assignment
+                self.session_token = original_token
+                
+                # Create a Python/text assignment similar to "Lists Practice 1"
+                assignment_data = {
+                    "classroom_id": classroom_id,
+                    "title": "Lists Practice 1 (Test)",
+                    "description": "Practice working with Python lists",
+                    "starter_code": "# Create a list of numbers\nnumbers = [1, 2, 3, 4, 5]\n\n# Your code here",
+                    "solution_code": "# Create a list of numbers\nnumbers = [1, 2, 3, 4, 5]\n\n# Add a number to the list\nnumbers.append(6)\nprint(numbers)",
+                    "expected_output": "[1, 2, 3, 4, 5, 6]",
+                    "test_cases": [
+                        {
+                            "input_data": "",
+                            "expected_output": "[1, 2, 3, 4, 5, 6]",
+                            "description": "Test list append operation"
+                        }
+                    ]
+                }
+                
+                assignment = self.run_test(
+                    "Create Lists Practice assignment",
+                    "POST",
+                    "assignments",
+                    200,
+                    assignment_data
+                )
+                
+                if not assignment:
+                    print("❌ Failed to create test assignment")
+                    return
+                
+                assignment_id = assignment.get("assignment_id")
+                print(f"   ✅ Created test assignment: {assignment_id}")
+                
+                # Switch back to student
+                self.session_token = student_session_token
+                
+            else:
+                # Use existing assignment
+                assignment = assignments_response[0]
+                assignment_id = assignment.get("id")
+                assignment_title = assignment.get("title", "Unknown")
+                print(f"   ✅ Found assignment: {assignment_title} (ID: {assignment_id})")
+            
+            # Step 4: Try to submit code to the assignment
+            print("   Step 4: Attempting to submit code (reproducing 500 error)...")
+            
+            submission_data = {
+                "assignment_id": assignment_id,
+                "code": "print('hello')"
+            }
+            
+            # This is where the 500 error should occur
+            submission_response = self.run_test(
+                "Submit code to Lists Practice assignment",
+                "POST",
+                "submissions",
+                200,  # We expect this to work now (if fixed) or get specific error
+                submission_data
+            )
+            
+            if submission_response:
+                print("   ✅ Submission successful - 500 error has been RESOLVED!")
+                score = submission_response.get("score", 0)
+                feedback = submission_response.get("feedback", "")
+                print(f"   Score: {score}%")
+                print(f"   Feedback: {feedback[:100]}...")
+                
+                self.log_test("Lists Practice submission works without 500 error", True)
+                
+            else:
+                print("   ❌ Submission failed - investigating error...")
+                
+                # Try to get more details about the error
+                url = f"{self.api_url}/submissions"
+                headers = {
+                    'Content-Type': 'application/json',
+                    'Authorization': f'Bearer {self.session_token}'
+                }
+                
+                try:
+                    import requests
+                    response = requests.post(url, json=submission_data, headers=headers)
+                    print(f"   Status Code: {response.status_code}")
+                    print(f"   Response Headers: {dict(response.headers)}")
+                    
+                    try:
+                        error_detail = response.json()
+                        print(f"   Error Response: {json.dumps(error_detail, indent=2)}")
+                    except:
+                        print(f"   Raw Response: {response.text}")
+                    
+                    self.log_test("Lists Practice submission works without 500 error", False, f"Status: {response.status_code}, Response: {response.text[:200]}")
+                    
+                except Exception as e:
+                    print(f"   ❌ Error making request: {str(e)}")
+                    self.log_test("Lists Practice submission works without 500 error", False, f"Request error: {str(e)}")
+            
+            # Step 5: Test with different code variations to isolate the issue
+            print("   Step 5: Testing different code variations...")
+            
+            test_codes = [
+                ("Simple print", "print('hello world')"),
+                ("List creation", "my_list = [1, 2, 3]\nprint(my_list)"),
+                ("List append", "numbers = [1, 2, 3]\nnumbers.append(4)\nprint(numbers)"),
+                ("Empty code", ""),
+                ("Comment only", "# This is a comment"),
+                ("Multi-line", "x = 1\ny = 2\nprint(x + y)")
+            ]
+            
+            for test_name, test_code in test_codes:
+                print(f"     Testing {test_name}...")
+                
+                test_submission_data = {
+                    "assignment_id": assignment_id,
+                    "code": test_code
+                }
+                
+                test_response = self.run_test(
+                    f"Submit {test_name}",
+                    "POST",
+                    "submissions",
+                    200,
+                    test_submission_data
+                )
+                
+                if test_response:
+                    score = test_response.get("score", 0)
+                    print(f"       ✅ {test_name}: Score {score}%")
+                else:
+                    print(f"       ❌ {test_name}: Failed")
+        
+        finally:
+            # Switch back to teacher token
+            self.session_token = original_token
+        
+        print("\n🎯 SUBMISSION ENDPOINT 500 ERROR TEST SUMMARY:")
+        print("   - Teacher login: ✅")
+        print("   - Found classroom with students: ✅")
+        print("   - Created student session: ✅")
+        print("   - Assignment access: ✅")
+        print("   - Submission endpoint test: See results above")
+        print("   - Code variation tests: See results above")
+
     def run_all_tests(self):
         """Run all API tests"""
         print("🚀 Starting CodeClass API Tests...")
