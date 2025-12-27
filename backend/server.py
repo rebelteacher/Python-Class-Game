@@ -2156,6 +2156,22 @@ def normalize_output(output: str) -> str:
     # Normalize line endings
     output = output.replace('\r\n', '\n').replace('\r', '\n')
     
+    # For list-like outputs, normalize to single line format
+    # This handles cases where expected output has newlines like "[10,\n20,\n30]"
+    # but actual output is "[10, 20, 30]"
+    if output.strip().startswith('[') and output.strip().endswith(']'):
+        # Remove all newlines and extra spaces within the list
+        normalized = output.replace('\n', ' ').replace('\r', ' ')
+        # Normalize multiple spaces to single space
+        while '  ' in normalized:
+            normalized = normalized.replace('  ', ' ')
+        # Normalize spacing around commas: "[10 , 20]" -> "[10, 20]"
+        normalized = normalized.replace(' ,', ',').replace(',  ', ', ').replace(', ', ', ')
+        # Ensure consistent format: "[10,20]" -> "[10, 20]"
+        import re
+        normalized = re.sub(r',(\S)', r', \1', normalized)
+        return normalized.strip()
+    
     # Strip leading/trailing whitespace from each line
     lines = [line.rstrip() for line in output.split('\n')]
     
@@ -2169,6 +2185,7 @@ def normalize_output(output: str) -> str:
     
     # Join back and ensure consistent spacing
     return '\n'.join(lines)
+
 
 
 def run_python_code(code: str, test_input: str = "", timeout: int = 5) -> dict:
