@@ -3241,6 +3241,11 @@ Be encouraging but fair. Give partial credit for good attempts."""
                 expected = normalize_output(test_case.get("expected_output", ""))
                 actual = normalize_output(result["output"]) if result["success"] else ""
                 
+                # Debug logging for test case comparison
+                logging.info(f"📊 TEST CASE: input='{test_input}', expected='{expected}', actual='{actual}', success={result['success']}")
+                if result.get("error"):
+                    logging.info(f"📊 TEST CASE ERROR: {result.get('error')}")
+                
                 passed = result["success"] and actual == expected
                 if passed:
                     passed_tests += 1
