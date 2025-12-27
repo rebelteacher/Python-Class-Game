@@ -3231,6 +3231,12 @@ Be encouraging but fair. Give partial credit for good attempts."""
     total_tests = len(test_cases)
     passed_tests = 0
     
+    # Log test case configuration for debugging
+    logging.info(f"📊 GRADING: Assignment '{assignment.get('title')}', Problem '{problem.get('title')}'")
+    logging.info(f"📊 GRADING: Found {total_tests} test cases")
+    for i, tc in enumerate(test_cases):
+        logging.info(f"📊 TEST CASE {i+1}: input='{tc.get('input_data') or tc.get('input', '')}', expected='{tc.get('expected_output', '')}'")
+    
     try:
         if total_tests > 0:
             # Traditional test case evaluation
