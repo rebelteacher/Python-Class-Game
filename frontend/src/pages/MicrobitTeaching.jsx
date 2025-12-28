@@ -1,8 +1,9 @@
 import { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { 
   ArrowLeft, 
   Play, 
@@ -13,428 +14,454 @@ import {
   Download,
   Maximize2,
   Cpu,
-  Lightbulb
+  Lightbulb,
+  BookOpen,
+  HelpCircle,
+  CheckCircle,
+  XCircle,
+  ExternalLink,
+  FileText,
+  Target,
+  Users
 } from "lucide-react";
 import Editor from "@monaco-editor/react";
 import MicrobitSimulator from "@/components/MicrobitSimulator";
 import { ResizablePanelGroup, ResizablePanel, ResizableHandle } from "@/components/ui/resizable";
 
-// Teaching examples organized by concept
-const TEACHING_EXAMPLES = {
-  display: {
-    title: "💡 LED Display",
-    lessons: [
-      {
-        id: "show_image",
-        title: "Display an Image",
-        description: "Use display.show() with built-in images like HEART, HAPPY, SAD.",
-        code: `from microbit import *
+// Curriculum-aligned teaching content matching the seeded problems
+const CURRICULUM = {
+  "unit1": {
+    title: "Unit 1: Getting Started",
+    icon: "🚀",
+    color: "from-blue-500 to-cyan-500",
+    lessons: {
+      "lesson1": {
+        title: "Lesson 1: What is Micro:bit?",
+        type: "quiz",
+        description: "Introduction to the BBC Micro:bit - components, features, and capabilities.",
+        teachingGuide: [
+          "Show the physical Micro:bit and point out each component",
+          "Explain the LED matrix (5x5 = 25 LEDs)",
+          "Demonstrate buttons A and B",
+          "Mention built-in sensors: accelerometer, compass, temperature",
+          "Explain how to connect via USB"
+        ],
+        quiz: [
+          { question: "What is the grid of lights on the front of the Micro:bit called?", options: ["LED Matrix", "Touch Screen", "Solar Panel", "Camera"], correct: 0 },
+          { question: "How many LEDs are on the Micro:bit display?", options: ["10", "25", "50", "100"], correct: 1 },
+          { question: "What are buttons A and B used for?", options: ["Charging the battery", "User input", "Turning it off", "Taking photos"], correct: 1 },
+          { question: "Which sensor detects motion and tilt?", options: ["Thermometer", "Accelerometer", "Barometer", "Microphone"], correct: 1 },
+          { question: "How do you connect the Micro:bit to a computer?", options: ["WiFi", "Bluetooth only", "USB cable", "HDMI"], correct: 2 }
+        ]
+      },
+      "lesson2": {
+        title: "Lesson 2: Display Heart",
+        type: "code",
+        description: "Your first program! Display images on the LED screen.",
+        teachingGuide: [
+          "Open the MicroPython editor",
+          "Explain 'from microbit import *'",
+          "Introduce display.show() function",
+          "Show built-in Image.HEART, Image.HAPPY, etc.",
+          "Demonstrate display.scroll() for text"
+        ],
+        demoCode: `from microbit import *
 
 # Show a heart on the LED display
-display.show(Image.HEART)
-`,
-        concepts: ["display.show()", "Image.HEART", "built-in images"]
+display.show(Image.HEART)`,
+        concepts: ["display.show()", "Image.HEART", "import statement"],
+        quiz: [
+          { question: "What function displays an image on the LEDs?", options: ["print()", "display.show()", "led.on()", "screen.draw()"], correct: 1 },
+          { question: "What is Image.HEART?", options: ["A text string", "A built-in image", "A number", "A function"], correct: 1 },
+          { question: "What does 'from microbit import *' do?", options: ["Deletes code", "Imports Micro:bit tools", "Prints text", "Stops the program"], correct: 1 },
+          { question: "Which function scrolls text across the display?", options: ["display.print()", "display.scroll()", "display.write()", "display.move()"], correct: 1 }
+        ]
       },
-      {
-        id: "show_text",
-        title: "Display Text",
-        description: "Use display.scroll() to show scrolling text across the LEDs.",
-        code: `from microbit import *
-
-# Scroll text across the display
-display.scroll("Hello!")
-`,
-        concepts: ["display.scroll()", "text output"]
-      },
-      {
-        id: "set_pixel",
-        title: "Control Individual LEDs",
-        description: "Use display.set_pixel(x, y, brightness) to light up specific LEDs.",
-        code: `from microbit import *
-
-# Light up individual pixels
-# set_pixel(x, y, brightness)
-# x: column (0-4), y: row (0-4)
-# brightness: 0-9
-
-display.set_pixel(2, 2, 9)  # Center LED
-display.set_pixel(0, 0, 5)  # Top-left (dimmer)
-display.set_pixel(4, 4, 9)  # Bottom-right
-`,
-        concepts: ["display.set_pixel()", "x, y coordinates", "brightness 0-9"]
-      },
-      {
-        id: "animation",
-        title: "Simple Animation",
-        description: "Create animations by showing images with sleep() delays.",
-        code: `from microbit import *
+      "lesson3": {
+        title: "Lesson 3: Animations",
+        type: "code",
+        description: "Create animations by displaying images in a loop with delays.",
+        teachingGuide: [
+          "Explain while True: for infinite loops",
+          "Introduce sleep() for timing",
+          "Show multiple images in sequence",
+          "Demonstrate Image.HEART and Image.HEART_SMALL",
+          "Let students create their own animations"
+        ],
+        demoCode: `from microbit import *
 
 while True:
     display.show(Image.HEART)
     sleep(500)
     display.show(Image.HEART_SMALL)
-    sleep(500)
-`,
-        concepts: ["while True:", "sleep()", "animation loop"]
+    sleep(500)`,
+        concepts: ["while True:", "sleep()", "animation loop"],
+        quiz: [
+          { question: "What does 'while True:' do?", options: ["Runs once", "Runs forever", "Stops the program", "Nothing"], correct: 1 },
+          { question: "What does sleep(500) do?", options: ["Waits 500 seconds", "Waits 500 milliseconds", "Sleeps forever", "Turns off LEDs"], correct: 1 },
+          { question: "What unit does sleep() use?", options: ["Seconds", "Minutes", "Milliseconds", "Hours"], correct: 2 },
+          { question: "How do you make an animation faster?", options: ["Use bigger sleep values", "Use smaller sleep values", "Remove the loop", "Add more images"], correct: 1 }
+        ]
       }
-    ]
+    }
   },
-  buttons: {
-    title: "🔘 Buttons",
-    lessons: [
-      {
-        id: "button_check",
-        title: "Check Button Press",
-        description: "Use button_a.is_pressed() to check if a button is currently pressed.",
-        code: `from microbit import *
+  "unit2": {
+    title: "Unit 2: Buttons & Input",
+    icon: "🔘",
+    color: "from-green-500 to-emerald-500",
+    lessons: {
+      "lesson4": {
+        title: "Lesson 4: Button Basics",
+        type: "code",
+        description: "Detect button presses and respond with different actions.",
+        teachingGuide: [
+          "Explain button_a and button_b objects",
+          "Difference between is_pressed() and was_pressed()",
+          "Use if statements to check buttons",
+          "Show elif for multiple conditions",
+          "Demonstrate checking both buttons with 'and'"
+        ],
+        demoCode: `from microbit import *
 
 while True:
     if button_a.is_pressed():
         display.show(Image.HAPPY)
-    else:
-        display.show(Image.SAD)
-`,
-        concepts: ["button_a.is_pressed()", "if statement"]
-      },
-      {
-        id: "both_buttons",
-        title: "Both Buttons",
-        description: "React differently to button A, button B, or both.",
-        code: `from microbit import *
-
-while True:
-    if button_a.is_pressed() and button_b.is_pressed():
-        display.show(Image.SURPRISED)
-    elif button_a.is_pressed():
-        display.show("A")
     elif button_b.is_pressed():
-        display.show("B")
+        display.show(Image.SAD)
     else:
-        display.clear()
-`,
-        concepts: ["button_a", "button_b", "and operator", "elif"]
+        display.clear()`,
+        concepts: ["button_a", "button_b", "is_pressed()", "if/elif/else"],
+        quiz: [
+          { question: "What checks if button A is currently being held?", options: ["button_a.click()", "button_a.is_pressed()", "button_a.pressed", "a.check()"], correct: 1 },
+          { question: "What is the difference between is_pressed() and was_pressed()?", options: ["No difference", "is_pressed checks now, was_pressed checks past", "was_pressed is faster", "is_pressed is broken"], correct: 1 },
+          { question: "How do you check if BOTH buttons are pressed?", options: ["button_a or button_b", "button_a + button_b", "button_a and button_b", "buttons.both()"], correct: 2 },
+          { question: "What keyword handles 'otherwise' in Python?", options: ["otherwise", "else", "default", "other"], correct: 1 }
+        ]
       },
-      {
-        id: "button_counter",
-        title: "Button Counter",
-        description: "Count button presses and display the count.",
-        code: `from microbit import *
+      "lesson5": {
+        title: "Lesson 5: Button Counter",
+        type: "code",
+        description: "Create counters and track button presses using variables.",
+        teachingGuide: [
+          "Introduce variables for storing data",
+          "Show count = 0 initialization",
+          "Explain count = count + 1",
+          "Use was_pressed() for counting clicks",
+          "Add reset functionality with button B"
+        ],
+        demoCode: `from microbit import *
 
 count = 0
 
 while True:
-    if button_a.is_pressed():
+    if button_a.was_pressed():
         count = count + 1
-        display.show(count)
-        sleep(300)  # Debounce
-    if button_b.is_pressed():
+    if button_b.was_pressed():
         count = 0
-        display.show(count)
-        sleep(300)
-`,
-        concepts: ["variables", "counter", "debouncing"]
+    display.show(count)`,
+        concepts: ["variables", "counter", "was_pressed()"],
+        quiz: [
+          { question: "What does 'count = 0' do?", options: ["Displays 0", "Creates a variable with value 0", "Deletes count", "Checks if count is 0"], correct: 1 },
+          { question: "How do you add 1 to count?", options: ["count++", "count = count + 1", "add(count, 1)", "count.increase()"], correct: 1 },
+          { question: "Why use was_pressed() instead of is_pressed() for counting?", options: ["It's faster", "It counts once per click", "It's newer", "No reason"], correct: 1 },
+          { question: "What does count = 0 do after pressing B?", options: ["Adds 0", "Resets the counter", "Does nothing", "Ends program"], correct: 1 }
+        ]
       },
-      {
-        id: "button_game",
-        title: "Reaction Game",
-        description: "A simple reaction time game using buttons.",
-        code: `from microbit import *
+      "lesson6": {
+        title: "Lesson 6: RPS Game",
+        type: "code",
+        description: "Create a Rock Paper Scissors game using random numbers and shake detection.",
+        teachingGuide: [
+          "Import random module",
+          "Explain random.randint(1, 3)",
+          "Show accelerometer gesture detection",
+          "Use was_gesture('shake')",
+          "Map numbers to R, P, S choices"
+        ],
+        demoCode: `from microbit import *
 import random
 
 while True:
-    display.show(Image.ASLEEP)
-    sleep(random.randint(1000, 3000))
-    display.show(Image.SURPRISED)
-    
-    if button_a.is_pressed():
-        display.scroll("WIN!")
+    if accelerometer.was_gesture('shake'):
+        choice = random.randint(0, 2)
+        if choice == 0:
+            display.show('R')
+        elif choice == 1:
+            display.show('P')
+        else:
+            display.show('S')`,
+        concepts: ["import random", "random.randint()", "was_gesture('shake')"],
+        quiz: [
+          { question: "How do you get a random number between 1 and 6?", options: ["random(1,6)", "random.randint(1, 6)", "randint(1-6)", "random.number(1,6)"], correct: 1 },
+          { question: "What detects when you shake the Micro:bit?", options: ["button_a", "accelerometer", "compass", "display"], correct: 1 },
+          { question: "What does 'import random' do?", options: ["Creates random images", "Adds random number tools", "Makes random sounds", "Shuffles the code"], correct: 1 },
+          { question: "What does random.choice(['R','P','S']) do?", options: ["Picks a random item from the list", "Sorts the list", "Counts the items", "Removes an item"], correct: 0 }
+        ]
+      }
+    }
+  },
+  "unit3": {
+    title: "Unit 3: Sensors",
+    icon: "📡",
+    color: "from-orange-500 to-red-500",
+    lessons: {
+      "lesson7": {
+        title: "Lesson 7: Accelerometer",
+        type: "code",
+        description: "Detect tilt, motion, and gestures using the accelerometer.",
+        teachingGuide: [
+          "Explain X, Y, Z axes",
+          "Show accelerometer.get_x(), get_y(), get_z()",
+          "Demonstrate tilt values (-1023 to 1023)",
+          "Use is_gesture() and was_gesture()",
+          "Create a spirit level or tilt game"
+        ],
+        demoCode: `from microbit import *
+
+while True:
+    x = accelerometer.get_x()
+    if x < -200:
+        display.show('<')
+    elif x > 200:
+        display.show('>')
     else:
-        sleep(1000)
-        display.scroll("Slow!")
-`,
-        concepts: ["random", "game logic", "timing"]
-      }
-    ]
-  },
-  loops: {
-    title: "🔁 Loops",
-    lessons: [
-      {
-        id: "while_true",
-        title: "Forever Loop",
-        description: "Use while True: to run code forever.",
-        code: `from microbit import *
+        display.show('-')`,
+        concepts: ["accelerometer.get_x()", "tilt values", "gesture detection"],
+        quiz: [
+          { question: "What does accelerometer.get_x() return?", options: ["A letter", "A tilt value", "An image", "A button state"], correct: 1 },
+          { question: "What range do accelerometer values span?", options: ["0 to 100", "-1023 to 1023", "0 to 255", "-10 to 10"], correct: 1 },
+          { question: "Which gesture detects shaking?", options: ["'tilt'", "'shake'", "'move'", "'vibrate'"], correct: 1 },
+          { question: "What axis detects forward/backward tilt?", options: ["X axis", "Y axis", "Z axis", "W axis"], correct: 1 }
+        ]
+      },
+      "lesson8": {
+        title: "Lesson 8: Step Counter",
+        type: "code",
+        description: "Build a pedometer using shake detection to count steps.",
+        teachingGuide: [
+          "Review shake gesture detection",
+          "Use a variable to count steps",
+          "Display count on button press",
+          "Add reset functionality",
+          "Discuss real-world fitness trackers"
+        ],
+        demoCode: `from microbit import *
+
+steps = 0
 
 while True:
-    display.show(Image.HEART)
+    if accelerometer.was_gesture('shake'):
+        steps += 1
+    if button_a.was_pressed():
+        display.scroll(steps)
+    if button_b.was_pressed():
+        steps = 0
+        display.show(Image.YES)`,
+        concepts: ["step counting", "was_gesture()", "fitness tracking"],
+        quiz: [
+          { question: "What does steps += 1 mean?", options: ["steps = steps + 1", "steps = 1", "steps = steps - 1", "Add steps to 1"], correct: 0 },
+          { question: "Why use button_a to show count instead of always displaying?", options: ["Saves battery", "Prevents scrolling constantly", "Both A and B", "Neither"], correct: 2 },
+          { question: "How would you estimate distance from steps?", options: ["steps * stride_length", "steps / 100", "steps + distance", "Can't be done"], correct: 0 },
+          { question: "What happens when you reset steps to 0?", options: ["Program stops", "Counter starts over", "Display breaks", "Nothing"], correct: 1 }
+        ]
+      },
+      "lesson9": {
+        title: "Lesson 9: Compass",
+        type: "code",
+        description: "Use the built-in compass to find direction and heading.",
+        teachingGuide: [
+          "Explain compass.calibrate() first",
+          "Show compass.heading() returns 0-359",
+          "Map heading to N, E, S, W",
+          "Create a compass arrow display",
+          "Discuss real navigation uses"
+        ],
+        demoCode: `from microbit import *
+
+compass.calibrate()
+
+while True:
+    heading = compass.heading()
+    if heading < 45 or heading > 315:
+        display.show('N')
+    elif heading < 135:
+        display.show('E')
+    elif heading < 225:
+        display.show('S')
+    else:
+        display.show('W')`,
+        concepts: ["compass.calibrate()", "compass.heading()", "directions"],
+        quiz: [
+          { question: "Why must you calibrate the compass first?", options: ["To turn it on", "To improve accuracy", "To change language", "Not required"], correct: 1 },
+          { question: "What range does compass.heading() return?", options: ["0 to 100", "0 to 359", "-180 to 180", "N, E, S, W"], correct: 1 },
+          { question: "What heading is North?", options: ["0 or 360", "90", "180", "270"], correct: 0 },
+          { question: "What heading is East?", options: ["0", "90", "180", "270"], correct: 1 }
+        ]
+      }
+    }
+  },
+  "unit4": {
+    title: "Unit 4: External Components",
+    icon: "💡",
+    color: "from-purple-500 to-pink-500",
+    lessons: {
+      "lesson10": {
+        title: "Lesson 10: External LED",
+        type: "code",
+        description: "Connect and control external LEDs using GPIO pins.",
+        teachingGuide: [
+          "Explain digital output (HIGH/LOW)",
+          "Show pin0.write_digital(1) and (0)",
+          "Demonstrate LED circuit with resistor",
+          "Create blink pattern",
+          "Introduce analog output for brightness"
+        ],
+        demoCode: `from microbit import *
+
+while True:
+    pin0.write_digital(1)  # LED ON
+    sleep(500)
+    pin0.write_digital(0)  # LED OFF
+    sleep(500)`,
+        concepts: ["write_digital()", "GPIO pins", "LED circuits"],
+        wiring: "Connect LED long leg to Pin 0, short leg through 220Ω resistor to GND",
+        quiz: [
+          { question: "What does pin0.write_digital(1) do?", options: ["Reads pin 0", "Sets pin 0 HIGH (on)", "Sets pin 0 LOW (off)", "Deletes pin 0"], correct: 1 },
+          { question: "Why do we need a resistor with an LED?", options: ["To make it brighter", "To limit current and protect the LED", "For decoration", "Not needed"], correct: 1 },
+          { question: "What does write_analog() do differently?", options: ["Same as digital", "Controls brightness 0-1023", "Only works with buttons", "Reads values"], correct: 1 },
+          { question: "Which pin connections are available?", options: ["Only pin 0", "Pins 0, 1, 2, 3V, GND", "Pins A and B", "No pins"], correct: 1 }
+        ]
+      },
+      "lesson11": {
+        title: "Lesson 11: Traffic Light",
+        type: "code",
+        description: "Build a traffic light using multiple LEDs on different pins.",
+        teachingGuide: [
+          "Use 3 LEDs on pins 0, 1, 2",
+          "Create red, yellow, green sequence",
+          "Add timing for realistic behavior",
+          "Implement pedestrian crossing button",
+          "Discuss real traffic light systems"
+        ],
+        demoCode: `from microbit import *
+
+# Pin 0 = Red, Pin 1 = Yellow, Pin 2 = Green
+
+while True:
+    # Red
+    pin0.write_digital(1)
+    pin1.write_digital(0)
+    pin2.write_digital(0)
+    sleep(3000)
+    # Yellow
+    pin0.write_digital(0)
+    pin1.write_digital(1)
     sleep(1000)
-    display.clear()
-    sleep(1000)
-`,
-        concepts: ["while True:", "forever loop"]
+    # Green
+    pin1.write_digital(0)
+    pin2.write_digital(1)
+    sleep(3000)
+    # Yellow
+    pin2.write_digital(0)
+    pin1.write_digital(1)
+    sleep(1000)`,
+        concepts: ["multiple pins", "state machines", "timing"],
+        wiring: "Red LED → Pin 0, Yellow LED → Pin 1, Green LED → Pin 2 (each with 220Ω resistor to GND)",
+        quiz: [
+          { question: "How many pins do you need for a 3-color traffic light?", options: ["1", "2", "3", "4"], correct: 2 },
+          { question: "What order do traffic lights go?", options: ["Green, Yellow, Red", "Red, Yellow, Green", "Red, Green, Yellow", "Green, Red, Yellow"], correct: 1 },
+          { question: "How long should yellow typically last?", options: ["5 seconds", "1-2 seconds", "10 seconds", "Same as green"], correct: 1 },
+          { question: "What's the purpose of the yellow light?", options: ["Decoration", "Warning to prepare to stop/go", "Save electricity", "Nothing"], correct: 1 }
+        ]
       },
-      {
-        id: "for_loop",
-        title: "For Loop with Range",
-        description: "Use for loops to repeat actions a specific number of times.",
-        code: `from microbit import *
-
-# Count from 0 to 9
-for i in range(10):
-    display.show(i)
-    sleep(500)
-
-display.scroll("Done!")
-`,
-        concepts: ["for i in range()", "counting"]
-      },
-      {
-        id: "loop_brightness",
-        title: "Brightness Loop",
-        description: "Use a loop to fade an LED in and out.",
-        code: `from microbit import *
+      "lesson12": {
+        title: "Lesson 12: Night Light",
+        type: "code",
+        description: "Create an automatic night light using a light sensor.",
+        teachingGuide: [
+          "Explain analog input with read_analog()",
+          "Show LDR (light dependent resistor) circuit",
+          "Read values 0-1023 based on brightness",
+          "Use threshold to trigger LED",
+          "Add adjustable sensitivity"
+        ],
+        demoCode: `from microbit import *
 
 while True:
-    # Fade in
-    for brightness in range(10):
-        display.set_pixel(2, 2, brightness)
-        sleep(100)
-    
-    # Fade out
-    for brightness in range(9, -1, -1):
-        display.set_pixel(2, 2, brightness)
-        sleep(100)
-`,
-        concepts: ["nested loops", "range with step", "fading"]
-      },
-      {
-        id: "loop_patterns",
-        title: "Pattern Loop",
-        description: "Loop through a list of images to create patterns.",
-        code: `from microbit import *
-
-images = [
-    Image.ARROW_N,
-    Image.ARROW_E,
-    Image.ARROW_S,
-    Image.ARROW_W
-]
-
-while True:
-    for image in images:
-        display.show(image)
-        sleep(200)
-`,
-        concepts: ["lists", "for item in list", "image arrays"]
-      }
-    ]
-  },
-  variables: {
-    title: "📦 Variables",
-    lessons: [
-      {
-        id: "var_intro",
-        title: "Using Variables",
-        description: "Variables store values that can change.",
-        code: `from microbit import *
-
-score = 0
-
-while True:
-    if button_a.is_pressed():
-        score = score + 1
-        display.show(score)
-        sleep(300)
-`,
-        concepts: ["variable assignment", "updating values"]
-      },
-      {
-        id: "var_math",
-        title: "Math with Variables",
-        description: "Perform calculations with variables.",
-        code: `from microbit import *
-
-health = 10
-
-while True:
-    display.show(health)
-    
-    if button_a.is_pressed():
-        health = health - 1  # Take damage
-        sleep(300)
-    
-    if button_b.is_pressed():
-        health = health + 1  # Heal
-        if health > 10:
-            health = 10
-        sleep(300)
-`,
-        concepts: ["math operations", "boundaries", "game mechanics"]
-      },
-      {
-        id: "var_boolean",
-        title: "True/False Variables",
-        description: "Boolean variables can be True or False.",
-        code: `from microbit import *
-
-game_over = False
-
-while not game_over:
-    display.show(Image.HAPPY)
-    
-    if button_a.is_pressed() and button_b.is_pressed():
-        game_over = True
-
-display.scroll("GAME OVER")
-`,
-        concepts: ["boolean", "True/False", "while not"]
-      },
-      {
-        id: "var_string",
-        title: "Text Variables",
-        description: "Store and display text messages.",
-        code: `from microbit import *
-
-messages = ["Hi!", "Hello", "Yo!"]
-index = 0
-
-while True:
-    if button_a.is_pressed():
-        display.scroll(messages[index])
-        index = index + 1
-        if index >= len(messages):
-            index = 0
-        sleep(500)
-`,
-        concepts: ["strings", "lists", "index"]
-      }
-    ]
-  },
-  functions: {
-    title: "📦 Functions",
-    lessons: [
-      {
-        id: "func_basic",
-        title: "Creating Functions",
-        description: "Functions are reusable blocks of code.",
-        code: `from microbit import *
-
-# Define a function
-def blink():
-    display.show(Image.HEART)
-    sleep(500)
-    display.clear()
-    sleep(500)
-
-# Use the function
-while True:
-    blink()
-`,
-        concepts: ["def", "function definition", "calling functions"]
-      },
-      {
-        id: "func_params",
-        title: "Functions with Parameters",
-        description: "Pass values into functions to customize behavior.",
-        code: `from microbit import *
-
-def flash(image, times):
-    for i in range(times):
-        display.show(image)
-        sleep(300)
+    light = pin1.read_analog()
+    if light < 300:  # Dark
+        pin0.write_digital(1)  # LED on
+        display.show(Image.HAPPY)
+    else:  # Bright
+        pin0.write_digital(0)  # LED off
         display.clear()
-        sleep(300)
-
-while True:
-    if button_a.is_pressed():
-        flash(Image.HEART, 3)
-    if button_b.is_pressed():
-        flash(Image.HAPPY, 5)
-`,
-        concepts: ["parameters", "arguments", "customization"]
-      },
-      {
-        id: "func_return",
-        title: "Functions that Return Values",
-        description: "Functions can calculate and return results.",
-        code: `from microbit import *
-
-def add_scores(a, b):
-    return a + b
-
-score1 = 5
-score2 = 3
-total = add_scores(score1, score2)
-
-display.scroll(total)
-`,
-        concepts: ["return", "calculating results"]
-      },
-      {
-        id: "func_organize",
-        title: "Organizing with Functions",
-        description: "Use functions to organize your code logically.",
-        code: `from microbit import *
-
-def show_ready():
-    display.show(Image.TARGET)
-    sleep(500)
-
-def show_win():
-    display.show(Image.HAPPY)
-    display.scroll("WIN!")
-
-def show_lose():
-    display.show(Image.SAD)
-    display.scroll("LOSE")
-
-show_ready()
-if button_a.is_pressed():
-    show_win()
-else:
-    show_lose()
-`,
-        concepts: ["code organization", "readable code"]
+    sleep(100)`,
+        concepts: ["read_analog()", "light sensor", "threshold"],
+        wiring: "LDR between 3V and Pin 1, 10kΩ resistor between Pin 1 and GND. LED on Pin 0.",
+        quiz: [
+          { question: "What does pin1.read_analog() return?", options: ["True or False", "A value 0-1023", "A string", "An image"], correct: 1 },
+          { question: "What is an LDR?", options: ["LED Display Resistor", "Light Dependent Resistor", "Low Data Reader", "Left Direction Reader"], correct: 1 },
+          { question: "What happens to the LDR reading when it gets darker?", options: ["Goes up", "Goes down", "Stays same", "Becomes negative"], correct: 1 },
+          { question: "What is a threshold in this context?", options: ["A door", "A value that triggers an action", "A type of LED", "A pin number"], correct: 1 }
+        ]
       }
-    ]
+    }
   }
 };
 
 export default function MicrobitTeaching({ user }) {
   const navigate = useNavigate();
-  const [selectedTopic, setSelectedTopic] = useState("display");
-  const [currentLessonIndex, setCurrentLessonIndex] = useState(0);
+  const [selectedUnit, setSelectedUnit] = useState("unit1");
+  const [selectedLesson, setSelectedLesson] = useState("lesson1");
   const [code, setCode] = useState("");
   const [isFullscreen, setIsFullscreen] = useState(false);
+  const [showQuiz, setShowQuiz] = useState(false);
+  const [quizAnswers, setQuizAnswers] = useState({});
+  const [quizSubmitted, setQuizSubmitted] = useState(false);
+  const [activeTab, setActiveTab] = useState("teach");
   const editorRef = useRef(null);
 
-  const currentTopic = TEACHING_EXAMPLES[selectedTopic];
-  const currentLesson = currentTopic.lessons[currentLessonIndex];
+  const currentUnit = CURRICULUM[selectedUnit];
+  const currentLesson = currentUnit?.lessons[selectedLesson];
 
   // Initialize code when lesson changes
-  const lessonCode = currentLesson?.code || "";
   useEffect(() => {
-    setCode(lessonCode);
-  }, [lessonCode]);
+    if (currentLesson?.demoCode) {
+      setCode(currentLesson.demoCode);
+    }
+    setShowQuiz(false);
+    setQuizAnswers({});
+    setQuizSubmitted(false);
+  }, [selectedUnit, selectedLesson]);
 
   const resetCode = () => {
-    setCode(currentLesson.code);
-  };
-
-  const nextLesson = () => {
-    if (currentLessonIndex < currentTopic.lessons.length - 1) {
-      setCurrentLessonIndex(currentLessonIndex + 1);
+    if (currentLesson?.demoCode) {
+      setCode(currentLesson.demoCode);
     }
   };
 
-  const prevLesson = () => {
-    if (currentLessonIndex > 0) {
-      setCurrentLessonIndex(currentLessonIndex - 1);
+  const handleQuizAnswer = (qIndex, aIndex) => {
+    if (!quizSubmitted) {
+      setQuizAnswers({ ...quizAnswers, [qIndex]: aIndex });
     }
   };
 
-  const handleEditorMount = (editor) => {
-    editorRef.current = editor;
+  const submitQuiz = () => {
+    setQuizSubmitted(true);
+  };
+
+  const resetQuiz = () => {
+    setQuizAnswers({});
+    setQuizSubmitted(false);
+  };
+
+  const getQuizScore = () => {
+    if (!currentLesson?.quiz) return 0;
+    let correct = 0;
+    currentLesson.quiz.forEach((q, i) => {
+      if (quizAnswers[i] === q.correct) correct++;
+    });
+    return correct;
   };
 
   const downloadCode = () => {
@@ -449,10 +476,14 @@ export default function MicrobitTeaching({ user }) {
     URL.revokeObjectURL(url);
   };
 
+  const openMicrobitEditor = () => {
+    window.open('https://python.microbit.org/v/3', '_blank');
+  };
+
   return (
     <div className={`min-h-screen bg-gray-900 text-white ${isFullscreen ? 'fixed inset-0 z-50' : ''}`}>
       {/* Header */}
-      <div className="bg-gradient-to-r from-cyan-600 to-blue-600 py-3 px-6">
+      <div className={`bg-gradient-to-r ${currentUnit?.color || 'from-cyan-600 to-blue-600'} py-3 px-6`}>
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-4">
             <Button
@@ -467,174 +498,314 @@ export default function MicrobitTeaching({ user }) {
             <div className="flex items-center gap-2">
               <Monitor className="w-5 h-5" />
               <span className="font-bold">Teaching Mode</span>
-              <span className="text-cyan-200">| {currentTopic.title}</span>
+              <span className="opacity-80">| {currentUnit?.icon} {currentUnit?.title}</span>
             </div>
           </div>
           
-          <div className="flex items-center gap-4">
-            <Select value={selectedTopic} onValueChange={(v) => { setSelectedTopic(v); setCurrentLessonIndex(0); }}>
-              <SelectTrigger className="w-40 bg-white/10 border-white/30 text-white">
+          <div className="flex items-center gap-3">
+            {/* Unit Selector */}
+            <Select value={selectedUnit} onValueChange={(v) => { 
+              setSelectedUnit(v); 
+              const firstLesson = Object.keys(CURRICULUM[v].lessons)[0];
+              setSelectedLesson(firstLesson);
+            }}>
+              <SelectTrigger className="w-48 bg-white/10 border-white/30 text-white">
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
-                {Object.entries(TEACHING_EXAMPLES).map(([key, topic]) => (
-                  <SelectItem key={key} value={key}>{topic.title}</SelectItem>
+                {Object.entries(CURRICULUM).map(([key, unit]) => (
+                  <SelectItem key={key} value={key}>{unit.icon} {unit.title}</SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+
+            {/* Lesson Selector */}
+            <Select value={selectedLesson} onValueChange={setSelectedLesson}>
+              <SelectTrigger className="w-52 bg-white/10 border-white/30 text-white">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                {Object.entries(currentUnit?.lessons || {}).map(([key, lesson]) => (
+                  <SelectItem key={key} value={key}>{lesson.title}</SelectItem>
                 ))}
               </SelectContent>
             </Select>
             
             <Button
-              variant="ghost"
+              onClick={openMicrobitEditor}
               size="sm"
-              onClick={() => setIsFullscreen(!isFullscreen)}
-              className="text-white hover:bg-white/20"
+              className="bg-white/20 hover:bg-white/30"
             >
-              <Maximize2 className="w-4 h-4" />
+              <ExternalLink className="w-4 h-4 mr-1" />
+              Open Editor
+            </Button>
+
+            <Button
+              onClick={() => navigate("/library?type=microbit")}
+              size="sm"
+              className="bg-white/20 hover:bg-white/30"
+            >
+              <FileText className="w-4 h-4 mr-1" />
+              View Problems
             </Button>
           </div>
         </div>
       </div>
 
-      {/* Main Content with Resizable Panels */}
-      <ResizablePanelGroup direction="horizontal" className="h-[calc(100vh-52px)]">
-        {/* Left: Code Editor */}
-        <ResizablePanel defaultSize={50} minSize={30}>
-          <div className="h-full flex flex-col border-r border-gray-700">
-            {/* Lesson Info */}
-            <div className="p-4 bg-gray-800 border-b border-gray-700">
-              <div className="flex items-center justify-between mb-2">
-                <h2 className="text-lg font-bold text-cyan-400">{currentLesson.title}</h2>
-                <div className="flex items-center gap-2 text-sm text-gray-400">
-                  <span>{currentLessonIndex + 1} / {currentTopic.lessons.length}</span>
-                </div>
+      {/* Main Content */}
+      <div className="p-6">
+        <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-4">
+          <TabsList className="bg-gray-800">
+            <TabsTrigger value="teach" className="data-[state=active]:bg-cyan-600">
+              <BookOpen className="w-4 h-4 mr-2" />
+              Teaching Guide
+            </TabsTrigger>
+            <TabsTrigger value="code" className="data-[state=active]:bg-cyan-600">
+              <Cpu className="w-4 h-4 mr-2" />
+              Demo Code
+            </TabsTrigger>
+            <TabsTrigger value="quiz" className="data-[state=active]:bg-cyan-600">
+              <HelpCircle className="w-4 h-4 mr-2" />
+              Quiz ({currentLesson?.quiz?.length || 0} questions)
+            </TabsTrigger>
+          </TabsList>
+
+          {/* Teaching Guide Tab */}
+          <TabsContent value="teach" className="space-y-4">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+              {/* Lesson Overview */}
+              <Card className="bg-gray-800 border-gray-700">
+                <CardHeader>
+                  <CardTitle className="text-cyan-400 flex items-center gap-2">
+                    <Target className="w-5 h-5" />
+                    {currentLesson?.title}
+                  </CardTitle>
+                  <CardDescription className="text-gray-300">
+                    {currentLesson?.description}
+                  </CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <h4 className="font-semibold text-white mb-3 flex items-center gap-2">
+                    <Lightbulb className="w-4 h-4 text-yellow-400" />
+                    Teaching Steps:
+                  </h4>
+                  <ol className="space-y-2">
+                    {currentLesson?.teachingGuide?.map((step, i) => (
+                      <li key={i} className="flex items-start gap-3 text-gray-300">
+                        <span className="flex-shrink-0 w-6 h-6 rounded-full bg-cyan-600 flex items-center justify-center text-sm font-bold">
+                          {i + 1}
+                        </span>
+                        <span>{step}</span>
+                      </li>
+                    ))}
+                  </ol>
+                </CardContent>
+              </Card>
+
+              {/* Concepts & Wiring */}
+              <div className="space-y-4">
+                {currentLesson?.concepts && (
+                  <Card className="bg-gray-800 border-gray-700">
+                    <CardHeader>
+                      <CardTitle className="text-green-400 text-lg">Key Concepts</CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                      <div className="flex flex-wrap gap-2">
+                        {currentLesson.concepts.map((concept, i) => (
+                          <span key={i} className="px-3 py-1 bg-green-900/50 text-green-300 rounded-full text-sm font-mono">
+                            {concept}
+                          </span>
+                        ))}
+                      </div>
+                    </CardContent>
+                  </Card>
+                )}
+
+                {currentLesson?.wiring && (
+                  <Card className="bg-gray-800 border-gray-700 border-l-4 border-l-yellow-500">
+                    <CardHeader>
+                      <CardTitle className="text-yellow-400 text-lg">⚡ Wiring Instructions</CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                      <p className="text-gray-300">{currentLesson.wiring}</p>
+                    </CardContent>
+                  </Card>
+                )}
+
+                {/* Student Activity */}
+                <Card className="bg-gradient-to-br from-cyan-900/50 to-blue-900/50 border-cyan-700">
+                  <CardHeader>
+                    <CardTitle className="text-white flex items-center gap-2">
+                      <Users className="w-5 h-5" />
+                      Student Activity
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent className="text-gray-200">
+                    Have students complete the practice problems for this lesson. 
+                    <Button 
+                      onClick={() => navigate("/library?type=microbit")}
+                      variant="outline"
+                      size="sm"
+                      className="mt-3 w-full border-cyan-500 text-cyan-300 hover:bg-cyan-900"
+                    >
+                      <FileText className="w-4 h-4 mr-2" />
+                      View & Assign Problems
+                    </Button>
+                  </CardContent>
+                </Card>
               </div>
-              <p className="text-gray-300 text-sm mb-2">{currentLesson.description}</p>
-              <div className="flex gap-2 flex-wrap">
-                {currentLesson.concepts.map((concept, i) => (
-                  <span key={i} className="px-2 py-0.5 bg-cyan-900/50 text-cyan-300 rounded text-xs">
-                    {concept}
-                  </span>
+            </div>
+          </TabsContent>
+
+          {/* Demo Code Tab */}
+          <TabsContent value="code">
+            <ResizablePanelGroup direction="horizontal" className="min-h-[500px] rounded-lg border border-gray-700">
+              {/* Code Editor */}
+              <ResizablePanel defaultSize={50} minSize={30}>
+                <div className="h-full flex flex-col bg-gray-800">
+                  <div className="p-3 border-b border-gray-700 flex items-center justify-between">
+                    <span className="font-medium text-cyan-400">Demo Code</span>
+                    <div className="flex gap-2">
+                      <Button onClick={resetCode} size="sm" variant="outline" className="bg-gray-700 border-gray-600">
+                        <RotateCcw className="w-4 h-4 mr-1" />
+                        Reset
+                      </Button>
+                      <Button onClick={downloadCode} size="sm" variant="outline" className="bg-gray-700 border-gray-600">
+                        <Download className="w-4 h-4 mr-1" />
+                        Download
+                      </Button>
+                    </div>
+                  </div>
+                  <div className="flex-1">
+                    <Editor
+                      height="100%"
+                      defaultLanguage="python"
+                      theme="vs-dark"
+                      value={code}
+                      onChange={setCode}
+                      options={{
+                        minimap: { enabled: false },
+                        fontSize: 14,
+                        lineNumbers: "on",
+                        scrollBeyondLastLine: false,
+                        automaticLayout: true,
+                        wordWrap: "on",
+                      }}
+                    />
+                  </div>
+                </div>
+              </ResizablePanel>
+
+              <ResizableHandle withHandle className="bg-gray-700" />
+
+              {/* Simulator */}
+              <ResizablePanel defaultSize={50} minSize={30}>
+                <div className="h-full flex flex-col bg-gray-950">
+                  <div className="p-3 border-b border-gray-700 flex items-center justify-between">
+                    <span className="font-medium text-cyan-400 flex items-center gap-2">
+                      <Cpu className="w-4 h-4" />
+                      Micro:bit Simulator
+                    </span>
+                    <Button onClick={openMicrobitEditor} size="sm" className="bg-cyan-600 hover:bg-cyan-700">
+                      <ExternalLink className="w-4 h-4 mr-1" />
+                      Run in Editor
+                    </Button>
+                  </div>
+                  <div className="flex-1 flex items-center justify-center p-4">
+                    <MicrobitSimulator code={code} />
+                  </div>
+                </div>
+              </ResizablePanel>
+            </ResizablePanelGroup>
+          </TabsContent>
+
+          {/* Quiz Tab */}
+          <TabsContent value="quiz">
+            <Card className="bg-gray-800 border-gray-700">
+              <CardHeader>
+                <CardTitle className="text-cyan-400 flex items-center gap-2">
+                  <HelpCircle className="w-5 h-5" />
+                  {currentLesson?.title} - Quiz
+                </CardTitle>
+                <CardDescription className="text-gray-400">
+                  Use these questions to check student understanding. {currentLesson?.quiz?.length || 0} questions.
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-6">
+                {currentLesson?.quiz?.map((q, qIndex) => (
+                  <div key={qIndex} className="p-4 bg-gray-900 rounded-lg">
+                    <p className="font-medium text-white mb-3">
+                      {qIndex + 1}. {q.question}
+                    </p>
+                    <div className="space-y-2">
+                      {q.options.map((option, oIndex) => {
+                        const isSelected = quizAnswers[qIndex] === oIndex;
+                        const isCorrect = oIndex === q.correct;
+                        const showResult = quizSubmitted;
+                        
+                        let bgColor = "bg-gray-800 hover:bg-gray-700";
+                        if (showResult) {
+                          if (isCorrect) bgColor = "bg-green-900/50 border-green-500";
+                          else if (isSelected && !isCorrect) bgColor = "bg-red-900/50 border-red-500";
+                        } else if (isSelected) {
+                          bgColor = "bg-cyan-900/50 border-cyan-500";
+                        }
+                        
+                        return (
+                          <button
+                            key={oIndex}
+                            onClick={() => handleQuizAnswer(qIndex, oIndex)}
+                            className={`w-full text-left p-3 rounded border ${bgColor} transition-colors flex items-center gap-3`}
+                            disabled={quizSubmitted}
+                          >
+                            <span className="w-6 h-6 rounded-full border flex items-center justify-center text-sm">
+                              {String.fromCharCode(65 + oIndex)}
+                            </span>
+                            <span className="flex-1">{option}</span>
+                            {showResult && isCorrect && <CheckCircle className="w-5 h-5 text-green-400" />}
+                            {showResult && isSelected && !isCorrect && <XCircle className="w-5 h-5 text-red-400" />}
+                          </button>
+                        );
+                      })}
+                    </div>
+                  </div>
                 ))}
-              </div>
-            </div>
-
-            {/* Editor */}
-            <div className="flex-1">
-              <Editor
-                height="100%"
-                defaultLanguage="python"
-                theme="vs-dark"
-                value={code}
-                onChange={setCode}
-                onMount={handleEditorMount}
-                options={{
-                  minimap: { enabled: false },
-                  fontSize: 16,
-                  lineNumbers: "on",
-                  scrollBeyondLastLine: false,
-                  automaticLayout: true,
-                  wordWrap: "on",
-                  wrappingIndent: "indent",
-                }}
-              />
-            </div>
-
-            {/* Controls */}
-            <div className="p-3 bg-gray-800 border-t border-gray-700 flex items-center justify-between">
-              <div className="flex gap-2">
-                <Button
-                  onClick={prevLesson}
-                  disabled={currentLessonIndex === 0}
-                  variant="outline"
-                  size="sm"
-                  className="bg-gray-700 border-gray-600 hover:bg-gray-600"
-                >
-                  <ChevronLeft className="w-4 h-4 mr-1" />
-                  Previous
-                </Button>
-                <Button
-                  onClick={nextLesson}
-                  disabled={currentLessonIndex === currentTopic.lessons.length - 1}
-                  variant="outline"
-                  size="sm"
-                  className="bg-gray-700 border-gray-600 hover:bg-gray-600"
-                >
-                  Next
-                  <ChevronRight className="w-4 h-4 ml-1" />
-                </Button>
-              </div>
-              
-              <div className="flex gap-2">
-                <Button
-                  onClick={resetCode}
-                  variant="outline"
-                  size="sm"
-                  className="bg-gray-700 border-gray-600 hover:bg-gray-600"
-                >
-                  <RotateCcw className="w-4 h-4 mr-1" />
-                  Reset
-                </Button>
-                <Button
-                  onClick={downloadCode}
-                  variant="outline"
-                  size="sm"
-                  className="bg-gray-700 border-gray-600 hover:bg-gray-600"
-                >
-                  <Download className="w-4 h-4 mr-1" />
-                  Download
-                </Button>
-              </div>
-            </div>
-          </div>
-        </ResizablePanel>
-
-        <ResizableHandle withHandle className="bg-gray-700" />
-
-        {/* Right: Micro:bit Simulator */}
-        <ResizablePanel defaultSize={50} minSize={30}>
-          <div className="h-full flex flex-col bg-gray-950">
-            <div className="p-3 bg-gray-800 border-b border-gray-700 flex items-center justify-between">
-              <span className="font-medium text-cyan-400 flex items-center gap-2">
-                <Cpu className="w-4 h-4" />
-                Micro:bit Simulator
-              </span>
-              <span className="text-xs text-gray-400">Click Run to test • Press A/B buttons</span>
-            </div>
-            
-            <div className="flex-1 flex flex-col items-center justify-center p-6">
-              <MicrobitSimulator code={code} />
-            </div>
-
-            {/* Quick Reference */}
-            <div className="p-4 bg-gray-800 border-t border-gray-700">
-              <div className="flex items-center gap-2 mb-2">
-                <Lightbulb className="w-4 h-4 text-yellow-500" />
-                <h3 className="text-sm font-medium text-gray-300">Quick Reference</h3>
-              </div>
-              <div className="grid grid-cols-2 gap-2 text-xs">
-                <div className="text-gray-500">
-                  <code className="text-cyan-400">display.show(Image.X)</code> - show image
+                
+                <div className="flex items-center justify-between pt-4 border-t border-gray-700">
+                  {quizSubmitted ? (
+                    <>
+                      <div className="text-lg">
+                        Score: <span className="text-cyan-400 font-bold">{getQuizScore()}/{currentLesson?.quiz?.length || 0}</span>
+                        <span className="text-gray-400 ml-2">
+                          ({Math.round((getQuizScore() / (currentLesson?.quiz?.length || 1)) * 100)}%)
+                        </span>
+                      </div>
+                      <Button onClick={resetQuiz} className="bg-cyan-600 hover:bg-cyan-700">
+                        <RotateCcw className="w-4 h-4 mr-2" />
+                        Try Again
+                      </Button>
+                    </>
+                  ) : (
+                    <>
+                      <p className="text-gray-400">
+                        Answered: {Object.keys(quizAnswers).length}/{currentLesson?.quiz?.length || 0}
+                      </p>
+                      <Button 
+                        onClick={submitQuiz} 
+                        className="bg-cyan-600 hover:bg-cyan-700"
+                        disabled={Object.keys(quizAnswers).length !== (currentLesson?.quiz?.length || 0)}
+                      >
+                        <CheckCircle className="w-4 h-4 mr-2" />
+                        Submit Quiz
+                      </Button>
+                    </>
+                  )}
                 </div>
-                <div className="text-gray-500">
-                  <code className="text-cyan-400">display.scroll(&quot;text&quot;)</code> - scroll text
-                </div>
-                <div className="text-gray-500">
-                  <code className="text-cyan-400">button_a.is_pressed()</code> - check button
-                </div>
-                <div className="text-gray-500">
-                  <code className="text-cyan-400">sleep(ms)</code> - wait milliseconds
-                </div>
-                <div className="text-gray-500">
-                  <code className="text-cyan-400">display.set_pixel(x,y,b)</code> - set LED
-                </div>
-                <div className="text-gray-500">
-                  <code className="text-cyan-400">display.clear()</code> - clear display
-                </div>
-              </div>
-            </div>
-          </div>
-        </ResizablePanel>
-      </ResizablePanelGroup>
+              </CardContent>
+            </Card>
+          </TabsContent>
+        </Tabs>
+      </div>
     </div>
   );
 }
