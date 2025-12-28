@@ -5,7 +5,7 @@ import json
 
 class TurtleProblemsTest:
     def __init__(self):
-        self.base_url = "https://block-teach.preview.emergentagent.com"
+        self.base_url = "https://curric-assess.preview.emergentagent.com"
         self.api_url = f"{self.base_url}/api"
         self.session_token = None
         self.tests_run = 0
