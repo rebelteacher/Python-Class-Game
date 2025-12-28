@@ -9418,3 +9418,1082 @@ async def seed_block_problems():
 @app.on_event("shutdown")
 async def shutdown_db_client():
     client.close()
+
+@app.on_event("startup")
+async def seed_microbit_problems():
+    """Seed Micro:bit curriculum problems - 5 per lesson, 12 lessons = 60 total"""
+    try:
+        # Check current count - we want exactly 60 problems
+        existing_count = await db.problems.count_documents({"assignment_type": "microbit"})
+        if existing_count >= 60:
+            logger.info(f"✅ Micro:bit problems already exist: {existing_count}")
+            return
+        
+        logger.info("🔄 Seeding Micro:bit problems...")
+        
+        # First, clear existing microbit problems to reorganize
+        await db.problems.delete_many({"assignment_type": "microbit"})
+        
+        microbit_problems = [
+            # ==================== UNIT 1: GETTING STARTED ====================
+            
+            # Lesson 1: What is Micro:bit? (Quiz - 5 multiple choice)
+            {
+                "title": "Micro:bit Components Quiz",
+                "description": "Test your knowledge about the parts of a Micro:bit! Identify the LED matrix, buttons, and other components.",
+                "unit": "Unit 1: Getting Started",
+                "chapter": "Chapter 1: LED Patterns",
+                "lesson": "Lesson 1: What is Micro:bit?",
+                "difficulty": "Easy",
+                "problem_type": "Quiz",
+                "quiz_questions": [
+                    {"question": "What is the grid of lights on the front of the Micro:bit called?", "options": ["LED Matrix", "Touch Screen", "Solar Panel", "Camera"], "correct": 0},
+                    {"question": "How many LEDs are on the Micro:bit display?", "options": ["10", "25", "50", "100"], "correct": 1},
+                    {"question": "What are buttons A and B used for?", "options": ["Charging the battery", "User input", "Turning it off", "Taking photos"], "correct": 1},
+                    {"question": "What type of device is the Micro:bit?", "options": ["Smartphone", "Microcontroller", "Laptop", "Calculator"], "correct": 1},
+                    {"question": "How do you connect the Micro:bit to a computer?", "options": ["WiFi", "Bluetooth only", "USB cable", "HDMI"], "correct": 2}
+                ]
+            },
+            {
+                "title": "Micro:bit Safety Quiz",
+                "description": "Learn the safety rules for handling your Micro:bit and electronic components.",
+                "unit": "Unit 1: Getting Started",
+                "chapter": "Chapter 1: LED Patterns",
+                "lesson": "Lesson 1: What is Micro:bit?",
+                "difficulty": "Easy",
+                "problem_type": "Quiz",
+                "quiz_questions": [
+                    {"question": "What should you NOT do with your Micro:bit?", "options": ["Connect via USB", "Submerge in water", "Write code for it", "Press its buttons"], "correct": 1},
+                    {"question": "Where should you store your Micro:bit?", "options": ["In water", "In a safe, dry place", "In the freezer", "In direct sunlight"], "correct": 1},
+                    {"question": "What should you hold when picking up a Micro:bit?", "options": ["The USB port", "The edges", "The LED screen", "The battery"], "correct": 1},
+                    {"question": "Static electricity can damage electronics. What helps prevent this?", "options": ["Touching metal first", "Rubbing your feet on carpet", "Wearing wool", "Being in a dry room"], "correct": 0}
+                ]
+            },
+            {
+                "title": "Micro:bit Features Quiz",
+                "description": "Discover all the built-in features of the Micro:bit including sensors and communication.",
+                "unit": "Unit 1: Getting Started",
+                "chapter": "Chapter 1: LED Patterns",
+                "lesson": "Lesson 1: What is Micro:bit?",
+                "difficulty": "Easy",
+                "problem_type": "Quiz",
+                "quiz_questions": [
+                    {"question": "Which sensor detects motion and tilt?", "options": ["Thermometer", "Accelerometer", "Barometer", "Microphone"], "correct": 1},
+                    {"question": "Can the Micro:bit measure temperature?", "options": ["Yes", "No", "Only with extra parts", "Only in Celsius"], "correct": 0},
+                    {"question": "What can the Micro:bit use to communicate wirelessly?", "options": ["WiFi only", "Radio and Bluetooth", "Satellite", "Infrared"], "correct": 1},
+                    {"question": "How many pins are on the edge connector for connecting external components?", "options": ["3", "10", "25", "50"], "correct": 2}
+                ]
+            },
+            {
+                "title": "Programming Languages Quiz",
+                "description": "Learn about the different programming languages you can use with Micro:bit.",
+                "unit": "Unit 1: Getting Started",
+                "chapter": "Chapter 1: LED Patterns",
+                "lesson": "Lesson 1: What is Micro:bit?",
+                "difficulty": "Easy",
+                "problem_type": "Quiz",
+                "quiz_questions": [
+                    {"question": "What programming language uses blocks that snap together?", "options": ["Python", "JavaScript", "MakeCode Blocks", "C++"], "correct": 2},
+                    {"question": "What text-based language is popular for Micro:bit?", "options": ["Java", "MicroPython", "Ruby", "PHP"], "correct": 1},
+                    {"question": "What is the name of the editor we use for MicroPython?", "options": ["Mu Editor", "Word", "Notepad", "Paint"], "correct": 0},
+                    {"question": "How do you transfer code to the Micro:bit?", "options": ["Email it", "Drag and drop the file", "Print it", "Say it out loud"], "correct": 1}
+                ]
+            },
+            {
+                "title": "Micro:bit History Quiz",
+                "description": "Learn about the history and purpose of the BBC Micro:bit.",
+                "unit": "Unit 1: Getting Started",
+                "chapter": "Chapter 1: LED Patterns",
+                "lesson": "Lesson 1: What is Micro:bit?",
+                "difficulty": "Easy",
+                "problem_type": "Quiz",
+                "quiz_questions": [
+                    {"question": "Which organization created the Micro:bit?", "options": ["Apple", "BBC", "Google", "Microsoft"], "correct": 1},
+                    {"question": "What was the main purpose of creating the Micro:bit?", "options": ["Playing games", "Teaching coding to students", "Making phone calls", "Taking photos"], "correct": 1},
+                    {"question": "In what year was the Micro:bit first released?", "options": ["2010", "2016", "2020", "2005"], "correct": 1},
+                    {"question": "The Micro:bit was inspired by which 1980s computer?", "options": ["Apple II", "BBC Micro", "Commodore 64", "Atari"], "correct": 1}
+                ]
+            },
+            
+            # Lesson 2: Your First Program - Display Heart (Code - 5 problems)
+            {
+                "title": "Display a Heart",
+                "description": "Write your first Micro:bit program! Display a heart image on the LED matrix using display.show(Image.HEART).",
+                "unit": "Unit 1: Getting Started",
+                "chapter": "Chapter 1: LED Patterns",
+                "lesson": "Lesson 2: Display Heart",
+                "difficulty": "Easy",
+                "problem_type": "Class Practice",
+                "starter_code": "from microbit import *\n\n# Display a heart on the LED screen\n# Your code here:\n",
+                "solution_code": "from microbit import *\n\n# Display a heart on the LED screen\ndisplay.show(Image.HEART)",
+                "test_cases": [
+                    {"description": "Imports microbit module", "pattern": "from microbit import", "points": 25},
+                    {"description": "Uses display.show()", "pattern": "display.show", "points": 25},
+                    {"description": "Shows HEART image", "pattern": "Image.HEART", "points": 50}
+                ]
+            },
+            {
+                "title": "Hello World - Scroll Text",
+                "description": "Make the LED display scroll the message 'Hello' across the screen using display.scroll().",
+                "unit": "Unit 1: Getting Started",
+                "chapter": "Chapter 1: LED Patterns",
+                "lesson": "Lesson 2: Display Heart",
+                "difficulty": "Easy",
+                "problem_type": "Class Practice",
+                "starter_code": "from microbit import *\n\n# Make the display scroll 'Hello'\n# Your code here:\n",
+                "solution_code": "from microbit import *\n\ndisplay.scroll('Hello')",
+                "test_cases": [
+                    {"description": "Uses display.scroll()", "pattern": "display.scroll", "points": 50},
+                    {"description": "Scrolls 'Hello'", "pattern": "Hello", "points": 50}
+                ]
+            },
+            {
+                "title": "Display Your Name",
+                "description": "Scroll your name across the LED display. Replace 'YourName' with your actual name!",
+                "unit": "Unit 1: Getting Started",
+                "chapter": "Chapter 1: LED Patterns",
+                "lesson": "Lesson 2: Display Heart",
+                "difficulty": "Easy",
+                "problem_type": "Independent Practice",
+                "starter_code": "from microbit import *\n\n# Scroll your name\n# Your code here:\n",
+                "solution_code": "from microbit import *\n\ndisplay.scroll('Student')",
+                "test_cases": [
+                    {"description": "Uses display.scroll()", "pattern": "display.scroll", "points": 100}
+                ]
+            },
+            {
+                "title": "Show a Happy Face",
+                "description": "Display a happy face image using the built-in Image.HAPPY.",
+                "unit": "Unit 1: Getting Started",
+                "chapter": "Chapter 1: LED Patterns",
+                "lesson": "Lesson 2: Display Heart",
+                "difficulty": "Easy",
+                "problem_type": "Independent Practice",
+                "starter_code": "from microbit import *\n\n# Show a happy face\n# Your code here:\n",
+                "solution_code": "from microbit import *\n\ndisplay.show(Image.HAPPY)",
+                "test_cases": [
+                    {"description": "Uses display.show()", "pattern": "display.show", "points": 50},
+                    {"description": "Shows HAPPY image", "pattern": "Image.HAPPY", "points": 50}
+                ]
+            },
+            {
+                "title": "Show Multiple Images",
+                "description": "Show a heart, wait 1 second, then show a happy face. Use sleep(1000) to pause.",
+                "unit": "Unit 1: Getting Started",
+                "chapter": "Chapter 1: LED Patterns",
+                "lesson": "Lesson 2: Display Heart",
+                "difficulty": "Medium",
+                "problem_type": "Challenge",
+                "starter_code": "from microbit import *\n\n# Show heart, wait, then show happy\n# Your code here:\n",
+                "solution_code": "from microbit import *\n\ndisplay.show(Image.HEART)\nsleep(1000)\ndisplay.show(Image.HAPPY)",
+                "test_cases": [
+                    {"description": "Shows HEART", "pattern": "Image.HEART", "points": 30},
+                    {"description": "Uses sleep()", "pattern": "sleep(", "points": 30},
+                    {"description": "Shows HAPPY", "pattern": "Image.HAPPY", "points": 40}
+                ]
+            },
+            
+            # Lesson 3: LED Patterns & Animations (Code - 5 problems)
+            {
+                "title": "Beating Heart Animation",
+                "description": "Create a beating heart animation by alternating between HEART and HEART_SMALL images in a loop.",
+                "unit": "Unit 1: Getting Started",
+                "chapter": "Chapter 1: LED Patterns",
+                "lesson": "Lesson 3: Animations",
+                "difficulty": "Medium",
+                "problem_type": "Class Practice",
+                "starter_code": "from microbit import *\n\n# Create a beating heart animation\n# Use while True loop\n# Your code here:\n",
+                "solution_code": "from microbit import *\n\nwhile True:\n    display.show(Image.HEART)\n    sleep(500)\n    display.show(Image.HEART_SMALL)\n    sleep(500)",
+                "test_cases": [
+                    {"description": "Uses while True loop", "pattern": "while True:", "points": 25},
+                    {"description": "Shows HEART", "pattern": "Image.HEART", "points": 25},
+                    {"description": "Shows HEART_SMALL", "pattern": "Image.HEART_SMALL", "points": 25},
+                    {"description": "Uses sleep()", "pattern": "sleep(", "points": 25}
+                ]
+            },
+            {
+                "title": "Happy Sad Animation",
+                "description": "Create an animation that alternates between happy and sad faces every half second.",
+                "unit": "Unit 1: Getting Started",
+                "chapter": "Chapter 1: LED Patterns",
+                "lesson": "Lesson 3: Animations",
+                "difficulty": "Medium",
+                "problem_type": "Class Practice",
+                "starter_code": "from microbit import *\n\n# Animate between happy and sad faces\n# Your code here:\n",
+                "solution_code": "from microbit import *\n\nwhile True:\n    display.show(Image.HAPPY)\n    sleep(500)\n    display.show(Image.SAD)\n    sleep(500)",
+                "test_cases": [
+                    {"description": "Uses while True loop", "pattern": "while True:", "points": 25},
+                    {"description": "Shows HAPPY", "pattern": "Image.HAPPY", "points": 25},
+                    {"description": "Shows SAD", "pattern": "Image.SAD", "points": 25},
+                    {"description": "Uses sleep()", "pattern": "sleep(", "points": 25}
+                ]
+            },
+            {
+                "title": "Clock Animation",
+                "description": "Create an animation showing clock hands moving: CLOCK12, CLOCK3, CLOCK6, CLOCK9 in a loop.",
+                "unit": "Unit 1: Getting Started",
+                "chapter": "Chapter 1: LED Patterns",
+                "lesson": "Lesson 3: Animations",
+                "difficulty": "Medium",
+                "problem_type": "Independent Practice",
+                "starter_code": "from microbit import *\n\n# Create a clock animation\n# Show CLOCK12, CLOCK3, CLOCK6, CLOCK9\n# Your code here:\n",
+                "solution_code": "from microbit import *\n\nwhile True:\n    display.show(Image.CLOCK12)\n    sleep(250)\n    display.show(Image.CLOCK3)\n    sleep(250)\n    display.show(Image.CLOCK6)\n    sleep(250)\n    display.show(Image.CLOCK9)\n    sleep(250)",
+                "test_cases": [
+                    {"description": "Uses while True loop", "pattern": "while True:", "points": 20},
+                    {"description": "Shows CLOCK images", "pattern": "Image.CLOCK", "points": 40},
+                    {"description": "Uses sleep()", "pattern": "sleep(", "points": 40}
+                ]
+            },
+            {
+                "title": "Arrow Spinner",
+                "description": "Make an arrow spin around! Show ARROW_N, ARROW_E, ARROW_S, ARROW_W in sequence.",
+                "unit": "Unit 1: Getting Started",
+                "chapter": "Chapter 1: LED Patterns",
+                "lesson": "Lesson 3: Animations",
+                "difficulty": "Medium",
+                "problem_type": "Independent Practice",
+                "starter_code": "from microbit import *\n\n# Make an arrow spin around\n# Your code here:\n",
+                "solution_code": "from microbit import *\n\nwhile True:\n    display.show(Image.ARROW_N)\n    sleep(200)\n    display.show(Image.ARROW_E)\n    sleep(200)\n    display.show(Image.ARROW_S)\n    sleep(200)\n    display.show(Image.ARROW_W)\n    sleep(200)",
+                "test_cases": [
+                    {"description": "Uses while True loop", "pattern": "while True:", "points": 20},
+                    {"description": "Shows ARROW images", "pattern": "Image.ARROW", "points": 40},
+                    {"description": "Uses sleep()", "pattern": "sleep(", "points": 40}
+                ]
+            },
+            {
+                "title": "Custom Image Animation",
+                "description": "Create your own custom image using Image() and animate it with another image.",
+                "unit": "Unit 1: Getting Started",
+                "chapter": "Chapter 1: LED Patterns",
+                "lesson": "Lesson 3: Animations",
+                "difficulty": "Hard",
+                "problem_type": "Challenge",
+                "starter_code": "from microbit import *\n\n# Create a custom image\n# Image('09090:09090:09090:09090:09090') makes vertical lines\n# Your code here:\n",
+                "solution_code": "from microbit import *\n\nimg1 = Image('09090:09090:09090:09090:09090')\nimg2 = Image('90909:90909:90909:90909:90909')\n\nwhile True:\n    display.show(img1)\n    sleep(300)\n    display.show(img2)\n    sleep(300)",
+                "test_cases": [
+                    {"description": "Creates custom Image", "pattern": "Image(", "points": 40},
+                    {"description": "Uses while True loop", "pattern": "while True:", "points": 30},
+                    {"description": "Uses sleep()", "pattern": "sleep(", "points": 30}
+                ]
+            },
+            
+            # ==================== UNIT 2: BUTTONS & INPUT ====================
+            
+            # Lesson 4: Button A & B Basics (Code - 5 problems)
+            {
+                "title": "Button A - Show A",
+                "description": "When button A is pressed, display the letter 'A' on the screen.",
+                "unit": "Unit 2: Buttons & Input",
+                "chapter": "Chapter 2: Buttons",
+                "lesson": "Lesson 4: Button Basics",
+                "difficulty": "Easy",
+                "problem_type": "Class Practice",
+                "starter_code": "from microbit import *\n\nwhile True:\n    # Check if button A is pressed\n    # If pressed, show 'A'\n    # Your code here:\n    pass",
+                "solution_code": "from microbit import *\n\nwhile True:\n    if button_a.is_pressed():\n        display.show('A')",
+                "test_cases": [
+                    {"description": "Checks button_a", "pattern": "button_a", "points": 30},
+                    {"description": "Uses is_pressed()", "pattern": "is_pressed()", "points": 30},
+                    {"description": "Shows 'A'", "pattern": "'A'", "points": 40}
+                ]
+            },
+            {
+                "title": "Button B - Show B",
+                "description": "When button B is pressed, display the letter 'B' on the screen.",
+                "unit": "Unit 2: Buttons & Input",
+                "chapter": "Chapter 2: Buttons",
+                "lesson": "Lesson 4: Button Basics",
+                "difficulty": "Easy",
+                "problem_type": "Class Practice",
+                "starter_code": "from microbit import *\n\nwhile True:\n    # Check if button B is pressed\n    # If pressed, show 'B'\n    # Your code here:\n    pass",
+                "solution_code": "from microbit import *\n\nwhile True:\n    if button_b.is_pressed():\n        display.show('B')",
+                "test_cases": [
+                    {"description": "Checks button_b", "pattern": "button_b", "points": 30},
+                    {"description": "Uses is_pressed()", "pattern": "is_pressed()", "points": 30},
+                    {"description": "Shows 'B'", "pattern": "'B'", "points": 40}
+                ]
+            },
+            {
+                "title": "Button A & B - Different Faces",
+                "description": "Button A shows a happy face, Button B shows a sad face. Use if/elif.",
+                "unit": "Unit 2: Buttons & Input",
+                "chapter": "Chapter 2: Buttons",
+                "lesson": "Lesson 4: Button Basics",
+                "difficulty": "Medium",
+                "problem_type": "Independent Practice",
+                "starter_code": "from microbit import *\n\nwhile True:\n    # Button A = Happy\n    # Button B = Sad\n    # Your code here:\n    pass",
+                "solution_code": "from microbit import *\n\nwhile True:\n    if button_a.is_pressed():\n        display.show(Image.HAPPY)\n    elif button_b.is_pressed():\n        display.show(Image.SAD)",
+                "test_cases": [
+                    {"description": "Checks button_a", "pattern": "button_a", "points": 25},
+                    {"description": "Checks button_b", "pattern": "button_b", "points": 25},
+                    {"description": "Shows HAPPY", "pattern": "Image.HAPPY", "points": 25},
+                    {"description": "Shows SAD", "pattern": "Image.SAD", "points": 25}
+                ]
+            },
+            {
+                "title": "Both Buttons - Surprise!",
+                "description": "When BOTH buttons A and B are pressed together, show a surprised face!",
+                "unit": "Unit 2: Buttons & Input",
+                "chapter": "Chapter 2: Buttons",
+                "lesson": "Lesson 4: Button Basics",
+                "difficulty": "Medium",
+                "problem_type": "Independent Practice",
+                "starter_code": "from microbit import *\n\nwhile True:\n    # Both A and B = Surprised\n    # Use 'and' to check both\n    # Your code here:\n    pass",
+                "solution_code": "from microbit import *\n\nwhile True:\n    if button_a.is_pressed() and button_b.is_pressed():\n        display.show(Image.SURPRISED)",
+                "test_cases": [
+                    {"description": "Checks button_a", "pattern": "button_a", "points": 25},
+                    {"description": "Checks button_b", "pattern": "button_b", "points": 25},
+                    {"description": "Uses 'and'", "pattern": " and ", "points": 25},
+                    {"description": "Shows SURPRISED", "pattern": "Image.SURPRISED", "points": 25}
+                ]
+            },
+            {
+                "title": "Clear on No Button",
+                "description": "Show 'A' for button A, 'B' for button B, and clear the display when neither is pressed.",
+                "unit": "Unit 2: Buttons & Input",
+                "chapter": "Chapter 2: Buttons",
+                "lesson": "Lesson 4: Button Basics",
+                "difficulty": "Medium",
+                "problem_type": "Challenge",
+                "starter_code": "from microbit import *\n\nwhile True:\n    # A pressed = 'A'\n    # B pressed = 'B'\n    # Neither = clear display\n    # Your code here:\n    pass",
+                "solution_code": "from microbit import *\n\nwhile True:\n    if button_a.is_pressed():\n        display.show('A')\n    elif button_b.is_pressed():\n        display.show('B')\n    else:\n        display.clear()",
+                "test_cases": [
+                    {"description": "Checks button_a", "pattern": "button_a", "points": 20},
+                    {"description": "Checks button_b", "pattern": "button_b", "points": 20},
+                    {"description": "Uses else", "pattern": "else:", "points": 30},
+                    {"description": "Uses display.clear()", "pattern": "display.clear()", "points": 30}
+                ]
+            },
+            
+            # Lesson 5: Button Counter (Code - 5 problems)
+            {
+                "title": "Simple Counter",
+                "description": "Create a counter that increases by 1 each time button A is pressed. Use was_pressed() to count once per click.",
+                "unit": "Unit 2: Buttons & Input",
+                "chapter": "Chapter 2: Buttons",
+                "lesson": "Lesson 5: Button Counter",
+                "difficulty": "Easy",
+                "problem_type": "Class Practice",
+                "starter_code": "from microbit import *\n\ncount = 0\n\nwhile True:\n    # Increase count when A is pressed\n    # Display the count\n    # Your code here:\n    pass",
+                "solution_code": "from microbit import *\n\ncount = 0\n\nwhile True:\n    if button_a.was_pressed():\n        count = count + 1\n    display.show(count)",
+                "test_cases": [
+                    {"description": "Creates count variable", "pattern": "count", "points": 25},
+                    {"description": "Uses was_pressed()", "pattern": "was_pressed()", "points": 25},
+                    {"description": "Increments count", "pattern": "count + 1|count +=", "points": 25},
+                    {"description": "Displays count", "pattern": "display.show", "points": 25}
+                ]
+            },
+            {
+                "title": "Up and Down Counter",
+                "description": "Button A adds 1, Button B subtracts 1. Display the current count.",
+                "unit": "Unit 2: Buttons & Input",
+                "chapter": "Chapter 2: Buttons",
+                "lesson": "Lesson 5: Button Counter",
+                "difficulty": "Medium",
+                "problem_type": "Class Practice",
+                "starter_code": "from microbit import *\n\ncount = 0\n\nwhile True:\n    # A = add 1\n    # B = subtract 1\n    # Your code here:\n    pass",
+                "solution_code": "from microbit import *\n\ncount = 0\n\nwhile True:\n    if button_a.was_pressed():\n        count = count + 1\n    if button_b.was_pressed():\n        count = count - 1\n    display.show(count)",
+                "test_cases": [
+                    {"description": "Increments count", "pattern": "count + 1|count +=", "points": 25},
+                    {"description": "Decrements count", "pattern": "count - 1|count -=", "points": 25},
+                    {"description": "Uses was_pressed()", "pattern": "was_pressed()", "points": 25},
+                    {"description": "Displays count", "pattern": "display.show", "points": 25}
+                ]
+            },
+            {
+                "title": "Counter with Reset",
+                "description": "A adds 1, B subtracts 1, Both buttons together reset to 0.",
+                "unit": "Unit 2: Buttons & Input",
+                "chapter": "Chapter 2: Buttons",
+                "lesson": "Lesson 5: Button Counter",
+                "difficulty": "Medium",
+                "problem_type": "Independent Practice",
+                "starter_code": "from microbit import *\n\ncount = 0\n\nwhile True:\n    # A = +1, B = -1, Both = reset to 0\n    # Your code here:\n    pass",
+                "solution_code": "from microbit import *\n\ncount = 0\n\nwhile True:\n    if button_a.is_pressed() and button_b.is_pressed():\n        count = 0\n    elif button_a.was_pressed():\n        count = count + 1\n    elif button_b.was_pressed():\n        count = count - 1\n    display.show(count)",
+                "test_cases": [
+                    {"description": "Checks both buttons", "pattern": "and", "points": 25},
+                    {"description": "Resets count to 0", "pattern": "count = 0", "points": 25},
+                    {"description": "Increments and decrements", "pattern": "count +|count -", "points": 25},
+                    {"description": "Displays count", "pattern": "display.show", "points": 25}
+                ]
+            },
+            {
+                "title": "Score Keeper",
+                "description": "Create a score keeper that adds 10 points for A and subtracts 5 for B.",
+                "unit": "Unit 2: Buttons & Input",
+                "chapter": "Chapter 2: Buttons",
+                "lesson": "Lesson 5: Button Counter",
+                "difficulty": "Medium",
+                "problem_type": "Independent Practice",
+                "starter_code": "from microbit import *\n\nscore = 0\n\nwhile True:\n    # A = +10 points, B = -5 points\n    # Scroll the score\n    # Your code here:\n    pass",
+                "solution_code": "from microbit import *\n\nscore = 0\n\nwhile True:\n    if button_a.was_pressed():\n        score = score + 10\n        display.scroll(score)\n    if button_b.was_pressed():\n        score = score - 5\n        display.scroll(score)",
+                "test_cases": [
+                    {"description": "Adds 10 for A", "pattern": "+ 10|+= 10", "points": 25},
+                    {"description": "Subtracts 5 for B", "pattern": "- 5|-= 5", "points": 25},
+                    {"description": "Uses was_pressed()", "pattern": "was_pressed()", "points": 25},
+                    {"description": "Scrolls score", "pattern": "display.scroll", "points": 25}
+                ]
+            },
+            {
+                "title": "Click Speed Game",
+                "description": "Count how many times button A is pressed in 5 seconds, then show the result.",
+                "unit": "Unit 2: Buttons & Input",
+                "chapter": "Chapter 2: Buttons",
+                "lesson": "Lesson 5: Button Counter",
+                "difficulty": "Hard",
+                "problem_type": "Challenge",
+                "starter_code": "from microbit import *\nimport time\n\n# Count button A presses in 5 seconds\n# Show countdown then result\n# Your code here:\n",
+                "solution_code": "from microbit import *\n\ndisplay.scroll('GO!')\ncount = 0\nstart = running_time()\n\nwhile running_time() - start < 5000:\n    if button_a.was_pressed():\n        count = count + 1\n        display.show(count)\n\ndisplay.scroll('Score:' + str(count))",
+                "test_cases": [
+                    {"description": "Uses running_time()", "pattern": "running_time()", "points": 30},
+                    {"description": "Counts button presses", "pattern": "count", "points": 30},
+                    {"description": "Shows result", "pattern": "display.scroll|display.show", "points": 40}
+                ]
+            },
+            
+            # Lesson 6: Rock Paper Scissors Game (Code - 5 problems)
+            {
+                "title": "Random Number",
+                "description": "Generate a random number between 1 and 3 when shaken. Display the number.",
+                "unit": "Unit 2: Buttons & Input",
+                "chapter": "Chapter 2: Buttons",
+                "lesson": "Lesson 6: RPS Game",
+                "difficulty": "Easy",
+                "problem_type": "Class Practice",
+                "starter_code": "from microbit import *\nimport random\n\nwhile True:\n    # When shaken, show random 1-3\n    # Your code here:\n    pass",
+                "solution_code": "from microbit import *\nimport random\n\nwhile True:\n    if accelerometer.was_gesture('shake'):\n        num = random.randint(1, 3)\n        display.show(num)",
+                "test_cases": [
+                    {"description": "Imports random", "pattern": "import random", "points": 25},
+                    {"description": "Detects shake", "pattern": "shake", "points": 25},
+                    {"description": "Uses randint()", "pattern": "random.randint", "points": 25},
+                    {"description": "Displays number", "pattern": "display.show", "points": 25}
+                ]
+            },
+            {
+                "title": "Rock Paper Scissors - Letters",
+                "description": "Shake to play RPS! Show 'R' for Rock, 'P' for Paper, 'S' for Scissors randomly.",
+                "unit": "Unit 2: Buttons & Input",
+                "chapter": "Chapter 2: Buttons",
+                "lesson": "Lesson 6: RPS Game",
+                "difficulty": "Medium",
+                "problem_type": "Class Practice",
+                "starter_code": "from microbit import *\nimport random\n\nwhile True:\n    # Shake = random R, P, or S\n    # Your code here:\n    pass",
+                "solution_code": "from microbit import *\nimport random\n\nwhile True:\n    if accelerometer.was_gesture('shake'):\n        choice = random.randint(0, 2)\n        if choice == 0:\n            display.show('R')\n        elif choice == 1:\n            display.show('P')\n        else:\n            display.show('S')",
+                "test_cases": [
+                    {"description": "Imports random", "pattern": "import random", "points": 20},
+                    {"description": "Detects shake", "pattern": "shake", "points": 20},
+                    {"description": "Shows R", "pattern": "'R'", "points": 20},
+                    {"description": "Shows P", "pattern": "'P'", "points": 20},
+                    {"description": "Shows S", "pattern": "'S'", "points": 20}
+                ]
+            },
+            {
+                "title": "RPS with Images",
+                "description": "Create custom images for Rock (square), Paper (all LEDs), and Scissors (X shape).",
+                "unit": "Unit 2: Buttons & Input",
+                "chapter": "Chapter 2: Buttons",
+                "lesson": "Lesson 6: RPS Game",
+                "difficulty": "Medium",
+                "problem_type": "Independent Practice",
+                "starter_code": "from microbit import *\nimport random\n\nrock = Image('00000:09990:09990:09990:00000')\npaper = Image('99999:99999:99999:99999:99999')\nscissors = Image('90009:09090:00900:09090:90009')\n\nwhile True:\n    # Shake to show random choice\n    # Your code here:\n    pass",
+                "solution_code": "from microbit import *\nimport random\n\nrock = Image('00000:09990:09990:09990:00000')\npaper = Image('99999:99999:99999:99999:99999')\nscissors = Image('90009:09090:00900:09090:90009')\n\nwhile True:\n    if accelerometer.was_gesture('shake'):\n        choice = random.choice([rock, paper, scissors])\n        display.show(choice)",
+                "test_cases": [
+                    {"description": "Creates rock Image", "pattern": "rock = Image", "points": 25},
+                    {"description": "Creates paper Image", "pattern": "paper = Image", "points": 25},
+                    {"description": "Detects shake", "pattern": "shake", "points": 25},
+                    {"description": "Shows random choice", "pattern": "display.show", "points": 25}
+                ]
+            },
+            {
+                "title": "Digital Dice",
+                "description": "Shake to roll a dice! Show random number 1-6.",
+                "unit": "Unit 2: Buttons & Input",
+                "chapter": "Chapter 2: Buttons",
+                "lesson": "Lesson 6: RPS Game",
+                "difficulty": "Easy",
+                "problem_type": "Independent Practice",
+                "starter_code": "from microbit import *\nimport random\n\nwhile True:\n    # Shake to roll dice (1-6)\n    # Your code here:\n    pass",
+                "solution_code": "from microbit import *\nimport random\n\nwhile True:\n    if accelerometer.was_gesture('shake'):\n        roll = random.randint(1, 6)\n        display.show(roll)",
+                "test_cases": [
+                    {"description": "Imports random", "pattern": "import random", "points": 25},
+                    {"description": "Detects shake", "pattern": "shake", "points": 25},
+                    {"description": "Uses randint(1, 6)", "pattern": "randint(1, 6)", "points": 25},
+                    {"description": "Displays roll", "pattern": "display.show", "points": 25}
+                ]
+            },
+            {
+                "title": "Magic 8 Ball",
+                "description": "Shake for a random answer! Show 'Yes', 'No', or 'Maybe' randomly.",
+                "unit": "Unit 2: Buttons & Input",
+                "chapter": "Chapter 2: Buttons",
+                "lesson": "Lesson 6: RPS Game",
+                "difficulty": "Medium",
+                "problem_type": "Challenge",
+                "starter_code": "from microbit import *\nimport random\n\nanswers = ['Yes', 'No', 'Maybe']\n\nwhile True:\n    # Shake for random answer\n    # Your code here:\n    pass",
+                "solution_code": "from microbit import *\nimport random\n\nanswers = ['Yes', 'No', 'Maybe']\n\nwhile True:\n    if accelerometer.was_gesture('shake'):\n        answer = random.choice(answers)\n        display.scroll(answer)",
+                "test_cases": [
+                    {"description": "Creates answers list", "pattern": "answers = ", "points": 25},
+                    {"description": "Uses random.choice()", "pattern": "random.choice", "points": 25},
+                    {"description": "Detects shake", "pattern": "shake", "points": 25},
+                    {"description": "Scrolls answer", "pattern": "display.scroll", "points": 25}
+                ]
+            },
+            
+            # ==================== UNIT 3: SENSORS ====================
+            
+            # Lesson 7: Accelerometer Basics (Code - 5 problems)
+            {
+                "title": "Tilt Left or Right",
+                "description": "Show '<' when tilted left, '>' when tilted right, using accelerometer X value.",
+                "unit": "Unit 3: Sensors",
+                "chapter": "Chapter 3: Sensors",
+                "lesson": "Lesson 7: Accelerometer",
+                "difficulty": "Medium",
+                "problem_type": "Class Practice",
+                "starter_code": "from microbit import *\n\nwhile True:\n    # Get X value\n    # Tilt left (x < -200) = '<'\n    # Tilt right (x > 200) = '>'\n    # Your code here:\n    pass",
+                "solution_code": "from microbit import *\n\nwhile True:\n    x = accelerometer.get_x()\n    if x < -200:\n        display.show('<')\n    elif x > 200:\n        display.show('>')\n    else:\n        display.show('-')",
+                "test_cases": [
+                    {"description": "Gets X value", "pattern": "accelerometer.get_x()", "points": 30},
+                    {"description": "Checks x < -200", "pattern": "x < -200|x<-200", "points": 20},
+                    {"description": "Checks x > 200", "pattern": "x > 200|x>200", "points": 20},
+                    {"description": "Shows direction", "pattern": "display.show", "points": 30}
+                ]
+            },
+            {
+                "title": "Spirit Level",
+                "description": "Create a spirit level! Show arrows for tilt direction: up, down, left, right.",
+                "unit": "Unit 3: Sensors",
+                "chapter": "Chapter 3: Sensors",
+                "lesson": "Lesson 7: Accelerometer",
+                "difficulty": "Medium",
+                "problem_type": "Class Practice",
+                "starter_code": "from microbit import *\n\nwhile True:\n    # Use gestures to detect tilt direction\n    # Show arrow pointing that way\n    # Your code here:\n    pass",
+                "solution_code": "from microbit import *\n\nwhile True:\n    if accelerometer.is_gesture('left'):\n        display.show(Image.ARROW_W)\n    elif accelerometer.is_gesture('right'):\n        display.show(Image.ARROW_E)\n    elif accelerometer.is_gesture('up'):\n        display.show(Image.ARROW_N)\n    elif accelerometer.is_gesture('down'):\n        display.show(Image.ARROW_S)",
+                "test_cases": [
+                    {"description": "Detects tilt gestures", "pattern": "is_gesture", "points": 40},
+                    {"description": "Shows ARROW images", "pattern": "Image.ARROW", "points": 40},
+                    {"description": "Uses if/elif", "pattern": "elif", "points": 20}
+                ]
+            },
+            {
+                "title": "Face Up or Down",
+                "description": "Detect if the Micro:bit is face up or face down using the Z axis.",
+                "unit": "Unit 3: Sensors",
+                "chapter": "Chapter 3: Sensors",
+                "lesson": "Lesson 7: Accelerometer",
+                "difficulty": "Medium",
+                "problem_type": "Independent Practice",
+                "starter_code": "from microbit import *\n\nwhile True:\n    # z < -800 = face up, z > 800 = face down\n    # Your code here:\n    pass",
+                "solution_code": "from microbit import *\n\nwhile True:\n    z = accelerometer.get_z()\n    if z < -800:\n        display.show(Image.HAPPY)\n    elif z > 800:\n        display.show(Image.SAD)\n    else:\n        display.show('-')",
+                "test_cases": [
+                    {"description": "Gets Z value", "pattern": "accelerometer.get_z()", "points": 40},
+                    {"description": "Checks z values", "pattern": "z <|z >", "points": 30},
+                    {"description": "Shows different images", "pattern": "display.show", "points": 30}
+                ]
+            },
+            {
+                "title": "Shake Detector",
+                "description": "Show a surprised face when the Micro:bit is shaken!",
+                "unit": "Unit 3: Sensors",
+                "chapter": "Chapter 3: Sensors",
+                "lesson": "Lesson 7: Accelerometer",
+                "difficulty": "Easy",
+                "problem_type": "Independent Practice",
+                "starter_code": "from microbit import *\n\nwhile True:\n    # Detect shake and show surprised face\n    # Your code here:\n    pass",
+                "solution_code": "from microbit import *\n\nwhile True:\n    if accelerometer.was_gesture('shake'):\n        display.show(Image.SURPRISED)\n        sleep(500)\n        display.clear()",
+                "test_cases": [
+                    {"description": "Detects shake", "pattern": "shake", "points": 50},
+                    {"description": "Shows SURPRISED", "pattern": "Image.SURPRISED", "points": 50}
+                ]
+            },
+            {
+                "title": "Ball Game",
+                "description": "Create a ball that moves based on tilt! Use a pixel that moves with X and Y tilt.",
+                "unit": "Unit 3: Sensors",
+                "chapter": "Chapter 3: Sensors",
+                "lesson": "Lesson 7: Accelerometer",
+                "difficulty": "Hard",
+                "problem_type": "Challenge",
+                "starter_code": "from microbit import *\n\nx = 2\ny = 2\n\nwhile True:\n    # Move ball based on tilt\n    # Keep within 0-4 bounds\n    # Your code here:\n    pass",
+                "solution_code": "from microbit import *\n\nx = 2\ny = 2\n\nwhile True:\n    display.clear()\n    tilt_x = accelerometer.get_x()\n    tilt_y = accelerometer.get_y()\n    \n    if tilt_x > 200 and x < 4:\n        x += 1\n    elif tilt_x < -200 and x > 0:\n        x -= 1\n    \n    if tilt_y > 200 and y < 4:\n        y += 1\n    elif tilt_y < -200 and y > 0:\n        y -= 1\n    \n    display.set_pixel(x, y, 9)\n    sleep(100)",
+                "test_cases": [
+                    {"description": "Gets X and Y tilt", "pattern": "accelerometer.get", "points": 30},
+                    {"description": "Uses set_pixel()", "pattern": "display.set_pixel", "points": 30},
+                    {"description": "Has boundary checks", "pattern": "x <|y <|x >|y >", "points": 40}
+                ]
+            },
+            
+            # Lesson 8: Step Counter Project (Code - 5 problems)
+            {
+                "title": "Basic Step Counter",
+                "description": "Count steps using shake detection. Display the count when button A is pressed.",
+                "unit": "Unit 3: Sensors",
+                "chapter": "Chapter 3: Sensors",
+                "lesson": "Lesson 8: Step Counter",
+                "difficulty": "Medium",
+                "problem_type": "Class Practice",
+                "starter_code": "from microbit import *\n\nsteps = 0\n\nwhile True:\n    # Count steps when shaken\n    # Show count when A is pressed\n    # Your code here:\n    pass",
+                "solution_code": "from microbit import *\n\nsteps = 0\n\nwhile True:\n    if accelerometer.was_gesture('shake'):\n        steps += 1\n    if button_a.was_pressed():\n        display.scroll(steps)",
+                "test_cases": [
+                    {"description": "Creates steps variable", "pattern": "steps", "points": 25},
+                    {"description": "Detects shake", "pattern": "shake", "points": 25},
+                    {"description": "Increments steps", "pattern": "steps +|steps +=", "points": 25},
+                    {"description": "Displays on button press", "pattern": "button_a", "points": 25}
+                ]
+            },
+            {
+                "title": "Step Counter with Reset",
+                "description": "Count steps, show count with A, reset to 0 with B.",
+                "unit": "Unit 3: Sensors",
+                "chapter": "Chapter 3: Sensors",
+                "lesson": "Lesson 8: Step Counter",
+                "difficulty": "Medium",
+                "problem_type": "Class Practice",
+                "starter_code": "from microbit import *\n\nsteps = 0\n\nwhile True:\n    # Shake = count step\n    # A = show count\n    # B = reset to 0\n    # Your code here:\n    pass",
+                "solution_code": "from microbit import *\n\nsteps = 0\n\nwhile True:\n    if accelerometer.was_gesture('shake'):\n        steps += 1\n    if button_a.was_pressed():\n        display.scroll(steps)\n    if button_b.was_pressed():\n        steps = 0\n        display.show(Image.YES)",
+                "test_cases": [
+                    {"description": "Counts steps", "pattern": "steps +|steps +=", "points": 25},
+                    {"description": "Shows count on A", "pattern": "button_a", "points": 25},
+                    {"description": "Resets on B", "pattern": "steps = 0", "points": 25},
+                    {"description": "Detects shake", "pattern": "shake", "points": 25}
+                ]
+            },
+            {
+                "title": "Step Goal Tracker",
+                "description": "Set a goal of 10 steps. Show a check mark when goal is reached!",
+                "unit": "Unit 3: Sensors",
+                "chapter": "Chapter 3: Sensors",
+                "lesson": "Lesson 8: Step Counter",
+                "difficulty": "Medium",
+                "problem_type": "Independent Practice",
+                "starter_code": "from microbit import *\n\nsteps = 0\ngoal = 10\n\nwhile True:\n    # Count steps\n    # Show check when goal reached\n    # Your code here:\n    pass",
+                "solution_code": "from microbit import *\n\nsteps = 0\ngoal = 10\n\nwhile True:\n    if accelerometer.was_gesture('shake'):\n        steps += 1\n        if steps >= goal:\n            display.show(Image.YES)\n        else:\n            display.show(steps)",
+                "test_cases": [
+                    {"description": "Sets goal", "pattern": "goal", "points": 20},
+                    {"description": "Counts steps", "pattern": "steps +=|steps +", "points": 20},
+                    {"description": "Compares to goal", "pattern": "steps >=|steps >", "points": 30},
+                    {"description": "Shows YES at goal", "pattern": "Image.YES", "points": 30}
+                ]
+            },
+            {
+                "title": "Distance Calculator",
+                "description": "Estimate distance walked! Each step = 0.7 meters. Show total meters.",
+                "unit": "Unit 3: Sensors",
+                "chapter": "Chapter 3: Sensors",
+                "lesson": "Lesson 8: Step Counter",
+                "difficulty": "Medium",
+                "problem_type": "Independent Practice",
+                "starter_code": "from microbit import *\n\nsteps = 0\nstep_length = 0.7  # meters per step\n\nwhile True:\n    # Count steps, calculate distance\n    # A = show distance\n    # Your code here:\n    pass",
+                "solution_code": "from microbit import *\n\nsteps = 0\nstep_length = 0.7\n\nwhile True:\n    if accelerometer.was_gesture('shake'):\n        steps += 1\n    if button_a.was_pressed():\n        distance = steps * step_length\n        display.scroll(str(int(distance)) + 'm')",
+                "test_cases": [
+                    {"description": "Has step_length", "pattern": "step_length", "points": 25},
+                    {"description": "Calculates distance", "pattern": "steps *|distance", "points": 25},
+                    {"description": "Counts steps", "pattern": "steps +=|steps +", "points": 25},
+                    {"description": "Shows distance", "pattern": "display.scroll", "points": 25}
+                ]
+            },
+            {
+                "title": "Fitness Tracker",
+                "description": "Track steps and estimate calories burned (1 cal per 20 steps). Show on button press.",
+                "unit": "Unit 3: Sensors",
+                "chapter": "Chapter 3: Sensors",
+                "lesson": "Lesson 8: Step Counter",
+                "difficulty": "Hard",
+                "problem_type": "Challenge",
+                "starter_code": "from microbit import *\n\nsteps = 0\n\nwhile True:\n    # Count steps\n    # A = show steps\n    # B = show calories (steps / 20)\n    # Your code here:\n    pass",
+                "solution_code": "from microbit import *\n\nsteps = 0\n\nwhile True:\n    if accelerometer.was_gesture('shake'):\n        steps += 1\n    if button_a.was_pressed():\n        display.scroll('S:' + str(steps))\n    if button_b.was_pressed():\n        calories = steps // 20\n        display.scroll('C:' + str(calories))",
+                "test_cases": [
+                    {"description": "Counts steps", "pattern": "steps +=|steps +", "points": 25},
+                    {"description": "Calculates calories", "pattern": "/ 20|// 20", "points": 25},
+                    {"description": "Shows steps on A", "pattern": "button_a", "points": 25},
+                    {"description": "Shows calories on B", "pattern": "button_b", "points": 25}
+                ]
+            },
+            
+            # Lesson 9: Digital Compass (Code - 5 problems)
+            {
+                "title": "Compass Heading",
+                "description": "Display the compass heading (0-359 degrees). Remember to calibrate first!",
+                "unit": "Unit 3: Sensors",
+                "chapter": "Chapter 3: Sensors",
+                "lesson": "Lesson 9: Compass",
+                "difficulty": "Easy",
+                "problem_type": "Class Practice",
+                "starter_code": "from microbit import *\n\ncompass.calibrate()\n\nwhile True:\n    # Show compass heading\n    # Your code here:\n    pass",
+                "solution_code": "from microbit import *\n\ncompass.calibrate()\n\nwhile True:\n    heading = compass.heading()\n    display.scroll(heading)\n    sleep(500)",
+                "test_cases": [
+                    {"description": "Calibrates compass", "pattern": "compass.calibrate()", "points": 30},
+                    {"description": "Gets heading", "pattern": "compass.heading()", "points": 40},
+                    {"description": "Displays heading", "pattern": "display.scroll|display.show", "points": 30}
+                ]
+            },
+            {
+                "title": "North Finder",
+                "description": "Show 'N' when pointing North (heading 0 ± 45 degrees).",
+                "unit": "Unit 3: Sensors",
+                "chapter": "Chapter 3: Sensors",
+                "lesson": "Lesson 9: Compass",
+                "difficulty": "Medium",
+                "problem_type": "Class Practice",
+                "starter_code": "from microbit import *\n\ncompass.calibrate()\n\nwhile True:\n    # Show 'N' when pointing North\n    # Your code here:\n    pass",
+                "solution_code": "from microbit import *\n\ncompass.calibrate()\n\nwhile True:\n    heading = compass.heading()\n    if heading < 45 or heading > 315:\n        display.show('N')\n    else:\n        display.clear()",
+                "test_cases": [
+                    {"description": "Calibrates compass", "pattern": "compass.calibrate()", "points": 25},
+                    {"description": "Gets heading", "pattern": "compass.heading()", "points": 25},
+                    {"description": "Checks heading range", "pattern": "< 45|> 315", "points": 25},
+                    {"description": "Shows N", "pattern": "'N'", "points": 25}
+                ]
+            },
+            {
+                "title": "Four Directions",
+                "description": "Show N, E, S, or W based on compass direction.",
+                "unit": "Unit 3: Sensors",
+                "chapter": "Chapter 3: Sensors",
+                "lesson": "Lesson 9: Compass",
+                "difficulty": "Medium",
+                "problem_type": "Independent Practice",
+                "starter_code": "from microbit import *\n\ncompass.calibrate()\n\nwhile True:\n    # N = 315-45, E = 45-135, S = 135-225, W = 225-315\n    # Your code here:\n    pass",
+                "solution_code": "from microbit import *\n\ncompass.calibrate()\n\nwhile True:\n    heading = compass.heading()\n    if heading < 45 or heading > 315:\n        display.show('N')\n    elif heading < 135:\n        display.show('E')\n    elif heading < 225:\n        display.show('S')\n    else:\n        display.show('W')",
+                "test_cases": [
+                    {"description": "Gets heading", "pattern": "compass.heading()", "points": 25},
+                    {"description": "Shows N", "pattern": "'N'", "points": 25},
+                    {"description": "Shows E or W", "pattern": "'E'|'W'", "points": 25},
+                    {"description": "Shows S", "pattern": "'S'", "points": 25}
+                ]
+            },
+            {
+                "title": "Compass Arrow",
+                "description": "Show an arrow image pointing to North as you rotate the Micro:bit.",
+                "unit": "Unit 3: Sensors",
+                "chapter": "Chapter 3: Sensors",
+                "lesson": "Lesson 9: Compass",
+                "difficulty": "Medium",
+                "problem_type": "Independent Practice",
+                "starter_code": "from microbit import *\n\ncompass.calibrate()\n\nwhile True:\n    # Show arrow pointing to North\n    # Your code here:\n    pass",
+                "solution_code": "from microbit import *\n\ncompass.calibrate()\n\nwhile True:\n    heading = compass.heading()\n    if heading < 45 or heading > 315:\n        display.show(Image.ARROW_N)\n    elif heading < 135:\n        display.show(Image.ARROW_W)\n    elif heading < 225:\n        display.show(Image.ARROW_S)\n    else:\n        display.show(Image.ARROW_E)",
+                "test_cases": [
+                    {"description": "Gets heading", "pattern": "compass.heading()", "points": 25},
+                    {"description": "Shows ARROW_N", "pattern": "Image.ARROW_N", "points": 25},
+                    {"description": "Shows other arrows", "pattern": "Image.ARROW", "points": 50}
+                ]
+            },
+            {
+                "title": "Treasure Hunt Compass",
+                "description": "Hot/cold game! Show HAPPY when within 30° of a target direction (90°), SAD otherwise.",
+                "unit": "Unit 3: Sensors",
+                "chapter": "Chapter 3: Sensors",
+                "lesson": "Lesson 9: Compass",
+                "difficulty": "Hard",
+                "problem_type": "Challenge",
+                "starter_code": "from microbit import *\n\ncompass.calibrate()\ntarget = 90  # East\n\nwhile True:\n    # Happy if within 30 degrees of target\n    # Your code here:\n    pass",
+                "solution_code": "from microbit import *\n\ncompass.calibrate()\ntarget = 90\n\nwhile True:\n    heading = compass.heading()\n    diff = abs(heading - target)\n    if diff > 180:\n        diff = 360 - diff\n    if diff < 30:\n        display.show(Image.HAPPY)\n    else:\n        display.show(Image.SAD)",
+                "test_cases": [
+                    {"description": "Sets target", "pattern": "target", "points": 20},
+                    {"description": "Gets heading", "pattern": "compass.heading()", "points": 20},
+                    {"description": "Calculates difference", "pattern": "abs(|diff", "points": 30},
+                    {"description": "Shows HAPPY/SAD", "pattern": "Image.HAPPY|Image.SAD", "points": 30}
+                ]
+            },
+            
+            # ==================== UNIT 4: EXTERNAL COMPONENTS ====================
+            
+            # Lesson 10: External LED Circuit (Code - 5 problems)
+            {
+                "title": "Turn On External LED",
+                "description": "Turn on an LED connected to pin0 using write_digital(1).",
+                "unit": "Unit 4: External Components",
+                "chapter": "Chapter 4: Circuits",
+                "lesson": "Lesson 10: External LED",
+                "difficulty": "Easy",
+                "problem_type": "Class Practice",
+                "starter_code": "from microbit import *\n\n# Turn on LED on pin0\n# Your code here:\n",
+                "solution_code": "from microbit import *\n\npin0.write_digital(1)",
+                "test_cases": [
+                    {"description": "Uses pin0", "pattern": "pin0", "points": 50},
+                    {"description": "Writes digital 1", "pattern": "write_digital(1)", "points": 50}
+                ],
+                "wiring_instructions": "1. Connect LED long leg to Pin 0\n2. Connect short leg through 220Ω resistor to GND"
+            },
+            {
+                "title": "Blink External LED",
+                "description": "Make the external LED blink on and off every 500ms.",
+                "unit": "Unit 4: External Components",
+                "chapter": "Chapter 4: Circuits",
+                "lesson": "Lesson 10: External LED",
+                "difficulty": "Easy",
+                "problem_type": "Class Practice",
+                "starter_code": "from microbit import *\n\nwhile True:\n    # Blink LED on pin0\n    # Your code here:\n    pass",
+                "solution_code": "from microbit import *\n\nwhile True:\n    pin0.write_digital(1)\n    sleep(500)\n    pin0.write_digital(0)\n    sleep(500)",
+                "test_cases": [
+                    {"description": "Turns LED on", "pattern": "write_digital(1)", "points": 25},
+                    {"description": "Turns LED off", "pattern": "write_digital(0)", "points": 25},
+                    {"description": "Uses sleep()", "pattern": "sleep(", "points": 25},
+                    {"description": "Uses while True", "pattern": "while True:", "points": 25}
+                ],
+                "wiring_instructions": "Connect LED and 220Ω resistor between Pin 0 and GND"
+            },
+            {
+                "title": "Button Controlled LED",
+                "description": "Turn on external LED when button A is pressed, off when released.",
+                "unit": "Unit 4: External Components",
+                "chapter": "Chapter 4: Circuits",
+                "lesson": "Lesson 10: External LED",
+                "difficulty": "Medium",
+                "problem_type": "Independent Practice",
+                "starter_code": "from microbit import *\n\nwhile True:\n    # A pressed = LED on, else LED off\n    # Your code here:\n    pass",
+                "solution_code": "from microbit import *\n\nwhile True:\n    if button_a.is_pressed():\n        pin0.write_digital(1)\n    else:\n        pin0.write_digital(0)",
+                "test_cases": [
+                    {"description": "Checks button_a", "pattern": "button_a", "points": 25},
+                    {"description": "Turns LED on", "pattern": "write_digital(1)", "points": 25},
+                    {"description": "Turns LED off", "pattern": "write_digital(0)", "points": 25},
+                    {"description": "Uses if/else", "pattern": "else:", "points": 25}
+                ],
+                "wiring_instructions": "Connect LED circuit to Pin 0"
+            },
+            {
+                "title": "LED Brightness Control",
+                "description": "Use write_analog() to set LED brightness to 50% (value 512).",
+                "unit": "Unit 4: External Components",
+                "chapter": "Chapter 4: Circuits",
+                "lesson": "Lesson 10: External LED",
+                "difficulty": "Medium",
+                "problem_type": "Independent Practice",
+                "starter_code": "from microbit import *\n\n# Set LED to 50% brightness\n# write_analog uses 0-1023\n# Your code here:\n",
+                "solution_code": "from microbit import *\n\npin0.write_analog(512)",
+                "test_cases": [
+                    {"description": "Uses pin0", "pattern": "pin0", "points": 50},
+                    {"description": "Uses write_analog()", "pattern": "write_analog(", "points": 50}
+                ],
+                "wiring_instructions": "Connect LED circuit to Pin 0"
+            },
+            {
+                "title": "Fade LED",
+                "description": "Create a fading effect by gradually increasing and decreasing brightness.",
+                "unit": "Unit 4: External Components",
+                "chapter": "Chapter 4: Circuits",
+                "lesson": "Lesson 10: External LED",
+                "difficulty": "Hard",
+                "problem_type": "Challenge",
+                "starter_code": "from microbit import *\n\nwhile True:\n    # Fade up from 0 to 1023\n    # Then fade down\n    # Your code here:\n    pass",
+                "solution_code": "from microbit import *\n\nwhile True:\n    # Fade up\n    for brightness in range(0, 1024, 64):\n        pin0.write_analog(brightness)\n        sleep(50)\n    # Fade down\n    for brightness in range(1023, -1, -64):\n        pin0.write_analog(brightness)\n        sleep(50)",
+                "test_cases": [
+                    {"description": "Uses write_analog()", "pattern": "write_analog(", "points": 30},
+                    {"description": "Uses for loop", "pattern": "for ", "points": 30},
+                    {"description": "Uses range()", "pattern": "range(", "points": 20},
+                    {"description": "Uses sleep()", "pattern": "sleep(", "points": 20}
+                ],
+                "wiring_instructions": "Connect LED circuit to Pin 0"
+            },
+            
+            # Lesson 11: Traffic Light Project (Code - 5 problems)
+            {
+                "title": "Two LED Control",
+                "description": "Control two LEDs on pin0 (red) and pin1 (green). Alternate between them.",
+                "unit": "Unit 4: External Components",
+                "chapter": "Chapter 4: Circuits",
+                "lesson": "Lesson 11: Traffic Light",
+                "difficulty": "Medium",
+                "problem_type": "Class Practice",
+                "starter_code": "from microbit import *\n\nwhile True:\n    # Alternate red (pin0) and green (pin1)\n    # Your code here:\n    pass",
+                "solution_code": "from microbit import *\n\nwhile True:\n    pin0.write_digital(1)\n    pin1.write_digital(0)\n    sleep(1000)\n    pin0.write_digital(0)\n    pin1.write_digital(1)\n    sleep(1000)",
+                "test_cases": [
+                    {"description": "Controls pin0", "pattern": "pin0.write_digital", "points": 25},
+                    {"description": "Controls pin1", "pattern": "pin1.write_digital", "points": 25},
+                    {"description": "Uses sleep()", "pattern": "sleep(", "points": 25},
+                    {"description": "Uses while True", "pattern": "while True:", "points": 25}
+                ],
+                "wiring_instructions": "Red LED on Pin 0, Green LED on Pin 1, both through 220Ω to GND"
+            },
+            {
+                "title": "Traffic Light Sequence",
+                "description": "Create a traffic light! Red (3s) → Yellow (1s) → Green (3s) → Yellow (1s) → repeat.",
+                "unit": "Unit 4: External Components",
+                "chapter": "Chapter 4: Circuits",
+                "lesson": "Lesson 11: Traffic Light",
+                "difficulty": "Medium",
+                "problem_type": "Class Practice",
+                "starter_code": "from microbit import *\n\n# Pin 0 = Red, Pin 1 = Yellow, Pin 2 = Green\n\nwhile True:\n    # Traffic light sequence\n    # Your code here:\n    pass",
+                "solution_code": "from microbit import *\n\nwhile True:\n    # Red\n    pin0.write_digital(1)\n    pin1.write_digital(0)\n    pin2.write_digital(0)\n    sleep(3000)\n    # Yellow\n    pin0.write_digital(0)\n    pin1.write_digital(1)\n    pin2.write_digital(0)\n    sleep(1000)\n    # Green\n    pin0.write_digital(0)\n    pin1.write_digital(0)\n    pin2.write_digital(1)\n    sleep(3000)\n    # Yellow\n    pin0.write_digital(0)\n    pin1.write_digital(1)\n    pin2.write_digital(0)\n    sleep(1000)",
+                "test_cases": [
+                    {"description": "Controls pin0 (red)", "pattern": "pin0.write_digital", "points": 25},
+                    {"description": "Controls pin1 (yellow)", "pattern": "pin1.write_digital", "points": 25},
+                    {"description": "Controls pin2 (green)", "pattern": "pin2.write_digital", "points": 25},
+                    {"description": "Has timing", "pattern": "sleep(", "points": 25}
+                ],
+                "wiring_instructions": "Red LED → Pin 0, Yellow LED → Pin 1, Green LED → Pin 2"
+            },
+            {
+                "title": "Pedestrian Crossing",
+                "description": "Add a button! Press button A to trigger pedestrian crossing (changes to red).",
+                "unit": "Unit 4: External Components",
+                "chapter": "Chapter 4: Circuits",
+                "lesson": "Lesson 11: Traffic Light",
+                "difficulty": "Hard",
+                "problem_type": "Independent Practice",
+                "starter_code": "from microbit import *\n\n# Traffic light that responds to button A\n# Your code here:\n",
+                "solution_code": "from microbit import *\n\nwhile True:\n    # Normal: Green light\n    pin2.write_digital(1)\n    pin0.write_digital(0)\n    \n    if button_a.was_pressed():\n        # Yellow\n        pin2.write_digital(0)\n        pin1.write_digital(1)\n        sleep(2000)\n        # Red for pedestrians\n        pin1.write_digital(0)\n        pin0.write_digital(1)\n        sleep(5000)\n        # Back to green\n        pin0.write_digital(0)",
+                "test_cases": [
+                    {"description": "Checks button_a", "pattern": "button_a", "points": 25},
+                    {"description": "Controls multiple pins", "pattern": "pin0|pin1|pin2", "points": 25},
+                    {"description": "Has timing", "pattern": "sleep(", "points": 25},
+                    {"description": "Uses if statement", "pattern": "if ", "points": 25}
+                ],
+                "wiring_instructions": "Red LED → Pin 0, Yellow LED → Pin 1, Green LED → Pin 2"
+            },
+            {
+                "title": "Emergency Mode",
+                "description": "Both buttons pressed = Emergency mode (all lights flash rapidly).",
+                "unit": "Unit 4: External Components",
+                "chapter": "Chapter 4: Circuits",
+                "lesson": "Lesson 11: Traffic Light",
+                "difficulty": "Hard",
+                "problem_type": "Independent Practice",
+                "starter_code": "from microbit import *\n\nwhile True:\n    # Both buttons = emergency flash mode\n    # Your code here:\n    pass",
+                "solution_code": "from microbit import *\n\nwhile True:\n    if button_a.is_pressed() and button_b.is_pressed():\n        # Emergency - flash all\n        pin0.write_digital(1)\n        pin1.write_digital(1)\n        pin2.write_digital(1)\n        sleep(200)\n        pin0.write_digital(0)\n        pin1.write_digital(0)\n        pin2.write_digital(0)\n        sleep(200)\n    else:\n        # Normal operation\n        pin2.write_digital(1)\n        pin0.write_digital(0)\n        pin1.write_digital(0)",
+                "test_cases": [
+                    {"description": "Checks both buttons", "pattern": "and", "points": 25},
+                    {"description": "Flashes all pins", "pattern": "pin0|pin1|pin2", "points": 25},
+                    {"description": "Has fast timing", "pattern": "sleep(", "points": 25},
+                    {"description": "Has else for normal", "pattern": "else:", "points": 25}
+                ],
+                "wiring_instructions": "Red → Pin 0, Yellow → Pin 1, Green → Pin 2"
+            },
+            {
+                "title": "Smart Traffic Light",
+                "description": "Create a traffic light that shows the current color on the Micro:bit display too!",
+                "unit": "Unit 4: External Components",
+                "chapter": "Chapter 4: Circuits",
+                "lesson": "Lesson 11: Traffic Light",
+                "difficulty": "Hard",
+                "problem_type": "Challenge",
+                "starter_code": "from microbit import *\n\nwhile True:\n    # Show color on display AND external LEDs\n    # Your code here:\n    pass",
+                "solution_code": "from microbit import *\n\nred_img = Image('99999:99999:00000:00000:00000')\nyellow_img = Image('00000:00000:99999:00000:00000')\ngreen_img = Image('00000:00000:00000:99999:99999')\n\nwhile True:\n    pin0.write_digital(1)\n    display.show(red_img)\n    sleep(3000)\n    pin0.write_digital(0)\n    pin1.write_digital(1)\n    display.show(yellow_img)\n    sleep(1000)\n    pin1.write_digital(0)\n    pin2.write_digital(1)\n    display.show(green_img)\n    sleep(3000)\n    pin2.write_digital(0)",
+                "test_cases": [
+                    {"description": "Controls external LEDs", "pattern": "write_digital", "points": 30},
+                    {"description": "Shows on display", "pattern": "display.show", "points": 30},
+                    {"description": "Has timing", "pattern": "sleep(", "points": 20},
+                    {"description": "Creates images", "pattern": "Image(", "points": 20}
+                ],
+                "wiring_instructions": "Red → Pin 0, Yellow → Pin 1, Green → Pin 2"
+            },
+            
+            # Lesson 12: Night Light (Code - 5 problems)
+            {
+                "title": "Read Light Sensor",
+                "description": "Read the light level from an LDR on pin1 and display the value.",
+                "unit": "Unit 4: External Components",
+                "chapter": "Chapter 4: Circuits",
+                "lesson": "Lesson 12: Night Light",
+                "difficulty": "Easy",
+                "problem_type": "Class Practice",
+                "starter_code": "from microbit import *\n\nwhile True:\n    # Read light level from pin1\n    # Display it\n    # Your code here:\n    pass",
+                "solution_code": "from microbit import *\n\nwhile True:\n    light = pin1.read_analog()\n    display.scroll(light)\n    sleep(1000)",
+                "test_cases": [
+                    {"description": "Reads analog value", "pattern": "read_analog()", "points": 50},
+                    {"description": "Displays value", "pattern": "display.scroll|display.show", "points": 50}
+                ],
+                "wiring_instructions": "LDR between 3V and Pin 1, 10kΩ resistor between Pin 1 and GND"
+            },
+            {
+                "title": "Dark Detector",
+                "description": "Show a moon image when it's dark (light < 300), sun when bright.",
+                "unit": "Unit 4: External Components",
+                "chapter": "Chapter 4: Circuits",
+                "lesson": "Lesson 12: Night Light",
+                "difficulty": "Medium",
+                "problem_type": "Class Practice",
+                "starter_code": "from microbit import *\n\nmoon = Image('00900:09990:09990:09990:00900')\nsun = Image('90909:09990:99999:09990:90909')\n\nwhile True:\n    # Dark = moon, Bright = sun\n    # Your code here:\n    pass",
+                "solution_code": "from microbit import *\n\nmoon = Image('00900:09990:09990:09990:00900')\nsun = Image('90909:09990:99999:09990:90909')\n\nwhile True:\n    light = pin1.read_analog()\n    if light < 300:\n        display.show(moon)\n    else:\n        display.show(sun)\n    sleep(100)",
+                "test_cases": [
+                    {"description": "Reads light level", "pattern": "read_analog()", "points": 30},
+                    {"description": "Compares to threshold", "pattern": "light <|light >", "points": 30},
+                    {"description": "Shows different images", "pattern": "display.show", "points": 40}
+                ],
+                "wiring_instructions": "LDR voltage divider on Pin 1"
+            },
+            {
+                "title": "Automatic Night Light",
+                "description": "Turn on external LED (pin0) when dark, off when bright.",
+                "unit": "Unit 4: External Components",
+                "chapter": "Chapter 4: Circuits",
+                "lesson": "Lesson 12: Night Light",
+                "difficulty": "Medium",
+                "problem_type": "Independent Practice",
+                "starter_code": "from microbit import *\n\nwhile True:\n    # Dark = LED on, Bright = LED off\n    # Your code here:\n    pass",
+                "solution_code": "from microbit import *\n\nwhile True:\n    light = pin1.read_analog()\n    if light < 300:\n        pin0.write_digital(1)\n    else:\n        pin0.write_digital(0)\n    sleep(100)",
+                "test_cases": [
+                    {"description": "Reads light level", "pattern": "read_analog()", "points": 25},
+                    {"description": "Compares to threshold", "pattern": "light <|light >", "points": 25},
+                    {"description": "Turns LED on", "pattern": "write_digital(1)", "points": 25},
+                    {"description": "Turns LED off", "pattern": "write_digital(0)", "points": 25}
+                ],
+                "wiring_instructions": "LDR on Pin 1, LED on Pin 0"
+            },
+            {
+                "title": "Brightness Indicator",
+                "description": "Show 1-5 LEDs on the display based on light level (bar graph style).",
+                "unit": "Unit 4: External Components",
+                "chapter": "Chapter 4: Circuits",
+                "lesson": "Lesson 12: Night Light",
+                "difficulty": "Medium",
+                "problem_type": "Independent Practice",
+                "starter_code": "from microbit import *\n\nwhile True:\n    # Show bar graph of brightness\n    # Your code here:\n    pass",
+                "solution_code": "from microbit import *\n\nwhile True:\n    light = pin1.read_analog()\n    # Map 0-1023 to 0-5 bars\n    bars = light // 200\n    if bars > 5:\n        bars = 5\n    \n    display.clear()\n    for i in range(bars):\n        for y in range(5):\n            display.set_pixel(i, y, 9)\n    sleep(100)",
+                "test_cases": [
+                    {"description": "Reads light level", "pattern": "read_analog()", "points": 25},
+                    {"description": "Maps to bars", "pattern": "// |/ ", "points": 25},
+                    {"description": "Uses set_pixel()", "pattern": "set_pixel", "points": 25},
+                    {"description": "Uses loop", "pattern": "for ", "points": 25}
+                ],
+                "wiring_instructions": "LDR voltage divider on Pin 1"
+            },
+            {
+                "title": "Smart Night Light",
+                "description": "Night light with adjustable threshold! A increases threshold, B decreases it.",
+                "unit": "Unit 4: External Components",
+                "chapter": "Chapter 4: Circuits",
+                "lesson": "Lesson 12: Night Light",
+                "difficulty": "Hard",
+                "problem_type": "Challenge",
+                "starter_code": "from microbit import *\n\nthreshold = 300\n\nwhile True:\n    # A = increase threshold, B = decrease\n    # LED on when dark\n    # Your code here:\n    pass",
+                "solution_code": "from microbit import *\n\nthreshold = 300\n\nwhile True:\n    if button_a.was_pressed():\n        threshold += 50\n        display.scroll(threshold)\n    if button_b.was_pressed():\n        threshold -= 50\n        display.scroll(threshold)\n    \n    light = pin1.read_analog()\n    if light < threshold:\n        pin0.write_digital(1)\n        display.show(Image.HAPPY)\n    else:\n        pin0.write_digital(0)\n        display.clear()\n    sleep(100)",
+                "test_cases": [
+                    {"description": "Has adjustable threshold", "pattern": "threshold", "points": 25},
+                    {"description": "Button adjusts threshold", "pattern": "button_a|button_b", "points": 25},
+                    {"description": "Reads light level", "pattern": "read_analog()", "points": 25},
+                    {"description": "Controls LED", "pattern": "write_digital", "points": 25}
+                ],
+                "wiring_instructions": "LDR on Pin 1, LED on Pin 0"
+            }
+        ]
+        
+        # Insert all problems
+        for problem in microbit_problems:
+            problem_doc = {
+                "id": str(uuid.uuid4()),
+                "title": problem["title"],
+                "description": problem["description"],
+                "starter_code": problem.get("starter_code", "from microbit import *\n\n# Your code here:\n"),
+                "solution_code": problem.get("solution_code", ""),
+                "expected_output": "",
+                "category": "Micro:bit",
+                "difficulty": problem["difficulty"],
+                "unit": problem["unit"],
+                "chapter": problem["chapter"],
+                "lesson": problem["lesson"],
+                "problem_type": problem["problem_type"],
+                "assignment_type": "microbit",
+                "test_cases": problem.get("test_cases", []),
+                "quiz_questions": problem.get("quiz_questions", []),
+                "wiring_instructions": problem.get("wiring_instructions", "No additional wiring needed - using built-in features"),
+                "resources_link": "",
+                "csta_standard": "",
+                "creator_id": "system",
+                "creator_name": "System",
+                "created_at": datetime.now(timezone.utc).isoformat()
+            }
+            await db.problems.insert_one(problem_doc)
+        
+        final_count = await db.problems.count_documents({"assignment_type": "microbit"})
+        logger.info(f"✅ Micro:bit problems seeded: {final_count}")
+    except Exception as e:
+        logger.error(f"Error seeding Micro:bit problems: {str(e)}")
