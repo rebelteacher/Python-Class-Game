@@ -6,13 +6,9 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { 
   ArrowLeft, 
-  Play, 
   RotateCcw,
   Monitor,
-  ChevronLeft,
-  ChevronRight,
   Download,
-  Maximize2,
   Cpu,
   Lightbulb,
   BookOpen,
@@ -22,13 +18,16 @@ import {
   ExternalLink,
   FileText,
   Target,
-  Users
+  Users,
+  ChevronDown,
+  ChevronRight,
+  Info
 } from "lucide-react";
 import Editor from "@monaco-editor/react";
 import MicrobitSimulator from "@/components/MicrobitSimulator";
 import { ResizablePanelGroup, ResizablePanel, ResizableHandle } from "@/components/ui/resizable";
 
-// Curriculum-aligned teaching content matching the seeded problems
+// Curriculum-aligned teaching content with clickable explanations
 const CURRICULUM = {
   "unit1": {
     title: "Unit 1: Getting Started",
@@ -40,11 +39,11 @@ const CURRICULUM = {
         type: "quiz",
         description: "Introduction to the BBC Micro:bit - components, features, and capabilities.",
         teachingGuide: [
-          "Show the physical Micro:bit and point out each component",
-          "Explain the LED matrix (5x5 = 25 LEDs)",
-          "Demonstrate buttons A and B",
-          "Mention built-in sensors: accelerometer, compass, temperature",
-          "Explain how to connect via USB"
+          { step: "Show the physical Micro:bit and point out each component", tip: "Hold up the Micro:bit. Front: LED matrix, buttons A & B. Back: processor, battery connector, USB port, reset button." },
+          { step: "Explain the LED matrix (5x5 = 25 LEDs)", tip: "25 tiny red lights arranged in a grid. Each can be turned on/off or dimmed. Used to display images, text, and animations." },
+          { step: "Demonstrate buttons A and B", tip: "A is on the left, B is on the right. Press them to show students how input works. Programs can detect single press, hold, or both buttons together." },
+          { step: "Mention built-in sensors: accelerometer, compass, temperature", tip: "Accelerometer = detects tilt and shake. Compass = detects direction. Temperature = measures how hot/cold it is. All built-in, no wiring needed!" },
+          { step: "Explain how to connect via USB", tip: "Plug USB cable into computer and Micro:bit. It shows up as a drive called 'MICROBIT'. Drag .hex files to it to upload programs." }
         ],
         quiz: [
           { question: "What is the grid of lights on the front of the Micro:bit called?", options: ["LED Matrix", "Touch Screen", "Solar Panel", "Camera"], correct: 0 },
@@ -59,11 +58,11 @@ const CURRICULUM = {
         type: "code",
         description: "Your first program! Display images on the LED screen.",
         teachingGuide: [
-          "Open the MicroPython editor",
-          "Explain 'from microbit import *'",
-          "Introduce display.show() function",
-          "Show built-in Image.HEART, Image.HAPPY, etc.",
-          "Demonstrate display.scroll() for text"
+          { step: "Open the MicroPython editor", tip: "Go to python.microbit.org in a web browser. Click 'Create' to start a new project. This is where we write code." },
+          { step: "Explain 'from microbit import *'", tip: "This line loads all Micro:bit tools. The * means 'everything'. Without this line, nothing will work. Always put it at the top!" },
+          { step: "Introduce display.show() function", tip: "display.show() puts something on the LED screen. Put what you want to show inside the parentheses. Can show images, numbers, or single letters." },
+          { step: "Show built-in Image.HEART, Image.HAPPY, etc.", tip: "Python has ready-made images! Type Image. and see the list: HEART, HAPPY, SAD, ANGRY, DUCK, HOUSE, and many more. Saves time drawing!" },
+          { step: "Demonstrate display.scroll() for text", tip: "scroll() makes text move across the screen. Great for longer messages: display.scroll('Hello World'). Text goes left to right automatically." }
         ],
         demoCode: `from microbit import *
 
@@ -73,8 +72,8 @@ display.show(Image.HEART)`,
         quiz: [
           { question: "What function displays an image on the LEDs?", options: ["print()", "display.show()", "led.on()", "screen.draw()"], correct: 1 },
           { question: "What is Image.HEART?", options: ["A text string", "A built-in image", "A number", "A function"], correct: 1 },
-          { question: "What does 'from microbit import *' do?", options: ["Deletes code", "Imports Micro:bit tools", "Prints text", "Stops the program"], correct: 1 },
-          { question: "Which function scrolls text across the display?", options: ["display.print()", "display.scroll()", "display.write()", "display.move()"], correct: 1 }
+          { question: "Which function scrolls text across the display?", options: ["display.print()", "display.scroll()", "display.write()", "display.move()"], correct: 1 },
+          { question: "What must you import to use Micro:bit?", options: ["import microbit", "from microbit import *", "include microbit", "require microbit"], correct: 1 }
         ]
       },
       "lesson3": {
@@ -82,11 +81,11 @@ display.show(Image.HEART)`,
         type: "code",
         description: "Create animations by displaying images in a loop with delays.",
         teachingGuide: [
-          "Explain while True: for infinite loops",
-          "Introduce sleep() for timing",
-          "Show multiple images in sequence",
-          "Demonstrate Image.HEART and Image.HEART_SMALL",
-          "Let students create their own animations"
+          { step: "Explain while True: for infinite loops", tip: "while True: means 'keep doing this forever'. The code inside (indented) repeats non-stop. Used for programs that should keep running." },
+          { step: "Introduce sleep() for timing", tip: "sleep(500) pauses for 500 milliseconds (half a second). 1000 = 1 second. Without sleep, animations happen too fast to see!" },
+          { step: "Show multiple images in sequence", tip: "Put several display.show() commands one after another. Add sleep() between them. The Micro:bit shows each image in order." },
+          { step: "Demonstrate Image.HEART and Image.HEART_SMALL", tip: "HEART is a big heart, HEART_SMALL is smaller. Switching between them creates a 'beating' effect. Great first animation!" },
+          { step: "Let students create their own animations", tip: "Challenge: Try HAPPY/SAD, or clock faces (CLOCK12, CLOCK3, CLOCK6, CLOCK9). What other animations can they make?" }
         ],
         demoCode: `from microbit import *
 
@@ -115,11 +114,11 @@ while True:
         type: "code",
         description: "Detect button presses and respond with different actions.",
         teachingGuide: [
-          "Explain button_a and button_b objects",
-          "Difference between is_pressed() and was_pressed()",
-          "Use if statements to check buttons",
-          "Show elif for multiple conditions",
-          "Demonstrate checking both buttons with 'and'"
+          { step: "Explain button_a and button_b objects", tip: "button_a is the left button, button_b is the right button. They're objects in Python that let us check if someone pressed them." },
+          { step: "Difference between is_pressed() and was_pressed()", tip: "is_pressed() = Is the button being held RIGHT NOW? Returns True while held. was_pressed() = Was it pressed SINCE last check? Returns True once per click." },
+          { step: "Use if statements to check buttons", tip: "if button_a.is_pressed(): runs code only when A is held. The colon and indent are required! Code runs only when condition is True." },
+          { step: "Show elif for multiple conditions", tip: "elif = 'else if'. Check another condition if the first was False. if A... elif B... else... Only ONE block runs." },
+          { step: "Demonstrate checking both buttons with 'and'", tip: "if button_a.is_pressed() and button_b.is_pressed(): checks if BOTH are pressed at the same time. Great for 'secret' actions!" }
         ],
         demoCode: `from microbit import *
 
@@ -134,7 +133,7 @@ while True:
         quiz: [
           { question: "What checks if button A is currently being held?", options: ["button_a.click()", "button_a.is_pressed()", "button_a.pressed", "a.check()"], correct: 1 },
           { question: "What is the difference between is_pressed() and was_pressed()?", options: ["No difference", "is_pressed checks now, was_pressed checks past", "was_pressed is faster", "is_pressed is broken"], correct: 1 },
-          { question: "How do you check if BOTH buttons are pressed?", options: ["button_a or button_b", "button_a + button_b", "button_a and button_b", "buttons.both()"], correct: 2 },
+          { question: "How do you check if BOTH buttons are pressed?", options: ["button_a or button_b", "button_a + button_b", "button_a.is_pressed() and button_b.is_pressed()", "buttons.both()"], correct: 2 },
           { question: "What keyword handles 'otherwise' in Python?", options: ["otherwise", "else", "default", "other"], correct: 1 }
         ]
       },
@@ -143,11 +142,11 @@ while True:
         type: "code",
         description: "Create counters and track button presses using variables.",
         teachingGuide: [
-          "Introduce variables for storing data",
-          "Show count = 0 initialization",
-          "Explain count = count + 1",
-          "Use was_pressed() for counting clicks",
-          "Add reset functionality with button B"
+          { step: "Introduce variables for storing data", tip: "A variable is a named box that holds a value. count = 0 creates a box named 'count' with 0 inside. The value can change." },
+          { step: "Show count = 0 initialization", tip: "We start at 0 before the loop. If we put it inside the loop, it would reset to 0 every time! Put it BEFORE while True:" },
+          { step: "Explain count = count + 1", tip: "Take the current value of count, add 1, and store it back. This is how we increment. Can also write: count += 1 (same thing)." },
+          { step: "Use was_pressed() for counting clicks", tip: "was_pressed() is better for counting because it only returns True once per click. is_pressed() would count many times while held!" },
+          { step: "Add reset functionality with button B", tip: "Check if button B was pressed, then set count = 0. Now students have +1 with A and reset with B. Useful pattern!" }
         ],
         demoCode: `from microbit import *
 
@@ -172,11 +171,11 @@ while True:
         type: "code",
         description: "Create a Rock Paper Scissors game using random numbers and shake detection.",
         teachingGuide: [
-          "Import random module",
-          "Explain random.randint(1, 3)",
-          "Show accelerometer gesture detection",
-          "Use was_gesture('shake')",
-          "Map numbers to R, P, S choices"
+          { step: "Import random module", tip: "Add 'import random' at the top. This gives us tools to make random choices. Like rolling dice in code!" },
+          { step: "Explain random.randint(1, 3)", tip: "randint(1, 3) picks a random whole number: 1, 2, or 3. Each number can represent rock, paper, or scissors." },
+          { step: "Show accelerometer gesture detection", tip: "The accelerometer can detect movements called 'gestures': shake, tilt left, tilt right, face up, face down, freefall, etc." },
+          { step: "Use was_gesture('shake')", tip: "accelerometer.was_gesture('shake') returns True if shaken since last check. Perfect for 'shake to play' games!" },
+          { step: "Map numbers to R, P, S choices", tip: "Use if/elif: 0='R', 1='P', 2='S'. Or use a list: choices=['R','P','S'] then choices[random_number]." }
         ],
         demoCode: `from microbit import *
 import random
@@ -195,7 +194,7 @@ while True:
           { question: "How do you get a random number between 1 and 6?", options: ["random(1,6)", "random.randint(1, 6)", "randint(1-6)", "random.number(1,6)"], correct: 1 },
           { question: "What detects when you shake the Micro:bit?", options: ["button_a", "accelerometer", "compass", "display"], correct: 1 },
           { question: "What does 'import random' do?", options: ["Creates random images", "Adds random number tools", "Makes random sounds", "Shuffles the code"], correct: 1 },
-          { question: "What does random.choice(['R','P','S']) do?", options: ["Picks a random item from the list", "Sorts the list", "Counts the items", "Removes an item"], correct: 0 }
+          { question: "What gesture name detects shaking?", options: ["move", "shake", "tilt", "vibrate"], correct: 1 }
         ]
       }
     }
@@ -210,11 +209,11 @@ while True:
         type: "code",
         description: "Detect tilt, motion, and gestures using the accelerometer.",
         teachingGuide: [
-          "Explain X, Y, Z axes",
-          "Show accelerometer.get_x(), get_y(), get_z()",
-          "Demonstrate tilt values (-1023 to 1023)",
-          "Use is_gesture() and was_gesture()",
-          "Create a spirit level or tilt game"
+          { step: "Explain X, Y, Z axes", tip: "X = left/right tilt. Y = forward/backward tilt. Z = up/down (gravity). Hold Micro:bit flat: X=0, Y=0, Z=-1024." },
+          { step: "Show accelerometer.get_x(), get_y(), get_z()", tip: "These return numbers from -1023 to 1023. Tilt left = negative X. Tilt right = positive X. Flat = near zero." },
+          { step: "Demonstrate tilt values (-1023 to 1023)", tip: "Flat = around 0. Fully tilted = around ±1000. Use thresholds like >200 or <-200 to detect 'definitely tilted'." },
+          { step: "Use is_gesture() and was_gesture()", tip: "Built-in gestures: 'shake', 'up', 'down', 'left', 'right', 'face up', 'face down'. Easier than checking raw numbers!" },
+          { step: "Create a spirit level or tilt game", tip: "Show different arrows based on tilt direction. Or move a dot on screen by tilting - like a marble maze!" }
         ],
         demoCode: `from microbit import *
 
@@ -231,7 +230,7 @@ while True:
           { question: "What does accelerometer.get_x() return?", options: ["A letter", "A tilt value", "An image", "A button state"], correct: 1 },
           { question: "What range do accelerometer values span?", options: ["0 to 100", "-1023 to 1023", "0 to 255", "-10 to 10"], correct: 1 },
           { question: "Which gesture detects shaking?", options: ["'tilt'", "'shake'", "'move'", "'vibrate'"], correct: 1 },
-          { question: "What axis detects forward/backward tilt?", options: ["X axis", "Y axis", "Z axis", "W axis"], correct: 1 }
+          { question: "What axis detects left/right tilt?", options: ["X axis", "Y axis", "Z axis", "W axis"], correct: 0 }
         ]
       },
       "lesson8": {
@@ -239,11 +238,11 @@ while True:
         type: "code",
         description: "Build a pedometer using shake detection to count steps.",
         teachingGuide: [
-          "Review shake gesture detection",
-          "Use a variable to count steps",
-          "Display count on button press",
-          "Add reset functionality",
-          "Discuss real-world fitness trackers"
+          { step: "Review shake gesture detection", tip: "Each step creates a small 'shake' motion. was_gesture('shake') can detect this. Not perfect, but works for learning!" },
+          { step: "Use a variable to count steps", tip: "steps = 0 before the loop. Inside: if shake detected, steps += 1. Same pattern as the button counter!" },
+          { step: "Display count on button press", tip: "Don't constantly scroll the number (too slow). Instead: press A to see your count. Use display.scroll(steps)." },
+          { step: "Add reset functionality", tip: "Button B sets steps = 0. Show a checkmark or 'YES' image to confirm reset. Same pattern as counter lesson!" },
+          { step: "Discuss real-world fitness trackers", tip: "Real devices use more advanced algorithms and additional sensors. But the basic idea is the same - detect motion, count it!" }
         ],
         demoCode: `from microbit import *
 
@@ -270,11 +269,11 @@ while True:
         type: "code",
         description: "Use the built-in compass to find direction and heading.",
         teachingGuide: [
-          "Explain compass.calibrate() first",
-          "Show compass.heading() returns 0-359",
-          "Map heading to N, E, S, W",
-          "Create a compass arrow display",
-          "Discuss real navigation uses"
+          { step: "Explain compass.calibrate() first", tip: "Must calibrate before use! A game appears - tilt to light up all LEDs. This teaches the compass about its surroundings. Takes 30 seconds." },
+          { step: "Show compass.heading() returns 0-359", tip: "Returns degrees like a real compass. 0° = North, 90° = East, 180° = South, 270° = West. Full circle = 360°." },
+          { step: "Map heading to N, E, S, W", tip: "Use ranges: 315-45 = N, 45-135 = E, 135-225 = S, 225-315 = W. The 'or' handles the wrap-around at North." },
+          { step: "Create a compass arrow display", tip: "Show Image.ARROW_N when pointing North, ARROW_E for East, etc. The arrow 'points' to North as you turn!" },
+          { step: "Discuss real navigation uses", tip: "Ships, planes, and phones use digital compasses. Combined with maps and GPS for navigation. Same basic principle!" }
         ],
         demoCode: `from microbit import *
 
@@ -310,11 +309,11 @@ while True:
         type: "code",
         description: "Connect and control external LEDs using GPIO pins.",
         teachingGuide: [
-          "Explain digital output (HIGH/LOW)",
-          "Show pin0.write_digital(1) and (0)",
-          "Demonstrate LED circuit with resistor",
-          "Create blink pattern",
-          "Introduce analog output for brightness"
+          { step: "Explain digital output (HIGH/LOW)", tip: "Digital = only two states: ON (HIGH/1) or OFF (LOW/0). Like a light switch. 3.3 volts when HIGH, 0 volts when LOW." },
+          { step: "Show pin0.write_digital(1) and (0)", tip: "write_digital(1) = turn pin ON (3.3V). write_digital(0) = turn pin OFF (0V). Pin stays in that state until you change it." },
+          { step: "Demonstrate LED circuit with resistor", tip: "LED needs a resistor (220Ω) or it burns out! Current flows: Pin → LED → Resistor → GND. Never skip the resistor!" },
+          { step: "Create blink pattern", tip: "On, sleep, off, sleep, repeat. Classic first electronics project! Try different sleep times for different blink speeds." },
+          { step: "Introduce analog output for brightness", tip: "write_analog(512) = 50% brightness. Range: 0-1023. Creates PWM (flickers super fast). Lets you dim the LED!" }
         ],
         demoCode: `from microbit import *
 
@@ -324,12 +323,12 @@ while True:
     pin0.write_digital(0)  # LED OFF
     sleep(500)`,
         concepts: ["write_digital()", "GPIO pins", "LED circuits"],
-        wiring: "Connect LED long leg to Pin 0, short leg through 220Ω resistor to GND",
+        wiring: "Connect LED long leg (+) to Pin 0. Connect short leg (-) through 220Ω resistor to GND.",
         quiz: [
           { question: "What does pin0.write_digital(1) do?", options: ["Reads pin 0", "Sets pin 0 HIGH (on)", "Sets pin 0 LOW (off)", "Deletes pin 0"], correct: 1 },
           { question: "Why do we need a resistor with an LED?", options: ["To make it brighter", "To limit current and protect the LED", "For decoration", "Not needed"], correct: 1 },
           { question: "What does write_analog() do differently?", options: ["Same as digital", "Controls brightness 0-1023", "Only works with buttons", "Reads values"], correct: 1 },
-          { question: "Which pin connections are available?", options: ["Only pin 0", "Pins 0, 1, 2, 3V, GND", "Pins A and B", "No pins"], correct: 1 }
+          { question: "What value turns a digital pin off?", options: ["0", "1", "OFF", "LOW"], correct: 0 }
         ]
       },
       "lesson11": {
@@ -337,11 +336,11 @@ while True:
         type: "code",
         description: "Build a traffic light using multiple LEDs on different pins.",
         teachingGuide: [
-          "Use 3 LEDs on pins 0, 1, 2",
-          "Create red, yellow, green sequence",
-          "Add timing for realistic behavior",
-          "Implement pedestrian crossing button",
-          "Discuss real traffic light systems"
+          { step: "Use 3 LEDs on pins 0, 1, 2", tip: "Pin 0 = Red, Pin 1 = Yellow, Pin 2 = Green. Each needs its own resistor! Use the big pins with crocodile clips." },
+          { step: "Create red, yellow, green sequence", tip: "Real traffic lights: Red (stop) → Red+Yellow (get ready) → Green (go) → Yellow (slow down) → Red. Or simplified version." },
+          { step: "Add timing for realistic behavior", tip: "Red: 3000ms, Yellow: 1000ms, Green: 3000ms. Real lights use longer times but this works for demo!" },
+          { step: "Implement pedestrian crossing button", tip: "Press button A = request crossing. After delay, light changes to red for cars. Then back to green. Real crossings work similarly!" },
+          { step: "Discuss real traffic light systems", tip: "Real systems have sensors, timers, and computers. They coordinate with nearby lights. Same basic idea, much more complex!" }
         ],
         demoCode: `from microbit import *
 
@@ -366,10 +365,10 @@ while True:
     pin1.write_digital(1)
     sleep(1000)`,
         concepts: ["multiple pins", "state machines", "timing"],
-        wiring: "Red LED → Pin 0, Yellow LED → Pin 1, Green LED → Pin 2 (each with 220Ω resistor to GND)",
+        wiring: "Red LED → Pin 0, Yellow LED → Pin 1, Green LED → Pin 2. Each LED needs a 220Ω resistor to GND.",
         quiz: [
           { question: "How many pins do you need for a 3-color traffic light?", options: ["1", "2", "3", "4"], correct: 2 },
-          { question: "What order do traffic lights go?", options: ["Green, Yellow, Red", "Red, Yellow, Green", "Red, Green, Yellow", "Green, Red, Yellow"], correct: 1 },
+          { question: "What order do traffic lights go?", options: ["Green, Yellow, Red", "Red, Yellow, Green, Yellow", "Red, Green, Yellow", "Green, Red, Yellow"], correct: 1 },
           { question: "How long should yellow typically last?", options: ["5 seconds", "1-2 seconds", "10 seconds", "Same as green"], correct: 1 },
           { question: "What's the purpose of the yellow light?", options: ["Decoration", "Warning to prepare to stop/go", "Save electricity", "Nothing"], correct: 1 }
         ]
@@ -379,11 +378,11 @@ while True:
         type: "code",
         description: "Create an automatic night light using a light sensor.",
         teachingGuide: [
-          "Explain analog input with read_analog()",
-          "Show LDR (light dependent resistor) circuit",
-          "Read values 0-1023 based on brightness",
-          "Use threshold to trigger LED",
-          "Add adjustable sensitivity"
+          { step: "Explain analog input with read_analog()", tip: "read_analog() reads a voltage and converts to 0-1023. Unlike digital (just 0 or 1), analog gives a range of values." },
+          { step: "Show LDR (light dependent resistor) circuit", tip: "LDR = resistance changes with light. Bright = low resistance, Dark = high resistance. Creates a voltage divider with another resistor." },
+          { step: "Read values 0-1023 based on brightness", tip: "Bright room = high number (800+). Dark room = low number (under 200). Test YOUR room to find the right threshold!" },
+          { step: "Use threshold to trigger LED", tip: "if light < 300: turn on LED. The number 300 is the 'threshold'. Adjust it based on testing in your room!" },
+          { step: "Add adjustable sensitivity", tip: "Use buttons to change the threshold. A = increase (less sensitive), B = decrease (more sensitive). Makes it customizable!" }
         ],
         demoCode: `from microbit import *
 
@@ -397,7 +396,7 @@ while True:
         display.clear()
     sleep(100)`,
         concepts: ["read_analog()", "light sensor", "threshold"],
-        wiring: "LDR between 3V and Pin 1, 10kΩ resistor between Pin 1 and GND. LED on Pin 0.",
+        wiring: "LDR: One leg to 3V, other leg to Pin 1. 10kΩ resistor from Pin 1 to GND. LED on Pin 0 with 220Ω to GND.",
         quiz: [
           { question: "What does pin1.read_analog() return?", options: ["True or False", "A value 0-1023", "A string", "An image"], correct: 1 },
           { question: "What is an LDR?", options: ["LED Display Resistor", "Light Dependent Resistor", "Low Data Reader", "Left Direction Reader"], correct: 1 },
@@ -409,12 +408,38 @@ while True:
   }
 };
 
+// Clickable teaching tip component
+function TeachingTip({ index, step, tip }) {
+  const [isOpen, setIsOpen] = useState(false);
+  
+  return (
+    <div className="mb-2">
+      <button
+        onClick={() => setIsOpen(!isOpen)}
+        className="w-full text-left flex items-start gap-3 p-2 rounded-lg hover:bg-gray-700/50 transition-colors group"
+      >
+        <span className="flex-shrink-0 w-7 h-7 rounded-full bg-cyan-600 flex items-center justify-center text-sm font-bold">
+          {index + 1}
+        </span>
+        <span className="flex-1 text-gray-200 group-hover:text-white">{step}</span>
+        <span className="text-cyan-400 opacity-70 group-hover:opacity-100">
+          {isOpen ? <ChevronDown className="w-4 h-4" /> : <Info className="w-4 h-4" />}
+        </span>
+      </button>
+      {isOpen && (
+        <div className="ml-10 mt-1 p-3 bg-cyan-900/30 border-l-2 border-cyan-500 rounded-r-lg text-sm text-cyan-100">
+          {tip}
+        </div>
+      )}
+    </div>
+  );
+}
+
 export default function MicrobitTeaching({ user }) {
   const navigate = useNavigate();
   const [selectedUnit, setSelectedUnit] = useState("unit1");
   const [selectedLesson, setSelectedLesson] = useState("lesson1");
   const [code, setCode] = useState("");
-  const [isFullscreen, setIsFullscreen] = useState(false);
   const [showQuiz, setShowQuiz] = useState(false);
   const [quizAnswers, setQuizAnswers] = useState({});
   const [quizSubmitted, setQuizSubmitted] = useState(false);
@@ -481,7 +506,7 @@ export default function MicrobitTeaching({ user }) {
   };
 
   return (
-    <div className={`min-h-screen bg-gray-900 text-white ${isFullscreen ? 'fixed inset-0 z-50' : ''}`}>
+    <div className="min-h-screen bg-gray-900 text-white">
       {/* Header */}
       <div className={`bg-gradient-to-r ${currentUnit?.color || 'from-cyan-600 to-blue-600'} py-3 px-6`}>
         <div className="flex items-center justify-between">
@@ -587,18 +612,19 @@ export default function MicrobitTeaching({ user }) {
                 <CardContent>
                   <h4 className="font-semibold text-white mb-3 flex items-center gap-2">
                     <Lightbulb className="w-4 h-4 text-yellow-400" />
-                    Teaching Steps:
+                    Teaching Steps
+                    <span className="text-xs text-gray-400 font-normal">(click for tips)</span>
                   </h4>
-                  <ol className="space-y-2">
-                    {currentLesson?.teachingGuide?.map((step, i) => (
-                      <li key={i} className="flex items-start gap-3 text-gray-300">
-                        <span className="flex-shrink-0 w-6 h-6 rounded-full bg-cyan-600 flex items-center justify-center text-sm font-bold">
-                          {i + 1}
-                        </span>
-                        <span>{step}</span>
-                      </li>
+                  <div className="space-y-1">
+                    {currentLesson?.teachingGuide?.map((item, i) => (
+                      <TeachingTip 
+                        key={i} 
+                        index={i} 
+                        step={typeof item === 'string' ? item : item.step} 
+                        tip={typeof item === 'string' ? 'No additional information.' : item.tip} 
+                      />
                     ))}
-                  </ol>
+                  </div>
                 </CardContent>
               </Card>
 
@@ -743,7 +769,7 @@ export default function MicrobitTeaching({ user }) {
                         const isCorrect = oIndex === q.correct;
                         const showResult = quizSubmitted;
                         
-                        let bgColor = "bg-gray-800 hover:bg-gray-700";
+                        let bgColor = "bg-gray-800 hover:bg-gray-700 border-gray-600";
                         if (showResult) {
                           if (isCorrect) bgColor = "bg-green-900/50 border-green-500";
                           else if (isSelected && !isCorrect) bgColor = "bg-red-900/50 border-red-500";
