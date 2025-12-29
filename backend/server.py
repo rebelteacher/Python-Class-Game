@@ -9286,6 +9286,134 @@ async def get_block_curriculum(request: Request):
     return BLOCK_CURRICULUM
 
 
+# ==================== CUSTOM CURRICULUM MANAGEMENT ====================
+
+class AddChapterRequest(BaseModel):
+    title: str
+    description: str = ""
+    icon: str = "📚"
+    color: str = "from-gray-500 to-slate-500"
+    weeks: str = ""
+
+class AddLessonRequest(BaseModel):
+    chapter: str  # Chapter title to add lesson to
+    title: str
+    type: str = "Code"
+    duration: str = "30 min"
+    objectives: list = []
+
+@api_router.get("/curriculum/{unit_type}/custom")
+async def get_custom_curriculum(unit_type: str, request: Request):
+    """Get custom chapters and lessons for a unit type"""
+    user = await get_current_user(request)
+    
+    # Get custom curriculum items created by any teacher
+    custom_chapters = await db.custom_curriculum.find(
+        {"unit_type": unit_type, "item_type": "chapter"},
+        {"_id": 0}
+    ).to_list(100)
+    
+    custom_lessons = await db.custom_curriculum.find(
+        {"unit_type": unit_type, "item_type": "lesson"},
+        {"_id": 0}
+    ).to_list(500)
+    
+    return {
+        "chapters": custom_chapters,
+        "lessons": custom_lessons
+    }
+
+@api_router.post("/curriculum/{unit_type}/chapter")
+async def add_custom_chapter(unit_type: str, chapter_data: AddChapterRequest, request: Request):
+    """Add a custom chapter to a unit curriculum"""
+    user = await get_current_user(request)
+    
+    chapter_doc = {
+        "id": str(uuid.uuid4()),
+        "unit_type": unit_type,
+        "item_type": "chapter",
+        "title": chapter_data.title,
+        "description": chapter_data.description,
+        "icon": chapter_data.icon,
+        "color": chapter_data.color,
+        "weeks": chapter_data.weeks,
+        "creator_id": user["id"],
+        "creator_name": user.get("name", user.get("email", "Unknown")),
+        "created_at": datetime.now(timezone.utc).isoformat(),
+        "is_custom": True
+    }
+    
+    await db.custom_curriculum.insert_one(chapter_doc)
+    logger.info(f"Custom chapter added: {chapter_data.title} to {unit_type} by {user.get('email')}")
+    
+    return {"message": "Chapter added successfully", "chapter": {k: v for k, v in chapter_doc.items() if k != "_id"}}
+
+@api_router.post("/curriculum/{unit_type}/lesson")
+async def add_custom_lesson(unit_type: str, lesson_data: AddLessonRequest, request: Request):
+    """Add a custom lesson to a chapter"""
+    user = await get_current_user(request)
+    
+    lesson_doc = {
+        "id": str(uuid.uuid4()),
+        "unit_type": unit_type,
+        "item_type": "lesson",
+        "chapter": lesson_data.chapter,
+        "title": lesson_data.title,
+        "type": lesson_data.type,
+        "duration": lesson_data.duration,
+        "objectives": lesson_data.objectives,
+        "creator_id": user["id"],
+        "creator_name": user.get("name", user.get("email", "Unknown")),
+        "created_at": datetime.now(timezone.utc).isoformat(),
+        "is_custom": True
+    }
+    
+    await db.custom_curriculum.insert_one(lesson_doc)
+    logger.info(f"Custom lesson added: {lesson_data.title} to {lesson_data.chapter} by {user.get('email')}")
+    
+    return {"message": "Lesson added successfully", "lesson": {k: v for k, v in lesson_doc.items() if k != "_id"}}
+
+@api_router.delete("/curriculum/{unit_type}/chapter/{chapter_id}")
+async def delete_custom_chapter(unit_type: str, chapter_id: str, request: Request):
+    """Delete a custom chapter (only creator can delete)"""
+    user = await get_current_user(request)
+    
+    # Find the chapter
+    chapter = await db.custom_curriculum.find_one({"id": chapter_id, "item_type": "chapter"})
+    if not chapter:
+        raise HTTPException(status_code=404, detail="Chapter not found")
+    
+    # Check ownership
+    if chapter.get("creator_id") != user["id"] and user.get("role") != "admin":
+        raise HTTPException(status_code=403, detail="You can only delete chapters you created")
+    
+    # Delete the chapter
+    await db.custom_curriculum.delete_one({"id": chapter_id})
+    
+    # Also delete associated custom lessons
+    await db.custom_curriculum.delete_many({"unit_type": unit_type, "chapter": chapter["title"], "item_type": "lesson"})
+    
+    return {"message": "Chapter deleted successfully"}
+
+@api_router.delete("/curriculum/{unit_type}/lesson/{lesson_id}")
+async def delete_custom_lesson(unit_type: str, lesson_id: str, request: Request):
+    """Delete a custom lesson (only creator can delete)"""
+    user = await get_current_user(request)
+    
+    # Find the lesson
+    lesson = await db.custom_curriculum.find_one({"id": lesson_id, "item_type": "lesson"})
+    if not lesson:
+        raise HTTPException(status_code=404, detail="Lesson not found")
+    
+    # Check ownership
+    if lesson.get("creator_id") != user["id"] and user.get("role") != "admin":
+        raise HTTPException(status_code=403, detail="You can only delete lessons you created")
+    
+    await db.custom_curriculum.delete_one({"id": lesson_id})
+    
+    return {"message": "Lesson deleted successfully"}
+
+
 # Include the router in the main app
 app.include_router(api_router)
 
