@@ -29,6 +29,16 @@ const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
 const API = `${BACKEND_URL}/api`;
 
 // Turtle curriculum structure - Unit 3: Visual Python with Turtle Graphics
+// Map from curriculum unit to database chapter
+const CHAPTER_MAPPING = {
+  "unit1": "Chapter 1: First Steps",
+  "unit2": "Chapter 2: Loops", 
+  "unit3": "Chapter 3: Colors",
+  "unit4": "Chapter 4: Conditionals",
+  "unit5": "Chapter 5: Functions",
+  "unit6": "Chapter 6: Projects"
+};
+
 const TURTLE_CURRICULUM = {
   units: [
     {
