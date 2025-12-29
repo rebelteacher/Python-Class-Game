@@ -175,11 +175,7 @@ metadata:
   run_ui: true
 
 test_plan:
-  current_focus:
-    - "Block Curriculum Page Navigation"
-    - "Add Chapter Functionality"
-    - "Add Lesson Functionality"
-    - "View in Library Navigation"
+  current_focus: []
   stuck_tasks: []
   test_all: false
   test_priority: "high_first"
@@ -191,3 +187,5 @@ agent_communication:
     message: "✅ ALL TURTLE CURRICULUM TESTS PASSED: API endpoint working correctly, 30 problems seeded with proper structure, 5 quizzes with correct format, topics properly distributed (6 per topic). Teacher authentication working with credentials astapp@spanola.net. Backend API fully functional for turtle curriculum."
   - agent: "testing"
     message: "🐢 TURTLE CURRICULUM UI TESTING COMPLETE: ✅ Library filtering works perfectly - 30 problems, 5 chapters in correct order, expandable lessons. ✅ Turtle curriculum page loads correctly. ✅ 'Go to Turtle Library' button works. ❌ ISSUE FOUND: Problems button missing from Unit 1 section in turtle curriculum page - needs to be added to allow direct navigation to Chapter 1 problems."
+  - agent: "testing"
+    message: "🧱 BLOCK CURRICULUM TESTING COMPLETE: ✅ ALL FEATURES WORKING PERFECTLY! Page loads at /blocks-curriculum (note: not /blocks/curriculum as mentioned in review request). Add Chapter/Lesson buttons functional with full dialog workflows. Custom chapter 'Chapter 7: Testing' and lesson 'Lesson 4: Test Lesson' created successfully. View in Library navigation works with proper URL filters (type=block&chapter=...&lesson=...). Backend APIs for custom curriculum management fully functional. Teacher can add/delete custom chapters and lessons as intended."
