@@ -11080,6 +11080,121 @@ async def seed_turtle_problems():
                     {"description": "Rotates 60 degrees", "pattern": "60", "points": 15},
                     {"description": "Calls draw_flower()", "pattern": "draw_flower()", "points": 15}
                 ]
+            },
+            
+            # ==================== CHAPTER 6: PROJECTS & CHALLENGES ====================
+            
+            # Quiz for Chapter 6
+            {
+                "title": "Projects & Challenges Quiz",
+                "description": "Test your understanding of combining turtle graphics concepts for creative projects!",
+                "unit": "Unit 3: Turtle Graphics",
+                "chapter": "Chapter 6: Projects",
+                "lesson": "Projects Quiz",
+                "difficulty": "Hard",
+                "problem_type": "Quiz",
+                "quiz_questions": [
+                    {"question": "What's the benefit of using functions in a drawing project?", "options": ["Makes code longer", "Reuse code and organize better", "Makes drawing slower", "Only for colors"], "correct": 1},
+                    {"question": "How would you draw the same shape in 6 different colors?", "options": ["Copy paste 6 times", "Use a loop with a color list", "Use 6 turtles", "Not possible"], "correct": 1},
+                    {"question": "To make a pattern that changes based on position, you need:", "options": ["More colors", "Conditionals with xcor()/ycor()", "Faster speed", "Bigger shapes"], "correct": 1},
+                    {"question": "What makes code 'creative' in turtle graphics?", "options": ["Using only basic commands", "Combining loops, functions, colors, and conditionals", "Writing very long code", "Copying examples exactly"], "correct": 1},
+                    {"question": "How do you count colors in your code?", "options": ["Count pencolor() and fillcolor() calls with different colors", "Count all forward() calls", "Count number of lines", "Count turtle objects"], "correct": 0}
+                ]
+            },
+            
+            # Challenge 1: Rainbow Garden
+            {
+                "title": "Rainbow Garden",
+                "description": "🌸 Create a beautiful garden scene! Draw flowers, grass, or any nature elements you like.\n\n**Requirements to earn full credit:**\n• Use at least **5 different colors**\n• Define at least **3 functions** (e.g., draw_flower, draw_grass, draw_sun)\n• Use at least **4 loops**\n• Use at least **2 conditional statements**\n\n*Be creative! Your garden can have any design - just meet the requirements above.*",
+                "unit": "Unit 3: Turtle Graphics",
+                "chapter": "Chapter 6: Projects",
+                "lesson": "Lesson 1: Geometric Art",
+                "difficulty": "Hard",
+                "problem_type": "Challenge",
+                "starter_code": "import turtle\n\nt = turtle.Turtle()\nt.speed(0)\n\n# 🌸 Rainbow Garden Challenge!\n# Requirements:\n# - 5+ different colors\n# - 3+ functions (def)\n# - 4+ loops (for/while)\n# - 2+ conditionals (if/elif/else)\n\n# Example function to get you started:\ndef draw_flower(size, color):\n    t.fillcolor(color)\n    t.begin_fill()\n    for i in range(6):\n        t.forward(size)\n        t.right(60)\n    t.end_fill()\n\n# Your creative garden code here:\n\n",
+                "solution_code": "import turtle\n\nt = turtle.Turtle()\nt.speed(0)\n\ndef draw_flower(size, color):\n    t.fillcolor(color)\n    t.begin_fill()\n    for i in range(6):\n        t.forward(size)\n        t.right(60)\n    t.end_fill()\n\ndef draw_stem():\n    t.pencolor('green')\n    t.right(90)\n    t.forward(50)\n    t.left(90)\n\ndef draw_grass():\n    t.pencolor('darkgreen')\n    for i in range(20):\n        t.forward(5)\n        t.left(80)\n        t.forward(15)\n        t.backward(15)\n        t.right(80)\n\ncolors = ['red', 'yellow', 'pink', 'orange', 'purple']\n\nfor i in range(5):\n    t.penup()\n    t.goto(-150 + i*75, 0)\n    t.pendown()\n    if i % 2 == 0:\n        draw_flower(30, colors[i])\n    else:\n        draw_flower(20, colors[i])\n    draw_stem()",
+                "test_cases": [
+                    {"description": "Uses 5+ different colors", "pattern": "pencolor|fillcolor|color", "min_count": 5, "points": 25},
+                    {"description": "Defines 3+ functions", "pattern": "def ", "min_count": 3, "points": 25},
+                    {"description": "Uses 4+ loops", "pattern": "for |while ", "min_count": 4, "points": 25},
+                    {"description": "Uses 2+ conditionals", "pattern": "if |elif |else:", "min_count": 2, "points": 25}
+                ]
+            },
+            
+            # Challenge 2: Geometric Mandala
+            {
+                "title": "Geometric Mandala",
+                "description": "🔮 Create a mesmerizing mandala pattern! Mandalas are circular designs with repeating patterns.\n\n**Requirements to earn full credit:**\n• Use at least **4 different colors**\n• Define at least **2 functions**\n• Use at least **5 loops** (nested loops work great for mandalas!)\n• Use at least **3 conditional statements**\n\n*Tip: Use rotation and repetition to create symmetric patterns!*",
+                "unit": "Unit 3: Turtle Graphics",
+                "chapter": "Chapter 6: Projects",
+                "lesson": "Lesson 1: Geometric Art",
+                "difficulty": "Hard",
+                "problem_type": "Challenge",
+                "starter_code": "import turtle\n\nt = turtle.Turtle()\nt.speed(0)\n\n# 🔮 Geometric Mandala Challenge!\n# Requirements:\n# - 4+ different colors\n# - 2+ functions (def)\n# - 5+ loops (for/while)\n# - 3+ conditionals (if/elif/else)\n\n# Tip: Mandalas use lots of rotation!\n\n# Your mandala code here:\n\n",
+                "solution_code": "import turtle\n\nt = turtle.Turtle()\nt.speed(0)\n\ncolors = ['red', 'blue', 'green', 'purple']\n\ndef draw_petal(size):\n    for i in range(2):\n        t.forward(size)\n        t.right(60)\n        t.forward(size)\n        t.right(120)\n\ndef draw_ring(petals, size, color):\n    t.pencolor(color)\n    angle = 360 / petals\n    for i in range(petals):\n        draw_petal(size)\n        t.right(angle)\n\nfor ring in range(4):\n    if ring == 0:\n        draw_ring(8, 30, colors[0])\n    elif ring == 1:\n        draw_ring(12, 50, colors[1])\n    elif ring == 2:\n        draw_ring(16, 70, colors[2])\n    else:\n        draw_ring(20, 90, colors[3])",
+                "test_cases": [
+                    {"description": "Uses 4+ different colors", "pattern": "pencolor|fillcolor|color", "min_count": 4, "points": 25},
+                    {"description": "Defines 2+ functions", "pattern": "def ", "min_count": 2, "points": 25},
+                    {"description": "Uses 5+ loops", "pattern": "for |while ", "min_count": 5, "points": 25},
+                    {"description": "Uses 3+ conditionals", "pattern": "if |elif |else:", "min_count": 3, "points": 25}
+                ]
+            },
+            
+            # Challenge 3: City Skyline
+            {
+                "title": "City Skyline",
+                "description": "🏙️ Design a city skyline at sunset! Draw buildings, windows, and a colorful sky.\n\n**Requirements to earn full credit:**\n• Use at least **6 different colors** (buildings, windows, sky, sun, etc.)\n• Define at least **4 functions** (e.g., draw_building, draw_window, draw_sun, draw_sky)\n• Use at least **3 loops**\n• Use at least **4 conditional statements**\n\n*Make your city unique - tall buildings, short buildings, different window patterns!*",
+                "unit": "Unit 3: Turtle Graphics",
+                "chapter": "Chapter 6: Projects",
+                "lesson": "Lesson 2: Scene Drawing",
+                "difficulty": "Hard",
+                "problem_type": "Challenge",
+                "starter_code": "import turtle\n\nt = turtle.Turtle()\nt.speed(0)\n\n# 🏙️ City Skyline Challenge!\n# Requirements:\n# - 6+ different colors\n# - 4+ functions (def)\n# - 3+ loops (for/while)\n# - 4+ conditionals (if/elif/else)\n\n# Example: A simple building function\ndef draw_building(width, height, color):\n    t.fillcolor(color)\n    t.begin_fill()\n    for i in range(2):\n        t.forward(width)\n        t.left(90)\n        t.forward(height)\n        t.left(90)\n    t.end_fill()\n\n# Your city skyline code here:\n\n",
+                "solution_code": "import turtle\n\nt = turtle.Turtle()\nt.speed(0)\n\ndef draw_building(width, height, color):\n    t.fillcolor(color)\n    t.begin_fill()\n    for i in range(2):\n        t.forward(width)\n        t.left(90)\n        t.forward(height)\n        t.left(90)\n    t.end_fill()\n\ndef draw_window():\n    t.fillcolor('yellow')\n    t.begin_fill()\n    for i in range(4):\n        t.forward(10)\n        t.right(90)\n    t.end_fill()\n\ndef draw_sun():\n    t.penup()\n    t.goto(150, 150)\n    t.pendown()\n    t.fillcolor('orange')\n    t.begin_fill()\n    t.circle(40)\n    t.end_fill()\n\ndef draw_ground():\n    t.penup()\n    t.goto(-200, -100)\n    t.pendown()\n    t.fillcolor('darkgray')\n    t.begin_fill()\n    for i in range(2):\n        t.forward(400)\n        t.right(90)\n        t.forward(50)\n        t.right(90)\n    t.end_fill()\n\nbuildings = [(60, 150, 'gray'), (40, 100, 'darkblue'), (80, 200, 'brown')]\nx_pos = -180\n\nfor width, height, color in buildings:\n    t.penup()\n    t.goto(x_pos, -100)\n    t.pendown()\n    draw_building(width, height, color)\n    if height > 150:\n        window_rows = 4\n    elif height > 100:\n        window_rows = 3\n    else:\n        window_rows = 2\n    x_pos += width + 20\n\ndraw_sun()\ndraw_ground()",
+                "test_cases": [
+                    {"description": "Uses 6+ different colors", "pattern": "pencolor|fillcolor|color", "min_count": 6, "points": 25},
+                    {"description": "Defines 4+ functions", "pattern": "def ", "min_count": 4, "points": 25},
+                    {"description": "Uses 3+ loops", "pattern": "for |while ", "min_count": 3, "points": 25},
+                    {"description": "Uses 4+ conditionals", "pattern": "if |elif |else:", "min_count": 4, "points": 25}
+                ]
+            },
+            
+            # Challenge 4: Abstract Art
+            {
+                "title": "Abstract Art Generator",
+                "description": "🎨 Create abstract art with lots of colors and patterns! Think Kandinsky or Mondrian.\n\n**Requirements to earn full credit:**\n• Use at least **8 different colors** (go wild with the rainbow!)\n• Define at least **2 functions**\n• Use at least **6 loops** (create lots of repetition)\n• Use at least **2 conditional statements**\n\n*Abstract art has no rules - except the requirements above! Mix shapes, colors, and patterns.*",
+                "unit": "Unit 3: Turtle Graphics",
+                "chapter": "Chapter 6: Projects",
+                "lesson": "Lesson 3: Animation Basics",
+                "difficulty": "Hard",
+                "problem_type": "Challenge",
+                "starter_code": "import turtle\nimport random\n\nt = turtle.Turtle()\nt.speed(0)\n\n# 🎨 Abstract Art Generator Challenge!\n# Requirements:\n# - 8+ different colors (use a big color list!)\n# - 2+ functions (def)\n# - 6+ loops (for/while)\n# - 2+ conditionals (if/elif/else)\n\n# Big color list to choose from:\ncolors = ['red', 'orange', 'yellow', 'green', 'blue', \n          'purple', 'pink', 'cyan', 'magenta', 'lime']\n\n# Your abstract art code here:\n\n",
+                "solution_code": "import turtle\nimport random\n\nt = turtle.Turtle()\nt.speed(0)\n\ncolors = ['red', 'orange', 'yellow', 'green', 'blue', 'purple', 'pink', 'cyan']\n\ndef random_shape(size):\n    sides = random.randint(3, 8)\n    angle = 360 / sides\n    for i in range(sides):\n        t.forward(size)\n        t.right(angle)\n\ndef spiral_burst(colors_list):\n    for i in range(36):\n        t.pencolor(colors_list[i % len(colors_list)])\n        t.forward(i * 3)\n        t.right(91)\n\nfor x in range(-150, 151, 150):\n    for y in range(-100, 101, 100):\n        t.penup()\n        t.goto(x, y)\n        t.pendown()\n        if x < 0:\n            spiral_burst(colors[:4])\n        else:\n            spiral_burst(colors[4:])\n\nfor i in range(20):\n    t.penup()\n    t.goto(random.randint(-180, 180), random.randint(-150, 150))\n    t.pendown()\n    t.pencolor(colors[i % 8])\n    random_shape(20)",
+                "test_cases": [
+                    {"description": "Uses 8+ different colors", "pattern": "pencolor|fillcolor|color", "min_count": 8, "points": 25},
+                    {"description": "Defines 2+ functions", "pattern": "def ", "min_count": 2, "points": 25},
+                    {"description": "Uses 6+ loops", "pattern": "for |while ", "min_count": 6, "points": 25},
+                    {"description": "Uses 2+ conditionals", "pattern": "if |elif |else:", "min_count": 2, "points": 25}
+                ]
+            },
+            
+            # Challenge 5: Final Masterpiece
+            {
+                "title": "Final Masterpiece",
+                "description": "🏆 **THE ULTIMATE CHALLENGE!** Create your best work combining everything you've learned!\n\n**Requirements to earn full credit:**\n• Use at least **6 different colors**\n• Define at least **5 functions** (good code organization!)\n• Use at least **5 loops**\n• Use at least **5 conditional statements**\n\n*This is your chance to show off! Create something you're proud of - a scene, pattern, game board, logo, or anything you can imagine.*",
+                "unit": "Unit 3: Turtle Graphics",
+                "chapter": "Chapter 6: Projects",
+                "lesson": "Lesson 4: Creative Challenge",
+                "difficulty": "Hard",
+                "problem_type": "Challenge",
+                "starter_code": "import turtle\n\nt = turtle.Turtle()\nt.speed(0)\nscreen = turtle.Screen()\nscreen.bgcolor('white')\n\n# 🏆 FINAL MASTERPIECE CHALLENGE!\n# Requirements:\n# - 6+ different colors\n# - 5+ functions (def) - organize your code!\n# - 5+ loops (for/while)\n# - 5+ conditionals (if/elif/else)\n\n# This is your ultimate test!\n# Show everything you've learned!\n\n# Your masterpiece code here:\n\n",
+                "solution_code": "import turtle\n\nt = turtle.Turtle()\nt.speed(0)\n\ncolors = ['red', 'orange', 'yellow', 'green', 'blue', 'purple']\n\ndef draw_star(size, color):\n    t.fillcolor(color)\n    t.begin_fill()\n    for i in range(5):\n        t.forward(size)\n        t.right(144)\n    t.end_fill()\n\ndef draw_circle_pattern(radius, color):\n    t.pencolor(color)\n    for i in range(36):\n        t.circle(radius)\n        t.right(10)\n\ndef draw_square_spiral(size):\n    for i in range(20):\n        t.pencolor(colors[i % 6])\n        t.forward(size + i * 5)\n        t.right(91)\n\ndef draw_rainbow_arc():\n    for i, color in enumerate(colors):\n        t.pencolor(color)\n        t.pensize(5)\n        t.circle(100 - i * 10, 180)\n\ndef draw_border():\n    t.penup()\n    t.goto(-200, -180)\n    t.pendown()\n    for i in range(4):\n        if i % 2 == 0:\n            t.pencolor('gold')\n        else:\n            t.pencolor('darkblue')\n        if i < 2:\n            t.forward(400)\n        else:\n            t.forward(360)\n        t.left(90)\n\nt.penup()\nt.goto(0, 50)\nt.pendown()\ndraw_square_spiral(10)\n\nfor i in range(6):\n    t.penup()\n    x = 120 * (1 if i < 3 else -1)\n    y = 80 if i % 2 == 0 else -80\n    t.goto(x, y)\n    t.pendown()\n    if i % 3 == 0:\n        draw_star(30, colors[i])\n    elif i % 3 == 1:\n        draw_circle_pattern(20, colors[i])\n    else:\n        draw_star(20, colors[i])\n\ndraw_border()",
+                "test_cases": [
+                    {"description": "Uses 6+ different colors", "pattern": "pencolor|fillcolor|color", "min_count": 6, "points": 25},
+                    {"description": "Defines 5+ functions", "pattern": "def ", "min_count": 5, "points": 25},
+                    {"description": "Uses 5+ loops", "pattern": "for |while ", "min_count": 5, "points": 25},
+                    {"description": "Uses 5+ conditionals", "pattern": "if |elif |else:", "min_count": 5, "points": 25}
+                ]
             }
         ]
         
