@@ -10496,4 +10496,620 @@ async def seed_microbit_problems():
         final_count = await db.problems.count_documents({"assignment_type": "microbit"})
         logger.info(f"✅ Micro:bit problems seeded: {final_count}")
     except Exception as e:
+
+
+@app.on_event("startup")
+async def seed_turtle_problems():
+    """Seed Turtle curriculum problems - 5 per topic + quiz = ~30 total"""
+    try:
+        # Check current count
+        existing_count = await db.problems.count_documents({"assignment_type": "turtle"})
+        if existing_count >= 30:
+            logger.info(f"✅ Turtle problems already exist: {existing_count}")
+            return
+        
+        logger.info("🔄 Seeding Turtle problems...")
+        
+        # Clear existing turtle problems to reorganize
+        await db.problems.delete_many({"assignment_type": "turtle"})
+        
+        turtle_problems = [
+            # ==================== TOPIC 1: BASICS - FIRST STEPS ====================
+            
+            # Quiz for Basics
+            {
+                "title": "Turtle Basics Quiz",
+                "description": "Test your knowledge of basic turtle graphics commands! Learn about movement, turning, and creating simple shapes.",
+                "unit": "Topic 1: Basics",
+                "chapter": "First Steps",
+                "lesson": "Basics Quiz",
+                "difficulty": "Easy",
+                "problem_type": "Quiz",
+                "quiz_questions": [
+                    {"question": "What command moves the turtle forward?", "options": ["t.forward(100)", "t.move(100)", "t.go(100)", "t.walk(100)"], "correct": 0},
+                    {"question": "What does t.right(90) do?", "options": ["Move right 90 pixels", "Turn right 90 degrees", "Draw 90 lines", "Create a 90-sided shape"], "correct": 1},
+                    {"question": "How many degrees are in a right angle (corner of a square)?", "options": ["45", "90", "180", "360"], "correct": 1},
+                    {"question": "What import statement is needed for turtle graphics?", "options": ["import graphics", "import drawing", "import turtle", "import canvas"], "correct": 2},
+                    {"question": "How many 90° turns make a complete circle?", "options": ["2", "3", "4", "6"], "correct": 2}
+                ]
+            },
+            
+            # Problem 1: Name Your Turtle
+            {
+                "title": "Name Your Turtle",
+                "description": "Create a turtle with a custom name (like 'bob' or 'sally') and make it move forward 100 pixels. Personalize your turtle!",
+                "unit": "Topic 1: Basics",
+                "chapter": "First Steps",
+                "lesson": "Lesson 1: Name Your Turtle",
+                "difficulty": "Easy",
+                "problem_type": "Class Practice",
+                "starter_code": "import turtle\n\n# Create a turtle with a fun name!\n# Example: bob = turtle.Turtle()\n# Your code here:\n",
+                "solution_code": "import turtle\n\nbob = turtle.Turtle()\nbob.forward(100)",
+                "test_cases": [
+                    {"description": "Imports turtle module", "pattern": "import turtle", "points": 25},
+                    {"description": "Creates a Turtle object", "pattern": "turtle.Turtle()", "points": 25},
+                    {"description": "Uses forward() command", "pattern": "forward(", "points": 50}
+                ]
+            },
+            
+            # Problem 2: Move Forward
+            {
+                "title": "Move Forward",
+                "description": "Make the turtle move forward 150 pixels. The turtle starts in the center facing right.",
+                "unit": "Topic 1: Basics",
+                "chapter": "First Steps",
+                "lesson": "Lesson 2: Moving Forward",
+                "difficulty": "Easy",
+                "problem_type": "Class Practice",
+                "starter_code": "import turtle\n\nt = turtle.Turtle()\n\n# Move forward 150 pixels\n# Your code here:\n",
+                "solution_code": "import turtle\n\nt = turtle.Turtle()\nt.forward(150)",
+                "test_cases": [
+                    {"description": "Uses forward() command", "pattern": "forward(", "points": 50},
+                    {"description": "Moves 150 pixels", "pattern": "150", "points": 50}
+                ]
+            },
+            
+            # Problem 3: Move Backward
+            {
+                "title": "Move Backward",
+                "description": "Move the turtle forward 100 pixels, then backward 50 pixels. The turtle should end up 50 pixels from the start.",
+                "unit": "Topic 1: Basics",
+                "chapter": "First Steps",
+                "lesson": "Lesson 3: Moving Backward",
+                "difficulty": "Easy",
+                "problem_type": "Class Practice",
+                "starter_code": "import turtle\n\nt = turtle.Turtle()\n\n# Move forward 100, then backward 50\n# Your code here:\n",
+                "solution_code": "import turtle\n\nt = turtle.Turtle()\nt.forward(100)\nt.backward(50)",
+                "test_cases": [
+                    {"description": "Uses forward()", "pattern": "forward(", "points": 40},
+                    {"description": "Uses backward()", "pattern": "backward(", "points": 60}
+                ]
+            },
+            
+            # Problem 4: Turn Right and Left
+            {
+                "title": "Turn Right and Left",
+                "description": "Draw an L-shape: move forward 100, turn right 90°, move forward 50.",
+                "unit": "Topic 1: Basics",
+                "chapter": "First Steps",
+                "lesson": "Lesson 4: Turning",
+                "difficulty": "Easy",
+                "problem_type": "Independent Practice",
+                "starter_code": "import turtle\n\nt = turtle.Turtle()\n\n# Draw an L-shape\n# Forward 100, turn right 90, forward 50\n# Your code here:\n",
+                "solution_code": "import turtle\n\nt = turtle.Turtle()\nt.forward(100)\nt.right(90)\nt.forward(50)",
+                "test_cases": [
+                    {"description": "Uses forward()", "pattern": "forward(", "points": 30},
+                    {"description": "Uses right() to turn", "pattern": "right(", "points": 40},
+                    {"description": "Turns 90 degrees", "pattern": "90", "points": 30}
+                ]
+            },
+            
+            # Problem 5: Draw a Square (Manual)
+            {
+                "title": "Draw a Square (Step by Step)",
+                "description": "Draw a square with sides of 80 pixels. Use forward() and right(90) four times.",
+                "unit": "Topic 1: Basics",
+                "chapter": "First Steps",
+                "lesson": "Lesson 5: Drawing a Square",
+                "difficulty": "Easy",
+                "problem_type": "Challenge",
+                "starter_code": "import turtle\n\nt = turtle.Turtle()\n\n# Draw a square with 80-pixel sides\n# Hint: forward, right 90, forward, right 90...\n# Your code here:\n",
+                "solution_code": "import turtle\n\nt = turtle.Turtle()\nt.forward(80)\nt.right(90)\nt.forward(80)\nt.right(90)\nt.forward(80)\nt.right(90)\nt.forward(80)",
+                "test_cases": [
+                    {"description": "Uses forward() multiple times", "pattern": "forward(", "points": 40},
+                    {"description": "Uses right(90) to turn corners", "pattern": "right(90)", "points": 40},
+                    {"description": "Uses 80 pixels for sides", "pattern": "80", "points": 20}
+                ]
+            },
+            
+            # ==================== TOPIC 2: LOOPS ====================
+            
+            # Quiz for Loops
+            {
+                "title": "Loops Quiz",
+                "description": "Test your understanding of for loops in turtle graphics! Learn how to repeat commands efficiently.",
+                "unit": "Topic 2: Loops",
+                "chapter": "Loops",
+                "lesson": "Loops Quiz",
+                "difficulty": "Medium",
+                "problem_type": "Quiz",
+                "quiz_questions": [
+                    {"question": "What does 'for i in range(4):' do?", "options": ["Counts to 4", "Repeats code 4 times", "Creates 4 turtles", "Draws 4 lines"], "correct": 1},
+                    {"question": "To draw a triangle, how many times should the loop repeat?", "options": ["2", "3", "4", "5"], "correct": 1},
+                    {"question": "What is the turning angle for a triangle? (360 ÷ 3)", "options": ["60°", "90°", "120°", "180°"], "correct": 2},
+                    {"question": "What is the turning angle for a hexagon (6 sides)?", "options": ["30°", "45°", "60°", "90°"], "correct": 2},
+                    {"question": "In 'for i in range(5):', what values does i take?", "options": ["1,2,3,4,5", "0,1,2,3,4", "0,1,2,3,4,5", "1,2,3,4"], "correct": 1}
+                ]
+            },
+            
+            # Problem 1: Square with Loop
+            {
+                "title": "Square with Loop",
+                "description": "Use a for loop to draw a square! Much easier than writing forward and right 4 times.",
+                "unit": "Topic 2: Loops",
+                "chapter": "Loops",
+                "lesson": "Lesson 1: For Loop Basics",
+                "difficulty": "Medium",
+                "problem_type": "Class Practice",
+                "starter_code": "import turtle\n\nt = turtle.Turtle()\n\n# Draw a square using a for loop\n# for i in range(4):\n#     forward, right 90\n# Your code here:\n",
+                "solution_code": "import turtle\n\nt = turtle.Turtle()\n\nfor i in range(4):\n    t.forward(100)\n    t.right(90)",
+                "test_cases": [
+                    {"description": "Uses for loop", "pattern": "for ", "points": 30},
+                    {"description": "Uses range(4)", "pattern": "range(4)", "points": 30},
+                    {"description": "Uses forward()", "pattern": "forward(", "points": 20},
+                    {"description": "Turns 90 degrees", "pattern": "right(90)", "points": 20}
+                ]
+            },
+            
+            # Problem 2: Triangle
+            {
+                "title": "Draw a Triangle",
+                "description": "Draw a triangle using a for loop. Remember: angle = 360 ÷ 3 = 120°",
+                "unit": "Topic 2: Loops",
+                "chapter": "Loops",
+                "lesson": "Lesson 2: Triangle with Loop",
+                "difficulty": "Medium",
+                "problem_type": "Class Practice",
+                "starter_code": "import turtle\n\nt = turtle.Turtle()\n\n# Draw a triangle\n# 3 sides, turn 120 degrees each time\n# Your code here:\n",
+                "solution_code": "import turtle\n\nt = turtle.Turtle()\n\nfor i in range(3):\n    t.forward(100)\n    t.left(120)",
+                "test_cases": [
+                    {"description": "Uses for loop", "pattern": "for ", "points": 25},
+                    {"description": "Repeats 3 times", "pattern": "range(3)", "points": 25},
+                    {"description": "Turns 120 degrees", "pattern": "120", "points": 25},
+                    {"description": "Uses forward()", "pattern": "forward(", "points": 25}
+                ]
+            },
+            
+            # Problem 3: Pentagon
+            {
+                "title": "Draw a Pentagon",
+                "description": "Draw a pentagon (5 sides) using a loop. Calculate the angle: 360 ÷ 5 = 72°",
+                "unit": "Topic 2: Loops",
+                "chapter": "Loops",
+                "lesson": "Lesson 3: Any Polygon",
+                "difficulty": "Medium",
+                "problem_type": "Independent Practice",
+                "starter_code": "import turtle\n\nt = turtle.Turtle()\n\n# Draw a pentagon (5 sides)\n# Angle = 360 / 5 = 72 degrees\n# Your code here:\n",
+                "solution_code": "import turtle\n\nt = turtle.Turtle()\n\nfor i in range(5):\n    t.forward(80)\n    t.right(72)",
+                "test_cases": [
+                    {"description": "Uses for loop", "pattern": "for ", "points": 25},
+                    {"description": "Repeats 5 times", "pattern": "range(5)", "points": 25},
+                    {"description": "Turns 72 degrees", "pattern": "72", "points": 25},
+                    {"description": "Uses forward()", "pattern": "forward(", "points": 25}
+                ]
+            },
+            
+            # Problem 4: Hexagon with Variable
+            {
+                "title": "Polygon with Variables",
+                "description": "Use variables for sides and angle to draw a hexagon. Set sides=6 and calculate angle=360/sides.",
+                "unit": "Topic 2: Loops",
+                "chapter": "Loops",
+                "lesson": "Lesson 3: Any Polygon",
+                "difficulty": "Medium",
+                "problem_type": "Independent Practice",
+                "starter_code": "import turtle\n\nt = turtle.Turtle()\n\nsides = 6\nangle = 360 / sides\n\n# Use the variables to draw the hexagon\n# Your code here:\n",
+                "solution_code": "import turtle\n\nt = turtle.Turtle()\n\nsides = 6\nangle = 360 / sides\n\nfor i in range(sides):\n    t.forward(50)\n    t.right(angle)",
+                "test_cases": [
+                    {"description": "Uses sides variable", "pattern": "sides", "points": 25},
+                    {"description": "Calculates angle", "pattern": "360", "points": 25},
+                    {"description": "Uses for loop with variable", "pattern": "range(sides)", "points": 25},
+                    {"description": "Uses angle variable in turn", "pattern": "angle", "points": 25}
+                ]
+            },
+            
+            # Problem 5: Spiral
+            {
+                "title": "Draw a Spiral",
+                "description": "Create a spiral by increasing the distance each time. Use i*5 for the forward distance.",
+                "unit": "Topic 2: Loops",
+                "chapter": "Loops",
+                "lesson": "Lesson 4: Spiral Pattern",
+                "difficulty": "Hard",
+                "problem_type": "Challenge",
+                "starter_code": "import turtle\n\nt = turtle.Turtle()\nt.speed(0)\n\n# Draw a spiral\n# Use i * 5 for distance, turn 90 each time\n# Your code here:\n",
+                "solution_code": "import turtle\n\nt = turtle.Turtle()\nt.speed(0)\n\nfor i in range(30):\n    t.forward(i * 5)\n    t.right(90)",
+                "test_cases": [
+                    {"description": "Uses for loop", "pattern": "for ", "points": 25},
+                    {"description": "Uses i in calculation", "pattern": "i *", "points": 35},
+                    {"description": "Uses forward()", "pattern": "forward(", "points": 20},
+                    {"description": "Uses right() to turn", "pattern": "right(", "points": 20}
+                ]
+            },
+            
+            # ==================== TOPIC 3: COLORS ====================
+            
+            # Quiz for Colors
+            {
+                "title": "Colors Quiz",
+                "description": "Test your knowledge of turtle colors and fill commands!",
+                "unit": "Topic 3: Colors",
+                "chapter": "Colors",
+                "lesson": "Colors Quiz",
+                "difficulty": "Medium",
+                "problem_type": "Quiz",
+                "quiz_questions": [
+                    {"question": "What command changes the line color?", "options": ["t.linecolor()", "t.pencolor()", "t.drawcolor()", "t.strokecolor()"], "correct": 1},
+                    {"question": "What TWO commands surround a shape to fill it?", "options": ["start_fill/stop_fill", "begin_fill/end_fill", "fill_start/fill_end", "open_fill/close_fill"], "correct": 1},
+                    {"question": "What does pensize(5) do?", "options": ["Draw 5 lines", "Make lines 5 pixels thick", "Use 5 colors", "Move 5 pixels"], "correct": 1},
+                    {"question": "How do you set the fill color to yellow?", "options": ["t.fillcolor('yellow')", "t.fill('yellow')", "t.color_fill('yellow')", "t.inside('yellow')"], "correct": 0},
+                    {"question": "What does i % 6 give you when cycling through 6 colors?", "options": ["Always 6", "Numbers 0-5 repeating", "Numbers 1-6", "Random numbers"], "correct": 1}
+                ]
+            },
+            
+            # Problem 1: Colored Lines
+            {
+                "title": "Colored Lines",
+                "description": "Draw a red line, then a blue line, then a green line. Use pencolor() to change colors.",
+                "unit": "Topic 3: Colors",
+                "chapter": "Colors",
+                "lesson": "Lesson 1: Pen Color",
+                "difficulty": "Easy",
+                "problem_type": "Class Practice",
+                "starter_code": "import turtle\n\nt = turtle.Turtle()\n\n# Draw lines in different colors\n# Use t.pencolor('red'), t.pencolor('blue'), etc.\n# Your code here:\n",
+                "solution_code": "import turtle\n\nt = turtle.Turtle()\n\nt.pencolor('red')\nt.forward(100)\nt.right(90)\n\nt.pencolor('blue')\nt.forward(100)\nt.right(90)\n\nt.pencolor('green')\nt.forward(100)",
+                "test_cases": [
+                    {"description": "Uses pencolor()", "pattern": "pencolor(", "points": 30},
+                    {"description": "Uses red color", "pattern": "red", "points": 20},
+                    {"description": "Uses blue color", "pattern": "blue", "points": 20},
+                    {"description": "Uses green color", "pattern": "green", "points": 30}
+                ]
+            },
+            
+            # Problem 2: Filled Square
+            {
+                "title": "Filled Square",
+                "description": "Draw a yellow filled square. Use begin_fill() before and end_fill() after drawing.",
+                "unit": "Topic 3: Colors",
+                "chapter": "Colors",
+                "lesson": "Lesson 2: Fill Shapes",
+                "difficulty": "Medium",
+                "problem_type": "Class Practice",
+                "starter_code": "import turtle\n\nt = turtle.Turtle()\n\nt.fillcolor('yellow')\n\n# Start fill, draw square, end fill\n# Your code here:\n",
+                "solution_code": "import turtle\n\nt = turtle.Turtle()\n\nt.fillcolor('yellow')\nt.begin_fill()\n\nfor i in range(4):\n    t.forward(100)\n    t.right(90)\n\nt.end_fill()",
+                "test_cases": [
+                    {"description": "Sets fill color", "pattern": "fillcolor(", "points": 20},
+                    {"description": "Uses begin_fill()", "pattern": "begin_fill()", "points": 30},
+                    {"description": "Uses end_fill()", "pattern": "end_fill()", "points": 30},
+                    {"description": "Draws a shape", "pattern": "forward(", "points": 20}
+                ]
+            },
+            
+            # Problem 3: Rainbow Triangle
+            {
+                "title": "Rainbow Triangle",
+                "description": "Draw a triangle with each side a different color: red, green, blue.",
+                "unit": "Topic 3: Colors",
+                "chapter": "Colors",
+                "lesson": "Lesson 3: Rainbow Colors",
+                "difficulty": "Medium",
+                "problem_type": "Independent Practice",
+                "starter_code": "import turtle\n\nt = turtle.Turtle()\nt.pensize(3)\n\ncolors = ['red', 'green', 'blue']\n\n# Draw a triangle with each side a different color\n# Hint: use colors[i] to get each color\n# Your code here:\n",
+                "solution_code": "import turtle\n\nt = turtle.Turtle()\nt.pensize(3)\n\ncolors = ['red', 'green', 'blue']\n\nfor i in range(3):\n    t.pencolor(colors[i])\n    t.forward(100)\n    t.left(120)",
+                "test_cases": [
+                    {"description": "Uses color list", "pattern": "colors[", "points": 30},
+                    {"description": "Uses pencolor()", "pattern": "pencolor(", "points": 25},
+                    {"description": "Uses for loop", "pattern": "for ", "points": 25},
+                    {"description": "Draws triangle (120 degrees)", "pattern": "120", "points": 20}
+                ]
+            },
+            
+            # Problem 4: Thick Lines
+            {
+                "title": "Growing Lines",
+                "description": "Draw 5 lines, each thicker than the last. Use pensize(i*2) to increase thickness.",
+                "unit": "Topic 3: Colors",
+                "chapter": "Colors",
+                "lesson": "Lesson 4: Pen Size",
+                "difficulty": "Medium",
+                "problem_type": "Independent Practice",
+                "starter_code": "import turtle\n\nt = turtle.Turtle()\n\n# Draw 5 lines with increasing thickness\n# Your code here:\n",
+                "solution_code": "import turtle\n\nt = turtle.Turtle()\n\nfor i in range(1, 6):\n    t.pensize(i * 2)\n    t.forward(50)\n    t.right(90)",
+                "test_cases": [
+                    {"description": "Uses pensize()", "pattern": "pensize(", "points": 40},
+                    {"description": "Uses for loop", "pattern": "for ", "points": 30},
+                    {"description": "Increases size with i", "pattern": "i *", "points": 30}
+                ]
+            },
+            
+            # Problem 5: Rainbow Spiral
+            {
+                "title": "Rainbow Spiral",
+                "description": "Create a colorful spiral using a list of colors and the modulo operator to cycle through them.",
+                "unit": "Topic 3: Colors",
+                "chapter": "Colors",
+                "lesson": "Lesson 3: Rainbow Colors",
+                "difficulty": "Hard",
+                "problem_type": "Challenge",
+                "starter_code": "import turtle\n\nt = turtle.Turtle()\nt.speed(0)\n\ncolors = ['red', 'orange', 'yellow', 'green', 'blue', 'purple']\n\n# Draw a rainbow spiral\n# Use colors[i % 6] to cycle through colors\n# Your code here:\n",
+                "solution_code": "import turtle\n\nt = turtle.Turtle()\nt.speed(0)\n\ncolors = ['red', 'orange', 'yellow', 'green', 'blue', 'purple']\n\nfor i in range(36):\n    t.pencolor(colors[i % 6])\n    t.forward(i * 5)\n    t.right(60)",
+                "test_cases": [
+                    {"description": "Uses color list", "pattern": "colors[", "points": 25},
+                    {"description": "Uses modulo operator", "pattern": "% 6", "points": 30},
+                    {"description": "Creates spiral with i *", "pattern": "i *", "points": 25},
+                    {"description": "Uses for loop", "pattern": "for ", "points": 20}
+                ]
+            },
+            
+            # ==================== TOPIC 4: CONDITIONALS ====================
+            
+            # Quiz for Conditionals
+            {
+                "title": "Conditionals Quiz",
+                "description": "Test your understanding of if statements and conditions in turtle graphics!",
+                "unit": "Topic 4: Conditionals",
+                "chapter": "Conditionals",
+                "lesson": "Conditionals Quiz",
+                "difficulty": "Medium",
+                "problem_type": "Quiz",
+                "quiz_questions": [
+                    {"question": "What does 'if i % 2 == 0:' check?", "options": ["If i is odd", "If i is even", "If i equals 2", "If i is positive"], "correct": 1},
+                    {"question": "What does t.xcor() return?", "options": ["The turtle's color", "The turtle's x position", "The number of steps", "The pen size"], "correct": 1},
+                    {"question": "What keyword is used when the if condition is False?", "options": ["then", "otherwise", "else", "false"], "correct": 2},
+                    {"question": "What does 'elif' stand for?", "options": ["else if", "element if", "end if", "early if"], "correct": 0},
+                    {"question": "If t.ycor() > 0, where is the turtle?", "options": ["Left side", "Right side", "Top half", "Bottom half"], "correct": 2}
+                ]
+            },
+            
+            # Problem 1: Even/Odd Colors
+            {
+                "title": "Even/Odd Colors",
+                "description": "Draw 10 lines. Color even-numbered lines red and odd-numbered lines blue using i % 2.",
+                "unit": "Topic 4: Conditionals",
+                "chapter": "Conditionals",
+                "lesson": "Lesson 4: Alternating with %",
+                "difficulty": "Medium",
+                "problem_type": "Class Practice",
+                "starter_code": "import turtle\n\nt = turtle.Turtle()\n\nfor i in range(10):\n    # If i is even (i % 2 == 0), use red\n    # Otherwise use blue\n    # Your code here:\n    \n    t.forward(30)\n    t.right(36)",
+                "solution_code": "import turtle\n\nt = turtle.Turtle()\n\nfor i in range(10):\n    if i % 2 == 0:\n        t.pencolor('red')\n    else:\n        t.pencolor('blue')\n    \n    t.forward(30)\n    t.right(36)",
+                "test_cases": [
+                    {"description": "Uses if statement", "pattern": "if ", "points": 25},
+                    {"description": "Checks even with % 2", "pattern": "% 2", "points": 30},
+                    {"description": "Uses else", "pattern": "else:", "points": 25},
+                    {"description": "Changes pen color", "pattern": "pencolor(", "points": 20}
+                ]
+            },
+            
+            # Problem 2: Position Check
+            {
+                "title": "Position-Based Color",
+                "description": "Draw a circle. When the turtle is on the right side (xcor() > 0), use red. Otherwise use blue.",
+                "unit": "Topic 4: Conditionals",
+                "chapter": "Conditionals",
+                "lesson": "Lesson 1: If Statement",
+                "difficulty": "Medium",
+                "problem_type": "Class Practice",
+                "starter_code": "import turtle\n\nt = turtle.Turtle()\nt.speed(0)\n\nfor i in range(360):\n    # Check if turtle is on right side: t.xcor() > 0\n    # Your code here:\n    \n    t.forward(1)\n    t.right(1)",
+                "solution_code": "import turtle\n\nt = turtle.Turtle()\nt.speed(0)\n\nfor i in range(360):\n    if t.xcor() > 0:\n        t.pencolor('red')\n    else:\n        t.pencolor('blue')\n    \n    t.forward(1)\n    t.right(1)",
+                "test_cases": [
+                    {"description": "Uses xcor()", "pattern": "xcor()", "points": 30},
+                    {"description": "Uses if statement", "pattern": "if ", "points": 25},
+                    {"description": "Uses else", "pattern": "else:", "points": 25},
+                    {"description": "Compares with > 0", "pattern": "> 0", "points": 20}
+                ]
+            },
+            
+            # Problem 3: Four Quadrants
+            {
+                "title": "Four Quadrant Colors",
+                "description": "Draw a circle with 4 colors based on position: top-right=red, top-left=green, bottom-left=blue, bottom-right=yellow.",
+                "unit": "Topic 4: Conditionals",
+                "chapter": "Conditionals",
+                "lesson": "Lesson 3: Multiple Conditions",
+                "difficulty": "Hard",
+                "problem_type": "Independent Practice",
+                "starter_code": "import turtle\n\nt = turtle.Turtle()\nt.speed(0)\n\nfor i in range(360):\n    x = t.xcor()\n    y = t.ycor()\n    \n    # Use if/elif/else to check quadrants\n    # Top-right: x > 0 and y > 0 -> red\n    # Your code here:\n    \n    t.forward(1)\n    t.right(1)",
+                "solution_code": "import turtle\n\nt = turtle.Turtle()\nt.speed(0)\n\nfor i in range(360):\n    x = t.xcor()\n    y = t.ycor()\n    \n    if x > 0 and y > 0:\n        t.pencolor('red')\n    elif x < 0 and y > 0:\n        t.pencolor('green')\n    elif x < 0 and y < 0:\n        t.pencolor('blue')\n    else:\n        t.pencolor('yellow')\n    \n    t.forward(1)\n    t.right(1)",
+                "test_cases": [
+                    {"description": "Uses xcor() and ycor()", "pattern": "xcor()|ycor()", "points": 25},
+                    {"description": "Uses if statement", "pattern": "if ", "points": 20},
+                    {"description": "Uses elif", "pattern": "elif ", "points": 30},
+                    {"description": "Uses 'and' for conditions", "pattern": " and ", "points": 25}
+                ]
+            },
+            
+            # Problem 4: Checkerboard Row
+            {
+                "title": "Checkerboard Row",
+                "description": "Draw 8 squares in a row. Fill every other square with black (checkerboard pattern).",
+                "unit": "Topic 4: Conditionals",
+                "chapter": "Conditionals",
+                "lesson": "Lesson 4: Alternating with %",
+                "difficulty": "Hard",
+                "problem_type": "Independent Practice",
+                "starter_code": "import turtle\n\nt = turtle.Turtle()\nt.speed(0)\n\nfor i in range(8):\n    # Fill black if i is even\n    # Your code here:\n    \n    # Draw square\n    for j in range(4):\n        t.forward(30)\n        t.right(90)\n    \n    # Move to next position\n    t.penup()\n    t.forward(40)\n    t.pendown()",
+                "solution_code": "import turtle\n\nt = turtle.Turtle()\nt.speed(0)\n\nfor i in range(8):\n    if i % 2 == 0:\n        t.fillcolor('black')\n        t.begin_fill()\n    \n    for j in range(4):\n        t.forward(30)\n        t.right(90)\n    \n    if i % 2 == 0:\n        t.end_fill()\n    \n    t.penup()\n    t.forward(40)\n    t.pendown()",
+                "test_cases": [
+                    {"description": "Uses % 2 for alternating", "pattern": "% 2", "points": 30},
+                    {"description": "Uses begin_fill()", "pattern": "begin_fill()", "points": 25},
+                    {"description": "Uses end_fill()", "pattern": "end_fill()", "points": 25},
+                    {"description": "Uses nested loops", "pattern": "for j", "points": 20}
+                ]
+            },
+            
+            # Problem 5: Size by Position
+            {
+                "title": "Dynamic Line Size",
+                "description": "As the turtle moves, make the line thicker when going up (ycor increasing) and thinner when going down.",
+                "unit": "Topic 4: Conditionals",
+                "chapter": "Conditionals",
+                "lesson": "Lesson 2: If-Else",
+                "difficulty": "Hard",
+                "problem_type": "Challenge",
+                "starter_code": "import turtle\n\nt = turtle.Turtle()\nt.speed(0)\n\nfor i in range(360):\n    # Thick line (pensize 3) when y > 0\n    # Thin line (pensize 1) when y <= 0\n    # Your code here:\n    \n    t.forward(1)\n    t.right(1)",
+                "solution_code": "import turtle\n\nt = turtle.Turtle()\nt.speed(0)\n\nfor i in range(360):\n    if t.ycor() > 0:\n        t.pensize(3)\n    else:\n        t.pensize(1)\n    \n    t.forward(1)\n    t.right(1)",
+                "test_cases": [
+                    {"description": "Uses ycor()", "pattern": "ycor()", "points": 30},
+                    {"description": "Uses if statement", "pattern": "if ", "points": 25},
+                    {"description": "Uses pensize()", "pattern": "pensize(", "points": 25},
+                    {"description": "Uses else", "pattern": "else:", "points": 20}
+                ]
+            },
+            
+            # ==================== TOPIC 5: FUNCTIONS ====================
+            
+            # Quiz for Functions
+            {
+                "title": "Functions Quiz",
+                "description": "Test your understanding of defining and using functions in turtle graphics!",
+                "unit": "Topic 5: Functions",
+                "chapter": "Functions",
+                "lesson": "Functions Quiz",
+                "difficulty": "Medium",
+                "problem_type": "Quiz",
+                "quiz_questions": [
+                    {"question": "What keyword is used to define a function?", "options": ["function", "def", "define", "func"], "correct": 1},
+                    {"question": "What is a parameter?", "options": ["A type of loop", "A value passed to a function", "A color name", "A turtle command"], "correct": 1},
+                    {"question": "How do you call a function named 'draw_star'?", "options": ["call draw_star", "draw_star()", "run draw_star", "execute draw_star"], "correct": 1},
+                    {"question": "What does 'def draw_square(size):' mean?", "options": ["Draw a square of size 'size'", "Create a function that takes a size parameter", "Size equals draw_square", "Define size as square"], "correct": 1},
+                    {"question": "Can functions call other functions?", "options": ["No, never", "Yes, this is called composition", "Only in Python 3", "Only once"], "correct": 1}
+                ]
+            },
+            
+            # Problem 1: Simple Function
+            {
+                "title": "Create a Square Function",
+                "description": "Define a function called draw_square() that draws a square. Then call it twice to draw two squares.",
+                "unit": "Topic 5: Functions",
+                "chapter": "Functions",
+                "lesson": "Lesson 1: Defining Functions",
+                "difficulty": "Medium",
+                "problem_type": "Class Practice",
+                "starter_code": "import turtle\n\nt = turtle.Turtle()\n\n# Define the function\ndef draw_square():\n    # Draw a square here\n    pass\n\n# Call the function twice\n# Your code here:\n",
+                "solution_code": "import turtle\n\nt = turtle.Turtle()\n\ndef draw_square():\n    for i in range(4):\n        t.forward(50)\n        t.right(90)\n\ndraw_square()\nt.penup()\nt.forward(70)\nt.pendown()\ndraw_square()",
+                "test_cases": [
+                    {"description": "Defines function with def", "pattern": "def draw_square", "points": 30},
+                    {"description": "Function draws square", "pattern": "forward(", "points": 25},
+                    {"description": "Calls function", "pattern": "draw_square()", "points": 25},
+                    {"description": "Calls function multiple times", "pattern": "draw_square()", "points": 20}
+                ]
+            },
+            
+            # Problem 2: Function with Parameter
+            {
+                "title": "Square with Size Parameter",
+                "description": "Create draw_square(size) that takes a size parameter. Draw squares of sizes 30, 60, and 90.",
+                "unit": "Topic 5: Functions",
+                "chapter": "Functions",
+                "lesson": "Lesson 2: Parameters",
+                "difficulty": "Medium",
+                "problem_type": "Class Practice",
+                "starter_code": "import turtle\n\nt = turtle.Turtle()\n\ndef draw_square(size):\n    # Use 'size' for the forward distance\n    # Your code here:\n    pass\n\n# Draw squares of different sizes\n# Your code here:\n",
+                "solution_code": "import turtle\n\nt = turtle.Turtle()\n\ndef draw_square(size):\n    for i in range(4):\n        t.forward(size)\n        t.right(90)\n\ndraw_square(30)\nt.penup()\nt.forward(50)\nt.pendown()\ndraw_square(60)\nt.penup()\nt.forward(80)\nt.pendown()\ndraw_square(90)",
+                "test_cases": [
+                    {"description": "Function has size parameter", "pattern": "def draw_square(size)", "points": 30},
+                    {"description": "Uses size in forward()", "pattern": "forward(size)", "points": 30},
+                    {"description": "Calls with different sizes", "pattern": "draw_square(", "points": 40}
+                ]
+            },
+            
+            # Problem 3: Two Parameters
+            {
+                "title": "Colored Square Function",
+                "description": "Create draw_square(size, color) with two parameters. Draw a red square, blue square, and green square.",
+                "unit": "Topic 5: Functions",
+                "chapter": "Functions",
+                "lesson": "Lesson 3: Multiple Parameters",
+                "difficulty": "Medium",
+                "problem_type": "Independent Practice",
+                "starter_code": "import turtle\n\nt = turtle.Turtle()\n\ndef draw_square(size, color):\n    # Set fill color and draw filled square\n    # Your code here:\n    pass\n\n# Draw red, blue, and green squares\n# Your code here:\n",
+                "solution_code": "import turtle\n\nt = turtle.Turtle()\n\ndef draw_square(size, color):\n    t.fillcolor(color)\n    t.begin_fill()\n    for i in range(4):\n        t.forward(size)\n        t.right(90)\n    t.end_fill()\n\ndraw_square(50, 'red')\nt.penup()\nt.forward(70)\nt.pendown()\ndraw_square(50, 'blue')\nt.penup()\nt.forward(70)\nt.pendown()\ndraw_square(50, 'green')",
+                "test_cases": [
+                    {"description": "Function has two parameters", "pattern": "def draw_square(size, color)", "points": 30},
+                    {"description": "Uses color parameter", "pattern": "fillcolor(color)", "points": 30},
+                    {"description": "Calls with different colors", "pattern": "'red'|'blue'|'green'", "points": 40}
+                ]
+            },
+            
+            # Problem 4: Triangle Function
+            {
+                "title": "Reusable Triangle Function",
+                "description": "Create draw_triangle(size) and use it to draw 3 triangles of different sizes.",
+                "unit": "Topic 5: Functions",
+                "chapter": "Functions",
+                "lesson": "Lesson 2: Parameters",
+                "difficulty": "Medium",
+                "problem_type": "Independent Practice",
+                "starter_code": "import turtle\n\nt = turtle.Turtle()\n\ndef draw_triangle(size):\n    # Draw a triangle with given size\n    # Remember: turn 120 degrees\n    # Your code here:\n    pass\n\n# Draw 3 triangles\n# Your code here:\n",
+                "solution_code": "import turtle\n\nt = turtle.Turtle()\n\ndef draw_triangle(size):\n    for i in range(3):\n        t.forward(size)\n        t.left(120)\n\ndraw_triangle(40)\nt.penup()\nt.forward(60)\nt.pendown()\ndraw_triangle(60)\nt.penup()\nt.forward(80)\nt.pendown()\ndraw_triangle(80)",
+                "test_cases": [
+                    {"description": "Defines triangle function", "pattern": "def draw_triangle", "points": 25},
+                    {"description": "Uses size parameter", "pattern": "forward(size)", "points": 25},
+                    {"description": "Turns 120 degrees", "pattern": "120", "points": 25},
+                    {"description": "Calls function multiple times", "pattern": "draw_triangle(", "points": 25}
+                ]
+            },
+            
+            # Problem 5: Flower using Composition
+            {
+                "title": "Flower with Function Composition",
+                "description": "Create draw_square(size) and draw_flower() that uses draw_square 6 times rotated 60° apart.",
+                "unit": "Topic 5: Functions",
+                "chapter": "Functions",
+                "lesson": "Lesson 4: Function Composition",
+                "difficulty": "Hard",
+                "problem_type": "Challenge",
+                "starter_code": "import turtle\n\nt = turtle.Turtle()\nt.speed(0)\n\ndef draw_square(size):\n    # Draw a square\n    # Your code here:\n    pass\n\ndef draw_flower():\n    # Draw 6 squares, rotating 60 degrees between each\n    # Your code here:\n    pass\n\ndraw_flower()",
+                "solution_code": "import turtle\n\nt = turtle.Turtle()\nt.speed(0)\n\ndef draw_square(size):\n    for i in range(4):\n        t.forward(size)\n        t.right(90)\n\ndef draw_flower():\n    for i in range(6):\n        draw_square(50)\n        t.right(60)\n\ndraw_flower()",
+                "test_cases": [
+                    {"description": "Defines draw_square function", "pattern": "def draw_square", "points": 20},
+                    {"description": "Defines draw_flower function", "pattern": "def draw_flower", "points": 20},
+                    {"description": "draw_flower calls draw_square", "pattern": "draw_square(", "points": 30},
+                    {"description": "Rotates 60 degrees", "pattern": "60", "points": 15},
+                    {"description": "Calls draw_flower()", "pattern": "draw_flower()", "points": 15}
+                ]
+            }
+        ]
+        
+        # Insert all problems
+        for problem in turtle_problems:
+            problem_doc = {
+                "id": str(uuid.uuid4()),
+                "title": problem["title"],
+                "description": problem["description"],
+                "starter_code": problem.get("starter_code", "import turtle\n\nt = turtle.Turtle()\n\n# Your code here:\n"),
+                "solution_code": problem.get("solution_code", ""),
+                "expected_output": "",
+                "category": "Turtle",
+                "difficulty": problem["difficulty"],
+                "unit": problem["unit"],
+                "chapter": problem["chapter"],
+                "lesson": problem["lesson"],
+                "problem_type": problem["problem_type"],
+                "assignment_type": "turtle",
+                "test_cases": problem.get("test_cases", []),
+                "quiz_questions": problem.get("quiz_questions", []),
+                "resources_link": "",
+                "csta_standard": "",
+                "creator_id": "system",
+                "creator_name": "System",
+                "created_at": datetime.now(timezone.utc).isoformat()
+            }
+            await db.problems.insert_one(problem_doc)
+        
+        final_count = await db.problems.count_documents({"assignment_type": "turtle"})
+        logger.info(f"✅ Turtle problems seeded: {final_count}")
+    except Exception as e:
+        logger.error(f"Error seeding Turtle problems: {str(e)}")
+
         logger.error(f"Error seeding Micro:bit problems: {str(e)}")
