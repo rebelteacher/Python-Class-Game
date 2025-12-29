@@ -108,15 +108,66 @@ frontend:
         agent: "testing"
         comment: "❌ FAILED: Problems button not found in Unit 1 section of turtle curriculum page. Expected button to link to library with Chapter 1 filter but button is missing from the UI. Unit expansion works but Problems button is not visible."
 
+  - task: "Block Curriculum Page Navigation"
+    implemented: true
+    working: "NA"
+    file: "BlockCurriculum.jsx"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: true
+    status_history:
+      - working: "NA"
+        agent: "main"
+        comment: "Block Curriculum page with new chapter/lesson management features needs testing. Route: /blocks-curriculum"
+
+  - task: "Add Chapter Functionality"
+    implemented: true
+    working: "NA"
+    file: "BlockCurriculum.jsx"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: true
+    status_history:
+      - working: "NA"
+        agent: "main"
+        comment: "Add Chapter button and dialog functionality needs testing. Should allow teachers to create custom chapters with title, description, icon, and color."
+
+  - task: "Add Lesson Functionality"
+    implemented: true
+    working: "NA"
+    file: "BlockCurriculum.jsx"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: true
+    status_history:
+      - working: "NA"
+        agent: "main"
+        comment: "Add Lesson button and dialog functionality needs testing. Should allow teachers to add lessons to existing chapters."
+
+  - task: "View in Library Navigation"
+    implemented: true
+    working: "NA"
+    file: "BlockCurriculum.jsx"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: true
+    status_history:
+      - working: "NA"
+        agent: "main"
+        comment: "View in Library button should properly filter problems by chapter and lesson when navigating to /library."
+
 metadata:
   created_by: "main_agent"
   version: "1.0"
-  test_sequence: 1
-  run_ui: false
+  test_sequence: 2
+  run_ui: true
 
 test_plan:
   current_focus:
-    - "Problems Button Functionality"
+    - "Block Curriculum Page Navigation"
+    - "Add Chapter Functionality"
+    - "Add Lesson Functionality"
+    - "View in Library Navigation"
   stuck_tasks: []
   test_all: false
   test_priority: "high_first"
