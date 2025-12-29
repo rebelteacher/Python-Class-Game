@@ -10496,6 +10496,7 @@ async def seed_microbit_problems():
         final_count = await db.problems.count_documents({"assignment_type": "microbit"})
         logger.info(f"✅ Micro:bit problems seeded: {final_count}")
     except Exception as e:
+        logger.error(f"❌ Error seeding Micro:bit problems: {str(e)}")
 
 
 @app.on_event("startup")
