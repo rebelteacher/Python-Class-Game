@@ -758,10 +758,23 @@ export default function AssignmentLibrary({ user }) {
                         id="chapter"
                         placeholder="e.g., Chapter 1"
                         value={newProblem.chapter}
-                        onChange={(e) => setNewProblem({ ...newProblem, chapter: e.target.value })}
+                        onChange={(e) => {
+                          const chapter = e.target.value;
+                          // Auto-detect assignment_type based on chapter name
+                          let autoType = newProblem.assignment_type;
+                          const chapterLower = chapter.toLowerCase();
+                          if (chapterLower.includes('block')) {
+                            autoType = 'block';
+                          } else if (chapterLower.includes('turtle')) {
+                            autoType = 'turtle';
+                          } else if (chapterLower.includes('micro') || chapterLower.includes('bit')) {
+                            autoType = 'microbit';
+                          }
+                          setNewProblem({ ...newProblem, chapter, assignment_type: autoType });
+                        }}
                         className="mt-1"
                       />
-                      <p className="text-xs text-gray-500 mt-1">Organize problems by chapter</p>
+                      <p className="text-xs text-gray-500 mt-1">Organize problems by chapter (auto-detects type)</p>
                     </div>
 
                     <div>
