@@ -4,8 +4,11 @@ import axios from "axios";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
 import { 
   ArrowLeft, 
   BookOpen, 
@@ -20,7 +23,9 @@ import {
   Star,
   Lightbulb,
   ArrowRightLeft,
-  Loader2
+  Loader2,
+  Plus,
+  Trash2
 } from "lucide-react";
 
 const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
@@ -60,6 +65,21 @@ const CHAPTER_META = {
   }
 };
 
+// Available icons for custom chapters
+const CHAPTER_ICONS = ["📚", "🎯", "🚀", "⭐", "💡", "🔧", "🎨", "🎮", "🌟", "✨"];
+
+// Available colors for custom chapters
+const CHAPTER_COLORS = [
+  { name: "Purple", value: "from-purple-500 to-indigo-500" },
+  { name: "Blue", value: "from-blue-500 to-cyan-500" },
+  { name: "Green", value: "from-green-500 to-emerald-500" },
+  { name: "Orange", value: "from-orange-500 to-amber-500" },
+  { name: "Pink", value: "from-pink-500 to-rose-500" },
+  { name: "Red", value: "from-red-500 to-orange-500" },
+  { name: "Teal", value: "from-teal-500 to-cyan-500" },
+  { name: "Gray", value: "from-gray-500 to-slate-500" }
+];
+
 // Problem type to badge styling
 const getProblemTypeBadge = (type) => {
   const styles = {
@@ -85,6 +105,25 @@ export default function BlockCurriculum({ user }) {
   const [loading, setLoading] = useState(true);
   const [curriculum, setCurriculum] = useState({});
   const [totalProblems, setTotalProblems] = useState(0);
+  
+  // Custom curriculum state
+  const [customCurriculum, setCustomCurriculum] = useState({ chapters: [], lessons: [] });
+  const [showAddChapterDialog, setShowAddChapterDialog] = useState(false);
+  const [showAddLessonDialog, setShowAddLessonDialog] = useState(false);
+  const [selectedChapterForLesson, setSelectedChapterForLesson] = useState("");
+  const [newChapter, setNewChapter] = useState({
+    title: "",
+    description: "",
+    icon: "📚",
+    color: "from-gray-500 to-slate-500",
+    weeks: ""
+  });
+  const [newLesson, setNewLesson] = useState({
+    title: "",
+    type: "Code",
+    duration: "30 min",
+    objectives: ""
+  });
 
   useEffect(() => {
     const fetchData = async () => {
@@ -110,6 +149,30 @@ export default function BlockCurriculum({ user }) {
         });
         
         setCurriculum(organized);
+        
+        // Fetch custom curriculum
+        try {
+          const customResponse = await axios.get(`${API}/curriculum/block/custom`, { withCredentials: true });
+          setCustomCurriculum(customResponse.data);
+          
+          // Add custom chapters to organized structure if they don't exist
+          customResponse.data.chapters.forEach(chapter => {
+            if (!organized[chapter.title]) {
+              organized[chapter.title] = {};
+            }
+          });
+          
+          // Add custom lessons to organized structure
+          customResponse.data.lessons.forEach(lesson => {
+            if (organized[lesson.chapter] && !organized[lesson.chapter][lesson.title]) {
+              organized[lesson.chapter][lesson.title] = [];
+            }
+          });
+          
+          setCurriculum({ ...organized });
+        } catch (err) {
+          console.log("No custom curriculum found");
+        }
         
         // Fetch classrooms
         const classroomsResponse = await axios.get(`${API}/classrooms`, { withCredentials: true });
@@ -170,12 +233,147 @@ export default function BlockCurriculum({ user }) {
     }
   };
 
+  const handleAddChapter = async () => {
+    if (!newChapter.title.trim()) {
+      toast.error("Please enter a chapter title");
+      return;
+    }
+
+    try {
+      const response = await axios.post(`${API}/curriculum/block/chapter`, newChapter, { withCredentials: true });
+      toast.success("Chapter added successfully!");
+      
+      // Update local state
+      setCustomCurriculum(prev => ({
+        ...prev,
+        chapters: [...prev.chapters, response.data.chapter]
+      }));
+      
+      // Add to curriculum display
+      setCurriculum(prev => ({
+        ...prev,
+        [newChapter.title]: {}
+      }));
+      
+      // Reset form
+      setNewChapter({ title: "", description: "", icon: "📚", color: "from-gray-500 to-slate-500", weeks: "" });
+      setShowAddChapterDialog(false);
+    } catch (error) {
+      toast.error("Failed to add chapter");
+    }
+  };
+
+  const handleAddLesson = async () => {
+    if (!newLesson.title.trim() || !selectedChapterForLesson) {
+      toast.error("Please enter a lesson title and select a chapter");
+      return;
+    }
+
+    try {
+      const lessonData = {
+        chapter: selectedChapterForLesson,
+        title: newLesson.title,
+        type: newLesson.type,
+        duration: newLesson.duration,
+        objectives: newLesson.objectives.split("\n").filter(o => o.trim())
+      };
+      
+      const response = await axios.post(`${API}/curriculum/block/lesson`, lessonData, { withCredentials: true });
+      toast.success("Lesson added successfully!");
+      
+      // Update local state
+      setCustomCurriculum(prev => ({
+        ...prev,
+        lessons: [...prev.lessons, response.data.lesson]
+      }));
+      
+      // Add to curriculum display
+      setCurriculum(prev => {
+        const updated = { ...prev };
+        if (!updated[selectedChapterForLesson]) {
+          updated[selectedChapterForLesson] = {};
+        }
+        updated[selectedChapterForLesson][newLesson.title] = [];
+        return updated;
+      });
+      
+      // Reset form
+      setNewLesson({ title: "", type: "Code", duration: "30 min", objectives: "" });
+      setSelectedChapterForLesson("");
+      setShowAddLessonDialog(false);
+    } catch (error) {
+      toast.error("Failed to add lesson");
+    }
+  };
+
+  const handleDeleteChapter = async (chapterObj) => {
+    if (!confirm(`Delete chapter "${chapterObj.title}"? This will also delete any custom lessons in this chapter.`)) {
+      return;
+    }
+
+    try {
+      await axios.delete(`${API}/curriculum/block/chapter/${chapterObj.id}`, { withCredentials: true });
+      toast.success("Chapter deleted");
+      
+      // Update local state
+      setCustomCurriculum(prev => ({
+        chapters: prev.chapters.filter(c => c.id !== chapterObj.id),
+        lessons: prev.lessons.filter(l => l.chapter !== chapterObj.title)
+      }));
+      
+      // Remove from curriculum display if empty
+      setCurriculum(prev => {
+        const updated = { ...prev };
+        if (updated[chapterObj.title] && Object.keys(updated[chapterObj.title]).length === 0) {
+          delete updated[chapterObj.title];
+        }
+        return updated;
+      });
+    } catch (error) {
+      toast.error(error.response?.data?.detail || "Failed to delete chapter");
+    }
+  };
+
+  const handleDeleteLesson = async (lessonObj) => {
+    if (!confirm(`Delete lesson "${lessonObj.title}"?`)) {
+      return;
+    }
+
+    try {
+      await axios.delete(`${API}/curriculum/block/lesson/${lessonObj.id}`, { withCredentials: true });
+      toast.success("Lesson deleted");
+      
+      // Update local state
+      setCustomCurriculum(prev => ({
+        ...prev,
+        lessons: prev.lessons.filter(l => l.id !== lessonObj.id)
+      }));
+    } catch (error) {
+      toast.error(error.response?.data?.detail || "Failed to delete lesson");
+    }
+  };
+
+  // Get custom chapter/lesson objects for delete buttons
+  const getCustomChapter = (chapterTitle) => {
+    return customCurriculum.chapters.find(c => c.title === chapterTitle);
+  };
+
+  const getCustomLesson = (lessonTitle, chapterTitle) => {
+    return customCurriculum.lessons.find(l => l.title === lessonTitle && l.chapter === chapterTitle);
+  };
+
   const sortedChapters = Object.keys(curriculum).sort((a, b) => {
     // Extract chapter numbers for sorting
     const numA = parseInt(a.match(/Chapter (\d+)/)?.[1] || "99");
     const numB = parseInt(b.match(/Chapter (\d+)/)?.[1] || "99");
     return numA - numB;
   });
+
+  // Get all chapter titles for lesson dropdown
+  const allChapterTitles = [...new Set([
+    ...Object.keys(curriculum),
+    ...customCurriculum.chapters.map(c => c.title)
+  ])].sort();
 
   if (loading) {
     return (
@@ -204,15 +402,33 @@ export default function BlockCurriculum({ user }) {
               Back to Dashboard
             </Button>
           </div>
-          <div className="flex items-center gap-4">
-            <div className="p-4 bg-white/20 rounded-xl">
-              <Boxes className="w-10 h-10" />
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-4">
+              <div className="p-4 bg-white/20 rounded-xl">
+                <Boxes className="w-10 h-10" />
+              </div>
+              <div>
+                <h1 className="text-3xl font-bold">Unit 1: Block-Based Coding</h1>
+                <p className="text-purple-100 mt-1">
+                  Visual programming fundamentals • {totalProblems} problems available
+                </p>
+              </div>
             </div>
-            <div>
-              <h1 className="text-3xl font-bold">Unit 1: Block-Based Coding</h1>
-              <p className="text-purple-100 mt-1">
-                Visual programming fundamentals • {totalProblems} problems available
-              </p>
+            <div className="flex gap-2">
+              <Button
+                onClick={() => setShowAddChapterDialog(true)}
+                className="bg-white/20 hover:bg-white/30"
+              >
+                <Plus className="w-4 h-4 mr-1" />
+                Add Chapter
+              </Button>
+              <Button
+                onClick={() => setShowAddLessonDialog(true)}
+                className="bg-white/20 hover:bg-white/30"
+              >
+                <Plus className="w-4 h-4 mr-1" />
+                Add Lesson
+              </Button>
             </div>
           </div>
         </div>
@@ -248,11 +464,11 @@ export default function BlockCurriculum({ user }) {
           <Card className="hover:shadow-lg transition-shadow cursor-pointer border-2 border-purple-500 bg-purple-50" onClick={() => navigate("/blocks/teach")}>
             <CardContent className="p-6 flex items-center gap-4">
               <div className="p-3 bg-purple-500 rounded-lg">
-                <Target className="w-6 h-6 text-white" />
+                <Play className="w-6 h-6 text-white" />
               </div>
               <div>
-                <h3 className="font-semibold text-purple-700">Teaching Mode</h3>
-                <p className="text-sm text-purple-600">Live demo with blocks</p>
+                <h3 className="font-semibold">Teaching Guide</h3>
+                <p className="text-sm text-gray-600">Interactive lesson guides</p>
               </div>
             </CardContent>
           </Card>
@@ -305,19 +521,20 @@ export default function BlockCurriculum({ user }) {
         {/* Curriculum Chapters */}
         <div className="space-y-4">
           {sortedChapters.map((chapter) => {
-            const meta = CHAPTER_META[chapter] || {
+            const customChapterObj = getCustomChapter(chapter);
+            const meta = CHAPTER_META[chapter] || customChapterObj || {
               icon: "📚",
               color: "from-gray-500 to-slate-500",
               weeks: "",
               description: ""
             };
-            const lessons = curriculum[chapter];
+            const lessons = curriculum[chapter] || {};
             const lessonKeys = Object.keys(lessons).sort((a, b) => {
               const numA = parseInt(a.match(/Lesson (\d+)/)?.[1] || "99");
               const numB = parseInt(b.match(/Lesson (\d+)/)?.[1] || "99");
               return numA - numB;
             });
-            const totalInChapter = lessonKeys.reduce((sum, l) => sum + lessons[l].length, 0);
+            const totalInChapter = lessonKeys.reduce((sum, l) => sum + (lessons[l]?.length || 0), 0);
 
             return (
               <Card key={chapter} className="overflow-hidden">
@@ -334,6 +551,19 @@ export default function BlockCurriculum({ user }) {
                       </div>
                     </div>
                     <div className="flex items-center gap-4">
+                      {customChapterObj && (
+                        <Button
+                          size="sm"
+                          variant="ghost"
+                          className="text-white hover:bg-white/20"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleDeleteChapter(customChapterObj);
+                          }}
+                        >
+                          <Trash2 className="w-4 h-4" />
+                        </Button>
+                      )}
                       <span className="text-sm bg-white/20 px-3 py-1 rounded-full">
                         {totalInChapter} problems
                       </span>
@@ -354,100 +584,157 @@ export default function BlockCurriculum({ user }) {
                 {expandedChapters.has(chapter) && (
                   <CardContent className="p-4">
                     <div className="space-y-3">
-                      {lessonKeys.map((lesson, lessonIndex) => {
-                        const problems = lessons[lesson];
-                        const lessonKey = `${chapter}-${lesson}`;
-                        const isLessonExpanded = expandedLessons.has(lessonKey);
+                      {lessonKeys.length === 0 ? (
+                        <div className="text-center py-8 text-gray-500">
+                          <p>No lessons yet. Add lessons or create problems in the library.</p>
+                          <Button
+                            variant="outline"
+                            className="mt-4"
+                            onClick={() => {
+                              setSelectedChapterForLesson(chapter);
+                              setShowAddLessonDialog(true);
+                            }}
+                          >
+                            <Plus className="w-4 h-4 mr-1" />
+                            Add Lesson to {chapter}
+                          </Button>
+                        </div>
+                      ) : (
+                        lessonKeys.map((lesson, lessonIndex) => {
+                          const problems = lessons[lesson] || [];
+                          const lessonKey = `${chapter}-${lesson}`;
+                          const isLessonExpanded = expandedLessons.has(lessonKey);
+                          const customLessonObj = getCustomLesson(lesson, chapter);
 
-                        return (
-                          <div key={lesson} className="border rounded-lg overflow-hidden">
-                            {/* Lesson Header */}
-                            <div
-                              className="flex items-center justify-between p-4 bg-gray-50 cursor-pointer hover:bg-gray-100"
-                              onClick={() => toggleLesson(lessonKey)}
-                            >
-                              <div className="flex items-center gap-3">
-                                <div className="w-8 h-8 bg-purple-100 rounded-full flex items-center justify-center text-purple-600 font-bold text-sm">
-                                  {lessonIndex + 1}
+                          return (
+                            <div key={lesson} className="border rounded-lg overflow-hidden">
+                              {/* Lesson Header */}
+                              <div
+                                className="flex items-center justify-between p-4 bg-gray-50 cursor-pointer hover:bg-gray-100"
+                                onClick={() => toggleLesson(lessonKey)}
+                              >
+                                <div className="flex items-center gap-3">
+                                  <div className="w-8 h-8 bg-purple-100 rounded-full flex items-center justify-center text-purple-600 font-bold text-sm">
+                                    {lessonIndex + 1}
+                                  </div>
+                                  <div>
+                                    <h3 className="font-semibold text-gray-900">{lesson}</h3>
+                                    <p className="text-xs text-gray-500">{problems.length} problems</p>
+                                  </div>
                                 </div>
-                                <div>
-                                  <h3 className="font-semibold text-gray-900">{lesson}</h3>
-                                  <p className="text-xs text-gray-500">{problems.length} problems</p>
-                                </div>
-                              </div>
-                              <div className="flex items-center gap-2">
-                                <Button
-                                  size="sm"
-                                  variant="outline"
-                                  onClick={(e) => {
-                                    e.stopPropagation();
-                                    navigate(`/library?type=block&chapter=${encodeURIComponent(chapter)}&lesson=${encodeURIComponent(lesson)}`);
-                                  }}
-                                >
-                                  <BookOpen className="w-4 h-4 mr-1" />
-                                  View in Library
-                                </Button>
-                                {isLessonExpanded ? (
-                                  <ChevronDown className="w-5 h-5 text-gray-400" />
-                                ) : (
-                                  <ChevronRight className="w-5 h-5 text-gray-400" />
-                                )}
-                              </div>
-                            </div>
-
-                            {/* Problems in Lesson */}
-                            {isLessonExpanded && (
-                              <div className="divide-y">
-                                {problems.map((problem, problemIndex) => (
-                                  <div
-                                    key={problem.id}
-                                    className="flex items-center justify-between p-3 pl-14 hover:bg-gray-50"
+                                <div className="flex items-center gap-2">
+                                  {customLessonObj && (
+                                    <Button
+                                      size="sm"
+                                      variant="ghost"
+                                      className="text-red-500 hover:text-red-700 hover:bg-red-50"
+                                      onClick={(e) => {
+                                        e.stopPropagation();
+                                        handleDeleteLesson(customLessonObj);
+                                      }}
+                                    >
+                                      <Trash2 className="w-4 h-4" />
+                                    </Button>
+                                  )}
+                                  <Button
+                                    size="sm"
+                                    variant="outline"
+                                    onClick={(e) => {
+                                      e.stopPropagation();
+                                      navigate(`/library?type=block&chapter=${encodeURIComponent(chapter)}&lesson=${encodeURIComponent(lesson)}`);
+                                    }}
                                   >
-                                    <div className="flex items-center gap-3">
-                                      <span className="text-sm text-gray-400 w-6">{problemIndex + 1}.</span>
-                                      <div>
-                                        <h4 className="font-medium text-gray-800">{problem.title}</h4>
-                                        <div className="flex items-center gap-2 mt-1">
-                                          <span className={`px-2 py-0.5 rounded text-xs font-medium ${getProblemTypeBadge(problem.problem_type)}`}>
-                                            {problem.problem_type}
-                                          </span>
-                                          <span className={`px-2 py-0.5 rounded text-xs font-medium ${
-                                            problem.difficulty === "Easy" ? "bg-green-100 text-green-700" :
-                                            problem.difficulty === "Medium" ? "bg-yellow-100 text-yellow-700" :
-                                            "bg-red-100 text-red-700"
-                                          }`}>
-                                            {problem.difficulty}
-                                          </span>
+                                    <BookOpen className="w-4 h-4 mr-1" />
+                                    View in Library
+                                  </Button>
+                                  {isLessonExpanded ? (
+                                    <ChevronDown className="w-5 h-5 text-gray-400" />
+                                  ) : (
+                                    <ChevronRight className="w-5 h-5 text-gray-400" />
+                                  )}
+                                </div>
+                              </div>
+
+                              {/* Problems in Lesson */}
+                              {isLessonExpanded && (
+                                <div className="divide-y">
+                                  {problems.length === 0 ? (
+                                    <div className="p-4 text-center text-gray-500">
+                                      <p className="text-sm">No problems in this lesson yet.</p>
+                                      <Button
+                                        size="sm"
+                                        variant="link"
+                                        onClick={() => navigate(`/library?type=block&chapter=${encodeURIComponent(chapter)}&lesson=${encodeURIComponent(lesson)}`)}
+                                      >
+                                        Create problems in library →
+                                      </Button>
+                                    </div>
+                                  ) : (
+                                    problems.map((problem, problemIndex) => (
+                                      <div
+                                        key={problem.id}
+                                        className="flex items-center justify-between p-3 pl-14 hover:bg-gray-50"
+                                      >
+                                        <div className="flex items-center gap-3">
+                                          <span className="text-sm text-gray-400 w-6">{problemIndex + 1}.</span>
+                                          <div>
+                                            <h4 className="font-medium text-gray-800">{problem.title}</h4>
+                                            <div className="flex items-center gap-2 mt-1">
+                                              <span className={`px-2 py-0.5 rounded text-xs font-medium ${getProblemTypeBadge(problem.problem_type)}`}>
+                                                {problem.problem_type}
+                                              </span>
+                                              <span className={`px-2 py-0.5 rounded text-xs font-medium ${
+                                                problem.difficulty === "Easy" ? "bg-green-100 text-green-700" :
+                                                problem.difficulty === "Medium" ? "bg-yellow-100 text-yellow-700" :
+                                                "bg-red-100 text-red-700"
+                                              }`}>
+                                                {problem.difficulty}
+                                              </span>
+                                            </div>
+                                          </div>
+                                        </div>
+                                        <div className="flex items-center gap-2">
+                                          <Button
+                                            size="sm"
+                                            variant="outline"
+                                            onClick={() => {
+                                              setSelectedProblem(problem);
+                                              setShowAssignDialog(true);
+                                            }}
+                                          >
+                                            <Zap className="w-4 h-4 mr-1" />
+                                            Assign
+                                          </Button>
+                                          <Button
+                                            size="sm"
+                                            onClick={() => navigate("/blocks/teach")}
+                                          >
+                                            <Play className="w-4 h-4 mr-1" />
+                                            Teach
+                                          </Button>
                                         </div>
                                       </div>
-                                    </div>
-                                    <div className="flex items-center gap-2">
-                                      <Button
-                                        size="sm"
-                                        variant="outline"
-                                        onClick={() => {
-                                          setSelectedProblem(problem);
-                                          setShowAssignDialog(true);
-                                        }}
-                                      >
-                                        <Zap className="w-4 h-4 mr-1" />
-                                        Assign
-                                      </Button>
-                                      <Button
-                                        size="sm"
-                                        onClick={() => navigate("/blocks/teach")}
-                                      >
-                                        <Play className="w-4 h-4 mr-1" />
-                                        Teach
-                                      </Button>
-                                    </div>
-                                  </div>
-                                ))}
-                              </div>
-                            )}
-                          </div>
-                        );
-                      })}
+                                    ))
+                                  )}
+                                </div>
+                              )}
+                            </div>
+                          );
+                        })
+                      )}
+                      
+                      {/* Add Lesson Button within chapter */}
+                      <Button
+                        variant="ghost"
+                        className="w-full border-2 border-dashed border-gray-200 hover:border-purple-300 hover:bg-purple-50"
+                        onClick={() => {
+                          setSelectedChapterForLesson(chapter);
+                          setShowAddLessonDialog(true);
+                        }}
+                      >
+                        <Plus className="w-4 h-4 mr-2" />
+                        Add Lesson to {chapter}
+                      </Button>
                     </div>
                   </CardContent>
                 )}
@@ -531,6 +818,155 @@ export default function BlockCurriculum({ user }) {
               Assign Problem
             </Button>
           </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Add Chapter Dialog */}
+      <Dialog open={showAddChapterDialog} onOpenChange={setShowAddChapterDialog}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Add New Chapter</DialogTitle>
+            <DialogDescription>
+              Create a new chapter for the Block curriculum
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div>
+              <Label>Chapter Title *</Label>
+              <Input
+                value={newChapter.title}
+                onChange={(e) => setNewChapter({ ...newChapter, title: e.target.value })}
+                placeholder="e.g., Chapter 6: Advanced Blocks"
+                className="mt-1"
+              />
+            </div>
+            <div>
+              <Label>Description</Label>
+              <Textarea
+                value={newChapter.description}
+                onChange={(e) => setNewChapter({ ...newChapter, description: e.target.value })}
+                placeholder="Brief description of this chapter"
+                className="mt-1"
+              />
+            </div>
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <Label>Icon</Label>
+                <Select value={newChapter.icon} onValueChange={(v) => setNewChapter({ ...newChapter, icon: v })}>
+                  <SelectTrigger className="mt-1">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {CHAPTER_ICONS.map((icon) => (
+                      <SelectItem key={icon} value={icon}>{icon}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+              <div>
+                <Label>Color</Label>
+                <Select value={newChapter.color} onValueChange={(v) => setNewChapter({ ...newChapter, color: v })}>
+                  <SelectTrigger className="mt-1">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {CHAPTER_COLORS.map((color) => (
+                      <SelectItem key={color.value} value={color.value}>{color.name}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+            <div>
+              <Label>Weeks (optional)</Label>
+              <Input
+                value={newChapter.weeks}
+                onChange={(e) => setNewChapter({ ...newChapter, weeks: e.target.value })}
+                placeholder="e.g., Week 6"
+                className="mt-1"
+              />
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowAddChapterDialog(false)}>Cancel</Button>
+            <Button onClick={handleAddChapter}>Add Chapter</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Add Lesson Dialog */}
+      <Dialog open={showAddLessonDialog} onOpenChange={setShowAddLessonDialog}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Add New Lesson</DialogTitle>
+            <DialogDescription>
+              Create a new lesson within a chapter
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div>
+              <Label>Chapter *</Label>
+              <Select value={selectedChapterForLesson} onValueChange={setSelectedChapterForLesson}>
+                <SelectTrigger className="mt-1">
+                  <SelectValue placeholder="Select a chapter" />
+                </SelectTrigger>
+                <SelectContent>
+                  {allChapterTitles.map((chapter) => (
+                    <SelectItem key={chapter} value={chapter}>{chapter}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+            <div>
+              <Label>Lesson Title *</Label>
+              <Input
+                value={newLesson.title}
+                onChange={(e) => setNewLesson({ ...newLesson, title: e.target.value })}
+                placeholder="e.g., Lesson 4: Custom Events"
+                className="mt-1"
+              />
+            </div>
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <Label>Type</Label>
+                <Select value={newLesson.type} onValueChange={(v) => setNewLesson({ ...newLesson, type: v })}>
+                  <SelectTrigger className="mt-1">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="Introduction">Introduction</SelectItem>
+                    <SelectItem value="Code">Code</SelectItem>
+                    <SelectItem value="Practice">Practice</SelectItem>
+                    <SelectItem value="Project">Project</SelectItem>
+                    <SelectItem value="Assessment">Assessment</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div>
+                <Label>Duration</Label>
+                <Input
+                  value={newLesson.duration}
+                  onChange={(e) => setNewLesson({ ...newLesson, duration: e.target.value })}
+                  placeholder="e.g., 30 min"
+                  className="mt-1"
+                />
+              </div>
+            </div>
+            <div>
+              <Label>Learning Objectives (one per line)</Label>
+              <Textarea
+                value={newLesson.objectives}
+                onChange={(e) => setNewLesson({ ...newLesson, objectives: e.target.value })}
+                placeholder="Understand X&#10;Learn to Y&#10;Practice Z"
+                className="mt-1"
+                rows={3}
+              />
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowAddLessonDialog(false)}>Cancel</Button>
+            <Button onClick={handleAddLesson}>Add Lesson</Button>
+          </DialogFooter>
         </DialogContent>
       </Dialog>
     </div>
