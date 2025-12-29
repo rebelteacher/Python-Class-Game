@@ -807,6 +807,24 @@ export default function AssignmentLibrary({ user }) {
                     </div>
 
                     <div>
+                      <Label htmlFor="assignmentType">Unit Type</Label>
+                      <Select value={newProblem.assignment_type} onValueChange={(val) => setNewProblem({ ...newProblem, assignment_type: val })}>
+                        <SelectTrigger data-testid="lib-assignment-type-select">
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="block">🧱 Block (Unit 1)</SelectItem>
+                          <SelectItem value="code">🐍 Python (Unit 2)</SelectItem>
+                          <SelectItem value="turtle">🐢 Turtle (Unit 3)</SelectItem>
+                          <SelectItem value="microbit">⚡ Micro:bit (Unit 4)</SelectItem>
+                        </SelectContent>
+                      </Select>
+                      <p className="text-xs text-gray-500 mt-1">Which curriculum this problem belongs to</p>
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
                       <Label htmlFor="csta">CSTA Standard</Label>
                       <Input
                         data-testid="lib-csta-input"
