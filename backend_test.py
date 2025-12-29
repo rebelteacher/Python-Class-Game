@@ -8820,6 +8820,148 @@ t.forward(100)
         print("   - Submission endpoint test: See results above")
         print("   - Code variation tests: See results above")
 
+    def test_turtle_curriculum(self):
+        """Test the newly seeded Turtle curriculum problems"""
+        print("\n🐢 Testing Turtle Curriculum Problems...")
+        
+        # Test 1: Verify Turtle Problems API - Get problems filtered by assignment_type=turtle
+        print("   Testing Turtle Problems API endpoint...")
+        response = self.run_test(
+            "Get turtle problems (assignment_type=turtle)",
+            "GET",
+            "problems?assignment_type=turtle",
+            200
+        )
+        
+        if response:
+            problems = response.get('problems', []) if isinstance(response, dict) else response
+            total_count = len(problems)
+            
+            # Verify count is 30
+            if total_count == 30:
+                self.log_test("Turtle problems count is 30", True)
+                print(f"   ✅ Found {total_count} turtle problems")
+            else:
+                self.log_test("Turtle problems count is 30", False, f"Expected 30, got {total_count}")
+                print(f"   ❌ Expected 30 turtle problems, found {total_count}")
+            
+            # Test 2: Verify Problem Structure
+            print("   Testing problem structure...")
+            required_fields = ['title', 'description', 'unit', 'chapter', 'lesson', 'difficulty', 'problem_type', 'starter_code', 'solution_code', 'test_cases']
+            
+            structure_issues = []
+            quiz_count = 0
+            practice_count = 0
+            
+            for i, problem in enumerate(problems[:5]):  # Check first 5 problems for structure
+                missing_fields = []
+                for field in required_fields:
+                    if field not in problem or problem[field] is None:
+                        missing_fields.append(field)
+                
+                if missing_fields:
+                    structure_issues.append(f"Problem {i+1} missing: {', '.join(missing_fields)}")
+                
+                # Count problem types
+                if problem.get('problem_type') == 'Quiz':
+                    quiz_count += 1
+                else:
+                    practice_count += 1
+            
+            if not structure_issues:
+                self.log_test("Problem structure validation", True)
+                print("   ✅ All required fields present in sample problems")
+            else:
+                self.log_test("Problem structure validation", False, "; ".join(structure_issues))
+                print(f"   ❌ Structure issues: {'; '.join(structure_issues)}")
+            
+            # Test 3: Verify Quiz Format
+            print("   Testing quiz format...")
+            quizzes = [p for p in problems if p.get('problem_type') == 'Quiz']
+            total_quizzes = len(quizzes)
+            
+            if total_quizzes == 5:
+                self.log_test("Quiz count is 5", True)
+                print(f"   ✅ Found {total_quizzes} quizzes")
+            else:
+                self.log_test("Quiz count is 5", False, f"Expected 5, got {total_quizzes}")
+                print(f"   ❌ Expected 5 quizzes, found {total_quizzes}")
+            
+            # Check quiz questions structure
+            quiz_issues = []
+            for i, quiz in enumerate(quizzes[:3]):  # Check first 3 quizzes
+                quiz_questions = quiz.get('quiz_questions', [])
+                
+                if not quiz_questions:
+                    quiz_issues.append(f"Quiz {i+1} has no quiz_questions array")
+                    continue
+                
+                if len(quiz_questions) != 5:
+                    quiz_issues.append(f"Quiz {i+1} has {len(quiz_questions)} questions, expected 5")
+                
+                # Check first question structure
+                if quiz_questions:
+                    first_q = quiz_questions[0]
+                    required_q_fields = ['question', 'options', 'correct']
+                    missing_q_fields = [f for f in required_q_fields if f not in first_q]
+                    
+                    if missing_q_fields:
+                        quiz_issues.append(f"Quiz {i+1} question missing: {', '.join(missing_q_fields)}")
+                    
+                    # Check options count
+                    options = first_q.get('options', [])
+                    if len(options) != 4:
+                        quiz_issues.append(f"Quiz {i+1} question has {len(options)} options, expected 4")
+            
+            if not quiz_issues:
+                self.log_test("Quiz format validation", True)
+                print("   ✅ Quiz format is correct")
+            else:
+                self.log_test("Quiz format validation", False, "; ".join(quiz_issues))
+                print(f"   ❌ Quiz format issues: {'; '.join(quiz_issues)}")
+            
+            # Test 4: Verify Topics Distribution
+            print("   Testing topics distribution...")
+            topics = {}
+            for problem in problems:
+                unit = problem.get('unit', 'Unknown')
+                if unit not in topics:
+                    topics[unit] = 0
+                topics[unit] += 1
+            
+            expected_topics = ['Basics', 'Loops', 'Colors', 'Conditionals', 'Functions']
+            topic_issues = []
+            
+            for topic in expected_topics:
+                count = topics.get(topic, 0)
+                if count != 6:
+                    topic_issues.append(f"{topic}: {count} problems (expected 6)")
+            
+            if not topic_issues:
+                self.log_test("Topics distribution (6 per topic)", True)
+                print("   ✅ All 5 topics have 6 problems each")
+            else:
+                self.log_test("Topics distribution (6 per topic)", False, "; ".join(topic_issues))
+                print(f"   ❌ Topic distribution issues: {'; '.join(topic_issues)}")
+            
+            # Test 5: Verify assignment_type field
+            print("   Testing assignment_type field...")
+            non_turtle_count = 0
+            for problem in problems:
+                if problem.get('assignment_type') != 'turtle':
+                    non_turtle_count += 1
+            
+            if non_turtle_count == 0:
+                self.log_test("All problems have assignment_type=turtle", True)
+                print("   ✅ All problems have assignment_type=turtle")
+            else:
+                self.log_test("All problems have assignment_type=turtle", False, f"{non_turtle_count} problems don't have assignment_type=turtle")
+                print(f"   ❌ {non_turtle_count} problems don't have assignment_type=turtle")
+        
+        else:
+            print("   ❌ Failed to retrieve turtle problems - cannot continue testing")
+            self.log_test("Turtle Problems API accessible", False, "API endpoint returned no data")
+
     def run_all_tests(self):
         """Run all API tests"""
         print("🚀 Starting CodeClass API Tests...")
