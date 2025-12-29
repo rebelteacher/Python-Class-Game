@@ -688,7 +688,11 @@ export default function TurtleCurriculum({ user }) {
                           <Button
                             size="sm"
                             variant="outline"
-                            onClick={() => navigate(`/library?type=turtle&chapter=${encodeURIComponent(CHAPTER_MAPPING[unit.id] || unit.title)}`)}
+                            onClick={() => {
+                              const chapterName = CHAPTER_MAPPING[unit.id];
+                              console.log('Unit ID:', unit.id, 'Mapped Chapter:', chapterName);
+                              navigate(`/library?type=turtle&chapter=${encodeURIComponent(chapterName || "Chapter 1: First Steps")}`);
+                            }}
                           >
                             <BookOpen className="w-4 h-4 mr-1" />
                             Problems
