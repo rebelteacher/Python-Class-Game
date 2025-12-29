@@ -8929,7 +8929,7 @@ t.forward(100)
                     topics[unit] = 0
                 topics[unit] += 1
             
-            expected_topics = ['Basics', 'Loops', 'Colors', 'Conditionals', 'Functions']
+            expected_topics = ['Topic 1: Basics', 'Topic 2: Loops', 'Topic 3: Colors', 'Topic 4: Conditionals', 'Topic 5: Functions']
             topic_issues = []
             
             for topic in expected_topics:
