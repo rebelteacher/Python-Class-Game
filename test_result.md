@@ -110,51 +110,63 @@ frontend:
 
   - task: "Block Curriculum Page Navigation"
     implemented: true
-    working: "NA"
+    working: true
     file: "BlockCurriculum.jsx"
     stuck_count: 0
     priority: "high"
-    needs_retesting: true
+    needs_retesting: false
     status_history:
       - working: "NA"
         agent: "main"
         comment: "Block Curriculum page with new chapter/lesson management features needs testing. Route: /blocks-curriculum"
+      - working: true
+        agent: "testing"
+        comment: "✅ PASSED: Block Curriculum page loads successfully at /blocks-curriculum. Page displays 'Unit 1: Block-Based Coding' title, shows Add Chapter and Add Lesson buttons in header, and displays curriculum structure with 6 chapters (5 default + 1 custom 'Chapter 7: Testing' created during testing)."
 
   - task: "Add Chapter Functionality"
     implemented: true
-    working: "NA"
+    working: true
     file: "BlockCurriculum.jsx"
     stuck_count: 0
     priority: "high"
-    needs_retesting: true
+    needs_retesting: false
     status_history:
       - working: "NA"
         agent: "main"
         comment: "Add Chapter button and dialog functionality needs testing. Should allow teachers to create custom chapters with title, description, icon, and color."
+      - working: true
+        agent: "testing"
+        comment: "✅ PASSED: Add Chapter functionality working correctly. Dialog opens with all required fields (title, description, icon, color, weeks). Successfully created 'Chapter 7: Testing' with custom description, icon selection, and purple color. New chapter appears in curriculum list immediately after creation."
 
   - task: "Add Lesson Functionality"
     implemented: true
-    working: "NA"
+    working: true
     file: "BlockCurriculum.jsx"
     stuck_count: 0
     priority: "high"
-    needs_retesting: true
+    needs_retesting: false
     status_history:
       - working: "NA"
         agent: "main"
         comment: "Add Lesson button and dialog functionality needs testing. Should allow teachers to add lessons to existing chapters."
+      - working: true
+        agent: "testing"
+        comment: "✅ PASSED: Add Lesson functionality working correctly. Dialog opens with chapter selection dropdown, lesson title field, type selection, duration, and objectives. Successfully created 'Lesson 4: Test Lesson' under 'Chapter 1: Block Basics'. New lesson appears in expanded chapter view with delete button for custom lessons."
 
   - task: "View in Library Navigation"
     implemented: true
-    working: "NA"
+    working: true
     file: "BlockCurriculum.jsx"
     stuck_count: 0
     priority: "high"
-    needs_retesting: true
+    needs_retesting: false
     status_history:
       - working: "NA"
         agent: "main"
         comment: "View in Library button should properly filter problems by chapter and lesson when navigating to /library."
+      - working: true
+        agent: "testing"
+        comment: "✅ PASSED: View in Library navigation working perfectly. Buttons appear for each lesson when chapters are expanded. Clicking 'View in Library' for 'Lesson 1: What are Blocks?' correctly navigates to /library?type=block&chapter=Chapter%201%3A%20Block%20Basics&lesson=Lesson%201%3A%20What%20are%20Blocks%3F with all filters properly applied. Library page shows filtered results with correct chapter and lesson filters active."
 
 metadata:
   created_by: "main_agent"
