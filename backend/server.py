@@ -10502,15 +10502,16 @@ async def seed_microbit_problems():
 async def seed_turtle_problems():
     """Seed Turtle curriculum problems - 5 per topic + quiz = ~30 total"""
     try:
-        # Check current count
-        existing_count = await db.problems.count_documents({"assignment_type": "turtle"})
-        if existing_count >= 30:
-            logger.info(f"✅ Turtle problems already exist: {existing_count}")
+        # Check if NEW curriculum structure exists (Topic 1: Basics)
+        new_structure_exists = await db.problems.find_one({"assignment_type": "turtle", "unit": "Topic 1: Basics"})
+        if new_structure_exists:
+            existing_count = await db.problems.count_documents({"assignment_type": "turtle", "unit": {"$regex": "^Topic"}})
+            logger.info(f"✅ Turtle curriculum already seeded: {existing_count} problems")
             return
         
-        logger.info("🔄 Seeding Turtle problems...")
+        logger.info("🔄 Seeding Turtle curriculum problems...")
         
-        # Clear existing turtle problems to reorganize
+        # Clear ALL existing turtle problems to replace with new curriculum
         await db.problems.delete_many({"assignment_type": "turtle"})
         
         turtle_problems = [
