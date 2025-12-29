@@ -129,7 +129,7 @@ export default function AssignmentLibrary({ user }) {
     if (typeFromUrl && typeFromUrl !== typeFilter) {
       setTypeFilter(typeFromUrl);
       // Also set the default assignment_type for new problems based on the filter
-      if (typeFromUrl === "microbit" || typeFromUrl === "turtle" || typeFromUrl === "code") {
+      if (typeFromUrl === "block" || typeFromUrl === "microbit" || typeFromUrl === "turtle" || typeFromUrl === "code") {
         setNewProblem(prev => ({ ...prev, assignment_type: typeFromUrl }));
       }
     }
