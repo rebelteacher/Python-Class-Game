@@ -202,6 +202,8 @@ export default function AssignmentLibrary({ user }) {
       // Also filter by assignment_type if it's a specific unit
       if (unitFilter === "Unit 1: Block-Based Coding") {
         filtered = filtered.filter(p => p.assignment_type === "block" || matchingUnits.includes(p.unit));
+      } else if (unitFilter === "Unit 2: Python Text") {
+        filtered = filtered.filter(p => p.assignment_type === "code" || matchingUnits.includes(p.unit));
       } else if (unitFilter === "Unit 3: Turtle Graphics") {
         filtered = filtered.filter(p => p.assignment_type === "turtle" || matchingUnits.includes(p.unit));
       } else if (unitFilter === "Unit 4: Micro:bit") {
