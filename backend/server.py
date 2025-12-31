@@ -11426,4 +11426,1069 @@ async def seed_turtle_problems():
     except Exception as e:
         logger.error(f"Error seeding Turtle problems: {str(e)}")
 
+
+@app.on_event("startup")
+async def seed_skill_quiz_questions():
+    """Seed skill quiz questions for all skill categories"""
+    try:
+        # Check if questions already exist
+        existing_count = await db.skill_quiz_questions.count_documents({})
+        if existing_count > 0:
+            logger.info(f"✅ Skill quiz questions already exist: {existing_count}")
+            return
+        
+        logger.info("🔄 Seeding skill quiz questions...")
+        
+        skill_quiz_questions = [
+            # ==================== TURTLE - FIRST STEPS ====================
+            {
+                "skill_category": "Turtle - First Steps",
+                "question_text": "What command moves the turtle forward 100 pixels?",
+                "choice_a": "t.forward(100)",
+                "choice_b": "t.move(100)",
+                "choice_c": "t.go(100)",
+                "choice_d": "t.walk(100)",
+                "correct_answer": "A",
+                "explanation": "forward() is the standard turtle command to move forward a specified number of pixels.",
+                "concept_tags": ["movement", "forward"]
+            },
+            {
+                "skill_category": "Turtle - First Steps",
+                "question_text": "What does t.right(90) do?",
+                "choice_a": "Move the turtle 90 pixels to the right",
+                "choice_b": "Turn the turtle 90 degrees clockwise",
+                "choice_c": "Draw a line 90 pixels long",
+                "choice_d": "Create a 90-degree angle",
+                "correct_answer": "B",
+                "explanation": "right() turns the turtle clockwise by the specified degrees without moving it.",
+                "concept_tags": ["turning", "angles"]
+            },
+            {
+                "skill_category": "Turtle - First Steps",
+                "question_text": "How do you create a new turtle object?",
+                "choice_a": "turtle.new()",
+                "choice_b": "create.Turtle()",
+                "choice_c": "turtle.Turtle()",
+                "choice_d": "new Turtle()",
+                "correct_answer": "C",
+                "explanation": "turtle.Turtle() creates a new turtle object from the turtle module.",
+                "concept_tags": ["objects", "initialization"]
+            },
+            {
+                "skill_category": "Turtle - First Steps",
+                "question_text": "What import statement is needed for turtle graphics?",
+                "choice_a": "import graphics",
+                "choice_b": "import drawing",
+                "choice_c": "import turtle",
+                "choice_d": "import canvas",
+                "correct_answer": "C",
+                "explanation": "The turtle module must be imported to use turtle graphics.",
+                "concept_tags": ["import", "module"]
+            },
+            {
+                "skill_category": "Turtle - First Steps",
+                "question_text": "What does t.backward(50) do?",
+                "choice_a": "Turn the turtle around",
+                "choice_b": "Move backward 50 pixels without turning",
+                "choice_c": "Delete the last 50 pixels drawn",
+                "choice_d": "Slow down the turtle by 50%",
+                "correct_answer": "B",
+                "explanation": "backward() moves the turtle in reverse without changing its direction.",
+                "concept_tags": ["movement", "backward"]
+            },
+            
+            # ==================== TURTLE - LOOPS ====================
+            {
+                "skill_category": "Turtle - Loops",
+                "question_text": "What does 'for i in range(4):' do?",
+                "choice_a": "Runs the code 4 times",
+                "choice_b": "Creates 4 turtles",
+                "choice_c": "Moves forward 4 pixels",
+                "choice_d": "Waits 4 seconds",
+                "correct_answer": "A",
+                "explanation": "range(4) creates values 0,1,2,3 so the loop runs 4 times.",
+                "concept_tags": ["for loop", "range"]
+            },
+            {
+                "skill_category": "Turtle - Loops",
+                "question_text": "To draw a square, how many times should you repeat forward + right(90)?",
+                "choice_a": "2",
+                "choice_b": "3",
+                "choice_c": "4",
+                "choice_d": "6",
+                "correct_answer": "C",
+                "explanation": "A square has 4 sides, so you need 4 repetitions of forward and turn.",
+                "concept_tags": ["shapes", "repetition"]
+            },
+            {
+                "skill_category": "Turtle - Loops",
+                "question_text": "What does range(1, 5) produce?",
+                "choice_a": "1, 2, 3, 4, 5",
+                "choice_b": "1, 2, 3, 4",
+                "choice_c": "0, 1, 2, 3, 4",
+                "choice_d": "1, 5",
+                "correct_answer": "B",
+                "explanation": "range(1, 5) starts at 1 and stops before 5, giving 1,2,3,4.",
+                "concept_tags": ["range", "parameters"]
+            },
+            {
+                "skill_category": "Turtle - Loops",
+                "question_text": "How do you draw a triangle using a loop?",
+                "choice_a": "for i in range(3): t.forward(100); t.right(120)",
+                "choice_b": "for i in range(3): t.forward(100); t.right(90)",
+                "choice_c": "for i in range(4): t.forward(100); t.right(60)",
+                "choice_d": "for i in range(6): t.forward(100); t.right(60)",
+                "correct_answer": "A",
+                "explanation": "A triangle has 3 sides and exterior angles of 120° (360÷3=120).",
+                "concept_tags": ["shapes", "angles"]
+            },
+            {
+                "skill_category": "Turtle - Loops",
+                "question_text": "What does 'i' represent in 'for i in range(5):'?",
+                "choice_a": "The turtle's position",
+                "choice_b": "A counter that changes each loop (0,1,2,3,4)",
+                "choice_c": "The pen size",
+                "choice_d": "The number of sides",
+                "correct_answer": "B",
+                "explanation": "The loop variable 'i' takes each value from range() in sequence.",
+                "concept_tags": ["loop variable", "iteration"]
+            },
+            
+            # ==================== TURTLE - COLORS & PEN ====================
+            {
+                "skill_category": "Turtle - Colors & Pen",
+                "question_text": "How do you change the turtle's drawing color to red?",
+                "choice_a": "t.color = 'red'",
+                "choice_b": "t.pencolor('red')",
+                "choice_c": "t.draw('red')",
+                "choice_d": "t.setcolor('red')",
+                "correct_answer": "B",
+                "explanation": "pencolor() sets the color of the line the turtle draws.",
+                "concept_tags": ["colors", "pencolor"]
+            },
+            {
+                "skill_category": "Turtle - Colors & Pen",
+                "question_text": "What does t.penup() do?",
+                "choice_a": "Makes the pen thicker",
+                "choice_b": "Changes the pen color",
+                "choice_c": "Lifts the pen so moving doesn't draw",
+                "choice_d": "Speeds up the turtle",
+                "correct_answer": "C",
+                "explanation": "penup() lifts the pen so the turtle can move without drawing.",
+                "concept_tags": ["pen control", "penup"]
+            },
+            {
+                "skill_category": "Turtle - Colors & Pen",
+                "question_text": "How do you fill a shape with color?",
+                "choice_a": "t.paint() and t.done()",
+                "choice_b": "t.begin_fill() and t.end_fill()",
+                "choice_c": "t.start_color() and t.stop_color()",
+                "choice_d": "t.fill_on() and t.fill_off()",
+                "correct_answer": "B",
+                "explanation": "begin_fill() starts recording, end_fill() fills the enclosed shape.",
+                "concept_tags": ["fill", "shapes"]
+            },
+            {
+                "skill_category": "Turtle - Colors & Pen",
+                "question_text": "What does t.pensize(5) do?",
+                "choice_a": "Sets the turtle size to 5",
+                "choice_b": "Draws 5 lines",
+                "choice_c": "Sets the line thickness to 5 pixels",
+                "choice_d": "Moves forward 5 pixels",
+                "correct_answer": "C",
+                "explanation": "pensize() sets the width of the line the turtle draws.",
+                "concept_tags": ["pen control", "pensize"]
+            },
+            {
+                "skill_category": "Turtle - Colors & Pen",
+                "question_text": "What's the difference between pencolor() and fillcolor()?",
+                "choice_a": "They are the same thing",
+                "choice_b": "pencolor is for lines, fillcolor is for shape interiors",
+                "choice_c": "fillcolor is for lines, pencolor is for backgrounds",
+                "choice_d": "pencolor only works with RGB values",
+                "correct_answer": "B",
+                "explanation": "pencolor sets the outline color, fillcolor sets the interior color.",
+                "concept_tags": ["colors", "fill"]
+            },
+            
+            # ==================== TURTLE - CONDITIONALS ====================
+            {
+                "skill_category": "Turtle - Conditionals",
+                "question_text": "What does 'if i % 2 == 0:' check?",
+                "choice_a": "If i is odd",
+                "choice_b": "If i is even",
+                "choice_c": "If i equals 2",
+                "choice_d": "If i is positive",
+                "correct_answer": "B",
+                "explanation": "% is modulo (remainder). If i % 2 equals 0, i is divisible by 2 (even).",
+                "concept_tags": ["modulo", "even/odd"]
+            },
+            {
+                "skill_category": "Turtle - Conditionals",
+                "question_text": "What does t.xcor() return?",
+                "choice_a": "The turtle's color",
+                "choice_b": "The turtle's x position",
+                "choice_c": "The number of steps taken",
+                "choice_d": "The pen size",
+                "correct_answer": "B",
+                "explanation": "xcor() returns the turtle's current x-coordinate position.",
+                "concept_tags": ["position", "coordinates"]
+            },
+            {
+                "skill_category": "Turtle - Conditionals",
+                "question_text": "What keyword runs code when the if condition is False?",
+                "choice_a": "then",
+                "choice_b": "otherwise",
+                "choice_c": "else",
+                "choice_d": "false",
+                "correct_answer": "C",
+                "explanation": "else: runs when the if condition evaluates to False.",
+                "concept_tags": ["else", "branching"]
+            },
+            {
+                "skill_category": "Turtle - Conditionals",
+                "question_text": "What does 'elif' mean?",
+                "choice_a": "End loop if",
+                "choice_b": "Else if",
+                "choice_c": "Element if",
+                "choice_d": "Early if",
+                "correct_answer": "B",
+                "explanation": "elif is short for 'else if' - checks another condition if the first was False.",
+                "concept_tags": ["elif", "chained conditions"]
+            },
+            {
+                "skill_category": "Turtle - Conditionals",
+                "question_text": "If t.ycor() > 0, where is the turtle?",
+                "choice_a": "Left side of screen",
+                "choice_b": "Right side of screen",
+                "choice_c": "Top half of screen",
+                "choice_d": "Bottom half of screen",
+                "correct_answer": "C",
+                "explanation": "Positive y values are above the center (0,0), in the top half.",
+                "concept_tags": ["coordinates", "position"]
+            },
+            
+            # ==================== TURTLE - FUNCTIONS ====================
+            {
+                "skill_category": "Turtle - Functions",
+                "question_text": "How do you define a function in Python?",
+                "choice_a": "function draw_square():",
+                "choice_b": "def draw_square():",
+                "choice_c": "create draw_square():",
+                "choice_d": "new draw_square():",
+                "correct_answer": "B",
+                "explanation": "'def' is the keyword to define a function in Python.",
+                "concept_tags": ["function definition", "def"]
+            },
+            {
+                "skill_category": "Turtle - Functions",
+                "question_text": "What is a parameter?",
+                "choice_a": "A type of loop",
+                "choice_b": "A value passed into a function",
+                "choice_c": "A turtle command",
+                "choice_d": "A color name",
+                "correct_answer": "B",
+                "explanation": "Parameters are variables that receive values when a function is called.",
+                "concept_tags": ["parameters", "arguments"]
+            },
+            {
+                "skill_category": "Turtle - Functions",
+                "question_text": "How do you call a function named draw_star?",
+                "choice_a": "call draw_star",
+                "choice_b": "run draw_star",
+                "choice_c": "draw_star()",
+                "choice_d": "execute draw_star",
+                "correct_answer": "C",
+                "explanation": "Functions are called by their name followed by parentheses.",
+                "concept_tags": ["function call", "invocation"]
+            },
+            {
+                "skill_category": "Turtle - Functions",
+                "question_text": "Why use functions in your code?",
+                "choice_a": "They make code run faster",
+                "choice_b": "They let you reuse code without rewriting it",
+                "choice_c": "They change colors automatically",
+                "choice_d": "They are required by Python",
+                "correct_answer": "B",
+                "explanation": "Functions allow code reuse and make programs more organized.",
+                "concept_tags": ["code reuse", "organization"]
+            },
+            {
+                "skill_category": "Turtle - Functions",
+                "question_text": "What does 'def draw_shape(size):' mean?",
+                "choice_a": "Draw a shape that is 'size' pixels",
+                "choice_b": "Define a function that takes 'size' as input",
+                "choice_c": "Default the shape to size",
+                "choice_d": "Delete the shape called size",
+                "correct_answer": "B",
+                "explanation": "'size' is a parameter - a variable that receives a value when called.",
+                "concept_tags": ["parameters", "function definition"]
+            },
+            
+            # ==================== MICRO:BIT - LED DISPLAY ====================
+            {
+                "skill_category": "Micro:bit - LED Display",
+                "question_text": "How do you display a heart on the micro:bit?",
+                "choice_a": "display.heart()",
+                "choice_b": "display.show(Image.HEART)",
+                "choice_c": "show.image('heart')",
+                "choice_d": "led.heart()",
+                "correct_answer": "B",
+                "explanation": "display.show() displays images, Image.HEART is a built-in image.",
+                "concept_tags": ["display", "images"]
+            },
+            {
+                "skill_category": "Micro:bit - LED Display",
+                "question_text": "What does display.scroll('Hello') do?",
+                "choice_a": "Shows 'Hello' all at once",
+                "choice_b": "Scrolls the text across the LED display",
+                "choice_c": "Says 'Hello' out loud",
+                "choice_d": "Saves 'Hello' to memory",
+                "correct_answer": "B",
+                "explanation": "scroll() animates text moving across the 5x5 LED display.",
+                "concept_tags": ["scroll", "text"]
+            },
+            {
+                "skill_category": "Micro:bit - LED Display",
+                "question_text": "How do you turn on a single LED at position (2, 2)?",
+                "choice_a": "display.on(2, 2)",
+                "choice_b": "display.set_pixel(2, 2, 9)",
+                "choice_c": "led.light(2, 2)",
+                "choice_d": "pixel(2, 2) = True",
+                "correct_answer": "B",
+                "explanation": "set_pixel(x, y, brightness) controls individual LEDs. 9 is max brightness.",
+                "concept_tags": ["pixel", "coordinates"]
+            },
+            {
+                "skill_category": "Micro:bit - LED Display",
+                "question_text": "What does display.clear() do?",
+                "choice_a": "Resets the micro:bit",
+                "choice_b": "Turns off all LEDs",
+                "choice_c": "Clears the code",
+                "choice_d": "Deletes all variables",
+                "correct_answer": "B",
+                "explanation": "clear() turns off all 25 LEDs on the display.",
+                "concept_tags": ["clear", "display"]
+            },
+            {
+                "skill_category": "Micro:bit - LED Display",
+                "question_text": "How many LEDs are on the micro:bit display?",
+                "choice_a": "16 (4x4)",
+                "choice_b": "25 (5x5)",
+                "choice_c": "36 (6x6)",
+                "choice_d": "64 (8x8)",
+                "correct_answer": "B",
+                "explanation": "The micro:bit has a 5x5 grid of 25 red LEDs.",
+                "concept_tags": ["hardware", "LED grid"]
+            },
+            
+            # ==================== MICRO:BIT - BUTTONS ====================
+            {
+                "skill_category": "Micro:bit - Buttons",
+                "question_text": "How do you check if button A is pressed?",
+                "choice_a": "if button_a.pressed():",
+                "choice_b": "if button_a.is_pressed():",
+                "choice_c": "if press(button_a):",
+                "choice_d": "if button_a == True:",
+                "correct_answer": "B",
+                "explanation": "is_pressed() returns True while the button is being held down.",
+                "concept_tags": ["buttons", "input"]
+            },
+            {
+                "skill_category": "Micro:bit - Buttons",
+                "question_text": "What's the difference between is_pressed() and was_pressed()?",
+                "choice_a": "They are the same",
+                "choice_b": "is_pressed checks now, was_pressed checks if pressed since last check",
+                "choice_c": "was_pressed is for button B only",
+                "choice_d": "is_pressed is faster",
+                "correct_answer": "B",
+                "explanation": "was_pressed() returns True once per press, useful for counting presses.",
+                "concept_tags": ["buttons", "event detection"]
+            },
+            {
+                "skill_category": "Micro:bit - Buttons",
+                "question_text": "How many physical buttons does the micro:bit have?",
+                "choice_a": "1",
+                "choice_b": "2",
+                "choice_c": "3",
+                "choice_d": "4",
+                "correct_answer": "B",
+                "explanation": "The micro:bit has 2 buttons: A (left) and B (right).",
+                "concept_tags": ["hardware", "buttons"]
+            },
+            {
+                "skill_category": "Micro:bit - Buttons",
+                "question_text": "How do you detect both buttons pressed together?",
+                "choice_a": "button_ab.is_pressed()",
+                "choice_b": "button_a.is_pressed() and button_b.is_pressed()",
+                "choice_c": "buttons.both()",
+                "choice_d": "press_all()",
+                "correct_answer": "B",
+                "explanation": "Use 'and' to check if both conditions are True at the same time.",
+                "concept_tags": ["logic", "and operator"]
+            },
+            {
+                "skill_category": "Micro:bit - Buttons",
+                "question_text": "What does button_a.get_presses() return?",
+                "choice_a": "True or False",
+                "choice_b": "The number of times button A was pressed",
+                "choice_c": "The button's color",
+                "choice_d": "The button's position",
+                "correct_answer": "B",
+                "explanation": "get_presses() returns the count of presses since last called, then resets.",
+                "concept_tags": ["buttons", "counting"]
+            },
+            
+            # ==================== MICRO:BIT - SENSORS ====================
+            {
+                "skill_category": "Micro:bit - Sensors",
+                "question_text": "How do you read the temperature from the micro:bit?",
+                "choice_a": "read.temp()",
+                "choice_b": "temperature()",
+                "choice_c": "sensor.temperature",
+                "choice_d": "get_temp()",
+                "correct_answer": "B",
+                "explanation": "temperature() returns the temperature in Celsius from the CPU sensor.",
+                "concept_tags": ["temperature", "sensors"]
+            },
+            {
+                "skill_category": "Micro:bit - Sensors",
+                "question_text": "What does accelerometer.get_x() measure?",
+                "choice_a": "The x position on screen",
+                "choice_b": "Tilt/acceleration in the x direction",
+                "choice_c": "The x button presses",
+                "choice_d": "The x coordinate of an LED",
+                "correct_answer": "B",
+                "explanation": "The accelerometer measures tilt and movement in 3 directions (x, y, z).",
+                "concept_tags": ["accelerometer", "motion"]
+            },
+            {
+                "skill_category": "Micro:bit - Sensors",
+                "question_text": "How do you detect if the micro:bit is shaken?",
+                "choice_a": "if shaking():",
+                "choice_b": "if accelerometer.was_gesture('shake'):",
+                "choice_c": "if motion.shake:",
+                "choice_d": "if sensor.detect('shake'):",
+                "correct_answer": "B",
+                "explanation": "was_gesture() detects gestures like 'shake', 'face up', 'face down'.",
+                "concept_tags": ["gestures", "accelerometer"]
+            },
+            {
+                "skill_category": "Micro:bit - Sensors",
+                "question_text": "What does compass.heading() return?",
+                "choice_a": "North, South, East, or West",
+                "choice_b": "A number from 0-359 representing degrees",
+                "choice_c": "The GPS location",
+                "choice_d": "True if pointing north",
+                "correct_answer": "B",
+                "explanation": "heading() returns degrees from north (0=N, 90=E, 180=S, 270=W).",
+                "concept_tags": ["compass", "direction"]
+            },
+            {
+                "skill_category": "Micro:bit - Sensors",
+                "question_text": "What does display.read_light_level() measure?",
+                "choice_a": "The brightness of the LEDs",
+                "choice_b": "The ambient light hitting the display",
+                "choice_c": "The battery level",
+                "choice_d": "The screen contrast",
+                "correct_answer": "B",
+                "explanation": "The LEDs can also detect light! This reads environmental brightness 0-255.",
+                "concept_tags": ["light sensor", "input"]
+            },
+            
+            # ==================== MICRO:BIT - EXTERNAL COMPONENTS ====================
+            {
+                "skill_category": "Micro:bit - External Components",
+                "question_text": "Which pins can be used for analog input?",
+                "choice_a": "Only pin0",
+                "choice_b": "pin0, pin1, pin2",
+                "choice_c": "All pins",
+                "choice_d": "None, analog is not supported",
+                "correct_answer": "B",
+                "explanation": "Pins 0, 1, and 2 support analog input for sensors like potentiometers.",
+                "concept_tags": ["pins", "analog"]
+            },
+            {
+                "skill_category": "Micro:bit - External Components",
+                "question_text": "How do you turn on an LED connected to pin0?",
+                "choice_a": "pin0.on()",
+                "choice_b": "pin0.write_digital(1)",
+                "choice_c": "digital.pin0 = True",
+                "choice_d": "led.pin0.light()",
+                "correct_answer": "B",
+                "explanation": "write_digital(1) sends HIGH signal to turn on external components.",
+                "concept_tags": ["digital output", "pins"]
+            },
+            {
+                "skill_category": "Micro:bit - External Components",
+                "question_text": "What does pin0.read_analog() return?",
+                "choice_a": "True or False",
+                "choice_b": "A number from 0 to 1023",
+                "choice_c": "The pin's name",
+                "choice_d": "The voltage in volts",
+                "correct_answer": "B",
+                "explanation": "Analog read returns 0-1023 representing 0V to 3V input.",
+                "concept_tags": ["analog input", "sensors"]
+            },
+            {
+                "skill_category": "Micro:bit - External Components",
+                "question_text": "What is PWM used for?",
+                "choice_a": "Reading button presses",
+                "choice_b": "Controlling brightness or motor speed",
+                "choice_c": "Playing music",
+                "choice_d": "Connecting to WiFi",
+                "correct_answer": "B",
+                "explanation": "PWM (Pulse Width Modulation) controls analog-like outputs for dimming/speed.",
+                "concept_tags": ["PWM", "analog output"]
+            },
+            {
+                "skill_category": "Micro:bit - External Components",
+                "question_text": "How do you play a sound on a connected speaker?",
+                "choice_a": "speaker.play('beep')",
+                "choice_b": "music.play(music.DADADADUM)",
+                "choice_c": "sound.make('tone')",
+                "choice_d": "audio.beep()",
+                "correct_answer": "B",
+                "explanation": "The music module plays built-in tunes and custom melodies.",
+                "concept_tags": ["music", "audio"]
+            },
+            
+            # ==================== BLOCK - OUTPUT & PRINT ====================
+            {
+                "skill_category": "Block - Output & Print",
+                "question_text": "Which block displays text on the screen?",
+                "choice_a": "show block",
+                "choice_b": "say block",
+                "choice_c": "print block",
+                "choice_d": "display block",
+                "correct_answer": "B",
+                "explanation": "The 'say' block makes a sprite display a speech bubble with text.",
+                "concept_tags": ["output", "say"]
+            },
+            {
+                "skill_category": "Block - Output & Print",
+                "question_text": "What's the difference between 'say' and 'think' blocks?",
+                "choice_a": "They are identical",
+                "choice_b": "'say' shows speech bubble, 'think' shows thought bubble",
+                "choice_c": "'think' is faster",
+                "choice_d": "'say' is for numbers only",
+                "correct_answer": "B",
+                "explanation": "'say' creates a speech bubble, 'think' creates a cloud-shaped thought bubble.",
+                "concept_tags": ["output", "sprites"]
+            },
+            {
+                "skill_category": "Block - Output & Print",
+                "question_text": "How do you join text together in blocks?",
+                "choice_a": "add block",
+                "choice_b": "join block",
+                "choice_c": "combine block",
+                "choice_d": "merge block",
+                "correct_answer": "B",
+                "explanation": "The 'join' operator block combines two pieces of text together.",
+                "concept_tags": ["strings", "operators"]
+            },
+            {
+                "skill_category": "Block - Output & Print",
+                "question_text": "What does 'say [Hello] for [2] seconds' do?",
+                "choice_a": "Shows 'Hello' forever",
+                "choice_b": "Shows 'Hello' for 2 seconds then disappears",
+                "choice_c": "Says 'Hello' twice",
+                "choice_d": "Waits 2 seconds then shows 'Hello'",
+                "correct_answer": "B",
+                "explanation": "The timed 'say' block displays text temporarily for the specified duration.",
+                "concept_tags": ["timing", "output"]
+            },
+            {
+                "skill_category": "Block - Output & Print",
+                "question_text": "How do you display a variable's value?",
+                "choice_a": "Use 'show variable' block",
+                "choice_b": "Drag the variable into a 'say' block",
+                "choice_c": "Variables display automatically",
+                "choice_d": "Use 'print variable' block",
+                "correct_answer": "B",
+                "explanation": "You can drag variable blocks into say/think blocks to display their values.",
+                "concept_tags": ["variables", "output"]
+            },
+            
+            # ==================== BLOCK - VARIABLES ====================
+            {
+                "skill_category": "Block - Variables",
+                "question_text": "How do you create a new variable in Scratch?",
+                "choice_a": "Type the variable name",
+                "choice_b": "Click 'Make a Variable' in the Variables category",
+                "choice_c": "Drag a variable block to the stage",
+                "choice_d": "Right-click and select 'New Variable'",
+                "correct_answer": "B",
+                "explanation": "Click 'Make a Variable' button in the Variables category to create one.",
+                "concept_tags": ["variables", "creation"]
+            },
+            {
+                "skill_category": "Block - Variables",
+                "question_text": "What does 'set [score] to [0]' do?",
+                "choice_a": "Adds 0 to score",
+                "choice_b": "Changes score to exactly 0",
+                "choice_c": "Checks if score is 0",
+                "choice_d": "Creates a variable called score",
+                "correct_answer": "B",
+                "explanation": "'set' assigns a specific value to the variable, replacing its current value.",
+                "concept_tags": ["assignment", "set"]
+            },
+            {
+                "skill_category": "Block - Variables",
+                "question_text": "What's the difference between 'set' and 'change' blocks?",
+                "choice_a": "They do the same thing",
+                "choice_b": "'set' replaces the value, 'change' adds to it",
+                "choice_c": "'change' is for text only",
+                "choice_d": "'set' only works with numbers",
+                "correct_answer": "B",
+                "explanation": "'set' replaces the value completely, 'change' adds or subtracts from it.",
+                "concept_tags": ["variables", "modification"]
+            },
+            {
+                "skill_category": "Block - Variables",
+                "question_text": "If score is 5, what does 'change [score] by [3]' result in?",
+                "choice_a": "3",
+                "choice_b": "5",
+                "choice_c": "8",
+                "choice_d": "15",
+                "correct_answer": "C",
+                "explanation": "'change by' adds to the current value: 5 + 3 = 8.",
+                "concept_tags": ["math", "change"]
+            },
+            {
+                "skill_category": "Block - Variables",
+                "question_text": "How do you show a variable on the stage?",
+                "choice_a": "Use the 'display' block",
+                "choice_b": "Check the checkbox next to the variable name",
+                "choice_c": "Variables always show automatically",
+                "choice_d": "Drag it to the stage",
+                "correct_answer": "B",
+                "explanation": "Click the checkbox in the Variables category to show/hide on stage.",
+                "concept_tags": ["display", "variables"]
+            },
+            
+            # ==================== BLOCK - LOOPS ====================
+            {
+                "skill_category": "Block - Loops",
+                "question_text": "What does the 'repeat [10]' block do?",
+                "choice_a": "Waits 10 seconds",
+                "choice_b": "Runs the blocks inside it 10 times",
+                "choice_c": "Creates 10 copies",
+                "choice_d": "Moves 10 steps",
+                "correct_answer": "B",
+                "explanation": "The repeat block executes its contents the specified number of times.",
+                "concept_tags": ["loops", "repeat"]
+            },
+            {
+                "skill_category": "Block - Loops",
+                "question_text": "What's the difference between 'repeat' and 'forever'?",
+                "choice_a": "They are the same",
+                "choice_b": "'repeat' runs a set number of times, 'forever' never stops",
+                "choice_c": "'forever' is faster",
+                "choice_d": "'repeat' only works with motion blocks",
+                "correct_answer": "B",
+                "explanation": "'repeat' runs a specific count, 'forever' runs until the program stops.",
+                "concept_tags": ["loops", "infinite"]
+            },
+            {
+                "skill_category": "Block - Loops",
+                "question_text": "What does 'repeat until [condition]' do?",
+                "choice_a": "Repeats while condition is true",
+                "choice_b": "Repeats until condition becomes true",
+                "choice_c": "Checks condition once",
+                "choice_d": "Skips if condition is false",
+                "correct_answer": "B",
+                "explanation": "'repeat until' keeps looping until the condition becomes true.",
+                "concept_tags": ["loops", "conditional"]
+            },
+            {
+                "skill_category": "Block - Loops",
+                "question_text": "How do you make a sprite spin forever?",
+                "choice_a": "Use 'turn forever' block",
+                "choice_b": "Put 'turn 15 degrees' inside a 'forever' block",
+                "choice_c": "Set rotation to infinite",
+                "choice_d": "Use 'spin' block",
+                "correct_answer": "B",
+                "explanation": "Combining 'turn' with 'forever' creates continuous spinning.",
+                "concept_tags": ["loops", "animation"]
+            },
+            {
+                "skill_category": "Block - Loops",
+                "question_text": "What happens if you put a 'wait' block inside a 'repeat' loop?",
+                "choice_a": "The wait is ignored",
+                "choice_b": "It pauses between each repetition",
+                "choice_c": "The loop runs faster",
+                "choice_d": "It only waits once at the end",
+                "correct_answer": "B",
+                "explanation": "Wait blocks pause execution each time they're reached in the loop.",
+                "concept_tags": ["loops", "timing"]
+            },
+            
+            # ==================== BLOCK - CONDITIONALS ====================
+            {
+                "skill_category": "Block - Conditionals",
+                "question_text": "What does the 'if-then' block do?",
+                "choice_a": "Always runs the code inside",
+                "choice_b": "Only runs the code if the condition is true",
+                "choice_c": "Runs the code twice",
+                "choice_d": "Creates a new variable",
+                "correct_answer": "B",
+                "explanation": "'if-then' checks a condition and only executes if it's true.",
+                "concept_tags": ["conditionals", "if"]
+            },
+            {
+                "skill_category": "Block - Conditionals",
+                "question_text": "What block checks if two things are equal?",
+                "choice_a": "The '=' block",
+                "choice_b": "The '==' block",
+                "choice_c": "The green '=' operator block",
+                "choice_d": "The 'equals' block",
+                "correct_answer": "C",
+                "explanation": "The green '=' block in Operators compares two values for equality.",
+                "concept_tags": ["comparison", "operators"]
+            },
+            {
+                "skill_category": "Block - Conditionals",
+                "question_text": "What's the difference between 'if-then' and 'if-then-else'?",
+                "choice_a": "They are the same",
+                "choice_b": "'if-then-else' also runs code when condition is false",
+                "choice_c": "'if-then-else' is faster",
+                "choice_d": "'if-then-else' checks multiple conditions",
+                "correct_answer": "B",
+                "explanation": "'if-then-else' has two code sections: one for true, one for false.",
+                "concept_tags": ["conditionals", "else"]
+            },
+            {
+                "skill_category": "Block - Conditionals",
+                "question_text": "How do you check if a sprite is touching another sprite?",
+                "choice_a": "Use 'distance to' block",
+                "choice_b": "Use 'touching [sprite]?' block",
+                "choice_c": "Compare x and y positions",
+                "choice_d": "Use 'collision' block",
+                "correct_answer": "B",
+                "explanation": "The 'touching?' sensing block detects sprite collisions.",
+                "concept_tags": ["sensing", "collision"]
+            },
+            {
+                "skill_category": "Block - Conditionals",
+                "question_text": "What does the 'and' block do?",
+                "choice_a": "Adds two numbers",
+                "choice_b": "Returns true only if both conditions are true",
+                "choice_c": "Joins two text strings",
+                "choice_d": "Runs two blocks at once",
+                "correct_answer": "B",
+                "explanation": "'and' combines conditions - both must be true for the result to be true.",
+                "concept_tags": ["logic", "operators"]
+            },
+            
+            # ==================== PYTHON - VARIABLES ====================
+            {
+                "skill_category": "Python - Variables",
+                "question_text": "How do you create a variable called 'score' with value 10?",
+                "choice_a": "var score = 10",
+                "choice_b": "score = 10",
+                "choice_c": "int score = 10",
+                "choice_d": "create score = 10",
+                "correct_answer": "B",
+                "explanation": "Python uses simple assignment with = to create variables.",
+                "concept_tags": ["assignment", "variables"]
+            },
+            {
+                "skill_category": "Python - Variables",
+                "question_text": "What does x = x + 5 do?",
+                "choice_a": "Checks if x equals x + 5",
+                "choice_b": "Adds 5 to x and stores the result back in x",
+                "choice_c": "Creates two variables",
+                "choice_d": "This is an error",
+                "correct_answer": "B",
+                "explanation": "The right side is calculated first, then assigned to the left side.",
+                "concept_tags": ["assignment", "math"]
+            },
+            {
+                "skill_category": "Python - Variables",
+                "question_text": "Which is a valid variable name?",
+                "choice_a": "2fast",
+                "choice_b": "my-score",
+                "choice_c": "player_name",
+                "choice_d": "class",
+                "correct_answer": "C",
+                "explanation": "Variable names can't start with numbers, contain hyphens, or be keywords.",
+                "concept_tags": ["naming", "syntax"]
+            },
+            {
+                "skill_category": "Python - Variables",
+                "question_text": "What is the shorthand for x = x + 3?",
+                "choice_a": "x + 3",
+                "choice_b": "x += 3",
+                "choice_c": "x =+ 3",
+                "choice_d": "x + = 3",
+                "correct_answer": "B",
+                "explanation": "+= is the addition assignment operator, a shortcut for adding to a variable.",
+                "concept_tags": ["operators", "shorthand"]
+            },
+            {
+                "skill_category": "Python - Variables",
+                "question_text": "What type of data is stored in: name = 'Alice'?",
+                "choice_a": "Integer",
+                "choice_b": "Float",
+                "choice_c": "String",
+                "choice_d": "Boolean",
+                "correct_answer": "C",
+                "explanation": "Text in quotes is a string. 'Alice' is a string value.",
+                "concept_tags": ["data types", "strings"]
+            },
+            
+            # ==================== PYTHON - STRINGS ====================
+            {
+                "skill_category": "Python - Strings",
+                "question_text": "How do you combine 'Hello' and 'World'?",
+                "choice_a": "'Hello' + 'World'",
+                "choice_b": "'Hello' & 'World'",
+                "choice_c": "'Hello'.add('World')",
+                "choice_d": "combine('Hello', 'World')",
+                "correct_answer": "A",
+                "explanation": "The + operator concatenates (joins) strings in Python.",
+                "concept_tags": ["concatenation", "operators"]
+            },
+            {
+                "skill_category": "Python - Strings",
+                "question_text": "What does len('Python') return?",
+                "choice_a": "5",
+                "choice_b": "6",
+                "choice_c": "7",
+                "choice_d": "'Python'",
+                "correct_answer": "B",
+                "explanation": "len() returns the number of characters. 'Python' has 6 letters.",
+                "concept_tags": ["length", "functions"]
+            },
+            {
+                "skill_category": "Python - Strings",
+                "question_text": "What does 'hello'.upper() return?",
+                "choice_a": "'hello'",
+                "choice_b": "'Hello'",
+                "choice_c": "'HELLO'",
+                "choice_d": "5",
+                "correct_answer": "C",
+                "explanation": "upper() converts all characters to uppercase.",
+                "concept_tags": ["methods", "case"]
+            },
+            {
+                "skill_category": "Python - Strings",
+                "question_text": "How do you get the first character of string s?",
+                "choice_a": "s[1]",
+                "choice_b": "s[0]",
+                "choice_c": "s.first()",
+                "choice_d": "first(s)",
+                "correct_answer": "B",
+                "explanation": "Python uses 0-based indexing. The first character is at index 0.",
+                "concept_tags": ["indexing", "characters"]
+            },
+            {
+                "skill_category": "Python - Strings",
+                "question_text": "What does f'Score: {points}' do?",
+                "choice_a": "Creates a file named 'Score'",
+                "choice_b": "Inserts the value of 'points' into the string",
+                "choice_c": "Formats 'points' as a filename",
+                "choice_d": "This is invalid syntax",
+                "correct_answer": "B",
+                "explanation": "f-strings (formatted strings) insert variable values using {variable}.",
+                "concept_tags": ["f-strings", "formatting"]
+            },
+            
+            # ==================== PYTHON - LISTS ====================
+            {
+                "skill_category": "Python - Lists",
+                "question_text": "How do you create a list with 1, 2, 3?",
+                "choice_a": "list = (1, 2, 3)",
+                "choice_b": "list = [1, 2, 3]",
+                "choice_c": "list = {1, 2, 3}",
+                "choice_d": "list = <1, 2, 3>",
+                "correct_answer": "B",
+                "explanation": "Lists use square brackets [] to hold multiple values.",
+                "concept_tags": ["lists", "creation"]
+            },
+            {
+                "skill_category": "Python - Lists",
+                "question_text": "How do you add an item to the end of a list?",
+                "choice_a": "mylist.add(item)",
+                "choice_b": "mylist.append(item)",
+                "choice_c": "mylist.insert(item)",
+                "choice_d": "mylist + item",
+                "correct_answer": "B",
+                "explanation": "append() adds an item to the end of a list.",
+                "concept_tags": ["lists", "methods"]
+            },
+            {
+                "skill_category": "Python - Lists",
+                "question_text": "If colors = ['red', 'green', 'blue'], what is colors[1]?",
+                "choice_a": "'red'",
+                "choice_b": "'green'",
+                "choice_c": "'blue'",
+                "choice_d": "1",
+                "correct_answer": "B",
+                "explanation": "Index 1 is the second item (0-based indexing). colors[1] is 'green'.",
+                "concept_tags": ["indexing", "lists"]
+            },
+            {
+                "skill_category": "Python - Lists",
+                "question_text": "How do you find how many items are in a list?",
+                "choice_a": "mylist.count()",
+                "choice_b": "mylist.size()",
+                "choice_c": "len(mylist)",
+                "choice_d": "mylist.length",
+                "correct_answer": "C",
+                "explanation": "len() returns the number of items in a list (or string).",
+                "concept_tags": ["length", "functions"]
+            },
+            {
+                "skill_category": "Python - Lists",
+                "question_text": "What does 'for item in mylist:' do?",
+                "choice_a": "Checks if item is in mylist",
+                "choice_b": "Loops through each item in mylist one at a time",
+                "choice_c": "Adds item to mylist",
+                "choice_d": "Removes item from mylist",
+                "correct_answer": "B",
+                "explanation": "for-in loops iterate through each element in the list.",
+                "concept_tags": ["loops", "iteration"]
+            },
+            
+            # ==================== PYTHON - LOOPS ====================
+            {
+                "skill_category": "Python - Loops",
+                "question_text": "What does range(5) produce?",
+                "choice_a": "1, 2, 3, 4, 5",
+                "choice_b": "0, 1, 2, 3, 4",
+                "choice_c": "0, 1, 2, 3, 4, 5",
+                "choice_d": "5",
+                "correct_answer": "B",
+                "explanation": "range(5) produces 5 numbers starting from 0: 0, 1, 2, 3, 4.",
+                "concept_tags": ["range", "sequences"]
+            },
+            {
+                "skill_category": "Python - Loops",
+                "question_text": "How do you exit a loop early?",
+                "choice_a": "exit",
+                "choice_b": "stop",
+                "choice_c": "break",
+                "choice_d": "end",
+                "correct_answer": "C",
+                "explanation": "'break' immediately exits the loop it's inside.",
+                "concept_tags": ["break", "control flow"]
+            },
+            {
+                "skill_category": "Python - Loops",
+                "question_text": "What does 'continue' do in a loop?",
+                "choice_a": "Exits the loop",
+                "choice_b": "Skips to the next iteration",
+                "choice_c": "Repeats the current iteration",
+                "choice_d": "Pauses the loop",
+                "correct_answer": "B",
+                "explanation": "'continue' skips the rest of the current iteration and moves to the next.",
+                "concept_tags": ["continue", "control flow"]
+            },
+            {
+                "skill_category": "Python - Loops",
+                "question_text": "What does 'while x < 10:' do?",
+                "choice_a": "Runs exactly 10 times",
+                "choice_b": "Keeps running as long as x is less than 10",
+                "choice_c": "Sets x to 10",
+                "choice_d": "Runs once if x < 10",
+                "correct_answer": "B",
+                "explanation": "'while' loops continue as long as the condition remains True.",
+                "concept_tags": ["while", "conditions"]
+            },
+            {
+                "skill_category": "Python - Loops",
+                "question_text": "What's the output of: for i in range(3): print(i)",
+                "choice_a": "1 2 3",
+                "choice_b": "0 1 2",
+                "choice_c": "0 1 2 3",
+                "choice_d": "3",
+                "correct_answer": "B",
+                "explanation": "range(3) gives 0, 1, 2 and each is printed on a new line.",
+                "concept_tags": ["range", "output"]
+            },
+            
+            # ==================== PYTHON - FUNCTIONS ====================
+            {
+                "skill_category": "Python - Functions",
+                "question_text": "How do you define a function named 'greet'?",
+                "choice_a": "function greet():",
+                "choice_b": "def greet():",
+                "choice_c": "create greet():",
+                "choice_d": "func greet():",
+                "correct_answer": "B",
+                "explanation": "'def' is the keyword to define functions in Python.",
+                "concept_tags": ["def", "definition"]
+            },
+            {
+                "skill_category": "Python - Functions",
+                "question_text": "What does 'return' do in a function?",
+                "choice_a": "Prints a value",
+                "choice_b": "Sends a value back to where the function was called",
+                "choice_c": "Ends the program",
+                "choice_d": "Creates a variable",
+                "correct_answer": "B",
+                "explanation": "'return' sends a value back to the caller and exits the function.",
+                "concept_tags": ["return", "output"]
+            },
+            {
+                "skill_category": "Python - Functions",
+                "question_text": "What is a parameter?",
+                "choice_a": "A function's name",
+                "choice_b": "A value received by a function when called",
+                "choice_c": "A type of loop",
+                "choice_d": "A return value",
+                "correct_answer": "B",
+                "explanation": "Parameters are variables that receive values when the function is called.",
+                "concept_tags": ["parameters", "inputs"]
+            },
+            {
+                "skill_category": "Python - Functions",
+                "question_text": "What's wrong with: def add(a, b) return a + b",
+                "choice_a": "add is a reserved word",
+                "choice_b": "Missing colon after the parentheses",
+                "choice_c": "return should be print",
+                "choice_d": "a and b need types",
+                "correct_answer": "B",
+                "explanation": "Function definitions need a colon: def add(a, b): return a + b",
+                "concept_tags": ["syntax", "colon"]
+            },
+            {
+                "skill_category": "Python - Functions",
+                "question_text": "What's the difference between print() and return?",
+                "choice_a": "They do the same thing",
+                "choice_b": "print displays output, return sends a value back to the caller",
+                "choice_c": "return is faster",
+                "choice_d": "print only works with strings",
+                "correct_answer": "B",
+                "explanation": "print() displays to screen, return sends a value back to be used in code.",
+                "concept_tags": ["print", "return"]
+            }
+        ]
+        
+        # Insert all skill quiz questions
+        for q in skill_quiz_questions:
+            question_doc = {
+                "id": str(uuid.uuid4()),
+                "skill_category": q["skill_category"],
+                "question_text": q["question_text"],
+                "choice_a": q["choice_a"],
+                "choice_b": q["choice_b"],
+                "choice_c": q["choice_c"],
+                "choice_d": q["choice_d"],
+                "correct_answer": q["correct_answer"],
+                "explanation": q.get("explanation", ""),
+                "concept_tags": q.get("concept_tags", []),
+                "creator_id": "system",
+                "creator_name": "System",
+                "created_at": datetime.now(timezone.utc).isoformat()
+            }
+            await db.skill_quiz_questions.insert_one(question_doc)
+        
+        final_count = await db.skill_quiz_questions.count_documents({})
+        logger.info(f"✅ Skill quiz questions seeded: {final_count}")
+    except Exception as e:
+        logger.error(f"Error seeding skill quiz questions: {str(e)}")
+
         logger.error(f"Error seeding Micro:bit problems: {str(e)}")
