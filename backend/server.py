@@ -6250,6 +6250,8 @@ async def bulk_upload_questions(data: dict, request: Request):
                 choice_c=row.get("choice_c", ""),
                 choice_d=row.get("choice_d", ""),
                 correct_answer=row.get("correct_answer", "A").upper(),
+                unit_type=row.get("unit_type", ""),
+                unit=row.get("unit", ""),
                 chapter=row.get("chapter", ""),
                 lesson=row.get("lesson", ""),
                 difficulty=row.get("difficulty", "Easy"),
