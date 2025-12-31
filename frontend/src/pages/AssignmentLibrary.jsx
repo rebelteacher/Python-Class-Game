@@ -2379,19 +2379,22 @@ export default function AssignmentLibrary({ user }) {
           </DialogHeader>
           <div className="space-y-4">
             <div>
-              <Label>Assignment Type</Label>
+              <Label className="text-base font-semibold">🎯 Unit Type (Required for curriculum)</Label>
               <Select value={bulkUpdateType} onValueChange={setBulkUpdateType}>
                 <SelectTrigger className="mt-1">
-                  <SelectValue placeholder="Keep current type" />
+                  <SelectValue placeholder="Select unit type..." />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="keep">Keep current type</SelectItem>
-                  <SelectItem value="block">Block-Based</SelectItem>
-                  <SelectItem value="code">Code (Python Text)</SelectItem>
-                  <SelectItem value="turtle">Turtle Graphics</SelectItem>
-                  <SelectItem value="microbit">Micro:bit</SelectItem>
+                  <SelectItem value="keep">⏸️ Keep current type</SelectItem>
+                  <SelectItem value="block">🧱 Block-Based (Unit 1)</SelectItem>
+                  <SelectItem value="code">🐍 Python Code (Unit 2)</SelectItem>
+                  <SelectItem value="turtle">🐢 Turtle Graphics (Unit 3)</SelectItem>
+                  <SelectItem value="microbit">⚡ Micro:bit (Unit 4)</SelectItem>
                 </SelectContent>
               </Select>
+              <p className="text-xs text-blue-600 mt-1 font-medium">
+                ⚠️ Change this to move problems to a different curriculum!
+              </p>
             </div>
             <div>
               <Label>Unit</Label>
