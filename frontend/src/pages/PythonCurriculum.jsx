@@ -680,7 +680,7 @@ export default function PythonCurriculum({ user }) {
             </div>
             <div>
               <h1 className="text-3xl font-bold">Python Text Curriculum</h1>
-              <p className="text-blue-100 mt-1">Core Python programming concepts</p>
+              <p className="text-blue-100 mt-1">Unit 3: Text-based Python programming</p>
             </div>
           </div>
         </div>
