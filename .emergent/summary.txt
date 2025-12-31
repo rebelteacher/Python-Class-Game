@@ -1,67 +1,55 @@
 <analysis>An analysis of the user's request and the agent's actions has been completed. The following summary will be used to hand over the work to the next agent.
 
 **original_problem_statement:**
-The user's initial request was to complete a Turtle Maze feature. The scope quickly expanded to a major new feature: a block-based programming curriculum using a custom editor and AI-generated sprites.
-
-During this session, the user provided significant feedback, leading to several pivots:
-1.  **Switch to Scratch:** The user requested to replace the in-app custom block editor with an integration that directs students to the external Scratch website, similar to the existing Micro:bit integration.
-2.  **Improve Grading:** The initial URL submission for Scratch was deemed insufficient. The user requested a more robust grading method, leading to the implementation of screenshot uploads graded by an AI Vision model.
-3.  **Fix Data Inconsistencies:** The user reported that the curriculum content on the deployed site did not match the newly created problems, revealing a discrepancy between local and production databases.
-4.  **Enhance Teacher Experience:** After seeing the new Scratch teaching interface, the user requested a similar, improved teaching UI for the existing Python text-based assignments.
-
-PRODUCT REQUIREMENTS:
-1.  **Block-Based Curriculum with Scratch:**
-    *   The platform must handle .
-    *   For students, the  must not show an editor but instead guide them to open Scratch in a new tab and provide an interface to upload a screenshot of their completed project.
-    *   For teachers, the Teaching Mode for block assignments must show a dedicated interface with teaching guides, tips, and a clear button to open the Scratch editor, replacing the previous Python editor view.
-2.  **AI Vision Grading:**
-    *   The backend must accept a screenshot (as a base64 string) for block assignment submissions.
-    *   The system must use an AI Vision model to analyze the screenshot against the problem's requirements, determine a score, and provide feedback.
-    *   The grading result should be displayed to the student on the assignment page.
-3.  **Database Seeding:**
-    *   The application must include a startup script that seeds the database with the 32 standard block-based problems, ensuring curriculum content is available in any environment (dev or prod).
-4.  **UI/UX Consistency:**
-    *   The Unit filter dropdown in the  must show a standardized, clean list of units that matches the main curriculum pages.
-    *   The teacher view for assignments must always show the correct interface corresponding to the assignment type (e.g., Scratch UI for 'block', Python UI for 'text').
-5.  **Python Teaching Interface:**
-    *   A new page must be created at  to provide teachers with a supportive, guided interface for teaching Python lessons, similar in style to the one created for Scratch.
+The user's initial goal was to complete and fix various aspects of a coding education platform. Over the session, the requests included:
+1.  **Populate Turtle Curriculum:** Create a full set of problems and quizzes for the Turtle curriculum, including a new Chapter 6: Projects with a unique grading mechanism based on code analysis (counting loops, functions, etc.).
+2.  **Fix Library Filtering & Navigation:**
+    *   Problems were not appearing when clicking the Problems button in the Turtle and Python curriculum pages.
+    *   The main library was sorting chapters alphabetically instead of in the intended teaching order.
+    *   The Unit 2: Python Text filter in the library was not showing any problems.
+    *   Newly created Block problems were appearing in the main library but not in the filtered Block library view.
+    *   A specific lesson (Lesson 1: What are Blocks?) was not showing its problems in the curriculum view.
+3.  **Enhance Curriculum Management:**
+    *   Implement a feature allowing teachers to add and delete their own custom chapters and lessons directly from the curriculum pages.
+    *   Add the Assignment Type (e.g., Block, Code, Turtle) selector to the bulk edit dialog to allow teachers to re-categorize existing problems.
+4.  **UI/UX Clean-up:**
+    *   Rename Unit to Chapter on the Turtle curriculum page for consistency.
+    *   Remove a defunct Sprite Editor card from the Block curriculum page.
+5.  **Address Bugs & Questions:**
+    *   Investigate and resolve page loading issues and 500 errors.
+    *   Provide clarification on Python Turtle errors ( vs ) and explain limitations of the in-app turtle previewer (e.g.,  not supported).
 
 **User's preferred language**: English
 
 **what currently exists?**
--   A startup function in  now seeds the database with 32 correctly structured block-based problems on launch.
--   The student  has been refactored for block type assignments. It now features a screenshot upload mechanism and instructions to use the external Scratch website.
--   The teacher demo mode on  has also been refactored. It now displays a new, user-friendly teaching interface for Scratch assignments, guiding the teacher to open the Scratch editor in a new tab.
--   The backend submission endpoint () has been upgraded to handle screenshot submissions. It uses the  library to perform AI Vision grading and returns the score and feedback. Bugs related to the AI call and JSON parsing have been fixed.
--   The  Unit filter dropdown now displays a clean, static list of units, and the filtering logic handles mapping to various data formats in the database.
--   A brand new teaching interface for Python text-based assignments has been created at , fulfilling a user request for a better teacher experience.
+-   The Turtle curriculum is now fully populated with **36 problems**, including 6 creative challenge problems for the new Chapter 6. The backend seeding script in  is updated accordingly.
+-   The library filtering and navigation issues have been resolved. The Problems buttons on curriculum pages now correctly link to filtered views, and chapters sort numerically.
+-   A new feature for **custom curriculum management** has been implemented for the **Block curriculum only**. Teachers can now add and delete their own chapters and lessons from the Block curriculum page, with changes saved to the database via new backend APIs.
+-   The problem creation workflow has been improved. The Create Problem and Bulk Edit dialogs in the library now include an Assignment Type selector, and the system attempts to auto-detect the type based on the chapter name.
+-   Minor UI fixes have been completed: the Turtle curriculum page now uses Chapter, and the Sprite Editor card has been removed from the Block page.
 
 **Last working item**:
-The agent created a new, dedicated teaching interface for Python assignments to provide teachers with better guidance, similar to the interface built for Scratch.
+The agent completed two minor UI fixes requested by the user.
 
--   **Last item agent was working:** Creating the new  page and adding the corresponding route.
+-   **Last item agent was working:**
+    1.  Changed the label Unit to Chapter throughout the  file for consistency.
+    2.  Removed the Sprite Editor card from the  file as it was obsolete.
 -   **Status:** USER VERIFICATION PENDING
--   **Agent Testing Done:** Y (Verified the page loads via screenshot).
--   **Which testing method agent to use?** Manual testing by the user is sufficient, as this is a new, static informational page.
+-   **Agent Testing Done:** N
+-   **Which testing method agent to use?**  tool to visually verify the UI changes on the Block and Turtle curriculum pages.
 -   **User Testing Done:** N
 
 **All Pending/In progress Issue list**:
--   **Issue 1: Fragile Layout on  (P2)**
-    -   **Attempted fixes:** None in this session. This is a known issue from a previous fork.
-    -   **Next debug checklist:** The page's  implementation is unstable. It requires a refactor of the page's core layout structure in .
-    -   **Why fix this issue and what will be achieved with this?** This is a source of recurring UI bugs and technical debt. Fixing it will improve the stability of a core student-facing page.
+-   **Issue 1: Implement Custom Curriculum Management for All Units (P0)**
+    -   **Description:** The feature allowing teachers to add/delete custom chapters and lessons was built for the Block curriculum but not for Python, Turtle, or Micro:bit. The user's request was general, implying it should apply to all curricula.
+    -   **Status:** NOT STARTED
+-   **Issue 2: Fragile Layout on  (P2)**
+    -   **Description:** A recurring UI bug related to  makes the student assignment page layout unstable.
     -   **Status:** NOT STARTED
     -   **Is recurring issue?** Y
-    -   **Should Test frontend/backend/both after fix?** Frontend
-    -   **Blocked on other issue:** None
--   **Issue 2: Assignment Creation  bug (P2)**
-    -   **Attempted fixes:** None in this session. This is a known issue from a previous fork.
-    -   **Next debug checklist:** The bug is suspected to be in the frontend payload creation within the  component inside . Investigate the  function.
-    -   **Why fix this issue and what will be achieved with this?** This is a critical bug that can prevent teachers from assigning work to students.
+-   **Issue 3: Assignment Creation  bug (P2)**
+    -   **Description:** A potential bug in the  component may prevent teachers from correctly assigning problems to their classrooms.
     -   **Status:** NOT STARTED
-    -   **Is recurring issue?** N
-    -   **Should Test frontend/backend/both after fix?** Both
-    -   **Blocked on other issue:** None
 
 **In progress Task List**:
 -   None.
@@ -69,28 +57,20 @@ The agent created a new, dedicated teaching interface for Python assignments to 
 **Upcoming and Future Tasks**
 
 -   **Upcoming Tasks:**
-    -   (P0) **User Verification:** Ask the user to review the new Python Teaching interface at .
-    -   (P1) **Populate Micro:bit Problems:** Create 16 problems for each skill/unit in the Micro:bit curriculum.
+    -   (P0) **Task 1: Extend Custom Curriculum Feature:** Refactor the custom chapter/lesson logic from  and apply it to , , and .
     -   (P1) **End-to-End Quiz Flow Testing:** Guide the user to test the student experience of receiving and submitting a quiz.
-    -   (P1) **Finalize Library Organization:** Discuss removing the main Library link from the sidebar to streamline navigation.
 -   **Future Tasks:**
-    -   (P2) **Build Out Full Curriculum:** Implement the remaining curriculum units outlined previously: Networking, Cybersecurity, AI, etc.
-    -   (P3) **Self-Paced Learning Module:** Design and build a new section for student-led courses.
+    -   (P2) **Brain Break Games:** Integrate simple games for students.
+    -   (P2) **Build Out Full Curriculum:** Implement remaining units (Networking, Cybersecurity, AI).
+    -   (P3) **Self-Paced Learning Module:** Build a new section for student-led courses.
 
 **Completed work in this session**
--   **Pivoted to Scratch & AI Vision Grading (DONE):**
-    -   Replaced the in-app block editor on  with a new UI that directs users to Scratch and includes a screenshot uploader for submissions.
-    -   Updated the backend () to receive screenshots and use an AI Vision model for grading, including fixing bugs in the AI call and response parsing.
--   **Created Dedicated Teaching Interfaces (DONE):**
-    -   Fixed the teacher view for block assignments on  to show a user-friendly Scratch teaching UI.
-    -   Created a brand new, similar teaching interface for Python assignments at  ().
--   **Fixed Database and UI Inconsistencies (DONE):**
-    -   Added a database seeding function to  to ensure block-based curriculum content is always available.
-    -   Cleaned the development database to remove old, incorrectly structured problems.
-    -   Standardized the Unit filter dropdown in  to provide a consistent user experience.
--   **AI Sprite Generation Flow (DONE):**
-    -   Generated 6 custom sprites for a space game theme.
-    -   Fixed a bug in  to ensure custom AI-generated sprites are fetched and displayed correctly.
+-   **Turtle Curriculum Population (DONE):** Added 36 problems, including 6 new challenge problems for Chapter 6, to the  seeding script.
+-   **Library Filtering & Ordering Fixes (DONE):** Corrected filtering from curriculum pages, fixed alphabetical chapter sorting, and resolved the Unit 2: Python Text filter bug in .
+-   **Problem Creation Workflow (DONE):** Added  detection and selection to the problem creation and bulk edit dialogs in .
+-   **Custom Curriculum Feature (DONE for Blocks):** Implemented backend APIs and frontend UI in  for teachers to manage their own chapters and lessons.
+-   **UI Fixes (DONE):** Renamed Unit to Chapter on the Turtle page and removed the Sprite Editor from the Block page.
+-   **Bug Fixes (DONE):** Resolved various bugs, including a 500 error on problem loading and an issue where Block lesson problem counts were incorrect in the UI.
 
 **Earlier issues found/mentioned but not fixed**
 -   **Issue 1: Fragile Layout on **: A recurring UI issue related to  that has been carried over.
@@ -103,66 +83,72 @@ The agent created a new, dedicated teaching interface for Python assignments to 
 
 
 **Key Technical Concepts**
--   **AI Vision Grading:** The core of the new grading system. It involves sending a base64-encoded image to an LLM via  and prompting it to return a structured JSON response with a score and feedback.
--   **Database Seeding:** A FastAPI startup event () is used to programmatically create database records, ensuring environment consistency.
--   **External Site Integration:** The platform now integrates with Scratch by guiding the user to the external site rather than embedding it in an iframe, which is blocked by Scratch's  policy.
--   **Resilient API Parsing:** The backend code was improved to handle LLM responses that are wrapped in markdown code fences (e.g., ), making the integration more robust.
--   **Role-Based & Type-Based UI:**  makes heavy use of conditional rendering to display different UIs based on the user's role (student vs. teacher) and the assignment's type.
+-   **Dynamic DB Seeding on Startup:** Heavily used  in  to manage curriculum content. A key fix involved updating the seeding condition to correctly handle the addition of a new chapter.
+-   **Separation of Default vs. Custom Data:** A new pattern was established where default curriculum is seeded from , while teacher-created chapters/lessons are stored in a new  MongoDB collection and merged on the frontend.
+-   **Frontend State Management for Dynamic UI:**  now uses  and  to fetch both default and custom curriculum data, merge them, and render a dynamic UI with add/delete capabilities for teachers.
+-   **URL-based Filtering:** Multiple issues were debugged and fixed related to how URL query parameters () are passed between curriculum pages and the main .
 
 **key DB schema**
--   **problems:** A startup script now ensures this collection contains 32 problems with  and a consistent chapter structure (Chapter 1-5).
--   **submissions:** The Pydantic model  in  was updated to include an optional  field to support the new grading flow.
+-   **problems:**  ('block', 'code', 'turtle', 'microbit') is critical for filtering.  distinguishes system vs. teacher problems.
+-   **custom_curriculum (New):** Stores teacher-created curriculum structures.
+    -   
 
 **changes in tech stack**
--   No new technologies were added, but the usage of  was expanded to include its vision capabilities.
+-   None.
 
 **All files of reference**
--   : The most recently created file, providing a new teaching interface for Python.
--   : The most heavily modified file, central to the new Scratch and AI grading workflow.
--   : Contains the critical backend logic for database seeding and AI Vision grading.
--   : Contains the fix for the unit filter dropdown.
+-   : The core of curriculum seeding and the new custom curriculum API.
+-   : The central library page with filtering, creation, and bulk-edit logic.
+-   : The template for the new custom curriculum feature.
+-   : Contains the Unit to Chapter UI change.
 
 **Areas that need refactoring**:
--   : This component has grown extremely large and complex. It manages the UI for students and teachers across four different assignment types. It should be broken down into smaller, more specialized components to improve maintainability.
+-   ****: Remains a large, monolithic file. Curriculum data is still hardcoded and should be moved to separate  files.
+-   **Redundant Curriculum Logic:** The custom curriculum management feature was built specifically into . This logic should be extracted into a reusable hook or component (e.g., ) to be applied to the Python, Turtle, and Micro:bit pages to avoid significant code duplication.
 
 **key api endpoints**
--   : This endpoint's logic was significantly updated. For , it now expects a  in the payload, performs AI Vision grading, and falls back to a default score if the AI call fails.
+-   
+-   
+-   (New) 
+-   (New) 
+-   (New) 
+-   (New) 
+-   (New) 
 
 **Critical Info for New Agent**
--   Your immediate task is to present the new **Python Teaching Interface** to the user for verification. The page is located at .
--   The entire workflow for block assignments has been changed to use **Scratch + Screenshot AI Grading**. The old in-app block editor is no longer part of the student submission flow.
--   A **database seed script** in  now populates the block curriculum. This is essential for ensuring the app works correctly in a clean environment.
--   When testing, be aware that the teacher view and student view for assignments are different. The  renders conditionally based on the user's role.
+-   Your immediate high-priority task is to **extend the custom curriculum management feature** to the Python, Turtle, and Micro:bit pages. You should refactor the existing implementation from  into a reusable component or hook to avoid duplicating code.
+-   The user is now actively creating their own problems. Ensure that any new feature or fix correctly distinguishes between system problems and problems created by a teacher (via the  field). Teachers should only be able to modify or delete their own content.
+-   Be mindful of browser caching. The user has experienced several issues where the UI did not reflect recent backend or frontend changes. Always remind the user to perform a hard refresh (Ctrl+Shift+R) after a deployment to verify fixes.
 
-**documents and test_reports created in this job**
--   : A temporary file created by the agent to document the process of testing the image AI integration. It can likely be deleted.
+**documents and test reports created in this job**
+-   Test reports were generated for the Turtle curriculum seeding and the Block curriculum custom management feature.
 
 **Last 10 User Messages and any pending HUMAN messages**
--   User: I really like the teaching interface! Now for the python section. Can you set it up like you did for blocks? Teachers who dont understand code will need additional help to teach text coding and this looks simplistic but also specific to each lesson skill."
--   User: "The drop down doesnt match the main page. Also, on the blocks for the teacher side, the teaching aspect doesnt show what the students see. It still shows the python editor. Can you make it show the scratch interface so I can teach?"
--   User: "student submitted problem, first got 80 because instructions did not say loop, followed feedback and got this;" (uploaded image showing 75% score despite AI giving 100%).
--   User: "Received a 70 for this code as well as code that just said Hello. Can that be fixed or will it be better once deployed?" (uploaded image showing AI fallback score).
--   User: "yes" (confirming to proceed with screenshot + AI vision grading).
--   User: "Lets try your way. I can place all the students in my classroom that way all those submissions wont be going public on the web" (choosing AI-based grading over other options).
--   User: "no bueno..... can the block grading be done using a screenshot? Is there a way to paste their code into an editor and grade it that way?" (rejecting URL-based grading).
--   User: "When you say valid scratch url, do you mean they get credit just for submitting with the url or will it grade the code that is at that url?"
--   User: "scratch scoring:" (uploaded image showing backend error on grading a Scratch URL).
--   User: "This is the teacher practice mode for the blocks unit. It should look like the student page so students can work alongside the teacher. Also, I dont see a way to add their sprites to the code... would it just be easier to link this to the scratch site... (initiating the pivot to Scratch).
+-   10. These unit numbers in the turtle section need to be Chapter numbers instead. Also, this button, sprite editor in the blocks section needs to be removed. (DONE - pending user verification)
+-   9. Good. Problem solved! (User confirmed the bulk edit feature was fixed)
+-   8. Request to add Unit Type to bulk edit screen. (DONE)
+-   7. User confirmed they redeployed/refreshed and were still seeing issues with problems not appearing in the unit library. (DONE)
+-   6. User reported being able to add a chapter to Blocks, but problems still not showing up in the unit library. (DONE)
+-   5. User reported missing Lesson 1 in Blocks and requested the ability to add chapters/lessons to all units. (DONE for Blocks, pending for others)
+-   4. User reported Unit 2 Python Text filter shows All Units. (DONE)
+-   3. User approved the plan for Turtle Chapter 6 challenge problems. (DONE)
+-   2. User defined requirements for Turtle Chapter 6 problems (creative challenges with measurable requirements). (DONE)
+-   1. User reported that clicking the Problems button in the Turtle curriculum results in no problems found. (DONE)
 
 **Project Health Check:**
 -   **Broken:** None
 -   **Mocked:** None
 
 **3rd Party Integrations**
--   OpenAI GPT-4o — uses Emergent LLM Key (via  for AI sprite generation and AI Vision grading)
+-   OpenAI GPT-4o — uses Emergent LLM Key (for AI Vision grading)
 -   Scratch — Integrated as an external website link.
 -    (SheetJS)
 -   
 -    / 
 
 **Testing status**
--   **Testing agent used after significant changes:** NO (Agent relied on manual screenshots and  commands, which was effective for the tasks).
--   **Troubleshoot agent used after agent stuck in loop:** NO.
+-   **Testing agent used after significant changes:** YES (Used for verifying turtle curriculum seeding and the block custom curriculum feature).
+-   **Troubleshoot agent used after agent stuck in loop:** NO
 -   **Test files created:** None.
 -   **Known regressions:** None.
 
@@ -170,4 +156,4 @@ The agent created a new, dedicated teaching interface for Python assignments to 
 -   **Admin/Teacher:** , password: 
 
 **What agent forgot to execute**
--   The agent correctly prioritized the user's feedback and feature requests. The two outstanding, low-priority issues from the initial handoff ( and ) were not addressed, which was appropriate given the significant pivots and new work completed in this session.</analysis>
+-   The agent implemented the custom curriculum management feature for the Block curriculum in response to a general request to add lessons/chapters to each of the units. However, the agent did not plan or propose to extend this feature to the other three curricula (Python, Turtle, Micro:bit), leaving the user's request only partially fulfilled.</analysis>
