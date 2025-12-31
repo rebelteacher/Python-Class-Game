@@ -746,8 +746,9 @@ export default function TurtleCurriculum({ user }) {
               </div>
             </div>
             <div className="mt-4 p-4 bg-gray-50 rounded-lg text-sm text-gray-600">
-              <strong>After Turtle:</strong> Students will apply these same concepts (loops, conditionals, functions) 
-              to <span className="text-cyan-600 font-medium">Micro:bit physical computing</span>, 
+              <strong>After Turtle:</strong> Students will take these same Python skills to 
+              <span className="text-blue-600 font-medium"> Unit 3: Python Text</span> for more advanced programming, 
+              then move to <span className="text-cyan-600 font-medium">Micro:bit physical computing</span>, 
               making LEDs blink, responding to buttons, and reading sensors.
             </div>
           </CardContent>
