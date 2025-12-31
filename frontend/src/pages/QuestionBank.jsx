@@ -1,23 +1,41 @@
 import { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import axios from "axios";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger, DialogFooter } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
-import { ArrowLeft, Plus, Edit, Trash2, FileQuestion, Folder, FolderOpen, ChevronRight, ChevronDown, Upload, FolderInput } from "lucide-react";
+import { Checkbox } from "@/components/ui/checkbox";
+import { ArrowLeft, Plus, Edit, Trash2, FileQuestion, Folder, FolderOpen, ChevronRight, ChevronDown, Upload, FolderInput, Search, Filter, X, CheckSquare, Square } from "lucide-react";
 
 const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
 const API = `${BACKEND_URL}/api`;
 
+// Unit type to unit name mapping
+const UNIT_TYPE_MAP = {
+  "block": "Unit 1: Block-Based Coding",
+  "turtle": "Unit 2: Turtle Graphics",
+  "code": "Unit 3: Python Text",
+  "microbit": "Unit 4: Micro:bit"
+};
+
+const UNIT_TYPES = [
+  { value: "block", label: "🧱 Block (Unit 1)" },
+  { value: "turtle", label: "🐢 Turtle (Unit 2)" },
+  { value: "code", label: "🐍 Python (Unit 3)" },
+  { value: "microbit", label: "⚡ Micro:bit (Unit 4)" }
+];
+
 export default function QuestionBank({ user }) {
   const navigate = useNavigate();
+  const [searchParams, setSearchParams] = useSearchParams();
   const [questions, setQuestions] = useState([]);
+  const [filteredQuestions, setFilteredQuestions] = useState([]);
   const [loading, setLoading] = useState(true);
   const [createDialogOpen, setCreateDialogOpen] = useState(false);
   const [editDialogOpen, setEditDialogOpen] = useState(false);
@@ -31,6 +49,23 @@ export default function QuestionBank({ user }) {
   const [moveToChapter, setMoveToChapter] = useState("");
   const [moveToLesson, setMoveToLesson] = useState("");
   
+  // Filters
+  const [searchTerm, setSearchTerm] = useState("");
+  const [unitTypeFilter, setUnitTypeFilter] = useState(searchParams.get("type") || "all");
+  const [unitFilter, setUnitFilter] = useState("all");
+  const [chapterFilter, setChapterFilter] = useState("all");
+  const [lessonFilter, setLessonFilter] = useState("all");
+  const [difficultyFilter, setDifficultyFilter] = useState("all");
+  
+  // Multi-select mode
+  const [selectionMode, setSelectionMode] = useState(false);
+  const [selectedQuestions, setSelectedQuestions] = useState([]);
+  const [bulkUpdateDialogOpen, setBulkUpdateDialogOpen] = useState(false);
+  const [bulkUpdateUnitType, setBulkUpdateUnitType] = useState("");
+  const [bulkUpdateUnit, setBulkUpdateUnit] = useState("");
+  const [bulkUpdateChapter, setBulkUpdateChapter] = useState("");
+  const [bulkUpdateLesson, setBulkUpdateLesson] = useState("");
+  
   const [newQuestion, setNewQuestion] = useState({
     question_text: "",
     choice_a: "",
@@ -38,6 +73,8 @@ export default function QuestionBank({ user }) {
     choice_c: "",
     choice_d: "",
     correct_answer: "A",
+    unit_type: "",
+    unit: "",
     chapter: "",
     lesson: "",
     difficulty: "Easy"
@@ -46,6 +83,11 @@ export default function QuestionBank({ user }) {
   useEffect(() => {
     fetchQuestions();
   }, []);
+
+  // Apply filters when questions or filter values change
+  useEffect(() => {
+    applyFilters();
+  }, [questions, searchTerm, unitTypeFilter, unitFilter, chapterFilter, lessonFilter, difficultyFilter]);
 
   const fetchQuestions = async () => {
     try {
@@ -61,6 +103,75 @@ export default function QuestionBank({ user }) {
     }
   };
 
+  const applyFilters = () => {
+    let filtered = [...questions];
+
+    // Search filter
+    if (searchTerm) {
+      const term = searchTerm.toLowerCase();
+      filtered = filtered.filter(q =>
+        q.question_text?.toLowerCase().includes(term) ||
+        q.choice_a?.toLowerCase().includes(term) ||
+        q.choice_b?.toLowerCase().includes(term) ||
+        q.choice_c?.toLowerCase().includes(term) ||
+        q.choice_d?.toLowerCase().includes(term)
+      );
+    }
+
+    // Unit type filter
+    if (unitTypeFilter && unitTypeFilter !== "all") {
+      filtered = filtered.filter(q => q.unit_type === unitTypeFilter);
+    }
+
+    // Unit filter
+    if (unitFilter && unitFilter !== "all") {
+      filtered = filtered.filter(q => q.unit === unitFilter);
+    }
+
+    // Chapter filter
+    if (chapterFilter && chapterFilter !== "all") {
+      filtered = filtered.filter(q => q.chapter === chapterFilter);
+    }
+
+    // Lesson filter
+    if (lessonFilter && lessonFilter !== "all") {
+      filtered = filtered.filter(q => q.lesson === lessonFilter);
+    }
+
+    // Difficulty filter
+    if (difficultyFilter && difficultyFilter !== "all") {
+      filtered = filtered.filter(q => q.difficulty === difficultyFilter);
+    }
+
+    setFilteredQuestions(filtered);
+  };
+
+  const clearFilters = () => {
+    setSearchTerm("");
+    setUnitTypeFilter("all");
+    setUnitFilter("all");
+    setChapterFilter("all");
+    setLessonFilter("all");
+    setDifficultyFilter("all");
+    setSearchParams({});
+  };
+
+  const hasActiveFilters = searchTerm || unitTypeFilter !== "all" || unitFilter !== "all" || 
+    chapterFilter !== "all" || lessonFilter !== "all" || difficultyFilter !== "all";
+
+  // Get unique values for filter dropdowns
+  const chapters = [...new Set(questions.map(q => q.chapter).filter(Boolean))].sort();
+  const lessons = [...new Set(questions.map(q => q.lesson).filter(Boolean))].sort();
+
+  // Auto-detect unit type from chapter name
+  const detectUnitType = (chapterName) => {
+    const lowerChapter = chapterName.toLowerCase();
+    if (lowerChapter.includes("block") || lowerChapter.includes("scratch")) return "block";
+    if (lowerChapter.includes("turtle")) return "turtle";
+    if (lowerChapter.includes("microbit") || lowerChapter.includes("micro:bit")) return "microbit";
+    return "code"; // Default to Python code
+  };
+
   const handleCreateQuestion = async (e) => {
     e.preventDefault();
     
@@ -72,7 +183,23 @@ export default function QuestionBank({ user }) {
     }
 
     try {
-      await axios.post(`${API}/mc-questions`, newQuestion, {
+      // Auto-detect unit type if not set but chapter is
+      let unitType = newQuestion.unit_type;
+      if (!unitType && newQuestion.chapter) {
+        unitType = detectUnitType(newQuestion.chapter);
+      }
+      
+      // Auto-set unit based on unit_type if not set
+      let unit = newQuestion.unit;
+      if (!unit && unitType) {
+        unit = UNIT_TYPE_MAP[unitType] || "";
+      }
+
+      await axios.post(`${API}/mc-questions`, {
+        ...newQuestion,
+        unit_type: unitType,
+        unit: unit
+      }, {
         withCredentials: true
       });
       toast.success("Question created!");
@@ -84,6 +211,8 @@ export default function QuestionBank({ user }) {
         choice_c: "",
         choice_d: "",
         correct_answer: "A",
+        unit_type: "",
+        unit: "",
         chapter: "",
         lesson: "",
         difficulty: "Easy"
@@ -108,6 +237,8 @@ export default function QuestionBank({ user }) {
           choice_c: editingQuestion.choice_c,
           choice_d: editingQuestion.choice_d,
           correct_answer: editingQuestion.correct_answer,
+          unit_type: editingQuestion.unit_type || "",
+          unit: editingQuestion.unit || "",
           chapter: editingQuestion.chapter,
           lesson: editingQuestion.lesson,
           difficulty: editingQuestion.difficulty
@@ -172,6 +303,86 @@ export default function QuestionBank({ user }) {
     }
   };
 
+  // Bulk operations
+  const toggleQuestionSelection = (questionId) => {
+    setSelectedQuestions(prev => 
+      prev.includes(questionId) 
+        ? prev.filter(id => id !== questionId)
+        : [...prev, questionId]
+    );
+  };
+
+  const selectAllVisible = () => {
+    const visibleIds = filteredQuestions.map(q => q.id);
+    setSelectedQuestions(visibleIds);
+  };
+
+  const deselectAll = () => {
+    setSelectedQuestions([]);
+  };
+
+  const handleBulkUpdate = async () => {
+    if (selectedQuestions.length === 0) {
+      toast.error("No questions selected");
+      return;
+    }
+
+    try {
+      const response = await axios.put(
+        `${API}/mc-questions/bulk-update`,
+        {
+          question_ids: selectedQuestions,
+          unit_type: bulkUpdateUnitType || undefined,
+          unit: bulkUpdateUnit || undefined,
+          chapter: bulkUpdateChapter || undefined,
+          lesson: bulkUpdateLesson || undefined
+        },
+        { withCredentials: true }
+      );
+      
+      toast.success(response.data.message);
+      setBulkUpdateDialogOpen(false);
+      setBulkUpdateUnitType("");
+      setBulkUpdateUnit("");
+      setBulkUpdateChapter("");
+      setBulkUpdateLesson("");
+      setSelectedQuestions([]);
+      setSelectionMode(false);
+      fetchQuestions();
+    } catch (error) {
+      console.error("Error bulk updating:", error);
+      toast.error("Failed to update questions");
+    }
+  };
+
+  const handleBulkDelete = async () => {
+    if (selectedQuestions.length === 0) {
+      toast.error("No questions selected");
+      return;
+    }
+
+    if (!window.confirm(`Are you sure you want to delete ${selectedQuestions.length} questions? This cannot be undone.`)) {
+      return;
+    }
+
+    try {
+      const response = await axios.delete(
+        `${API}/mc-questions/bulk-delete`,
+        { 
+          data: { question_ids: selectedQuestions },
+          withCredentials: true 
+        }
+      );
+      
+      toast.success(response.data.message);
+      setSelectedQuestions([]);
+      setSelectionMode(false);
+      fetchQuestions();
+    } catch (error) {
+      console.error("Error bulk deleting:", error);
+      toast.error("Failed to delete questions");
+    }
+  };
 
   const handleBulkUpload = async (e) => {
     const file = e.target.files[0];
@@ -201,15 +412,12 @@ export default function QuestionBank({ user }) {
           
           if (char === '"') {
             if (inQuotes && nextChar === '"') {
-              // Escaped quote
               current += '"';
-              i++; // Skip next quote
+              i++;
             } else {
-              // Toggle quote state
               inQuotes = !inQuotes;
             }
           } else if (char === ',' && !inQuotes) {
-            // Field delimiter
             result.push(current.trim());
             current = '';
           } else {
@@ -217,13 +425,12 @@ export default function QuestionBank({ user }) {
           }
         }
         
-        // Add last field
         result.push(current.trim());
         return result;
       };
 
       const headers = parseCSVLine(lines[0]);
-      const questions = [];
+      const questionsData = [];
 
       for (let i = 1; i < lines.length; i++) {
         const values = parseCSVLine(lines[i]);
@@ -233,22 +440,20 @@ export default function QuestionBank({ user }) {
           question[header] = values[index] || "";
         });
         
-        // Only add if question has required fields
         if (question.question_text && question.choice_a) {
-          questions.push(question);
+          questionsData.push(question);
         }
       }
 
-      if (questions.length === 0) {
+      if (questionsData.length === 0) {
         toast.error("No valid questions found in CSV");
         setUploading(false);
         return;
       }
 
-      // Upload to backend
       const response = await axios.post(
         `${API}/mc-questions/bulk-upload`,
-        { questions },
+        { questions: questionsData },
         { withCredentials: true }
       );
 
@@ -294,7 +499,7 @@ export default function QuestionBank({ user }) {
 
   const organizeQuestions = () => {
     const organized = {};
-    questions.forEach(question => {
+    filteredQuestions.forEach(question => {
       const chapter = question.chapter || "Uncategorized";
       const lesson = question.lesson || "Lesson 1";
       
@@ -311,6 +516,17 @@ export default function QuestionBank({ user }) {
 
   const organizedQuestions = organizeQuestions();
 
+  // Get unit type badge
+  const getUnitTypeBadge = (unitType) => {
+    const badges = {
+      "block": { bg: "bg-purple-100", text: "text-purple-700", label: "🧱 Block" },
+      "turtle": { bg: "bg-green-100", text: "text-green-700", label: "🐢 Turtle" },
+      "code": { bg: "bg-blue-100", text: "text-blue-700", label: "🐍 Python" },
+      "microbit": { bg: "bg-cyan-100", text: "text-cyan-700", label: "⚡ Micro:bit" }
+    };
+    return badges[unitType] || { bg: "bg-gray-100", text: "text-gray-700", label: "❓ Unassigned" };
+  };
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50">
       <nav className="bg-white shadow-sm border-b border-gray-200">
@@ -326,6 +542,21 @@ export default function QuestionBank({ user }) {
             </div>
           </div>
           <div className="flex gap-2">
+            {/* Selection Mode Toggle */}
+            <Button
+              variant={selectionMode ? "default" : "outline"}
+              onClick={() => {
+                setSelectionMode(!selectionMode);
+                if (selectionMode) {
+                  setSelectedQuestions([]);
+                }
+              }}
+              className={selectionMode ? "bg-indigo-600" : ""}
+            >
+              <CheckSquare className="w-4 h-4 mr-2" />
+              {selectionMode ? "Exit Selection" : "Select Multiple"}
+            </Button>
+            
             <Dialog open={bulkUploadDialogOpen} onOpenChange={setBulkUploadDialogOpen}>
               <DialogTrigger asChild>
                 <Button variant="outline">
@@ -342,10 +573,11 @@ export default function QuestionBank({ user }) {
                   <div>
                     <Label>CSV Format:</Label>
                     <pre className="text-xs bg-gray-100 p-3 rounded mt-2 overflow-x-auto whitespace-pre-wrap">
-question_text,choice_a,choice_b,choice_c,choice_d,correct_answer,chapter,lesson,difficulty
-What is 2+2?,3,4,5,6,B,Chapter 1,Lesson 1,Easy</pre>
+question_text,choice_a,choice_b,choice_c,choice_d,correct_answer,unit_type,unit,chapter,lesson,difficulty
+What is 2+2?,3,4,5,6,B,code,Unit 3: Python Text,Chapter 1,Lesson 1,Easy</pre>
                     <p className="text-xs text-gray-600 mt-2">
                       • correct_answer should be A, B, C, or D<br/>
+                      • unit_type should be block, turtle, code, or microbit<br/>
                       • difficulty should be Easy, Medium, or Hard
                     </p>
                   </div>
@@ -372,136 +604,305 @@ What is 2+2?,3,4,5,6,B,Chapter 1,Lesson 1,Easy</pre>
                   Create Question
                 </Button>
               </DialogTrigger>
-            <DialogContent className="max-w-2xl">
-              <DialogHeader>
-                <DialogTitle>Create Multiple Choice Question</DialogTitle>
-                <DialogDescription>Add a new question to your question bank</DialogDescription>
-              </DialogHeader>
-              <form onSubmit={handleCreateQuestion} className="space-y-4">
-                <div>
-                  <Label htmlFor="question_text">Question *</Label>
-                  <Textarea
-                    id="question_text"
-                    placeholder="Enter your question..."
-                    value={newQuestion.question_text}
-                    onChange={(e) => setNewQuestion({ ...newQuestion, question_text: e.target.value })}
-                    className="mt-1"
-                    rows={3}
-                  />
-                </div>
+              <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+                <DialogHeader>
+                  <DialogTitle>Create Multiple Choice Question</DialogTitle>
+                  <DialogDescription>Add a new question to your question bank</DialogDescription>
+                </DialogHeader>
+                <form onSubmit={handleCreateQuestion} className="space-y-4">
+                  <div>
+                    <Label htmlFor="question_text">Question *</Label>
+                    <Textarea
+                      id="question_text"
+                      placeholder="Enter your question..."
+                      value={newQuestion.question_text}
+                      onChange={(e) => setNewQuestion({ ...newQuestion, question_text: e.target.value })}
+                      className="mt-1"
+                      rows={3}
+                    />
+                  </div>
 
-                <div className="space-y-2">
-                  <Label>Answer Choices *</Label>
                   <div className="space-y-2">
-                    <Input
-                      placeholder="A. First choice"
-                      value={newQuestion.choice_a}
-                      onChange={(e) => setNewQuestion({ ...newQuestion, choice_a: e.target.value })}
-                    />
-                    <Input
-                      placeholder="B. Second choice"
-                      value={newQuestion.choice_b}
-                      onChange={(e) => setNewQuestion({ ...newQuestion, choice_b: e.target.value })}
-                    />
-                    <Input
-                      placeholder="C. Third choice"
-                      value={newQuestion.choice_c}
-                      onChange={(e) => setNewQuestion({ ...newQuestion, choice_c: e.target.value })}
-                    />
-                    <Input
-                      placeholder="D. Fourth choice"
-                      value={newQuestion.choice_d}
-                      onChange={(e) => setNewQuestion({ ...newQuestion, choice_d: e.target.value })}
-                    />
+                    <Label>Answer Choices *</Label>
+                    <div className="space-y-2">
+                      <Input
+                        placeholder="A. First choice"
+                        value={newQuestion.choice_a}
+                        onChange={(e) => setNewQuestion({ ...newQuestion, choice_a: e.target.value })}
+                      />
+                      <Input
+                        placeholder="B. Second choice"
+                        value={newQuestion.choice_b}
+                        onChange={(e) => setNewQuestion({ ...newQuestion, choice_b: e.target.value })}
+                      />
+                      <Input
+                        placeholder="C. Third choice"
+                        value={newQuestion.choice_c}
+                        onChange={(e) => setNewQuestion({ ...newQuestion, choice_c: e.target.value })}
+                      />
+                      <Input
+                        placeholder="D. Fourth choice"
+                        value={newQuestion.choice_d}
+                        onChange={(e) => setNewQuestion({ ...newQuestion, choice_d: e.target.value })}
+                      />
+                    </div>
                   </div>
-                </div>
 
-                <div>
-                  <Label>Correct Answer *</Label>
-                  <RadioGroup value={newQuestion.correct_answer} onValueChange={(val) => setNewQuestion({ ...newQuestion, correct_answer: val })}>
-                    <div className="flex items-center space-x-2">
-                      <RadioGroupItem value="A" id="correct-a" />
-                      <Label htmlFor="correct-a">A</Label>
-                    </div>
-                    <div className="flex items-center space-x-2">
-                      <RadioGroupItem value="B" id="correct-b" />
-                      <Label htmlFor="correct-b">B</Label>
-                    </div>
-                    <div className="flex items-center space-x-2">
-                      <RadioGroupItem value="C" id="correct-c" />
-                      <Label htmlFor="correct-c">C</Label>
-                    </div>
-                    <div className="flex items-center space-x-2">
-                      <RadioGroupItem value="D" id="correct-d" />
-                      <Label htmlFor="correct-d">D</Label>
-                    </div>
-                  </RadioGroup>
-                </div>
+                  <div>
+                    <Label>Correct Answer *</Label>
+                    <RadioGroup value={newQuestion.correct_answer} onValueChange={(val) => setNewQuestion({ ...newQuestion, correct_answer: val })} className="flex gap-4 mt-1">
+                      <div className="flex items-center space-x-2">
+                        <RadioGroupItem value="A" id="correct-a" />
+                        <Label htmlFor="correct-a">A</Label>
+                      </div>
+                      <div className="flex items-center space-x-2">
+                        <RadioGroupItem value="B" id="correct-b" />
+                        <Label htmlFor="correct-b">B</Label>
+                      </div>
+                      <div className="flex items-center space-x-2">
+                        <RadioGroupItem value="C" id="correct-c" />
+                        <Label htmlFor="correct-c">C</Label>
+                      </div>
+                      <div className="flex items-center space-x-2">
+                        <RadioGroupItem value="D" id="correct-d" />
+                        <Label htmlFor="correct-d">D</Label>
+                      </div>
+                    </RadioGroup>
+                  </div>
 
-                <div className="grid grid-cols-3 gap-4">
-                  <div>
-                    <Label htmlFor="chapter">Chapter</Label>
-                    <Input
-                      id="chapter"
-                      placeholder="e.g., Chapter 1"
-                      value={newQuestion.chapter}
-                      onChange={(e) => setNewQuestion({ ...newQuestion, chapter: e.target.value })}
-                      className="mt-1"
-                    />
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <Label>Unit Type</Label>
+                      <Select 
+                        value={newQuestion.unit_type} 
+                        onValueChange={(val) => setNewQuestion({ 
+                          ...newQuestion, 
+                          unit_type: val,
+                          unit: UNIT_TYPE_MAP[val] || ""
+                        })}
+                      >
+                        <SelectTrigger className="mt-1">
+                          <SelectValue placeholder="Select unit type..." />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {UNIT_TYPES.map(type => (
+                            <SelectItem key={type.value} value={type.value}>{type.label}</SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
+                    <div>
+                      <Label htmlFor="difficulty">Difficulty</Label>
+                      <Select value={newQuestion.difficulty} onValueChange={(val) => setNewQuestion({ ...newQuestion, difficulty: val })}>
+                        <SelectTrigger className="mt-1">
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="Easy">Easy</SelectItem>
+                          <SelectItem value="Medium">Medium</SelectItem>
+                          <SelectItem value="Hard">Hard</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
                   </div>
-                  <div>
-                    <Label htmlFor="lesson">Lesson</Label>
-                    <Input
-                      id="lesson"
-                      placeholder="e.g., Lesson 1"
-                      value={newQuestion.lesson}
-                      onChange={(e) => setNewQuestion({ ...newQuestion, lesson: e.target.value })}
-                      className="mt-1"
-                    />
-                  </div>
-                  <div>
-                    <Label htmlFor="difficulty">Difficulty</Label>
-                    <Select value={newQuestion.difficulty} onValueChange={(val) => setNewQuestion({ ...newQuestion, difficulty: val })}>
-                      <SelectTrigger className="mt-1">
-                        <SelectValue />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="Easy">Easy</SelectItem>
-                        <SelectItem value="Medium">Medium</SelectItem>
-                        <SelectItem value="Hard">Hard</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </div>
-                </div>
 
-                <Button type="submit" className="w-full bg-indigo-600 hover:bg-indigo-700">
-                  Create Question
-                </Button>
-              </form>
-            </DialogContent>
-          </Dialog>
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <Label htmlFor="chapter">Chapter</Label>
+                      <Input
+                        id="chapter"
+                        placeholder="e.g., Chapter 1: Printing"
+                        value={newQuestion.chapter}
+                        onChange={(e) => setNewQuestion({ ...newQuestion, chapter: e.target.value })}
+                        className="mt-1"
+                      />
+                    </div>
+                    <div>
+                      <Label htmlFor="lesson">Lesson</Label>
+                      <Input
+                        id="lesson"
+                        placeholder="e.g., Lesson 1: Intro"
+                        value={newQuestion.lesson}
+                        onChange={(e) => setNewQuestion({ ...newQuestion, lesson: e.target.value })}
+                        className="mt-1"
+                      />
+                    </div>
+                  </div>
+
+                  <Button type="submit" className="w-full bg-indigo-600 hover:bg-indigo-700">
+                    Create Question
+                  </Button>
+                </form>
+              </DialogContent>
+            </Dialog>
           </div>
         </div>
       </nav>
 
-      <main className="container mx-auto px-6 py-10">
+      <main className="container mx-auto px-6 py-6">
+        {/* Filters Bar */}
+        <Card className="mb-6">
+          <CardContent className="p-4">
+            <div className="flex flex-wrap gap-3 items-center">
+              {/* Search */}
+              <div className="relative flex-grow max-w-md">
+                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400" />
+                <Input
+                  placeholder="Search questions..."
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                  className="pl-10"
+                />
+              </div>
+
+              {/* Unit Type Filter */}
+              <Select value={unitTypeFilter} onValueChange={(v) => {
+                setUnitTypeFilter(v);
+                if (v && v !== "all") {
+                  setSearchParams({ type: v });
+                } else {
+                  setSearchParams({});
+                }
+              }}>
+                <SelectTrigger className="w-44">
+                  <SelectValue placeholder="All Types" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">All Types</SelectItem>
+                  {UNIT_TYPES.map(type => (
+                    <SelectItem key={type.value} value={type.value}>{type.label}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+
+              {/* Unit Filter */}
+              <Select value={unitFilter} onValueChange={setUnitFilter}>
+                <SelectTrigger className="w-52">
+                  <SelectValue placeholder="All Units" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">All Units</SelectItem>
+                  <SelectItem value="Unit 1: Block-Based Coding">Unit 1: Block-Based Coding</SelectItem>
+                  <SelectItem value="Unit 2: Turtle Graphics">Unit 2: Turtle Graphics</SelectItem>
+                  <SelectItem value="Unit 3: Python Text">Unit 3: Python Text</SelectItem>
+                  <SelectItem value="Unit 4: Micro:bit">Unit 4: Micro:bit</SelectItem>
+                </SelectContent>
+              </Select>
+
+              {/* Chapter Filter */}
+              <Select value={chapterFilter} onValueChange={setChapterFilter}>
+                <SelectTrigger className="w-40">
+                  <SelectValue placeholder="All Chapters" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">All Chapters</SelectItem>
+                  {chapters.map(chapter => (
+                    <SelectItem key={chapter} value={chapter}>{chapter}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+
+              {/* Lesson Filter */}
+              <Select value={lessonFilter} onValueChange={setLessonFilter}>
+                <SelectTrigger className="w-40">
+                  <SelectValue placeholder="All Lessons" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">All Lessons</SelectItem>
+                  {lessons.map(lesson => (
+                    <SelectItem key={lesson} value={lesson}>{lesson}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+
+              {/* Difficulty Filter */}
+              <Select value={difficultyFilter} onValueChange={setDifficultyFilter}>
+                <SelectTrigger className="w-32">
+                  <SelectValue placeholder="All Levels" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">All Levels</SelectItem>
+                  <SelectItem value="Easy">Easy</SelectItem>
+                  <SelectItem value="Medium">Medium</SelectItem>
+                  <SelectItem value="Hard">Hard</SelectItem>
+                </SelectContent>
+              </Select>
+
+              {/* Clear Filters */}
+              {hasActiveFilters && (
+                <Button variant="ghost" size="sm" onClick={clearFilters} className="text-gray-500">
+                  <X className="w-4 h-4 mr-1" />
+                  Clear Filters
+                </Button>
+              )}
+            </div>
+
+            {/* Selection Mode Actions */}
+            {selectionMode && (
+              <div className="flex items-center gap-3 mt-4 pt-4 border-t">
+                <span className="text-sm text-gray-600">
+                  {selectedQuestions.length} selected
+                </span>
+                <Button variant="outline" size="sm" onClick={selectAllVisible}>
+                  Select All Visible ({filteredQuestions.length})
+                </Button>
+                <Button variant="outline" size="sm" onClick={deselectAll}>
+                  Deselect All
+                </Button>
+                <Button 
+                  size="sm" 
+                  onClick={() => setBulkUpdateDialogOpen(true)}
+                  disabled={selectedQuestions.length === 0}
+                  className="bg-indigo-600 hover:bg-indigo-700"
+                >
+                  <Edit className="w-4 h-4 mr-1" />
+                  Bulk Edit
+                </Button>
+                <Button 
+                  variant="destructive" 
+                  size="sm" 
+                  onClick={handleBulkDelete}
+                  disabled={selectedQuestions.length === 0}
+                >
+                  <Trash2 className="w-4 h-4 mr-1" />
+                  Delete Selected
+                </Button>
+              </div>
+            )}
+          </CardContent>
+        </Card>
+
+        {/* Results Summary */}
+        <div className="mb-4 text-sm text-gray-600">
+          Showing {filteredQuestions.length} of {questions.length} questions
+        </div>
+
         {loading ? (
           <div className="text-center py-20">Loading questions...</div>
-        ) : questions.length === 0 ? (
+        ) : filteredQuestions.length === 0 ? (
           <div className="text-center py-20">
             <FileQuestion className="w-16 h-16 text-gray-400 mx-auto mb-4" />
-            <h3 className="text-xl font-semibold text-gray-700 mb-2">No questions yet</h3>
-            <p className="text-gray-500 mb-6">Create your first multiple choice question</p>
-            <Button onClick={() => setCreateDialogOpen(true)} className="bg-indigo-600 hover:bg-indigo-700">
-              <Plus className="w-4 h-4 mr-2" />
-              Create Question
-            </Button>
+            <h3 className="text-xl font-semibold text-gray-700 mb-2">
+              {questions.length === 0 ? "No questions yet" : "No questions match your filters"}
+            </h3>
+            <p className="text-gray-500 mb-6">
+              {questions.length === 0 
+                ? "Create your first multiple choice question" 
+                : "Try adjusting your filters or search term"}
+            </p>
+            {questions.length === 0 && (
+              <Button onClick={() => setCreateDialogOpen(true)} className="bg-indigo-600 hover:bg-indigo-700">
+                <Plus className="w-4 h-4 mr-2" />
+                Create Question
+              </Button>
+            )}
           </div>
         ) : (
           <div className="space-y-4">
             {Object.keys(organizedQuestions).sort().map((chapter) => {
               const isChapterExpanded = expandedChapters.has(chapter);
-              const lessons = organizedQuestions[chapter];
+              const lessonsList = organizedQuestions[chapter];
+              const chapterQuestionCount = Object.values(lessonsList).reduce((sum, arr) => sum + arr.length, 0);
               
               return (
                 <div key={chapter} className="border rounded-lg bg-white shadow-sm">
@@ -521,16 +922,16 @@ What is 2+2?,3,4,5,6,B,Chapter 1,Lesson 1,Easy</pre>
                     )}
                     <h3 className="text-lg font-semibold text-gray-900">{chapter}</h3>
                     <span className="ml-auto text-sm text-gray-500 bg-gray-100 px-3 py-1 rounded-full">
-                      {Object.keys(lessons).length} lesson{Object.keys(lessons).length !== 1 ? 's' : ''}
+                      {chapterQuestionCount} question{chapterQuestionCount !== 1 ? 's' : ''}
                     </span>
                   </div>
 
                   {isChapterExpanded && (
                     <div className="pl-8 pr-4 pb-4 space-y-3">
-                      {Object.keys(lessons).sort().map((lesson) => {
+                      {Object.keys(lessonsList).sort().map((lesson) => {
                         const lessonKey = `${chapter}-${lesson}`;
                         const isLessonExpanded = expandedLessons.has(lessonKey);
-                        const lessonQuestions = lessons[lesson];
+                        const lessonQuestions = lessonsList[lesson];
                         
                         return (
                           <div key={lessonKey} className="border rounded-lg bg-gray-50">
@@ -556,69 +957,101 @@ What is 2+2?,3,4,5,6,B,Chapter 1,Lesson 1,Easy</pre>
 
                             {isLessonExpanded && (
                               <div className="p-3 pt-0 space-y-3">
-                                {lessonQuestions.map((question) => (
-                                  <Card key={question.id} className="hover:shadow-md transition-shadow">
-                                    <CardHeader>
-                                      <div className="flex justify-between items-start">
-                                        <CardTitle className="text-base">{question.question_text}</CardTitle>
-                                        <div className={`px-2 py-1 rounded text-xs font-semibold ${
-                                          question.difficulty === "Easy" ? "bg-green-100 text-green-700" :
-                                          question.difficulty === "Medium" ? "bg-yellow-100 text-yellow-700" :
-                                          "bg-red-100 text-red-700"
-                                        }`}>
-                                          {question.difficulty}
+                                {lessonQuestions.map((question) => {
+                                  const badge = getUnitTypeBadge(question.unit_type);
+                                  const isSelected = selectedQuestions.includes(question.id);
+                                  
+                                  return (
+                                    <Card 
+                                      key={question.id} 
+                                      className={`hover:shadow-md transition-shadow ${isSelected ? 'ring-2 ring-indigo-500' : ''}`}
+                                    >
+                                      <CardHeader className="pb-2">
+                                        <div className="flex justify-between items-start gap-2">
+                                          <div className="flex items-start gap-2 flex-1">
+                                            {selectionMode && (
+                                              <Checkbox
+                                                checked={isSelected}
+                                                onCheckedChange={() => toggleQuestionSelection(question.id)}
+                                                className="mt-1"
+                                              />
+                                            )}
+                                            <CardTitle className="text-base">{question.question_text}</CardTitle>
+                                          </div>
+                                          <div className="flex items-center gap-2 flex-shrink-0">
+                                            <span className={`px-2 py-1 rounded text-xs font-semibold ${badge.bg} ${badge.text}`}>
+                                              {badge.label}
+                                            </span>
+                                            <span className={`px-2 py-1 rounded text-xs font-semibold ${
+                                              question.difficulty === "Easy" ? "bg-green-100 text-green-700" :
+                                              question.difficulty === "Medium" ? "bg-yellow-100 text-yellow-700" :
+                                              "bg-red-100 text-red-700"
+                                            }`}>
+                                              {question.difficulty}
+                                            </span>
+                                          </div>
                                         </div>
-                                      </div>
-                                    </CardHeader>
-                                    <CardContent>
-                                      <div className="space-y-1 text-sm mb-3">
-                                        <div>A. {question.choice_a}</div>
-                                        <div>B. {question.choice_b}</div>
-                                        <div>C. {question.choice_c}</div>
-                                        <div>D. {question.choice_d}</div>
-                                      </div>
-                                      <div className="text-sm text-green-600 font-medium mb-3">
-                                        ✓ Correct Answer: {question.correct_answer}
-                                      </div>
-                                      <div className="flex gap-2">
-                                        <Button
-                                          onClick={() => {
-                                            setMovingQuestion(question);
-                                            setMoveToChapter(question.chapter || "");
-                                            setMoveToLesson(question.lesson || "");
-                                            setMoveDialogOpen(true);
-                                          }}
-                                          variant="outline"
-                                          size="sm"
-                                          className="flex-1"
-                                        >
-                                          <FolderInput className="w-4 h-4 mr-1" />
-                                          Move
-                                        </Button>
-                                        <Button
-                                          onClick={() => {
-                                            setEditingQuestion(question);
-                                            setEditDialogOpen(true);
-                                          }}
-                                          variant="outline"
-                                          size="sm"
-                                          className="flex-1"
-                                        >
-                                          <Edit className="w-4 h-4 mr-1" />
-                                          Edit
-                                        </Button>
-                                        <Button
-                                          onClick={() => handleDeleteQuestion(question.id)}
-                                          variant="outline"
-                                          size="sm"
-                                          className="text-red-600 hover:text-red-700"
-                                        >
-                                          <Trash2 className="w-4 h-4" />
-                                        </Button>
-                                      </div>
-                                    </CardContent>
-                                  </Card>
-                                ))}
+                                      </CardHeader>
+                                      <CardContent>
+                                        <div className="space-y-1 text-sm mb-3">
+                                          <div className={question.correct_answer === "A" ? "text-green-600 font-medium" : ""}>
+                                            A. {question.choice_a}
+                                          </div>
+                                          <div className={question.correct_answer === "B" ? "text-green-600 font-medium" : ""}>
+                                            B. {question.choice_b}
+                                          </div>
+                                          <div className={question.correct_answer === "C" ? "text-green-600 font-medium" : ""}>
+                                            C. {question.choice_c}
+                                          </div>
+                                          <div className={question.correct_answer === "D" ? "text-green-600 font-medium" : ""}>
+                                            D. {question.choice_d}
+                                          </div>
+                                        </div>
+                                        <div className="text-sm text-green-600 font-medium mb-3">
+                                          ✓ Correct Answer: {question.correct_answer}
+                                        </div>
+                                        {!selectionMode && (
+                                          <div className="flex gap-2">
+                                            <Button
+                                              onClick={() => {
+                                                setMovingQuestion(question);
+                                                setMoveToChapter(question.chapter || "");
+                                                setMoveToLesson(question.lesson || "");
+                                                setMoveDialogOpen(true);
+                                              }}
+                                              variant="outline"
+                                              size="sm"
+                                              className="flex-1"
+                                            >
+                                              <FolderInput className="w-4 h-4 mr-1" />
+                                              Move
+                                            </Button>
+                                            <Button
+                                              onClick={() => {
+                                                setEditingQuestion(question);
+                                                setEditDialogOpen(true);
+                                              }}
+                                              variant="outline"
+                                              size="sm"
+                                              className="flex-1"
+                                            >
+                                              <Edit className="w-4 h-4 mr-1" />
+                                              Edit
+                                            </Button>
+                                            <Button
+                                              onClick={() => handleDeleteQuestion(question.id)}
+                                              variant="outline"
+                                              size="sm"
+                                              className="text-red-600 hover:text-red-700"
+                                            >
+                                              <Trash2 className="w-4 h-4" />
+                                            </Button>
+                                          </div>
+                                        )}
+                                      </CardContent>
+                                    </Card>
+                                  );
+                                })}
                               </div>
                             )}
                           </div>
@@ -636,7 +1069,7 @@ What is 2+2?,3,4,5,6,B,Chapter 1,Lesson 1,Easy</pre>
       {/* Edit Dialog */}
       {editingQuestion && (
         <Dialog open={editDialogOpen} onOpenChange={setEditDialogOpen}>
-          <DialogContent className="max-w-2xl">
+          <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
             <DialogHeader>
               <DialogTitle>Edit Question</DialogTitle>
             </DialogHeader>
@@ -678,7 +1111,7 @@ What is 2+2?,3,4,5,6,B,Chapter 1,Lesson 1,Easy</pre>
 
               <div>
                 <Label>Correct Answer *</Label>
-                <RadioGroup value={editingQuestion.correct_answer} onValueChange={(val) => setEditingQuestion({ ...editingQuestion, correct_answer: val })}>
+                <RadioGroup value={editingQuestion.correct_answer} onValueChange={(val) => setEditingQuestion({ ...editingQuestion, correct_answer: val })} className="flex gap-4 mt-1">
                   <div className="flex items-center space-x-2">
                     <RadioGroupItem value="A" id="edit-correct-a" />
                     <Label htmlFor="edit-correct-a">A</Label>
@@ -698,7 +1131,43 @@ What is 2+2?,3,4,5,6,B,Chapter 1,Lesson 1,Easy</pre>
                 </RadioGroup>
               </div>
 
-              <div className="grid grid-cols-3 gap-4">
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <Label>Unit Type</Label>
+                  <Select 
+                    value={editingQuestion.unit_type || ""} 
+                    onValueChange={(val) => setEditingQuestion({ 
+                      ...editingQuestion, 
+                      unit_type: val,
+                      unit: UNIT_TYPE_MAP[val] || editingQuestion.unit
+                    })}
+                  >
+                    <SelectTrigger className="mt-1">
+                      <SelectValue placeholder="Select unit type..." />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {UNIT_TYPES.map(type => (
+                        <SelectItem key={type.value} value={type.value}>{type.label}</SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div>
+                  <Label>Difficulty</Label>
+                  <Select value={editingQuestion.difficulty} onValueChange={(val) => setEditingQuestion({ ...editingQuestion, difficulty: val })}>
+                    <SelectTrigger className="mt-1">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="Easy">Easy</SelectItem>
+                      <SelectItem value="Medium">Medium</SelectItem>
+                      <SelectItem value="Hard">Hard</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-2 gap-4">
                 <div>
                   <Label>Chapter</Label>
                   <Input
@@ -714,19 +1183,6 @@ What is 2+2?,3,4,5,6,B,Chapter 1,Lesson 1,Easy</pre>
                     onChange={(e) => setEditingQuestion({ ...editingQuestion, lesson: e.target.value })}
                     className="mt-1"
                   />
-                </div>
-                <div>
-                  <Label>Difficulty</Label>
-                  <Select value={editingQuestion.difficulty} onValueChange={(val) => setEditingQuestion({ ...editingQuestion, difficulty: val })}>
-                    <SelectTrigger className="mt-1">
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="Easy">Easy</SelectItem>
-                      <SelectItem value="Medium">Medium</SelectItem>
-                      <SelectItem value="Hard">Hard</SelectItem>
-                    </SelectContent>
-                  </Select>
                 </div>
               </div>
 
@@ -752,7 +1208,7 @@ What is 2+2?,3,4,5,6,B,Chapter 1,Lesson 1,Easy</pre>
               <div>
                 <Label>Chapter</Label>
                 <Input
-                  placeholder="e.g., Chapter 1"
+                  placeholder="e.g., Chapter 1: Printing"
                   value={moveToChapter}
                   onChange={(e) => setMoveToChapter(e.target.value)}
                   className="mt-1"
@@ -761,7 +1217,7 @@ What is 2+2?,3,4,5,6,B,Chapter 1,Lesson 1,Easy</pre>
               <div>
                 <Label>Lesson</Label>
                 <Input
-                  placeholder="e.g., Lesson 1"
+                  placeholder="e.g., Lesson 1: Intro"
                   value={moveToLesson}
                   onChange={(e) => setMoveToLesson(e.target.value)}
                   className="mt-1"
@@ -780,6 +1236,81 @@ What is 2+2?,3,4,5,6,B,Chapter 1,Lesson 1,Easy</pre>
           </DialogContent>
         </Dialog>
       )}
+
+      {/* Bulk Update Dialog */}
+      <Dialog open={bulkUpdateDialogOpen} onOpenChange={setBulkUpdateDialogOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Bulk Edit {selectedQuestions.length} Questions</DialogTitle>
+            <DialogDescription>
+              Update the unit type, unit, chapter, or lesson for all selected questions.
+              Leave fields empty to keep their current values.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div>
+              <Label>Unit Type</Label>
+              <Select value={bulkUpdateUnitType} onValueChange={(val) => {
+                setBulkUpdateUnitType(val);
+                if (val && val !== "keep") {
+                  setBulkUpdateUnit(UNIT_TYPE_MAP[val] || "");
+                }
+              }}>
+                <SelectTrigger className="mt-1">
+                  <SelectValue placeholder="Keep current type" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="keep">⏸️ Keep current type</SelectItem>
+                  {UNIT_TYPES.map(type => (
+                    <SelectItem key={type.value} value={type.value}>{type.label}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              <p className="text-xs text-blue-600 mt-1 font-medium">
+                ⚠️ Change this to move questions to a different curriculum!
+              </p>
+            </div>
+            <div>
+              <Label>Unit</Label>
+              <Input
+                placeholder="e.g., Unit 2: Turtle Graphics"
+                value={bulkUpdateUnit}
+                onChange={(e) => setBulkUpdateUnit(e.target.value)}
+                className="mt-1"
+              />
+              <p className="text-xs text-gray-500 mt-1">
+                Examples: "Unit 1: Block-Based Coding", "Unit 2: Turtle Graphics", "Unit 3: Python Text"
+              </p>
+            </div>
+            <div>
+              <Label>Chapter</Label>
+              <Input
+                placeholder="e.g., Chapter 1: Printing"
+                value={bulkUpdateChapter}
+                onChange={(e) => setBulkUpdateChapter(e.target.value)}
+                className="mt-1"
+              />
+            </div>
+            <div>
+              <Label>Lesson</Label>
+              <Input
+                placeholder="e.g., Lesson 1: Intro"
+                value={bulkUpdateLesson}
+                onChange={(e) => setBulkUpdateLesson(e.target.value)}
+                className="mt-1"
+              />
+            </div>
+          </div>
+          <DialogFooter className="mt-4">
+            <Button variant="outline" onClick={() => setBulkUpdateDialogOpen(false)}>
+              Cancel
+            </Button>
+            <Button onClick={handleBulkUpdate} className="bg-indigo-600 hover:bg-indigo-700">
+              Update {selectedQuestions.length} Questions
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
