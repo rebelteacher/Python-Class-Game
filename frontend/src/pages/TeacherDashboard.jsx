@@ -288,29 +288,29 @@ export default function TeacherDashboard({ user, setUser }) {
             </CardContent>
           </Card>
 
-          {/* Unit 2: Python */}
-          <Card 
-            className="bg-gradient-to-br from-blue-500 to-blue-700 text-white cursor-pointer hover:shadow-xl transition-all hover:scale-105 border-0"
-            onClick={() => navigate("/python-curriculum")}
-          >
-            <CardContent className="p-6 text-center">
-              <div className="text-4xl mb-2">🐍</div>
-              <h3 className="font-bold text-lg">Unit 2</h3>
-              <p className="text-blue-100 text-sm">Python Text</p>
-              <p className="text-xs text-blue-200 mt-2">Text-Based Programming</p>
-            </CardContent>
-          </Card>
-
-          {/* Unit 3: Turtle */}
+          {/* Unit 2: Turtle */}
           <Card 
             className="bg-gradient-to-br from-green-500 to-emerald-600 text-white cursor-pointer hover:shadow-xl transition-all hover:scale-105 border-0"
             onClick={() => navigate("/turtle-curriculum")}
           >
             <CardContent className="p-6 text-center">
               <div className="text-4xl mb-2">🐢</div>
-              <h3 className="font-bold text-lg">Unit 3</h3>
+              <h3 className="font-bold text-lg">Unit 2</h3>
               <p className="text-green-100 text-sm">Turtle Graphics</p>
               <p className="text-xs text-green-200 mt-2">Visual Output</p>
+            </CardContent>
+          </Card>
+
+          {/* Unit 3: Python */}
+          <Card 
+            className="bg-gradient-to-br from-blue-500 to-blue-700 text-white cursor-pointer hover:shadow-xl transition-all hover:scale-105 border-0"
+            onClick={() => navigate("/python-curriculum")}
+          >
+            <CardContent className="p-6 text-center">
+              <div className="text-4xl mb-2">🐍</div>
+              <h3 className="font-bold text-lg">Unit 3</h3>
+              <p className="text-blue-100 text-sm">Python Text</p>
+              <p className="text-xs text-blue-200 mt-2">Text-Based Programming</p>
             </CardContent>
           </Card>
 

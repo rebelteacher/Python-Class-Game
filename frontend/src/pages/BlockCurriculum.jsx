@@ -737,17 +737,17 @@ export default function BlockCurriculum({ user }) {
             <ArrowRightLeft className="w-12 h-12 text-purple-400 mx-auto mb-4" />
             <h3 className="text-xl font-bold text-gray-900 mb-2">Ready for Unit 2?</h3>
             <p className="text-gray-600 mb-4">
-              After completing Unit 1, students will be prepared to transition to text-based Python programming.
+              After completing Unit 1, students will be prepared to transition to Turtle Graphics - learning Python syntax through visual programming!
             </p>
             <div className="flex justify-center gap-4 flex-wrap">
-              <Button onClick={() => navigate("/python-curriculum")} className="bg-blue-600 hover:bg-blue-700">
-                🐍 Python Text (Unit 2)
+              <Button onClick={() => navigate("/turtle-curriculum")} className="bg-green-600 hover:bg-green-700">
+                🐢 Turtle Graphics (Unit 2)
               </Button>
-              <Button variant="outline" onClick={() => navigate("/turtle-curriculum")}>
-                🐢 Turtle Graphics (Unit 3)
+              <Button variant="outline" onClick={() => navigate("/python-curriculum")}>
+                🐍 Python Text (Unit 3)
               </Button>
               <Button variant="outline" onClick={() => navigate("/microbit")}>
-                ⚡ Micro:bit (Unit 4+)
+                ⚡ Micro:bit (Unit 4)
               </Button>
             </div>
           </CardContent>
