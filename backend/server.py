@@ -6202,6 +6202,8 @@ async def create_mc_question(question: MCQuestionCreate, request: Request):
         choice_c=question.choice_c,
         choice_d=question.choice_d,
         correct_answer=question.correct_answer.upper(),
+        unit_type=question.unit_type,
+        unit=question.unit,
         chapter=question.chapter,
         lesson=question.lesson,
         difficulty=question.difficulty,
