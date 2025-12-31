@@ -43,7 +43,7 @@ const TURTLE_CURRICULUM = {
   units: [
     {
       id: "unit1",
-      title: "Unit 1: First Steps with Turtle",
+      title: "Chapter 1: First Steps with Turtle",
       description: "Introduction to turtle graphics and basic commands",
       icon: "🐢",
       color: "from-green-500 to-emerald-500",
@@ -89,7 +89,7 @@ const TURTLE_CURRICULUM = {
     },
     {
       id: "unit2",
-      title: "Unit 2: Loops - The Power of Repetition",
+      title: "Chapter 2: Loops - The Power of Repetition",
       description: "Use loops to create patterns efficiently",
       icon: "🔁",
       color: "from-blue-500 to-indigo-500",
@@ -147,7 +147,7 @@ const TURTLE_CURRICULUM = {
     },
     {
       id: "unit3",
-      title: "Unit 3: Colors & Style",
+      title: "Chapter 3: Colors & Style",
       description: "Add color and customize your drawings",
       icon: "🎨",
       color: "from-pink-500 to-rose-500",
@@ -193,7 +193,7 @@ const TURTLE_CURRICULUM = {
     },
     {
       id: "unit4",
-      title: "Unit 4: Conditionals - Making Decisions",
+      title: "Chapter 4: Conditionals - Making Decisions",
       description: "Use if/else to create dynamic drawings",
       icon: "🔀",
       color: "from-purple-500 to-violet-500",
@@ -251,7 +251,7 @@ const TURTLE_CURRICULUM = {
     },
     {
       id: "unit5",
-      title: "Unit 5: Functions - Reusable Code",
+      title: "Chapter 5: Functions - Reusable Code",
       description: "Create your own commands with functions",
       icon: "📦",
       color: "from-orange-500 to-amber-500",
@@ -309,7 +309,7 @@ const TURTLE_CURRICULUM = {
     },
     {
       id: "unit6",
-      title: "Unit 6: Projects & Challenges",
+      title: "Chapter 6: Projects & Challenges",
       description: "Apply all skills to create amazing art",
       icon: "🏆",
       color: "from-yellow-500 to-orange-500",
