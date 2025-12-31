@@ -6379,6 +6379,67 @@ async def move_mc_question(question_id: str, data: dict, request: Request):
     return {"success": True, "message": "Question moved successfully"}
 
 
+@api_router.put("/mc-questions/bulk-update")
+async def bulk_update_mc_questions(data: dict, request: Request):
+    """Bulk update multiple MC questions' unit_type, unit, chapter, and/or lesson"""
+    user = await get_current_user(request)
+    
+    if user["role"] != "teacher":
+        raise HTTPException(status_code=403, detail="Only teachers can update questions")
+    
+    question_ids = data.get("question_ids", [])
+    if not question_ids:
+        raise HTTPException(status_code=400, detail="No questions selected")
+    
+    update_fields = {}
+    
+    # Only update fields that are provided and not empty
+    if data.get("unit_type") and data["unit_type"] != "keep":
+        update_fields["unit_type"] = data["unit_type"]
+    if data.get("unit"):
+        update_fields["unit"] = data["unit"]
+    if data.get("chapter"):
+        update_fields["chapter"] = data["chapter"]
+    if data.get("lesson"):
+        update_fields["lesson"] = data["lesson"]
+    
+    if not update_fields:
+        raise HTTPException(status_code=400, detail="No fields to update")
+    
+    # Update only questions owned by this teacher
+    result = await db.mc_questions.update_many(
+        {"id": {"$in": question_ids}, "creator_id": user["id"]},
+        {"$set": update_fields}
+    )
+    
+    return {
+        "updated": result.modified_count,
+        "message": f"Updated {result.modified_count} questions"
+    }
+
+
+@api_router.delete("/mc-questions/bulk-delete")
+async def bulk_delete_mc_questions(data: dict, request: Request):
+    """Bulk delete multiple MC questions"""
+    user = await get_current_user(request)
+    
+    if user["role"] != "teacher":
+        raise HTTPException(status_code=403, detail="Only teachers can delete questions")
+    
+    question_ids = data.get("question_ids", [])
+    if not question_ids:
+        raise HTTPException(status_code=400, detail="No questions selected")
+    
+    # Delete only questions owned by this teacher
+    result = await db.mc_questions.delete_many(
+        {"id": {"$in": question_ids}, "creator_id": user["id"]}
+    )
+    
+    return {
+        "deleted": result.deleted_count,
+        "message": f"Deleted {result.deleted_count} questions"
+    }
+
 
 @api_router.post("/mc-tests")
 async def create_mc_test(test: MCTestCreate, request: Request):
