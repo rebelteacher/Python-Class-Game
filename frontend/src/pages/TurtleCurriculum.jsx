@@ -28,7 +28,7 @@ import {
 const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
 const API = `${BACKEND_URL}/api`;
 
-// Turtle curriculum structure - Unit 3: Visual Python with Turtle Graphics
+// Turtle curriculum structure - Unit 2: Visual Python with Turtle Graphics
 // Map from curriculum unit to database chapter
 const CHAPTER_MAPPING = {
   "unit1": "Chapter 1: First Steps",
@@ -490,7 +490,7 @@ export default function TurtleCurriculum({ user }) {
                 <h1 className="text-3xl font-bold flex items-center gap-3">
                   🐢 Turtle Graphics Curriculum
                 </h1>
-                <p className="text-green-100 mt-1">Unit 3: Visual Python Programming</p>
+                <p className="text-green-100 mt-1">Unit 2: Visual Python Programming</p>
               </div>
             </div>
             <Button
@@ -595,7 +595,7 @@ export default function TurtleCurriculum({ user }) {
               <div className="flex items-center gap-3">
                 <div className="text-sm">
                   <p className="text-gray-700 font-medium">
-                    📚 Part of <span className="text-green-600">Unit 3: Turtle Graphics</span> curriculum
+                    📚 Part of <span className="text-green-600">Unit 2: Turtle Graphics</span> curriculum
                   </p>
                   <p className="text-gray-500 text-xs">
                     Covers: Variables, Loops, Conditionals, Functions, Debugging
@@ -747,7 +747,7 @@ export default function TurtleCurriculum({ user }) {
             </div>
             <div className="mt-4 p-4 bg-gray-50 rounded-lg text-sm text-gray-600">
               <strong>After Turtle:</strong> Students will take these same Python skills to 
-              <span className="text-blue-600 font-medium"> Unit 3: Python Text</span> for more advanced programming, 
+              <span className="text-blue-600 font-medium"> Unit 3: Python Text</span> for advanced text-based programming, 
               then move to <span className="text-cyan-600 font-medium">Micro:bit physical computing</span>, 
               making LEDs blink, responding to buttons, and reading sensors.
             </div>
