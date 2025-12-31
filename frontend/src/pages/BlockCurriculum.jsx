@@ -449,19 +449,7 @@ export default function BlockCurriculum({ user }) {
             </CardContent>
           </Card>
           
-          <Card className="hover:shadow-lg transition-shadow cursor-pointer border-2 border-indigo-200" onClick={() => navigate("/blocks/sprites")}>
-            <CardContent className="p-6 flex items-center gap-4">
-              <div className="p-3 bg-indigo-100 rounded-lg">
-                <Star className="w-6 h-6 text-indigo-600" />
-              </div>
-              <div>
-                <h3 className="font-semibold">Sprite Editor</h3>
-                <p className="text-sm text-gray-600">Create with sprites & AI</p>
-              </div>
-            </CardContent>
-          </Card>
-          
-          <Card className="hover:shadow-lg transition-shadow cursor-pointer border-2 border-purple-500 bg-purple-50" onClick={() => navigate("/blocks/teach")}>
+          <Card className="hover:shadow-lg transition-shadow cursor-pointer border-2 border-purple-500 bg-purple-50" onClick={() => navigate("/blocks/teach")}>>
             <CardContent className="p-6 flex items-center gap-4">
               <div className="p-3 bg-purple-500 rounded-lg">
                 <Play className="w-6 h-6 text-white" />
