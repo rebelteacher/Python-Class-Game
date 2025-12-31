@@ -602,6 +602,8 @@ class MCQuestion(BaseModel):
     choice_c: str
     choice_d: str
     correct_answer: str  # "A", "B", "C", or "D"
+    unit_type: str = ""  # "block", "turtle", "code", "microbit"
+    unit: str = ""  # "Unit 1: Block-Based Coding", etc.
     chapter: str = ""
     lesson: str = ""
     difficulty: str = "Easy"  # "Easy", "Medium", "Hard"
@@ -617,6 +619,8 @@ class MCQuestionCreate(BaseModel):
     choice_c: str
     choice_d: str
     correct_answer: str
+    unit_type: str = ""
+    unit: str = ""
     chapter: str = ""
     lesson: str = ""
     difficulty: str = "Easy"
