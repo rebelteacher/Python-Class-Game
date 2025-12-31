@@ -192,8 +192,8 @@ export default function AssignmentLibrary({ user }) {
       // Map standardized unit names to database values
       const unitMappings = {
         "Unit 1: Block-Based Coding": ["Unit 1: Block-Based Coding", "Unit 1 Blocks", "Unit 1"],
-        "Unit 2: Python Text": ["Unit 2: Python Text", "Unit 1: Python Text", "Unit 2", "Unit 1"],
-        "Unit 3: Turtle Graphics": ["Unit 3: Turtle Graphics", "Unit 3"],
+        "Unit 2: Turtle Graphics": ["Unit 2: Turtle Graphics", "Unit 2", "Unit 3: Turtle Graphics", "Unit 3"],
+        "Unit 3: Python Text": ["Unit 3: Python Text", "Unit 3", "Unit 2: Python Text", "Unit 2", "Unit 1: Python Text", "Unit 1"],
         "Unit 4: Micro:bit": ["Unit 4: Micro:bit", "Unit 4", "Unit 4: Microbit"]
       };
       
@@ -202,10 +202,10 @@ export default function AssignmentLibrary({ user }) {
       // Also filter by assignment_type if it's a specific unit
       if (unitFilter === "Unit 1: Block-Based Coding") {
         filtered = filtered.filter(p => p.assignment_type === "block" || matchingUnits.includes(p.unit));
-      } else if (unitFilter === "Unit 2: Python Text") {
-        filtered = filtered.filter(p => p.assignment_type === "code" || matchingUnits.includes(p.unit));
-      } else if (unitFilter === "Unit 3: Turtle Graphics") {
+      } else if (unitFilter === "Unit 2: Turtle Graphics") {
         filtered = filtered.filter(p => p.assignment_type === "turtle" || matchingUnits.includes(p.unit));
+      } else if (unitFilter === "Unit 3: Python Text") {
+        filtered = filtered.filter(p => p.assignment_type === "code" || matchingUnits.includes(p.unit));
       } else if (unitFilter === "Unit 4: Micro:bit") {
         filtered = filtered.filter(p => p.assignment_type === "microbit" || matchingUnits.includes(p.unit));
       } else {
@@ -814,8 +814,8 @@ export default function AssignmentLibrary({ user }) {
                         </SelectTrigger>
                         <SelectContent>
                           <SelectItem value="block">🧱 Block (Unit 1)</SelectItem>
-                          <SelectItem value="code">🐍 Python (Unit 2)</SelectItem>
-                          <SelectItem value="turtle">🐢 Turtle (Unit 3)</SelectItem>
+                          <SelectItem value="turtle">🐢 Turtle (Unit 2)</SelectItem>
+                          <SelectItem value="code">🐍 Python (Unit 3)</SelectItem>
                           <SelectItem value="microbit">⚡ Micro:bit (Unit 4)</SelectItem>
                         </SelectContent>
                       </Select>
@@ -1660,8 +1660,8 @@ export default function AssignmentLibrary({ user }) {
               <SelectContent>
                 <SelectItem value="all">All Units</SelectItem>
                 <SelectItem value="Unit 1: Block-Based Coding">Unit 1: Block-Based Coding</SelectItem>
-                <SelectItem value="Unit 2: Python Text">Unit 2: Python Text</SelectItem>
-                <SelectItem value="Unit 3: Turtle Graphics">Unit 3: Turtle Graphics</SelectItem>
+                <SelectItem value="Unit 2: Turtle Graphics">Unit 2: Turtle Graphics</SelectItem>
+                <SelectItem value="Unit 3: Python Text">Unit 3: Python Text</SelectItem>
                 <SelectItem value="Unit 4: Micro:bit">Unit 4: Micro:bit</SelectItem>
               </SelectContent>
             </Select>
@@ -2387,8 +2387,8 @@ export default function AssignmentLibrary({ user }) {
                 <SelectContent>
                   <SelectItem value="keep">⏸️ Keep current type</SelectItem>
                   <SelectItem value="block">🧱 Block-Based (Unit 1)</SelectItem>
-                  <SelectItem value="code">🐍 Python Code (Unit 2)</SelectItem>
-                  <SelectItem value="turtle">🐢 Turtle Graphics (Unit 3)</SelectItem>
+                  <SelectItem value="turtle">🐢 Turtle Graphics (Unit 2)</SelectItem>
+                  <SelectItem value="code">🐍 Python Code (Unit 3)</SelectItem>
                   <SelectItem value="microbit">⚡ Micro:bit (Unit 4)</SelectItem>
                 </SelectContent>
               </Select>
@@ -2399,13 +2399,13 @@ export default function AssignmentLibrary({ user }) {
             <div>
               <Label>Unit</Label>
               <Input
-                placeholder="e.g., Unit 2: Python Text"
+                placeholder="e.g., Unit 2: Turtle Graphics"
                 value={bulkUpdateUnit}
                 onChange={(e) => setBulkUpdateUnit(e.target.value)}
                 className="mt-1"
               />
               <p className="text-xs text-gray-500 mt-1">
-                Examples: "Unit 1: Block-Based", "Unit 2: Python Text", "Unit 3: Turtle Graphics"
+                Examples: "Unit 1: Block-Based", "Unit 2: Turtle Graphics", "Unit 3: Python Text"
               </p>
             </div>
             <div>
