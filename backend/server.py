@@ -2905,25 +2905,33 @@ async def submit_assignment(submission: SubmissionCreate, request: Request):
         # Also evaluate pattern-based test cases from the problem
         # Check multiple sources for test_cases:
         # 1. From the problem document itself
-        # 2. From the assignment's embedded problem data
-        # 3. From the assignment directly (legacy)
+        # 2. From the assignment's problems array (embedded problem data)
+        # 3. From the assignment directly (for per-problem test cases stored at assignment level)
         test_cases = problem.get("test_cases") or []
+        logging.info(f"GRADING Step 1: problem.test_cases = {len(test_cases)} tests")
         
         # If no test_cases on problem, check assignment's problems array
         if not test_cases and assignment.get("problems"):
             for ap in assignment.get("problems") or []:
                 if ap.get("id") == submission.problem_id:
                     test_cases = ap.get("test_cases") or []
-                    logging.info(f"Found test_cases in assignment.problems: {len(test_cases)} tests")
+                    logging.info(f"GRADING Step 2: Found test_cases in assignment.problems: {len(test_cases)} tests")
                     break
         
         # If still no test_cases, check assignment directly (legacy single-problem)
         if not test_cases:
             test_cases = assignment.get("test_cases") or []
             if test_cases:
-                logging.info(f"Found test_cases in assignment: {len(test_cases)} tests")
+                logging.info(f"GRADING Step 3: Found test_cases in assignment: {len(test_cases)} tests")
         
-        logging.info(f"Turtle grading - test_cases found: {len(test_cases)}, problem_id: {submission.problem_id}")
+        # FINAL FALLBACK: For multi-problem assignments, test_cases might be stored
+        # in a per-problem structure at assignment level with problem_id as key
+        if not test_cases and assignment.get("problem_test_cases"):
+            test_cases = assignment["problem_test_cases"].get(submission.problem_id) or []
+            if test_cases:
+                logging.info(f"GRADING Step 4: Found test_cases in assignment.problem_test_cases: {len(test_cases)} tests")
+        
+        logging.info(f"Turtle grading - FINAL test_cases found: {len(test_cases)}, problem_id: {submission.problem_id}")
         if test_cases:
             logging.info(f"Turtle grading - first test_case: {test_cases[0] if test_cases else 'none'}")
         
