@@ -2942,9 +2942,6 @@ async def submit_assignment(submission: SubmissionCreate, request: Request):
                     # Extract keywords from description for pattern matching
                     desc_lower = description.lower()
                     
-                    # Common patterns: "Uses X()" -> check for "X"
-                    import re
-                    
                     # Look for function names like "left()", "forward()", "right()", etc.
                     func_match = re.search(r'uses?\s+(\w+)\s*\(?', desc_lower)
                     if func_match:
