@@ -2924,6 +2924,8 @@ async def submit_assignment(submission: SubmissionCreate, request: Request):
                 logging.info(f"Found test_cases in assignment: {len(test_cases)} tests")
         
         logging.info(f"Turtle grading - test_cases found: {len(test_cases)}, problem_id: {submission.problem_id}")
+        if test_cases:
+            logging.info(f"Turtle grading - first test_case: {test_cases[0] if test_cases else 'none'}")
         
         test_results = []
         pattern_score = 0
