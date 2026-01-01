@@ -2899,7 +2899,28 @@ async def submit_assignment(submission: SubmissionCreate, request: Request):
         logging.info(f"Turtle grading result: score={turtle_result['score']}, feedback={turtle_result['feedback']}")
         
         # Also evaluate pattern-based test cases from the problem
+        # Check multiple sources for test_cases:
+        # 1. From the problem document itself
+        # 2. From the assignment's embedded problem data
+        # 3. From the assignment directly (legacy)
         test_cases = problem.get("test_cases", [])
+        
+        # If no test_cases on problem, check assignment's problems array
+        if not test_cases and assignment.get("problems"):
+            for ap in assignment["problems"]:
+                if ap.get("id") == submission.problem_id:
+                    test_cases = ap.get("test_cases", [])
+                    logging.info(f"Found test_cases in assignment.problems: {len(test_cases)} tests")
+                    break
+        
+        # If still no test_cases, check assignment directly (legacy single-problem)
+        if not test_cases:
+            test_cases = assignment.get("test_cases", [])
+            if test_cases:
+                logging.info(f"Found test_cases in assignment: {len(test_cases)} tests")
+        
+        logging.info(f"Turtle grading - test_cases found: {len(test_cases)}, problem_id: {submission.problem_id}")
+        
         test_results = []
         pattern_score = 0
         total_pattern_points = 0
