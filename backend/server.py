@@ -2828,7 +2828,10 @@ async def submit_assignment(submission: SubmissionCreate, request: Request):
             raise HTTPException(status_code=404, detail="Problem not found")
         if submission.problem_id not in assignment["problem_ids"]:
             raise HTTPException(status_code=400, detail="Problem not part of this assignment")
-        logging.info(f"GRADING: Found problem from db.problems - id={submission.problem_id}, has test_cases={bool(problem.get('test_cases'))}, test_cases_count={len(problem.get('test_cases') or [])}")
+        # Log all keys and test_cases details
+        logging.info(f"GRADING: Found problem from db.problems - id={submission.problem_id}")
+        logging.info(f"GRADING: Problem keys: {list(problem.keys())}")
+        logging.info(f"GRADING: test_cases type={type(problem.get('test_cases'))}, value={problem.get('test_cases')}")
     else:
         # Old structure: problem data is in assignment itself
         problem = {
