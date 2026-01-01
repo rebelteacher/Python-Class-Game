@@ -3269,7 +3269,7 @@ Be encouraging but fair. Give partial credit for good attempts."""
                 
                 # Parse AI response - handle markdown code blocks
                 import json
-                import re
+
                 
                 # Clean up the response - remove markdown code blocks if present
                 clean_response = response.strip()
@@ -3406,7 +3406,7 @@ Be encouraging but fair. Give partial credit for good attempts."""
                 if test_input:
                     # First, replace any newlines with a placeholder
                     # Then split by comma and/or newline
-                    import re
+
                     # Split by comma or newline, strip whitespace from each value
                     values = re.split(r'[,\n]+', test_input)
                     values = [v.strip() for v in values if v.strip()]
@@ -3536,7 +3536,7 @@ Be encouraging but fair. Give partial credit for good attempts."""
                 
                 # Check for minor differences (only end punctuation)
                 # Remove only trailing punctuation (., !, ?) but keep internal content like quotes
-                import re
+
                 expected_trimmed = re.sub(r'[.!?]+$', '', expected).strip()
                 actual_trimmed = re.sub(r'[.!?]+$', '', actual).strip()
                 
