@@ -2889,7 +2889,7 @@ async def submit_assignment(submission: SubmissionCreate, request: Request):
             }
             logging.info(f"Maze config for problem {problem.get('id')}: goals={len(maze_config['goals'])} items, collision_enabled={maze_config['collision_enabled']}")
         
-        # Grade turtle submission
+        # Grade turtle submission (for visual/tracking validation)
         turtle_result = await grade_turtle_submission(
             submission.code,
             grading_criteria,
@@ -2898,14 +2898,57 @@ async def submit_assignment(submission: SubmissionCreate, request: Request):
         )
         logging.info(f"Turtle grading result: score={turtle_result['score']}, feedback={turtle_result['feedback']}")
         
-        base_score = turtle_result["score"]
-        feedback = turtle_result["feedback"]
-        test_results = [{
-            "test_id": "turtle_grading",
-            "description": "Turtle graphics requirements",
-            "passed": base_score >= 70,
-            "tracking_data": turtle_result["tracking_data"]
-        }]
+        # Also evaluate pattern-based test cases from the problem
+        test_cases = problem.get("test_cases", [])
+        test_results = []
+        pattern_score = 0
+        total_pattern_points = 0
+        
+        if test_cases:
+            for i, tc in enumerate(test_cases):
+                pattern = tc.get("pattern", "")
+                description = tc.get("description", f"Test case {i+1}")
+                points = tc.get("points", 0)
+                total_pattern_points += points
+                
+                # Check if pattern exists in the code
+                passed = False
+                if pattern:
+                    # Case-insensitive pattern check in code
+                    passed = pattern.lower() in submission.code.lower()
+                    if passed:
+                        pattern_score += points
+                
+                test_results.append({
+                    "test_id": f"pattern_{i}",
+                    "description": description,
+                    "passed": passed,
+                    "points": points,
+                    "pattern": pattern
+                })
+            
+            # Calculate final score based on pattern tests
+            if total_pattern_points > 0:
+                base_score = (pattern_score / total_pattern_points) * 100
+            else:
+                base_score = turtle_result["score"]
+            
+            feedback = f"Pattern tests: {pattern_score}/{total_pattern_points} points"
+            if turtle_result.get("feedback"):
+                feedback += f". {turtle_result['feedback']}"
+        else:
+            # No pattern test cases - use turtle visual grading
+            base_score = turtle_result["score"]
+            feedback = turtle_result["feedback"]
+            test_results = [{
+                "test_id": "turtle_grading",
+                "description": "Turtle graphics requirements",
+                "passed": base_score >= 70,
+                "tracking_data": turtle_result["tracking_data"]
+            }]
+        
+        logging.info(f"Final turtle score: {base_score}, test_results: {len(test_results)}")
+        
         is_passing = base_score >= 70
         
         # No lives deduction - unlimited attempts
