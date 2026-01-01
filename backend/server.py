@@ -2173,7 +2173,6 @@ def normalize_output(output: str) -> str:
         # Normalize spacing around commas: "[10 , 20]" -> "[10, 20]"
         normalized = normalized.replace(' ,', ',').replace(',  ', ', ').replace(', ', ', ')
         # Ensure consistent format: "[10,20]" -> "[10, 20]"
-        import re
         normalized = re.sub(r',(\S)', r', \1', normalized)
         return normalized.strip()
     
