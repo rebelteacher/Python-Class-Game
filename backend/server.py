@@ -3009,14 +3009,9 @@ async def submit_assignment(submission: SubmissionCreate, request: Request):
                     
                     # Special case: "names the turtle" - check for variable assignment pattern
                     if 'name' in desc_lower and 'turtle' in desc_lower:
-                        # Look for pattern like: variable = turtle.Turtle()
-                        # This regex checks for: word = turtle.Turtle() (excluding 'import' and 't = ')
-                        name_match = re.search(r'\b([a-zA-Z_][a-zA-Z0-9_]*)\s*=\s*turtle\.Turtle\s*\(\s*\)', submission.code)
-                        if name_match:
-                            var_name = name_match.group(1)
-                            # Pass if they used a meaningful name (not just 't' or single letter)
-                            if len(var_name) > 1:
-                                patterns_to_check = ['_TURTLE_NAMED_']  # Special marker
+                        # Look for pattern: anything = turtle.Turtle()
+                        if '= turtle.Turtle()' in submission.code or '=turtle.Turtle()' in submission.code:
+                            patterns_to_check = ['_TURTLE_NAMED_']  # Special marker
                     
                     logging.info(f"Test case '{description}': patterns to check = {patterns_to_check}")
                     
