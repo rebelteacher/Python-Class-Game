@@ -2904,19 +2904,19 @@ async def submit_assignment(submission: SubmissionCreate, request: Request):
         # 1. From the problem document itself
         # 2. From the assignment's embedded problem data
         # 3. From the assignment directly (legacy)
-        test_cases = problem.get("test_cases", [])
+        test_cases = problem.get("test_cases") or []
         
         # If no test_cases on problem, check assignment's problems array
         if not test_cases and assignment.get("problems"):
-            for ap in assignment["problems"]:
+            for ap in assignment.get("problems") or []:
                 if ap.get("id") == submission.problem_id:
-                    test_cases = ap.get("test_cases", [])
+                    test_cases = ap.get("test_cases") or []
                     logging.info(f"Found test_cases in assignment.problems: {len(test_cases)} tests")
                     break
         
         # If still no test_cases, check assignment directly (legacy single-problem)
         if not test_cases:
-            test_cases = assignment.get("test_cases", [])
+            test_cases = assignment.get("test_cases") or []
             if test_cases:
                 logging.info(f"Found test_cases in assignment: {len(test_cases)} tests")
         
