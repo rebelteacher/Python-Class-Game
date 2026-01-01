@@ -2828,14 +2828,17 @@ async def submit_assignment(submission: SubmissionCreate, request: Request):
             raise HTTPException(status_code=404, detail="Problem not found")
         if submission.problem_id not in assignment["problem_ids"]:
             raise HTTPException(status_code=400, detail="Problem not part of this assignment")
+        logging.info(f"GRADING: Found problem from db.problems - id={submission.problem_id}, has test_cases={bool(problem.get('test_cases'))}, test_cases_count={len(problem.get('test_cases') or [])}")
     else:
         # Old structure: problem data is in assignment itself
         problem = {
             "id": assignment["id"],
             "solution_code": assignment.get("solution_code", ""),
             "title": assignment.get("title", ""),
-            "assignment_type": assignment.get("assignment_type", "code")
+            "assignment_type": assignment.get("assignment_type", "code"),
+            "test_cases": assignment.get("test_cases", [])
         }
+        logging.info(f"GRADING: Using embedded problem from assignment - id={assignment['id']}, has test_cases={bool(problem.get('test_cases'))}, test_cases_count={len(problem.get('test_cases') or [])}")
         # For backward compatibility, use assignment_id as problem_id
         if not submission.problem_id:
             submission.problem_id = assignment["id"]
