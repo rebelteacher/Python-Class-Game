@@ -2990,16 +2990,48 @@ async def submit_assignment(submission: SubmissionCreate, request: Request):
                             patterns_to_check.append('circle')
                         if 'goto' in desc_lower or 'go to' in desc_lower:
                             patterns_to_check.append('goto')
+                        if 'fillcolor' in desc_lower or 'fill color' in desc_lower:
+                            patterns_to_check.append('fillcolor')
+                        if 'begin_fill' in desc_lower or 'beginfill' in desc_lower:
+                            patterns_to_check.append('begin_fill')
+                        if 'end_fill' in desc_lower or 'endfill' in desc_lower:
+                            patterns_to_check.append('end_fill')
+                        if 'pensize' in desc_lower or 'pen size' in desc_lower:
+                            patterns_to_check.append('pensize')
+                        if 'speed' in desc_lower:
+                            patterns_to_check.append('speed')
+                        if 'shape' in desc_lower:
+                            patterns_to_check.append('shape')
+                        if 'hideturtle' in desc_lower or 'hide turtle' in desc_lower:
+                            patterns_to_check.append('hideturtle')
+                        if 'showturtle' in desc_lower or 'show turtle' in desc_lower:
+                            patterns_to_check.append('showturtle')
+                    
+                    # Special case: "names the turtle" - check for variable assignment pattern
+                    if 'name' in desc_lower and 'turtle' in desc_lower:
+                        # Look for pattern like: variable = turtle.Turtle()
+                        # This regex checks for: word = turtle.Turtle() (excluding 'import' and 't = ')
+                        name_match = re.search(r'\b([a-zA-Z_][a-zA-Z0-9_]*)\s*=\s*turtle\.Turtle\s*\(\s*\)', submission.code)
+                        if name_match:
+                            var_name = name_match.group(1)
+                            # Pass if they used a meaningful name (not just 't' or single letter)
+                            if len(var_name) > 1:
+                                patterns_to_check = ['_TURTLE_NAMED_']  # Special marker
                     
                     logging.info(f"Test case '{description}': patterns to check = {patterns_to_check}")
                     
                     # Check if ALL patterns exist in the code
                     passed = False
                     if patterns_to_check:
-                        code_lower = submission.code.lower()
-                        passed = all(p.lower() in code_lower for p in patterns_to_check)
-                        if passed:
+                        if '_TURTLE_NAMED_' in patterns_to_check:
+                            # Special case already validated above
+                            passed = True
                             pattern_score += points
+                        else:
+                            code_lower = submission.code.lower()
+                            passed = all(p.lower() in code_lower for p in patterns_to_check)
+                            if passed:
+                                pattern_score += points
                     
                     test_results.append({
                         "test_id": f"pattern_{i}",
