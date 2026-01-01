@@ -2928,66 +2928,76 @@ async def submit_assignment(submission: SubmissionCreate, request: Request):
         
         if test_cases:
             for i, tc in enumerate(test_cases):
-                # Get explicit pattern or auto-extract from description
-                pattern = tc.get("pattern", "")
-                description = tc.get("description", f"Test case {i+1}")
-                points = tc.get("points", 0)
-                total_pattern_points += points
-                
-                # Auto-extract patterns from description if no explicit pattern
-                patterns_to_check = []
-                if pattern:
-                    patterns_to_check = [pattern]
-                else:
-                    # Extract keywords from description for pattern matching
-                    desc_lower = description.lower()
+                try:
+                    # Get explicit pattern or auto-extract from description
+                    pattern = tc.get("pattern", "") or ""
+                    description = tc.get("description", f"Test case {i+1}") or f"Test case {i+1}"
+                    points = tc.get("points", 0) or 0
+                    total_pattern_points += points
                     
-                    # Look for function names like "left()", "forward()", "right()", etc.
-                    func_match = re.search(r'uses?\s+(\w+)\s*\(?', desc_lower)
-                    if func_match:
-                        patterns_to_check.append(func_match.group(1))
+                    # Auto-extract patterns from description if no explicit pattern
+                    patterns_to_check = []
+                    if pattern:
+                        patterns_to_check = [pattern]
+                    else:
+                        # Extract keywords from description for pattern matching
+                        desc_lower = description.lower()
+                        
+                        # Look for function names like "left()", "forward()", "right()", etc.
+                        func_match = re.search(r'uses?\s+(\w+)\s*\(?', desc_lower)
+                        if func_match:
+                            patterns_to_check.append(func_match.group(1))
+                        
+                        # Look for numbers (degrees, pixels, etc.)
+                        numbers = re.findall(r'\b(\d+)\b', description)
+                        patterns_to_check.extend(numbers)
+                        
+                        # Look for specific keywords
+                        if 'forward' in desc_lower and 'forward' not in patterns_to_check:
+                            patterns_to_check.append('forward')
+                        if 'backward' in desc_lower and 'backward' not in patterns_to_check:
+                            patterns_to_check.append('backward')
+                        if 'left' in desc_lower and 'left' not in patterns_to_check:
+                            patterns_to_check.append('left')
+                        if 'right' in desc_lower and 'right' not in patterns_to_check:
+                            patterns_to_check.append('right')
+                        if 'penup' in desc_lower or 'pen up' in desc_lower:
+                            patterns_to_check.append('penup')
+                        if 'pendown' in desc_lower or 'pen down' in desc_lower:
+                            patterns_to_check.append('pendown')
+                        if 'pencolor' in desc_lower or 'pen color' in desc_lower or 'color' in desc_lower:
+                            patterns_to_check.append('color')
+                        if 'circle' in desc_lower:
+                            patterns_to_check.append('circle')
+                        if 'goto' in desc_lower or 'go to' in desc_lower:
+                            patterns_to_check.append('goto')
                     
-                    # Look for numbers (degrees, pixels, etc.)
-                    numbers = re.findall(r'\b(\d+)\b', description)
-                    patterns_to_check.extend(numbers)
+                    logging.info(f"Test case '{description}': patterns to check = {patterns_to_check}")
                     
-                    # Look for specific keywords
-                    if 'forward' in desc_lower and 'forward' not in patterns_to_check:
-                        patterns_to_check.append('forward')
-                    if 'backward' in desc_lower and 'backward' not in patterns_to_check:
-                        patterns_to_check.append('backward')
-                    if 'left' in desc_lower and 'left' not in patterns_to_check:
-                        patterns_to_check.append('left')
-                    if 'right' in desc_lower and 'right' not in patterns_to_check:
-                        patterns_to_check.append('right')
-                    if 'penup' in desc_lower or 'pen up' in desc_lower:
-                        patterns_to_check.append('penup')
-                    if 'pendown' in desc_lower or 'pen down' in desc_lower:
-                        patterns_to_check.append('pendown')
-                    if 'pencolor' in desc_lower or 'pen color' in desc_lower or 'color' in desc_lower:
-                        patterns_to_check.append('color')
-                    if 'circle' in desc_lower:
-                        patterns_to_check.append('circle')
-                    if 'goto' in desc_lower or 'go to' in desc_lower:
-                        patterns_to_check.append('goto')
-                
-                logging.info(f"Test case '{description}': patterns to check = {patterns_to_check}")
-                
-                # Check if ALL patterns exist in the code
-                passed = False
-                if patterns_to_check:
-                    code_lower = submission.code.lower()
-                    passed = all(p.lower() in code_lower for p in patterns_to_check)
-                    if passed:
-                        pattern_score += points
-                
-                test_results.append({
-                    "test_id": f"pattern_{i}",
-                    "description": description,
-                    "passed": passed,
-                    "points": points,
-                    "patterns_checked": patterns_to_check
-                })
+                    # Check if ALL patterns exist in the code
+                    passed = False
+                    if patterns_to_check:
+                        code_lower = submission.code.lower()
+                        passed = all(p.lower() in code_lower for p in patterns_to_check)
+                        if passed:
+                            pattern_score += points
+                    
+                    test_results.append({
+                        "test_id": f"pattern_{i}",
+                        "description": description,
+                        "passed": passed,
+                        "points": points,
+                        "patterns_checked": patterns_to_check
+                    })
+                except Exception as tc_error:
+                    logging.error(f"Error processing test case {i}: {str(tc_error)}")
+                    test_results.append({
+                        "test_id": f"pattern_{i}",
+                        "description": tc.get("description", f"Test case {i+1}"),
+                        "passed": False,
+                        "points": tc.get("points", 0),
+                        "error": str(tc_error)
+                    })
             
             # Calculate final score based on pattern tests
             if total_pattern_points > 0:
