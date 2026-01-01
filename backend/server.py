@@ -3069,7 +3069,12 @@ async def submit_assignment(submission: SubmissionCreate, request: Request):
             "is_final": False,
             "turtle_image": turtle_result["image_data"],
             "turtle_tracking_data": turtle_result["tracking_data"],
-            "submitted_at": datetime.now(timezone.utc).isoformat()
+            "submitted_at": datetime.now(timezone.utc).isoformat(),
+            # DEBUG: Include test_cases info to diagnose grading issues
+            "_debug_test_cases_count": len(test_cases),
+            "_debug_test_cases_source": "problem" if problem.get("test_cases") else ("assignment.problems" if assignment.get("problems") else "assignment"),
+            "_debug_pattern_score": pattern_score,
+            "_debug_total_pattern_points": total_pattern_points
         }
         
         await db.submissions.insert_one(new_submission)
