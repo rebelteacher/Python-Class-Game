@@ -2906,16 +2906,59 @@ async def submit_assignment(submission: SubmissionCreate, request: Request):
         
         if test_cases:
             for i, tc in enumerate(test_cases):
+                # Get explicit pattern or auto-extract from description
                 pattern = tc.get("pattern", "")
                 description = tc.get("description", f"Test case {i+1}")
                 points = tc.get("points", 0)
                 total_pattern_points += points
                 
-                # Check if pattern exists in the code
-                passed = False
+                # Auto-extract patterns from description if no explicit pattern
+                patterns_to_check = []
                 if pattern:
-                    # Case-insensitive pattern check in code
-                    passed = pattern.lower() in submission.code.lower()
+                    patterns_to_check = [pattern]
+                else:
+                    # Extract keywords from description for pattern matching
+                    desc_lower = description.lower()
+                    
+                    # Common patterns: "Uses X()" -> check for "X"
+                    import re
+                    
+                    # Look for function names like "left()", "forward()", "right()", etc.
+                    func_match = re.search(r'uses?\s+(\w+)\s*\(?', desc_lower)
+                    if func_match:
+                        patterns_to_check.append(func_match.group(1))
+                    
+                    # Look for numbers (degrees, pixels, etc.)
+                    numbers = re.findall(r'\b(\d+)\b', description)
+                    patterns_to_check.extend(numbers)
+                    
+                    # Look for specific keywords
+                    if 'forward' in desc_lower and 'forward' not in patterns_to_check:
+                        patterns_to_check.append('forward')
+                    if 'backward' in desc_lower and 'backward' not in patterns_to_check:
+                        patterns_to_check.append('backward')
+                    if 'left' in desc_lower and 'left' not in patterns_to_check:
+                        patterns_to_check.append('left')
+                    if 'right' in desc_lower and 'right' not in patterns_to_check:
+                        patterns_to_check.append('right')
+                    if 'penup' in desc_lower or 'pen up' in desc_lower:
+                        patterns_to_check.append('penup')
+                    if 'pendown' in desc_lower or 'pen down' in desc_lower:
+                        patterns_to_check.append('pendown')
+                    if 'pencolor' in desc_lower or 'pen color' in desc_lower or 'color' in desc_lower:
+                        patterns_to_check.append('color')
+                    if 'circle' in desc_lower:
+                        patterns_to_check.append('circle')
+                    if 'goto' in desc_lower or 'go to' in desc_lower:
+                        patterns_to_check.append('goto')
+                
+                logging.info(f"Test case '{description}': patterns to check = {patterns_to_check}")
+                
+                # Check if ALL patterns exist in the code
+                passed = False
+                if patterns_to_check:
+                    code_lower = submission.code.lower()
+                    passed = all(p.lower() in code_lower for p in patterns_to_check)
                     if passed:
                         pattern_score += points
                 
@@ -2924,7 +2967,7 @@ async def submit_assignment(submission: SubmissionCreate, request: Request):
                     "description": description,
                     "passed": passed,
                     "points": points,
-                    "pattern": pattern
+                    "patterns_checked": patterns_to_check
                 })
             
             # Calculate final score based on pattern tests
