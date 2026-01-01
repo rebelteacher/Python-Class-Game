@@ -961,6 +961,7 @@ export default function AssignmentPage({ user }) {
                           <th className="border border-gray-200 px-3 py-2 text-left font-semibold text-indigo-700">Input</th>
                           <th className="border border-gray-200 px-3 py-2 text-left font-semibold text-indigo-700">Expected Output</th>
                           <th className="border border-gray-200 px-3 py-2 text-center font-semibold text-indigo-700">Points</th>
+                          {latestSubmission && <th className="border border-gray-200 px-3 py-2 text-center font-semibold text-indigo-700">Status</th>}
                         </tr>
                       </thead>
                       <tbody>
@@ -969,7 +970,18 @@ export default function AssignmentPage({ user }) {
                           const testCases = problem?.test_cases || [];
                           const pointsPerTest = testCases.length > 0 ? Math.round(100 / testCases.length) : 0;
                           
-                          return testCases.map((testCase, index) => (
+                          // Get test results from latest submission to show pass/fail
+                          const testResults = latestSubmission?.test_results || [];
+                          
+                          return testCases.map((testCase, index) => {
+                            // Find matching result by description or index
+                            const result = testResults.find(r => 
+                              r.description === testCase.description || 
+                              r.description === (testCase.description || `Test ${index + 1}`) ||
+                              r.test_id === `pattern_${index}`
+                            );
+                            
+                            return (
                             <tr key={testCase.id || index} className={index % 2 === 0 ? 'bg-white' : 'bg-gray-50'}>
                               <td className="border border-gray-200 px-3 py-2 text-center font-medium text-gray-600">
                                 {index + 1}
@@ -992,8 +1004,27 @@ export default function AssignmentPage({ user }) {
                                   {testCase.points || pointsPerTest} pts
                                 </span>
                               </td>
+                              {latestSubmission && (
+                                <td className="border border-gray-200 px-3 py-2 text-center">
+                                  {result ? (
+                                    result.passed ? (
+                                      <span className="inline-flex items-center justify-center px-2 py-1 bg-green-100 text-green-700 rounded-full font-semibold text-xs">
+                                        ✓ Pass
+                                      </span>
+                                    ) : (
+                                      <span className="inline-flex items-center justify-center px-2 py-1 bg-red-100 text-red-700 rounded-full font-semibold text-xs">
+                                        ✗ Fail
+                                      </span>
+                                    )
+                                  ) : (
+                                    <span className="inline-flex items-center justify-center px-2 py-1 bg-gray-100 text-gray-500 rounded-full font-semibold text-xs">
+                                      —
+                                    </span>
+                                  )}
+                                </td>
+                              )}
                             </tr>
-                          ));
+                          )});
                         })()}
                       </tbody>
                     </table>
