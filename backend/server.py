@@ -2941,13 +2941,17 @@ async def submit_assignment(submission: SubmissionCreate, request: Request):
         pattern_score = 0
         total_pattern_points = 0
         
+        # Calculate default points per test case if not specified
+        default_points_per_test = 100 // len(test_cases) if test_cases else 0
+        
         if test_cases:
             for i, tc in enumerate(test_cases):
                 try:
                     # Get explicit pattern or auto-extract from description
                     pattern = tc.get("pattern", "") or ""
                     description = tc.get("description", f"Test case {i+1}") or f"Test case {i+1}"
-                    points = tc.get("points", 0) or 0
+                    # Use test case points, or default to even distribution
+                    points = tc.get("points") or default_points_per_test
                     total_pattern_points += points
                     
                     # Auto-extract patterns from description if no explicit pattern
