@@ -2672,7 +2672,7 @@ try:
         def ycor(self):
             return self._sim.ycor()
         def heading(self):
-            return self._sim.heading
+            return self._sim.get_heading()
         def stamp(self):
             return self._sim.stamp()
         def clearstamp(self, stamp_id=None):
