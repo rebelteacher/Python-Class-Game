@@ -84,6 +84,31 @@ const TURTLE_CURRICULUM = {
             "Understand the concept of a closed shape"
           ],
           dokLevel: 3
+        },
+        {
+          id: "lesson4",
+          title: "Pen Control",
+          type: "Code",
+          duration: "45 min",
+          objectives: [
+            "Use penup() and pendown() commands",
+            "Draw shapes without connecting lines",
+            "Create patterns with gaps"
+          ],
+          dokLevel: 2
+        },
+        {
+          id: "lesson5",
+          title: "Location",
+          type: "Code",
+          duration: "45 min",
+          objectives: [
+            "Use goto() to move to specific coordinates",
+            "Understand the turtle coordinate system",
+            "Use setx(), sety(), home() commands",
+            "Get position with pos(), xcor(), ycor()"
+          ],
+          dokLevel: 3
         }
       ]
     },
