@@ -26,7 +26,7 @@ class TurtleSim:
         # Turtle state
         self.x = width / 2  # Center X
         self.y = height / 2  # Center Y
-        self.heading = 90  # Degrees (0=right, 90=up, 180=left, 270=down)
+        self._heading = 90  # Degrees (0=right, 90=up, 180=left, 270=down)
         self.pen_down = True
         self.pen_color = "black"
         self.pen_width = 2
