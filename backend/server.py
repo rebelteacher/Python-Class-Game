@@ -2625,8 +2625,14 @@ try:
             if y is None:
                 x, y = x
             self._sim.goto(x, y)
+        def setx(self, x):
+            self._sim.setx(x)
+        def sety(self, y):
+            self._sim.sety(y)
         def circle(self, r, e=None, s=None):
             self._sim.circle(r, e, s)
+        def dot(self, size=None, color=None):
+            self._sim.dot(size, color)
         def penup(self):
             self._sim.penup()
         def pendown(self):
@@ -2649,18 +2655,48 @@ try:
             self._sim.end_fill()
         def setheading(self, a):
             self._sim.setheading(a)
+        def home(self):
+            self._sim.home()
+        def clear(self):
+            self._sim.clear()
+        def clearscreen(self):
+            self._sim.clearscreen()
+        def reset(self):
+            self._sim.reset()
+        def position(self):
+            return self._sim.position()
+        def pos(self):
+            return self._sim.pos()
+        def xcor(self):
+            return self._sim.xcor()
+        def ycor(self):
+            return self._sim.ycor()
+        def heading(self):
+            return self._sim.heading
+        def stamp(self):
+            return self._sim.stamp()
+        def clearstamp(self, stamp_id=None):
+            self._sim.clearstamp(stamp_id)
+        def clearstamps(self, n=None):
+            self._sim.clearstamps(n)
         def bye(self):
             pass
         
         # Aliases
         fd = forward
         bk = backward
+        back = backward
         rt = right
         lt = left
         pu = penup
         pd = pendown
+        up = penup
+        down = pendown
         ht = hideturtle
         st = showturtle
+        seth = setheading
+        setpos = goto
+        setposition = goto
     
     turtle = MockTurtleModule(turtle_sim)
     
