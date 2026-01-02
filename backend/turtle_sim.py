@@ -228,9 +228,19 @@ class TurtleSim:
         """Return Y coordinate"""
         return self.y - self.height/2
     
-    def heading(self) -> float:
+    def get_heading(self) -> float:
         """Return current heading in degrees"""
-        return self.heading
+        return self._heading
+    
+    @property
+    def heading(self) -> float:
+        """Property to get heading"""
+        return self._heading
+    
+    @heading.setter
+    def heading(self, value: float):
+        """Property to set heading"""
+        self._heading = value
     
     def home(self):
         """Move turtle to origin (0, 0) and set heading to 0"""
