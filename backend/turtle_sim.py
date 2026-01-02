@@ -216,6 +216,10 @@ class TurtleSim:
         """Return current position"""
         return (self.x - self.width/2, self.y - self.height/2)
     
+    def pos(self) -> Tuple[float, float]:
+        """Alias for position - return current position"""
+        return self.position()
+    
     def xcor(self) -> float:
         """Return X coordinate"""
         return self.x - self.width/2
@@ -223,6 +227,88 @@ class TurtleSim:
     def ycor(self) -> float:
         """Return Y coordinate"""
         return self.y - self.height/2
+    
+    def heading(self) -> float:
+        """Return current heading in degrees"""
+        return self.heading
+    
+    def home(self):
+        """Move turtle to origin (0, 0) and set heading to 0"""
+        self.commands_used.append("home()")
+        
+        # Draw line if pen is down
+        if self.pen_down:
+            start = self._to_canvas_coords(self.x, self.y)
+            end = self._to_canvas_coords(self.width/2, self.height/2)
+            self.draw.line([start, end], fill=self.pen_color, width=self.pen_width)
+            self.lines_drawn += 1
+        
+        # Reset to center
+        self.x = self.width / 2
+        self.y = self.height / 2
+        self.heading = 90  # 90 degrees = facing up (standard turtle orientation)
+        self.positions_visited.append((self.x, self.y))
+        self.path_history.append({"x": 0, "y": 0})
+    
+    def clear(self):
+        """Clear the drawing but keep turtle position"""
+        self.commands_used.append("clear()")
+        # Redraw background
+        self.draw.rectangle([0, 0, self.width, self.height], fill=self.bg_color)
+        self.lines_drawn = 0
+        self.circles_drawn = 0
+    
+    def clearscreen(self):
+        """Clear screen and reset turtle to home"""
+        self.commands_used.append("clearscreen()")
+        self.clear()
+        self.home()
+    
+    def reset(self):
+        """Alias for clearscreen"""
+        self.clearscreen()
+    
+    def stamp(self) -> int:
+        """Stamp a copy of the turtle shape at current position, return stamp_id"""
+        self.commands_used.append("stamp()")
+        
+        # Draw turtle shape at current position
+        pos = self._to_canvas_coords(self.x, self.y)
+        size = 10
+        
+        # Draw a simple triangle pointing in heading direction
+        rad = math.radians(self.heading)
+        # Front point
+        front_x = pos[0] + size * math.cos(rad)
+        front_y = pos[1] - size * math.sin(rad)  # Y is inverted on canvas
+        # Back left
+        back_left_x = pos[0] + size * 0.7 * math.cos(rad + math.pi * 0.8)
+        back_left_y = pos[1] - size * 0.7 * math.sin(rad + math.pi * 0.8)
+        # Back right
+        back_right_x = pos[0] + size * 0.7 * math.cos(rad - math.pi * 0.8)
+        back_right_y = pos[1] - size * 0.7 * math.sin(rad - math.pi * 0.8)
+        
+        self.draw.polygon(
+            [(front_x, front_y), (back_left_x, back_left_y), (back_right_x, back_right_y)],
+            fill=self.pen_color,
+            outline=self.pen_color
+        )
+        
+        # Return a stamp ID (just use current count)
+        stamp_id = len([c for c in self.commands_used if c.startswith("stamp")])
+        return stamp_id
+    
+    def clearstamp(self, stamp_id: int = None):
+        """Clear a stamp (not fully implemented - would need to track stamps)"""
+        self.commands_used.append(f"clearstamp({stamp_id})")
+        # Note: Full implementation would require tracking individual stamps
+        pass
+    
+    def clearstamps(self, n: int = None):
+        """Clear all or n stamps"""
+        self.commands_used.append(f"clearstamps({n})")
+        # Note: Full implementation would require tracking individual stamps
+        pass
     
     def get_image_base64(self) -> str:
         """Return the canvas image as base64 PNG"""
