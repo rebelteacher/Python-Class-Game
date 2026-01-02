@@ -458,7 +458,7 @@ class Turtle:
         return self.sim.ycor()
     
     def heading(self):
-        return self.sim.heading
+        return self.sim.get_heading()
     
     def home(self):
         self.sim.home()
