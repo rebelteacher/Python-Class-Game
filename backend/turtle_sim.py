@@ -438,11 +438,38 @@ class Turtle:
     def position(self):
         return self.sim.position()
     
+    def pos(self):
+        return self.sim.pos()
+    
     def xcor(self):
         return self.sim.xcor()
     
     def ycor(self):
         return self.sim.ycor()
+    
+    def heading(self):
+        return self.sim.heading
+    
+    def home(self):
+        self.sim.home()
+    
+    def clear(self):
+        self.sim.clear()
+    
+    def clearscreen(self):
+        self.sim.clearscreen()
+    
+    def reset(self):
+        self.sim.reset()
+    
+    def stamp(self):
+        return self.sim.stamp()
+    
+    def clearstamp(self, stamp_id=None):
+        self.sim.clearstamp(stamp_id)
+    
+    def clearstamps(self, n=None):
+        self.sim.clearstamps(n)
     
     # Aliases
     fd = forward
@@ -452,5 +479,10 @@ class Turtle:
     lt = left
     pu = penup
     pd = pendown
+    up = penup
+    down = pendown
     st = showturtle
     ht = hideturtle
+    seth = setheading
+    setpos = goto
+    setposition = goto
