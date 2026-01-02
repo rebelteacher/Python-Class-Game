@@ -3020,8 +3020,8 @@ async def submit_assignment(submission: SubmissionCreate, request: Request):
                             patterns_to_check.append('penup')
                         if 'pendown' in desc_lower or 'pen down' in desc_lower:
                             patterns_to_check.append('pendown')
-                        if 'pencolor' in desc_lower or 'pen color' in desc_lower or 'color' in desc_lower:
-                            patterns_to_check.append('color')
+                        if 'pencolor' in desc_lower or 'pen color' in desc_lower:
+                            patterns_to_check.append('pencolor')
                         if 'circle' in desc_lower:
                             patterns_to_check.append('circle')
                         if 'goto' in desc_lower or 'go to' in desc_lower:
@@ -3038,6 +3038,31 @@ async def submit_assignment(submission: SubmissionCreate, request: Request):
                             patterns_to_check.append('speed')
                         if 'shape' in desc_lower:
                             patterns_to_check.append('shape')
+                        # New turtle commands
+                        if 'home' in desc_lower:
+                            patterns_to_check.append('home')
+                        if 'clearscreen' in desc_lower or 'clear screen' in desc_lower:
+                            patterns_to_check.append('clearscreen')
+                        if 'pos()' in desc_lower or 'position()' in desc_lower:
+                            patterns_to_check.append('pos')
+                        if 'setx' in desc_lower or 'set x' in desc_lower:
+                            patterns_to_check.append('setx')
+                        if 'sety' in desc_lower or 'set y' in desc_lower:
+                            patterns_to_check.append('sety')
+                        if 'dot' in desc_lower:
+                            patterns_to_check.append('dot')
+                        if 'heading()' in desc_lower and 'setheading' not in desc_lower:
+                            patterns_to_check.append('heading()')
+                        if 'setheading' in desc_lower or 'set heading' in desc_lower:
+                            patterns_to_check.append('setheading')
+                        if 'stamp' in desc_lower and 'clearstamp' not in desc_lower:
+                            patterns_to_check.append('stamp')
+                        if 'clearstamp' in desc_lower:
+                            patterns_to_check.append('clearstamp')
+                        if 'xcor' in desc_lower:
+                            patterns_to_check.append('xcor')
+                        if 'ycor' in desc_lower:
+                            patterns_to_check.append('ycor')
                         if 'hideturtle' in desc_lower or 'hide turtle' in desc_lower:
                             patterns_to_check.append('hideturtle')
                         if 'showturtle' in desc_lower or 'show turtle' in desc_lower:
