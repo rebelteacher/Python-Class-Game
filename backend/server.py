@@ -1718,7 +1718,7 @@ async def get_problems(
             {"description": {"$regex": search, "$options": "i"}}
         ]
     
-    problems = await db.problems.find(query, {"_id": 0}).to_list(1000)
+    problems = await db.problems.find(query, {"_id": 0}).to_list(10000)
     return problems
 
 
