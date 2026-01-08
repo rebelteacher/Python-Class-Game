@@ -1470,6 +1470,124 @@ export default function AssignmentLibrary({ user }) {
                     </div>
                   )}
 
+                  {/* Test Cases Builder - for Turtle assignments (Pattern + Count) */}
+                  {newProblem.assignment_type === "turtle" && (
+                    <div className="border-2 border-green-200 bg-green-50 rounded-lg p-4">
+                      <div className="flex items-center justify-between mb-3">
+                        <div>
+                          <Label className="text-lg font-semibold">🐢 Turtle Test Cases</Label>
+                          <p className="text-sm text-gray-600 mt-1">Check if student code uses required turtle commands</p>
+                        </div>
+                        <Button
+                          type="button"
+                          onClick={() => {
+                            setNewProblem({
+                              ...newProblem,
+                              test_cases: [...newProblem.test_cases, { description: "", pattern: "", min_count: 1, points: 20 }]
+                            });
+                          }}
+                          size="sm"
+                          className="bg-green-600 hover:bg-green-700"
+                        >
+                          + Add Test
+                        </Button>
+                      </div>
+
+                      {newProblem.test_cases.length === 0 ? (
+                        <p className="text-sm text-gray-500 text-center py-4">No tests added yet. Click "Add Test" to create one.</p>
+                      ) : (
+                        <div className="overflow-x-auto">
+                          <table className="w-full text-sm">
+                            <thead>
+                              <tr className="border-b border-green-300">
+                                <th className="text-left py-2 px-2 font-semibold">Test Name</th>
+                                <th className="text-left py-2 px-2 font-semibold">Code Pattern</th>
+                                <th className="text-center py-2 px-2 font-semibold w-20">Times</th>
+                                <th className="text-center py-2 px-2 font-semibold w-20">Points</th>
+                                <th className="w-10"></th>
+                              </tr>
+                            </thead>
+                            <tbody>
+                              {newProblem.test_cases.map((testCase, index) => (
+                                <tr key={index} className="border-b border-green-200 hover:bg-green-100">
+                                  <td className="py-2 px-2">
+                                    <Input
+                                      placeholder="e.g., Uses circle"
+                                      value={testCase.description || ""}
+                                      onChange={(e) => {
+                                        const newTestCases = [...newProblem.test_cases];
+                                        newTestCases[index].description = e.target.value;
+                                        setNewProblem({ ...newProblem, test_cases: newTestCases });
+                                      }}
+                                      className="h-8 text-sm"
+                                    />
+                                  </td>
+                                  <td className="py-2 px-2">
+                                    <Input
+                                      placeholder="e.g., circle(25)"
+                                      value={testCase.pattern || ""}
+                                      onChange={(e) => {
+                                        const newTestCases = [...newProblem.test_cases];
+                                        newTestCases[index].pattern = e.target.value;
+                                        setNewProblem({ ...newProblem, test_cases: newTestCases });
+                                      }}
+                                      className="h-8 text-sm font-mono"
+                                    />
+                                  </td>
+                                  <td className="py-2 px-2">
+                                    <Input
+                                      type="number"
+                                      min="1"
+                                      placeholder="1"
+                                      value={testCase.min_count || 1}
+                                      onChange={(e) => {
+                                        const newTestCases = [...newProblem.test_cases];
+                                        newTestCases[index].min_count = parseInt(e.target.value) || 1;
+                                        setNewProblem({ ...newProblem, test_cases: newTestCases });
+                                      }}
+                                      className="h-8 text-sm text-center w-16"
+                                    />
+                                  </td>
+                                  <td className="py-2 px-2">
+                                    <Input
+                                      type="number"
+                                      min="0"
+                                      placeholder="20"
+                                      value={testCase.points || ""}
+                                      onChange={(e) => {
+                                        const newTestCases = [...newProblem.test_cases];
+                                        newTestCases[index].points = parseInt(e.target.value) || 0;
+                                        setNewProblem({ ...newProblem, test_cases: newTestCases });
+                                      }}
+                                      className="h-8 text-sm text-center w-16"
+                                    />
+                                  </td>
+                                  <td className="py-2 px-2">
+                                    <Button
+                                      type="button"
+                                      variant="ghost"
+                                      size="sm"
+                                      onClick={() => {
+                                        const newTestCases = newProblem.test_cases.filter((_, i) => i !== index);
+                                        setNewProblem({ ...newProblem, test_cases: newTestCases });
+                                      }}
+                                      className="text-red-600 hover:text-red-700 h-8 w-8 p-0"
+                                    >
+                                      ✕
+                                    </Button>
+                                  </td>
+                                </tr>
+                              ))}
+                            </tbody>
+                          </table>
+                          <p className="text-xs text-gray-500 mt-2">
+                            💡 <strong>Pattern examples:</strong> <code>forward(</code>, <code>circle(25)</code>, <code>penup()</code>, <code>= turtle.Turtle()</code>
+                          </p>
+                        </div>
+                      )}
+                    </div>
+                  )}
+
                   {/* Test Cases Builder - for Micro:bit assignments (Pattern-based) */}
                   {newProblem.assignment_type === "microbit" && (
                     <div className="border-2 border-cyan-200 bg-cyan-50 rounded-lg p-4">
