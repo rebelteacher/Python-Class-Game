@@ -2464,96 +2464,442 @@ export default function AssignmentLibrary({ user }) {
                   <p className="text-xs text-gray-500 mt-1">What the program should output when run</p>
                 </div>
 
-                {/* Test Cases Builder for Edit */}
-                <div className="border-2 border-yellow-200 bg-yellow-50 rounded-lg p-4">
-                  <div className="flex items-center justify-between mb-3">
-                    <div>
-                      <Label className="text-lg font-semibold">Test Cases (Optional but Recommended)</Label>
-                      <p className="text-sm text-gray-600 mt-1">For problems with input(), add test cases for auto-grading</p>
+                {/* Test Cases Builder for Edit - Code type */}
+                {editingProblem.assignment_type === "code" && (
+                  <div className="border-2 border-yellow-200 bg-yellow-50 rounded-lg p-4">
+                    <div className="flex items-center justify-between mb-3">
+                      <div>
+                        <Label className="text-lg font-semibold">Test Cases (Optional but Recommended)</Label>
+                        <p className="text-sm text-gray-600 mt-1">For problems with input(), add test cases for auto-grading</p>
+                      </div>
+                      <Button
+                        type="button"
+                        onClick={() => {
+                          setEditingProblem({
+                            ...editingProblem,
+                            test_cases: [...(editingProblem.test_cases || []), { description: "", input: "", expected_output: "" }]
+                          });
+                        }}
+                        size="sm"
+                        className="bg-yellow-600 hover:bg-yellow-700"
+                      >
+                        + Add Test Case
+                      </Button>
                     </div>
-                    <Button
-                      type="button"
-                      onClick={() => {
-                        setEditingProblem({
-                          ...editingProblem,
-                          test_cases: [...(editingProblem.test_cases || []), { description: "", input: "", expected_output: "" }]
-                        });
-                      }}
-                      size="sm"
-                      className="bg-yellow-600 hover:bg-yellow-700"
-                    >
-                      + Add Test Case
-                    </Button>
-                  </div>
 
-                  {(!editingProblem.test_cases || editingProblem.test_cases.length === 0) ? (
-                    <p className="text-sm text-gray-500 text-center py-4">No test cases added yet. Click "Add Test Case" to create one.</p>
-                  ) : (
-                    <div className="space-y-3">
-                      {editingProblem.test_cases.map((testCase, index) => (
-                        <div key={index} className="bg-white p-3 rounded border border-yellow-300">
-                          <div className="flex items-center justify-between mb-2">
-                            <Label className="font-semibold">Test Case {index + 1}</Label>
-                            <Button
-                              type="button"
-                              variant="outline"
-                              size="sm"
-                              onClick={() => {
-                                const newTestCases = editingProblem.test_cases.filter((_, i) => i !== index);
-                                setEditingProblem({ ...editingProblem, test_cases: newTestCases });
-                              }}
-                              className="text-red-600 hover:text-red-700"
-                            >
-                              Remove
-                            </Button>
+                    {(!editingProblem.test_cases || editingProblem.test_cases.length === 0) ? (
+                      <p className="text-sm text-gray-500 text-center py-4">No test cases added yet. Click "Add Test Case" to create one.</p>
+                    ) : (
+                      <div className="space-y-3">
+                        {editingProblem.test_cases.map((testCase, index) => (
+                          <div key={index} className="bg-white p-3 rounded border border-yellow-300">
+                            <div className="flex items-center justify-between mb-2">
+                              <Label className="font-semibold">Test Case {index + 1}</Label>
+                              <Button
+                                type="button"
+                                variant="outline"
+                                size="sm"
+                                onClick={() => {
+                                  const newTestCases = editingProblem.test_cases.filter((_, i) => i !== index);
+                                  setEditingProblem({ ...editingProblem, test_cases: newTestCases });
+                                }}
+                                className="text-red-600 hover:text-red-700"
+                              >
+                                Remove
+                              </Button>
+                            </div>
+                            <div className="space-y-2">
+                              <div>
+                                <Label className="text-sm">Test Name (students will see this)</Label>
+                                <Input
+                                  placeholder="e.g., Correct login, Wrong password, Extra spaces"
+                                  value={testCase.description || ""}
+                                  onChange={(e) => {
+                                    const newTestCases = [...editingProblem.test_cases];
+                                    newTestCases[index].description = e.target.value;
+                                    setEditingProblem({ ...editingProblem, test_cases: newTestCases });
+                                  }}
+                                  className="mt-1"
+                                />
+                              </div>
+                              <div>
+                                <Label className="text-sm">Input (press Enter for multiple inputs)</Label>
+                                <Textarea
+                                  placeholder="Example:\nadmin\nsecret123"
+                                  value={testCase.input}
+                                  onChange={(e) => {
+                                    const newTestCases = [...editingProblem.test_cases];
+                                    newTestCases[index].input = e.target.value;
+                                    setEditingProblem({ ...editingProblem, test_cases: newTestCases });
+                                  }}
+                                  className="mt-1 font-mono text-sm"
+                                  rows={3}
+                                />
+                              </div>
+                              <div>
+                                <Label className="text-sm">Expected Output</Label>
+                                <Input
+                                  placeholder="e.g., Access granted"
+                                  value={testCase.expected_output}
+                                  onChange={(e) => {
+                                    const newTestCases = [...editingProblem.test_cases];
+                                    newTestCases[index].expected_output = e.target.value;
+                                    setEditingProblem({ ...editingProblem, test_cases: newTestCases });
+                                  }}
+                                  className="mt-1 font-mono text-sm"
+                                />
+                              </div>
+                            </div>
                           </div>
-                          <div className="space-y-2">
-                            <div>
-                              <Label className="text-sm">Test Name (students will see this)</Label>
-                              <Input
-                                placeholder="e.g., Correct login, Wrong password, Extra spaces"
-                                value={testCase.description || ""}
-                                onChange={(e) => {
-                                  const newTestCases = [...editingProblem.test_cases];
-                                  newTestCases[index].description = e.target.value;
-                                  setEditingProblem({ ...editingProblem, test_cases: newTestCases });
-                                }}
-                                className="mt-1"
-                              />
-                            </div>
-                            <div>
-                              <Label className="text-sm">Input (press Enter for multiple inputs)</Label>
-                              <Textarea
-                                placeholder="Example:\nadmin\nsecret123"
-                                value={testCase.input}
-                                onChange={(e) => {
-                                  const newTestCases = [...editingProblem.test_cases];
-                                  newTestCases[index].input = e.target.value;
-                                  setEditingProblem({ ...editingProblem, test_cases: newTestCases });
-                                }}
-                                className="mt-1 font-mono text-sm"
-                                rows={3}
-                              />
-                            </div>
-                            <div>
-                              <Label className="text-sm">Expected Output</Label>
-                              <Input
-                                placeholder="e.g., Access granted"
-                                value={testCase.expected_output}
-                                onChange={(e) => {
-                                  const newTestCases = [...editingProblem.test_cases];
-                                  newTestCases[index].expected_output = e.target.value;
-                                  setEditingProblem({ ...editingProblem, test_cases: newTestCases });
-                                }}
-                                className="mt-1 font-mono text-sm"
-                              />
-                            </div>
-                          </div>
-                        </div>
-                      ))}
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                )}
+
+                {/* Test Cases Builder for Edit - Turtle type (Table format) */}
+                {editingProblem.assignment_type === "turtle" && (
+                  <div className="border-2 border-green-200 bg-green-50 rounded-lg p-4">
+                    <div className="flex items-center justify-between mb-3">
+                      <div>
+                        <Label className="text-lg font-semibold">🐢 Turtle Test Cases</Label>
+                        <p className="text-sm text-gray-600 mt-1">Check if student code uses required turtle commands</p>
+                      </div>
+                      <Button
+                        type="button"
+                        onClick={() => {
+                          setEditingProblem({
+                            ...editingProblem,
+                            test_cases: [...(editingProblem.test_cases || []), { description: "", pattern: "", min_count: 1, points: 20 }]
+                          });
+                        }}
+                        size="sm"
+                        className="bg-green-600 hover:bg-green-700"
+                      >
+                        + Add Test
+                      </Button>
                     </div>
-                  )}
-                </div>
+
+                    {(!editingProblem.test_cases || editingProblem.test_cases.length === 0) ? (
+                      <p className="text-sm text-gray-500 text-center py-4">No tests added yet. Click "Add Test" to create one.</p>
+                    ) : (
+                      <div className="overflow-x-auto">
+                        <table className="w-full text-sm">
+                          <thead>
+                            <tr className="border-b border-green-300">
+                              <th className="text-left py-2 px-2 font-semibold">Test Name</th>
+                              <th className="text-left py-2 px-2 font-semibold">Code Pattern</th>
+                              <th className="text-center py-2 px-2 font-semibold w-20">Times</th>
+                              <th className="text-center py-2 px-2 font-semibold w-20">Points</th>
+                              <th className="w-10"></th>
+                            </tr>
+                          </thead>
+                          <tbody>
+                            {editingProblem.test_cases.map((testCase, index) => (
+                              <tr key={index} className="border-b border-green-200 hover:bg-green-100">
+                                <td className="py-2 px-2">
+                                  <Input
+                                    placeholder="e.g., Uses circle"
+                                    value={testCase.description || ""}
+                                    onChange={(e) => {
+                                      const newTestCases = [...editingProblem.test_cases];
+                                      newTestCases[index].description = e.target.value;
+                                      setEditingProblem({ ...editingProblem, test_cases: newTestCases });
+                                    }}
+                                    className="h-8 text-sm"
+                                  />
+                                </td>
+                                <td className="py-2 px-2">
+                                  <Input
+                                    placeholder="e.g., circle(25)"
+                                    value={testCase.pattern || ""}
+                                    onChange={(e) => {
+                                      const newTestCases = [...editingProblem.test_cases];
+                                      newTestCases[index].pattern = e.target.value;
+                                      setEditingProblem({ ...editingProblem, test_cases: newTestCases });
+                                    }}
+                                    className="h-8 text-sm font-mono"
+                                  />
+                                </td>
+                                <td className="py-2 px-2">
+                                  <Input
+                                    type="number"
+                                    min="1"
+                                    placeholder="1"
+                                    value={testCase.min_count || 1}
+                                    onChange={(e) => {
+                                      const newTestCases = [...editingProblem.test_cases];
+                                      newTestCases[index].min_count = parseInt(e.target.value) || 1;
+                                      setEditingProblem({ ...editingProblem, test_cases: newTestCases });
+                                    }}
+                                    className="h-8 text-sm text-center w-16"
+                                  />
+                                </td>
+                                <td className="py-2 px-2">
+                                  <Input
+                                    type="number"
+                                    min="0"
+                                    placeholder="20"
+                                    value={testCase.points || ""}
+                                    onChange={(e) => {
+                                      const newTestCases = [...editingProblem.test_cases];
+                                      newTestCases[index].points = parseInt(e.target.value) || 0;
+                                      setEditingProblem({ ...editingProblem, test_cases: newTestCases });
+                                    }}
+                                    className="h-8 text-sm text-center w-16"
+                                  />
+                                </td>
+                                <td className="py-2 px-2">
+                                  <Button
+                                    type="button"
+                                    variant="ghost"
+                                    size="sm"
+                                    onClick={() => {
+                                      const newTestCases = editingProblem.test_cases.filter((_, i) => i !== index);
+                                      setEditingProblem({ ...editingProblem, test_cases: newTestCases });
+                                    }}
+                                    className="text-red-600 hover:text-red-700 h-8 w-8 p-0"
+                                  >
+                                    ✕
+                                  </Button>
+                                </td>
+                              </tr>
+                            ))}
+                          </tbody>
+                        </table>
+                        <p className="text-xs text-gray-500 mt-2">
+                          💡 <strong>Pattern examples:</strong> <code>forward(</code>, <code>circle(25)</code>, <code>penup()</code>, <code>= turtle.Turtle()</code>
+                        </p>
+                      </div>
+                    )}
+                  </div>
+                )}
+
+                {/* Test Cases Builder for Edit - Micro:bit type */}
+                {editingProblem.assignment_type === "microbit" && (
+                  <div className="border-2 border-cyan-200 bg-cyan-50 rounded-lg p-4">
+                    <div className="flex items-center justify-between mb-3">
+                      <div>
+                        <Label className="text-lg font-semibold">Pattern Test Cases</Label>
+                        <p className="text-sm text-gray-600 mt-1">Check if student code contains required patterns</p>
+                      </div>
+                      <Button
+                        type="button"
+                        onClick={() => {
+                          setEditingProblem({
+                            ...editingProblem,
+                            test_cases: [...(editingProblem.test_cases || []), { description: "", pattern: "", points: 20 }]
+                          });
+                        }}
+                        size="sm"
+                        className="bg-cyan-600 hover:bg-cyan-700"
+                      >
+                        + Add Pattern Check
+                      </Button>
+                    </div>
+
+                    {(!editingProblem.test_cases || editingProblem.test_cases.length === 0) ? (
+                      <p className="text-sm text-gray-500 text-center py-4">No pattern checks added yet.</p>
+                    ) : (
+                      <div className="space-y-3">
+                        {editingProblem.test_cases.map((testCase, index) => (
+                          <div key={index} className="bg-white p-3 rounded border border-cyan-300">
+                            <div className="flex items-center justify-between mb-2">
+                              <Label className="font-semibold">Pattern Check {index + 1}</Label>
+                              <Button
+                                type="button"
+                                variant="outline"
+                                size="sm"
+                                onClick={() => {
+                                  const newTestCases = editingProblem.test_cases.filter((_, i) => i !== index);
+                                  setEditingProblem({ ...editingProblem, test_cases: newTestCases });
+                                }}
+                                className="text-red-600 hover:text-red-700"
+                              >
+                                Remove
+                              </Button>
+                            </div>
+                            <div className="grid grid-cols-3 gap-2">
+                              <div className="col-span-2">
+                                <Label className="text-sm">Description</Label>
+                                <Input
+                                  placeholder="e.g., Uses display.show()"
+                                  value={testCase.description || ""}
+                                  onChange={(e) => {
+                                    const newTestCases = [...editingProblem.test_cases];
+                                    newTestCases[index].description = e.target.value;
+                                    setEditingProblem({ ...editingProblem, test_cases: newTestCases });
+                                  }}
+                                  className="mt-1"
+                                />
+                              </div>
+                              <div>
+                                <Label className="text-sm">Points</Label>
+                                <Input
+                                  type="number"
+                                  placeholder="20"
+                                  value={testCase.points || ""}
+                                  onChange={(e) => {
+                                    const newTestCases = [...editingProblem.test_cases];
+                                    newTestCases[index].points = parseInt(e.target.value) || 0;
+                                    setEditingProblem({ ...editingProblem, test_cases: newTestCases });
+                                  }}
+                                  className="mt-1"
+                                />
+                              </div>
+                              <div className="col-span-3">
+                                <Label className="text-sm">Pattern to match</Label>
+                                <Input
+                                  placeholder="e.g., display.show"
+                                  value={testCase.pattern || ""}
+                                  onChange={(e) => {
+                                    const newTestCases = [...editingProblem.test_cases];
+                                    newTestCases[index].pattern = e.target.value;
+                                    setEditingProblem({ ...editingProblem, test_cases: newTestCases });
+                                  }}
+                                  className="mt-1 font-mono text-sm"
+                                />
+                              </div>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                )}
+
+                {/* Test Cases Builder for Edit - Block type (Table format) */}
+                {editingProblem.assignment_type === "block" && (
+                  <div className="border-2 border-purple-200 bg-purple-50 rounded-lg p-4">
+                    <div className="flex items-center justify-between mb-3">
+                      <div>
+                        <Label className="text-lg font-semibold">🧱 Block Test Cases</Label>
+                        <p className="text-sm text-gray-600 mt-1">Check if student uses required blocks</p>
+                      </div>
+                      <Button
+                        type="button"
+                        onClick={() => {
+                          setEditingProblem({
+                            ...editingProblem,
+                            test_cases: [...(editingProblem.test_cases || []), { description: "", pattern: "", min_count: 1, points: 20 }]
+                          });
+                        }}
+                        size="sm"
+                        className="bg-purple-600 hover:bg-purple-700"
+                      >
+                        + Add Test
+                      </Button>
+                    </div>
+
+                    {(!editingProblem.test_cases || editingProblem.test_cases.length === 0) ? (
+                      <p className="text-sm text-gray-500 text-center py-4">No tests added yet. Click "Add Test" to create one.</p>
+                    ) : (
+                      <div className="overflow-x-auto">
+                        <table className="w-full text-sm">
+                          <thead>
+                            <tr className="border-b border-purple-300">
+                              <th className="text-left py-2 px-2 font-semibold">Test Name</th>
+                              <th className="text-left py-2 px-2 font-semibold">Block Type</th>
+                              <th className="text-center py-2 px-2 font-semibold w-20">Times</th>
+                              <th className="text-center py-2 px-2 font-semibold w-20">Points</th>
+                              <th className="w-10"></th>
+                            </tr>
+                          </thead>
+                          <tbody>
+                            {editingProblem.test_cases.map((testCase, index) => (
+                              <tr key={index} className="border-b border-purple-200 hover:bg-purple-100">
+                                <td className="py-2 px-2">
+                                  <Input
+                                    placeholder="e.g., Uses repeat loop"
+                                    value={testCase.description || ""}
+                                    onChange={(e) => {
+                                      const newTestCases = [...editingProblem.test_cases];
+                                      newTestCases[index].description = e.target.value;
+                                      setEditingProblem({ ...editingProblem, test_cases: newTestCases });
+                                    }}
+                                    className="h-8 text-sm"
+                                  />
+                                </td>
+                                <td className="py-2 px-2">
+                                  <select
+                                    value={testCase.pattern || ""}
+                                    onChange={(e) => {
+                                      const newTestCases = [...editingProblem.test_cases];
+                                      newTestCases[index].pattern = e.target.value;
+                                      setEditingProblem({ ...editingProblem, test_cases: newTestCases });
+                                    }}
+                                    className="h-8 text-sm w-full border rounded px-2"
+                                  >
+                                    <option value="">Select block...</option>
+                                    <optgroup label="Motion">
+                                      <option value="move_forward">Move Forward</option>
+                                      <option value="turn_right">Turn Right</option>
+                                      <option value="turn_left">Turn Left</option>
+                                    </optgroup>
+                                    <optgroup label="Control">
+                                      <option value="repeat">Repeat Loop</option>
+                                      <option value="forever">Forever Loop</option>
+                                      <option value="if">If Statement</option>
+                                      <option value="if_else">If-Else</option>
+                                      <option value="wait">Wait</option>
+                                    </optgroup>
+                                    <optgroup label="Pen">
+                                      <option value="pen_down">Pen Down</option>
+                                      <option value="pen_up">Pen Up</option>
+                                      <option value="set_pen_color">Set Pen Color</option>
+                                    </optgroup>
+                                  </select>
+                                </td>
+                                <td className="py-2 px-2">
+                                  <Input
+                                    type="number"
+                                    min="1"
+                                    placeholder="1"
+                                    value={testCase.min_count || 1}
+                                    onChange={(e) => {
+                                      const newTestCases = [...editingProblem.test_cases];
+                                      newTestCases[index].min_count = parseInt(e.target.value) || 1;
+                                      setEditingProblem({ ...editingProblem, test_cases: newTestCases });
+                                    }}
+                                    className="h-8 text-sm text-center w-16"
+                                  />
+                                </td>
+                                <td className="py-2 px-2">
+                                  <Input
+                                    type="number"
+                                    min="0"
+                                    placeholder="20"
+                                    value={testCase.points || ""}
+                                    onChange={(e) => {
+                                      const newTestCases = [...editingProblem.test_cases];
+                                      newTestCases[index].points = parseInt(e.target.value) || 0;
+                                      setEditingProblem({ ...editingProblem, test_cases: newTestCases });
+                                    }}
+                                    className="h-8 text-sm text-center w-16"
+                                  />
+                                </td>
+                                <td className="py-2 px-2">
+                                  <Button
+                                    type="button"
+                                    variant="ghost"
+                                    size="sm"
+                                    onClick={() => {
+                                      const newTestCases = editingProblem.test_cases.filter((_, i) => i !== index);
+                                      setEditingProblem({ ...editingProblem, test_cases: newTestCases });
+                                    }}
+                                    className="text-red-600 hover:text-red-700 h-8 w-8 p-0"
+                                  >
+                                    ✕
+                                  </Button>
+                                </td>
+                              </tr>
+                            ))}
+                          </tbody>
+                        </table>
+                      </div>
+                    )}
+                  </div>
+                )}
 
                 <Button type="submit" className="w-full bg-indigo-600 hover:bg-indigo-700">
                   Update Problem
