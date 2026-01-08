@@ -3165,7 +3165,9 @@ async def submit_assignment(submission: SubmissionCreate, request: Request):
             "_debug_test_cases_count": len(test_cases),
             "_debug_test_cases_source": "problem" if problem.get("test_cases") else ("assignment.problems" if assignment.get("problems") else "assignment"),
             "_debug_pattern_score": pattern_score,
-            "_debug_total_pattern_points": total_pattern_points
+            "_debug_total_pattern_points": total_pattern_points,
+            "_debug_test_cases_raw": test_cases[:5] if test_cases else [],  # First 5 test cases for debugging
+            "_debug_code_snippet": submission.code[:200] if submission.code else ""  # First 200 chars of code
         }
         
         await db.submissions.insert_one(new_submission)
