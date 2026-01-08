@@ -980,86 +980,12 @@ export default function AssignmentLibrary({ user }) {
                       </div>
                     )}
 
-                    {/* Turtle Grading Criteria (only show when turtle is selected) */}
+                    {/* Turtle Options (only show when turtle is selected) */}
                     {newProblem.assignment_type === "turtle" && (
                       <div className="space-y-3 mt-4 pt-4 border-t border-green-300">
-                        <Label className="font-semibold">Auto-Grading Criteria</Label>
-                        <p className="text-sm text-gray-600 mb-3">Students must meet these requirements to pass</p>
-                        
-                        <div className="grid grid-cols-2 gap-3">
-                          <div>
-                            <Label className="text-sm">Minimum Lines</Label>
-                            <Input
-                              type="number"
-                              min="0"
-                              placeholder="e.g., 6"
-                              value={newProblem.turtle_grading_criteria.min_lines || ""}
-                              onChange={(e) => setNewProblem({
-                                ...newProblem,
-                                turtle_grading_criteria: {
-                                  ...newProblem.turtle_grading_criteria,
-                                  min_lines: parseInt(e.target.value) || 0
-                                }
-                              })}
-                              className="mt-1"
-                            />
-                          </div>
-                          
-                          <div>
-                            <Label className="text-sm">Minimum Circles</Label>
-                            <Input
-                              type="number"
-                              min="0"
-                              placeholder="e.g., 1"
-                              value={newProblem.turtle_grading_criteria.min_circles || ""}
-                              onChange={(e) => setNewProblem({
-                                ...newProblem,
-                                turtle_grading_criteria: {
-                                  ...newProblem.turtle_grading_criteria,
-                                  min_circles: parseInt(e.target.value) || 0
-                                }
-                              })}
-                              className="mt-1"
-                            />
-                          </div>
-                          
-                          <div>
-                            <Label className="text-sm">Minimum Distance (pixels)</Label>
-                            <Input
-                              type="number"
-                              min="0"
-                              placeholder="e.g., 400"
-                              value={newProblem.turtle_grading_criteria.min_distance || ""}
-                              onChange={(e) => setNewProblem({
-                                ...newProblem,
-                                turtle_grading_criteria: {
-                                  ...newProblem.turtle_grading_criteria,
-                                  min_distance: parseInt(e.target.value) || 0
-                                }
-                              })}
-                              className="mt-1"
-                            />
-                          </div>
-                          
-                          <div>
-                            <Label className="text-sm">Required Colors (comma-separated)</Label>
-                            <Input
-                              placeholder="e.g., red, blue"
-                              value={newProblem.turtle_grading_criteria.required_colors?.join(", ") || ""}
-                              onChange={(e) => setNewProblem({
-                                ...newProblem,
-                                turtle_grading_criteria: {
-                                  ...newProblem.turtle_grading_criteria,
-                                  required_colors: e.target.value.split(",").map(c => c.trim()).filter(c => c)
-                                }
-                              })}
-                              className="mt-1"
-                            />
-                          </div>
-                        </div>
                         
                         {/* Maze/Background Options */}
-                        <div className="mt-4 pt-4 border-t border-green-300">
+                        <div>
                           <Label className="font-semibold flex items-center gap-2">
                             <Map className="w-4 h-4" />
                             Maze & Background Options
