@@ -2986,6 +2986,7 @@ async def submit_assignment(submission: SubmissionCreate, request: Request):
                     # Get explicit pattern or auto-extract from description
                     pattern = tc.get("pattern", "") or ""
                     description = tc.get("description", f"Test case {i+1}") or f"Test case {i+1}"
+                    desc_lower = description.lower()  # Always define desc_lower for later use
                     # Use test case points, or default to even distribution
                     points = tc.get("points") or default_points_per_test
                     total_pattern_points += points
@@ -2996,7 +2997,6 @@ async def submit_assignment(submission: SubmissionCreate, request: Request):
                         patterns_to_check = [pattern]
                     else:
                         # Extract keywords from description for pattern matching
-                        desc_lower = description.lower()
                         
                         # Look for function names like "left()", "forward()", "right()", etc.
                         func_match = re.search(r'uses?\s+(\w+)\s*\(?', desc_lower)
