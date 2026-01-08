@@ -1684,6 +1684,155 @@ export default function AssignmentLibrary({ user }) {
                     </div>
                   )}
 
+                  {/* Test Cases Builder - for Block assignments (Block-based checking) */}
+                  {newProblem.assignment_type === "block" && (
+                    <div className="border-2 border-purple-200 bg-purple-50 rounded-lg p-4">
+                      <div className="flex items-center justify-between mb-3">
+                        <div>
+                          <Label className="text-lg font-semibold">🧱 Block Test Cases</Label>
+                          <p className="text-sm text-gray-600 mt-1">Check if student uses required blocks</p>
+                        </div>
+                        <Button
+                          type="button"
+                          onClick={() => {
+                            setNewProblem({
+                              ...newProblem,
+                              test_cases: [...newProblem.test_cases, { description: "", pattern: "", min_count: 1, points: 20 }]
+                            });
+                          }}
+                          size="sm"
+                          className="bg-purple-600 hover:bg-purple-700"
+                        >
+                          + Add Test
+                        </Button>
+                      </div>
+
+                      {newProblem.test_cases.length === 0 ? (
+                        <p className="text-sm text-gray-500 text-center py-4">No tests added yet. Click "Add Test" to create one.</p>
+                      ) : (
+                        <div className="overflow-x-auto">
+                          <table className="w-full text-sm">
+                            <thead>
+                              <tr className="border-b border-purple-300">
+                                <th className="text-left py-2 px-2 font-semibold">Test Name</th>
+                                <th className="text-left py-2 px-2 font-semibold">Block Type</th>
+                                <th className="text-center py-2 px-2 font-semibold w-20">Times</th>
+                                <th className="text-center py-2 px-2 font-semibold w-20">Points</th>
+                                <th className="w-10"></th>
+                              </tr>
+                            </thead>
+                            <tbody>
+                              {newProblem.test_cases.map((testCase, index) => (
+                                <tr key={index} className="border-b border-purple-200 hover:bg-purple-100">
+                                  <td className="py-2 px-2">
+                                    <Input
+                                      placeholder="e.g., Uses repeat loop"
+                                      value={testCase.description || ""}
+                                      onChange={(e) => {
+                                        const newTestCases = [...newProblem.test_cases];
+                                        newTestCases[index].description = e.target.value;
+                                        setNewProblem({ ...newProblem, test_cases: newTestCases });
+                                      }}
+                                      className="h-8 text-sm"
+                                    />
+                                  </td>
+                                  <td className="py-2 px-2">
+                                    <select
+                                      value={testCase.pattern || ""}
+                                      onChange={(e) => {
+                                        const newTestCases = [...newProblem.test_cases];
+                                        newTestCases[index].pattern = e.target.value;
+                                        setNewProblem({ ...newProblem, test_cases: newTestCases });
+                                      }}
+                                      className="h-8 text-sm w-full border rounded px-2"
+                                    >
+                                      <option value="">Select block...</option>
+                                      <optgroup label="Motion">
+                                        <option value="move_forward">Move Forward</option>
+                                        <option value="move_backward">Move Backward</option>
+                                        <option value="turn_right">Turn Right</option>
+                                        <option value="turn_left">Turn Left</option>
+                                        <option value="go_to">Go To Position</option>
+                                        <option value="glide">Glide</option>
+                                      </optgroup>
+                                      <optgroup label="Looks">
+                                        <option value="say">Say</option>
+                                        <option value="think">Think</option>
+                                        <option value="show">Show</option>
+                                        <option value="hide">Hide</option>
+                                        <option value="change_size">Change Size</option>
+                                      </optgroup>
+                                      <optgroup label="Control">
+                                        <option value="repeat">Repeat Loop</option>
+                                        <option value="forever">Forever Loop</option>
+                                        <option value="if">If Statement</option>
+                                        <option value="if_else">If-Else</option>
+                                        <option value="wait">Wait</option>
+                                      </optgroup>
+                                      <optgroup label="Events">
+                                        <option value="when_start">When Start Clicked</option>
+                                        <option value="when_key">When Key Pressed</option>
+                                        <option value="when_clicked">When Sprite Clicked</option>
+                                      </optgroup>
+                                      <optgroup label="Pen">
+                                        <option value="pen_down">Pen Down</option>
+                                        <option value="pen_up">Pen Up</option>
+                                        <option value="set_pen_color">Set Pen Color</option>
+                                        <option value="change_pen_size">Change Pen Size</option>
+                                      </optgroup>
+                                    </select>
+                                  </td>
+                                  <td className="py-2 px-2">
+                                    <Input
+                                      type="number"
+                                      min="1"
+                                      placeholder="1"
+                                      value={testCase.min_count || 1}
+                                      onChange={(e) => {
+                                        const newTestCases = [...newProblem.test_cases];
+                                        newTestCases[index].min_count = parseInt(e.target.value) || 1;
+                                        setNewProblem({ ...newProblem, test_cases: newTestCases });
+                                      }}
+                                      className="h-8 text-sm text-center w-16"
+                                    />
+                                  </td>
+                                  <td className="py-2 px-2">
+                                    <Input
+                                      type="number"
+                                      min="0"
+                                      placeholder="20"
+                                      value={testCase.points || ""}
+                                      onChange={(e) => {
+                                        const newTestCases = [...newProblem.test_cases];
+                                        newTestCases[index].points = parseInt(e.target.value) || 0;
+                                        setNewProblem({ ...newProblem, test_cases: newTestCases });
+                                      }}
+                                      className="h-8 text-sm text-center w-16"
+                                    />
+                                  </td>
+                                  <td className="py-2 px-2">
+                                    <Button
+                                      type="button"
+                                      variant="ghost"
+                                      size="sm"
+                                      onClick={() => {
+                                        const newTestCases = newProblem.test_cases.filter((_, i) => i !== index);
+                                        setNewProblem({ ...newProblem, test_cases: newTestCases });
+                                      }}
+                                      className="text-red-600 hover:text-red-700 h-8 w-8 p-0"
+                                    >
+                                      ✕
+                                    </Button>
+                                  </td>
+                                </tr>
+                              ))}
+                            </tbody>
+                          </table>
+                        </div>
+                      )}
+                    </div>
+                  )}
+
                   <Button data-testid="lib-submit-btn" type="submit" className="w-full bg-indigo-600 hover:bg-indigo-700">
                     Add to Library
                   </Button>
