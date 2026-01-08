@@ -3097,26 +3097,59 @@ async def submit_assignment(submission: SubmissionCreate, request: Request):
                     
                     logging.info(f"Test case '{description}': patterns to check = {patterns_to_check}")
                     
-                    # Check if ALL patterns exist in the code
+                    # Get min_count requirement (default 1 = just check existence)
+                    min_count = tc.get("min_count", 1) or 1
+                    
+                    # Auto-extract count requirement from description like "5 times" or "x5"
+                    if min_count == 1:
+                        count_match = re.search(r'(\d+)\s*times?', desc_lower)
+                        if count_match:
+                            min_count = int(count_match.group(1))
+                        else:
+                            # Check for "x5" or "×5" pattern
+                            x_match = re.search(r'[x×]\s*(\d+)', desc_lower)
+                            if x_match:
+                                min_count = int(x_match.group(1))
+                    
+                    # Check if ALL patterns exist in the code (with count requirement)
                     passed = False
+                    actual_count = 0
                     if patterns_to_check:
                         if '_TURTLE_NAMED_' in patterns_to_check:
                             # Special case already validated above
                             passed = True
                             pattern_score += points
+                            actual_count = 1
                         else:
                             code_lower = submission.code.lower()
-                            passed = all(p.lower() in code_lower for p in patterns_to_check)
+                            # Count occurrences of each pattern
+                            pattern_counts = []
+                            for p in patterns_to_check:
+                                count = code_lower.count(p.lower())
+                                pattern_counts.append(count)
+                            
+                            # All patterns must appear at least min_count times
+                            actual_count = min(pattern_counts) if pattern_counts else 0
+                            passed = actual_count >= min_count
                             if passed:
                                 pattern_score += points
                     
-                    test_results.append({
+                    test_result = {
                         "test_id": f"pattern_{i}",
                         "description": description,
                         "passed": passed,
                         "points": points,
                         "patterns_checked": patterns_to_check
-                    })
+                    }
+                    
+                    # Add count info if min_count > 1
+                    if min_count > 1:
+                        test_result["min_count"] = min_count
+                        test_result["actual_count"] = actual_count
+                        if not passed:
+                            test_result["feedback"] = f"Found {actual_count} time(s), need {min_count}"
+                    
+                    test_results.append(test_result)
                 except Exception as tc_error:
                     logging.error(f"Error processing test case {i}: {str(tc_error)}")
                     test_results.append({
