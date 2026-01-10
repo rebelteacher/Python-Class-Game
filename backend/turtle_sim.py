@@ -124,7 +124,11 @@ class TurtleSim:
     
     def circle(self, radius: float, extent: Optional[float] = None, steps: Optional[int] = None):
         """Draw a circle with given radius"""
-        self.commands_used.append(f"circle({radius})")
+        # Log the command with all provided arguments
+        if extent is not None:
+            self.commands_used.append(f"circle({radius}, {extent})")
+        else:
+            self.commands_used.append(f"circle({radius})")
         self.circles_drawn += 1
         
         if extent is None:
