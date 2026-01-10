@@ -3019,12 +3019,29 @@ async def submit_assignment(submission: SubmissionCreate, request: Request):
                     else:
                         # Extract keywords from description for pattern matching
                         
-                        # Look for function names like "left()", "forward()", "right()", etc.
+                        # Method 1: Look for "Uses X()" format
                         func_match = re.search(r'uses?\s+(\w+)\s*\(?', desc_lower)
                         if func_match:
-                            patterns_to_check.append(func_match.group(1))
+                            patterns_to_check.append(func_match.group(1) + "(")
                         
-                        # Look for numbers (degrees, pixels, etc.)
+                        # Method 2: Look for standalone function names like "goto()", "color()", "forward()"
+                        if not patterns_to_check:
+                            standalone_func = re.search(r'^(\w+)\s*\(\s*\)$', desc_lower.strip())
+                            if standalone_func:
+                                patterns_to_check.append(standalone_func.group(1) + "(")
+                        
+                        # Method 3: Look for common turtle commands in description
+                        if not patterns_to_check:
+                            turtle_commands = ['forward', 'backward', 'left', 'right', 'goto', 'setx', 'sety', 
+                                             'circle', 'dot', 'penup', 'pendown', 'pensize', 'pencolor', 
+                                             'color', 'speed', 'home', 'clear', 'hideturtle', 'showturtle',
+                                             'begin_fill', 'end_fill', 'setheading', 'stamp']
+                            for cmd in turtle_commands:
+                                if cmd in desc_lower:
+                                    patterns_to_check.append(cmd + "(")
+                                    break
+                        
+                        # Look for numbers (degrees, pixels, etc.) - add to patterns
                         numbers = re.findall(r'\b(\d+)\b', description)
                         patterns_to_check.extend(numbers)
                         
