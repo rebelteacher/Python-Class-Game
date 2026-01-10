@@ -1,7 +1,6 @@
 import { useState, useEffect, useRef, useCallback, useMemo } from "react";
 import { Button } from "@/components/ui/button";
-import { Slider } from "@/components/ui/slider";
-import { Play, Pause, RotateCcw, FastForward } from "lucide-react";
+import { Play, Pause, RotateCcw, FastForward, Grid } from "lucide-react";
 
 // Simple expression evaluator for variables
 function evaluateExpression(expr, variables) {
