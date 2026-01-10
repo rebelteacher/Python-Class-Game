@@ -874,9 +874,11 @@ export default function AnimatedTurtle({
           
         case 'circle': {
           const r = cmd.value;
-          const steps = Math.abs(r) < 50 ? 36 : 72;
-          const angleStep = (r > 0 ? 1 : -1) * 360 / steps;
-          const arcLength = 2 * Math.PI * Math.abs(r) / steps;
+          const extent = cmd.extent || 360; // Use extent from command, default to 360
+          const fullCircleSteps = Math.abs(r) < 50 ? 36 : 72;
+          const steps = Math.round(fullCircleSteps * Math.abs(extent) / 360); // Proportional steps
+          const angleStep = (r > 0 ? 1 : -1) * extent / steps;
+          const arcLength = 2 * Math.PI * Math.abs(r) * Math.abs(extent) / 360 / steps;
           
           const drawCircleStep = (step) => {
             if (step >= steps) {
