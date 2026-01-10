@@ -186,12 +186,13 @@ function parseCode(code, parentVars = {}) {
       continue;
     }
     
-    // Parse circle with variable support
-    match = trimmed.match(new RegExp(`${turtlePrefix}circle\\s*\\(\\s*([^)]+)\\s*\\)`));
+    // Parse circle with variable support (supports radius and optional extent)
+    match = trimmed.match(new RegExp(`${turtlePrefix}circle\\s*\\(\\s*([^,)]+)(?:\\s*,\\s*([^,)]+))?(?:\\s*,\\s*([^)]+))?\\s*\\)`));
     if (match) {
-      const value = getNumericValue(match[1]);
-      if (value !== null) {
-        commands.push({ type: 'circle', value, line: lineNum });
+      const radius = getNumericValue(match[1]);
+      const extent = match[2] ? getNumericValue(match[2]) : 360; // Default to full circle
+      if (radius !== null) {
+        commands.push({ type: 'circle', value: radius, extent: extent || 360, line: lineNum });
       }
       continue;
     }
