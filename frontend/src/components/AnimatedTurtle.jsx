@@ -1035,18 +1035,19 @@ export default function AnimatedTurtle({
           <FastForward className="w-4 h-4" />
         </Button>
         
-        <div className="flex items-center gap-2 flex-1">
-          <span className="text-xs text-gray-400">Speed:</span>
-          <Slider
-            value={[speed]}
-            onValueChange={([v]) => setSpeed(v)}
-            min={1}
-            max={10}
-            step={1}
-            className="w-24"
-          />
-          <span className="text-xs text-gray-400 w-4">{speed}</span>
-        </div>
+        <Button
+          size="sm"
+          variant="outline"
+          onClick={() => {
+            setShowGrid(!showGrid);
+            // Trigger redraw
+            setTimeout(() => drawCanvas(), 50);
+          }}
+          className={`${showGrid ? 'bg-blue-600 border-blue-500' : 'bg-gray-700 border-gray-600'} hover:bg-gray-600`}
+          title={showGrid ? "Hide grid" : "Show grid"}
+        >
+          <Grid className="w-4 h-4" />
+        </Button>
       </div>
       
       <div className="flex items-center gap-2 text-xs text-gray-500">
