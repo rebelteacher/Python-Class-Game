@@ -311,6 +311,7 @@ export default function AnimatedTurtle({
   const [collisionCount, setCollisionCount] = useState(0);
   const [goalsReached, setGoalsReached] = useState(new Set());
   const [pathLength, setPathLength] = useState(0);
+  const [showGrid, setShowGrid] = useState(false); // Grid toggle state
   
   const turtleRef = useRef(getInitialTurtleState());
   const pathsRef = useRef([]);
