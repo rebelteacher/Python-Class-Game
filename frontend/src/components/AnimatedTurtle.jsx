@@ -672,10 +672,13 @@ export default function AnimatedTurtle({
     ctx.fillStyle = backgroundColor;
     ctx.fillRect(0, 0, width, height);
     
-    // Draw background based on type
-    if (backgroundType === 'grid') {
+    // Draw grid if enabled (user toggle or background type)
+    if (showGrid || backgroundType === 'grid') {
       drawGrid(ctx);
-    } else if (backgroundType === 'maze') {
+    }
+    
+    // Draw background based on type
+    if (backgroundType === 'maze') {
       drawMaze(ctx);
     } else if (backgroundType === 'raceway') {
       drawRaceway(ctx);
