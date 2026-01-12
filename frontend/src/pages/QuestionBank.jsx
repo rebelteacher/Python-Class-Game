@@ -1006,16 +1006,16 @@ What is 2+2?,3,4,5,6,B,code,Unit 3: Python Text,Chapter 1,Lesson 1,Easy</pre>
                                       <CardContent>
                                         <div className="space-y-1 text-sm mb-3">
                                           <div className={question.correct_answer === "A" ? "text-green-600 font-medium" : ""}>
-                                            A. {question.choice_a}
+                                            A. {renderTextWithLineBreaks(question.choice_a)}
                                           </div>
                                           <div className={question.correct_answer === "B" ? "text-green-600 font-medium" : ""}>
-                                            B. {question.choice_b}
+                                            B. {renderTextWithLineBreaks(question.choice_b)}
                                           </div>
                                           <div className={question.correct_answer === "C" ? "text-green-600 font-medium" : ""}>
-                                            C. {question.choice_c}
+                                            C. {renderTextWithLineBreaks(question.choice_c)}
                                           </div>
                                           <div className={question.correct_answer === "D" ? "text-green-600 font-medium" : ""}>
-                                            D. {question.choice_d}
+                                            D. {renderTextWithLineBreaks(question.choice_d)}
                                           </div>
                                         </div>
                                         <div className="text-sm text-green-600 font-medium mb-3">
