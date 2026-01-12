@@ -31,6 +31,17 @@ const UNIT_TYPES = [
   { value: "microbit", label: "⚡ Micro:bit (Unit 4)" }
 ];
 
+// Helper function to render text with line breaks preserved
+const renderTextWithLineBreaks = (text) => {
+  if (!text) return null;
+  return text.split('\n').map((line, index, array) => (
+    <span key={index}>
+      {line}
+      {index < array.length - 1 && <br />}
+    </span>
+  ));
+};
+
 export default function QuestionBank({ user }) {
   const navigate = useNavigate();
   const [searchParams, setSearchParams] = useSearchParams();
