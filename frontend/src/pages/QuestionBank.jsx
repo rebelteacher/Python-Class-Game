@@ -987,7 +987,7 @@ What is 2+2?,3,4,5,6,B,code,Unit 3: Python Text,Chapter 1,Lesson 1,Easy</pre>
                                                 className="mt-1"
                                               />
                                             )}
-                                            <CardTitle className="text-base">{question.question_text}</CardTitle>
+                                            <CardTitle className="text-base whitespace-pre-wrap">{renderTextWithLineBreaks(question.question_text)}</CardTitle>
                                           </div>
                                           <div className="flex items-center gap-2 flex-shrink-0">
                                             <span className={`px-2 py-1 rounded text-xs font-semibold ${badge.bg} ${badge.text}`}>
