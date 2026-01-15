@@ -7049,6 +7049,10 @@ async def submit_mc_test(test_id: str, submission: MCTestSubmission, request: Re
     
     return {
         "score": round(score, 1),
+        "correct_count": correct_count,
+        "total_questions": total_questions,
+        "question_results": question_results if show_answers else [],
+        "show_answers": show_answers,
         "message": "Test submitted successfully"
     }
 
