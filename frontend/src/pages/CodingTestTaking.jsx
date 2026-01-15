@@ -204,6 +204,16 @@ export default function CodingTestTaking({ user }) {
   };
 
   const handleRunCode = async (providedInput = null) => {
+    // Check if this is turtle code
+    const isTurtle = code.includes('import turtle') || code.includes('turtle.Turtle');
+    
+    if (isTurtle) {
+      // For turtle code, we don't execute via API - the AnimatedTurtle component handles it
+      setTurtleImage(null);
+      setOutput("Turtle code runs in the preview panel on the right.");
+      return;
+    }
+    
     const hasInputCalls = /input\s*\(/i.test(code);
     
     // If code has input() calls and no input provided yet
@@ -215,6 +225,7 @@ export default function CodingTestTaking({ user }) {
 
     setRunning(true);
     setOutput("");
+    setTurtleImage(null);
     
     try {
       const response = await axios.post(
