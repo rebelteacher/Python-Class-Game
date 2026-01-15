@@ -147,7 +147,9 @@ export default function TestBuilder({ user }) {
           time_limit_minutes: parseInt(testData.time_limit_minutes) || 0,
           classroom_ids: testData.classroom_ids,
           available_date: testData.available_date || null,
-          due_date: testData.due_date || null
+          due_date: testData.due_date || null,
+          allow_retake: testData.allow_retake,
+          show_answers_after: testData.show_answers_after
         },
         { withCredentials: true }
       );
