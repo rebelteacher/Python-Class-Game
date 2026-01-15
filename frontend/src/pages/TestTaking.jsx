@@ -195,6 +195,9 @@ export default function TestTaking({ user }) {
   }
 
   if (submitted && score !== null) {
+    const missedQuestions = questionResults.filter(q => !q.is_correct);
+    const correctQuestions = questionResults.filter(q => q.is_correct);
+    
     return (
       <div className="min-h-screen bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50">
         <nav className="bg-white shadow-sm border-b border-gray-200">
@@ -203,8 +206,8 @@ export default function TestTaking({ user }) {
           </div>
         </nav>
 
-        <main className="container mx-auto px-6 py-20">
-          <Card className="max-w-2xl mx-auto">
+        <main className="container mx-auto px-6 py-10">
+          <Card className="max-w-4xl mx-auto mb-6">
             <CardHeader className="text-center">
               <div className="mx-auto mb-4">
                 {score >= 70 ? (
@@ -220,6 +223,9 @@ export default function TestTaking({ user }) {
                 <p className="text-gray-600 mb-2">Your Score</p>
                 <p className={`text-6xl font-bold ${score >= 70 ? 'text-green-600' : 'text-yellow-600'}`}>
                   {score}%
+                </p>
+                <p className="text-gray-500 mt-2">
+                  {correctQuestions.length} correct out of {questionResults.length} questions
                 </p>
               </div>
               
@@ -241,6 +247,70 @@ export default function TestTaking({ user }) {
               </div>
             </CardContent>
           </Card>
+
+          {/* Show Question Review if answers are visible */}
+          {showAnswers && questionResults.length > 0 && (
+            <Card className="max-w-4xl mx-auto">
+              <CardHeader>
+                <CardTitle className="text-xl">Question Review</CardTitle>
+                <p className="text-gray-600">
+                  {missedQuestions.length > 0 
+                    ? `You missed ${missedQuestions.length} question${missedQuestions.length > 1 ? 's' : ''}. Review below:`
+                    : "Perfect score! All questions answered correctly."}
+                </p>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                {questionResults.map((result, idx) => (
+                  <div 
+                    key={result.question_id} 
+                    className={`p-4 rounded-lg border-2 ${
+                      result.is_correct 
+                        ? 'bg-green-50 border-green-200' 
+                        : 'bg-red-50 border-red-200'
+                    }`}
+                  >
+                    <div className="flex items-start gap-3">
+                      <span className={`flex-shrink-0 w-8 h-8 rounded-full flex items-center justify-center text-white font-bold ${
+                        result.is_correct ? 'bg-green-500' : 'bg-red-500'
+                      }`}>
+                        {result.is_correct ? '✓' : '✗'}
+                      </span>
+                      <div className="flex-1">
+                        <p className="font-medium text-gray-900 mb-2">
+                          Q{idx + 1}: {renderTextWithLineBreaks(result.question_text)}
+                        </p>
+                        
+                        {result.choices && (
+                          <div className="space-y-1 text-sm">
+                            {Object.entries(result.choices).map(([letter, text]) => (
+                              <div 
+                                key={letter}
+                                className={`p-2 rounded ${
+                                  letter === result.correct_answer 
+                                    ? 'bg-green-200 text-green-800 font-medium' 
+                                    : letter === result.student_answer && !result.is_correct
+                                    ? 'bg-red-200 text-red-800 line-through'
+                                    : 'bg-white'
+                                }`}
+                              >
+                                {letter}. {renderTextWithLineBreaks(text)}
+                                {letter === result.correct_answer && (
+                                  <span className="ml-2 text-green-600">✓ Correct Answer</span>
+                                )}
+                                {letter === result.student_answer && !result.is_correct && (
+                                  <span className="ml-2 text-red-600">✗ Your Answer</span>
+                                )}
+                              </div>
+                            ))}
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </CardContent>
+            </Card>
+          )}
         </main>
       </div>
     );
