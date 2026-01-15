@@ -7159,6 +7159,35 @@ async def get_test_results(test_id: str, request: Request):
         return {"score": attempt["score"]}
 
 
+@api_router.put("/mc-tests/{test_id}/release-results")
+async def release_test_results(test_id: str, request: Request):
+    """Release test results so students can see their answers"""
+    user = await get_current_user(request)
+    
+    if user["role"] != "teacher":
+        raise HTTPException(status_code=403, detail="Only teachers can release results")
+    
+    test = await db.mc_tests.find_one({"id": test_id})
+    if not test:
+        raise HTTPException(status_code=404, detail="Test not found")
+    
+    if test["teacher_id"] != user["id"]:
+        raise HTTPException(status_code=403, detail="You can only release results for your own tests")
+    
+    # Toggle or set results_released to True
+    new_status = not test.get("results_released", False)
+    
+    await db.mc_tests.update_one(
+        {"id": test_id},
+        {"$set": {"results_released": new_status}}
+    )
+    
+    return {
+        "results_released": new_status,
+        "message": f"Results {'released' if new_status else 'hidden'} successfully"
+    }
+
+
 @api_router.put("/mc-tests/{test_id}/schedule")
 async def update_test_schedule(
     test_id: str,
