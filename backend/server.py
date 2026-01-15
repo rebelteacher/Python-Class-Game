@@ -6960,9 +6960,14 @@ async def submit_mc_test(test_id: str, submission: MCTestSubmission, request: Re
     if not attempt:
         raise HTTPException(status_code=404, detail="Test attempt not found or already completed")
     
-    # Grade the test
+    # Get test settings
+    test = await db.mc_tests.find_one({"id": test_id})
+    show_answers = test.get("show_answers_after", True) if test else True
+    
+    # Grade the test and build question results
     correct_count = 0
     total_questions = len(attempt["randomized_question_ids"])
+    question_results = []  # Store results for each question
     
     logging.info(f"🔍 DEBUG: Grading test for student {user['id']}")
     logging.info(f"📊 Total questions: {total_questions}")
@@ -6981,16 +6986,21 @@ async def submit_mc_test(test_id: str, submission: MCTestSubmission, request: Re
             logging.info(f"   Randomized order: {randomized_order}")
             logging.info(f"   Original correct answer: {question['correct_answer']}")
             
+            is_correct = False
+            student_letter = None
+            
             # Convert student's position to the actual original letter
             try:
                 position = int(student_answer)
                 logging.info(f"   Position (converted): {position}")
                 if 0 <= position < len(randomized_order):
                     actual_original_letter = randomized_order[position]
+                    student_letter = actual_original_letter
                     logging.info(f"   Actual original letter at position {position}: {actual_original_letter}")
                     
                     if actual_original_letter == question["correct_answer"]:
                         correct_count += 1
+                        is_correct = True
                         logging.info(f"   ✅ CORRECT! {actual_original_letter} == {question['correct_answer']}")
                     else:
                         logging.info(f"   ❌ WRONG! {actual_original_letter} != {question['correct_answer']}")
@@ -6998,13 +7008,32 @@ async def submit_mc_test(test_id: str, submission: MCTestSubmission, request: Re
                     logging.info(f"   ⚠️ Position {position} out of range")
             except (ValueError, TypeError) as e:
                 logging.info(f"   ⚠️ Error converting answer: {e}")
+            
+            # Build question result
+            q_result = {
+                "question_id": q_id,
+                "question_text": question.get("question_text", ""),
+                "is_correct": is_correct,
+                "student_answer": student_letter,
+                "randomized_order": randomized_order
+            }
+            
+            # Only include correct answer if show_answers is enabled
+            if show_answers:
+                q_result["correct_answer"] = question["correct_answer"]
+                q_result["choices"] = {
+                    "A": question.get("choice_a", ""),
+                    "B": question.get("choice_b", ""),
+                    "C": question.get("choice_c", ""),
+                    "D": question.get("choice_d", "")
+                }
+            
+            question_results.append(q_result)
     
     score = (correct_count / total_questions * 100) if total_questions > 0 else 0
     logging.info(f"\n🎯 Final score: {correct_count}/{total_questions} = {score}%")
     
-    score = (correct_count / total_questions * 100) if total_questions > 0 else 0
-    
-    # Update attempt
+    # Update attempt with question results
     await db.mc_test_attempts.update_one(
         {"id": attempt["id"]},
         {
@@ -7012,7 +7041,8 @@ async def submit_mc_test(test_id: str, submission: MCTestSubmission, request: Re
                 "student_answers": submission.answers,
                 "score": score,
                 "is_complete": True,
-                "submitted_at": datetime.now(timezone.utc).isoformat()
+                "submitted_at": datetime.now(timezone.utc).isoformat(),
+                "question_results": question_results
             }
         }
     )
