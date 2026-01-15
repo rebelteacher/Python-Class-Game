@@ -372,23 +372,56 @@ export default function TestReports({ user }) {
                       </Label>
                     </div>
                     {allTests.map((test) => (
-                      <div key={test.id} className="flex items-center space-x-2">
-                        <input
-                          type="checkbox"
-                          id={`test-${test.id}`}
-                          checked={selectedTests.includes(test.id)}
-                          onChange={(e) => {
-                            if (e.target.checked) {
-                              setSelectedTests([...selectedTests, test.id]);
-                            } else {
-                              setSelectedTests(selectedTests.filter(id => id !== test.id));
-                            }
-                          }}
-                          className="w-4 h-4"
-                        />
-                        <Label htmlFor={`test-${test.id}`} className="cursor-pointer">
-                          {test.title}
-                        </Label>
+                      <div key={test.id} className="flex items-center justify-between py-2 border-b last:border-b-0">
+                        <div className="flex items-center space-x-2">
+                          <input
+                            type="checkbox"
+                            id={`test-${test.id}`}
+                            checked={selectedTests.includes(test.id)}
+                            onChange={(e) => {
+                              if (e.target.checked) {
+                                setSelectedTests([...selectedTests, test.id]);
+                              } else {
+                                setSelectedTests(selectedTests.filter(id => id !== test.id));
+                              }
+                            }}
+                            className="w-4 h-4"
+                          />
+                          <Label htmlFor={`test-${test.id}`} className="cursor-pointer">
+                            {test.title}
+                          </Label>
+                          {test.results_released ? (
+                            <span className="text-xs bg-green-100 text-green-700 px-2 py-0.5 rounded-full">
+                              Released
+                            </span>
+                          ) : (
+                            <span className="text-xs bg-yellow-100 text-yellow-700 px-2 py-0.5 rounded-full">
+                              Not Released
+                            </span>
+                          )}
+                        </div>
+                        <Button
+                          size="sm"
+                          variant={test.results_released ? "outline" : "default"}
+                          onClick={() => handleReleaseResults(test.id)}
+                          disabled={releasingResults}
+                          className={test.results_released 
+                            ? "text-yellow-600 border-yellow-300 hover:bg-yellow-50" 
+                            : "bg-green-600 hover:bg-green-700"
+                          }
+                        >
+                          {test.results_released ? (
+                            <>
+                              <Lock className="w-3 h-3 mr-1" />
+                              Hide
+                            </>
+                          ) : (
+                            <>
+                              <Unlock className="w-3 h-3 mr-1" />
+                              Release
+                            </>
+                          )}
+                        </Button>
                       </div>
                     ))}
                   </div>
