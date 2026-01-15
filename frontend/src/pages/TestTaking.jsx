@@ -22,6 +22,8 @@ export default function TestTaking({ user }) {
   const [submitting, setSubmitting] = useState(false);
   const [submitted, setSubmitted] = useState(false);
   const [score, setScore] = useState(null);
+  const [questionResults, setQuestionResults] = useState([]);
+  const [showAnswers, setShowAnswers] = useState(true);
   const [timeRemaining, setTimeRemaining] = useState(null);
   const [attemptId, setAttemptId] = useState(null);
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
