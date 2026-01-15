@@ -701,9 +701,22 @@ export default function CodingTestTaking({ user }) {
           {/* Output Panel */}
           <div className="h-1/4 bg-gray-950 p-4 overflow-y-auto">
             <h3 className="text-sm font-semibold mb-2">Output:</h3>
-            <pre className="text-sm text-green-400 font-mono whitespace-pre-wrap">
-              {output || "Run your code to see output here..."}
-            </pre>
+            
+            {/* Show AnimatedTurtle for turtle code */}
+            {isTurtleProblem ? (
+              <div className="bg-white rounded-lg overflow-hidden" style={{ height: '200px' }}>
+                <AnimatedTurtle 
+                  code={code}
+                  width={300}
+                  height={200}
+                  autoPlay={false}
+                />
+              </div>
+            ) : (
+              <pre className="text-sm text-green-400 font-mono whitespace-pre-wrap">
+                {output || "Run your code to see output here..."}
+              </pre>
+            )}
             
             {/* Submission History */}
             {allSubmissions[currentProblem?.id] && allSubmissions[currentProblem.id].length > 0 && (
