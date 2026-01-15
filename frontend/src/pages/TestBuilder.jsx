@@ -348,6 +348,33 @@ export default function TestBuilder({ user }) {
                       </div>
                     </div>
 
+                    {/* Test Options */}
+                    <div className="space-y-3 pt-4 border-t">
+                      <Label className="text-base font-semibold">Test Options</Label>
+                      
+                      <div className="flex items-center space-x-2">
+                        <Checkbox
+                          id="allow_retake"
+                          checked={testData.allow_retake}
+                          onCheckedChange={(checked) => setTestData({ ...testData, allow_retake: checked })}
+                        />
+                        <Label htmlFor="allow_retake" className="cursor-pointer">
+                          Allow students to retake this test
+                        </Label>
+                      </div>
+                      
+                      <div className="flex items-center space-x-2">
+                        <Checkbox
+                          id="show_answers_after"
+                          checked={testData.show_answers_after}
+                          onCheckedChange={(checked) => setTestData({ ...testData, show_answers_after: checked })}
+                        />
+                        <Label htmlFor="show_answers_after" className="cursor-pointer">
+                          Show correct answers after submission
+                        </Label>
+                      </div>
+                    </div>
+
                     <Button
                       type="submit"
                       disabled={creating}
