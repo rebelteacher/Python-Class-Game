@@ -6881,8 +6881,45 @@ async def start_mc_test(test_id: str, request: Request):
         "student_id": user["id"],
         "is_complete": True
     })
+    
     if existing_attempt:
-        raise HTTPException(status_code=400, detail="Test already completed")
+        # Check if retakes are allowed
+        if test.get("allow_retake", False):
+            # Delete old attempt to allow retake
+            await db.mc_test_attempts.delete_one({"id": existing_attempt["id"]})
+        else:
+            raise HTTPException(status_code=400, detail="Test already completed. Retakes are not allowed.")
+    
+    # Check for incomplete attempt
+    incomplete_attempt = await db.mc_test_attempts.find_one({
+        "test_id": test_id,
+        "student_id": user["id"],
+        "is_complete": False
+    })
+    
+    if incomplete_attempt:
+        # Resume existing attempt
+        questions_data = []
+        for q_id in incomplete_attempt["randomized_question_ids"]:
+            question = await db.mc_questions.find_one({"id": q_id}, {"_id": 0})
+            if question:
+                randomized_order = incomplete_attempt["randomized_choices"].get(q_id, ["A", "B", "C", "D"])
+                shuffled_choices = [question[f"choice_{letter.lower()}"] for letter in randomized_order]
+                questions_data.append({
+                    "id": q_id,
+                    "question_text": question["question_text"],
+                    "choices": shuffled_choices
+                })
+        
+        return {
+            "attempt_id": incomplete_attempt["id"],
+            "test_title": test["title"],
+            "test_description": test["description"],
+            "time_limit_minutes": test["time_limit_minutes"],
+            "num_questions": len(questions_data),
+            "questions": questions_data,
+            "previous_answers": incomplete_attempt.get("student_answers", {})
+        }
     
     # Randomly select questions
     import random
