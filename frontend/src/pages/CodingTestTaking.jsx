@@ -9,6 +9,7 @@ import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } f
 import { Clock, Play, Send, AlertTriangle, Maximize, Trophy } from "lucide-react";
 import Editor from "@monaco-editor/react";
 import InteractiveInputCollector from "@/components/InteractiveInputCollector";
+import AnimatedTurtle from "@/components/AnimatedTurtle";
 
 const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
 const API = `${BACKEND_URL}/api`;
