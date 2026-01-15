@@ -165,6 +165,31 @@ export default function TestReports({ user }) {
     window.print();
   };
 
+  const handleReleaseResults = async (testIdToRelease) => {
+    setReleasingResults(true);
+    try {
+      const response = await axios.put(
+        `${API}/mc-tests/${testIdToRelease}/release-results`,
+        {},
+        { withCredentials: true }
+      );
+      
+      // Update the test in allTests to reflect new status
+      setAllTests(prev => prev.map(t => 
+        t.id === testIdToRelease 
+          ? { ...t, results_released: response.data.results_released }
+          : t
+      ));
+      
+      toast.success(response.data.message);
+    } catch (error) {
+      console.error("Error releasing results:", error);
+      toast.error("Failed to release results");
+    } finally {
+      setReleasingResults(false);
+    }
+  };
+
   const handleExportExcel = () => {
     if (results.length === 0) {
       toast.error("No results to export");
