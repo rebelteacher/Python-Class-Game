@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { ArrowLeft, Download, FileSpreadsheet, Printer, TrendingUp, TrendingDown, Users, Award } from "lucide-react";
+import { ArrowLeft, Download, FileSpreadsheet, Printer, TrendingUp, TrendingDown, Users, Award, Unlock, Lock } from "lucide-react";
 
 const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
 const API = `${BACKEND_URL}/api`;
@@ -24,6 +24,7 @@ export default function TestReports({ user }) {
   const [loadingResults, setLoadingResults] = useState(false);
   const [results, setResults] = useState([]);
   const [testInfo, setTestInfo] = useState(null);
+  const [releasingResults, setReleasingResults] = useState(false);
 
   useEffect(() => {
     fetchClassrooms();
