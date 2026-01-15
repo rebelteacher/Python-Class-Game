@@ -131,6 +131,8 @@ export default function TestTaking({ user }) {
       
       console.log("✅ Submission response:", response.data);
       setScore(response.data.score);
+      setQuestionResults(response.data.question_results || []);
+      setShowAnswers(response.data.show_answers !== false);
       setSubmitted(true);
       
       if (timerRef.current) {
