@@ -134,6 +134,7 @@ export default function TestTaking({ user }) {
       setScore(response.data.score);
       setQuestionResults(response.data.question_results || []);
       setShowAnswers(response.data.show_answers !== false);
+      setResultsReleased(response.data.results_released !== false);
       setSubmitted(true);
       
       if (timerRef.current) {
