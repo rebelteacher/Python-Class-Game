@@ -33,7 +33,9 @@ export default function TestBuilder({ user }) {
     time_limit_minutes: "",
     available_date: "",
     due_date: "",
-    classroom_ids: []
+    classroom_ids: [],
+    allow_retake: false,
+    show_answers_after: true
   });
 
   useEffect(() => {
