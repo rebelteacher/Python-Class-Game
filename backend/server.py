@@ -6792,7 +6792,8 @@ async def create_mc_test(test: MCTestCreate, request: Request):
         available_date=available_date,
         due_date=due_date,
         allow_retake=test.allow_retake,
-        show_answers_after=test.show_answers_after
+        show_answers_after=test.show_answers_after,
+        results_released=test.results_released
     )
     
     test_dict = mc_test.model_dump()
