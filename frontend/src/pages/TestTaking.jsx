@@ -250,8 +250,22 @@ export default function TestTaking({ user }) {
             </CardContent>
           </Card>
 
-          {/* Show Question Review if answers are visible */}
-          {showAnswers && questionResults.length > 0 && (
+          {/* Show message when results are not released yet */}
+          {!resultsReleased && (
+            <Card className="max-w-4xl mx-auto bg-yellow-50 border-yellow-200">
+              <CardContent className="py-8 text-center">
+                <Lock className="w-12 h-12 text-yellow-500 mx-auto mb-4" />
+                <h3 className="text-lg font-semibold text-yellow-800 mb-2">Results Pending Release</h3>
+                <p className="text-yellow-700">
+                  Your teacher has not released the test results yet. 
+                  Check back later to see which questions you missed.
+                </p>
+              </CardContent>
+            </Card>
+          )}
+
+          {/* Show Question Review if answers are visible and results are released */}
+          {showAnswers && resultsReleased && questionResults.length > 0 && (
             <Card className="max-w-4xl mx-auto">
               <CardHeader>
                 <CardTitle className="text-xl">Question Review</CardTitle>
