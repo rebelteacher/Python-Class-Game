@@ -28,6 +28,7 @@ export default function CodingTestTaking({ user }) {
   const [codePerProblem, setCodePerProblem] = useState({}); // Save code per problem
   const [code, setCode] = useState("");
   const [output, setOutput] = useState("");
+  const [turtleImage, setTurtleImage] = useState(null); // For turtle graphics output
   const [loading, setLoading] = useState(true);
   const [running, setRunning] = useState(false);
   const [submitting, setSubmitting] = useState(false);
@@ -45,6 +46,12 @@ export default function CodingTestTaking({ user }) {
   const timerRef = useRef(null);
   
   const currentProblem = problems[currentProblemIndex];
+  
+  // Check if current problem is turtle-based
+  const isTurtleProblem = currentProblem?.unit_type === 'turtle' || 
+                          currentProblem?.assignment_type === 'turtle' ||
+                          code.includes('import turtle') ||
+                          code.includes('turtle.Turtle');
 
   useEffect(() => {
     startTest();
