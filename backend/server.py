@@ -7002,7 +7002,10 @@ async def submit_mc_test(test_id: str, submission: MCTestSubmission, request: Re
     
     # Get test settings
     test = await db.mc_tests.find_one({"id": test_id})
-    show_answers = test.get("show_answers_after", True) if test else True
+    # Only show answers if: show_answers_after is True AND results have been released
+    results_released = test.get("results_released", False) if test else False
+    show_answers_setting = test.get("show_answers_after", True) if test else True
+    show_answers = show_answers_setting and results_released
     
     # Grade the test and build question results
     correct_count = 0
