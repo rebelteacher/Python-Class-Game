@@ -641,7 +641,8 @@ class MCTest(BaseModel):
     available_date: Optional[datetime] = None
     due_date: Optional[datetime] = None
     allow_retake: bool = False  # Allow students to retake the test
-    show_answers_after: bool = True  # Show correct answers after submission
+    show_answers_after: bool = True  # Show correct answers after submission (if results_released)
+    results_released: bool = False  # Teacher must release results before students can see answers
     created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
 
 class MCTestCreate(BaseModel):
@@ -657,6 +658,7 @@ class MCTestCreate(BaseModel):
     due_date: Optional[str] = None
     allow_retake: bool = False
     show_answers_after: bool = True
+    results_released: bool = False
 
 class MCTestAttempt(BaseModel):
     model_config = ConfigDict(extra="ignore")
