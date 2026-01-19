@@ -2827,6 +2827,23 @@ export default function AssignmentLibrary({ user }) {
                   </div>
                 )}
 
+                {/* Turtle Preview for Edit */}
+                {editingProblem.assignment_type === "turtle" && editingProblem.solution_code && (
+                  <div className="border-2 border-green-200 bg-green-50 rounded-lg p-4">
+                    <Label className="text-lg font-semibold mb-3 block">🐢 Live Preview</Label>
+                    <AnimatedTurtle
+                      code={editingProblem.solution_code}
+                      width={350}
+                      height={350}
+                      backgroundType="none"
+                      backgroundColor="#ffffff"
+                    />
+                    <p className="text-xs text-gray-500 mt-2">
+                      Hover over canvas to see coordinates. Use play controls to test your code.
+                    </p>
+                  </div>
+                )}
+
                 <Button type="submit" className="w-full bg-indigo-600 hover:bg-indigo-700">
                   Update Problem
                 </Button>
