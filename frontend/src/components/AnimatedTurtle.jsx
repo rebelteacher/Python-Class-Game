@@ -808,12 +808,14 @@ export default function AnimatedTurtle({
         }
         
         case 'right':
+          console.log(`[TURTLE] right(${cmd.value}): heading ${turtle.heading.toFixed(1)}° → ${(turtle.heading - cmd.value).toFixed(1)}°`);
           turtle.heading -= cmd.value;
           drawCanvas();
           setTimeout(resolve, baseDelay / 2);
           break;
           
         case 'left':
+          console.log(`[TURTLE] left(${cmd.value}): heading ${turtle.heading.toFixed(1)}° → ${(turtle.heading + cmd.value).toFixed(1)}°`);
           turtle.heading += cmd.value;
           drawCanvas();
           setTimeout(resolve, baseDelay / 2);
