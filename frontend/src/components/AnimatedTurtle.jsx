@@ -314,6 +314,7 @@ export default function AnimatedTurtle({
   const [goalsReached, setGoalsReached] = useState(new Set());
   const [pathLength, setPathLength] = useState(0);
   const [showGrid, setShowGrid] = useState(false); // Grid toggle state
+  const [mouseCoords, setMouseCoords] = useState(null); // For hover coordinate display
   
   const turtleRef = useRef(getInitialTurtleState());
   const pathsRef = useRef([]);
