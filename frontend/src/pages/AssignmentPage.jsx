@@ -897,9 +897,15 @@ export default function AssignmentPage({ user }) {
               {/* Expected Output - Text or Turtle Image */}
               {(() => {
                 const currentProblem = assignment.problems?.[currentProblemIndex];
-                const isTurtle = currentProblem?.assignment_type === "turtle";
+                const isTurtle = currentProblem?.assignment_type === "turtle" || 
+                                 currentProblem?.unit_type === "turtle" ||
+                                 assignment.assignment_type === "turtle" ||
+                                 assignment.unit_type === "turtle";
                 const hasExpectedOutput = assignment.expected_output || currentProblem?.expected_output;
-                const hasExpectedImage = currentProblem?.expected_turtle_image;
+                const hasExpectedImage = currentProblem?.expected_turtle_image || 
+                                         assignment.expected_turtle_image ||
+                                         currentProblem?.expected_image ||
+                                         assignment.expected_image;
                 
                 if (isTurtle && hasExpectedImage) {
                   return (
