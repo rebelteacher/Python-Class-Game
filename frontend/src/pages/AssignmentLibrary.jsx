@@ -3049,20 +3049,18 @@ export default function AssignmentLibrary({ user }) {
               </div>
             </div>
           ) : (
-            /* Show static image for non-maze problems */
-            <div className="flex justify-center">
-              {turtlePreviewImage ? (
-                <img 
-                  src={`data:image/png;base64,${turtlePreviewImage}`}
-                  alt="Turtle preview"
-                  className="border-2 border-gray-300 rounded"
-                  style={{ maxWidth: "100%", height: "auto" }}
-                />
-              ) : (
-                <div className="text-gray-500 text-center py-8">
-                  Click "Preview Turtle Output" to generate a preview image
-                </div>
-              )}
+            /* Show AnimatedTurtle for non-maze problems too */
+            <div className="flex flex-col items-center gap-4">
+              <AnimatedTurtle
+                code={newProblem.solution_code || ""}
+                width={400}
+                height={400}
+                backgroundType="none"
+                backgroundColor={newProblem.background_color || "#ffffff"}
+              />
+              <p className="text-sm text-gray-500">
+                Use the controls above to run your code. Hover over the canvas to see coordinates.
+              </p>
             </div>
           )}
           
