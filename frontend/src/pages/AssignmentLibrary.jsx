@@ -1759,6 +1759,25 @@ export default function AssignmentLibrary({ user }) {
                     </div>
                   )}
 
+                  {/* Turtle Live Preview for Create */}
+                  {newProblem.assignment_type === "turtle" && newProblem.solution_code && (
+                    <div className="border-2 border-green-200 bg-green-50 rounded-lg p-4">
+                      <Label className="text-lg font-semibold mb-3 block">🐢 Live Preview</Label>
+                      <AnimatedTurtle
+                        code={newProblem.solution_code}
+                        width={350}
+                        height={350}
+                        backgroundType={newProblem.background_type || "none"}
+                        backgroundColor={newProblem.background_color || "#ffffff"}
+                        mazeData={newProblem.maze_data}
+                        goals={newProblem.goals || []}
+                      />
+                      <p className="text-xs text-gray-500 mt-2">
+                        Hover over canvas to see coordinates. Use play controls to test your code.
+                      </p>
+                    </div>
+                  )}
+
                   <Button data-testid="lib-submit-btn" type="submit" className="w-full bg-indigo-600 hover:bg-indigo-700">
                     Add to Library
                   </Button>
