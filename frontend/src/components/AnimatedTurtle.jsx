@@ -724,6 +724,7 @@ export default function AnimatedTurtle({
   
   // Reset turtle
   const resetTurtle = useCallback(() => {
+    console.log('[TURTLE] resetTurtle called - resetting to initial state');
     playingRef.current = false;
     setIsPlaying(false);
     setCurrentStep(-1);
@@ -733,6 +734,7 @@ export default function AnimatedTurtle({
     
     turtleRef.current = getInitialTurtleState();
     pathsRef.current = [];
+    console.log(`[TURTLE] Reset complete: position=(${turtleRef.current.x}, ${turtleRef.current.y}), heading=${turtleRef.current.heading}°`);
     drawCanvas();
     if (onLineHighlight) onLineHighlight(-1);
   }, [drawCanvas, onLineHighlight]);
