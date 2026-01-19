@@ -698,10 +698,12 @@ export default function AnimatedTurtle({
     }
     
     // Draw all paths
+    console.log(`[DRAW] Drawing ${pathsRef.current.length} paths`);
     for (const path of pathsRef.current) {
       if (path.type === 'line') {
         const start = toCanvasCoords(path.x1, path.y1);
         const end = toCanvasCoords(path.x2, path.y2);
+        console.log(`[DRAW] Line ${path.color}: turtle(${path.x1.toFixed(0)},${path.y1.toFixed(0)}) -> (${path.x2.toFixed(0)},${path.y2.toFixed(0)}) | canvas(${start.x.toFixed(0)},${start.y.toFixed(0)}) -> (${end.x.toFixed(0)},${end.y.toFixed(0)})`);
         ctx.beginPath();
         ctx.moveTo(start.x, start.y);
         ctx.lineTo(end.x, end.y);
