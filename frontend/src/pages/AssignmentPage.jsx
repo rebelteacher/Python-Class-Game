@@ -1604,8 +1604,8 @@ export default function AssignmentPage({ user }) {
                                 <div className="bg-white rounded-lg shadow p-2">
                                   <AnimatedTurtle
                                     code={code}
-                                    width={400}
-                                    height={400}
+                                    width={600}
+                                    height={600}
                                     backgroundType={currentProblem?.background_type || "none"}
                                     backgroundColor={currentProblem?.background_color || "#ffffff"}
                                     backgroundImage={currentProblem?.background_image}
