@@ -239,14 +239,19 @@ function parseCode(code, parentVars = {}) {
       if (iterations !== null && iterations > 0) {
         const loopIndent = line.search(/\S/);
         const loopBody = [];
+        let lastBodyLine = lineNum;
         
         // Collect loop body lines
         for (let j = lineNum + 1; j < lines.length; j++) {
           const bodyLine = lines[j];
-          if (bodyLine.trim() === '') continue;
+          if (bodyLine.trim() === '') {
+            lastBodyLine = j;
+            continue;
+          }
           const bodyIndent = bodyLine.search(/\S/);
           if (bodyIndent <= loopIndent && bodyLine.trim() !== '') break;
           loopBody.push({ code: bodyLine.trim(), lineNum: j });
+          lastBodyLine = j;
         }
         
         // Expand loop - execute body for each iteration
@@ -260,6 +265,9 @@ function parseCode(code, parentVars = {}) {
             }
           }
         }
+        
+        // Skip past the loop body lines so they aren't parsed again
+        lineNum = lastBodyLine;
       }
       continue;
     }
