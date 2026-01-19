@@ -3053,8 +3053,8 @@ export default function AssignmentLibrary({ user }) {
             <div className="flex flex-col items-center gap-4">
               <AnimatedTurtle
                 code={newProblem.solution_code || ""}
-                width={400}
-                height={400}
+                width={600}
+                height={600}
                 backgroundType={newProblem.background_type}
                 backgroundColor={newProblem.background_color || "#ffffff"}
                 backgroundImage={newProblem.background_image}
@@ -3089,8 +3089,8 @@ export default function AssignmentLibrary({ user }) {
             <div className="flex flex-col items-center gap-4">
               <AnimatedTurtle
                 code={newProblem.solution_code || ""}
-                width={400}
-                height={400}
+                width={600}
+                height={600}
                 backgroundType="none"
                 backgroundColor={newProblem.background_color || "#ffffff"}
               />
