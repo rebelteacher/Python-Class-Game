@@ -1002,15 +1002,47 @@ export default function AnimatedTurtle({
     if (onLineHighlight) onLineHighlight(-1);
   }, [onLineHighlight]);
   
+  // Handle mouse move for coordinate display
+  const handleMouseMove = useCallback((e) => {
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+    
+    const rect = canvas.getBoundingClientRect();
+    const scaleX = canvas.width / rect.width;
+    const scaleY = canvas.height / rect.height;
+    
+    // Get canvas coordinates
+    const canvasX = (e.clientX - rect.left) * scaleX;
+    const canvasY = (e.clientY - rect.top) * scaleY;
+    
+    // Convert to turtle coordinates (origin at center, Y inverted)
+    const turtleX = Math.round(canvasX - width / 2);
+    const turtleY = Math.round(height / 2 - canvasY);
+    
+    setMouseCoords({ x: turtleX, y: turtleY });
+  }, [width, height]);
+  
+  const handleMouseLeave = useCallback(() => {
+    setMouseCoords(null);
+  }, []);
+  
   return (
     <div className="flex flex-col items-center gap-3">
-      <div className="bg-white rounded-lg shadow-lg p-2">
+      <div className="bg-white rounded-lg shadow-lg p-2 relative">
         <canvas
           ref={canvasRef}
           width={width}
           height={height}
-          className="border border-gray-300 rounded"
+          className="border border-gray-300 rounded cursor-crosshair"
+          onMouseMove={handleMouseMove}
+          onMouseLeave={handleMouseLeave}
         />
+        {/* Coordinate display overlay */}
+        {mouseCoords && (
+          <div className="absolute top-2 right-2 bg-black/70 text-white text-xs px-2 py-1 rounded font-mono">
+            ({mouseCoords.x}, {mouseCoords.y})
+          </div>
+        )}
       </div>
       
       <div className="flex items-center gap-3 w-full max-w-md">
