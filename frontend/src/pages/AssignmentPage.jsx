@@ -907,6 +907,17 @@ export default function AssignmentPage({ user }) {
                                          currentProblem?.expected_image ||
                                          assignment.expected_image;
                 
+                // Debug: log what's available
+                console.log("Expected Output Debug:", {
+                  isTurtle,
+                  hasExpectedImage: !!hasExpectedImage,
+                  hasExpectedOutput: !!hasExpectedOutput,
+                  currentProblem_expected_turtle_image: !!currentProblem?.expected_turtle_image,
+                  assignment_expected_turtle_image: !!assignment?.expected_turtle_image,
+                  problemKeys: currentProblem ? Object.keys(currentProblem) : [],
+                  assignmentKeys: assignment ? Object.keys(assignment).filter(k => k.includes('expected') || k.includes('turtle')) : []
+                });
+                
                 if (isTurtle && hasExpectedImage) {
                   return (
                     <Card data-testid="expected-output-card" className="border-2 border-green-200 bg-green-50">
@@ -922,6 +933,20 @@ export default function AssignmentPage({ user }) {
                             className="border-2 border-green-300 rounded max-w-full h-auto"
                           />
                         </div>
+                      </CardContent>
+                    </Card>
+                  );
+                } else if (isTurtle && !hasExpectedImage) {
+                  // Show message when turtle problem has no expected image
+                  return (
+                    <Card data-testid="expected-output-card" className="border-2 border-yellow-200 bg-yellow-50">
+                      <CardHeader>
+                        <CardTitle className="text-lg">🎯 Expected Output</CardTitle>
+                      </CardHeader>
+                      <CardContent>
+                        <p className="text-yellow-700 text-sm">
+                          Follow the instructions and test cases to create your turtle drawing.
+                        </p>
                       </CardContent>
                     </Card>
                   );
