@@ -287,8 +287,8 @@ const getInitialTurtleState = () => ({
 export default function AnimatedTurtle({ 
   code, 
   onLineHighlight, 
-  width = 400, 
-  height = 400,
+  width = 600, 
+  height = 600,
   // Maze/Background props
   backgroundType = "none",  // "none", "maze", "raceway", "grid", "custom"
   backgroundColor = "#ffffff",
