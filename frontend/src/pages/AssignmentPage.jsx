@@ -943,17 +943,6 @@ export default function AssignmentPage({ user }) {
                                          currentProblem?.expected_image ||
                                          assignment.expected_image;
                 
-                // Debug: log what's available
-                console.log("Expected Output Debug:", {
-                  isTurtle,
-                  hasExpectedImage: !!hasExpectedImage,
-                  hasExpectedOutput: !!hasExpectedOutput,
-                  currentProblem_expected_turtle_image: !!currentProblem?.expected_turtle_image,
-                  assignment_expected_turtle_image: !!assignment?.expected_turtle_image,
-                  problemKeys: currentProblem ? Object.keys(currentProblem) : [],
-                  assignmentKeys: assignment ? Object.keys(assignment).filter(k => k.includes('expected') || k.includes('turtle')) : []
-                });
-                
                 if (isTurtle && hasExpectedImage) {
                   return (
                     <Card data-testid="expected-output-card" className="border-2 border-green-200 bg-green-50">
