@@ -960,6 +960,10 @@ export default function AnimatedTurtle({
   
   // Play animation
   const play = useCallback(async () => {
+    // Always reset turtle to starting position before playing
+    resetTurtle();
+    await new Promise(r => setTimeout(r, 50)); // Let reset complete
+    
     playingRef.current = true;
     setIsPlaying(true);
     
@@ -976,7 +980,7 @@ export default function AnimatedTurtle({
     playingRef.current = false;
     setIsPlaying(false);
     if (onLineHighlight) onLineHighlight(-1);
-  }, [commands, executeCommand, onLineHighlight]);
+  }, [commands, executeCommand, onLineHighlight, resetTurtle]);
   
   // Run instantly (no animation)
   const runInstant = useCallback(async () => {
