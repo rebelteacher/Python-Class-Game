@@ -759,6 +759,8 @@ export default function AnimatedTurtle({
           const newX = turtle.x + dx;
           const newY = turtle.y + dy;
           
+          console.log(`[TURTLE] ${cmd.type}(${cmd.value}): heading=${turtle.heading.toFixed(1)}°, (${turtle.x.toFixed(1)}, ${turtle.y.toFixed(1)}) → (${newX.toFixed(1)}, ${newY.toFixed(1)})`);
+          
           // Check for collision before moving
           if (collisionEnabled && checkCollision(newX, newY)) {
             setCollisionCount(prev => prev + 1);
