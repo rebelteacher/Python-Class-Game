@@ -1463,6 +1463,9 @@ export default function AssignmentPage({ user }) {
                         value={code}
                         onChange={(value) => !problemsFinal[getCurrentProblemId()] && setCode(value || "")}
                         theme={darkMode ? "vs-dark" : "vs-light"}
+                        onMount={(editor) => {
+                          codeEditorRef.current = editor;
+                        }}
                         options={{
                           minimap: { enabled: false },
                           fontSize: 14,
