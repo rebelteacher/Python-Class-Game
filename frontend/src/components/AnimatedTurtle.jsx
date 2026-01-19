@@ -269,20 +269,23 @@ function parseCode(code, parentVars = {}) {
 }
 
 // Initial turtle state
-const getInitialTurtleState = () => ({
-  x: 0,
-  y: 0,
-  heading: 90,  // Match Python turtle default (90 = UP)
-  penDown: true,
-  penColor: 'black',
-  fillColor: 'black',
-  turtleColor: '#228B22', // Default green turtle
-  penSize: 1,
-  visible: true,
-  filling: false,
-  fillPath: [],
-  name: 't' // Default name
-});
+const getInitialTurtleState = () => {
+  console.log("INIT: Creating new turtle state at (0, 0)");
+  return {
+    x: 0,
+    y: 0,
+    heading: 90,  // Match Python turtle default (90 = UP)
+    penDown: true,
+    penColor: 'black',
+    fillColor: 'black',
+    turtleColor: '#228B22', // Default green turtle
+    penSize: 1,
+    visible: true,
+    filling: false,
+    fillPath: [],
+    name: 't' // Default name
+  };
+};
 
 export default function AnimatedTurtle({ 
   code, 
