@@ -1587,6 +1587,7 @@ export default function AssignmentPage({ user }) {
                                     checkpoints={currentProblem?.checkpoints || []}
                                     collisionEnabled={currentProblem?.collision_enabled || false}
                                     challengeMode={currentProblem?.challenge_mode || false}
+                                    onLineHighlight={(lineNum) => setHighlightedLine(lineNum)}
                                     onGoalReached={(index, goal) => {
                                       toast.success(`🎯 Goal ${index + 1} reached!`);
                                     }}
