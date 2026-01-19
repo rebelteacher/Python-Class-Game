@@ -308,7 +308,23 @@ export default function AssignmentLibrary({ user }) {
           problem_type: editingProblem.problem_type,
           resources_link: editingProblem.resources_link,
           csta_standard: editingProblem.csta_standard,
-          test_cases: editingProblem.test_cases || []
+          test_cases: editingProblem.test_cases || [],
+          // Turtle/maze fields
+          assignment_type: editingProblem.assignment_type || "code",
+          expected_turtle_image: editingProblem.expected_turtle_image || "",
+          turtle_grading_criteria: editingProblem.turtle_grading_criteria || null,
+          background_type: editingProblem.background_type || "none",
+          background_color: editingProblem.background_color || "#ffffff",
+          background_image: editingProblem.background_image || "",
+          maze_data: editingProblem.maze_data || null,
+          goals: editingProblem.goals || [],
+          checkpoints: editingProblem.checkpoints || [],
+          collision_enabled: editingProblem.collision_enabled || false,
+          challenge_mode: editingProblem.challenge_mode || false,
+          // Micro:bit fields
+          materials_needed: editingProblem.materials_needed || [],
+          wiring_instructions: editingProblem.wiring_instructions || "",
+          learning_objectives: editingProblem.learning_objectives || []
         },
         { withCredentials: true }
       );
