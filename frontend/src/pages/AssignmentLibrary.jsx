@@ -2852,8 +2852,8 @@ export default function AssignmentLibrary({ user }) {
                     <Label className="text-lg font-semibold mb-3 block">🐢 Live Preview</Label>
                     <AnimatedTurtle
                       code={editingProblem.solution_code}
-                      width={350}
-                      height={350}
+                      width={600}
+                      height={600}
                       backgroundType="none"
                       backgroundColor="#ffffff"
                     />
