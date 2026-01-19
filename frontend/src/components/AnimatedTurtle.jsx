@@ -919,6 +919,7 @@ export default function AnimatedTurtle({
         }
           
         case 'goto':
+          console.log(`[TURTLE DEBUG] goto(${cmd.x}, ${cmd.y}) - Before: turtle at (${turtle.x}, ${turtle.y})`);
           if (turtle.penDown) {
             pathsRef.current.push({
               type: 'line',
@@ -930,6 +931,8 @@ export default function AnimatedTurtle({
           }
           turtle.x = cmd.x;
           turtle.y = cmd.y;
+          console.log(`[TURTLE DEBUG] goto(${cmd.x}, ${cmd.y}) - After: turtle at (${turtle.x}, ${turtle.y})`);
+          console.log(`[TURTLE DEBUG] Canvas coords: ${JSON.stringify(toCanvasCoords(turtle.x, turtle.y))}`);
           drawCanvas();
           setTimeout(resolve, baseDelay);
           break;
