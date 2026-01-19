@@ -181,6 +181,39 @@ export default function AssignmentPage({ user }) {
     return () => clearTimeout(timeoutId);
   }, [code, assignment, assignmentId]);
 
+  // Handle code line highlighting in Monaco editor
+  useEffect(() => {
+    const editor = codeEditorRef.current;
+    if (!editor) return;
+    
+    // Clear previous decorations
+    if (decorationsRef.current.length > 0) {
+      decorationsRef.current = editor.deltaDecorations(decorationsRef.current, []);
+    }
+    
+    // Add new decoration if we have a valid line
+    if (highlightedLine >= 0) {
+      decorationsRef.current = editor.deltaDecorations([], [
+        {
+          range: {
+            startLineNumber: highlightedLine + 1, // Monaco uses 1-based line numbers
+            startColumn: 1,
+            endLineNumber: highlightedLine + 1,
+            endColumn: 1000
+          },
+          options: {
+            isWholeLine: true,
+            className: 'highlighted-line',
+            glyphMarginClassName: 'highlighted-line-glyph'
+          }
+        }
+      ]);
+      
+      // Scroll to the highlighted line
+      editor.revealLineInCenter(highlightedLine + 1);
+    }
+  }, [highlightedLine]);
+
   const hasRun = hasRunPerProblem[getCurrentProblemId()] || false;
 
   const fetchAssignment = async () => {
