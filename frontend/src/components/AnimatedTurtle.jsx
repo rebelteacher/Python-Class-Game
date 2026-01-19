@@ -201,6 +201,7 @@ function parseCode(code, parentVars = {}) {
     if (match) {
       const x = getNumericValue(match[1]);
       const y = getNumericValue(match[2]);
+      console.log(`[PARSE DEBUG] goto parsed: x=${x}, y=${y} from "${trimmed}"`);
       if (x !== null && y !== null) {
         commands.push({ type: 'goto', x, y, line: lineNum });
       }
