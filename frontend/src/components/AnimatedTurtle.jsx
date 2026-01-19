@@ -1044,6 +1044,7 @@ export default function AnimatedTurtle({
       
       <div className="flex items-center gap-3 w-full max-w-md">
         <Button
+          type="button"
           size="sm"
           variant="outline"
           onClick={resetTurtle}
@@ -1054,6 +1055,7 @@ export default function AnimatedTurtle({
         </Button>
         
         <Button
+          type="button"
           size="sm"
           onClick={isPlaying ? stop : play}
           className={isPlaying ? "bg-yellow-600 hover:bg-yellow-700" : "bg-green-600 hover:bg-green-700"}
@@ -1062,6 +1064,7 @@ export default function AnimatedTurtle({
         </Button>
         
         <Button
+          type="button"
           size="sm"
           variant="outline"
           onClick={runInstant}
@@ -1072,6 +1075,7 @@ export default function AnimatedTurtle({
         </Button>
         
         <Button
+          type="button"
           size="sm"
           variant="outline"
           onClick={() => {
