@@ -1765,8 +1765,8 @@ export default function AssignmentLibrary({ user }) {
                       <Label className="text-lg font-semibold mb-3 block">🐢 Live Preview</Label>
                       <AnimatedTurtle
                         code={newProblem.solution_code}
-                        width={350}
-                        height={350}
+                        width={600}
+                        height={600}
                         backgroundType={newProblem.background_type || "none"}
                         backgroundColor={newProblem.background_color || "#ffffff"}
                         mazeData={newProblem.maze_data}
