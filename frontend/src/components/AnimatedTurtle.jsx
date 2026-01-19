@@ -921,6 +921,7 @@ export default function AnimatedTurtle({
         }
           
         case 'goto':
+          console.log(`[TURTLE] goto(${cmd.x}, ${cmd.y}): was at (${turtle.x.toFixed(1)}, ${turtle.y.toFixed(1)}), heading=${turtle.heading.toFixed(1)}°`);
           if (turtle.penDown) {
             pathsRef.current.push({
               type: 'line',
@@ -932,6 +933,7 @@ export default function AnimatedTurtle({
           }
           turtle.x = cmd.x;
           turtle.y = cmd.y;
+          console.log(`[TURTLE] goto complete: now at (${turtle.x}, ${turtle.y}), heading still ${turtle.heading.toFixed(1)}°`);
           drawCanvas();
           setTimeout(resolve, baseDelay);
           break;
