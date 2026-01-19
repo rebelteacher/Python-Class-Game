@@ -62,6 +62,7 @@ export default function AssignmentPage({ user }) {
   const [useLiveTurtle, setUseLiveTurtle] = useState(true); // Use AnimatedTurtle instead of static image
   const [mazeStartTime, setMazeStartTime] = useState(null); // Track time for maze challenges
   const [showLeaderboard, setShowLeaderboard] = useState(false);
+  const [highlightedLine, setHighlightedLine] = useState(-1); // For code highlighting during animation
   
   // Block-based programming state
   const blockEditorRef = useRef(null);
