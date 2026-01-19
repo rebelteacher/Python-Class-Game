@@ -63,6 +63,8 @@ export default function AssignmentPage({ user }) {
   const [mazeStartTime, setMazeStartTime] = useState(null); // Track time for maze challenges
   const [showLeaderboard, setShowLeaderboard] = useState(false);
   const [highlightedLine, setHighlightedLine] = useState(-1); // For code highlighting during animation
+  const codeEditorRef = useRef(null); // Reference to Monaco editor instance
+  const decorationsRef = useRef([]); // Store decoration IDs for removal
   
   // Block-based programming state
   const blockEditorRef = useRef(null);
