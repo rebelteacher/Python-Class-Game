@@ -1031,6 +1031,14 @@ const AnimatedTurtle = forwardRef(function AnimatedTurtle({
     setMouseCoords(null);
   }, []);
   
+  // Expose methods via ref for external control
+  useImperativeHandle(ref, () => ({
+    play,
+    stop,
+    reset: resetTurtle,
+    runInstant
+  }), [play, stop, resetTurtle, runInstant]);
+  
   return (
     <div className="flex flex-col items-center gap-3">
       <div className="bg-white rounded-lg shadow-lg p-2 relative">
