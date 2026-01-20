@@ -437,47 +437,45 @@ export default function BlockTeaching({ user }) {
                     </CardContent>
                   </Card>
 
-                  {/* Scratch Link */}
-                  {selectedLesson.scratchProject && (
-                    <Card className="bg-gradient-to-r from-orange-100 to-yellow-100 border-orange-200">
-                      <CardContent className="py-6">
-                        <div className="flex items-center justify-between">
-                          <div className="flex items-center gap-4">
-                            <img 
-                              src="https://scratch.mit.edu/images/logo_sm.png" 
-                              alt="Scratch" 
-                              className="h-10"
-                            />
-                            <div>
-                              <h3 className="font-bold text-orange-800">Ready to Demo?</h3>
-                              <p className="text-sm text-orange-600">Open Scratch and share your screen with students</p>
-                            </div>
+                  {/* Turtle Blocks Link */}
+                  <Card className="bg-gradient-to-r from-purple-100 to-blue-100 border-purple-200">
+                    <CardContent className="py-6">
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-4">
+                          <span className="text-4xl">🐢</span>
+                          <div>
+                            <h3 className="font-bold text-purple-800">Ready to Demo?</h3>
+                            <p className="text-sm text-purple-600">Open Turtle Blocks and share your screen with students</p>
                           </div>
-                          <Button onClick={openScratch} className="bg-orange-500 hover:bg-orange-600">
-                            <ExternalLink className="w-4 h-4 mr-2" />
-                            Open Scratch
-                          </Button>
                         </div>
-                      </CardContent>
-                    </Card>
-                  )}
+                        <Button onClick={openTurtleBlocks} className="bg-purple-500 hover:bg-purple-600">
+                          <Play className="w-4 h-4 mr-2" />
+                          Open Turtle Blocks
+                        </Button>
+                      </div>
+                    </CardContent>
+                  </Card>
 
-                  {/* Python Transition Note */}
-                  {!selectedLesson.scratchProject && (
-                    <Card className="bg-gradient-to-r from-blue-100 to-indigo-100 border-blue-200">
+                  {/* Python Preview Note */}
+                  {selectedLesson.id === "4-3" && (
+                    <Card className="bg-gradient-to-r from-green-100 to-emerald-100 border-green-200">
                       <CardContent className="py-6">
                         <div className="flex items-center justify-between">
                           <div className="flex items-center gap-4">
                             <span className="text-4xl">🐍</span>
                             <div>
-                              <h3 className="font-bold text-blue-800">Python Transition Lesson</h3>
-                              <p className="text-sm text-blue-600">This lesson uses the Python coding environment</p>
+                              <h3 className="font-bold text-green-800">Ready for Text Coding?</h3>
+                              <p className="text-sm text-green-600">Students who've mastered blocks can move to Python Turtle</p>
                             </div>
                           </div>
-                          <Button onClick={() => navigate("/python-curriculum")} className="bg-blue-500 hover:bg-blue-600">
-                            <ExternalLink className="w-4 h-4 mr-2" />
-                            Go to Python
+                          <Button onClick={() => navigate("/turtle-curriculum")} className="bg-green-500 hover:bg-green-600">
+                            <ArrowRight className="w-4 h-4 mr-2" />
+                            Go to Turtle Unit
                           </Button>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  )}
                         </div>
                       </CardContent>
                     </Card>
