@@ -349,11 +349,11 @@ export default function BlockTeaching({ user }) {
           </div>
           
           <Button
-            onClick={openScratch}
+            onClick={openTurtleBlocks}
             className="bg-white text-orange-600 hover:bg-orange-50"
           >
-            <ExternalLink className="w-4 h-4 mr-2" />
-            Open Scratch Editor
+            <Play className="w-4 h-4 mr-2" />
+            Open Turtle Blocks
           </Button>
         </div>
       </div>
