@@ -674,18 +674,54 @@ const TOOLBOX = {
     },
     {
       kind: 'category',
-      name: '🔄 Control',
+      name: '🔄 Loops',
       colour: '20',
       contents: [
-        { kind: 'block', type: 'turtle_repeat', inputs: { TIMES: { shadow: { type: 'math_number', fields: { NUM: 4 } } } } }
+        { kind: 'block', type: 'turtle_repeat', inputs: { TIMES: { shadow: { type: 'math_number', fields: { NUM: 4 } } } } },
+        { kind: 'block', type: 'turtle_for', inputs: { 
+          FROM: { shadow: { type: 'math_number', fields: { NUM: 1 } } },
+          TO: { shadow: { type: 'math_number', fields: { NUM: 10 } } }
+        } },
+        { kind: 'block', type: 'turtle_while' }
       ]
     },
     {
       kind: 'category',
-      name: '🔢 Numbers',
+      name: '🔀 Control',
+      colour: '210',
+      contents: [
+        { kind: 'block', type: 'turtle_if' },
+        { kind: 'block', type: 'turtle_if_else' }
+      ]
+    },
+    {
+      kind: 'category',
+      name: '⚖️ Logic',
+      colour: '210',
+      contents: [
+        { kind: 'block', type: 'logic_compare' },
+        { kind: 'block', type: 'logic_operation' },
+        { kind: 'block', type: 'logic_not' },
+        { kind: 'block', type: 'logic_boolean' }
+      ]
+    },
+    {
+      kind: 'category',
+      name: '📦 Variables',
+      colour: '330',
+      custom: 'VARIABLE'
+    },
+    {
+      kind: 'category',
+      name: '🔢 Math',
       colour: '290',
       contents: [
-        { kind: 'block', type: 'math_number' }
+        { kind: 'block', type: 'math_number' },
+        { kind: 'block', type: 'math_arithmetic' },
+        { kind: 'block', type: 'math_random', inputs: { 
+          FROM: { shadow: { type: 'math_number', fields: { NUM: 1 } } },
+          TO: { shadow: { type: 'math_number', fields: { NUM: 100 } } }
+        } }
       ]
     }
   ]
