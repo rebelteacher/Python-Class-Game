@@ -292,7 +292,7 @@ const getInitialTurtleState = () => ({
   name: 't' // Default name
 });
 
-export default function AnimatedTurtle({ 
+const AnimatedTurtle = forwardRef(function AnimatedTurtle({ 
   code, 
   onLineHighlight, 
   width = 600, 
@@ -309,7 +309,7 @@ export default function AnimatedTurtle({
   onGoalReached = null,
   onCollision = null,
   onComplete = null
-}) {
+}, ref) {
   const canvasRef = useRef(null);
   const bgCanvasRef = useRef(null);  // Separate canvas for background
   const [isPlaying, setIsPlaying] = useState(false);
