@@ -317,8 +317,8 @@ export default function BlockTeaching({ user }) {
   const [selectedChapter, setSelectedChapter] = useState("chapter1");
   const [selectedLesson, setSelectedLesson] = useState(LESSONS.chapter1.lessons[0]);
 
-  const openScratch = () => {
-    window.open('https://scratch.mit.edu/projects/editor/', '_blank');
+  const openTurtleBlocks = () => {
+    navigate('/turtle-blocks');
   };
 
   const copyObjectives = () => {
