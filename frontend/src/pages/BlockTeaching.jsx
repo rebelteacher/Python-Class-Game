@@ -16,7 +16,7 @@ import {
 } from "lucide-react";
 import { toast } from "sonner";
 
-// Lesson content aligned with curriculum chapters
+// Lesson content aligned with curriculum chapters - Turtle Blocks Edition
 const LESSONS = {
   chapter1: {
     title: "Chapter 1: Block Basics",
@@ -25,56 +25,53 @@ const LESSONS = {
       {
         id: "1-1",
         name: "Lesson 1: What are Blocks?",
-        scratchProject: "https://scratch.mit.edu/projects/editor/",
         objectives: [
           "Understand what programming blocks are",
           "Connect blocks together in sequence",
-          "Use the 'say' block to display messages"
+          "Make the turtle move forward"
         ],
         demoSteps: [
-          "Show students the Scratch interface",
-          "Explain the block categories (Events, Looks, Motion)",
-          "Drag a 'when green flag clicked' event",
-          "Add a 'say Hello!' block",
-          "Click the green flag to run"
+          "Show students the Turtle Blocks interface",
+          "Explain the block categories (Motion, Pen, Control, Numbers)",
+          "Drag a 'forward 50 steps' block",
+          "Click Run to see the turtle move",
+          "Explain that blocks represent code commands"
         ],
-        studentActivity: "Have students make the cat say their name"
+        studentActivity: "Make the turtle move forward 100 steps"
       },
       {
         id: "1-2",
-        name: "Lesson 2: Motion & Actions",
-        scratchProject: "https://scratch.mit.edu/projects/editor/",
+        name: "Lesson 2: Motion & Turning",
         objectives: [
-          "Use motion blocks to move sprites",
-          "Understand coordinates (x, y)",
-          "Make sprites glide and turn"
+          "Use motion blocks to move the turtle",
+          "Understand turning with degrees",
+          "Create simple shapes"
         ],
         demoSteps: [
           "Show the motion blocks category",
-          "Demonstrate 'move 10 steps'",
-          "Show 'turn' blocks for rotation",
-          "Explain x,y coordinates on the stage",
-          "Create a simple square path"
+          "Demonstrate 'forward' and 'backward' blocks",
+          "Show 'turn right' and 'turn left' blocks",
+          "Explain degrees (90° = quarter turn)",
+          "Draw a line and turn"
         ],
-        studentActivity: "Make the cat walk in a square pattern"
+        studentActivity: "Make the turtle draw an L-shape"
       },
       {
         id: "1-3",
-        name: "Lesson 3: Events & Triggers",
-        scratchProject: "https://scratch.mit.edu/projects/editor/",
+        name: "Lesson 3: Drawing with the Pen",
         objectives: [
-          "Understand event-driven programming",
-          "Use different event blocks",
-          "React to keyboard and mouse input"
+          "Understand pen up and pen down",
+          "Change colors and pen size",
+          "Move without drawing"
         ],
         demoSteps: [
-          "Explain what events are",
-          "Show 'when green flag clicked'",
-          "Show 'when key pressed' blocks",
-          "Demonstrate 'when this sprite clicked'",
-          "Build interactive keyboard controls"
+          "Show 'pen down' and 'pen up' blocks",
+          "Demonstrate the color picker",
+          "Show pen size block",
+          "Draw two separate lines using pen up",
+          "Create a colorful pattern"
         ],
-        studentActivity: "Create arrow key controls to move the cat"
+        studentActivity: "Draw two colored squares in different positions"
       }
     ]
   },
@@ -85,69 +82,171 @@ const LESSONS = {
       {
         id: "2-1",
         name: "Lesson 4: Repeat Blocks",
-        scratchProject: "https://scratch.mit.edu/projects/editor/",
         objectives: [
           "Understand why loops are useful",
           "Use 'repeat' blocks",
-          "Create patterns with loops"
+          "Draw shapes with fewer blocks"
         ],
         demoSteps: [
-          "Show code duplication problem",
+          "Show drawing a square with 8 blocks",
           "Introduce the 'repeat' block",
-          "Draw a square with repeat",
-          "Create a star pattern",
-          "Discuss efficiency"
+          "Draw a square with repeat 4 times",
+          "Explain: forward + turn = one side",
+          "Count how many blocks we saved"
         ],
-        studentActivity: "Draw a pentagon using a repeat loop"
+        studentActivity: "Draw a triangle using a repeat 3 times loop"
       },
       {
         id: "2-2",
-        name: "Lesson 5: Forever Loops",
-        scratchProject: "https://scratch.mit.edu/projects/editor/",
+        name: "Lesson 5: Counter Patterns",
         objectives: [
-          "Understand continuous loops",
-          "Create animations",
-          "Build interactive programs"
+          "Understand patterns in shapes",
+          "Calculate turns for regular shapes",
+          "Create pentagons and hexagons"
         ],
         demoSteps: [
-          "Introduce 'forever' block",
-          "Create a spinning animation",
-          "Make a bouncing ball",
-          "Discuss when to use forever vs repeat"
+          "Review: triangle = repeat 3, turn 120°",
+          "Review: square = repeat 4, turn 90°",
+          "Pattern: turn = 360 ÷ sides",
+          "Calculate pentagon: 360 ÷ 5 = 72°",
+          "Create a hexagon (360 ÷ 6 = 60°)"
         ],
-        studentActivity: "Create an animated fish swimming back and forth"
+        studentActivity: "Draw a pentagon and octagon"
       },
       {
         id: "2-3",
-        name: "Lesson 6: Nested Loops",
-        scratchProject: "https://scratch.mit.edu/projects/editor/",
+        name: "Lesson 6: Spiral Patterns",
         objectives: [
-          "Understand loops inside loops",
-          "Create complex patterns",
-          "Build grids and matrices"
+          "Create growing patterns",
+          "Use increasing values in loops",
+          "Build complex designs"
         ],
         demoSteps: [
-          "Review single loops",
-          "Show loop inside loop concept",
-          "Create a row of dots",
-          "Create a grid of dots",
-          "Build a spiral pattern"
+          "Show a simple square",
+          "Make each side slightly longer",
+          "Create a square spiral",
+          "Experiment with turn angles",
+          "Create artistic patterns"
         ],
-        studentActivity: "Create a 3x3 grid of stamps"
+        studentActivity: "Create your own spiral design"
       }
     ]
   },
   chapter3: {
-    title: "Chapter 3: Decisions & Logic",
+    title: "Chapter 3: Coordinates & Position",
     color: "from-green-500 to-emerald-500",
     lessons: [
       {
         id: "3-1",
-        name: "Lesson 7: If Blocks",
-        scratchProject: "https://scratch.mit.edu/projects/editor/",
+        name: "Lesson 7: The Coordinate Grid",
         objectives: [
-          "Understand conditional logic",
-          "Use 'if' blocks",
+          "Understand x and y coordinates",
+          "Use 'go to' blocks",
+          "Navigate the canvas"
+        ],
+        demoSteps: [
+          "Enable grid on the canvas",
+          "Explain center is (0, 0)",
+          "Show x goes left (-) and right (+)",
+          "Show y goes down (-) and up (+)",
+          "Use 'go to x: y:' block"
+        ],
+        studentActivity: "Move the turtle to four corners using coordinates"
+      },
+      {
+        id: "3-2",
+        name: "Lesson 8: Drawing at Positions",
+        objectives: [
+          "Combine goto with drawing",
+          "Use pen up to move without drawing",
+          "Create positioned shapes"
+        ],
+        demoSteps: [
+          "Pen up, go to position, pen down",
+          "Draw a shape at that position",
+          "Move to another position",
+          "Draw another shape",
+          "Create a pattern of shapes"
+        ],
+        studentActivity: "Draw a house using goto for positioning"
+      },
+      {
+        id: "3-3",
+        name: "Lesson 9: Home & Reset",
+        objectives: [
+          "Return turtle to center",
+          "Use home block",
+          "Create symmetrical designs"
+        ],
+        demoSteps: [
+          "Draw a line outward",
+          "Use 'go home' block",
+          "Draw another line at angle",
+          "Create a star from center",
+          "Build symmetrical patterns"
+        ],
+        studentActivity: "Create a compass rose from the center"
+      }
+    ]
+  },
+  chapter4: {
+    title: "Chapter 4: Project Challenge",
+    color: "from-orange-500 to-amber-500",
+    lessons: [
+      {
+        id: "4-1",
+        name: "Lesson 10: Planning Your Design",
+        objectives: [
+          "Plan before coding",
+          "Break down complex shapes",
+          "Sketch ideas first"
+        ],
+        demoSteps: [
+          "Show example finished projects",
+          "Discuss planning on paper first",
+          "Identify shapes needed",
+          "Plan colors and positions",
+          "Create a step-by-step plan"
+        ],
+        studentActivity: "Sketch a design and list the shapes needed"
+      },
+      {
+        id: "4-2",
+        name: "Lesson 11: Building Your Project",
+        objectives: [
+          "Apply all learned concepts",
+          "Debug and fix problems",
+          "Test and iterate"
+        ],
+        demoSteps: [
+          "Start with basic shapes",
+          "Test each part separately",
+          "Combine pieces together",
+          "Fix any issues",
+          "Add colors and details"
+        ],
+        studentActivity: "Build your planned project"
+      },
+      {
+        id: "4-3",
+        name: "Lesson 12: Show Your Code",
+        objectives: [
+          "Toggle to see generated Python code",
+          "Understand blocks become text",
+          "Prepare for text coding"
+        ],
+        demoSteps: [
+          "Click 'Show Code' toggle",
+          "Point out import turtle",
+          "Show t.forward() is the forward block",
+          "Show for loop is the repeat block",
+          "Preview Unit 2: Turtle text coding"
+        ],
+        studentActivity: "Compare your blocks to the Python code"
+      }
+    ]
+  }
+};
           "Check conditions"
         ],
         demoSteps: [
