@@ -353,9 +353,9 @@ export default function BlockTeaching({ user }) {
                       </CardTitle>
                     </CardHeader>
                     <CardContent className="space-y-2">
-                      <Button onClick={openScratch} className="w-full bg-orange-500 hover:bg-orange-600">
-                        <ExternalLink className="w-4 h-4 mr-2" />
-                        Open Scratch (Demo)
+                      <Button onClick={openTurtleBlocks} className="w-full bg-purple-500 hover:bg-purple-600">
+                        <Play className="w-4 h-4 mr-2" />
+                        Open Turtle Blocks
                       </Button>
                       <Button onClick={() => navigate("/library?type=block")} variant="outline" className="w-full">
                         <BookOpen className="w-4 h-4 mr-2" />
