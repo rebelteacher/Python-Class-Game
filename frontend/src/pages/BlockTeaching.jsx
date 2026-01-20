@@ -402,7 +402,7 @@ export default function BlockTeaching({ user }) {
                         <Monitor className="w-5 h-5 text-purple-600" />
                         Teacher Demo Steps
                       </CardTitle>
-                      <CardDescription>Follow these steps while screen sharing Scratch</CardDescription>
+                      <CardDescription>Follow these steps while screen sharing Turtle Blocks</CardDescription>
                     </CardHeader>
                     <CardContent>
                       <ol className="space-y-3">
