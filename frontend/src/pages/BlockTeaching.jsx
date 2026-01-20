@@ -257,6 +257,10 @@ export default function BlockTeaching({ user }) {
     navigate('/turtle-blocks');
   };
 
+  const openScratch = () => {
+    window.open('https://scratch.mit.edu/projects/editor/', '_blank');
+  };
+
   const copyObjectives = () => {
     const text = selectedLesson.objectives.join('\n• ');
     navigator.clipboard.writeText('• ' + text);
