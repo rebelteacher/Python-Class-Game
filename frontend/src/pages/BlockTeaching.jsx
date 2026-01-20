@@ -476,10 +476,6 @@ export default function BlockTeaching({ user }) {
                       </CardContent>
                     </Card>
                   )}
-                        </div>
-                      </CardContent>
-                    </Card>
-                  )}
                 </div>
               </div>
             </TabsContent>
