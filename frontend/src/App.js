@@ -312,6 +312,15 @@ function App() {
               />
               
               <Route
+                path="/turtle-blocks"
+                element={
+                  <ProtectedRoute user={user}>
+                    <TurtleBlocks user={user} />
+                  </ProtectedRoute>
+                }
+              />
+              
+              <Route
                 path="/skill-quiz-manager"
                 element={
                   <ProtectedRoute user={user} teacherOnly>
