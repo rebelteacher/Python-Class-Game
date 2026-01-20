@@ -1144,4 +1144,6 @@ const AnimatedTurtle = forwardRef(function AnimatedTurtle({
       )}
     </div>
   );
-}
+});
+
+export default AnimatedTurtle;
