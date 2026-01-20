@@ -4,7 +4,7 @@
 A coding education platform for K-12 students featuring multiple programming environments: Blocks, Turtle Graphics, Python, and Micro:bit.
 
 ## Current Curriculum Structure
-- **Unit 1**: Blocks (Scratch-based, external link)
+- **Unit 1**: Turtle Blocks (Visual block-based turtle programming - NEW!)
 - **Unit 2**: Turtle Graphics (Python turtle with visual output)
 - **Unit 3**: Python (Text-based programming)
 - **Unit 4**: Micro:bit (Hardware programming)
@@ -33,6 +33,19 @@ A coding education platform for K-12 students featuring multiple programming env
 - Grid toggle and coordinate hover display
 - Code line highlighting during animation
 - Support for: forward, backward, left, right, goto, circle (with extent), penup, pendown, color, home, etc.
+
+### Turtle Blocks (NEW - Unit 1)
+- Visual block-based programming using Blockly
+- **Motion blocks**: forward, backward, left, right, goto, home
+- **Pen blocks**: penup, pendown, color, pensize
+- **Loop blocks**: repeat N times, count with variable, while
+- **Control blocks**: if, if-else
+- **Logic blocks**: comparisons, and/or, not, boolean values
+- **Variable blocks**: create, set, change, get variables
+- **Math blocks**: numbers, arithmetic (+, -, ×, ÷), random
+- Code toggle: Show generated Python code from blocks
+- Live turtle canvas preview
+- Replaces external Scratch integration
 
 ---
 
