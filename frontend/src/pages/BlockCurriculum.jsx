@@ -449,7 +449,7 @@ export default function BlockCurriculum({ user }) {
             </CardContent>
           </Card>
           
-          <Card className="hover:shadow-lg transition-shadow cursor-pointer border-2 border-purple-500 bg-purple-50" onClick={() => navigate("/blocks/teach")}>>
+          <Card className="hover:shadow-lg transition-shadow cursor-pointer border-2 border-purple-500 bg-purple-50" onClick={() => navigate("/blocks/teach")}>
             <CardContent className="p-6 flex items-center gap-4">
               <div className="p-3 bg-purple-500 rounded-lg">
                 <Play className="w-6 h-6 text-white" />
@@ -461,8 +461,19 @@ export default function BlockCurriculum({ user }) {
             </CardContent>
           </Card>
           
-          <Card className="hover:shadow-lg transition-shadow cursor-pointer" onClick={() => navigate("/teacher/dashboard")}>
+          <Card className="hover:shadow-lg transition-shadow cursor-pointer border-2 border-blue-500 bg-blue-50" onClick={() => navigate("/turtle-blocks")}>
             <CardContent className="p-6 flex items-center gap-4">
+              <div className="p-3 bg-blue-500 rounded-lg">
+                <span className="text-2xl">🐢</span>
+              </div>
+              <div>
+                <h3 className="font-semibold">Turtle Blocks Editor</h3>
+                <p className="text-sm text-gray-600">Visual block coding workspace</p>
+              </div>
+            </CardContent>
+          </Card>
+          
+          <Card className="hover:shadow-lg transition-shadow cursor-pointer" onClick={() => navigate("/teacher/dashboard")}>            <CardContent className="p-6 flex items-center gap-4">
               <div className="p-3 bg-green-100 rounded-lg">
                 <Clock className="w-6 h-6 text-green-600" />
               </div>
