@@ -436,74 +436,185 @@ const defineTurtleBlocks = () => {
 
 // Generate Python code from blocks
 const generatePythonCode = (workspace) => {
-  let code = "import turtle\nt = turtle.Turtle()\n\n";
+  let code = "import turtle\nimport random\nt = turtle.Turtle()\n\n";
   
   const blocks = workspace.getTopBlocks(true);
+  const usedVariables = new Set();
   
-  const processBlock = (block) => {
+  // Get value code recursively handles nested blocks
+  const getValueCode = (block, inputName, defaultValue) => {
+    const targetBlock = block.getInputTargetBlock(inputName);
+    if (!targetBlock) return defaultValue;
+    
+    switch (targetBlock.type) {
+      case 'math_number':
+        return targetBlock.getFieldValue('NUM');
+      case 'variables_get':
+        return targetBlock.getField('VAR').getText();
+      case 'math_arithmetic': {
+        const a = getValueCode(targetBlock, 'A', '0');
+        const b = getValueCode(targetBlock, 'B', '0');
+        const op = targetBlock.getFieldValue('OP');
+        const opMap = { ADD: '+', MINUS: '-', MULTIPLY: '*', DIVIDE: '/' };
+        return `(${a} ${opMap[op]} ${b})`;
+      }
+      case 'math_random': {
+        const from = getValueCode(targetBlock, 'FROM', '1');
+        const to = getValueCode(targetBlock, 'TO', '10');
+        return `random.randint(${from}, ${to})`;
+      }
+      case 'logic_compare': {
+        const a = getValueCode(targetBlock, 'A', '0');
+        const b = getValueCode(targetBlock, 'B', '0');
+        const op = targetBlock.getFieldValue('OP');
+        const opMap = { EQ: '==', NEQ: '!=', LT: '<', LTE: '<=', GT: '>', GTE: '>=' };
+        return `(${a} ${opMap[op]} ${b})`;
+      }
+      case 'logic_operation': {
+        const a = getValueCode(targetBlock, 'A', 'True');
+        const b = getValueCode(targetBlock, 'B', 'True');
+        const op = targetBlock.getFieldValue('OP').toLowerCase();
+        return `(${a} ${op} ${b})`;
+      }
+      case 'logic_not': {
+        const bool = getValueCode(targetBlock, 'BOOL', 'True');
+        return `(not ${bool})`;
+      }
+      case 'logic_boolean': {
+        return targetBlock.getFieldValue('BOOL') === 'TRUE' ? 'True' : 'False';
+      }
+      default:
+        return defaultValue;
+    }
+  };
+  
+  const processBlock = (block, indent = '') => {
     let blockCode = "";
     
     switch (block.type) {
       case 'turtle_forward': {
         const steps = getValueCode(block, 'STEPS', '10');
-        blockCode = `t.forward(${steps})\n`;
+        blockCode = `${indent}t.forward(${steps})\n`;
         break;
       }
       case 'turtle_backward': {
         const steps = getValueCode(block, 'STEPS', '10');
-        blockCode = `t.backward(${steps})\n`;
+        blockCode = `${indent}t.backward(${steps})\n`;
         break;
       }
       case 'turtle_right': {
         const degrees = getValueCode(block, 'DEGREES', '90');
-        blockCode = `t.right(${degrees})\n`;
+        blockCode = `${indent}t.right(${degrees})\n`;
         break;
       }
       case 'turtle_left': {
         const degrees = getValueCode(block, 'DEGREES', '90');
-        blockCode = `t.left(${degrees})\n`;
+        blockCode = `${indent}t.left(${degrees})\n`;
         break;
       }
       case 'turtle_goto': {
         const x = getValueCode(block, 'X', '0');
         const y = getValueCode(block, 'Y', '0');
-        blockCode = `t.goto(${x}, ${y})\n`;
+        blockCode = `${indent}t.goto(${x}, ${y})\n`;
         break;
       }
       case 'turtle_home': {
-        blockCode = `t.goto(0, 0)\nt.setheading(90)\n`;
+        blockCode = `${indent}t.goto(0, 0)\n${indent}t.setheading(90)\n`;
         break;
       }
       case 'turtle_pendown': {
-        blockCode = `t.pendown()\n`;
+        blockCode = `${indent}t.pendown()\n`;
         break;
       }
       case 'turtle_penup': {
-        blockCode = `t.penup()\n`;
+        blockCode = `${indent}t.penup()\n`;
         break;
       }
       case 'turtle_color': {
         const color = block.getFieldValue('COLOR');
-        blockCode = `t.color("${color}")\n`;
+        blockCode = `${indent}t.color("${color}")\n`;
         break;
       }
       case 'turtle_pensize': {
         const size = getValueCode(block, 'SIZE', '1');
-        blockCode = `t.pensize(${size})\n`;
+        blockCode = `${indent}t.pensize(${size})\n`;
         break;
       }
       case 'turtle_repeat': {
         const times = getValueCode(block, 'TIMES', '4');
-        blockCode = `for i in range(${times}):\n`;
+        blockCode = `${indent}for i in range(${times}):\n`;
         const doBlock = block.getInputTargetBlock('DO');
         if (doBlock) {
-          let innerCode = processBlockChain(doBlock);
-          // Indent the inner code
-          innerCode = innerCode.split('\n').map(line => line ? '    ' + line : '').join('\n');
-          blockCode += innerCode + '\n';
+          blockCode += processBlockChain(doBlock, indent + '    ');
         } else {
-          blockCode += '    pass\n';
+          blockCode += `${indent}    pass\n`;
         }
+        break;
+      }
+      case 'turtle_for': {
+        const varName = block.getField('VAR').getText();
+        const from = getValueCode(block, 'FROM', '0');
+        const to = getValueCode(block, 'TO', '10');
+        blockCode = `${indent}for ${varName} in range(${from}, ${to} + 1):\n`;
+        const doBlock = block.getInputTargetBlock('DO');
+        if (doBlock) {
+          blockCode += processBlockChain(doBlock, indent + '    ');
+        } else {
+          blockCode += `${indent}    pass\n`;
+        }
+        break;
+      }
+      case 'turtle_while': {
+        const condition = getValueCode(block, 'CONDITION', 'True');
+        blockCode = `${indent}while ${condition}:\n`;
+        const doBlock = block.getInputTargetBlock('DO');
+        if (doBlock) {
+          blockCode += processBlockChain(doBlock, indent + '    ');
+        } else {
+          blockCode += `${indent}    pass\n`;
+        }
+        break;
+      }
+      case 'turtle_if': {
+        const condition = getValueCode(block, 'CONDITION', 'True');
+        blockCode = `${indent}if ${condition}:\n`;
+        const doBlock = block.getInputTargetBlock('DO');
+        if (doBlock) {
+          blockCode += processBlockChain(doBlock, indent + '    ');
+        } else {
+          blockCode += `${indent}    pass\n`;
+        }
+        break;
+      }
+      case 'turtle_if_else': {
+        const condition = getValueCode(block, 'CONDITION', 'True');
+        blockCode = `${indent}if ${condition}:\n`;
+        const doBlock = block.getInputTargetBlock('DO');
+        if (doBlock) {
+          blockCode += processBlockChain(doBlock, indent + '    ');
+        } else {
+          blockCode += `${indent}    pass\n`;
+        }
+        blockCode += `${indent}else:\n`;
+        const elseBlock = block.getInputTargetBlock('ELSE');
+        if (elseBlock) {
+          blockCode += processBlockChain(elseBlock, indent + '    ');
+        } else {
+          blockCode += `${indent}    pass\n`;
+        }
+        break;
+      }
+      case 'variables_set': {
+        const varName = block.getField('VAR').getText();
+        const value = getValueCode(block, 'VALUE', '0');
+        usedVariables.add(varName);
+        blockCode = `${indent}${varName} = ${value}\n`;
+        break;
+      }
+      case 'variables_change': {
+        const varName = block.getField('VAR').getText();
+        const delta = getValueCode(block, 'DELTA', '1');
+        blockCode = `${indent}${varName} = ${varName} + ${delta}\n`;
         break;
       }
       default:
@@ -513,19 +624,11 @@ const generatePythonCode = (workspace) => {
     return blockCode;
   };
   
-  const getValueCode = (block, inputName, defaultValue) => {
-    const targetBlock = block.getInputTargetBlock(inputName);
-    if (targetBlock && targetBlock.type === 'math_number') {
-      return targetBlock.getFieldValue('NUM');
-    }
-    return defaultValue;
-  };
-  
-  const processBlockChain = (block) => {
+  const processBlockChain = (block, indent = '') => {
     let chainCode = "";
     let currentBlock = block;
     while (currentBlock) {
-      chainCode += processBlock(currentBlock);
+      chainCode += processBlock(currentBlock, indent);
       currentBlock = currentBlock.getNextBlock();
     }
     return chainCode;
