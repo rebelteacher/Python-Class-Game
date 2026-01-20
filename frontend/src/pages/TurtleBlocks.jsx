@@ -202,7 +202,188 @@ const defineTurtleBlocks = () => {
     }
   };
 
-  // ===== NUMBER BLOCKS (Purple - Color 290) =====
+  // For loop with counter
+  Blockly.Blocks['turtle_for'] = {
+    init: function() {
+      this.appendDummyInput()
+          .appendField("count with")
+          .appendField(new Blockly.FieldVariable("i"), "VAR");
+      this.appendValueInput("FROM")
+          .setCheck("Number")
+          .appendField("from");
+      this.appendValueInput("TO")
+          .setCheck("Number")
+          .appendField("to");
+      this.appendStatementInput("DO")
+          .appendField("do");
+      this.setInputsInline(true);
+      this.setPreviousStatement(true, null);
+      this.setNextStatement(true, null);
+      this.setColour(20);
+      this.setTooltip("Count with a variable from start to end");
+    }
+  };
+
+  // While loop
+  Blockly.Blocks['turtle_while'] = {
+    init: function() {
+      this.appendValueInput("CONDITION")
+          .setCheck("Boolean")
+          .appendField("repeat while");
+      this.appendStatementInput("DO")
+          .appendField("do");
+      this.setPreviousStatement(true, null);
+      this.setNextStatement(true, null);
+      this.setColour(20);
+      this.setTooltip("Repeat while condition is true");
+    }
+  };
+
+  // If block
+  Blockly.Blocks['turtle_if'] = {
+    init: function() {
+      this.appendValueInput("CONDITION")
+          .setCheck("Boolean")
+          .appendField("if");
+      this.appendStatementInput("DO")
+          .appendField("then");
+      this.setPreviousStatement(true, null);
+      this.setNextStatement(true, null);
+      this.setColour(210);
+      this.setTooltip("Do something if condition is true");
+    }
+  };
+
+  // If-else block
+  Blockly.Blocks['turtle_if_else'] = {
+    init: function() {
+      this.appendValueInput("CONDITION")
+          .setCheck("Boolean")
+          .appendField("if");
+      this.appendStatementInput("DO")
+          .appendField("then");
+      this.appendStatementInput("ELSE")
+          .appendField("else");
+      this.setPreviousStatement(true, null);
+      this.setNextStatement(true, null);
+      this.setColour(210);
+      this.setTooltip("Do something if condition is true, otherwise do something else");
+    }
+  };
+
+  // ===== LOGIC BLOCKS (Blue - Color 210) =====
+
+  // Comparison block
+  Blockly.Blocks['logic_compare'] = {
+    init: function() {
+      this.appendValueInput("A")
+          .setCheck("Number");
+      this.appendDummyInput()
+          .appendField(new Blockly.FieldDropdown([
+            ["=", "EQ"],
+            ["≠", "NEQ"],
+            ["<", "LT"],
+            ["≤", "LTE"],
+            [">", "GT"],
+            ["≥", "GTE"]
+          ]), "OP");
+      this.appendValueInput("B")
+          .setCheck("Number");
+      this.setInputsInline(true);
+      this.setOutput(true, "Boolean");
+      this.setColour(210);
+      this.setTooltip("Compare two values");
+    }
+  };
+
+  // And/Or block
+  Blockly.Blocks['logic_operation'] = {
+    init: function() {
+      this.appendValueInput("A")
+          .setCheck("Boolean");
+      this.appendDummyInput()
+          .appendField(new Blockly.FieldDropdown([
+            ["and", "AND"],
+            ["or", "OR"]
+          ]), "OP");
+      this.appendValueInput("B")
+          .setCheck("Boolean");
+      this.setInputsInline(true);
+      this.setOutput(true, "Boolean");
+      this.setColour(210);
+      this.setTooltip("Combine two conditions");
+    }
+  };
+
+  // Not block
+  Blockly.Blocks['logic_not'] = {
+    init: function() {
+      this.appendValueInput("BOOL")
+          .setCheck("Boolean")
+          .appendField("not");
+      this.setOutput(true, "Boolean");
+      this.setColour(210);
+      this.setTooltip("Returns true if input is false");
+    }
+  };
+
+  // Boolean value
+  Blockly.Blocks['logic_boolean'] = {
+    init: function() {
+      this.appendDummyInput()
+          .appendField(new Blockly.FieldDropdown([
+            ["true", "TRUE"],
+            ["false", "FALSE"]
+          ]), "BOOL");
+      this.setOutput(true, "Boolean");
+      this.setColour(210);
+      this.setTooltip("True or false value");
+    }
+  };
+
+  // ===== VARIABLE BLOCKS (Red - Color 330) =====
+
+  // Set variable
+  Blockly.Blocks['variables_set'] = {
+    init: function() {
+      this.appendValueInput("VALUE")
+          .appendField("set")
+          .appendField(new Blockly.FieldVariable("myVar"), "VAR")
+          .appendField("to");
+      this.setPreviousStatement(true, null);
+      this.setNextStatement(true, null);
+      this.setColour(330);
+      this.setTooltip("Set a variable to a value");
+    }
+  };
+
+  // Get variable
+  Blockly.Blocks['variables_get'] = {
+    init: function() {
+      this.appendDummyInput()
+          .appendField(new Blockly.FieldVariable("myVar"), "VAR");
+      this.setOutput(true, null);
+      this.setColour(330);
+      this.setTooltip("Get the value of a variable");
+    }
+  };
+
+  // Change variable by
+  Blockly.Blocks['variables_change'] = {
+    init: function() {
+      this.appendValueInput("DELTA")
+          .setCheck("Number")
+          .appendField("change")
+          .appendField(new Blockly.FieldVariable("myVar"), "VAR")
+          .appendField("by");
+      this.setPreviousStatement(true, null);
+      this.setNextStatement(true, null);
+      this.setColour(330);
+      this.setTooltip("Change a variable by an amount");
+    }
+  };
+
+  // ===== MATH BLOCKS (Purple - Color 290) =====
 
   // Number input
   Blockly.Blocks['math_number'] = {
@@ -212,6 +393,43 @@ const defineTurtleBlocks = () => {
       this.setOutput(true, "Number");
       this.setColour(290);
       this.setTooltip("A number");
+    }
+  };
+
+  // Math arithmetic
+  Blockly.Blocks['math_arithmetic'] = {
+    init: function() {
+      this.appendValueInput("A")
+          .setCheck("Number");
+      this.appendDummyInput()
+          .appendField(new Blockly.FieldDropdown([
+            ["+", "ADD"],
+            ["-", "MINUS"],
+            ["×", "MULTIPLY"],
+            ["÷", "DIVIDE"]
+          ]), "OP");
+      this.appendValueInput("B")
+          .setCheck("Number");
+      this.setInputsInline(true);
+      this.setOutput(true, "Number");
+      this.setColour(290);
+      this.setTooltip("Do math with two numbers");
+    }
+  };
+
+  // Random number
+  Blockly.Blocks['math_random'] = {
+    init: function() {
+      this.appendValueInput("FROM")
+          .setCheck("Number")
+          .appendField("random");
+      this.appendValueInput("TO")
+          .setCheck("Number")
+          .appendField("to");
+      this.setInputsInline(true);
+      this.setOutput(true, "Number");
+      this.setColour(290);
+      this.setTooltip("Pick a random number between two values");
     }
   };
 };
