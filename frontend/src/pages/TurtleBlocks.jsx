@@ -552,22 +552,23 @@ export default function TurtleBlocks({ user }) {
           <ResizablePanel defaultSize={55} minSize={30}>
             <div className="h-full p-4">
               <Card className="h-full overflow-hidden shadow-lg border-2 border-purple-200">
-                <CardContent className="p-0 h-full">
-                  {showCode ? (
-                    <div className="h-full bg-gray-900 text-green-400 font-mono p-4 overflow-auto">
-                      <div className="flex items-center gap-2 mb-4 text-gray-400">
-                        <Code className="w-4 h-4" />
-                        <span className="text-sm">Generated Python Code</span>
-                      </div>
-                      <pre className="text-sm whitespace-pre-wrap">{generatedCode}</pre>
+                <CardContent className="p-0 h-full relative">
+                  {/* Code View */}
+                  <div 
+                    className={`h-full bg-gray-900 text-green-400 font-mono p-4 overflow-auto absolute inset-0 ${showCode ? 'block' : 'hidden'}`}
+                  >
+                    <div className="flex items-center gap-2 mb-4 text-gray-400">
+                      <Code className="w-4 h-4" />
+                      <span className="text-sm">Generated Python Code</span>
                     </div>
-                  ) : (
-                    <div 
-                      ref={blocklyDiv} 
-                      className="h-full w-full"
-                      style={{ minHeight: '500px' }}
-                    />
-                  )}
+                    <pre className="text-sm whitespace-pre-wrap">{generatedCode}</pre>
+                  </div>
+                  {/* Block Editor */}
+                  <div 
+                    ref={blocklyDiv} 
+                    className={`h-full w-full ${showCode ? 'invisible' : 'visible'}`}
+                    style={{ minHeight: '500px' }}
+                  />
                 </CardContent>
               </Card>
             </div>
