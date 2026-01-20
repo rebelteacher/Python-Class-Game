@@ -462,7 +462,7 @@ export default function BlockTeaching({ user }) {
                             <span className="text-4xl">🐍</span>
                             <div>
                               <h3 className="font-bold text-green-800">Ready for Text Coding?</h3>
-                              <p className="text-sm text-green-600">Students who've mastered blocks can move to Python Turtle</p>
+                              <p className="text-sm text-green-600">Students who have mastered blocks can move to Python Turtle</p>
                             </div>
                           </div>
                           <Button onClick={() => navigate("/turtle-curriculum")} className="bg-green-500 hover:bg-green-600">
