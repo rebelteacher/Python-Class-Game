@@ -4011,16 +4011,28 @@ async def get_student_progress(assignment_id: str, request: Request, classroom_i
         raise HTTPException(status_code=403, detail="Access denied")
     
     # Get problem IDs from the assignment
-    problem_ids = assignment.get("problems", [])
-    if not problem_ids:
+    # Handle both cases: problems array with full objects OR problem_ids array with just IDs
+    problems_data = assignment.get("problems", [])
+    problem_ids_raw = assignment.get("problem_ids", [])
+    
+    # If problems is an array of objects, extract the IDs
+    if problems_data and isinstance(problems_data[0], dict):
+        problem_ids = [p.get("id") for p in problems_data if p.get("id")]
+        # Use the embedded problems data directly
+        problems_dict = {p.get("id"): p for p in problems_data}
+    elif problem_ids_raw:
+        problem_ids = problem_ids_raw
+        # Need to fetch from DB
+        problems = await db.problems.find(
+            {"id": {"$in": problem_ids}},
+            {"_id": 0, "id": 1, "title": 1}
+        ).to_list(100)
+        problems_dict = {p["id"]: p for p in problems}
+    else:
         return {"problems": [], "students": [], "summary": {}}
     
-    # Get problems details
-    problems = await db.problems.find(
-        {"id": {"$in": problem_ids}},
-        {"_id": 0, "id": 1, "title": 1}
-    ).to_list(100)
-    problems_dict = {p["id"]: p for p in problems}
+    if not problem_ids:
+        return {"problems": [], "students": [], "summary": {}}
     
     # Get students from classroom(s)
     classroom_ids = assignment.get("classroom_ids", [])
