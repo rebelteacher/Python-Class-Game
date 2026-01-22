@@ -2021,6 +2021,16 @@ export default function AssignmentPage({ user }) {
         </div>
       </main>
 
+      {/* Teacher Panel - Only show for teachers */}
+      {isTeacher && assignment?.problems && (
+        <TeacherPanel
+          assignmentId={assignmentId}
+          classroomId={classroomIdFromNav}
+          currentProblemIndex={currentProblemIndex}
+          problems={assignment.problems}
+        />
+      )}
+
       {/* Hint Dialog */}
       <Dialog open={showHintDialog} onOpenChange={setShowHintDialog}>
         <DialogContent className="max-w-2xl">
