@@ -4,7 +4,7 @@
 A coding education platform for K-12 students featuring multiple programming environments: Blocks, Turtle Graphics, Python, and Micro:bit.
 
 ## Current Curriculum Structure
-- **Unit 1**: Turtle Blocks (Visual block-based turtle programming - NEW!)
+- **Unit 1**: Turtle Blocks (Visual block-based turtle programming)
 - **Unit 2**: Turtle Graphics (Python turtle with visual output)
 - **Unit 3**: Python (Text-based programming)
 - **Unit 4**: Micro:bit (Hardware programming)
@@ -19,6 +19,7 @@ A coding education platform for K-12 students featuring multiple programming env
 - Test reports with release controls
 - Question bank with filtering and bulk edit
 - Skill quiz manager
+- **Teacher Panel** - View student progress and code submissions (NEW - Jan 2025)
 
 ### Student Features
 - Assignment completion with auto-grading
@@ -34,7 +35,7 @@ A coding education platform for K-12 students featuring multiple programming env
 - Code line highlighting during animation
 - Support for: forward, backward, left, right, goto, circle (with extent), penup, pendown, color, home, etc.
 
-### Turtle Blocks (NEW - Unit 1)
+### Turtle Blocks (Unit 1)
 - Visual block-based programming using Blockly
 - **Motion blocks**: forward, backward, left, right, goto, home
 - **Pen blocks**: penup, pendown, color, pensize
@@ -47,11 +48,30 @@ A coding education platform for K-12 students featuring multiple programming env
 - Live turtle canvas preview
 - Replaces external Scratch integration
 
+### Teacher Panel (NEW - Jan 2025)
+A sidebar panel similar to code.org that allows teachers to view student progress and code submissions during live lessons.
+
+**Features:**
+- Collapsible sidebar on right side of AssignmentPage
+- "Me" section for teacher demo/example solution
+- Student list with color-coded badges:
+  - 🟢 Green = Done (student clicked "Done")
+  - 🟡 Yellow = Started (has submissions but not done)
+  - 🔴 Red = Not started (no work)
+- Click any student to view their code (read-only)
+- Section/Classroom filter
+- Sort options (display name, status, score)
+- Summary footer showing completion counts
+
+**API Endpoints:**
+- `GET /api/assignments/{id}/student-progress` - Returns aggregated student progress per problem
+- `GET /api/assignments/{id}/student-code/{student_id}/{problem_id}` - Returns specific student's code submission
+
 ---
 
 ## Roadmap
 
-### P0 - Completed This Session
+### Completed (Jan 2025)
 - [x] Problem library limit increased (1000 → 10000)
 - [x] Test case grading bugs fixed
 - [x] Turtle functions expanded (home, circle extent, etc.)
@@ -66,6 +86,8 @@ A coding education platform for K-12 students featuring multiple programming env
 - [x] Hover coordinates display on turtle canvas
 - [x] Teacher preview with run controls
 - [x] Code line highlighting during turtle animation
+- [x] Turtle Blocks feature (replaces Scratch)
+- [x] **Teacher Panel** - View student progress and code during live lessons
 
 ### P1 - Next Priority
 - [ ] Fix students not seeing expected output image (may need backend check)
@@ -73,7 +95,6 @@ A coding education platform for K-12 students featuring multiple programming env
 - [ ] End-to-end quiz flow testing
 
 ### P2 - Upcoming
-- [ ] **Turtle Blocks** (replaces Scratch) - See detailed spec below
 - [ ] Brain Break Games integration
 - [ ] Build out remaining curriculum units
 
@@ -81,77 +102,8 @@ A coding education platform for K-12 students featuring multiple programming env
 - [ ] Self-Paced Learning Module
 - [ ] AI-powered code feedback
 - [ ] Parent portal
-
----
-
-## Feature Spec: Turtle Blocks (P2)
-
-### Purpose
-Replace the external Scratch link with an integrated block-based turtle programming environment. Serves as a **review tool** for students who have already been exposed to Code.org Unit 3 (approximately 10 hours of instruction).
-
-### User Experience
-```
-┌─────────────────────────────────────────────────────────────┐
-│  BLOCKS (drag & drop)          │  GENERATED PYTHON CODE     │
-│  ┌─────────────────────┐       │  import turtle             │
-│  │ Move forward [100]  │       │  t = turtle.Turtle()       │
-│  └─────────────────────┘       │  t.forward(100)            │
-│  ┌─────────────────────┐       │  t.right(90)               │
-│  │ Turn right [90]     │       │                            │
-│  └─────────────────────┘       │                            │
-│────────────────────────────────┴────────────────────────────│
-│              🐢 TURTLE CANVAS (AnimatedTurtle)              │
-└─────────────────────────────────────────────────────────────┘
-```
-
-### Learning Progression
-1. **Unit 1: Turtle Blocks** - Drag & drop, see Python code generated
-2. **Unit 2: Turtle Text** - Write Python turtle code directly
-3. **Unit 3: Python** - General programming
-
-### Benefits Over Scratch
-| Scratch (Current) | Turtle Blocks (Proposed) |
-|-------------------|-------------------------|
-| External website | Integrated in app |
-| Different concepts | Same turtle commands |
-| No code visibility | Shows generated Python |
-| Screenshot grading | Pattern-based grading |
-| No transition path | Natural blocks → text progression |
-
-### Technical Requirements
-
-#### Blockly Toolbox Categories
-1. **Movement**: forward, backward, goto, home
-2. **Turning**: left, right, setheading
-3. **Pen**: penup, pendown, pensize, pencolor
-4. **Drawing**: circle, dot, stamp
-5. **Control**: repeat loop, variables
-6. **Color**: color picker for pen/fill
-
-#### Code Generator
-- Blocks → Python turtle code (real-time)
-- Generated code displayed alongside blocks
-- Same code runs in AnimatedTurtle component
-
-#### Design Considerations
-- **IMPORTANT**: Reduce spacing around blocks - previous Blockly implementation had blocks that didn't fit well
-- Compact block design for smaller screens
-- Match existing app color scheme
-- Mobile-friendly touch targets
-
-#### Grading
-- Uses existing pattern-based test case system
-- Teacher creates test cases same way as turtle text problems
-- Grading runs against generated Python code
-
-### Files to Modify/Create
-- `TurtleBlockEditor.jsx` - New component
-- `TurtleCurriculum.jsx` - Add Turtle Blocks section
-- Custom Blockly block definitions
-- Code generator functions
-
-### Estimated Effort
-1-2 focused sessions for v1
+- [ ] Add more Turtle Blocks types (circle, fill)
+- [ ] Student-facing features for Turtle Blocks (save/load projects, challenges)
 
 ---
 
@@ -172,8 +124,10 @@ Replace the external Scratch link with an integrated block-based turtle programm
 
 ### Key Files
 - `/app/frontend/src/components/AnimatedTurtle.jsx` - Turtle graphics engine
-- `/app/frontend/src/pages/AssignmentPage.jsx` - Student assignment view
+- `/app/frontend/src/components/TeacherPanel.jsx` - Teacher Panel sidebar (NEW)
+- `/app/frontend/src/pages/AssignmentPage.jsx` - Student/Teacher assignment view
 - `/app/frontend/src/pages/AssignmentLibrary.jsx` - Teacher problem management
+- `/app/frontend/src/pages/TurtleBlocks.jsx` - Blockly editor for turtle programming
 - `/app/backend/server.py` - API endpoints
 - `/app/backend/turtle_sim.py` - Backend turtle simulator
 
@@ -181,7 +135,7 @@ Replace the external Scratch link with an integrated block-based turtle programm
 
 ## Known Issues
 
-### Carried Over
+### Carried Over (P2)
 - Fragile layout on AssignmentPage.jsx (react-resizable-panels)
 - Assignment creation classroom_ids bug (potential)
 
@@ -190,4 +144,4 @@ Replace the external Scratch link with an integrated block-based turtle programm
 
 ---
 
-*Last Updated: January 2025*
+*Last Updated: January 22, 2025*
