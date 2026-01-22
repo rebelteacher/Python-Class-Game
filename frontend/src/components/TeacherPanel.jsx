@@ -328,7 +328,7 @@ export default function TeacherPanel({
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2">
               <User className="w-5 h-5 text-cyan-600" />
-              {selectedStudent?.name}'s Work
+              {selectedStudent?.name}&apos;s Work
             </DialogTitle>
             <DialogDescription>
               Problem {currentProblemIndex + 1}: {problems?.[currentProblemIndex]?.title || 'Untitled'}
