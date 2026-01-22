@@ -1,99 +1,88 @@
-<analysis>An analysis of the user's request and the agent's actions has been completed. The following summary will be used to hand over the work to the next agent.
+<analysis>original_problem_statement:
+The session began with fixing a critical, recurring bug where the frontend live turtle preview () rendered drawings incorrectly, causing a major mismatch with the backend-generated expected output image. This was a high-priority issue confusing users.
 
-**original_problem_statement:**
-The user's initial goal was to complete and fix various aspects of a coding education platform. Over the session, the requests evolved to include:
+After fixing the rendering bug, the user requested a major new feature:
+1.  **Replace Scratch Integration:** Remove the existing Unit 1 (Block-Based Coding) which relied on an external link to Scratch.
+2.  **Implement Turtle Blocks:** Create a new, fully integrated Blockly-based editor for turtle graphics to serve as the new Unit 1.
+    *   **Requirements:**
+        *   A toolbox with categories for Motion, Pen, Control (if/else), Loops (for, while), Logic, Variables, and Math.
+        *   Blocks should snap together.
+        *   A toggle to switch between the block view and the generated Python code.
+        *   A live turtle canvas to run the code created with blocks.
+        *   This feature is for Junior High students as a review of block coding before they start text-based coding.
+        *   Start with basic blocks and expand later if needed.
 
-1.  **Fix Production Server Crash:** Resolve a critical 500 error that made the application inaccessible.
-2.  **Problem Library Limit:** Increase the query limit for problems, which was stuck at 1000.
-3.  **Turtle Grading Logic:**
-    *   Fix a bug where test cases with explicit  fields were failing due to an .
-    *   Fix incorrect scoring where partial completion could result in a 100% score.
-    *   Add support for checking the number of times a command is used ().
-    *   Ensure  works for semi-circles/arcs in both grading and preview.
-    *   Ensure the  function and others were available to the grading module.
-4.  **UI/UX Improvements:**
-    *   Create a table-based UI for creating/editing Turtle and Block test cases.
-    *   Remove a confusing Auto-Grading Criteria section.
-    *   Add a grid-toggle button and remove the speed slider from the student turtle view.
-    *   Preserve line breaks in the Question Bank teacher preview.
-    *   Show the expected output image for turtle problems to students.
-    *   Add a coordinate display on hover for the turtle canvas.
-    *   Implement code line highlighting during turtle animation.
-    *   Fix a visual mismatch between the live turtle preview and the backend-generated expected output image.
-5.  **Multiple Choice & Coding Tests:**
-    *   Allow teachers to enable/disable test retakes.
-    *   Implement a Release Results feature for teachers to control when students see correct answers.
-    *   Show students a review of their missed questions.
-    *   Ensure the turtle canvas appears for turtle problems within coding tests.
-6.  **Future Features:** Discussed and added Turtle Blocks to the roadmap as a replacement for the external Scratch integration.
+Most recently, the user requested another new feature:
+3.  **Student Progress Tracking per Problem:** On an assignment's page, teachers should be able to click a button to see which students have completed each specific problem within that assignment. This is to track we do participation during live lessons.
 
 **User's preferred language**: English
 
 **what currently exists?**
--   The production server crash has been resolved. The problem query limit is increased to 10,000.
--   The turtle grading logic is more robust, supporting command usage counts () and fixing several critical bugs related to pattern matching and function availability.
--   The UI for creating/editing Turtle and Block problems in the  now uses a more intuitive table format.
--   The student's turtle assignment view () now features a grid toggle, coordinate display on hover, and active code line highlighting. The speed slider has been removed.
--   The frontend live turtle preview () now correctly renders arcs and semi-circles for the  command.
--   Multiple Choice tests now support retakes and a teacher-controlled Release Results workflow. Students can see a detailed review of their answers once released.
--   Coding tests now correctly display the  canvas for turtle-based problems.
--   The Turtle Blocks feature has been documented in  as a future roadmap item.
+-   The critical turtle rendering and parsing bugs in  have been fixed. The frontend preview now correctly matches the backend logic.
+-   Data persistence for turtle problems has been fixed; the  and  are now correctly saved on edit.
+-   A new Turtle Blocks feature has been implemented and integrated as the new Unit 1 curriculum.
+    -   A new page  exists with a complete Blockly editor.
+    -   The editor includes a live turtle preview and a toggle to show the generated Python code.
+    -   The toolbox is populated with categories for Motion, Pen, Loops, Control, Logic, Variables, and Math.
+    -   The old Scratch integration has been removed from , and the curriculum content has been updated to reflect Turtle Blocks.
+    -   The  page now links directly to the new Turtle Blocks editor.
 
 **Last working item**:
-The user reported that the frontend live preview for turtle assignments still does not match the backend-generated expected output image, specifically regarding the positioning of shapes using  with negative coordinates.
+The agent had just started exploring the implementation for the user's latest request: showing student progress on individual problems within an assignment.
 
--   **Last item agent was working:** Investigating why the frontend  component renders coordinates differently than the backend , causing a visual mismatch in the preview vs. the final expected image.
--   **Status:** IN PROGRESS
+-   **Last item agent was working:** Initial investigation for the Student Progress per Problem feature. The agent viewed existing backend submission APIs () and frontend pages (, ) to plan the implementation.
+-   **Status:** NOT STARTED
 -   **Agent Testing Done:** N
--   **Which testing method agent to use?** Manual testing. The agent should create a simple turtle problem with  and negative coordinates, run it in the teacher preview, and compare the visual output with the expected output image generated by the backend. The  tool can be used to capture and compare.
--   **User Testing Done:** Y (User provided screenshots confirming the issue persists after the agent's last attempt to fix it).
+-   **Which testing method agent to use?** This will be a new feature requiring both backend and frontend work.
+    1.  **Backend:** Use  to test the new API endpoint for fetching progress data.
+    2.  **Frontend:** Use the  tool to verify the new Student Progress button and the dialog/view that displays the student data.
+    3.  **E2E:** Once implemented, the testing agent should be used to verify the full flow for a teacher.
+-   **User Testing Done:** N
 
 **All Pending/In progress Issue list**:
--   **Issue 1: Turtle Preview vs. Expected Output Mismatch (P0)**
-    -   **Description:** The live preview in the frontend () renders shapes in a different position (e.g., center) than the backend-generated expected output image (e.g., bottom-left quadrant) when using  with negative coordinates. The user has confirmed this issue persists.
-    -   **Attempted fixes:** The agent added extensive logging to  to trace coordinate calculations and command execution. The issue was temporarily resolved but recurred, indicating a subtle bug in state management, coordinate transformation, or command parsing within the component.
-    -   **Next debug checklist:**
-        1.  Re-examine .
-        2.  Focus on the  function to ensure the coordinate transformation () is applied consistently everywhere.
-        3.  Verify the  function and where it's called. Ensure the turtle's position isn't being reset unexpectedly between commands, especially during the  execution.
-        4.  Log the turtle's  and  state inside the  function *before* and *after* a  command is processed to confirm the state is being updated and persists.
-    -   **Why fix this issue and what will be achieved with the fix?** This is confusing for teachers creating problems, as what they see in the live preview doesn't match the final correct answer image students will be graded against.
-    -   **Status:** IN PROGRESS
-    -   **Is recurring issue?** Y
-    -   **Should Test frontend/backend/both after fix?** Frontend.
-    -   **Blocked on other issue:** None. This is the top priority.
--   **Issue 2: Fragile Layout on  (P2)**
+-   **Issue 1: Fragile Layout on  (P2)**
     -   **Description:** A recurring UI issue related to . Carried over from a previous session.
     -   **Status:** NOT STARTED
--   **Issue 3: Assignment Creation  bug (P2)**
+-   **Issue 2: Assignment Creation  bug (P2)**
     -   **Description:** A potential bug preventing teachers from creating assignments. Carried over from a previous session.
     -   **Status:** NOT STARTED
 
 **In progress Task List**:
--   None.
+-   **Task 1: Implement Student Progress Tracking per Problem (P0)**
+    -   **Where to resume:**
+        1.  **Backend:** Create a new API endpoint in . This endpoint will likely take an  and return a summary of which students have successfully completed each problem within that assignment. It will need to aggregate data from the  collection.
+        2.  **Frontend:**
+            *   Add a Student Progress button to the , visible only to teachers.
+            *   Create a new component (dialog or panel) that fetches data from the new API endpoint and displays it in a user-friendly format (e.g., a table showing problems vs. students with checkmarks for completion).
+    -   **What will be achieved with this?** Teachers will be able to track live class participation by seeing which students have completed specific practice problems within an assignment.
+    -   **Status:** NOT STARTED
+    -   **Should Test frontend/backend/both after fix?** Both.
+    -   **Blocked on something:** None.
 
 **Upcoming and Future Tasks**
 -   **Upcoming Tasks:**
     -   **(P1) Extend Custom Curriculum Feature:** Refactor the add/delete chapter/lesson logic from  into a reusable component or hook for Python, Turtle, and Micro:bit curricula.
 -   **Future Tasks:**
-    -   **(P2) Implement Turtle Blocks:** Replace the external Scratch integration with an internal Blockly implementation that generates Python turtle code. The user has emphasized the need for a compact block design to improve usability.
     -   (P2) End-to-End Quiz Flow Testing: Guide the user through testing the full student experience of receiving, taking, and submitting a quiz.
     -   (P2) Brain Break Games integration.
     -   (P2) Build out remaining curriculum units (Networking, Cybersecurity, AI).
     -   (P3) Implement a Self-Paced Learning Module.
+    -   (P3) Add more block types to Turtle Blocks (e.g., , ).
+    -   (P3) Add student-facing features to Turtle Blocks (save/load projects, challenges).
 
 **Completed work in this session**
--   **Production Stability (DONE):** Fixed a server-crashing recursion bug in  and increased the problem query limit in  from 1000 to 10,000.
--   **Turtle Grading Engine (DONE):** Fixed a critical  and implemented  support for test cases to check command usage frequency. Added missing functions (, etc.) to the grading module.
--   **Test Case UI (DONE):** Implemented a table-based UI in  for creating and editing Turtle and Block test cases, and removed the old Auto-Grading Criteria section.
--   **Turtle Functionality (DONE):** Correctly implemented  to draw arcs/semi-circles in both the backend simulator and the frontend  preview.
--   **Student Turtle UI (DONE):** Added a grid toggle button, hover-to-see-coordinates, and code line highlighting in  and . Removed the speed slider.
--   **Multiple Choice Test Features (DONE):**
-    -   Added UI in  to allow teachers to enable retakes and control when answers are shown.
-    -   Implemented a Release Results feature in  for teachers.
-    -   Updated  to show students a detailed review of their missed questions or a pending release message.
--   **Coding Test Improvements (DONE):** Updated  to use the  component, allowing turtle problems to be used in coding tests.
--   **Teacher Preview (DONE):** Added an interactive  preview to the create and edit problem dialogs in .
+-   **Turtle Rendering Bug (FIXED):** Resolved a critical bug in the  loop parser in  that caused extra commands to be executed, leading to incorrect drawings. The frontend preview is now accurate.
+-   **Turtle Problem Persistence (FIXED):** Corrected the  function in  to send all necessary turtle-related fields (, , etc.), preventing data loss on save.
+-   **Canvas Size Consistency (DONE):** Standardized the  canvas size to 600x600 in most places to match the backend's default, ensuring visual consistency.
+-   **Turtle Blocks Feature (IMPLEMENTED):**
+    -   Created a new page, , with a full-featured Blockly editor for turtle programming.
+    -   Implemented a toggle to switch between the block interface and the generated Python code view.
+    -   Refactored  using  and  to allow external control from the  page.
+-   **Expanded Turtle Blocks Toolbox (DONE):** Added new categories and blocks for **Loops** (, ), **Control** (, ), **Logic** (, , comparisons), **Variables**, and **Math**.
+-   **Scratch Integration Replacement (DONE):**
+    -   Removed all references to the external Scratch website from .
+    -   Updated all Unit 1 curriculum content and lesson plans to be based on the new internal Turtle Blocks feature.
+    -   Added a direct link to the Turtle Blocks editor from the  page.
 
 **Earlier issues found/mentioned but not fixed**
 -   **Issue 1: Fragile Layout on **: A recurring UI issue related to  that has been carried over.
@@ -106,82 +95,74 @@ The user reported that the frontend live preview for turtle assignments still do
 
 
 **Key Technical Concepts**
--   **Frontend vs. Backend Rendering Discrepancy:** A core challenge is ensuring the frontend JavaScript turtle () perfectly mirrors the output of the backend Python one (), especially regarding coordinate systems.
--   **Monaco Editor Decorations:** The line highlighting feature was implemented using the Monaco Editor's  API to dynamically apply CSS classes to specific lines of code.
--   **Conditional UI Rendering:** The  was refactored to conditionally render different test case editor UIs based on the  (Turtle, Block, Code, etc.).
--   **API-Driven UI State:** The Release Results feature demonstrates a flow where a teacher's action (clicking Release in ) updates a backend flag, which then dictates what a student sees in a completely different component ().
+-   **Recursive Parser Bug:** The core rendering issue was a logic error in the  function where it processed  loop body lines twice. The fix involved advancing the parser's line index past the loop body after it was processed.
+-   **Blockly Integration:** A major new feature was built using  and custom block definitions to create an interactive coding environment (). This involved defining custom blocks, setting up a toolbox, and generating executable code from the block structure.
+-   ** and :** Used to expose child component methods (like ,  in ) to a parent component (), enabling the parent to control the child's behavior.
+-   **Conditional Rendering vs. Hiding:** Fixed a UI bug in the block/code toggle by switching from conditional rendering () to conditional styling (), which preserves the state of the Blockly workspace when hidden.
 
 **key DB schema**
--   **mc_tests:**
-    -    (New): Determines if students can retry the test.
-    -    (New): Determines if answers are shown on submission.
-    -    (New): Master control for teachers to release graded results.
--   **mc_test_attempts:**
-    -    (New): Stores detailed results for each question (e.g., ).
+-   No changes made to the database schema in this session.
 
 **changes in tech stack**
 -   None.
 
 **All files of reference**
--   : The source of the current P0 bug. Handles all frontend turtle rendering.
--   : Contains the UI for creating and editing problems, including the new test case tables and previews.
--   : Contains all backend logic for grading, tests, and APIs.
--   : The main student view for completing coding assignments.
--   : Student view for taking multiple-choice tests.
--   : Teacher view for managing test results and releases.
--   : Project documentation, now includes the Turtle Blocks feature request.
+-   : **(New)** The core file for the new Turtle Blocks feature.
+-   : The source of the critical rendering bug; was heavily debugged and fixed.
+-   : Was completely overhauled to remove Scratch and integrate Turtle Blocks.
+-   : Was updated to link to the new editor.
+-   : Was fixed to ensure turtle problem data persists correctly.
+-   : Was inspected to find submission-related APIs for the next task.
+-   : The target page for the upcoming Student Progress feature.
 
 **Areas that need refactoring**:
--   **Turtle Blocks Feature:** The future Turtle Blocks feature will require a dedicated effort to integrate Blockly with custom turtle blocks and a Python code generator.
--   ****: The main backend file is very large and could be split into separate routers/modules for better organization (e.g., , ).
--   **Custom Curriculum Logic:** The logic for custom chapters/lessons in  is still not reusable and needs to be extracted.
+-   ****: The main backend file remains large and could be split into separate routers/modules (e.g., , ).
+-   **Custom Curriculum Logic:** The logic for custom chapters/lessons in  is still not reusable and needs to be extracted for use in other curriculum pages.
 
 **key api endpoints**
--   : (New) Toggles the  flag for a test.
--   : Updated to respect the  flag.
--   : Updated to check  status and delete previous attempts if needed.
--   : Used by the frontend to generate turtle preview images.
+-   : An existing endpoint that was identified as a potential source of data for the new student progress feature.
+-   A new API endpoint will need to be created to provide an aggregated summary of student progress per problem.
 
 **Critical Info for New Agent**
--   **Your P0 priority is the turtle preview mismatch.** The user has confirmed the bug persists where the live preview in  does not match the backend-generated expected output for  with negative coordinates. You must fix this visual inconsistency.
--   The user is bought into the idea of replacing Scratch with an integrated Turtle Blocks feature. This is a key future direction for the project.
--   The user is very attentive to UI details. When implementing UI changes, ensure they are polished and match the user's expectations (e.g., compact block design for the future Turtle Blocks feature).
+-   **Your P0 task is to implement the Student Progress feature.** The user wants to see which students have completed specific problems within an assignment, directly from the assignment page. You will need to create a new backend API and a new frontend UI component for this.
+-   The Turtle Blocks feature is now a core part of the application and replaces the old Scratch integration for Unit 1. Be aware of its implementation in  and its integration into the curriculum pages.
+-   The critical rendering bug in  was caused by a faulty  loop parser. The fix involved incrementing the line counter () after processing the loop to prevent the main parser from re-processing the loop's body.
 
 **documents and test reports created in this job**
--   
+-    (Updated with Turtle Blocks completion).
 
 **Last 10 User Messages and any pending HUMAN messages**
-1.  **User:** Reports the preview vs. expected output mismatch is still happening and provides new screenshots. (PENDING FIX)
-2.  **Agent:** Acknowledges the issue and prepares to investigate again.
-3.  **User:** Confirms they will redeploy to test the latest work.
-4.  **Agent:** Asks the user if they want to wrap up the session or continue.
-5.  **User:** Asks to add the Turtle Blocks idea to the roadmap, noting concerns about block spacing. (DONE)
-6.  **Agent:** Confirms adding Turtle Blocks to the roadmap.
-7.  **User:** Asks if a Turtle Blocks feature is possible to replace Scratch. (Agent provided detailed explanation)
-8.  **Agent:** Summarizes all work completed and asks if the user wants to continue.
-9.  **User:** Signals that they want to continue with the next set of tasks.
-10. **Agent:** Summarizes the next set of tasks (hover coordinates, teacher preview improvements, etc.).
+1.  **User:** Requests a new feature: see student work/completion for a specific problem within an assignment. (PENDING)
+2.  **User:** Requests new blocks for the Turtle Blocks toolbox: variables, more loops, and if/else. (DONE)
+3.  **Agent:** Summarizes the completed Turtle Blocks feature and asks for next steps.
+4.  **User:** Provides detailed requirements for the Turtle Blocks feature (toolbox categories, code toggle, target audience). (DONE)
+5.  **Agent:** Asks for requirements for the Turtle Blocks feature after confirming readiness to start.
+6.  **User:** Confirms readiness to start on replacing Scratch with Turtle Blocks. (DONE)
+7.  **Agent:** Confirms the rendering fix is working in the preview and asks the user to redeploy and test.
+8.  **User:** States Now it works in preview. I will redeploy to lock it in. after the agent fixes the rendering bug. (User confirmation of fix).
+9.  **Agent:** Summarizes the turtle rendering bug fix and next steps for the user.
+10. **User:** Provides a screenshot showing the frontend rendering bug is still happening in the preview environment (squares in wrong positions), contradicting the agent's math and confirming a real bug. (This led to the final fix).
 
 **Project Health Check:**
--   **Broken:** The frontend turtle live preview () is broken in its coordinate handling, causing visual inconsistencies that confuse the user.
+-   **Broken:** None. The major turtle rendering bug has been resolved.
+-   **Mocked:** None.
 
 **3rd Party Integrations**
+-    / : Now a core part of the Turtle Blocks feature.
 -   OpenAI GPT-4o — uses Emergent LLM Key (for AI Vision grading)
--   Scratch — Integrated as an external website link (slated for replacement by Turtle Blocks).
+-   
+-   
 -    (SheetJS)
--   
--    / 
--   
+-   Scratch — Functionally replaced by the internal Turtle Blocks feature. The UI has been updated, but some underlying code might still exist.
 
 **Testing status**
 -   **Testing agent used after significant changes:** NO
 -   **Troubleshoot agent used after agent stuck in loop:** NO
--   **Test files created:** None
--   **Known regressions:** The visual mismatch in the turtle preview is a regression or a newly discovered critical bug.
+-   **Test files created:** None. The agent used temporary python scripts and extensive manual testing with the  tool.
+-   **Known regressions:** None. The turtle rendering issue was a pre-existing bug that has now been fixed.
 
 **Credentials to test flow:**
--   **Admin/Teacher (for PREVIEW ONLY):** , password: 
+-   **Admin/Teacher:** , password: 
 
 **What agent forgot to execute**
--   The agent removed debug logs that could have been useful for debugging the persistent preview mismatch issue with the user's help.
--   The Earlier issues found/mentioned but not fixed (resizable panels,  bug) were not addressed or re-prioritized in this session.</analysis>
+-   The agent correctly identified the plan for the new Student Progress feature but was interrupted before starting the implementation. The next step is to create the backend API endpoint as planned.</analysis>
