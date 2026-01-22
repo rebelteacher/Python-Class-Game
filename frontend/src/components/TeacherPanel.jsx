@@ -403,7 +403,7 @@ export default function TeacherPanel({
             <div className="flex flex-col items-center justify-center h-64 text-gray-500">
               <X className="w-12 h-12 mb-3 opacity-30" />
               <div className="text-lg font-medium">No submission yet</div>
-              <div className="text-sm">This student hasn't submitted code for this problem.</div>
+              <div className="text-sm">This student hasn&apos;t submitted code for this problem.</div>
             </div>
           )}
         </DialogContent>
