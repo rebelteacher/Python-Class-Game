@@ -3992,6 +3992,130 @@ async def get_submissions(assignment_id: str, request: Request, classroom_id: st
     return submissions
 
 
+@api_router.get("/assignments/{assignment_id}/student-progress")
+async def get_student_progress(assignment_id: str, request: Request, classroom_id: str = None):
+    """Get student progress summary for each problem in an assignment"""
+    user = await get_current_user(request)
+    
+    if user["role"] != "teacher":
+        raise HTTPException(status_code=403, detail="Only teachers can view student progress")
+    
+    # Get assignment
+    assignment = await db.assignments.find_one({"id": assignment_id}, {"_id": 0})
+    if not assignment:
+        raise HTTPException(status_code=404, detail="Assignment not found")
+    
+    # Verify teacher owns this assignment
+    teacher_id = assignment.get("teacher_id")
+    if teacher_id and teacher_id != user["id"]:
+        raise HTTPException(status_code=403, detail="Access denied")
+    
+    # Get problem IDs from the assignment
+    problem_ids = assignment.get("problems", [])
+    if not problem_ids:
+        return {"problems": [], "students": [], "summary": {}}
+    
+    # Get problems details
+    problems = await db.problems.find(
+        {"id": {"$in": problem_ids}},
+        {"_id": 0, "id": 1, "title": 1}
+    ).to_list(100)
+    problems_dict = {p["id"]: p for p in problems}
+    
+    # Get students from classroom(s)
+    classroom_ids = assignment.get("classroom_ids", [])
+    if not classroom_ids and assignment.get("classroom_id"):
+        classroom_ids = [assignment["classroom_id"]]
+    if classroom_id:
+        classroom_ids = [classroom_id]  # Filter to specific classroom
+    
+    all_students = []
+    for cid in classroom_ids:
+        classroom = await db.classrooms.find_one({"id": cid}, {"_id": 0})
+        if classroom:
+            student_ids = classroom.get("students", [])
+            for sid in student_ids:
+                student = await db.users.find_one({"id": sid}, {"_id": 0, "id": 1, "name": 1})
+                if student and student not in all_students:
+                    all_students.append(student)
+    
+    # Get all submissions for this assignment
+    submissions = await db.submissions.find(
+        {"assignment_id": assignment_id},
+        {"_id": 0}
+    ).to_list(5000)
+    
+    # Build progress data: for each problem, track which students passed
+    progress = {}
+    for pid in problem_ids:
+        progress[pid] = {
+            "problem_id": pid,
+            "problem_title": problems_dict.get(pid, {}).get("title", f"Problem {problem_ids.index(pid) + 1}"),
+            "completed_students": [],
+            "in_progress_students": [],
+            "not_started_students": []
+        }
+    
+    # Track student progress
+    student_submissions = {}  # student_id -> {problem_id -> best_submission}
+    for sub in submissions:
+        sid = sub.get("student_id")
+        pid = sub.get("problem_id")
+        if sid and pid:
+            if sid not in student_submissions:
+                student_submissions[sid] = {}
+            # Keep track of best submission (passing > non-passing)
+            existing = student_submissions[sid].get(pid)
+            if not existing or (sub.get("is_passing") and not existing.get("is_passing")):
+                student_submissions[sid][pid] = sub
+    
+    # Categorize students for each problem
+    for student in all_students:
+        sid = student["id"]
+        student_name = student["name"]
+        for pid in problem_ids:
+            sub = student_submissions.get(sid, {}).get(pid)
+            student_info = {"id": sid, "name": student_name}
+            if sub:
+                if sub.get("is_passing"):
+                    progress[pid]["completed_students"].append({
+                        **student_info,
+                        "score": sub.get("score", 0),
+                        "submitted_at": sub.get("submitted_at")
+                    })
+                else:
+                    progress[pid]["in_progress_students"].append({
+                        **student_info,
+                        "score": sub.get("score", 0),
+                        "attempts": len([s for s in submissions if s.get("student_id") == sid and s.get("problem_id") == pid])
+                    })
+            else:
+                progress[pid]["not_started_students"].append(student_info)
+    
+    # Build summary
+    summary = {
+        "total_students": len(all_students),
+        "problems_count": len(problem_ids),
+        "overall_completion": {}
+    }
+    
+    for pid in problem_ids:
+        completed = len(progress[pid]["completed_students"])
+        in_progress = len(progress[pid]["in_progress_students"])
+        summary["overall_completion"][pid] = {
+            "completed": completed,
+            "in_progress": in_progress,
+            "not_started": len(progress[pid]["not_started_students"]),
+            "completion_rate": round(completed / len(all_students) * 100, 1) if all_students else 0
+        }
+    
+    return {
+        "assignment_title": assignment.get("title", ""),
+        "problems": [progress[pid] for pid in problem_ids],
+        "students": all_students,
+        "summary": summary
+    }
+
 
 @api_router.post("/assignments/{assignment_id}/unlock-problem")
 async def unlock_problem(assignment_id: str, data: dict, request: Request):
