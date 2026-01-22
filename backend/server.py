@@ -4117,6 +4117,72 @@ async def get_student_progress(assignment_id: str, request: Request, classroom_i
     }
 
 
+@api_router.get("/assignments/{assignment_id}/student-code/{student_id}/{problem_id}")
+async def get_student_code(assignment_id: str, student_id: str, problem_id: str, request: Request):
+    """Get a specific student's latest code submission for a problem (Teacher only)"""
+    user = await get_current_user(request)
+    
+    if user["role"] != "teacher":
+        raise HTTPException(status_code=403, detail="Only teachers can view student code")
+    
+    # Verify teacher owns this assignment
+    assignment = await db.assignments.find_one({"id": assignment_id}, {"_id": 0})
+    if not assignment:
+        raise HTTPException(status_code=404, detail="Assignment not found")
+    
+    teacher_id = assignment.get("teacher_id")
+    if teacher_id and teacher_id != user["id"]:
+        raise HTTPException(status_code=403, detail="Access denied")
+    
+    # Get the student info
+    student = await db.users.find_one({"id": student_id}, {"_id": 0, "id": 1, "name": 1})
+    if not student:
+        raise HTTPException(status_code=404, detail="Student not found")
+    
+    # Get the latest submission for this student/problem
+    submissions = await db.submissions.find(
+        {"assignment_id": assignment_id, "student_id": student_id, "problem_id": problem_id},
+        {"_id": 0}
+    ).sort("submitted_at", -1).to_list(100)
+    
+    if not submissions:
+        return {
+            "student_id": student_id,
+            "student_name": student["name"],
+            "problem_id": problem_id,
+            "code": None,
+            "score": None,
+            "is_final": False,
+            "is_passing": False,
+            "submitted_at": None,
+            "attempts": 0
+        }
+    
+    # Get the latest submission
+    latest = submissions[0]
+    
+    # Check for any final submission
+    final_submission = next((s for s in submissions if s.get("is_final")), None)
+    
+    # Use final submission if exists, otherwise latest
+    best_submission = final_submission if final_submission else latest
+    
+    return {
+        "student_id": student_id,
+        "student_name": student["name"],
+        "problem_id": problem_id,
+        "code": best_submission.get("code", ""),
+        "score": best_submission.get("score", 0),
+        "is_final": best_submission.get("is_final", False),
+        "is_passing": best_submission.get("is_passing", False),
+        "submitted_at": best_submission.get("submitted_at"),
+        "attempts": len(submissions),
+        "feedback": best_submission.get("feedback", ""),
+        "test_results": best_submission.get("test_results", []),
+        "turtle_image": best_submission.get("turtle_image", "")
+    }
+
+
 @api_router.post("/assignments/{assignment_id}/unlock-problem")
 async def unlock_problem(assignment_id: str, data: dict, request: Request):
     """Unlock a 'done' problem with proctor code"""
