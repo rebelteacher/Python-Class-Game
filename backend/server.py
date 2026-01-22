@@ -4070,24 +4070,31 @@ async def get_student_progress(assignment_id: str, request: Request, classroom_i
                 student_submissions[sid][pid] = sub
     
     # Categorize students for each problem
+    # Also check for is_final status (student clicked "Done")
     for student in all_students:
         sid = student["id"]
         student_name = student["name"]
         for pid in problem_ids:
             sub = student_submissions.get(sid, {}).get(pid)
+            # Check if any submission is marked as final
+            student_subs_for_problem = [s for s in submissions if s.get("student_id") == sid and s.get("problem_id") == pid]
+            is_final = any(s.get("is_final") for s in student_subs_for_problem)
+            
             student_info = {"id": sid, "name": student_name}
             if sub:
-                if sub.get("is_passing"):
+                # Consider "done" if is_final OR is_passing
+                if sub.get("is_passing") or is_final:
                     progress[pid]["completed_students"].append({
                         **student_info,
                         "score": sub.get("score", 0),
-                        "submitted_at": sub.get("submitted_at")
+                        "submitted_at": sub.get("submitted_at"),
+                        "is_final": is_final
                     })
                 else:
                     progress[pid]["in_progress_students"].append({
                         **student_info,
                         "score": sub.get("score", 0),
-                        "attempts": len([s for s in submissions if s.get("student_id") == sid and s.get("problem_id") == pid])
+                        "attempts": len(student_subs_for_problem)
                     })
             else:
                 progress[pid]["not_started_students"].append(student_info)
