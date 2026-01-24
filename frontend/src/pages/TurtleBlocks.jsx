@@ -383,6 +383,64 @@ const defineTurtleBlocks = () => {
     }
   };
 
+  // ===== LOOKS BLOCKS (Purple/Magenta - Color 260) =====
+
+  // Say (write text)
+  Blockly.Blocks['turtle_say'] = {
+    init: function() {
+      this.appendDummyInput()
+          .appendField("say")
+          .appendField(new Blockly.FieldTextInput("Hello!"), "TEXT");
+      this.setPreviousStatement(true, null);
+      this.setNextStatement(true, null);
+      this.setColour(260);
+      this.setTooltip("Display text at turtle's position");
+    }
+  };
+
+  // Say for seconds (with duration)
+  Blockly.Blocks['turtle_say_for'] = {
+    init: function() {
+      this.appendDummyInput()
+          .appendField("say")
+          .appendField(new Blockly.FieldTextInput("Hello!"), "TEXT")
+          .appendField("for");
+      this.appendValueInput("SECONDS")
+          .setCheck("Number");
+      this.appendDummyInput()
+          .appendField("seconds");
+      this.setInputsInline(true);
+      this.setPreviousStatement(true, null);
+      this.setNextStatement(true, null);
+      this.setColour(260);
+      this.setTooltip("Display text for a number of seconds");
+    }
+  };
+
+  // Hide turtle
+  Blockly.Blocks['turtle_hide'] = {
+    init: function() {
+      this.appendDummyInput()
+          .appendField("hide turtle");
+      this.setPreviousStatement(true, null);
+      this.setNextStatement(true, null);
+      this.setColour(260);
+      this.setTooltip("Hide the turtle sprite");
+    }
+  };
+
+  // Show turtle
+  Blockly.Blocks['turtle_show'] = {
+    init: function() {
+      this.appendDummyInput()
+          .appendField("show turtle");
+      this.setPreviousStatement(true, null);
+      this.setNextStatement(true, null);
+      this.setColour(260);
+      this.setTooltip("Show the turtle sprite");
+    }
+  };
+
   // ===== MATH BLOCKS (Purple - Color 290) =====
 
   // Number input
