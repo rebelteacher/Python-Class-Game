@@ -960,6 +960,30 @@ const AnimatedTurtle = forwardRef(function AnimatedTurtle({
           resolve();
           break;
           
+        case 'write': {
+          // Write text at turtle's current position
+          const text = args[0] || '';
+          const canvas = canvasRef.current;
+          if (canvas) {
+            const ctx = canvas.getContext('2d');
+            const scale = canvas.width / canvasSize;
+            const cx = canvas.width / 2;
+            const cy = canvas.height / 2;
+            const drawX = cx + turtle.x * scale;
+            const drawY = cy - turtle.y * scale;
+            
+            ctx.save();
+            ctx.font = `${12 * scale}px Arial`;
+            ctx.fillStyle = turtle.penColor;
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'bottom';
+            ctx.fillText(text, drawX, drawY);
+            ctx.restore();
+          }
+          resolve();
+          break;
+        }
+          
         default:
           resolve();
       }
