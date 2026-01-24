@@ -229,6 +229,13 @@ function parseCode(code, parentVars = {}) {
       continue;
     }
     
+    // Parse write command - t.write("text", ...) - extracts just the text content
+    match = trimmed.match(new RegExp(`${turtlePrefix}write\\s*\\(\\s*["']([^"']*?)["']`));
+    if (match) {
+      commands.push({ type: 'write', args: [match[1]], line: lineNum });
+      continue;
+    }
+    
     // Parse for loop with variable or literal support
     match = trimmed.match(/for\s+(\w+)\s+in\s+range\s*\(\s*([^)]+)\s*\)\s*:/);
     if (match) {
