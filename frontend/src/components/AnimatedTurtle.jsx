@@ -988,7 +988,6 @@ const AnimatedTurtle = forwardRef(function AnimatedTurtle({
         case 'write': {
           // Store text at turtle's current position so it persists on canvas
           const text = cmd.args?.[0] || '';
-          console.log('WRITE command executing:', { text, x: turtle.x, y: turtle.y, color: turtle.penColor });
           if (!turtle.texts) turtle.texts = [];
           turtle.texts.push({
             text: text,
@@ -996,7 +995,6 @@ const AnimatedTurtle = forwardRef(function AnimatedTurtle({
             y: turtle.y,
             color: turtle.penColor
           });
-          console.log('Turtle texts array:', turtle.texts);
           drawCanvas();
           resolve();
           break;
