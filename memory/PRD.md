@@ -19,7 +19,7 @@ A coding education platform for K-12 students featuring multiple programming env
 - Test reports with release controls
 - Question bank with filtering and bulk edit
 - Skill quiz manager
-- **Teacher Panel** - View student progress and code submissions (NEW - Jan 2025)
+- **Teacher Panel** - View student progress and code submissions (Jan 2025)
 
 ### Student Features
 - Assignment completion with auto-grading
@@ -33,12 +33,13 @@ A coding education platform for K-12 students featuring multiple programming env
 - Pattern-based test case grading with count support
 - Grid toggle and coordinate hover display
 - Code line highlighting during animation
-- Support for: forward, backward, left, right, goto, circle (with extent), penup, pendown, color, home, etc.
+- Support for: forward, backward, left, right, goto, circle (with extent), penup, pendown, color, home, write, hideturtle, showturtle, etc.
 
 ### Turtle Blocks (Unit 1)
 - Visual block-based programming using Blockly
 - **Motion blocks**: forward, backward, left, right, goto, home
 - **Pen blocks**: penup, pendown, color, pensize
+- **Looks blocks**: say (write text), say for seconds, hide turtle, show turtle (NEW - Jan 2025)
 - **Loop blocks**: repeat N times, count with variable, while
 - **Control blocks**: if, if-else
 - **Logic blocks**: comparisons, and/or, not, boolean values
@@ -48,7 +49,7 @@ A coding education platform for K-12 students featuring multiple programming env
 - Live turtle canvas preview
 - Replaces external Scratch integration
 
-### Teacher Panel (NEW - Jan 2025)
+### Teacher Panel (Jan 2025)
 A sidebar panel similar to code.org that allows teachers to view student progress and code submissions during live lessons.
 
 **Features:**
@@ -88,6 +89,7 @@ A sidebar panel similar to code.org that allows teachers to view student progres
 - [x] Code line highlighting during turtle animation
 - [x] Turtle Blocks feature (replaces Scratch)
 - [x] **Teacher Panel** - View student progress and code during live lessons
+- [x] **Looks blocks** - say, say for seconds, hide/show turtle
 
 ### P1 - Next Priority
 - [ ] Fix students not seeing expected output image (may need backend check)
@@ -102,7 +104,7 @@ A sidebar panel similar to code.org that allows teachers to view student progres
 - [ ] Self-Paced Learning Module
 - [ ] AI-powered code feedback
 - [ ] Parent portal
-- [ ] Add more Turtle Blocks types (circle, fill)
+- [ ] Add more Turtle Blocks types (circle, fill, stamp)
 - [ ] Student-facing features for Turtle Blocks (save/load projects, challenges)
 
 ---
@@ -123,11 +125,11 @@ A sidebar panel similar to code.org that allows teachers to view student progres
 - Custom turtle_sim.py simulator
 
 ### Key Files
-- `/app/frontend/src/components/AnimatedTurtle.jsx` - Turtle graphics engine
-- `/app/frontend/src/components/TeacherPanel.jsx` - Teacher Panel sidebar (NEW)
+- `/app/frontend/src/components/AnimatedTurtle.jsx` - Turtle graphics engine (supports write command)
+- `/app/frontend/src/components/TeacherPanel.jsx` - Teacher Panel sidebar
 - `/app/frontend/src/pages/AssignmentPage.jsx` - Student/Teacher assignment view
 - `/app/frontend/src/pages/AssignmentLibrary.jsx` - Teacher problem management
-- `/app/frontend/src/pages/TurtleBlocks.jsx` - Blockly editor for turtle programming
+- `/app/frontend/src/pages/TurtleBlocks.jsx` - Blockly editor for turtle programming (with Looks category)
 - `/app/backend/server.py` - API endpoints
 - `/app/backend/turtle_sim.py` - Backend turtle simulator
 
@@ -144,4 +146,4 @@ A sidebar panel similar to code.org that allows teachers to view student progres
 
 ---
 
-*Last Updated: January 22, 2025*
+*Last Updated: January 24, 2025*
