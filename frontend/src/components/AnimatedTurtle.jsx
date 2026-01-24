@@ -733,9 +733,12 @@ const AnimatedTurtle = forwardRef(function AnimatedTurtle({
     
     // Draw all written texts
     const turtle = turtleRef.current;
+    console.log('drawCanvas - turtle.texts:', turtle.texts);
     if (turtle.texts && turtle.texts.length > 0) {
+      console.log('Drawing texts...');
       for (const textItem of turtle.texts) {
         const pos = toCanvasCoords(textItem.x, textItem.y);
+        console.log('Drawing text:', textItem.text, 'at canvas pos:', pos);
         ctx.save();
         ctx.font = '14px Arial';
         ctx.fillStyle = textItem.color || 'black';
