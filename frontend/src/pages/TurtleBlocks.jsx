@@ -752,6 +752,17 @@ const TOOLBOX = {
     },
     {
       kind: 'category',
+      name: '💬 Looks',
+      colour: '260',
+      contents: [
+        { kind: 'block', type: 'turtle_say' },
+        { kind: 'block', type: 'turtle_say_for', inputs: { SECONDS: { shadow: { type: 'math_number', fields: { NUM: 2 } } } } },
+        { kind: 'block', type: 'turtle_hide' },
+        { kind: 'block', type: 'turtle_show' }
+      ]
+    },
+    {
+      kind: 'category',
       name: '🔄 Loops',
       colour: '20',
       contents: [
