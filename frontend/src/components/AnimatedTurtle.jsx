@@ -731,8 +731,22 @@ const AnimatedTurtle = forwardRef(function AnimatedTurtle({
       }
     }
     
-    // Draw turtle if visible
+    // Draw all written texts
     const turtle = turtleRef.current;
+    if (turtle.texts && turtle.texts.length > 0) {
+      for (const textItem of turtle.texts) {
+        const pos = toCanvasCoords(textItem.x, textItem.y);
+        ctx.save();
+        ctx.font = '14px Arial';
+        ctx.fillStyle = textItem.color || 'black';
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'bottom';
+        ctx.fillText(textItem.text, pos.x, pos.y);
+        ctx.restore();
+      }
+    }
+    
+    // Draw turtle if visible
     if (turtle.visible) {
       drawTurtle(ctx, turtle.x, turtle.y, turtle.heading, turtle.turtleColor);
     }
