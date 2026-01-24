@@ -296,6 +296,7 @@ const getInitialTurtleState = () => ({
   visible: true,
   filling: false,
   fillPath: [],
+  texts: [],  // Array of {text, x, y, color} for write command
   name: 't' // Default name
 });
 
