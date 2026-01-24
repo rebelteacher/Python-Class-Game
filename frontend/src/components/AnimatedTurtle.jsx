@@ -740,11 +740,11 @@ const AnimatedTurtle = forwardRef(function AnimatedTurtle({
         const pos = toCanvasCoords(textItem.x, textItem.y);
         console.log('Drawing text:', textItem.text, 'at canvas pos:', pos);
         ctx.save();
-        ctx.font = '14px Arial';
+        ctx.font = 'bold 24px Arial';  // Larger, bold font
         ctx.fillStyle = textItem.color || 'black';
         ctx.textAlign = 'center';
         ctx.textBaseline = 'bottom';
-        ctx.fillText(textItem.text, pos.x, pos.y);
+        ctx.fillText(textItem.text, pos.x, pos.y - 20);  // Offset above turtle
         ctx.restore();
       }
     }
