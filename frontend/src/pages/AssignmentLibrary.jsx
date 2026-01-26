@@ -2666,14 +2666,14 @@ export default function AssignmentLibrary({ user }) {
                     <p className="text-sm text-gray-600 mb-3">
                       Drag blocks here to create what students will start with. Leave empty for a blank canvas.
                     </p>
-                    <div className="h-[350px] border rounded-lg overflow-hidden">
+                    <div className="h-[400px] border rounded-lg overflow-hidden">
                       <TurtleBlocklyEditor
                         initialXml={editingProblem.starter_blocks_xml || ""}
                         onCodeChange={(code) => setEditingProblem(prev => ({ ...prev, starter_code: code }))}
                         onXmlChange={(xml) => setEditingProblem(prev => ({ ...prev, starter_blocks_xml: xml }))}
-                        showPreview={true}
+                        showPreview={false}
                         showCodeToggle={true}
-                        height="300px"
+                        height="360px"
                         compact={true}
                       />
                     </div>
@@ -2701,14 +2701,14 @@ export default function AssignmentLibrary({ user }) {
                     <p className="text-sm text-gray-600 mb-3">
                       Create the correct solution using blocks. This will be used for grading.
                     </p>
-                    <div className="h-[350px] border rounded-lg overflow-hidden">
+                    <div className="h-[400px] border rounded-lg overflow-hidden">
                       <TurtleBlocklyEditor
                         initialXml={editingProblem.solution_blocks_xml || ""}
                         onCodeChange={(code) => setEditingProblem(prev => ({ ...prev, solution_code: code }))}
                         onXmlChange={(xml) => setEditingProblem(prev => ({ ...prev, solution_blocks_xml: xml }))}
-                        showPreview={true}
+                        showPreview={false}
                         showCodeToggle={true}
-                        height="300px"
+                        height="360px"
                         compact={true}
                       />
                     </div>
