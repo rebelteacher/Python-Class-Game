@@ -1374,108 +1374,74 @@ export default function AssignmentPage({ user }) {
                   </CardHeader>
                   <CardContent className="p-0">
                     {assignment.problems?.[currentProblemIndex]?.assignment_type === "block" ? (
-                      /* Block-Based - Scratch Integration with Screenshot Upload */
-                      <div className="h-[600px] flex flex-col overflow-y-auto">
-                        {/* Scratch Link */}
-                        <div className="flex items-center justify-between bg-gradient-to-r from-orange-100 to-yellow-100 rounded-lg border border-orange-200 p-4 mb-4">
-                          <div className="flex items-center gap-3">
-                            <img 
-                              src="https://scratch.mit.edu/images/logo_sm.png" 
-                              alt="Scratch" 
-                              className="h-10"
-                            />
-                            <div>
-                              <h3 className="font-bold text-orange-700">Create with Scratch!</h3>
-                              <p className="text-xs text-gray-600">Complete your project, then upload a screenshot</p>
+                      /* Block-Based - Turtle Blocks Editor (Like Unit 2 but with blocks) */
+                      <div className="h-[600px] flex flex-col p-4">
+                        {/* Turtle Blocks Inline Editor */}
+                        <div className="flex-1 flex flex-col bg-gray-50 rounded-lg border overflow-hidden">
+                          {/* Toolbar */}
+                          <div className="flex items-center justify-between bg-gradient-to-r from-purple-600 to-indigo-600 text-white px-4 py-2">
+                            <div className="flex items-center gap-2">
+                              <Blocks className="w-5 h-5" />
+                              <span className="font-bold">Turtle Blocks</span>
+                            </div>
+                            <div className="flex items-center gap-2">
+                              <Button
+                                size="sm"
+                                variant="ghost"
+                                className="text-white hover:bg-white/20"
+                                onClick={() => {
+                                  // Open full Turtle Blocks editor in new tab
+                                  window.open('/turtle-blocks', '_blank');
+                                }}
+                              >
+                                <ExternalLink className="w-4 h-4 mr-1" />
+                                Full Editor
+                              </Button>
                             </div>
                           </div>
-                          <Button
-                            onClick={() => window.open('https://scratch.mit.edu/projects/editor/', '_blank')}
-                            className="bg-orange-500 hover:bg-orange-600 text-white"
-                            size="sm"
-                          >
-                            <ExternalLink className="w-4 h-4 mr-1" />
-                            Open Scratch
-                          </Button>
-                        </div>
-                        
-                        {/* Screenshot Upload Area */}
-                        <div className="flex-1 flex flex-col">
-                          <label className="block text-sm font-medium text-gray-700 mb-2">
-                            📸 Upload Screenshot of Your Code Blocks:
-                          </label>
                           
-                          {!scratchScreenshot ? (
-                            <div 
-                              className="flex-1 border-2 border-dashed border-orange-300 rounded-lg bg-orange-50 flex flex-col items-center justify-center cursor-pointer hover:bg-orange-100 transition-colors"
-                              onClick={() => document.getElementById('scratch-screenshot-input')?.click()}
-                            >
-                              <div className="text-5xl mb-3">📷</div>
-                              <p className="text-lg font-medium text-orange-700">Click to Upload Screenshot</p>
-                              <p className="text-sm text-gray-500 mt-1">Take a screenshot of your Scratch code blocks</p>
-                              <p className="text-xs text-gray-400 mt-2">PNG, JPG up to 5MB</p>
-                              <input
-                                id="scratch-screenshot-input"
-                                type="file"
-                                accept="image/*"
-                                className="hidden"
-                                onChange={(e) => {
-                                  const file = e.target.files?.[0];
-                                  if (file) {
-                                    if (file.size > 5 * 1024 * 1024) {
-                                      toast.error("Image must be less than 5MB");
-                                      return;
-                                    }
-                                    const reader = new FileReader();
-                                    reader.onload = (event) => {
-                                      setScratchScreenshot(event.target?.result);
-                                    };
-                                    reader.readAsDataURL(file);
-                                  }
-                                }}
-                                disabled={problemsFinal[getCurrentProblemId()]}
-                              />
-                            </div>
-                          ) : (
-                            <div className="flex-1 flex flex-col">
-                              <div className="relative flex-1 border rounded-lg overflow-hidden bg-gray-100">
-                                <img 
-                                  src={scratchScreenshot} 
-                                  alt="Scratch screenshot" 
-                                  className="w-full h-full object-contain"
-                                />
-                                {!problemsFinal[getCurrentProblemId()] && (
-                                  <Button
-                                    variant="destructive"
-                                    size="sm"
-                                    className="absolute top-2 right-2"
-                                    onClick={() => setScratchScreenshot(null)}
-                                  >
-                                    <X className="w-4 h-4 mr-1" />
-                                    Remove
-                                  </Button>
-                                )}
-                              </div>
-                              <p className="text-xs text-green-600 mt-2 text-center">
-                                ✓ Screenshot uploaded - Click Submit when ready!
-                              </p>
-                            </div>
-                          )}
+                          {/* Instructions */}
+                          <div className="p-3 bg-purple-50 border-b border-purple-200 text-sm">
+                            <p className="text-purple-800">
+                              <strong>📝 Instructions:</strong> Write Python turtle code below using what you learned with blocks.
+                              Your code will be graded the same way as Unit 2 turtle problems.
+                            </p>
+                          </div>
+                          
+                          {/* Code Editor - Same as turtle problems */}
+                          <div className="flex-1">
+                            <Editor
+                              height="100%"
+                              defaultLanguage="python"
+                              value={code}
+                              onChange={(value) => !problemsFinal[getCurrentProblemId()] && setCode(value || "")}
+                              theme={darkMode ? "vs-dark" : "vs-light"}
+                              onMount={(editor) => {
+                                codeEditorRef.current = editor;
+                              }}
+                              options={{
+                                minimap: { enabled: false },
+                                fontSize: 14,
+                                lineNumbers: "on",
+                                scrollBeyondLastLine: false,
+                                automaticLayout: true,
+                                wordWrap: "on",
+                                wrappingIndent: "indent",
+                                readOnly: problemsFinal[getCurrentProblemId()],
+                              }}
+                            />
+                          </div>
                         </div>
                         
-                        {/* Optional Project URL */}
-                        <div className="mt-3 p-3 bg-gray-50 rounded-lg border">
-                          <label className="block text-xs font-medium text-gray-600 mb-1">
-                            📎 Optional: Scratch Project URL (for teacher reference)
-                          </label>
-                          <input
-                            type="text"
-                            placeholder="https://scratch.mit.edu/projects/..."
-                            value={code}
-                            onChange={(e) => !problemsFinal[getCurrentProblemId()] && setCode(e.target.value)}
-                            className="w-full px-3 py-1.5 text-sm border rounded focus:ring-2 focus:ring-orange-500 focus:border-orange-500"
-                            disabled={problemsFinal[getCurrentProblemId()]}
-                          />
+                        {/* Help Link */}
+                        <div className="mt-2 text-center">
+                          <a 
+                            href="/turtle-blocks" 
+                            target="_blank"
+                            className="text-sm text-purple-600 hover:text-purple-800 underline"
+                          >
+                            Need help? Practice with the Turtle Blocks editor →
+                          </a>
                         </div>
                       </div>
                     ) : (
