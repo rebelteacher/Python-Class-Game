@@ -1385,15 +1385,15 @@ export default function AssignmentLibrary({ user }) {
                       <p className="text-sm text-gray-600 mb-3">
                         Drag blocks here to create what students will start with. Leave empty for a blank canvas.
                       </p>
-                      <div className="h-[350px] border rounded-lg overflow-hidden">
+                      <div className="h-[400px] border rounded-lg overflow-hidden">
                         <TurtleBlocklyEditor
                           ref={starterBlocksRef}
                           initialXml={newProblem.starter_blocks_xml}
                           onCodeChange={(code) => setNewProblem(prev => ({ ...prev, starter_code: code }))}
                           onXmlChange={(xml) => setNewProblem(prev => ({ ...prev, starter_blocks_xml: xml }))}
-                          showPreview={true}
+                          showPreview={false}
                           showCodeToggle={true}
-                          height="300px"
+                          height="360px"
                           compact={true}
                         />
                       </div>
