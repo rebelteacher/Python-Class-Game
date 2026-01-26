@@ -111,8 +111,15 @@ export default function AssignmentLibrary({ user }) {
     time_limit: 0,
     optimal_path_length: 0,
     // Lesson materials for pre-problem instruction
-    lesson_materials: []  // Array of { type: 'video'|'image'|'text'|'link', content: string, title?: string }
+    lesson_materials: [],  // Array of { type: 'video'|'image'|'text'|'link', content: string, title?: string }
+    // Block-based assignment fields
+    starter_blocks_xml: "",  // XML representation of starter blocks
+    solution_blocks_xml: ""  // XML representation of solution blocks
   });
+  
+  // Refs for Blockly editors
+  const starterBlocksRef = useRef(null);
+  const solutionBlocksRef = useRef(null);
   
   const [mazeBuilderOpen, setMazeBuilderOpen] = useState(false);
   const [turtlePreviewOpen, setTurtlePreviewOpen] = useState(false);
