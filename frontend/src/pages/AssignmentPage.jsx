@@ -1400,7 +1400,11 @@ export default function AssignmentPage({ user }) {
                           initialXml={assignment.problems[currentProblemIndex]?.starter_blocks_xml || ""}
                           onCodeChange={(newCode) => {
                             setCode(newCode);
-                            setHasRun(false);
+                            // Reset hasRun when code changes
+                            setHasRunPerProblem(prev => ({
+                              ...prev,
+                              [getCurrentProblemId()]: false
+                            }));
                           }}
                           readOnly={problemsFinal[getCurrentProblemId()]}
                           showPreview={true}
