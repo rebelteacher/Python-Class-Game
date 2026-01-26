@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import axios from "axios";
 import { toast } from "sonner";
@@ -16,6 +16,7 @@ import { Switch } from "@/components/ui/switch";
 import { BookOpen, Plus, Search, Filter, Code2, ArrowLeft, Download, Edit, Folder, FolderOpen, ChevronRight, ChevronDown, Trash2, FolderInput, CheckSquare, Map, Target, Play } from "lucide-react";
 import MazeBuilder from "@/components/MazeBuilder";
 import AnimatedTurtle from "@/components/AnimatedTurtle";
+import TurtleBlocklyEditor from "@/components/TurtleBlocklyEditor";
 
 const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
 const API = `${BACKEND_URL}/api`;
