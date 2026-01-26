@@ -2636,11 +2636,25 @@ export default function AssignmentLibrary({ user }) {
                   <Label htmlFor="edit-resourcesLink">Resources Link (Optional)</Label>
                   <Input
                     id="edit-resourcesLink"
-                    placeholder="https://drive.google.com/..."
+                    placeholder="https://drive.google.com/... or paste embed code"
                     value={editingProblem.resources_link}
-                    onChange={(e) => setEditingProblem({ ...editingProblem, resources_link: e.target.value })}
+                    onChange={(e) => {
+                      let value = e.target.value;
+                      // Extract URL from iframe embed code if pasted
+                      if (value.includes('<iframe') || value.includes('&lt;iframe')) {
+                        const srcMatch = value.match(/src=["']([^"']+)["']/i);
+                        if (srcMatch && srcMatch[1]) {
+                          value = srcMatch[1];
+                          toast.info("Extracted URL from embed code");
+                        }
+                      }
+                      setEditingProblem({ ...editingProblem, resources_link: value });
+                    }}
                     className="mt-1"
                   />
+                  <p className="text-xs text-gray-500 mt-1">
+                    Paste a direct URL or embed code - we'll extract the link automatically
+                  </p>
                 </div>
 
                 {/* Starter Code/Blocks - conditional based on assignment type */}
