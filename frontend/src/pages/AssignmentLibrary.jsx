@@ -108,7 +108,9 @@ export default function AssignmentLibrary({ user }) {
     collision_enabled: false,
     challenge_mode: false,
     time_limit: 0,
-    optimal_path_length: 0
+    optimal_path_length: 0,
+    // Lesson materials for pre-problem instruction
+    lesson_materials: []  // Array of { type: 'video'|'image'|'text'|'link', content: string, title?: string }
   });
   
   const [mazeBuilderOpen, setMazeBuilderOpen] = useState(false);
