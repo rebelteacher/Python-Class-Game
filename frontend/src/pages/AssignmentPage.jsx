@@ -436,22 +436,15 @@ export default function AssignmentPage({ user }) {
     const currentProblem = assignment.problems?.[currentProblemIndex];
     const isBlockType = currentProblem?.assignment_type === "block";
     
-    // For block assignments, check screenshot instead of run status
-    if (isBlockType) {
-      if (!scratchScreenshot) {
-        toast.error("Please upload a screenshot of your Scratch code blocks!");
-        return;
-      }
-    } else {
-      if (!hasRun) {
-        toast.error("Please run your code first before submitting!");
-        return;
-      }
+    // Block assignments now use code (like turtle), so require run and code
+    if (!hasRun) {
+      toast.error("Please run your code first before submitting!");
+      return;
+    }
 
-      if (!code.trim()) {
-        toast.error("Please write some code before submitting");
-        return;
-      }
+    if (!code.trim()) {
+      toast.error("Please write some code before submitting");
+      return;
     }
 
     // Get current problem ID
@@ -473,11 +466,6 @@ export default function AssignmentPage({ user }) {
         problem_id: problemId,
         code: code || "",
       };
-      
-      // Add screenshot for block assignments
-      if (isBlockType && scratchScreenshot) {
-        submissionData.screenshot = scratchScreenshot;
-      }
       
       const response = await axios.post(
         `${API}/submissions`,
