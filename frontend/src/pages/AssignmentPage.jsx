@@ -2125,6 +2125,14 @@ export default function AssignmentPage({ user }) {
           />
         </DialogContent>
       </Dialog>
+      
+      {/* Lesson Materials Popup - Shows for problems with instructional content */}
+      <LessonPopup
+        open={showLessonPopup}
+        onClose={handleLessonAcknowledged}
+        lessonTitle={assignment?.problems?.[currentProblemIndex]?.title || "Before You Begin..."}
+        materials={assignment?.problems?.[currentProblemIndex]?.lesson_materials || []}
+      />
     </div>
   );
 }
