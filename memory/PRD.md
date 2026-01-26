@@ -110,10 +110,12 @@ Teachers can now create "Block" type assignments using drag-and-drop Blockly edi
 - [x] Turtle Blocks feature (replaces Scratch)
 - [x] **Teacher Panel** - View student progress and code during live lessons
 - [x] **Looks blocks** - say, say for seconds, hide/show turtle
+- [x] **Block Problem Creation Workflow** - Teachers create block problems with Blockly editors
 
 ### P1 - Next Priority
-- [ ] Fix students not seeing expected output image (may need backend check)
+- [ ] Direct Image Upload for Lesson Materials (instead of pasting URLs, with click-to-enlarge for students)
 - [ ] Extend custom curriculum feature to Python/Turtle/Micro:bit
+- [ ] Fix students not seeing expected output image (may need backend check)
 - [ ] End-to-end quiz flow testing
 
 ### P2 - Upcoming
