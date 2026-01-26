@@ -1464,19 +1464,17 @@ export default function AssignmentPage({ user }) {
                   </CardHeader>
                   <CardContent className="flex-1 overflow-auto min-h-0 p-4">
                     {assignment.problems?.[currentProblemIndex]?.assignment_type === "block" ? (
-                      /* Block-Based - Show Turtle Canvas (same as Unit 2) */
+                      /* Block-Based - Show Expected Output & Test Cases (preview is in Blockly editor) */
                       <div className="h-full flex flex-col gap-3">
-                        {/* Live Turtle Canvas */}
-                        <div className="flex-1 flex flex-col">
-                          <div className="bg-white rounded-lg shadow p-2 flex-1 flex items-center justify-center">
-                            <AnimatedTurtle
-                              ref={turtleBlocksRef}
-                              code={code}
-                              width={500}
-                              height={500}
-                              onLineHighlight={(lineNum) => setHighlightedLine(lineNum)}
-                            />
-                          </div>
+                        {/* Instructions */}
+                        <div className="p-3 bg-purple-50 rounded-lg border border-purple-200">
+                          <h4 className="text-sm font-semibold text-purple-800 mb-2">🧩 How to Complete:</h4>
+                          <ol className="text-xs text-gray-700 space-y-1 list-decimal list-inside">
+                            <li>Drag blocks from the toolbox on the left</li>
+                            <li>Snap blocks together to build your program</li>
+                            <li>Click <strong>Run</strong> to test your turtle drawing</li>
+                            <li>Click <strong>Submit</strong> when you&apos;re done!</li>
+                          </ol>
                         </div>
                         
                         {/* Expected Output if available */}
@@ -1487,7 +1485,10 @@ export default function AssignmentPage({ user }) {
                               <img
                                 src={`data:image/png;base64,${assignment.problems[currentProblemIndex].expected_turtle_image}`}
                                 alt="Expected turtle output"
-                                className="max-h-32 rounded border"
+                                className="max-h-48 rounded border cursor-pointer hover:shadow-lg transition-shadow"
+                                onClick={() => {
+                                  // Could open enlarged view
+                                }}
                               />
                             </div>
                           </div>
@@ -1505,6 +1506,27 @@ export default function AssignmentPage({ user }) {
                                 </li>
                               ))}
                             </ul>
+                          </div>
+                        )}
+                        
+                        {/* Latest Submission Feedback */}
+                        {submissions.length > 0 && submissions[submissions.length - 1]?.problem_id === getCurrentProblemId() && (
+                          <div className={`p-3 rounded-lg border ${
+                            submissions[submissions.length - 1].score >= 70 
+                              ? 'bg-green-50 border-green-200' 
+                              : 'bg-yellow-50 border-yellow-200'
+                          }`}>
+                            <h4 className={`text-sm font-semibold mb-2 ${
+                              submissions[submissions.length - 1].score >= 70 ? 'text-green-800' : 'text-yellow-800'
+                            }`}>
+                              📊 Latest Feedback:
+                            </h4>
+                            <div className="text-2xl font-bold mb-2">
+                              {submissions[submissions.length - 1].score?.toFixed(0)}%
+                            </div>
+                            <p className="text-xs text-gray-700 whitespace-pre-wrap">
+                              {submissions[submissions.length - 1].feedback}
+                            </p>
                           </div>
                         )}
                       </div>
