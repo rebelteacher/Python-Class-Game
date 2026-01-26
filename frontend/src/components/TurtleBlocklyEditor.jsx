@@ -975,10 +975,10 @@ const TurtleBlocklyEditor = forwardRef(({
       </div>
 
       {/* Main content */}
-      <div className="flex-1 flex border border-t-0 rounded-b-lg overflow-hidden" style={{ height }}>
+      <div className="flex-1 flex border border-t-0 rounded-b-lg" style={{ height }}>
         {/* Blockly workspace or Code view */}
         <div 
-          className="flex-1 relative"
+          className="flex-1 relative overflow-hidden"
           style={{ display: showCode ? 'none' : 'block' }}
         >
           <div 
@@ -997,7 +997,7 @@ const TurtleBlocklyEditor = forwardRef(({
 
         {/* Turtle preview */}
         {showPreview && (
-          <div className="w-64 border-l bg-white flex items-center justify-center p-2">
+          <div className="w-64 border-l bg-white flex items-center justify-center p-2 flex-shrink-0">
             <AnimatedTurtle
               ref={turtleRef}
               code={generatedCode}
