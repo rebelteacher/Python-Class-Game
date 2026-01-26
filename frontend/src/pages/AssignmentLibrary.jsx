@@ -1468,9 +1468,9 @@ export default function AssignmentLibrary({ user }) {
                           initialXml={newProblem.solution_blocks_xml}
                           onCodeChange={(code) => setNewProblem(prev => ({ ...prev, solution_code: code }))}
                           onXmlChange={(xml) => setNewProblem(prev => ({ ...prev, solution_blocks_xml: xml }))}
-                          showPreview={true}
+                          showPreview={false}
                           showCodeToggle={true}
-                          height="350px"
+                          height="360px"
                           compact={true}
                         />
                       </div>
