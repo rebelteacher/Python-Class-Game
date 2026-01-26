@@ -1393,75 +1393,20 @@ export default function AssignmentPage({ user }) {
                   </CardHeader>
                   <CardContent className="p-0">
                     {assignment.problems?.[currentProblemIndex]?.assignment_type === "block" ? (
-                      /* Block-Based - Turtle Blocks Editor (Like Unit 2 but with blocks) */
-                      <div className="h-[600px] flex flex-col p-4">
-                        {/* Turtle Blocks Inline Editor */}
-                        <div className="flex-1 flex flex-col bg-gray-50 rounded-lg border overflow-hidden">
-                          {/* Toolbar */}
-                          <div className="flex items-center justify-between bg-gradient-to-r from-purple-600 to-indigo-600 text-white px-4 py-2">
-                            <div className="flex items-center gap-2">
-                              <Blocks className="w-5 h-5" />
-                              <span className="font-bold">Turtle Blocks</span>
-                            </div>
-                            <div className="flex items-center gap-2">
-                              <Button
-                                size="sm"
-                                variant="ghost"
-                                className="text-white hover:bg-white/20"
-                                onClick={() => {
-                                  // Open full Turtle Blocks editor in new tab
-                                  window.open('/turtle-blocks', '_blank');
-                                }}
-                              >
-                                <ExternalLink className="w-4 h-4 mr-1" />
-                                Full Editor
-                              </Button>
-                            </div>
-                          </div>
-                          
-                          {/* Instructions */}
-                          <div className="p-3 bg-purple-50 border-b border-purple-200 text-sm">
-                            <p className="text-purple-800">
-                              <strong>📝 Instructions:</strong> Write Python turtle code below using what you learned with blocks.
-                              Your code will be graded the same way as Unit 2 turtle problems.
-                            </p>
-                          </div>
-                          
-                          {/* Code Editor - Same as turtle problems */}
-                          <div className="flex-1">
-                            <Editor
-                              height="100%"
-                              defaultLanguage="python"
-                              value={code}
-                              onChange={(value) => !problemsFinal[getCurrentProblemId()] && setCode(value || "")}
-                              theme={darkMode ? "vs-dark" : "vs-light"}
-                              onMount={(editor) => {
-                                codeEditorRef.current = editor;
-                              }}
-                              options={{
-                                minimap: { enabled: false },
-                                fontSize: 14,
-                                lineNumbers: "on",
-                                scrollBeyondLastLine: false,
-                                automaticLayout: true,
-                                wordWrap: "on",
-                                wrappingIndent: "indent",
-                                readOnly: problemsFinal[getCurrentProblemId()],
-                              }}
-                            />
-                          </div>
-                        </div>
-                        
-                        {/* Help Link */}
-                        <div className="mt-2 text-center">
-                          <a 
-                            href="/turtle-blocks" 
-                            target="_blank"
-                            className="text-sm text-purple-600 hover:text-purple-800 underline"
-                          >
-                            Need help? Practice with the Turtle Blocks editor →
-                          </a>
-                        </div>
+                      /* Block-Based - Turtle Blocks Editor with drag-and-drop blocks */
+                      <div className="h-[600px] p-2">
+                        <TurtleBlocklyEditor
+                          ref={turtleBlocksRef}
+                          initialXml={assignment.problems[currentProblemIndex]?.starter_blocks_xml || ""}
+                          onCodeChange={(newCode) => {
+                            setCode(newCode);
+                            setHasRun(false);
+                          }}
+                          readOnly={problemsFinal[getCurrentProblemId()]}
+                          showPreview={true}
+                          showCodeToggle={true}
+                          height="560px"
+                        />
                       </div>
                     ) : (
                       /* Regular Code Editor */
