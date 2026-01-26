@@ -149,8 +149,9 @@ Teachers can now create "Block" type assignments using drag-and-drop Blockly edi
 ### Key Files
 - `/app/frontend/src/components/AnimatedTurtle.jsx` - Turtle graphics engine (supports write command)
 - `/app/frontend/src/components/TeacherPanel.jsx` - Teacher Panel sidebar
+- `/app/frontend/src/components/TurtleBlocklyEditor.jsx` - Reusable Blockly editor component for block problems
 - `/app/frontend/src/pages/AssignmentPage.jsx` - Student/Teacher assignment view
-- `/app/frontend/src/pages/AssignmentLibrary.jsx` - Teacher problem management
+- `/app/frontend/src/pages/AssignmentLibrary.jsx` - Teacher problem management (with Blockly editors for block type)
 - `/app/frontend/src/pages/TurtleBlocks.jsx` - Blockly editor for turtle programming (with Looks category)
 - `/app/backend/server.py` - API endpoints
 - `/app/backend/turtle_sim.py` - Backend turtle simulator
@@ -168,4 +169,4 @@ Teachers can now create "Block" type assignments using drag-and-drop Blockly edi
 
 ---
 
-*Last Updated: January 24, 2025*
+*Last Updated: January 26, 2025*
