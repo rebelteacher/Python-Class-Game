@@ -1485,7 +1485,7 @@ export default function AssignmentPage({ user }) {
                         : assignment.problems?.[currentProblemIndex]?.assignment_type === "microbit"
                           ? "⚡ Virtual Micro:bit"
                           : assignment.problems?.[currentProblemIndex]?.assignment_type === "block"
-                            ? "🎮 Sprite Stage"
+                            ? "🐢 Turtle Preview"
                             : "Output"}
                     </CardTitle>
                     <CardDescription className="text-xs">
@@ -1494,73 +1494,53 @@ export default function AssignmentPage({ user }) {
                         : assignment.problems?.[currentProblemIndex]?.assignment_type === "microbit"
                           ? "Test your code on the virtual Micro:bit before using real hardware"
                           : assignment.problems?.[currentProblemIndex]?.assignment_type === "block"
-                            ? "Watch your sprite follow your block commands"
+                            ? "See your turtle drawing - works just like Unit 2!"
                             : "Code with input() will show interactive dialog automatically"}
                     </CardDescription>
                   </CardHeader>
                   <CardContent className="flex-1 overflow-auto min-h-0 p-4">
                     {assignment.problems?.[currentProblemIndex]?.assignment_type === "block" ? (
-                      /* Block-Based - Problem Info & Grading Feedback */
-                      <div className="h-full flex flex-col gap-4">
-                        {/* Problem Description */}
-                        <div className="p-4 bg-gradient-to-r from-orange-50 to-yellow-50 rounded-lg border border-orange-200">
-                          <h3 className="font-bold text-orange-800 mb-2">📋 Challenge:</h3>
-                          <p className="text-gray-700">
-                            {assignment.problems?.[currentProblemIndex]?.description || "Complete this Scratch challenge!"}
-                          </p>
+                      /* Block-Based - Show Turtle Canvas (same as Unit 2) */
+                      <div className="h-full flex flex-col gap-3">
+                        {/* Live Turtle Canvas */}
+                        <div className="flex-1 flex flex-col">
+                          <div className="bg-white rounded-lg shadow p-2 flex-1 flex items-center justify-center">
+                            <AnimatedTurtle
+                              ref={turtleBlocksRef}
+                              code={code}
+                              width={500}
+                              height={500}
+                              onLineHighlight={(lineNum) => setHighlightedLine(lineNum)}
+                            />
+                          </div>
                         </div>
                         
-                        {/* Grading Requirements */}
-                        <div className="p-4 bg-blue-50 rounded-lg border border-blue-200">
-                          <h3 className="font-bold text-blue-800 mb-2">✅ What We're Looking For:</h3>
-                          <ul className="text-sm text-gray-700 space-y-1">
-                            {assignment.problems?.[currentProblemIndex]?.block_requirements ? (
-                              assignment.problems[currentProblemIndex].block_requirements.map((req, i) => (
-                                <li key={i} className="flex items-center gap-2">
-                                  <span className="text-blue-500">•</span> {req}
-                                </li>
-                              ))
-                            ) : (
-                              <>
-                                <li className="flex items-center gap-2"><span className="text-blue-500">•</span> Correct use of blocks</li>
-                                <li className="flex items-center gap-2"><span className="text-blue-500">•</span> Code organization</li>
-                                <li className="flex items-center gap-2"><span className="text-blue-500">•</span> Problem completion</li>
-                              </>
-                            )}
-                          </ul>
-                        </div>
-                        
-                        {/* Latest Submission Feedback */}
-                        {submissions.length > 0 && submissions[submissions.length - 1]?.problem_id === getCurrentProblemId() && (
-                          <div className={`p-4 rounded-lg border ${
-                            submissions[submissions.length - 1].score >= 70 
-                              ? 'bg-green-50 border-green-200' 
-                              : 'bg-yellow-50 border-yellow-200'
-                          }`}>
-                            <h3 className={`font-bold mb-2 ${
-                              submissions[submissions.length - 1].score >= 70 ? 'text-green-800' : 'text-yellow-800'
-                            }`}>
-                              📊 Latest Feedback:
-                            </h3>
-                            <div className="text-2xl font-bold mb-2">
-                              {submissions[submissions.length - 1].score?.toFixed(0)}%
+                        {/* Expected Output if available */}
+                        {assignment.problems?.[currentProblemIndex]?.expected_turtle_image && (
+                          <div className="p-3 bg-green-50 rounded-lg border border-green-200">
+                            <h4 className="text-sm font-semibold text-green-800 mb-2">🎯 Expected Output:</h4>
+                            <div className="flex justify-center">
+                              <img
+                                src={`data:image/png;base64,${assignment.problems[currentProblemIndex].expected_turtle_image}`}
+                                alt="Expected turtle output"
+                                className="max-h-32 rounded border"
+                              />
                             </div>
-                            <p className="text-sm text-gray-700 whitespace-pre-wrap">
-                              {submissions[submissions.length - 1].feedback}
-                            </p>
                           </div>
                         )}
                         
-                        {/* Instructions if no submission yet */}
-                        {(!submissions.length || submissions[submissions.length - 1]?.problem_id !== getCurrentProblemId()) && (
-                          <div className="p-4 bg-gray-50 rounded-lg border border-gray-200">
-                            <h3 className="font-bold text-gray-700 mb-2">📸 How to Submit:</h3>
-                            <ol className="text-sm text-gray-600 space-y-1 list-decimal list-inside">
-                              <li>Create your project in Scratch</li>
-                              <li>Take a screenshot of your code blocks</li>
-                              <li>Upload the screenshot on the left</li>
-                              <li>Click Submit for AI grading</li>
-                            </ol>
+                        {/* Test Cases if available */}
+                        {assignment.problems?.[currentProblemIndex]?.test_cases?.length > 0 && (
+                          <div className="p-3 bg-blue-50 rounded-lg border border-blue-200">
+                            <h4 className="text-sm font-semibold text-blue-800 mb-2">✅ Test Cases:</h4>
+                            <ul className="text-xs text-gray-700 space-y-1">
+                              {assignment.problems[currentProblemIndex].test_cases.map((tc, i) => (
+                                <li key={i} className="flex items-center gap-2">
+                                  <span className="text-blue-500">•</span> 
+                                  {tc.pattern ? `Pattern: ${tc.pattern}` : tc.description || `Test ${i + 1}`}
+                                </li>
+                              ))}
+                            </ul>
                           </div>
                         )}
                       </div>
