@@ -162,6 +162,33 @@ export default function AssignmentPage({ user }) {
     }
   }, [currentProblemIndex, assignment, savedCodePerProblem, problemsFinal, submissions]);
   
+  // Check for lesson materials popup when problem changes
+  useEffect(() => {
+    if (!assignment?.problems?.[currentProblemIndex]) return;
+    
+    const currentProblem = assignment.problems[currentProblemIndex];
+    const problemId = currentProblem.id;
+    
+    // Only show popup if:
+    // 1. Problem has lesson_materials with content
+    // 2. User hasn't already acknowledged this problem's lesson
+    // 3. User is a student (teachers don't need to see it)
+    if (
+      currentProblem.lesson_materials?.length > 0 &&
+      !acknowledgedLessons.has(problemId) &&
+      user?.role !== 'teacher'
+    ) {
+      setShowLessonPopup(true);
+    }
+  }, [currentProblemIndex, assignment, acknowledgedLessons, user?.role]);
+  
+  // Handle lesson popup acknowledgment
+  const handleLessonAcknowledged = () => {
+    const problemId = getCurrentProblemId();
+    setAcknowledgedLessons(prev => new Set([...prev, problemId]));
+    setShowLessonPopup(false);
+  };
+  
   // Auto-save code to localStorage (debounced to prevent flickering)
   useEffect(() => {
     if (!assignment || !code) return;
