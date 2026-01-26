@@ -68,6 +68,26 @@ A sidebar panel similar to code.org that allows teachers to view student progres
 - `GET /api/assignments/{id}/student-progress` - Returns aggregated student progress per problem
 - `GET /api/assignments/{id}/student-code/{student_id}/{problem_id}` - Returns specific student's code submission
 
+### Block Problem Creation Workflow (Jan 2025)
+Teachers can now create "Block" type assignments using drag-and-drop Blockly editors instead of typing Python code.
+
+**Features:**
+- Blockly editor for creating Starter Blocks (what students see initially)
+- Blockly editor for creating Solution Blocks (used for grading reference)
+- Lesson Materials support (video URLs, image URLs, text, links)
+- Automatic Python code generation from blocks
+- XML persistence for block configurations
+- Edit dialog also shows Blockly editors for existing block problems
+
+**New Database Fields in Problem model:**
+- `starter_blocks_xml: string` - XML representation of starter blocks
+- `solution_blocks_xml: string` - XML representation of solution blocks
+- `lesson_materials: List[dict]` - Array of {type, title, content} for instructional content
+
+**Frontend Changes:**
+- `AssignmentLibrary.jsx`: Create/Edit dialogs conditionally show TurtleBlocklyEditor for block type
+- Validation checks `solution_blocks_xml` instead of `solution_code` for block assignments
+
 ---
 
 ## Roadmap
