@@ -1325,84 +1325,175 @@ export default function AssignmentLibrary({ user }) {
                     </div>
                   )}
 
-                  <div>
-                    <Label htmlFor="starterCode">Starter Code (Optional)</Label>
-                    <Textarea
-                      data-testid="lib-starter-input"
-                      id="starterCode"
-                      placeholder="# Starter code for students..."
-                      value={newProblem.starter_code}
-                      onChange={(e) => setNewProblem({ ...newProblem, starter_code: e.target.value })}
-                      className="mt-1 font-mono text-sm"
-                      rows={5}
-                    />
-                  </div>
+                  {/* Starter Code/Blocks Section */}
+                  {newProblem.assignment_type === "block" ? (
+                    /* Block Type - Show Blockly Editor for Starter Blocks */
+                    <div className="border-2 border-purple-200 bg-purple-50 rounded-lg p-4">
+                      <Label className="text-lg font-semibold flex items-center gap-2 mb-3">
+                        🧩 Starter Blocks (Optional)
+                      </Label>
+                      <p className="text-sm text-gray-600 mb-3">
+                        Drag blocks here to create what students will start with. Leave empty for a blank canvas.
+                      </p>
+                      <div className="h-[350px] border rounded-lg overflow-hidden">
+                        <TurtleBlocklyEditor
+                          ref={starterBlocksRef}
+                          initialXml={newProblem.starter_blocks_xml}
+                          onCodeChange={(code) => setNewProblem(prev => ({ ...prev, starter_code: code }))}
+                          onXmlChange={(xml) => setNewProblem(prev => ({ ...prev, starter_blocks_xml: xml }))}
+                          showPreview={true}
+                          showCodeToggle={true}
+                          height="300px"
+                          compact={true}
+                        />
+                      </div>
+                    </div>
+                  ) : (
+                    /* Other Types - Show Text Area for Starter Code */
+                    <div>
+                      <Label htmlFor="starterCode">Starter Code (Optional)</Label>
+                      <Textarea
+                        data-testid="lib-starter-input"
+                        id="starterCode"
+                        placeholder="# Starter code for students..."
+                        value={newProblem.starter_code}
+                        onChange={(e) => setNewProblem({ ...newProblem, starter_code: e.target.value })}
+                        className="mt-1 font-mono text-sm"
+                        rows={5}
+                      />
+                    </div>
+                  )}
 
-                  <div>
-                    <div className="flex items-center justify-between mb-2">
-                      <Label htmlFor="solutionCode">Solution Code *</Label>
-                      {newProblem.assignment_type === "turtle" && (
-                        <div className="flex gap-2">
-                          <Button
-                            type="button"
-                            size="sm"
-                            variant="outline"
-                            onClick={async () => {
-                              if (!newProblem.solution_code.trim()) {
-                                toast.error("Please enter solution code first");
-                                return;
+                  {/* Solution Code/Blocks Section */}
+                  {newProblem.assignment_type === "block" ? (
+                    /* Block Type - Show Blockly Editor for Solution Blocks */
+                    <div className="border-2 border-green-200 bg-green-50 rounded-lg p-4">
+                      <div className="flex items-center justify-between mb-3">
+                        <div>
+                          <Label className="text-lg font-semibold flex items-center gap-2">
+                            ✅ Solution Blocks *
+                          </Label>
+                          <p className="text-sm text-gray-600 mt-1">
+                            Create the correct solution using blocks. This will be used for grading.
+                          </p>
+                        </div>
+                        <Button
+                          type="button"
+                          size="sm"
+                          variant="outline"
+                          onClick={async () => {
+                            const code = solutionBlocksRef.current?.getCode();
+                            if (!code || !code.trim()) {
+                              toast.error("Please create solution blocks first");
+                              return;
+                            }
+                            try {
+                              const response = await axios.post(`${API}/code/execute-turtle`, {
+                                code: code,
+                                test_input: ""
+                              });
+                              if (response.data.success && response.data.image_data) {
+                                setTurtlePreviewImage(response.data.image_data);
+                                setTurtlePreviewOpen(true);
+                                setNewProblem(prev => ({
+                                  ...prev,
+                                  expected_turtle_image: response.data.image_data
+                                }));
+                                toast.success("Preview generated!");
+                              } else {
+                                toast.error("Failed to generate preview: " + (response.data.error || "Unknown error"));
                               }
-                              try {
-                                const response = await axios.post(`${API}/code/execute-turtle`, {
-                                  code: newProblem.solution_code,
-                                  test_input: ""
-                                });
-                                if (response.data.success && response.data.image_data) {
-                                  setTurtlePreviewImage(response.data.image_data);
-                                  setTurtlePreviewOpen(true);
-                                  // Store the expected image
-                                  setNewProblem({
-                                    ...newProblem,
-                                    expected_turtle_image: response.data.image_data
-                                  });
-                                  toast.success("Preview generated!");
-                                } else {
-                                  toast.error("Failed to generate preview: " + (response.data.error || "Unknown error"));
-                                }
-                              } catch (error) {
-                                toast.error("Failed to preview: " + (error.response?.data?.detail || error.message));
-                              }
-                            }}
-                            className="bg-green-600 hover:bg-green-700 text-white"
-                          >
-                            🐢 Preview Turtle Output
-                          </Button>
-                          
-                          {/* Live Preview with Maze Button */}
-                          {newProblem.background_type !== "none" && (
+                            } catch (error) {
+                              toast.error("Failed to preview: " + (error.response?.data?.detail || error.message));
+                            }
+                          }}
+                          className="bg-green-600 hover:bg-green-700 text-white"
+                        >
+                          🐢 Preview Output
+                        </Button>
+                      </div>
+                      <div className="h-[400px] border rounded-lg overflow-hidden">
+                        <TurtleBlocklyEditor
+                          ref={solutionBlocksRef}
+                          initialXml={newProblem.solution_blocks_xml}
+                          onCodeChange={(code) => setNewProblem(prev => ({ ...prev, solution_code: code }))}
+                          onXmlChange={(xml) => setNewProblem(prev => ({ ...prev, solution_blocks_xml: xml }))}
+                          showPreview={true}
+                          showCodeToggle={true}
+                          height="350px"
+                          compact={true}
+                        />
+                      </div>
+                    </div>
+                  ) : (
+                    /* Other Types - Show Text Area for Solution Code */
+                    <div>
+                      <div className="flex items-center justify-between mb-2">
+                        <Label htmlFor="solutionCode">Solution Code *</Label>
+                        {newProblem.assignment_type === "turtle" && (
+                          <div className="flex gap-2">
                             <Button
                               type="button"
                               size="sm"
                               variant="outline"
-                              onClick={() => setTurtlePreviewOpen(true)}
-                              className="bg-blue-50 border-blue-300 hover:bg-blue-100"
+                              onClick={async () => {
+                                if (!newProblem.solution_code.trim()) {
+                                  toast.error("Please enter solution code first");
+                                  return;
+                                }
+                                try {
+                                  const response = await axios.post(`${API}/code/execute-turtle`, {
+                                    code: newProblem.solution_code,
+                                    test_input: ""
+                                  });
+                                  if (response.data.success && response.data.image_data) {
+                                    setTurtlePreviewImage(response.data.image_data);
+                                    setTurtlePreviewOpen(true);
+                                    // Store the expected image
+                                    setNewProblem({
+                                      ...newProblem,
+                                      expected_turtle_image: response.data.image_data
+                                    });
+                                    toast.success("Preview generated!");
+                                  } else {
+                                    toast.error("Failed to generate preview: " + (response.data.error || "Unknown error"));
+                                  }
+                                } catch (error) {
+                                  toast.error("Failed to preview: " + (error.response?.data?.detail || error.message));
+                                }
+                              }}
+                              className="bg-green-600 hover:bg-green-700 text-white"
                             >
-                              <Play className="w-4 h-4 mr-1" />
-                              Live Preview
+                              🐢 Preview Turtle Output
                             </Button>
-                          )}
-                        </div>
-                      )}
+                            
+                            {/* Live Preview with Maze Button */}
+                            {newProblem.background_type !== "none" && (
+                              <Button
+                                type="button"
+                                size="sm"
+                                variant="outline"
+                                onClick={() => setTurtlePreviewOpen(true)}
+                                className="bg-blue-50 border-blue-300 hover:bg-blue-100"
+                              >
+                                <Play className="w-4 h-4 mr-1" />
+                                Live Preview
+                              </Button>
+                            )}
+                          </div>
+                        )}
+                      </div>
+                      <Textarea
+                        data-testid="lib-solution-input"
+                        id="solutionCode"
+                        placeholder={newProblem.assignment_type === "turtle" ? "# Turtle graphics code...\nimport turtle\nt = turtle.Turtle()\n..." : "# Your solution code..."}
+                        value={newProblem.solution_code}
+                        onChange={(e) => setNewProblem({ ...newProblem, solution_code: e.target.value })}
+                        className="mt-1 font-mono text-sm"
+                        rows={8}
+                      />
                     </div>
-                    <Textarea
-                      data-testid="lib-solution-input"
-                      id="solutionCode"
-                      placeholder={newProblem.assignment_type === "turtle" ? "# Turtle graphics code...\nimport turtle\nt = turtle.Turtle()\n..." : "# Your solution code..."}
-                      value={newProblem.solution_code}
-                      onChange={(e) => setNewProblem({ ...newProblem, solution_code: e.target.value })}
-                      className="mt-1 font-mono text-sm"
-                      rows={8}
-                    />
+                  )}
                   </div>
 
                   {newProblem.assignment_type === "code" && (
