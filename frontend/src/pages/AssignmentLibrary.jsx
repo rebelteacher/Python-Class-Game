@@ -241,8 +241,21 @@ export default function AssignmentLibrary({ user }) {
   const handleCreateProblem = async (e) => {
     e.preventDefault();
     
-    if (!newProblem.title.trim() || !newProblem.solution_code.trim()) {
-      toast.error("Please fill in title and solution code");
+    // Validate based on assignment type
+    if (!newProblem.title.trim()) {
+      toast.error("Please fill in the title");
+      return;
+    }
+    
+    // For block type, check solution_blocks_xml; for others, check solution_code
+    if (newProblem.assignment_type === "block") {
+      if (!newProblem.solution_blocks_xml || newProblem.solution_blocks_xml.trim() === "" || 
+          newProblem.solution_blocks_xml === '<xml xmlns="https://developers.google.com/blockly/xml"></xml>') {
+        toast.error("Please create solution blocks by dragging blocks to the editor");
+        return;
+      }
+    } else if (!newProblem.solution_code.trim()) {
+      toast.error("Please fill in solution code");
       return;
     }
 
@@ -262,6 +275,7 @@ export default function AssignmentLibrary({ user }) {
         expected_output: "",
         category: "",
         difficulty: "Easy",
+        unit: "",
         chapter: "",
         lesson: "",
         problem_type: "Independent Practice",
@@ -284,7 +298,11 @@ export default function AssignmentLibrary({ user }) {
         test_cases: [],
         materials_needed: [],
         wiring_instructions: "",
-        learning_objectives: []
+        learning_objectives: [],
+        // Reset block and lesson fields
+        starter_blocks_xml: "",
+        solution_blocks_xml: "",
+        lesson_materials: []
       });
       fetchProblems();
     } catch (error) {
