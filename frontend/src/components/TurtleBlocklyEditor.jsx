@@ -654,7 +654,7 @@ const generatePythonCode = (workspace) => {
         blockCode = `${indent}t.penup()\n`;
         break;
       case 'turtle_color': {
-        const color = block.getFieldValue('COLOR') || '#ff0000';
+        const color = block.getFieldValue('COLOR') || 'red';
         blockCode = `${indent}t.color("${color}")\n`;
         break;
       }
