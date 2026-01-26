@@ -1512,7 +1512,7 @@ export default function AssignmentLibrary({ user }) {
                     </div>
                   )}
                   
-                  {newProblem.assignment_type === "turtle" && newProblem.expected_turtle_image && (
+                  {(newProblem.assignment_type === "turtle" || newProblem.assignment_type === "block") && newProblem.expected_turtle_image && (
                     <div className="border-2 border-green-200 bg-green-50 rounded-lg p-4">
                       <Label className="font-semibold">Expected Output Preview</Label>
                       <img 
