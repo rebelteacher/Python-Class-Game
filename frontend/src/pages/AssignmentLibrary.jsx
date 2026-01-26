@@ -1618,8 +1618,8 @@ export default function AssignmentLibrary({ user }) {
                     </div>
                   )}
 
-                  {/* Test Cases Builder - for Turtle assignments (Pattern + Count) */}
-                  {newProblem.assignment_type === "turtle" && (
+                  {/* Test Cases Builder - for Turtle and Block assignments (Pattern + Count) */}
+                  {(newProblem.assignment_type === "turtle" || newProblem.assignment_type === "block") && (
                     <div className="border-2 border-green-200 bg-green-50 rounded-lg p-4">
                       <div className="flex items-center justify-between mb-3">
                         <div>
