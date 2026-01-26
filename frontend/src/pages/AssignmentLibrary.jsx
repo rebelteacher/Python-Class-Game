@@ -1494,7 +1494,6 @@ export default function AssignmentLibrary({ user }) {
                       />
                     </div>
                   )}
-                  </div>
 
                   {newProblem.assignment_type === "code" && (
                     <div>
