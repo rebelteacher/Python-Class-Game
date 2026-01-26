@@ -847,20 +847,42 @@ export default function AssignmentPage({ user }) {
                   </p>
                   
                   {/* Resources Link - Show for students and teachers */}
-                  {assignment.problems?.[currentProblemIndex]?.resources_link && (
-                    <div className="mt-4 pt-4 border-t">
-                      <a
-                        href={assignment.problems[currentProblemIndex].resources_link}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="inline-flex items-center gap-2 px-4 py-2 bg-blue-50 hover:bg-blue-100 text-blue-700 rounded-lg border border-blue-200 transition-colors"
-                      >
-                        <BookOpen className="w-4 h-4" />
-                        <span className="font-medium">View Resources</span>
-                        <ExternalLink className="w-3 h-3" />
-                      </a>
-                    </div>
-                  )}
+                  {assignment.problems?.[currentProblemIndex]?.resources_link && (() => {
+                    // Extract URL from iframe embed code if someone pasted embed code instead of URL
+                    let resourceUrl = assignment.problems[currentProblemIndex].resources_link;
+                    
+                    // Check if it contains iframe embed code
+                    if (resourceUrl.includes('<iframe') || resourceUrl.includes('&lt;iframe')) {
+                      // Try to extract src from iframe
+                      const srcMatch = resourceUrl.match(/src=["']([^"']+)["']/i);
+                      if (srcMatch && srcMatch[1]) {
+                        resourceUrl = srcMatch[1];
+                      }
+                    }
+                    
+                    // Clean up any HTML entities
+                    resourceUrl = resourceUrl.replace(/&amp;/g, '&').replace(/&lt;/g, '<').replace(/&gt;/g, '>');
+                    
+                    // Make sure it starts with http/https
+                    if (!resourceUrl.startsWith('http://') && !resourceUrl.startsWith('https://')) {
+                      resourceUrl = 'https://' + resourceUrl;
+                    }
+                    
+                    return (
+                      <div className="mt-4 pt-4 border-t">
+                        <a
+                          href={resourceUrl}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="inline-flex items-center gap-2 px-4 py-2 bg-blue-50 hover:bg-blue-100 text-blue-700 rounded-lg border border-blue-200 transition-colors"
+                        >
+                          <BookOpen className="w-4 h-4" />
+                          <span className="font-medium">View Resources</span>
+                          <ExternalLink className="w-3 h-3" />
+                        </a>
+                      </div>
+                    );
+                  })()}
                   
                   {/* Lesson Materials Indicator */}
                   {assignment.problems?.[currentProblemIndex]?.lesson_materials?.length > 0 && (
