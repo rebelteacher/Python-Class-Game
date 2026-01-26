@@ -314,8 +314,21 @@ export default function AssignmentLibrary({ user }) {
   const handleEditProblem = async (e) => {
     e.preventDefault();
     
-    if (!editingProblem.title.trim() || !editingProblem.solution_code.trim()) {
-      toast.error("Please fill in title and solution code");
+    // Validate based on assignment type
+    if (!editingProblem.title.trim()) {
+      toast.error("Please fill in the title");
+      return;
+    }
+    
+    // For block type, check solution_blocks_xml; for others, check solution_code
+    if (editingProblem.assignment_type === "block") {
+      if (!editingProblem.solution_blocks_xml || editingProblem.solution_blocks_xml.trim() === "" || 
+          editingProblem.solution_blocks_xml === '<xml xmlns="https://developers.google.com/blockly/xml"></xml>') {
+        toast.error("Please create solution blocks by dragging blocks to the editor");
+        return;
+      }
+    } else if (!editingProblem.solution_code.trim()) {
+      toast.error("Please fill in solution code");
       return;
     }
 
@@ -352,7 +365,12 @@ export default function AssignmentLibrary({ user }) {
           // Micro:bit fields
           materials_needed: editingProblem.materials_needed || [],
           wiring_instructions: editingProblem.wiring_instructions || "",
-          learning_objectives: editingProblem.learning_objectives || []
+          learning_objectives: editingProblem.learning_objectives || [],
+          // Block-based fields
+          starter_blocks_xml: editingProblem.starter_blocks_xml || "",
+          solution_blocks_xml: editingProblem.solution_blocks_xml || "",
+          // Lesson materials
+          lesson_materials: editingProblem.lesson_materials || []
         },
         { withCredentials: true }
       );
