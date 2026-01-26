@@ -360,6 +360,11 @@ class Problem(BaseModel):
     challenge_mode: bool = False  # If true, track completion and leaderboard
     time_limit: int = 0  # Seconds, 0 = no limit
     optimal_path_length: float = 0  # For accuracy scoring
+    # Block-based assignment fields
+    starter_blocks_xml: str = ""  # XML representation of starter blocks
+    solution_blocks_xml: str = ""  # XML representation of solution blocks
+    # Lesson materials for pre-problem instruction
+    lesson_materials: List[dict] = []  # Array of {type: 'video'|'image'|'text'|'link', content: string, title?: string}
     created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
 
 class ProblemCreate(BaseModel):
@@ -400,6 +405,11 @@ class ProblemCreate(BaseModel):
     challenge_mode: bool = False  # If true, track completion and leaderboard
     time_limit: int = 0  # Seconds, 0 = no limit
     optimal_path_length: float = 0  # For accuracy scoring
+    # Block-based assignment fields
+    starter_blocks_xml: str = ""  # XML representation of starter blocks
+    solution_blocks_xml: str = ""  # XML representation of solution blocks
+    # Lesson materials for pre-problem instruction
+    lesson_materials: List[dict] = []  # Array of {type: 'video'|'image'|'text'|'link', content: string, title?: string}
 
 # Assignment model - bundle of multiple problems with unified scheduling
 class Assignment(BaseModel):
