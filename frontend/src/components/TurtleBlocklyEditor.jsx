@@ -126,7 +126,20 @@ const defineTurtleBlocks = () => {
     init: function() {
       this.appendDummyInput()
           .appendField("set color to")
-          .appendField(new Blockly.FieldColour("#ff0000"), "COLOR");
+          .appendField(new Blockly.FieldDropdown([
+            ["red", "red"],
+            ["blue", "blue"],
+            ["green", "green"],
+            ["yellow", "yellow"],
+            ["orange", "orange"],
+            ["purple", "purple"],
+            ["pink", "pink"],
+            ["black", "black"],
+            ["white", "white"],
+            ["brown", "brown"],
+            ["gray", "gray"],
+            ["cyan", "cyan"]
+          ]), "COLOR");
       this.setPreviousStatement(true, null);
       this.setNextStatement(true, null);
       this.setColour(160);
