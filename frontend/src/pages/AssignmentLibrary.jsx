@@ -881,6 +881,111 @@ export default function AssignmentLibrary({ user }) {
                         className="mt-1"
                       />
                     </div>
+
+                    {/* Lesson Materials Section */}
+                    <div className="border-2 border-purple-200 bg-purple-50 rounded-lg p-4">
+                      <div className="flex items-center justify-between mb-3">
+                        <div>
+                          <Label className="text-lg font-semibold flex items-center gap-2">
+                            📚 Lesson Materials (Optional)
+                          </Label>
+                          <p className="text-sm text-gray-600 mt-1">
+                            Add videos, images, text, or links that students must review before starting
+                          </p>
+                        </div>
+                        <Button
+                          type="button"
+                          variant="outline"
+                          size="sm"
+                          onClick={() => {
+                            const materials = [...(newProblem.lesson_materials || [])];
+                            materials.push({ type: 'text', content: '', title: '' });
+                            setNewProblem({ ...newProblem, lesson_materials: materials });
+                          }}
+                        >
+                          + Add Material
+                        </Button>
+                      </div>
+                      
+                      {newProblem.lesson_materials?.length > 0 && (
+                        <div className="space-y-3">
+                          {newProblem.lesson_materials.map((material, index) => (
+                            <div key={index} className="bg-white p-3 rounded-lg border border-purple-200">
+                              <div className="flex items-center gap-2 mb-2">
+                                <select
+                                  value={material.type}
+                                  onChange={(e) => {
+                                    const materials = [...newProblem.lesson_materials];
+                                    materials[index] = { ...materials[index], type: e.target.value };
+                                    setNewProblem({ ...newProblem, lesson_materials: materials });
+                                  }}
+                                  className="border rounded px-2 py-1 text-sm"
+                                >
+                                  <option value="video">🎬 Video</option>
+                                  <option value="image">🖼️ Image</option>
+                                  <option value="text">📝 Text</option>
+                                  <option value="link">🔗 Link</option>
+                                </select>
+                                <Input
+                                  placeholder="Title (optional)"
+                                  value={material.title || ''}
+                                  onChange={(e) => {
+                                    const materials = [...newProblem.lesson_materials];
+                                    materials[index] = { ...materials[index], title: e.target.value };
+                                    setNewProblem({ ...newProblem, lesson_materials: materials });
+                                  }}
+                                  className="flex-1 h-8"
+                                />
+                                <Button
+                                  type="button"
+                                  variant="ghost"
+                                  size="sm"
+                                  onClick={() => {
+                                    const materials = newProblem.lesson_materials.filter((_, i) => i !== index);
+                                    setNewProblem({ ...newProblem, lesson_materials: materials });
+                                  }}
+                                  className="text-red-500 hover:text-red-700 hover:bg-red-50"
+                                >
+                                  ✕
+                                </Button>
+                              </div>
+                              {material.type === 'text' ? (
+                                <Textarea
+                                  placeholder="Enter lesson text or instructions..."
+                                  value={material.content}
+                                  onChange={(e) => {
+                                    const materials = [...newProblem.lesson_materials];
+                                    materials[index] = { ...materials[index], content: e.target.value };
+                                    setNewProblem({ ...newProblem, lesson_materials: materials });
+                                  }}
+                                  rows={3}
+                                />
+                              ) : (
+                                <Input
+                                  placeholder={
+                                    material.type === 'video' ? "YouTube or Loom URL..." :
+                                    material.type === 'image' ? "Image URL..." :
+                                    "External link URL..."
+                                  }
+                                  value={material.content}
+                                  onChange={(e) => {
+                                    const materials = [...newProblem.lesson_materials];
+                                    materials[index] = { ...materials[index], content: e.target.value };
+                                    setNewProblem({ ...newProblem, lesson_materials: materials });
+                                  }}
+                                />
+                              )}
+                            </div>
+                          ))}
+                        </div>
+                      )}
+                      
+                      {(!newProblem.lesson_materials || newProblem.lesson_materials.length === 0) && (
+                        <div className="text-center py-4 text-gray-500 text-sm">
+                          No lesson materials added. Click "Add Material" to create a pre-assignment lesson.
+                        </div>
+                      )}
+                    </div>
                   </div>
 
                   {/* Assignment Type Selection */}
