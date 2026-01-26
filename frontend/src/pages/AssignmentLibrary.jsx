@@ -2629,42 +2629,91 @@ export default function AssignmentLibrary({ user }) {
                   />
                 </div>
 
-                <div>
-                  <Label htmlFor="edit-starterCode">Starter Code (Optional)</Label>
-                  <Textarea
-                    id="edit-starterCode"
-                    placeholder="# Starter code for students..."
-                    value={editingProblem.starter_code}
-                    onChange={(e) => setEditingProblem({ ...editingProblem, starter_code: e.target.value })}
-                    className="mt-1 font-mono text-sm"
-                    rows={5}
-                  />
-                </div>
+                {/* Starter Code/Blocks - conditional based on assignment type */}
+                {editingProblem.assignment_type === "block" ? (
+                  <div className="border-2 border-purple-200 bg-purple-50 rounded-lg p-4">
+                    <Label className="text-lg font-semibold flex items-center gap-2 mb-3">
+                      🧩 Starter Blocks (Optional)
+                    </Label>
+                    <p className="text-sm text-gray-600 mb-3">
+                      Drag blocks here to create what students will start with. Leave empty for a blank canvas.
+                    </p>
+                    <div className="h-[350px] border rounded-lg overflow-hidden">
+                      <TurtleBlocklyEditor
+                        initialXml={editingProblem.starter_blocks_xml || ""}
+                        onCodeChange={(code) => setEditingProblem(prev => ({ ...prev, starter_code: code }))}
+                        onXmlChange={(xml) => setEditingProblem(prev => ({ ...prev, starter_blocks_xml: xml }))}
+                        showPreview={true}
+                        showCodeToggle={true}
+                        height="300px"
+                        compact={true}
+                      />
+                    </div>
+                  </div>
+                ) : (
+                  <div>
+                    <Label htmlFor="edit-starterCode">Starter Code (Optional)</Label>
+                    <Textarea
+                      id="edit-starterCode"
+                      placeholder="# Starter code for students..."
+                      value={editingProblem.starter_code}
+                      onChange={(e) => setEditingProblem({ ...editingProblem, starter_code: e.target.value })}
+                      className="mt-1 font-mono text-sm"
+                      rows={5}
+                    />
+                  </div>
+                )}
 
-                <div>
-                  <Label htmlFor="edit-solutionCode">Solution Code *</Label>
-                  <Textarea
-                    id="edit-solutionCode"
-                    placeholder="# Your solution code..."
-                    value={editingProblem.solution_code}
-                    onChange={(e) => setEditingProblem({ ...editingProblem, solution_code: e.target.value })}
-                    className="mt-1 font-mono text-sm"
-                    rows={8}
-                  />
-                </div>
+                {/* Solution Code/Blocks - conditional based on assignment type */}
+                {editingProblem.assignment_type === "block" ? (
+                  <div className="border-2 border-green-200 bg-green-50 rounded-lg p-4">
+                    <Label className="text-lg font-semibold flex items-center gap-2 mb-3">
+                      ✅ Solution Blocks *
+                    </Label>
+                    <p className="text-sm text-gray-600 mb-3">
+                      Create the correct solution using blocks. This will be used for grading.
+                    </p>
+                    <div className="h-[350px] border rounded-lg overflow-hidden">
+                      <TurtleBlocklyEditor
+                        initialXml={editingProblem.solution_blocks_xml || ""}
+                        onCodeChange={(code) => setEditingProblem(prev => ({ ...prev, solution_code: code }))}
+                        onXmlChange={(xml) => setEditingProblem(prev => ({ ...prev, solution_blocks_xml: xml }))}
+                        showPreview={true}
+                        showCodeToggle={true}
+                        height="300px"
+                        compact={true}
+                      />
+                    </div>
+                  </div>
+                ) : (
+                  <div>
+                    <Label htmlFor="edit-solutionCode">Solution Code *</Label>
+                    <Textarea
+                      id="edit-solutionCode"
+                      placeholder="# Your solution code..."
+                      value={editingProblem.solution_code}
+                      onChange={(e) => setEditingProblem({ ...editingProblem, solution_code: e.target.value })}
+                      className="mt-1 font-mono text-sm"
+                      rows={8}
+                    />
+                  </div>
+                )}
 
-                <div>
-                  <Label htmlFor="edit-expectedOutput">Expected Output (Optional)</Label>
-                  <Textarea
-                    id="edit-expectedOutput"
-                    placeholder="e.g., 60"
-                    value={editingProblem.expected_output}
-                    onChange={(e) => setEditingProblem({ ...editingProblem, expected_output: e.target.value })}
-                    className="mt-1 font-mono text-sm"
-                    rows={3}
-                  />
-                  <p className="text-xs text-gray-500 mt-1">What the program should output when run</p>
-                </div>
+                {/* Expected Output - only for non-block types */}
+                {editingProblem.assignment_type !== "block" && (
+                  <div>
+                    <Label htmlFor="edit-expectedOutput">Expected Output (Optional)</Label>
+                    <Textarea
+                      id="edit-expectedOutput"
+                      placeholder="e.g., 60"
+                      value={editingProblem.expected_output}
+                      onChange={(e) => setEditingProblem({ ...editingProblem, expected_output: e.target.value })}
+                      className="mt-1 font-mono text-sm"
+                      rows={3}
+                    />
+                    <p className="text-xs text-gray-500 mt-1">What the program should output when run</p>
+                  </div>
+                )}
 
                 {/* Test Cases Builder for Edit - Code type */}
                 {editingProblem.assignment_type === "code" && (
