@@ -71,9 +71,14 @@ export default function AssignmentPage({ user }) {
   // Block-based programming state
   const blockEditorRef = useRef(null);
   const spriteCanvasRef = useRef(null);
+  const turtleBlocksRef = useRef(null);  // Ref for Turtle Blocks AnimatedTurtle
   const [blockXml, setBlockXml] = useState("");
   const [isBlockRunning, setIsBlockRunning] = useState(false);
-  const [scratchScreenshot, setScratchScreenshot] = useState(null); // Screenshot for Scratch grading
+  const [blockCode, setBlockCode] = useState("");  // Generated Python code from blocks
+  
+  // Lesson popup state - track which problems user has acknowledged
+  const [showLessonPopup, setShowLessonPopup] = useState(false);
+  const [acknowledgedLessons, setAcknowledgedLessons] = useState(new Set());
   
   // Proctor code for unlocking done problems (kept for teacher override)
   const [showProctorDialog, setShowProctorDialog] = useState(false);
