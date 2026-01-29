@@ -1429,7 +1429,7 @@ export default function AssignmentPage({ user }) {
                             }));
                           }}
                           readOnly={problemsFinal[getCurrentProblemId()]}
-                          showPreview={false}
+                          showPreview={true}
                           showCodeToggle={true}
                           height="560px"
                         />
