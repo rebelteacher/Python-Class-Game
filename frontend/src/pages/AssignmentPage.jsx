@@ -68,6 +68,7 @@ export default function AssignmentPage({ user }) {
   const [highlightedLine, setHighlightedLine] = useState(-1); // For code highlighting during animation
   const codeEditorRef = useRef(null); // Reference to Monaco editor instance
   const decorationsRef = useRef([]); // Store decoration IDs for removal
+  const turtleRef = useRef(null); // Reference to AnimatedTurtle for block assignments
   
   // Block-based programming state
   const blockEditorRef = useRef(null);
