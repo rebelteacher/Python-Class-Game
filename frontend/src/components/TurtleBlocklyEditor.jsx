@@ -940,7 +940,11 @@ const TurtleBlocklyEditor = forwardRef(({
 
     return () => {
       window.removeEventListener('resize', handleResize);
-      workspace.dispose();
+      if (workspace) {
+        workspace.dispose();
+      }
+      workspaceRef.current = null;
+      injectedRef.current = false;
     };
   }, []);
 
