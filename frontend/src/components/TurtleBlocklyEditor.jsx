@@ -944,8 +944,11 @@ const TurtleBlocklyEditor = forwardRef(({
 
   return (
     <div className="flex flex-col h-full">
+      {/* Inject Blockly CSS fixes */}
+      <style>{blocklyStyles}</style>
+      
       {/* Toolbar */}
-      <div className="flex items-center justify-between bg-gradient-to-r from-purple-600 to-indigo-600 text-white px-3 py-2 rounded-t-lg">
+      <div className="flex items-center justify-between bg-gradient-to-r from-purple-600 to-indigo-600 text-white px-3 py-2 rounded-t-lg flex-shrink-0">
         <div className="flex items-center gap-2">
           <Blocks className="w-5 h-5" />
           <span className="font-bold text-sm">Turtle Blocks</span>
@@ -987,16 +990,17 @@ const TurtleBlocklyEditor = forwardRef(({
         </div>
       </div>
 
-      {/* Main content */}
-      <div className="flex-1 flex border border-t-0 rounded-b-lg" style={{ height }}>
-        {/* Blockly workspace or Code view */}
+      {/* Main content - Blockly workspace and preview side by side */}
+      <div className="flex-1 flex border border-t-0 rounded-b-lg min-h-0" style={{ height }}>
+        {/* Blockly workspace - takes up all available space except preview */}
         <div 
-          className="flex-1 relative overflow-hidden"
+          className="flex-1 relative min-w-0"
           style={{ display: showCode ? 'none' : 'block' }}
         >
           <div 
             ref={blocklyDivRef} 
             className="absolute inset-0"
+            style={{ width: '100%', height: '100%' }}
           />
         </div>
         
