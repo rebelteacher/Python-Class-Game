@@ -5,6 +5,19 @@ import { toast } from "sonner";
 import * as Blockly from 'blockly';
 import AnimatedTurtle from "@/components/AnimatedTurtle";
 
+// CSS to fix Blockly layout issues
+const blocklyStyles = `
+  .injectionDiv {
+    position: absolute !important;
+    width: 100% !important;
+    height: 100% !important;
+  }
+  .blocklySvg {
+    width: 100% !important;
+    height: 100% !important;
+  }
+`;
+
 // Define turtle-specific blocks
 const defineTurtleBlocks = () => {
   // ===== MOTION BLOCKS (Blue - Color 230) =====
