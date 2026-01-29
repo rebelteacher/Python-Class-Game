@@ -856,6 +856,9 @@ const TurtleBlocklyEditor = forwardRef(({
   useEffect(() => {
     if (!blocklyDivRef.current) return;
     
+    // Clear any existing Blockly content first
+    blocklyDivRef.current.innerHTML = '';
+    
     // Define blocks only once
     if (!blocksDefinedRef.current) {
       defineTurtleBlocks();
