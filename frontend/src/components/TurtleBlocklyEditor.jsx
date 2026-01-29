@@ -852,9 +852,15 @@ const TurtleBlocklyEditor = forwardRef(({
     }
   }));
 
-  // Initialize Blockly
+  // Initialize Blockly - use a flag to prevent double injection
+  const injectedRef = useRef(false);
+  
   useEffect(() => {
-    if (!blocklyDivRef.current) return;
+    // Prevent double injection (especially in React Strict Mode)
+    if (!blocklyDivRef.current || injectedRef.current) return;
+    
+    // Mark as injected immediately
+    injectedRef.current = true;
     
     // Clear any existing Blockly content first
     blocklyDivRef.current.innerHTML = '';
@@ -865,7 +871,7 @@ const TurtleBlocklyEditor = forwardRef(({
       blocksDefinedRef.current = true;
     }
 
-    // Create workspace
+    // Create workspace with a single scrollbar configuration
     const workspace = Blockly.inject(blocklyDivRef.current, {
       toolbox: TOOLBOX,
       grid: {
@@ -883,11 +889,9 @@ const TurtleBlocklyEditor = forwardRef(({
         scaleSpeed: 1.2
       },
       trashcan: true,
-      move: {
-        scrollbars: true,
-        drag: true,
-        wheel: true
-      },
+      scrollbars: true,
+      horizontalLayout: false,
+      sounds: false,
       readOnly: readOnly
     });
 
