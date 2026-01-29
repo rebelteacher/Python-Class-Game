@@ -1491,17 +1491,48 @@ export default function AssignmentPage({ user }) {
                   </CardHeader>
                   <CardContent className="flex-1 overflow-auto min-h-0 p-4">
                     {assignment.problems?.[currentProblemIndex]?.assignment_type === "block" ? (
-                      /* Block-Based - Show Expected Output & Test Cases (preview is in Blockly editor) */
+                      /* Block-Based - Show Turtle Canvas and Controls */
                       <div className="h-full flex flex-col gap-3">
-                        {/* Instructions */}
-                        <div className="p-3 bg-purple-50 rounded-lg border border-purple-200">
-                          <h4 className="text-sm font-semibold text-purple-800 mb-2">🧩 How to Complete:</h4>
-                          <ol className="text-xs text-gray-700 space-y-1 list-decimal list-inside">
-                            <li>Drag blocks from the toolbox on the left</li>
-                            <li>Snap blocks together to build your program</li>
-                            <li>Click <strong>Run</strong> to test your turtle drawing</li>
-                            <li>Click <strong>Submit</strong> when you&apos;re done!</li>
-                          </ol>
+                        {/* Turtle Canvas - Primary Output */}
+                        <div className="flex-1 flex flex-col items-center justify-center bg-gray-50 rounded-lg border p-4 min-h-[280px]">
+                          <AnimatedTurtle
+                            ref={turtleRef}
+                            code={code}
+                            width={260}
+                            height={260}
+                          />
+                          {/* Run/Reset Controls */}
+                          <div className="flex gap-2 mt-3">
+                            <Button
+                              size="sm"
+                              variant="outline"
+                              onClick={() => turtleRef.current?.reset()}
+                              className="gap-1"
+                            >
+                              <RotateCcw className="w-4 h-4" />
+                              Reset
+                            </Button>
+                            <Button
+                              size="sm"
+                              className="bg-green-600 hover:bg-green-700 gap-1"
+                              onClick={() => {
+                                if (turtleRef.current) {
+                                  turtleRef.current.reset();
+                                  setTimeout(() => turtleRef.current?.runInstant(), 100);
+                                }
+                              }}
+                            >
+                              <Play className="w-4 h-4" />
+                              Run
+                            </Button>
+                          </div>
+                        </div>
+
+                        {/* Instructions - Collapsible or smaller */}
+                        <div className="p-2 bg-purple-50 rounded-lg border border-purple-200">
+                          <p className="text-xs text-gray-700">
+                            <strong>🧩 Tip:</strong> Drag blocks from the toolbox, snap them together, then click <strong>Run</strong> to test!
+                          </p>
                         </div>
                         
                         {/* Expected Output if available */}
@@ -1512,27 +1543,12 @@ export default function AssignmentPage({ user }) {
                               <img
                                 src={`data:image/png;base64,${assignment.problems[currentProblemIndex].expected_turtle_image}`}
                                 alt="Expected turtle output"
-                                className="max-h-48 rounded border cursor-pointer hover:shadow-lg transition-shadow"
+                                className="max-h-32 rounded border cursor-pointer hover:shadow-lg transition-shadow"
                                 onClick={() => {
                                   // Could open enlarged view
                                 }}
                               />
                             </div>
-                          </div>
-                        )}
-                        
-                        {/* Test Cases if available */}
-                        {assignment.problems?.[currentProblemIndex]?.test_cases?.length > 0 && (
-                          <div className="p-3 bg-blue-50 rounded-lg border border-blue-200">
-                            <h4 className="text-sm font-semibold text-blue-800 mb-2">✅ Test Cases:</h4>
-                            <ul className="text-xs text-gray-700 space-y-1">
-                              {assignment.problems[currentProblemIndex].test_cases.map((tc, i) => (
-                                <li key={i} className="flex items-center gap-2">
-                                  <span className="text-blue-500">•</span> 
-                                  {tc.pattern ? `Pattern: ${tc.pattern}` : tc.description || `Test ${i + 1}`}
-                                </li>
-                              ))}
-                            </ul>
                           </div>
                         )}
                         
@@ -1543,15 +1559,12 @@ export default function AssignmentPage({ user }) {
                               ? 'bg-green-50 border-green-200' 
                               : 'bg-yellow-50 border-yellow-200'
                           }`}>
-                            <h4 className={`text-sm font-semibold mb-2 ${
+                            <h4 className={`text-sm font-semibold mb-1 ${
                               submissions[submissions.length - 1].score >= 70 ? 'text-green-800' : 'text-yellow-800'
                             }`}>
-                              📊 Latest Feedback:
+                              📊 Latest: {submissions[submissions.length - 1].score?.toFixed(0)}%
                             </h4>
-                            <div className="text-2xl font-bold mb-2">
-                              {submissions[submissions.length - 1].score?.toFixed(0)}%
-                            </div>
-                            <p className="text-xs text-gray-700 whitespace-pre-wrap">
+                            <p className="text-xs text-gray-700 whitespace-pre-wrap line-clamp-3">
                               {submissions[submissions.length - 1].feedback}
                             </p>
                           </div>
