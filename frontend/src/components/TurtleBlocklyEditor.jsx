@@ -920,7 +920,19 @@ const TurtleBlocklyEditor = forwardRef(({
     // Initial code generation
     handleChange();
 
+    // Resize workspace after mount to fix layout
+    setTimeout(() => {
+      Blockly.svgResize(workspace);
+    }, 100);
+
+    // Resize on window resize
+    const handleResize = () => {
+      Blockly.svgResize(workspace);
+    };
+    window.addEventListener('resize', handleResize);
+
     return () => {
+      window.removeEventListener('resize', handleResize);
       workspace.dispose();
     };
   }, []);
