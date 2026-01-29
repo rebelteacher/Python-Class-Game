@@ -1418,6 +1418,7 @@ export default function AssignmentPage({ user }) {
                       /* Block-Based - Turtle Blocks Editor with drag-and-drop blocks */
                       <div className="h-[600px] p-2">
                         <TurtleBlocklyEditor
+                          key={`block-editor-${currentProblemIndex}-${assignment.problems[currentProblemIndex]?.id || 'new'}`}
                           ref={turtleBlocksRef}
                           initialXml={assignment.problems[currentProblemIndex]?.starter_blocks_xml || ""}
                           onCodeChange={(newCode) => {
