@@ -871,7 +871,7 @@ const TurtleBlocklyEditor = forwardRef(({
       blocksDefinedRef.current = true;
     }
 
-    // Create workspace with a single scrollbar configuration
+    // Create workspace with simplified configuration
     const workspace = Blockly.inject(blocklyDivRef.current, {
       toolbox: TOOLBOX,
       grid: {
@@ -889,9 +889,12 @@ const TurtleBlocklyEditor = forwardRef(({
         scaleSpeed: 1.2
       },
       trashcan: true,
-      scrollbars: true,
-      horizontalLayout: false,
+      scrollbars: {
+        horizontal: true,
+        vertical: true
+      },
       sounds: false,
+      renderer: 'zelos',
       readOnly: readOnly
     });
 
