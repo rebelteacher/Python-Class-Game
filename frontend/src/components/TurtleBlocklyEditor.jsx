@@ -931,22 +931,35 @@ const TurtleBlocklyEditor = forwardRef(({
     const closeFlyout = () => {
       console.log('Attempting to close flyout...');
       try {
-        // Method 1: Access toolbox internal properties
         const toolbox = workspace.toolbox_;
         if (toolbox) {
-          console.log('Toolbox found:', toolbox);
-          // Clear selected item directly
-          if (toolbox.selectedItem_) {
-            toolbox.selectedItem_.setSelected(false);
-            toolbox.selectedItem_ = null;
+          // Get the flyout
+          const flyout = toolbox.flyout_;
+          if (flyout) {
+            console.log('Flyout found, trying to close...');
+            // Try setVisible
+            if (typeof flyout.setVisible === 'function') {
+              flyout.setVisible(false);
+              console.log('Called setVisible(false)');
+            }
+            // Try hide
+            if (typeof flyout.hide === 'function') {
+              flyout.hide();
+              console.log('Called hide()');
+            }
           }
-          // Hide flyout
-          if (toolbox.flyout_) {
-            toolbox.flyout_.hide();
+          
+          // Deselect toolbox item
+          if (toolbox.selectedItem_) {
+            if (typeof toolbox.selectedItem_.setSelected === 'function') {
+              toolbox.selectedItem_.setSelected(false);
+            }
+            toolbox.selectedItem_ = null;
+            console.log('Cleared selectedItem_');
           }
         }
         
-        // Method 2: Global hideChaff
+        // Also try global method
         Blockly.hideChaff();
         
       } catch (e) {
@@ -954,16 +967,21 @@ const TurtleBlocklyEditor = forwardRef(({
       }
     };
 
+    // Track if we just dropped a block
+    let justDroppedBlock = false;
+    
     workspace.addChangeListener((event) => {
       console.log('Blockly event:', event.type);
-      // Close on end of drag or block create
+      
+      // When block drag ends
       if (event.type === Blockly.Events.BLOCK_DRAG && event.isStart === false) {
-        console.log('Block drag ended');
-        setTimeout(closeFlyout, 50);
-      }
-      if (event.type === Blockly.Events.BLOCK_CREATE) {
-        console.log('Block created');
-        setTimeout(closeFlyout, 50);
+        console.log('Block drag ended - will close flyout');
+        justDroppedBlock = true;
+        // Use longer delay to let Blockly finish its internal processing
+        setTimeout(() => {
+          closeFlyout();
+          justDroppedBlock = false;
+        }, 200);
       }
     });
 
