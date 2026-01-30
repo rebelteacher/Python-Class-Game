@@ -927,6 +927,19 @@ const TurtleBlocklyEditor = forwardRef(({
 
     workspace.addChangeListener(handleChange);
 
+    // Auto-close flyout when a block is dragged to workspace
+    workspace.addChangeListener((event) => {
+      if (event.type === Blockly.Events.BLOCK_CREATE) {
+        // Close the flyout after a short delay to let the block settle
+        setTimeout(() => {
+          const toolbox = workspace.getToolbox();
+          if (toolbox) {
+            toolbox.clearSelection();
+          }
+        }, 50);
+      }
+    });
+
     // Initial code generation
     handleChange();
 
