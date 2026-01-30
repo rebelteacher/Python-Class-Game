@@ -871,15 +871,9 @@ const TurtleBlocklyEditor = forwardRef(({
       blocksDefinedRef.current = true;
     }
 
-    // Create toolbox config with autoClose enabled
-    const toolboxConfig = {
-      kind: 'categoryToolbox',
-      contents: TOOLBOX.contents
-    };
-
-    // Create workspace with simplified configuration
+    // Create workspace with autoClose flyout
     const workspace = Blockly.inject(blocklyDivRef.current, {
-      toolbox: toolboxConfig,
+      toolbox: TOOLBOX,
       grid: {
         spacing: 20,
         length: 3,
@@ -906,11 +900,11 @@ const TurtleBlocklyEditor = forwardRef(({
 
     workspaceRef.current = workspace;
     
-    // Set flyout autoClose after workspace is created
+    // Enable autoClose on the flyout - Blockly 10 supports this
     const toolbox = workspace.getToolbox();
     if (toolbox) {
       const flyout = toolbox.getFlyout();
-      if (flyout && typeof flyout.autoClose !== 'undefined') {
+      if (flyout) {
         flyout.autoClose = true;
       }
     }
