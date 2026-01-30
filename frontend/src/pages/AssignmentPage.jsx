@@ -1522,93 +1522,12 @@ export default function AssignmentPage({ user }) {
                         ? "🐢 Your Turtle Output" 
                         : assignment.problems?.[currentProblemIndex]?.assignment_type === "microbit"
                           ? "⚡ Virtual Micro:bit"
-                          : assignment.problems?.[currentProblemIndex]?.assignment_type === "block"
-                            ? "🐢 Turtle Preview"
-                            : "Output"}
+                          : "Output"}
                     </CardTitle>
                   </CardHeader>
                   <CardContent className="flex-1 overflow-auto min-h-0 p-2">
-                    {assignment.problems?.[currentProblemIndex]?.assignment_type === "block" ? (
-                      /* Block-Based - Show Turtle Canvas and Controls - Compact layout */
-                      <div className="h-full flex flex-col gap-2">
-                        {/* Turtle Canvas - Primary Output */}
-                        <div className="flex-1 flex flex-col items-center justify-center bg-gray-50 rounded-lg border p-2 min-h-[240px]">
-                          <AnimatedTurtle
-                            ref={turtleRef}
-                            code={code}
-                            width={220}
-                            height={220}
-                          />
-                          {/* Run/Reset Controls */}
-                          <div className="flex gap-2 mt-2">
-                            <Button
-                              size="sm"
-                              variant="outline"
-                              onClick={() => turtleRef.current?.reset()}
-                              className="gap-1"
-                            >
-                              <RotateCcw className="w-4 h-4" />
-                              Reset
-                            </Button>
-                            <Button
-                              size="sm"
-                              className="bg-green-600 hover:bg-green-700 gap-1"
-                              onClick={() => {
-                                if (turtleRef.current) {
-                                  turtleRef.current.reset();
-                                  setTimeout(() => turtleRef.current?.runInstant(), 100);
-                                }
-                              }}
-                            >
-                              <Play className="w-4 h-4" />
-                              Run
-                            </Button>
-                          </div>
-                        </div>
-
-                        {/* Instructions - Collapsible or smaller */}
-                        <div className="p-2 bg-purple-50 rounded-lg border border-purple-200">
-                          <p className="text-xs text-gray-700">
-                            <strong>🧩 Tip:</strong> Drag blocks from the toolbox, snap them together, then click <strong>Run</strong> to test!
-                          </p>
-                        </div>
-                        
-                        {/* Expected Output if available */}
-                        {assignment.problems?.[currentProblemIndex]?.expected_turtle_image && (
-                          <div className="p-3 bg-green-50 rounded-lg border border-green-200">
-                            <h4 className="text-sm font-semibold text-green-800 mb-2">🎯 Expected Output:</h4>
-                            <div className="flex justify-center">
-                              <img
-                                src={`data:image/png;base64,${assignment.problems[currentProblemIndex].expected_turtle_image}`}
-                                alt="Expected turtle output"
-                                className="max-h-32 rounded border cursor-pointer hover:shadow-lg transition-shadow"
-                                onClick={() => {
-                                  // Could open enlarged view
-                                }}
-                              />
-                            </div>
-                          </div>
-                        )}
-                        
-                        {/* Latest Submission Feedback */}
-                        {submissions.length > 0 && submissions[submissions.length - 1]?.problem_id === getCurrentProblemId() && (
-                          <div className={`p-3 rounded-lg border ${
-                            submissions[submissions.length - 1].score >= 70 
-                              ? 'bg-green-50 border-green-200' 
-                              : 'bg-yellow-50 border-yellow-200'
-                          }`}>
-                            <h4 className={`text-sm font-semibold mb-1 ${
-                              submissions[submissions.length - 1].score >= 70 ? 'text-green-800' : 'text-yellow-800'
-                            }`}>
-                              📊 Latest: {submissions[submissions.length - 1].score?.toFixed(0)}%
-                            </h4>
-                            <p className="text-xs text-gray-700 whitespace-pre-wrap line-clamp-3">
-                              {submissions[submissions.length - 1].feedback}
-                            </p>
-                          </div>
-                        )}
-                      </div>
-                    ) : assignment.problems?.[currentProblemIndex]?.assignment_type === "microbit" ? (
+                    {/* Block assignments have their own layout above - this is for other types */}
+                    {assignment.problems?.[currentProblemIndex]?.assignment_type === "microbit" ? (
                       <div className="h-full flex flex-col gap-3">
                         {/* Micro:bit Simulator */}
                         <MicrobitSimulator 
