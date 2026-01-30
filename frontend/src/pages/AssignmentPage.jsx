@@ -1692,6 +1692,7 @@ export default function AssignmentPage({ user }) {
                 </Card>
               </Panel>
               </PanelGroup>
+              )
             ) : (
               // Teacher Demo/Sandbox Mode - Interactive coding without submissions
               assignment.problems?.[currentProblemIndex]?.assignment_type === "block" ? (
