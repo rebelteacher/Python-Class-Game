@@ -947,35 +947,20 @@ const TurtleBlocklyEditor = forwardRef(({
       try {
         const toolbox = workspace.getToolbox();
         if (toolbox) {
-          // In Blockly 10+, use selectItemByPosition with -1 or use contents
-          if (toolbox.contents_ && toolbox.contents_.length > 0) {
-            // Deselect all items
-            toolbox.contents_.forEach(item => {
-              if (item.setSelected) {
-                item.setSelected(false);
-              }
-            });
+          // Get the selected item and click it again to toggle/close
+          const selectedItem = toolbox.getSelectedItem();
+          if (selectedItem) {
+            // Clicking the same category again should close the flyout
+            selectedItem.onClick(new PointerEvent('click'));
           }
           
-          // Try getting contentArea and collapsing
-          if (toolbox.contentsDiv_) {
-            const selectedItems = toolbox.contentsDiv_.querySelectorAll('.blocklyTreeSelected');
-            selectedItems.forEach(el => el.classList.remove('blocklyTreeSelected'));
-          }
+          // Also try these methods
+          toolbox.clearSelection();
           
-          // Access flyout and close
           const flyout = toolbox.getFlyout();
           if (flyout) {
-            flyout.setVisible(false);
             flyout.hide();
           }
-          
-          // Clear internal selection state
-          if (toolbox.selectedItem_) {
-            toolbox.selectedItem_ = null;
-          }
-          
-          toolbox.clearSelection();
         }
         
         Blockly.hideChaff();
@@ -985,16 +970,9 @@ const TurtleBlocklyEditor = forwardRef(({
       }
     };
 
-    // Use END_DRAG event type string directly
     workspace.addChangeListener((event) => {
-      // When block is moved/dropped from flyout to workspace
       if (event.type === 'drag' && event.isStart === false) {
-        setTimeout(closeFlyout, 400);
-        setTimeout(closeFlyout, 800);
-      }
-      // Also try on finished_loading or move events
-      if (event.type === 'finished_loading' || (event.type === 'move' && event.newParentId === undefined)) {
-        setTimeout(closeFlyout, 400);
+        setTimeout(closeFlyout, 300);
       }
     });
 
