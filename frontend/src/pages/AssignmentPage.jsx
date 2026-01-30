@@ -1212,12 +1212,12 @@ export default function AssignmentPage({ user }) {
           <PanelResizeHandle className="w-2 bg-gray-300 hover:bg-indigo-500 transition-colors cursor-col-resize mx-2" />
 
           {/* Right Side: Code Editor & Output */}
-          <Panel defaultSize={70} minSize={50}>
-            <div className="pl-3 h-full">
+          <Panel defaultSize={80} minSize={60}>
+            <div className="pl-2 h-full">
             {!isTeacher ? (
               <PanelGroup direction="horizontal" style={{ height: '100%' }}>
-                {/* Code Editor - Left */}
-                <Panel defaultSize={50} minSize={30}>
+                {/* Code Editor - Left - Give more space to blocks */}
+                <Panel defaultSize={55} minSize={40}>
                 <div className="h-full overflow-y-auto">
                 <Card data-testid="code-editor-card">
                   <CardHeader>
