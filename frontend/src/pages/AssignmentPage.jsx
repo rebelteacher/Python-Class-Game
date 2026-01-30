@@ -837,12 +837,12 @@ export default function AssignmentPage({ user }) {
         <PanelGroup direction="horizontal" style={{ height: '100%' }}>
           {/* Left Side: Instructions & Test Cases - Compact for more coding space */}
           <Panel defaultSize={20} minSize={15} maxSize={35}>
-            <div className="space-y-4 pr-2 h-full overflow-y-auto">
-              <Card data-testid="assignment-instructions">
-                <CardHeader className="pb-2">
+            <div className="space-y-4 pr-2 h-full overflow-y-auto pl-0">
+              <Card data-testid="assignment-instructions" className="ml-0 rounded-l-none border-l-0">
+                <CardHeader className="pb-2 px-3">
                   <CardTitle className="text-base">Instructions</CardTitle>
                 </CardHeader>
-                <CardContent className="pt-0">
+                <CardContent className="pt-0 px-3">
                   <p className="text-gray-700 whitespace-pre-wrap text-sm">
                     {(assignment.problems && assignment.problems[currentProblemIndex]?.description) || assignment.description || "No description provided."}
                   </p>
