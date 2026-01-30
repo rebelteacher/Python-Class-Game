@@ -934,19 +934,18 @@ const TurtleBlocklyEditor = forwardRef(({
           event.type === Blockly.Events.BLOCK_CREATE) {
         setTimeout(() => {
           try {
+            // hideChaff is the recommended way to close flyouts in Blockly
+            if (typeof workspace.hideChaff === 'function') {
+              workspace.hideChaff();
+            }
+            
+            // Also deselect toolbox item
             const toolbox = workspace.getToolbox();
             if (toolbox) {
-              // Try multiple methods to close the flyout
-              if (typeof toolbox.setSelectedItem === 'function') {
+              if (typeof toolbox.deselectItem_ === 'function') {
+                toolbox.deselectItem_();
+              } else if (typeof toolbox.setSelectedItem === 'function') {
                 toolbox.setSelectedItem(null);
-              }
-              if (typeof toolbox.clearSelection === 'function') {
-                toolbox.clearSelection();
-              }
-              // Try to hide flyout directly
-              const flyout = workspace.getFlyout ? workspace.getFlyout() : null;
-              if (flyout && typeof flyout.hide === 'function') {
-                flyout.hide();
               }
             }
           } catch (e) {
