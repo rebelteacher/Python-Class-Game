@@ -1416,8 +1416,8 @@ export default function AssignmentPage({ user }) {
                   </CardHeader>
                   <CardContent className="p-0">
                     {assignment.problems?.[currentProblemIndex]?.assignment_type === "block" ? (
-                      /* Block-Based - Turtle Blocks Editor with drag-and-drop blocks */
-                      <div className="h-[600px] p-2">
+                      /* Block-Based - Turtle Blocks Editor - Minimal padding for max workspace */
+                      <div className="h-[620px] p-1">
                         <TurtleBlocklyEditor
                           key={`block-editor-${currentProblemIndex}-${assignment.problems[currentProblemIndex]?.id || 'new'}`}
                           ref={turtleBlocksRef}
@@ -1433,7 +1433,7 @@ export default function AssignmentPage({ user }) {
                           readOnly={problemsFinal[getCurrentProblemId()]}
                           showPreview={false}
                           showCodeToggle={true}
-                          height="560px"
+                          height="600px"
                         />
                       </div>
                     ) : (
