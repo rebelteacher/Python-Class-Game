@@ -1215,6 +1215,75 @@ export default function AssignmentPage({ user }) {
           <Panel defaultSize={80} minSize={60}>
             <div className="pl-2 h-full">
             {!isTeacher ? (
+              /* Check if this is a block assignment - use simplified full-width layout */
+              assignment.problems?.[currentProblemIndex]?.assignment_type === "block" ? (
+                /* Block-Based Layout - TurtleBlocklyEditor takes full space with inline preview */
+                <div className="h-full flex flex-col">
+                  {/* Compact header with score and submit */}
+                  <div className="flex items-center justify-between bg-white border-b px-3 py-2 flex-shrink-0">
+                    <div className="flex items-center gap-3">
+                      <span className="font-semibold text-gray-700">🧩 Block Coding</span>
+                      {(() => {
+                        const currentProblemId = getCurrentProblemId();
+                        const bestScore = problemStatuses[currentProblemId];
+                        const isFinal = problemsFinal[currentProblemId];
+                        
+                        if (isFinal) {
+                          return <span className="text-sm text-blue-600 font-medium">✔ Done ({bestScore?.toFixed(0) || 0}%)</span>;
+                        }
+                        if (bestScore !== null && bestScore !== undefined) {
+                          return <span className={`text-sm font-medium ${bestScore >= 70 ? 'text-green-600' : 'text-orange-600'}`}>Best: {bestScore.toFixed(0)}%</span>;
+                        }
+                        return null;
+                      })()}
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <Button
+                        data-testid="submit-code-btn"
+                        onClick={() => handleSubmitCode()}
+                        disabled={submitting || problemsFinal[getCurrentProblemId()]}
+                        size="sm"
+                        className="bg-indigo-600 hover:bg-indigo-700"
+                      >
+                        {submitting ? "Submitting..." : problemsFinal[getCurrentProblemId()] ? "✓ Submitted" : "Submit"}
+                      </Button>
+                      {!problemsFinal[getCurrentProblemId()] && (
+                        <Button
+                          data-testid="done-btn"
+                          onClick={() => handleMarkDone()}
+                          disabled={submitting}
+                          size="sm"
+                          variant="outline"
+                          className="border-green-600 text-green-700 hover:bg-green-50"
+                        >
+                          Done
+                        </Button>
+                      )}
+                    </div>
+                  </div>
+                  
+                  {/* TurtleBlocklyEditor takes remaining space */}
+                  <div className="flex-1 min-h-0 p-1">
+                    <TurtleBlocklyEditor
+                      key={`block-editor-${currentProblemIndex}-${assignment.problems[currentProblemIndex]?.id || 'new'}`}
+                      ref={turtleBlocksRef}
+                      initialXml={assignment.problems[currentProblemIndex]?.starter_blocks_xml || ""}
+                      onCodeChange={(newCode) => {
+                        setCode(newCode);
+                        setHasRunPerProblem(prev => ({
+                          ...prev,
+                          [getCurrentProblemId()]: false
+                        }));
+                      }}
+                      readOnly={problemsFinal[getCurrentProblemId()]}
+                      showPreview={true}
+                      showCodeToggle={true}
+                      height="100%"
+                    />
+                  </div>
+                </div>
+              ) : (
+              /* Non-block assignments - use the original two-panel layout */
               <PanelGroup direction="horizontal" style={{ height: '100%' }}>
                 {/* Code Editor - Left - Give more space to blocks */}
                 <Panel defaultSize={55} minSize={40}>
