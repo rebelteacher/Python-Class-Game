@@ -872,9 +872,11 @@ const TurtleBlocklyEditor = forwardRef(({
       blocksDefinedRef.current = true;
     }
 
-    // Create workspace with autoClose flyout
+    // Create workspace with horizontal toolbox at top
     const workspace = Blockly.inject(blocklyDivRef.current, {
       toolbox: TOOLBOX,
+      horizontalLayout: true,
+      toolboxPosition: 'start',
       grid: {
         spacing: 20,
         length: 3,
