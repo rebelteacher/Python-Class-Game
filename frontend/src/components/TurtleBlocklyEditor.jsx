@@ -928,31 +928,53 @@ const TurtleBlocklyEditor = forwardRef(({
     workspace.addChangeListener(handleChange);
 
     // Auto-close flyout when a block is dropped in workspace
-    workspace.addChangeListener((event) => {
-      // When drag ends (block dropped) or block is created from flyout
-      if ((event.type === Blockly.Events.BLOCK_DRAG && event.isStart === false) ||
-          event.type === Blockly.Events.BLOCK_CREATE) {
-        setTimeout(() => {
-          try {
-            // Use global Blockly.hideChaff() - most reliable method
-            Blockly.hideChaff();
-            
-            // Also try accessing internal toolbox flyout
-            const toolbox = workspace.getToolbox();
-            if (toolbox) {
-              // Try internal flyout_ property
-              if (toolbox.flyout_ && typeof toolbox.flyout_.hide === 'function') {
-                toolbox.flyout_.hide();
-              }
-              // Clear selection
-              if (typeof toolbox.clearSelection === 'function') {
-                toolbox.clearSelection();
-              }
-            }
-          } catch (e) {
-            console.log('Flyout close error:', e);
+    const closeFlyout = () => {
+      try {
+        // Method 1: Global hideChaff
+        Blockly.hideChaff();
+        
+        // Method 2: Get toolbox and close
+        const toolbox = workspace.getToolbox();
+        if (toolbox) {
+          // Try to get the selected item and deselect it
+          const selectedItem = toolbox.getSelectedItem();
+          if (selectedItem) {
+            toolbox.setSelectedItem(null);
           }
-        }, 100);
+          toolbox.clearSelection();
+          
+          // Access flyout through toolbox
+          if (toolbox.flyout_) {
+            toolbox.flyout_.hide();
+          }
+          if (toolbox.getFlyout) {
+            const flyout = toolbox.getFlyout();
+            if (flyout && flyout.hide) flyout.hide();
+          }
+        }
+        
+        // Method 3: Click on workspace SVG to close flyout
+        const svgElement = workspace.getParentSvg();
+        if (svgElement) {
+          const clickEvent = new MouseEvent('click', {
+            bubbles: true,
+            cancelable: true,
+            view: window
+          });
+          svgElement.dispatchEvent(clickEvent);
+        }
+      } catch (e) {
+        console.log('Flyout close error:', e);
+      }
+    };
+
+    workspace.addChangeListener((event) => {
+      // Close on end of drag or block create
+      if (event.type === Blockly.Events.BLOCK_DRAG && event.isStart === false) {
+        setTimeout(closeFlyout, 50);
+      }
+      if (event.type === Blockly.Events.BLOCK_CREATE) {
+        setTimeout(closeFlyout, 50);
       }
     });
 
