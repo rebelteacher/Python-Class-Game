@@ -1030,7 +1030,7 @@ const TurtleBlocklyEditor = forwardRef(({
       </div>
 
       {/* Main content - Blockly workspace takes full space */}
-      <div className="flex-1 flex border border-t-0 rounded-b-lg min-h-0 bg-white" style={{ height }}>
+      <div className="flex-1 flex border border-t-0 min-h-0 bg-white" style={{ height }}>
         {/* Blockly workspace - takes up all available space */}
         <div 
           className="flex-1 relative min-w-0"
