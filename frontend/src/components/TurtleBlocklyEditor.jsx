@@ -467,100 +467,75 @@ const defineTurtleBlocks = () => {
 };
 
 // Toolbox configuration
+// Simple Toolbox - All blocks visible without flyout categories
 const TOOLBOX = {
-  kind: 'categoryToolbox',
+  kind: 'flyoutToolbox',
   contents: [
-    {
-      kind: 'category',
-      name: '🐢 Motion',
-      colour: '230',
-      contents: [
-        { kind: 'block', type: 'turtle_forward', inputs: { STEPS: { shadow: { type: 'math_number', fields: { NUM: 50 } } } } },
-        { kind: 'block', type: 'turtle_backward', inputs: { STEPS: { shadow: { type: 'math_number', fields: { NUM: 50 } } } } },
-        { kind: 'block', type: 'turtle_right', inputs: { DEGREES: { shadow: { type: 'math_number', fields: { NUM: 90 } } } } },
-        { kind: 'block', type: 'turtle_left', inputs: { DEGREES: { shadow: { type: 'math_number', fields: { NUM: 90 } } } } },
-        { kind: 'block', type: 'turtle_goto', inputs: { 
-          X: { shadow: { type: 'math_number', fields: { NUM: 0 } } },
-          Y: { shadow: { type: 'math_number', fields: { NUM: 0 } } }
-        } },
-        { kind: 'block', type: 'turtle_home' }
-      ]
-    },
-    {
-      kind: 'category',
-      name: '🖊️ Pen',
-      colour: '160',
-      contents: [
-        { kind: 'block', type: 'turtle_pendown' },
-        { kind: 'block', type: 'turtle_penup' },
-        { kind: 'block', type: 'turtle_color' },
-        { kind: 'block', type: 'turtle_pensize', inputs: { SIZE: { shadow: { type: 'math_number', fields: { NUM: 2 } } } } }
-      ]
-    },
-    {
-      kind: 'category',
-      name: '💬 Looks',
-      colour: '260',
-      contents: [
-        { kind: 'block', type: 'turtle_say' },
-        { kind: 'block', type: 'turtle_say_for', inputs: { SECONDS: { shadow: { type: 'math_number', fields: { NUM: 2 } } } } },
-        { kind: 'block', type: 'turtle_hide' },
-        { kind: 'block', type: 'turtle_show' }
-      ]
-    },
-    {
-      kind: 'category',
-      name: '🔄 Loops',
-      colour: '20',
-      contents: [
-        { kind: 'block', type: 'turtle_repeat', inputs: { TIMES: { shadow: { type: 'math_number', fields: { NUM: 4 } } } } },
-        { kind: 'block', type: 'turtle_for', inputs: { 
-          FROM: { shadow: { type: 'math_number', fields: { NUM: 1 } } },
-          TO: { shadow: { type: 'math_number', fields: { NUM: 10 } } }
-        } },
-        { kind: 'block', type: 'turtle_while' }
-      ]
-    },
-    {
-      kind: 'category',
-      name: '🔀 Control',
-      colour: '210',
-      contents: [
-        { kind: 'block', type: 'turtle_if' },
-        { kind: 'block', type: 'turtle_if_else' }
-      ]
-    },
-    {
-      kind: 'category',
-      name: '⚖️ Logic',
-      colour: '210',
-      contents: [
-        { kind: 'block', type: 'logic_compare' },
-        { kind: 'block', type: 'logic_operation' },
-        { kind: 'block', type: 'logic_not' },
-        { kind: 'block', type: 'logic_boolean' }
-      ]
-    },
-    {
-      kind: 'category',
-      name: '📦 Variables',
-      colour: '330',
-      contents: [
-        { kind: 'block', type: 'variables_get' },
-        { kind: 'block', type: 'variables_set' },
-        { kind: 'block', type: 'variables_change' }
-      ]
-    },
-    {
-      kind: 'category',
-      name: '🔢 Math',
-      colour: '290',
-      contents: [
-        { kind: 'block', type: 'math_number' },
-        { kind: 'block', type: 'math_arithmetic' },
-        { kind: 'block', type: 'math_random' }
-      ]
-    }
+    // Motion blocks
+    { kind: 'label', text: '🐢 Motion' },
+    { kind: 'block', type: 'turtle_forward', inputs: { STEPS: { shadow: { type: 'math_number', fields: { NUM: 50 } } } } },
+    { kind: 'block', type: 'turtle_backward', inputs: { STEPS: { shadow: { type: 'math_number', fields: { NUM: 50 } } } } },
+    { kind: 'block', type: 'turtle_right', inputs: { DEGREES: { shadow: { type: 'math_number', fields: { NUM: 90 } } } } },
+    { kind: 'block', type: 'turtle_left', inputs: { DEGREES: { shadow: { type: 'math_number', fields: { NUM: 90 } } } } },
+    { kind: 'block', type: 'turtle_goto', inputs: { 
+      X: { shadow: { type: 'math_number', fields: { NUM: 0 } } },
+      Y: { shadow: { type: 'math_number', fields: { NUM: 0 } } }
+    } },
+    { kind: 'block', type: 'turtle_home' },
+    { kind: 'sep', gap: '24' },
+    
+    // Pen blocks
+    { kind: 'label', text: '🖊️ Pen' },
+    { kind: 'block', type: 'turtle_pendown' },
+    { kind: 'block', type: 'turtle_penup' },
+    { kind: 'block', type: 'turtle_color' },
+    { kind: 'block', type: 'turtle_pensize', inputs: { SIZE: { shadow: { type: 'math_number', fields: { NUM: 2 } } } } },
+    { kind: 'sep', gap: '24' },
+    
+    // Looks blocks
+    { kind: 'label', text: '💬 Looks' },
+    { kind: 'block', type: 'turtle_say' },
+    { kind: 'block', type: 'turtle_say_for', inputs: { SECONDS: { shadow: { type: 'math_number', fields: { NUM: 2 } } } } },
+    { kind: 'block', type: 'turtle_hide' },
+    { kind: 'block', type: 'turtle_show' },
+    { kind: 'sep', gap: '24' },
+    
+    // Loops blocks
+    { kind: 'label', text: '🔄 Loops' },
+    { kind: 'block', type: 'turtle_repeat', inputs: { TIMES: { shadow: { type: 'math_number', fields: { NUM: 4 } } } } },
+    { kind: 'block', type: 'turtle_for', inputs: { 
+      FROM: { shadow: { type: 'math_number', fields: { NUM: 1 } } },
+      TO: { shadow: { type: 'math_number', fields: { NUM: 10 } } }
+    } },
+    { kind: 'block', type: 'turtle_while' },
+    { kind: 'sep', gap: '24' },
+    
+    // Control blocks
+    { kind: 'label', text: '🔀 Control' },
+    { kind: 'block', type: 'turtle_if' },
+    { kind: 'block', type: 'turtle_if_else' },
+    { kind: 'sep', gap: '24' },
+    
+    // Logic blocks
+    { kind: 'label', text: '⚖️ Logic' },
+    { kind: 'block', type: 'logic_compare' },
+    { kind: 'block', type: 'logic_operation' },
+    { kind: 'block', type: 'logic_not' },
+    { kind: 'block', type: 'logic_boolean' },
+    { kind: 'sep', gap: '24' },
+    
+    // Variables blocks
+    { kind: 'label', text: '📦 Variables' },
+    { kind: 'block', type: 'variables_get' },
+    { kind: 'block', type: 'variables_set' },
+    { kind: 'block', type: 'variables_change' },
+    { kind: 'sep', gap: '24' },
+    
+    // Math blocks
+    { kind: 'label', text: '🔢 Math' },
+    { kind: 'block', type: 'math_number' },
+    { kind: 'block', type: 'math_arithmetic' },
+    { kind: 'block', type: 'math_random' }
   ]
 };
 
