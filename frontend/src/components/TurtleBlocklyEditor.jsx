@@ -927,24 +927,32 @@ const TurtleBlocklyEditor = forwardRef(({
 
     workspace.addChangeListener(handleChange);
 
-    // Auto-close flyout when a block is dragged to workspace
+    // Auto-close flyout when a block is dropped in workspace
     workspace.addChangeListener((event) => {
-      // Close flyout on multiple event types to ensure it works
-      if (event.type === Blockly.Events.BLOCK_CREATE || 
-          event.type === Blockly.Events.BLOCK_MOVE ||
-          (event.type === Blockly.Events.BLOCK_DRAG && !event.isStart)) {
-        // Close the flyout after a short delay
+      // When drag ends (block dropped) or block is created from flyout
+      if ((event.type === Blockly.Events.BLOCK_DRAG && event.isStart === false) ||
+          event.type === Blockly.Events.BLOCK_CREATE) {
         setTimeout(() => {
-          const toolbox = workspace.getToolbox();
-          if (toolbox) {
-            toolbox.clearSelection();
-            // Also try to close flyout directly
-            const flyout = toolbox.getFlyout();
-            if (flyout && flyout.isVisible()) {
-              toolbox.clearSelection();
+          try {
+            const toolbox = workspace.getToolbox();
+            if (toolbox) {
+              // Try multiple methods to close the flyout
+              if (typeof toolbox.setSelectedItem === 'function') {
+                toolbox.setSelectedItem(null);
+              }
+              if (typeof toolbox.clearSelection === 'function') {
+                toolbox.clearSelection();
+              }
+              // Try to hide flyout directly
+              const flyout = workspace.getFlyout ? workspace.getFlyout() : null;
+              if (flyout && typeof flyout.hide === 'function') {
+                flyout.hide();
+              }
             }
+          } catch (e) {
+            console.log('Flyout close error:', e);
           }
-        }, 100);
+        }, 150);
       }
     });
 
