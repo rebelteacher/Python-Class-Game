@@ -929,14 +929,22 @@ const TurtleBlocklyEditor = forwardRef(({
 
     // Auto-close flyout when a block is dragged to workspace
     workspace.addChangeListener((event) => {
-      if (event.type === Blockly.Events.BLOCK_CREATE) {
-        // Close the flyout after a short delay to let the block settle
+      // Close flyout on multiple event types to ensure it works
+      if (event.type === Blockly.Events.BLOCK_CREATE || 
+          event.type === Blockly.Events.BLOCK_MOVE ||
+          (event.type === Blockly.Events.BLOCK_DRAG && !event.isStart)) {
+        // Close the flyout after a short delay
         setTimeout(() => {
           const toolbox = workspace.getToolbox();
           if (toolbox) {
             toolbox.clearSelection();
+            // Also try to close flyout directly
+            const flyout = toolbox.getFlyout();
+            if (flyout && flyout.isVisible()) {
+              toolbox.clearSelection();
+            }
           }
-        }, 50);
+        }, 100);
       }
     });
 
