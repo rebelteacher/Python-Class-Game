@@ -931,57 +931,58 @@ const TurtleBlocklyEditor = forwardRef(({
     const closeFlyout = () => {
       console.log('Attempting to close flyout...');
       try {
-        const toolbox = workspace.toolbox_;
+        // Try getToolbox() method
+        const toolbox = workspace.getToolbox();
+        console.log('Toolbox via getToolbox():', toolbox);
+        
         if (toolbox) {
-          // Get the flyout
-          const flyout = toolbox.flyout_;
+          // Try to get flyout
+          const flyout = toolbox.getFlyout ? toolbox.getFlyout() : toolbox.flyout_;
+          console.log('Flyout:', flyout);
+          
           if (flyout) {
-            console.log('Flyout found, trying to close...');
-            // Try setVisible
             if (typeof flyout.setVisible === 'function') {
               flyout.setVisible(false);
-              console.log('Called setVisible(false)');
+              console.log('Called flyout.setVisible(false)');
             }
-            // Try hide
             if (typeof flyout.hide === 'function') {
               flyout.hide();
-              console.log('Called hide()');
+              console.log('Called flyout.hide()');
             }
           }
           
-          // Deselect toolbox item
-          if (toolbox.selectedItem_) {
-            if (typeof toolbox.selectedItem_.setSelected === 'function') {
-              toolbox.selectedItem_.setSelected(false);
-            }
-            toolbox.selectedItem_ = null;
-            console.log('Cleared selectedItem_');
+          // Try clearSelection
+          if (typeof toolbox.clearSelection === 'function') {
+            toolbox.clearSelection();
+            console.log('Called toolbox.clearSelection()');
+          }
+          
+          // Try setSelectedItem(null)
+          if (typeof toolbox.setSelectedItem === 'function') {
+            toolbox.setSelectedItem(null);
+            console.log('Called toolbox.setSelectedItem(null)');
           }
         }
         
-        // Also try global method
+        // Global hideChaff
         Blockly.hideChaff();
+        console.log('Called Blockly.hideChaff()');
         
       } catch (e) {
         console.log('Flyout close error:', e);
       }
     };
 
-    // Track if we just dropped a block
-    let justDroppedBlock = false;
-    
     workspace.addChangeListener((event) => {
-      console.log('Blockly event:', event.type);
+      // Only log non-frequent events
+      if (event.type !== 'viewport_change') {
+        console.log('Blockly event:', event.type);
+      }
       
       // When block drag ends
       if (event.type === Blockly.Events.BLOCK_DRAG && event.isStart === false) {
         console.log('Block drag ended - will close flyout');
-        justDroppedBlock = true;
-        // Use longer delay to let Blockly finish its internal processing
-        setTimeout(() => {
-          closeFlyout();
-          justDroppedBlock = false;
-        }, 200);
+        setTimeout(closeFlyout, 300);
       }
     });
 
