@@ -987,7 +987,7 @@ const TurtleBlocklyEditor = forwardRef(({
       <style>{blocklyStyles}</style>
       
       {/* Toolbar - Compact */}
-      <div className="flex items-center justify-between bg-gradient-to-r from-purple-600 to-indigo-600 text-white px-2 py-1.5 rounded-t-lg flex-shrink-0">
+      <div className="flex items-center justify-between bg-gradient-to-r from-purple-600 to-indigo-600 text-white px-2 py-1.5 flex-shrink-0">
         <div className="flex items-center gap-1.5">
           <Blocks className="w-4 h-4" />
           <span className="font-bold text-sm">Turtle Blocks</span>
