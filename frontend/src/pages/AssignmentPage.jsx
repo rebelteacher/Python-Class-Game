@@ -835,15 +835,15 @@ export default function AssignmentPage({ user }) {
       <main className="container mx-auto px-6 py-6">
         <div style={{ height: 'calc(100vh - 200px)', overflow: 'hidden' }}>
         <PanelGroup direction="horizontal" style={{ height: '100%' }}>
-          {/* Left Side: Instructions & Test Cases */}
-          <Panel defaultSize={30} minSize={20} maxSize={50}>
-            <div className="space-y-6 pr-3 h-full overflow-y-auto">
+          {/* Left Side: Instructions & Test Cases - Compact for more coding space */}
+          <Panel defaultSize={20} minSize={15} maxSize={35}>
+            <div className="space-y-4 pr-2 h-full overflow-y-auto">
               <Card data-testid="assignment-instructions">
-                <CardHeader>
-                  <CardTitle>Instructions</CardTitle>
+                <CardHeader className="pb-2">
+                  <CardTitle className="text-base">Instructions</CardTitle>
                 </CardHeader>
-                <CardContent>
-                  <p className="text-gray-700 whitespace-pre-wrap">
+                <CardContent className="pt-0">
+                  <p className="text-gray-700 whitespace-pre-wrap text-sm">
                     {(assignment.problems && assignment.problems[currentProblemIndex]?.description) || assignment.description || "No description provided."}
                   </p>
                   
