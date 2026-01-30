@@ -1465,13 +1465,13 @@ export default function AssignmentPage({ user }) {
               </Panel>
 
               {/* Resize Handle */}
-              <PanelResizeHandle className="w-2 bg-gray-300 hover:bg-indigo-500 transition-colors cursor-col-resize mx-2" />
+              <PanelResizeHandle className="w-1.5 bg-gray-200 hover:bg-indigo-500 transition-colors cursor-col-resize mx-1" />
 
-              {/* Output - Right - Full Space */}
-              <Panel defaultSize={50} minSize={30}>
+              {/* Output - Right - Compact for more coding space */}
+              <Panel defaultSize={45} minSize={25}>
                 <Card data-testid="output-card" className="h-full flex flex-col">
-                  <CardHeader className="pb-2 pt-3 flex-shrink-0">
-                    <CardTitle className="text-lg">
+                  <CardHeader className="pb-1 pt-2 flex-shrink-0 px-3">
+                    <CardTitle className="text-base">
                       {assignment.problems?.[currentProblemIndex]?.assignment_type === "turtle" 
                         ? "🐢 Your Turtle Output" 
                         : assignment.problems?.[currentProblemIndex]?.assignment_type === "microbit"
@@ -1480,30 +1480,21 @@ export default function AssignmentPage({ user }) {
                             ? "🐢 Turtle Preview"
                             : "Output"}
                     </CardTitle>
-                    <CardDescription className="text-xs">
-                      {assignment.problems?.[currentProblemIndex]?.assignment_type === "turtle" 
-                        ? "Your turtle graphics will appear here" 
-                        : assignment.problems?.[currentProblemIndex]?.assignment_type === "microbit"
-                          ? "Test your code on the virtual Micro:bit before using real hardware"
-                          : assignment.problems?.[currentProblemIndex]?.assignment_type === "block"
-                            ? "See your turtle drawing - works just like Unit 2!"
-                            : "Code with input() will show interactive dialog automatically"}
-                    </CardDescription>
                   </CardHeader>
-                  <CardContent className="flex-1 overflow-auto min-h-0 p-4">
+                  <CardContent className="flex-1 overflow-auto min-h-0 p-2">
                     {assignment.problems?.[currentProblemIndex]?.assignment_type === "block" ? (
-                      /* Block-Based - Show Turtle Canvas and Controls */
-                      <div className="h-full flex flex-col gap-3">
+                      /* Block-Based - Show Turtle Canvas and Controls - Compact layout */
+                      <div className="h-full flex flex-col gap-2">
                         {/* Turtle Canvas - Primary Output */}
-                        <div className="flex-1 flex flex-col items-center justify-center bg-gray-50 rounded-lg border p-4 min-h-[280px]">
+                        <div className="flex-1 flex flex-col items-center justify-center bg-gray-50 rounded-lg border p-2 min-h-[240px]">
                           <AnimatedTurtle
                             ref={turtleRef}
                             code={code}
-                            width={260}
-                            height={260}
+                            width={220}
+                            height={220}
                           />
                           {/* Run/Reset Controls */}
-                          <div className="flex gap-2 mt-3">
+                          <div className="flex gap-2 mt-2">
                             <Button
                               size="sm"
                               variant="outline"
