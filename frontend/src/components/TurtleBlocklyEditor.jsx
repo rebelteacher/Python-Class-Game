@@ -945,16 +945,22 @@ const TurtleBlocklyEditor = forwardRef(({
     // Auto-close flyout when a block is dropped in workspace
     const closeFlyout = () => {
       try {
+        // Try workspace.getFlyout() directly
+        if (workspace.getFlyout) {
+          const flyout = workspace.getFlyout();
+          if (flyout) {
+            flyout.hide();
+            flyout.setVisible(false);
+          }
+        }
+        
+        // Try through toolbox
         const toolbox = workspace.getToolbox();
         if (toolbox) {
-          // Get the selected item and click it again to toggle/close
-          const selectedItem = toolbox.getSelectedItem();
-          if (selectedItem) {
-            // Clicking the same category again should close the flyout
-            selectedItem.onClick(new PointerEvent('click'));
+          // Try clicking outside/deselecting
+          if (toolbox.deselectItem_) {
+            toolbox.deselectItem_();
           }
-          
-          // Also try these methods
           toolbox.clearSelection();
           
           const flyout = toolbox.getFlyout();
@@ -963,6 +969,8 @@ const TurtleBlocklyEditor = forwardRef(({
           }
         }
         
+        // Force workspace to update
+        workspace.resize();
         Blockly.hideChaff();
         
       } catch (e) {
@@ -970,9 +978,14 @@ const TurtleBlocklyEditor = forwardRef(({
       }
     };
 
+    // Listen for when a block is created (dragged from flyout)
     workspace.addChangeListener((event) => {
-      if (event.type === 'drag' && event.isStart === false) {
+      if (event.type === Blockly.Events.BLOCK_CREATE || 
+          (event.type === Blockly.Events.BLOCK_DRAG && !event.isStart)) {
+        // Close after delays to catch the right timing
+        setTimeout(closeFlyout, 100);
         setTimeout(closeFlyout, 300);
+        setTimeout(closeFlyout, 600);
       }
     });
 
