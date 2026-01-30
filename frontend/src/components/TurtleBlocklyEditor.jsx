@@ -929,27 +929,38 @@ const TurtleBlocklyEditor = forwardRef(({
 
     // Auto-close flyout when a block is dropped in workspace
     const closeFlyout = () => {
-      console.log('Attempting to close flyout...');
       try {
         const toolbox = workspace.getToolbox();
         if (toolbox) {
-          const flyout = toolbox.getFlyout ? toolbox.getFlyout() : toolbox.flyout_;
+          // In Blockly 10+, use selectItemByPosition with -1 or use contents
+          if (toolbox.contents_ && toolbox.contents_.length > 0) {
+            // Deselect all items
+            toolbox.contents_.forEach(item => {
+              if (item.setSelected) {
+                item.setSelected(false);
+              }
+            });
+          }
           
+          // Try getting contentArea and collapsing
+          if (toolbox.contentsDiv_) {
+            const selectedItems = toolbox.contentsDiv_.querySelectorAll('.blocklyTreeSelected');
+            selectedItems.forEach(el => el.classList.remove('blocklyTreeSelected'));
+          }
+          
+          // Access flyout and close
+          const flyout = toolbox.getFlyout();
           if (flyout) {
-            if (typeof flyout.setVisible === 'function') {
-              flyout.setVisible(false);
-            }
-            if (typeof flyout.hide === 'function') {
-              flyout.hide();
-            }
+            flyout.setVisible(false);
+            flyout.hide();
           }
           
-          if (typeof toolbox.clearSelection === 'function') {
-            toolbox.clearSelection();
+          // Clear internal selection state
+          if (toolbox.selectedItem_) {
+            toolbox.selectedItem_ = null;
           }
-          if (typeof toolbox.setSelectedItem === 'function') {
-            toolbox.setSelectedItem(null);
-          }
+          
+          toolbox.clearSelection();
         }
         
         Blockly.hideChaff();
@@ -959,21 +970,16 @@ const TurtleBlocklyEditor = forwardRef(({
       }
     };
 
-    // Track when we're dragging from flyout
-    let isDraggingFromFlyout = false;
-    
+    // Use END_DRAG event type string directly
     workspace.addChangeListener((event) => {
-      // Detect when drag starts from flyout (block create happens)
-      if (event.type === Blockly.Events.BLOCK_CREATE) {
-        isDraggingFromFlyout = true;
+      // When block is moved/dropped from flyout to workspace
+      if (event.type === 'drag' && event.isStart === false) {
+        setTimeout(closeFlyout, 400);
+        setTimeout(closeFlyout, 800);
       }
-      
-      // When block drag ends AND we were dragging from flyout
-      if (event.type === Blockly.Events.BLOCK_DRAG && event.isStart === false && isDraggingFromFlyout) {
-        isDraggingFromFlyout = false;
-        // Wait for ALL Blockly events to settle, then close
-        setTimeout(closeFlyout, 500);
-        setTimeout(closeFlyout, 700); // Try again just in case
+      // Also try on finished_loading or move events
+      if (event.type === 'finished_loading' || (event.type === 'move' && event.newParentId === undefined)) {
+        setTimeout(closeFlyout, 400);
       }
     });
 
