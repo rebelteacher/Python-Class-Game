@@ -931,58 +931,49 @@ const TurtleBlocklyEditor = forwardRef(({
     const closeFlyout = () => {
       console.log('Attempting to close flyout...');
       try {
-        // Try getToolbox() method
         const toolbox = workspace.getToolbox();
-        console.log('Toolbox via getToolbox():', toolbox);
-        
         if (toolbox) {
-          // Try to get flyout
           const flyout = toolbox.getFlyout ? toolbox.getFlyout() : toolbox.flyout_;
-          console.log('Flyout:', flyout);
           
           if (flyout) {
             if (typeof flyout.setVisible === 'function') {
               flyout.setVisible(false);
-              console.log('Called flyout.setVisible(false)');
             }
             if (typeof flyout.hide === 'function') {
               flyout.hide();
-              console.log('Called flyout.hide()');
             }
           }
           
-          // Try clearSelection
           if (typeof toolbox.clearSelection === 'function') {
             toolbox.clearSelection();
-            console.log('Called toolbox.clearSelection()');
           }
-          
-          // Try setSelectedItem(null)
           if (typeof toolbox.setSelectedItem === 'function') {
             toolbox.setSelectedItem(null);
-            console.log('Called toolbox.setSelectedItem(null)');
           }
         }
         
-        // Global hideChaff
         Blockly.hideChaff();
-        console.log('Called Blockly.hideChaff()');
         
       } catch (e) {
         console.log('Flyout close error:', e);
       }
     };
 
+    // Track when we're dragging from flyout
+    let isDraggingFromFlyout = false;
+    
     workspace.addChangeListener((event) => {
-      // Only log non-frequent events
-      if (event.type !== 'viewport_change') {
-        console.log('Blockly event:', event.type);
+      // Detect when drag starts from flyout (block create happens)
+      if (event.type === Blockly.Events.BLOCK_CREATE) {
+        isDraggingFromFlyout = true;
       }
       
-      // When block drag ends
-      if (event.type === Blockly.Events.BLOCK_DRAG && event.isStart === false) {
-        console.log('Block drag ended - will close flyout');
-        setTimeout(closeFlyout, 300);
+      // When block drag ends AND we were dragging from flyout
+      if (event.type === Blockly.Events.BLOCK_DRAG && event.isStart === false && isDraggingFromFlyout) {
+        isDraggingFromFlyout = false;
+        // Wait for ALL Blockly events to settle, then close
+        setTimeout(closeFlyout, 500);
+        setTimeout(closeFlyout, 700); // Try again just in case
       }
     });
 
