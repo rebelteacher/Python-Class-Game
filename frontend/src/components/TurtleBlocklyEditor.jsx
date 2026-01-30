@@ -874,15 +874,6 @@ const TurtleBlocklyEditor = forwardRef(({
     });
 
     workspaceRef.current = workspace;
-    
-    // Enable autoClose on the flyout - Blockly 10 supports this
-    const toolbox = workspace.getToolbox();
-    if (toolbox) {
-      const flyout = toolbox.getFlyout();
-      if (flyout) {
-        flyout.autoClose = true;
-      }
-    }
 
     // Load initial XML if provided
     if (initialXml) {
