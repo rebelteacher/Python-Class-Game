@@ -1213,14 +1213,14 @@ export default function AssignmentPage({ user }) {
 
           {/* Right Side: Code Editor & Output */}
           <Panel defaultSize={80} minSize={60}>
-            <div className="pl-2 h-full">
+            <div className="pl-2 pr-0 h-full">
             {!isTeacher ? (
               /* Check if this is a block assignment - use simplified full-width layout */
               assignment.problems?.[currentProblemIndex]?.assignment_type === "block" ? (
                 /* Block-Based Layout - TurtleBlocklyEditor takes full space with inline preview */
-                <div className="h-full flex flex-col">
+                <div className="h-full flex flex-col pr-0">
                   {/* Compact header with score and submit */}
-                  <div className="flex items-center justify-between bg-white border-b px-3 py-2 flex-shrink-0">
+                  <div className="flex items-center justify-between bg-white border-b px-3 py-2 flex-shrink-0 rounded-tr-none">
                     <div className="flex items-center gap-3">
                       <span className="font-semibold text-gray-700">🧩 Block Coding</span>
                       {(() => {
@@ -1263,7 +1263,7 @@ export default function AssignmentPage({ user }) {
                   </div>
                   
                   {/* TurtleBlocklyEditor takes remaining space */}
-                  <div className="flex-1 min-h-0 p-1">
+                  <div className="flex-1 min-h-0 p-0">
                     <TurtleBlocklyEditor
                       key={`block-editor-${currentProblemIndex}-${assignment.problems[currentProblemIndex]?.id || 'new'}`}
                       ref={turtleBlocksRef}
