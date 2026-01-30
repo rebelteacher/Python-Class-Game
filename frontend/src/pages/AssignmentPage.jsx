@@ -1484,50 +1484,27 @@ export default function AssignmentPage({ user }) {
                     </CardTitle>
                   </CardHeader>
                   <CardContent className="p-0">
-                    {assignment.problems?.[currentProblemIndex]?.assignment_type === "block" ? (
-                      /* Block-Based - Turtle Blocks Editor - Minimal padding for max workspace */
-                      <div className="h-[620px] p-1">
-                        <TurtleBlocklyEditor
-                          key={`block-editor-${currentProblemIndex}-${assignment.problems[currentProblemIndex]?.id || 'new'}`}
-                          ref={turtleBlocksRef}
-                          initialXml={assignment.problems[currentProblemIndex]?.starter_blocks_xml || ""}
-                          onCodeChange={(newCode) => {
-                            setCode(newCode);
-                            // Reset hasRun when code changes
-                            setHasRunPerProblem(prev => ({
-                              ...prev,
-                              [getCurrentProblemId()]: false
-                            }));
-                          }}
-                          readOnly={problemsFinal[getCurrentProblemId()]}
-                          showPreview={false}
-                          showCodeToggle={true}
-                          height="600px"
-                        />
-                      </div>
-                    ) : (
-                      /* Regular Code Editor */
-                      <Editor
-                        height="600px"
-                        defaultLanguage="python"
-                        value={code}
-                        onChange={(value) => !problemsFinal[getCurrentProblemId()] && setCode(value || "")}
-                        theme={darkMode ? "vs-dark" : "vs-light"}
-                        onMount={(editor) => {
-                          codeEditorRef.current = editor;
-                        }}
-                        options={{
-                          minimap: { enabled: false },
-                          fontSize: 14,
-                          lineNumbers: "on",
-                          scrollBeyondLastLine: false,
-                          automaticLayout: true,
-                          wordWrap: "on",
-                          wrappingIndent: "indent",
-                          readOnly: problemsFinal[getCurrentProblemId()],
-                        }}
-                      />
-                    )}
+                    {/* Regular Code Editor - Block assignments are handled above */}
+                    <Editor
+                      height="600px"
+                      defaultLanguage="python"
+                      value={code}
+                      onChange={(value) => !problemsFinal[getCurrentProblemId()] && setCode(value || "")}
+                      theme={darkMode ? "vs-dark" : "vs-light"}
+                      onMount={(editor) => {
+                        codeEditorRef.current = editor;
+                      }}
+                      options={{
+                        minimap: { enabled: false },
+                        fontSize: 14,
+                        lineNumbers: "on",
+                        scrollBeyondLastLine: false,
+                        automaticLayout: true,
+                        wordWrap: "on",
+                        wrappingIndent: "indent",
+                        readOnly: problemsFinal[getCurrentProblemId()],
+                      }}
+                    />
                   </CardContent>
                 </Card>
                 </div>
