@@ -1016,9 +1016,9 @@ const TurtleBlocklyEditor = forwardRef(({
         </div>
       </div>
 
-      {/* Main content - Blockly workspace and preview side by side */}
-      <div className="flex-1 flex border border-t-0 rounded-b-lg min-h-0" style={{ height }}>
-        {/* Blockly workspace - takes up all available space except preview */}
+      {/* Main content - Blockly workspace takes full space */}
+      <div className="flex-1 flex border border-t-0 rounded-b-lg min-h-0 bg-white" style={{ height }}>
+        {/* Blockly workspace - takes up all available space */}
         <div 
           className="flex-1 relative min-w-0"
           style={{ display: showCode ? 'none' : 'block' }}
@@ -1031,21 +1031,21 @@ const TurtleBlocklyEditor = forwardRef(({
         </div>
         
         {showCode && (
-          <div className="flex-1 bg-gray-900 p-3 overflow-auto">
+          <div className="flex-1 bg-gray-900 p-2 overflow-auto">
             <pre className="text-green-400 font-mono text-xs whitespace-pre-wrap">
               {generatedCode || "# No blocks yet - drag blocks to generate code"}
             </pre>
           </div>
         )}
 
-        {/* Turtle preview */}
+        {/* Turtle preview - only when enabled */}
         {showPreview && (
-          <div className="w-64 border-l bg-white flex items-center justify-center p-2 flex-shrink-0">
+          <div className="w-56 border-l bg-white flex items-center justify-center p-1 flex-shrink-0">
             <AnimatedTurtle
               ref={turtleRef}
               code={generatedCode}
-              width={compact ? 200 : 240}
-              height={compact ? 200 : 240}
+              width={compact ? 180 : 200}
+              height={compact ? 180 : 200}
             />
           </div>
         )}
