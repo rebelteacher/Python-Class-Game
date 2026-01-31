@@ -336,14 +336,11 @@ const TOOLBOX = {
       name: '🐢 Motion',
       colour: '230',
       contents: [
-        { kind: 'block', type: 'turtle_forward', inputs: { STEPS: { shadow: { type: 'math_number', fields: { NUM: 50 } } } } },
-        { kind: 'block', type: 'turtle_backward', inputs: { STEPS: { shadow: { type: 'math_number', fields: { NUM: 50 } } } } },
-        { kind: 'block', type: 'turtle_right', inputs: { DEGREES: { shadow: { type: 'math_number', fields: { NUM: 90 } } } } },
-        { kind: 'block', type: 'turtle_left', inputs: { DEGREES: { shadow: { type: 'math_number', fields: { NUM: 90 } } } } },
-        { kind: 'block', type: 'turtle_goto', inputs: { 
-          X: { shadow: { type: 'math_number', fields: { NUM: 0 } } },
-          Y: { shadow: { type: 'math_number', fields: { NUM: 0 } } }
-        } },
+        { kind: 'block', type: 'turtle_forward' },
+        { kind: 'block', type: 'turtle_backward' },
+        { kind: 'block', type: 'turtle_right' },
+        { kind: 'block', type: 'turtle_left' },
+        { kind: 'block', type: 'turtle_goto' },
         { kind: 'block', type: 'turtle_home' }
       ]
     },
@@ -355,7 +352,7 @@ const TOOLBOX = {
         { kind: 'block', type: 'turtle_pendown' },
         { kind: 'block', type: 'turtle_penup' },
         { kind: 'block', type: 'turtle_color' },
-        { kind: 'block', type: 'turtle_pensize', inputs: { SIZE: { shadow: { type: 'math_number', fields: { NUM: 2 } } } } }
+        { kind: 'block', type: 'turtle_pensize' }
       ]
     },
     {
@@ -364,7 +361,7 @@ const TOOLBOX = {
       colour: '260',
       contents: [
         { kind: 'block', type: 'turtle_say' },
-        { kind: 'block', type: 'turtle_say_for', inputs: { SECONDS: { shadow: { type: 'math_number', fields: { NUM: 2 } } } } },
+        { kind: 'block', type: 'turtle_say_for' },
         { kind: 'block', type: 'turtle_hide' },
         { kind: 'block', type: 'turtle_show' }
       ]
@@ -374,11 +371,8 @@ const TOOLBOX = {
       name: '🔄 Loops',
       colour: '120',
       contents: [
-        { kind: 'block', type: 'turtle_repeat', inputs: { TIMES: { shadow: { type: 'math_number', fields: { NUM: 4 } } } } },
-        { kind: 'block', type: 'turtle_for', inputs: { 
-          FROM: { shadow: { type: 'math_number', fields: { NUM: 1 } } },
-          TO: { shadow: { type: 'math_number', fields: { NUM: 10 } } }
-        } },
+        { kind: 'block', type: 'turtle_repeat' },
+        { kind: 'block', type: 'turtle_for' },
         { kind: 'block', type: 'turtle_while' },
         { kind: 'block', type: 'controls_repeat_ext', inputs: { TIMES: { shadow: { type: 'math_number', fields: { NUM: 10 } } } } },
         { kind: 'block', type: 'controls_whileUntil' },
