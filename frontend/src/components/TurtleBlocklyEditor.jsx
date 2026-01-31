@@ -59,23 +59,35 @@ const blocklyStyles = `
 // This is a known bug fixed in later versions
 const suppressBlocklyFocusErrors = () => {
   if (typeof window !== 'undefined' && !window._blocklyErrorSuppressed) {
+    // Intercept errors before they trigger React error overlay
+    const originalWindowOnError = window.onerror;
+    window.onerror = function(message, source, lineno, colno, error) {
+      if (message?.includes('Attempted to focus unregistered tree') || 
+          error?.message?.includes('Attempted to focus unregistered tree')) {
+        return true; // Prevent the error from propagating
+      }
+      if (originalWindowOnError) {
+        return originalWindowOnError.call(this, message, source, lineno, colno, error);
+      }
+      return false;
+    };
+    
+    // Also suppress in console
     const originalConsoleError = console.error;
     console.error = function(...args) {
-      // Filter out Blockly focus manager errors
       const message = args[0]?.toString() || '';
       if (message.includes('Attempted to focus unregistered tree')) {
-        return; // Suppress this specific error
+        return;
       }
       originalConsoleError.apply(console, args);
     };
     
-    // Also catch unhandled errors from Blockly
-    window.addEventListener('error', (event) => {
-      if (event.message?.includes('Attempted to focus unregistered tree')) {
+    // Catch unhandled promise rejections too
+    window.addEventListener('unhandledrejection', (event) => {
+      if (event.reason?.message?.includes('Attempted to focus unregistered tree')) {
         event.preventDefault();
-        return false;
       }
-    }, true);
+    });
     
     window._blocklyErrorSuppressed = true;
   }
