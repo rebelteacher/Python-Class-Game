@@ -24,6 +24,17 @@ const blocklyStyles = `
   .blocklyFlyoutScrollbar {
     display: none !important;
   }
+  /* Ensure Blockly text input fields are properly accessible and editable */
+  .blocklyWidgetDiv {
+    z-index: 10000 !important;
+  }
+  .blocklyHtmlInput {
+    z-index: 10001 !important;
+    pointer-events: auto !important;
+  }
+  .blocklyDropDownDiv {
+    z-index: 10000 !important;
+  }
 `;
 
 // Define turtle-specific blocks
