@@ -741,7 +741,7 @@ export default function AssignmentLibrary({ user }) {
                 </DialogContent>
               </Dialog>
 
-              <Dialog open={createDialogOpen} onOpenChange={(open) => {
+              <Dialog modal={false} open={createDialogOpen} onOpenChange={(open) => {
                 setCreateDialogOpen(open);
                 // When opening, set assignment_type based on current filter
                 if (open && typeFilter) {
