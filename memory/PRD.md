@@ -20,6 +20,7 @@ A coding education platform for K-12 students featuring multiple programming env
 - Question bank with filtering and bulk edit
 - Skill quiz manager
 - **Teacher Panel** - View student progress and code submissions (Jan 2025)
+- **Block Problem Creation** - Teachers create block assignments using Blockly editors (Jan 2025)
 
 ### Student Features
 - Assignment completion with auto-grading
@@ -35,18 +36,25 @@ A coding education platform for K-12 students featuring multiple programming env
 - Code line highlighting during animation
 - Support for: forward, backward, left, right, goto, circle (with extent), penup, pendown, color, home, write, hideturtle, showturtle, etc.
 
-### Turtle Blocks (Unit 1)
+### Turtle Blocks (Unit 1) - UPDATED Jan 2025
 - Visual block-based programming using Blockly
-- **Motion blocks**: forward, backward, left, right, goto, home
-- **Pen blocks**: penup, pendown, color, pensize
-- **Looks blocks**: say (write text), say for seconds, hide turtle, show turtle (NEW - Jan 2025)
-- **Loop blocks**: repeat N times, count with variable, while
-- **Control blocks**: if, if-else
-- **Logic blocks**: comparisons, and/or, not, boolean values
-- **Variable blocks**: create, set, change, get variables
-- **Math blocks**: numbers, arithmetic (+, -, ×, ÷), random
+- **Full-screen layout** for students (Instructions | TurtleBlocklyEditor with inline preview)
+- **Flyout auto-close** fixed via CSS scrollbar hiding
+- **25% smaller blocks** for better workspace utilization
+- **Full Blockly toolbox** with all standard categories:
+  - **Motion blocks**: forward, backward, left, right, goto, home
+  - **Pen blocks**: penup, pendown, color, pensize
+  - **Looks blocks**: say (write text), say for seconds, hide turtle, show turtle
+  - **Loop blocks**: repeat, for, while, forEach, flow control
+  - **Control blocks**: if, if-else (both turtle-specific and standard Blockly)
+  - **Logic blocks**: comparisons, and/or, not, boolean values, null, ternary
+  - **Math blocks**: numbers, arithmetic, trig, constants, random, modulo, constrain
+  - **Text blocks**: text manipulation, join, length, indexOf, substring, print, prompt
+  - **Lists blocks**: create, repeat, length, indexOf, getIndex, setIndex, sort, reverse
+  - **Variables**: Custom variable creation with "Create variable..." button
+  - **Functions**: Custom function/procedure creation
 - Code toggle: Show generated Python code from blocks
-- Live turtle canvas preview
+- Live turtle canvas preview (larger size: 300x300px)
 - Replaces external Scratch integration
 
 ### Teacher Panel (Jan 2025)
