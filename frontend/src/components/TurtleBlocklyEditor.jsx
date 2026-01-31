@@ -93,8 +93,33 @@ const suppressBlocklyFocusErrors = () => {
   }
 };
 
+// Patch Blockly's FocusManager to handle unregistered trees gracefully
+const patchBlocklyFocusManager = () => {
+  if (Blockly && Blockly.FocusManager && !Blockly.FocusManager._patched) {
+    // Patch the focusTree method to not throw on unregistered trees
+    const proto = Blockly.FocusManager.prototype;
+    if (proto.focusTree) {
+      const originalFocusTree = proto.focusTree;
+      proto.focusTree = function(tree) {
+        try {
+          return originalFocusTree.call(this, tree);
+        } catch (e) {
+          if (e.message?.includes('Attempted to focus unregistered tree')) {
+            // Silently ignore this error
+            return;
+          }
+          throw e;
+        }
+      };
+    }
+    Blockly.FocusManager._patched = true;
+  }
+};
+
 // Call immediately to suppress errors before Blockly initializes
 suppressBlocklyFocusErrors();
+// Patch FocusManager after Blockly is loaded
+patchBlocklyFocusManager();
 
 // Define turtle-specific blocks
 const defineTurtleBlocks = () => {
