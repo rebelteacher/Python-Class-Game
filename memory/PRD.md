@@ -119,6 +119,7 @@ Teachers can now create "Block" type assignments using drag-and-drop Blockly edi
 - [x] **Teacher Panel** - View student progress and code during live lessons
 - [x] **Looks blocks** - say, say for seconds, hide/show turtle
 - [x] **Block Problem Creation Workflow** - Teachers create block problems with Blockly editors
+- [x] **Blockly Number Input Bug Fix** - Fixed issue where users couldn't type in number fields inside dialogs (Jan 31, 2025)
 
 ### P1 - Next Priority
 - [ ] Direct Image Upload for Lesson Materials (instead of pasting URLs, with click-to-enlarge for students)
