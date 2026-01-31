@@ -28,14 +28,30 @@ const blocklyStyles = `
   }
   /* Ensure Blockly widget div is visible and interactive */
   .blocklyWidgetDiv {
-    z-index: 10000 !important;
+    z-index: 100000 !important;
+    pointer-events: auto !important;
   }
   .blocklyHtmlInput {
-    z-index: 10001 !important;
+    z-index: 100001 !important;
     pointer-events: auto !important;
   }
   .blocklyDropDownDiv {
-    z-index: 10000 !important;
+    z-index: 100000 !important;
+    pointer-events: auto !important;
+  }
+  /* Force all field elements to be clickable */
+  .blocklyEditableText,
+  .blocklyField,
+  .blocklyFieldRect,
+  .blocklyFieldNumber,
+  .blocklyFieldTextInput {
+    pointer-events: auto !important;
+    cursor: pointer !important;
+  }
+  /* Ensure SVG elements within fields are interactive */
+  .blocklyEditableText *,
+  .blocklyFieldGroup * {
+    pointer-events: auto !important;
   }
 `;
 
