@@ -1039,6 +1039,18 @@ const TurtleBlocklyEditor = forwardRef(({
         <div className="flex items-center gap-1.5">
           <Blocks className="w-4 h-4" />
           <span className="font-bold text-sm">Turtle Blocks</span>
+          {/* Close Toolbox button - shows when flyout is open */}
+          {flyoutOpen && (
+            <Button
+              size="sm"
+              variant="ghost"
+              className="text-white hover:bg-red-500 text-xs h-6 px-2 ml-2 bg-red-600/50"
+              onClick={closeFlyout}
+            >
+              <X className="w-3 h-3 mr-1" />
+              Close Toolbox
+            </Button>
+          )}
         </div>
         <div className="flex items-center gap-1.5">
           {showCodeToggle && (
