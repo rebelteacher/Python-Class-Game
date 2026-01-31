@@ -938,35 +938,6 @@ const TurtleBlocklyEditor = forwardRef(({
 
     workspace.addChangeListener(handleChange);
 
-    // Track flyout open/close state
-    workspace.addChangeListener((event) => {
-      if (event.type === Blockly.Events.TOOLBOX_ITEM_SELECT) {
-        // Flyout opened when a category is selected
-        if (event.newItem) {
-          setFlyoutOpen(true);
-        } else {
-          setFlyoutOpen(false);
-        }
-      }
-      
-      // Close flyout when block is created (dragged from toolbox)
-      if (event.type === Blockly.Events.BLOCK_CREATE || 
-          (event.type === Blockly.Events.BLOCK_DRAG && !event.isStart)) {
-        setTimeout(() => {
-          try {
-            Blockly.hideChaff();
-            const toolbox = workspace.getToolbox();
-            if (toolbox && toolbox.clearSelection) {
-              toolbox.clearSelection();
-            }
-            setFlyoutOpen(false);
-          } catch (e) {
-            // Ignore
-          }
-        }, 200);
-      }
-    });
-
     // Initial code generation
     handleChange();
 
