@@ -838,15 +838,10 @@ const TurtleBlocklyEditor = forwardRef(({
         scaleSpeed: 1.2
       },
       trashcan: true,
-      scrollbars: {
-        horizontal: true,
-        vertical: true
-      },
+      scrollbars: true,
       sounds: false,
       renderer: 'zelos',
-      readOnly: readOnly,
-      // Disable keyboard navigation to prevent focus manager issues
-      keyboardNavigation: false
+      readOnly: readOnly
     });
 
     workspaceRef.current = workspace;
