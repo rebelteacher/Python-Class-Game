@@ -859,6 +859,39 @@ const TurtleBlocklyEditor = forwardRef(({
       }
     }, 100);
 
+    // Watch for Blockly input appearing and force focus
+    const observer = new MutationObserver((mutations) => {
+      mutations.forEach((mutation) => {
+        if (mutation.addedNodes.length > 0) {
+          mutation.addedNodes.forEach((node) => {
+            if (node.nodeType === 1) { // Element node
+              // Check if it's a blocklyHtmlInput
+              if (node.classList?.contains('blocklyHtmlInput')) {
+                setTimeout(() => {
+                  node.focus();
+                  node.select();
+                }, 10);
+              }
+              // Or check children
+              const input = node.querySelector?.('.blocklyHtmlInput');
+              if (input) {
+                setTimeout(() => {
+                  input.focus();
+                  input.select();
+                }, 10);
+              }
+            }
+          });
+        }
+      });
+    });
+    
+    // Start observing the document body for Blockly widget div
+    observer.observe(document.body, {
+      childList: true,
+      subtree: true
+    });
+
     // Load initial XML if provided
     if (initialXml) {
       try {
