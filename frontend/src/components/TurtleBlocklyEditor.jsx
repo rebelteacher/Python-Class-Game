@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef, useCallback, forwardRef, useImperativeHandle } from "react";
 import { Button } from "@/components/ui/button";
-import { Play, RotateCcw, Code, Blocks } from "lucide-react";
+import { Play, RotateCcw, Code, Blocks, X } from "lucide-react";
 import { toast } from "sonner";
 import * as Blockly from 'blockly';
 import AnimatedTurtle from "@/components/AnimatedTurtle";
