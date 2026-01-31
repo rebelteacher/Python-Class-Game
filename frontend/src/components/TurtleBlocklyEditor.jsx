@@ -126,10 +126,67 @@ const patchBlocklyFocusManager = () => {
   }
 };
 
+// Fix for Blockly's widget div aria-hidden and pointer-events issues
+const fixBlocklyWidgetDiv = () => {
+  if (typeof window === 'undefined' || window._blocklyWidgetObserver) return;
+  
+  // Create a MutationObserver to fix widget div issues as they occur
+  const observer = new MutationObserver((mutations) => {
+    mutations.forEach((mutation) => {
+      if (mutation.type === 'attributes') {
+        const target = mutation.target;
+        // Fix aria-hidden on blocklyWidgetDiv
+        if (target.classList?.contains('blocklyWidgetDiv')) {
+          if (target.getAttribute('aria-hidden') === 'true') {
+            target.removeAttribute('aria-hidden');
+          }
+          if (target.style.pointerEvents === 'none') {
+            target.style.pointerEvents = 'auto';
+          }
+          if (target.style.display === 'none') {
+            target.style.display = 'block';
+          }
+        }
+        // Also fix any child input elements
+        if (target.classList?.contains('blocklyHtmlInput')) {
+          target.style.pointerEvents = 'auto';
+        }
+      }
+      // Handle added nodes
+      if (mutation.addedNodes.length > 0) {
+        mutation.addedNodes.forEach((node) => {
+          if (node.classList?.contains('blocklyWidgetDiv')) {
+            node.removeAttribute('aria-hidden');
+            node.style.pointerEvents = 'auto';
+          }
+        });
+      }
+    });
+  });
+  
+  // Start observing the document body
+  observer.observe(document.body, {
+    attributes: true,
+    childList: true,
+    subtree: true,
+    attributeFilter: ['aria-hidden', 'style']
+  });
+  
+  window._blocklyWidgetObserver = observer;
+};
+
 // Call immediately to suppress errors before Blockly initializes
 suppressBlocklyFocusErrors();
 // Patch FocusManager after Blockly is loaded
 patchBlocklyFocusManager();
+// Setup widget div fix observer
+if (typeof window !== 'undefined') {
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', fixBlocklyWidgetDiv);
+  } else {
+    fixBlocklyWidgetDiv();
+  }
+}
 
 // Define turtle-specific blocks
 const defineTurtleBlocks = () => {
