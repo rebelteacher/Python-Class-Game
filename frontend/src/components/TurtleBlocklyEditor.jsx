@@ -55,8 +55,33 @@ const blocklyStyles = `
   }
 `;
 
+// Workaround for Blockly 12.3.x FocusManager bug
+// This patches the FocusManager to prevent "Attempted to focus unregistered tree" errors
+const patchBlocklyFocusManager = () => {
+  if (Blockly.FocusManager && !Blockly.FocusManager._patched) {
+    const originalFocusTree = Blockly.FocusManager.prototype.focusTree;
+    if (originalFocusTree) {
+      Blockly.FocusManager.prototype.focusTree = function(tree) {
+        try {
+          if (tree && typeof tree.isRegistered === 'function' && !tree.isRegistered()) {
+            console.warn('Blockly: Skipping focus on unregistered tree');
+            return;
+          }
+          originalFocusTree.call(this, tree);
+        } catch (e) {
+          console.warn('Blockly FocusManager error suppressed:', e.message);
+        }
+      };
+    }
+    Blockly.FocusManager._patched = true;
+  }
+};
+
 // Define turtle-specific blocks
 const defineTurtleBlocks = () => {
+  // Apply FocusManager patch
+  patchBlocklyFocusManager();
+  
   // ===== MOTION BLOCKS (Blue - Color 230) =====
   
   Blockly.Blocks['turtle_forward'] = {
