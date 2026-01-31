@@ -145,7 +145,7 @@ Teachers can now create "Block" type assignments using drag-and-drop Blockly edi
 ### Frontend Stack
 - React 18
 - Monaco Editor (code editing)
-- Blockly (block programming)
+- Blockly 10.4.3 (block programming - downgraded from v12 for stability)
 - Tailwind CSS + shadcn/ui
 - AnimatedTurtle component (custom)
 
@@ -159,6 +159,7 @@ Teachers can now create "Block" type assignments using drag-and-drop Blockly edi
 - `/app/frontend/src/components/AnimatedTurtle.jsx` - Turtle graphics engine (supports write command)
 - `/app/frontend/src/components/TeacherPanel.jsx` - Teacher Panel sidebar
 - `/app/frontend/src/components/TurtleBlocklyEditor.jsx` - Reusable Blockly editor component for block problems
+- `/app/frontend/src/components/ui/dialog.jsx` - Dialog component (modified to support `modal={false}` for Blockly compatibility)
 - `/app/frontend/src/pages/AssignmentPage.jsx` - Student/Teacher assignment view
 - `/app/frontend/src/pages/AssignmentLibrary.jsx` - Teacher problem management (with Blockly editors for block type)
 - `/app/frontend/src/pages/TurtleBlocks.jsx` - Blockly editor for turtle programming (with Looks category)
