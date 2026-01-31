@@ -45,10 +45,9 @@ const defineTurtleBlocks = () => {
   
   Blockly.Blocks['turtle_forward'] = {
     init: function() {
-      this.appendValueInput("STEPS")
-          .setCheck("Number")
-          .appendField("forward");
       this.appendDummyInput()
+          .appendField("forward")
+          .appendField(new Blockly.FieldNumber(50, 0, 1000, 1), "STEPS")
           .appendField("steps");
       this.setInputsInline(true);
       this.setPreviousStatement(true, null);
@@ -60,10 +59,9 @@ const defineTurtleBlocks = () => {
 
   Blockly.Blocks['turtle_backward'] = {
     init: function() {
-      this.appendValueInput("STEPS")
-          .setCheck("Number")
-          .appendField("backward");
       this.appendDummyInput()
+          .appendField("backward")
+          .appendField(new Blockly.FieldNumber(50, 0, 1000, 1), "STEPS")
           .appendField("steps");
       this.setInputsInline(true);
       this.setPreviousStatement(true, null);
@@ -75,9 +73,31 @@ const defineTurtleBlocks = () => {
 
   Blockly.Blocks['turtle_right'] = {
     init: function() {
-      this.appendValueInput("DEGREES")
-          .setCheck("Number")
-          .appendField("turn right");
+      this.appendDummyInput()
+          .appendField("turn right")
+          .appendField(new Blockly.FieldNumber(90, 0, 360, 1), "DEGREES")
+          .appendField("degrees");
+      this.setInputsInline(true);
+      this.setPreviousStatement(true, null);
+      this.setNextStatement(true, null);
+      this.setColour(230);
+      this.setTooltip("Turn the turtle clockwise");
+    }
+  };
+
+  Blockly.Blocks['turtle_left'] = {
+    init: function() {
+      this.appendDummyInput()
+          .appendField("turn left")
+          .appendField(new Blockly.FieldNumber(90, 0, 360, 1), "DEGREES")
+          .appendField("degrees");
+      this.setInputsInline(true);
+      this.setPreviousStatement(true, null);
+      this.setNextStatement(true, null);
+      this.setColour(230);
+      this.setTooltip("Turn the turtle counter-clockwise");
+    }
+  };
       this.appendDummyInput()
           .appendField("degrees");
       this.setInputsInline(true);
