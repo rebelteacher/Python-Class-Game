@@ -827,6 +827,22 @@ const TurtleBlocklyEditor = forwardRef(({
 
     workspaceRef.current = workspace;
 
+    // Fix pointer-events for fields inside modals/dialogs
+    // Blockly fields need pointer-events: auto to be clickable
+    setTimeout(() => {
+      const blocklyDiv = blocklyDivRef.current;
+      if (blocklyDiv) {
+        // Force resize to ensure proper layout
+        Blockly.svgResize(workspace);
+        
+        // Ensure all field elements are clickable
+        const fieldElements = blocklyDiv.querySelectorAll('.blocklyEditableText, .blocklyField, .blocklyFieldRect, .blocklyNonEditableText');
+        fieldElements.forEach(el => {
+          el.style.pointerEvents = 'auto';
+        });
+      }
+    }, 100);
+
     // Load initial XML if provided
     if (initialXml) {
       try {
