@@ -1240,7 +1240,7 @@ export default function AssignmentPage({ user }) {
                     <div className="flex items-center gap-2">
                       <Button
                         data-testid="submit-code-btn"
-                        onClick={() => handleSubmitCode()}
+                        onClick={() => handleSubmit()}
                         disabled={submitting || problemsFinal[getCurrentProblemId()]}
                         size="sm"
                         className="bg-indigo-600 hover:bg-indigo-700"
@@ -1250,7 +1250,7 @@ export default function AssignmentPage({ user }) {
                       {!problemsFinal[getCurrentProblemId()] && (
                         <Button
                           data-testid="done-btn"
-                          onClick={() => handleMarkDone()}
+                          onClick={() => handleMarkFinal()}
                           disabled={submitting}
                           size="sm"
                           variant="outline"
