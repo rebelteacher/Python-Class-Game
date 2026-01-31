@@ -889,7 +889,9 @@ const TurtleBlocklyEditor = forwardRef(({
       },
       sounds: false,
       renderer: 'zelos',
-      readOnly: readOnly
+      readOnly: readOnly,
+      // Disable keyboard navigation to prevent focus manager issues
+      keyboardNavigation: false
     });
 
     workspaceRef.current = workspace;
