@@ -935,6 +935,7 @@ const TurtleBlocklyEditor = forwardRef(({
 
     return () => {
       window.removeEventListener('resize', handleResize);
+      observer.disconnect(); // Clean up the MutationObserver
       if (workspace) {
         workspace.dispose();
       }
