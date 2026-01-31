@@ -4,7 +4,11 @@ import { X } from "lucide-react"
 
 import { cn } from "@/lib/utils"
 
-const Dialog = DialogPrimitive.Root
+// Create a wrapper that allows modal prop to be passed
+const Dialog = React.forwardRef(({ modal = true, ...props }, ref) => (
+  <DialogPrimitive.Root modal={modal} {...props} />
+));
+Dialog.displayName = "Dialog"
 
 const DialogTrigger = DialogPrimitive.Trigger
 
