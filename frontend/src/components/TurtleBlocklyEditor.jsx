@@ -959,39 +959,30 @@ const TurtleBlocklyEditor = forwardRef(({
 
     workspace.addChangeListener(handleChange);
 
-    // Close flyout when block is created (dragged from toolbox)
+    // Track flyout open/close state
     workspace.addChangeListener((event) => {
+      if (event.type === Blockly.Events.TOOLBOX_ITEM_SELECT) {
+        // Flyout opened when a category is selected
+        if (event.newItem) {
+          setFlyoutOpen(true);
+        } else {
+          setFlyoutOpen(false);
+        }
+      }
+      
+      // Close flyout when block is created (dragged from toolbox)
       if (event.type === Blockly.Events.BLOCK_CREATE || 
           (event.type === Blockly.Events.BLOCK_DRAG && !event.isStart)) {
-        // Delay to let block settle, then close flyout
         setTimeout(() => {
           try {
-            // Method 1: hideChaff
             Blockly.hideChaff();
-            
-            // Method 2: Click on workspace to close flyout
-            const svg = workspace.getParentSvg();
-            if (svg) {
-              const rect = svg.getBoundingClientRect();
-              const clickX = rect.left + rect.width / 2;
-              const clickY = rect.top + rect.height / 2;
-              
-              const mouseDown = new MouseEvent('mousedown', {
-                bubbles: true,
-                cancelable: true,
-                clientX: clickX,
-                clientY: clickY
-              });
-              svg.dispatchEvent(mouseDown);
-            }
-            
-            // Method 3: Clear toolbox selection
             const toolbox = workspace.getToolbox();
             if (toolbox && toolbox.clearSelection) {
               toolbox.clearSelection();
             }
+            setFlyoutOpen(false);
           } catch (e) {
-            // Ignore errors
+            // Ignore
           }
         }, 200);
       }
