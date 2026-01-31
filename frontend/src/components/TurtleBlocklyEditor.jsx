@@ -176,9 +176,9 @@ const defineTurtleBlocks = () => {
 
   Blockly.Blocks['turtle_pensize'] = {
     init: function() {
-      this.appendValueInput("SIZE")
-          .setCheck("Number")
-          .appendField("set pen size to");
+      this.appendDummyInput()
+          .appendField("set pen size to")
+          .appendField(new Blockly.FieldNumber(2, 1, 50, 1), "SIZE");
       this.setInputsInline(true);
       this.setPreviousStatement(true, null);
       this.setNextStatement(true, null);
