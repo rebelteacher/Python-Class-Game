@@ -5,7 +5,7 @@ import { toast } from "sonner";
 import * as Blockly from 'blockly';
 import AnimatedTurtle from "@/components/AnimatedTurtle";
 
-// CSS to fix Blockly layout issues
+// CSS to fix Blockly layout issues and hide flyout scrollbar
 const blocklyStyles = `
   .injectionDiv {
     position: absolute !important;
@@ -15,6 +15,16 @@ const blocklyStyles = `
   .blocklySvg {
     width: 100% !important;
     height: 100% !important;
+  }
+  /* Hide flyout scrollbar */
+  .blocklyFlyout {
+    overflow: hidden !important;
+  }
+  .blocklyFlyoutScrollbar {
+    display: none !important;
+  }
+  .blocklyScrollbarVertical {
+    display: none !important;
   }
 `;
 
