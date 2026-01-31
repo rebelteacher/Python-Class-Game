@@ -16,14 +16,12 @@ const blocklyStyles = `
     width: 100% !important;
     height: 100% !important;
   }
-  /* Hide flyout scrollbar */
-  .blocklyFlyout {
-    overflow: hidden !important;
-  }
-  .blocklyFlyoutScrollbar {
+  /* Hide only the flyout scrollbar, not workspace scrollbars */
+  .blocklyFlyout .blocklyScrollbarVertical,
+  .blocklyFlyout .blocklyScrollbarHorizontal {
     display: none !important;
   }
-  .blocklyScrollbarVertical {
+  .blocklyFlyoutScrollbar {
     display: none !important;
   }
 `;
