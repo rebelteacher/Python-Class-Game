@@ -206,10 +206,8 @@ const defineTurtleBlocks = () => {
       this.appendDummyInput()
           .appendField("say")
           .appendField(new Blockly.FieldTextInput("Hello!"), "TEXT")
-          .appendField("for");
-      this.appendValueInput("SECONDS")
-          .setCheck("Number");
-      this.appendDummyInput()
+          .appendField("for")
+          .appendField(new Blockly.FieldNumber(2, 0.1, 60, 0.1), "SECONDS")
           .appendField("seconds");
       this.setInputsInline(true);
       this.setPreviousStatement(true, null);
