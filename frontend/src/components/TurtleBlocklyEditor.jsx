@@ -941,6 +941,18 @@ const TurtleBlocklyEditor = forwardRef(({
 
     workspace.addChangeListener(handleChange);
 
+    // Close flyout when block is created (dragged from toolbox)
+    workspace.addChangeListener((event) => {
+      if (event.type === Blockly.Events.BLOCK_CREATE) {
+        // This block was created from flyout - close it
+        Blockly.hideChaff();
+        const toolbox = workspace.getToolbox();
+        if (toolbox) {
+          toolbox.clearSelection();
+        }
+      }
+    });
+
     // Initial code generation
     handleChange();
 
