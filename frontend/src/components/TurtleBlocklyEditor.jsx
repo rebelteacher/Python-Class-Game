@@ -243,10 +243,9 @@ const defineTurtleBlocks = () => {
   
   Blockly.Blocks['turtle_repeat'] = {
     init: function() {
-      this.appendValueInput("TIMES")
-          .setCheck("Number")
-          .appendField("repeat");
       this.appendDummyInput()
+          .appendField("repeat")
+          .appendField(new Blockly.FieldNumber(10, 1, 1000, 1), "TIMES")
           .appendField("times");
       this.appendStatementInput("DO")
           .appendField("do");
@@ -263,13 +262,10 @@ const defineTurtleBlocks = () => {
       this.appendDummyInput()
           .appendField("count with")
           .appendField(new Blockly.FieldVariable("i"), "VAR")
-          .appendField("from");
-      this.appendValueInput("FROM")
-          .setCheck("Number");
-      this.appendDummyInput()
-          .appendField("to");
-      this.appendValueInput("TO")
-          .setCheck("Number");
+          .appendField("from")
+          .appendField(new Blockly.FieldNumber(1, -1000, 1000, 1), "FROM")
+          .appendField("to")
+          .appendField(new Blockly.FieldNumber(10, -1000, 1000, 1), "TO");
       this.appendStatementInput("DO")
           .appendField("do");
       this.setInputsInline(true);
