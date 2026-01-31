@@ -98,41 +98,14 @@ const defineTurtleBlocks = () => {
       this.setTooltip("Turn the turtle counter-clockwise");
     }
   };
-      this.appendDummyInput()
-          .appendField("degrees");
-      this.setInputsInline(true);
-      this.setPreviousStatement(true, null);
-      this.setNextStatement(true, null);
-      this.setColour(230);
-      this.setTooltip("Turn the turtle clockwise");
-    }
-  };
-
-  Blockly.Blocks['turtle_left'] = {
-    init: function() {
-      this.appendValueInput("DEGREES")
-          .setCheck("Number")
-          .appendField("turn left");
-      this.appendDummyInput()
-          .appendField("degrees");
-      this.setInputsInline(true);
-      this.setPreviousStatement(true, null);
-      this.setNextStatement(true, null);
-      this.setColour(230);
-      this.setTooltip("Turn the turtle counter-clockwise");
-    }
-  };
 
   Blockly.Blocks['turtle_goto'] = {
     init: function() {
       this.appendDummyInput()
-          .appendField("go to x:");
-      this.appendValueInput("X")
-          .setCheck("Number");
-      this.appendDummyInput()
-          .appendField("y:");
-      this.appendValueInput("Y")
-          .setCheck("Number");
+          .appendField("go to x:")
+          .appendField(new Blockly.FieldNumber(0, -500, 500, 1), "X")
+          .appendField("y:")
+          .appendField(new Blockly.FieldNumber(0, -500, 500, 1), "Y");
       this.setInputsInline(true);
       this.setPreviousStatement(true, null);
       this.setNextStatement(true, null);
