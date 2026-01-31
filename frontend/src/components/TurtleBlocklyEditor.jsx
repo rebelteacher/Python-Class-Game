@@ -568,28 +568,28 @@ const generatePythonCode = (workspace) => {
     
     switch (block.type) {
       case 'turtle_forward': {
-        const steps = getValueCode(block, 'STEPS', '50');
+        const steps = block.getFieldValue('STEPS') || '50';
         blockCode = `${indent}t.forward(${steps})\n`;
         break;
       }
       case 'turtle_backward': {
-        const steps = getValueCode(block, 'STEPS', '50');
+        const steps = block.getFieldValue('STEPS') || '50';
         blockCode = `${indent}t.backward(${steps})\n`;
         break;
       }
       case 'turtle_right': {
-        const degrees = getValueCode(block, 'DEGREES', '90');
+        const degrees = block.getFieldValue('DEGREES') || '90';
         blockCode = `${indent}t.right(${degrees})\n`;
         break;
       }
       case 'turtle_left': {
-        const degrees = getValueCode(block, 'DEGREES', '90');
+        const degrees = block.getFieldValue('DEGREES') || '90';
         blockCode = `${indent}t.left(${degrees})\n`;
         break;
       }
       case 'turtle_goto': {
-        const x = getValueCode(block, 'X', '0');
-        const y = getValueCode(block, 'Y', '0');
+        const x = block.getFieldValue('X') || '0';
+        const y = block.getFieldValue('Y') || '0';
         blockCode = `${indent}t.goto(${x}, ${y})\n`;
         break;
       }
@@ -608,7 +608,7 @@ const generatePythonCode = (workspace) => {
         break;
       }
       case 'turtle_pensize': {
-        const size = getValueCode(block, 'SIZE', '2');
+        const size = block.getFieldValue('SIZE') || '2';
         blockCode = `${indent}t.pensize(${size})\n`;
         break;
       }
@@ -629,7 +629,7 @@ const generatePythonCode = (workspace) => {
         blockCode = `${indent}t.showturtle()\n`;
         break;
       case 'turtle_repeat': {
-        const times = getValueCode(block, 'TIMES', '4');
+        const times = block.getFieldValue('TIMES') || '4';
         blockCode = `${indent}for _ in range(${times}):\n`;
         const doBlock = block.getInputTargetBlock('DO');
         if (doBlock) {
@@ -641,8 +641,8 @@ const generatePythonCode = (workspace) => {
       }
       case 'turtle_for': {
         const varName = block.getField('VAR')?.getText() || 'i';
-        const from = getValueCode(block, 'FROM', '1');
-        const to = getValueCode(block, 'TO', '10');
+        const from = block.getFieldValue('FROM') || '1';
+        const to = block.getFieldValue('TO') || '10';
         blockCode = `${indent}for ${varName} in range(${from}, ${to} + 1):\n`;
         const doBlock = block.getInputTargetBlock('DO');
         if (doBlock) {
