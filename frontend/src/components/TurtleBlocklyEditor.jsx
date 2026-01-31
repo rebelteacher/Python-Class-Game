@@ -477,7 +477,7 @@ const defineTurtleBlocks = () => {
 };
 
 // Toolbox configuration
-// Category Toolbox - organized by type with autoClose enabled
+// Full Category Toolbox with all Blockly features
 const TOOLBOX = {
   kind: 'categoryToolbox',
   contents: [
@@ -522,14 +522,23 @@ const TOOLBOX = {
     {
       kind: 'category',
       name: '🔄 Loops',
-      colour: '20',
+      colour: '120',
       contents: [
         { kind: 'block', type: 'turtle_repeat', inputs: { TIMES: { shadow: { type: 'math_number', fields: { NUM: 4 } } } } },
         { kind: 'block', type: 'turtle_for', inputs: { 
           FROM: { shadow: { type: 'math_number', fields: { NUM: 1 } } },
           TO: { shadow: { type: 'math_number', fields: { NUM: 10 } } }
         } },
-        { kind: 'block', type: 'turtle_while' }
+        { kind: 'block', type: 'turtle_while' },
+        { kind: 'block', type: 'controls_repeat_ext', inputs: { TIMES: { shadow: { type: 'math_number', fields: { NUM: 10 } } } } },
+        { kind: 'block', type: 'controls_whileUntil' },
+        { kind: 'block', type: 'controls_for', inputs: {
+          FROM: { shadow: { type: 'math_number', fields: { NUM: 1 } } },
+          TO: { shadow: { type: 'math_number', fields: { NUM: 10 } } },
+          BY: { shadow: { type: 'math_number', fields: { NUM: 1 } } }
+        }},
+        { kind: 'block', type: 'controls_forEach' },
+        { kind: 'block', type: 'controls_flow_statements' }
       ]
     },
     {
@@ -538,7 +547,9 @@ const TOOLBOX = {
       colour: '210',
       contents: [
         { kind: 'block', type: 'turtle_if' },
-        { kind: 'block', type: 'turtle_if_else' }
+        { kind: 'block', type: 'turtle_if_else' },
+        { kind: 'block', type: 'controls_if' },
+        { kind: 'block', type: 'controls_ifelse' }
       ]
     },
     {
@@ -548,29 +559,93 @@ const TOOLBOX = {
       contents: [
         { kind: 'block', type: 'logic_compare' },
         { kind: 'block', type: 'logic_operation' },
-        { kind: 'block', type: 'logic_not' },
-        { kind: 'block', type: 'logic_boolean' }
+        { kind: 'block', type: 'logic_negate' },
+        { kind: 'block', type: 'logic_boolean' },
+        { kind: 'block', type: 'logic_null' },
+        { kind: 'block', type: 'logic_ternary' }
+      ]
+    },
+    {
+      kind: 'category',
+      name: '🔢 Math',
+      colour: '230',
+      contents: [
+        { kind: 'block', type: 'math_number' },
+        { kind: 'block', type: 'math_arithmetic' },
+        { kind: 'block', type: 'math_single' },
+        { kind: 'block', type: 'math_trig' },
+        { kind: 'block', type: 'math_constant' },
+        { kind: 'block', type: 'math_number_property' },
+        { kind: 'block', type: 'math_round' },
+        { kind: 'block', type: 'math_on_list' },
+        { kind: 'block', type: 'math_modulo' },
+        { kind: 'block', type: 'math_constrain', inputs: {
+          LOW: { shadow: { type: 'math_number', fields: { NUM: 1 } } },
+          HIGH: { shadow: { type: 'math_number', fields: { NUM: 100 } } }
+        }},
+        { kind: 'block', type: 'math_random_int', inputs: {
+          FROM: { shadow: { type: 'math_number', fields: { NUM: 1 } } },
+          TO: { shadow: { type: 'math_number', fields: { NUM: 100 } } }
+        }},
+        { kind: 'block', type: 'math_random_float' }
+      ]
+    },
+    {
+      kind: 'category',
+      name: '📝 Text',
+      colour: '160',
+      contents: [
+        { kind: 'block', type: 'text' },
+        { kind: 'block', type: 'text_join' },
+        { kind: 'block', type: 'text_append', inputs: { TEXT: { shadow: { type: 'text', fields: { TEXT: '' } } } } },
+        { kind: 'block', type: 'text_length' },
+        { kind: 'block', type: 'text_isEmpty' },
+        { kind: 'block', type: 'text_indexOf', inputs: { 
+          VALUE: { block: { type: 'variables_get' } },
+          FIND: { shadow: { type: 'text', fields: { TEXT: 'abc' } } }
+        }},
+        { kind: 'block', type: 'text_charAt', inputs: {
+          VALUE: { block: { type: 'variables_get' } }
+        }},
+        { kind: 'block', type: 'text_getSubstring', inputs: {
+          STRING: { block: { type: 'variables_get' } }
+        }},
+        { kind: 'block', type: 'text_changeCase' },
+        { kind: 'block', type: 'text_trim' },
+        { kind: 'block', type: 'text_print' },
+        { kind: 'block', type: 'text_prompt_ext', inputs: { TEXT: { shadow: { type: 'text', fields: { TEXT: 'Enter text:' } } } } }
+      ]
+    },
+    {
+      kind: 'category',
+      name: '📋 Lists',
+      colour: '260',
+      contents: [
+        { kind: 'block', type: 'lists_create_with' },
+        { kind: 'block', type: 'lists_create_with', extraState: { itemCount: 0 } },
+        { kind: 'block', type: 'lists_repeat', inputs: { NUM: { shadow: { type: 'math_number', fields: { NUM: 5 } } } } },
+        { kind: 'block', type: 'lists_length' },
+        { kind: 'block', type: 'lists_isEmpty' },
+        { kind: 'block', type: 'lists_indexOf', inputs: { VALUE: { block: { type: 'variables_get' } } } },
+        { kind: 'block', type: 'lists_getIndex', inputs: { VALUE: { block: { type: 'variables_get' } } } },
+        { kind: 'block', type: 'lists_setIndex', inputs: { LIST: { block: { type: 'variables_get' } } } },
+        { kind: 'block', type: 'lists_getSublist', inputs: { LIST: { block: { type: 'variables_get' } } } },
+        { kind: 'block', type: 'lists_split', inputs: { DELIM: { shadow: { type: 'text', fields: { TEXT: ',' } } } } },
+        { kind: 'block', type: 'lists_sort' },
+        { kind: 'block', type: 'lists_reverse' }
       ]
     },
     {
       kind: 'category',
       name: '📦 Variables',
       colour: '330',
-      contents: [
-        { kind: 'block', type: 'variables_get' },
-        { kind: 'block', type: 'variables_set' },
-        { kind: 'block', type: 'variables_change' }
-      ]
+      custom: 'VARIABLE'
     },
     {
       kind: 'category',
-      name: '🔢 Math',
+      name: '🔧 Functions',
       colour: '290',
-      contents: [
-        { kind: 'block', type: 'math_number' },
-        { kind: 'block', type: 'math_arithmetic' },
-        { kind: 'block', type: 'math_random' }
-      ]
+      custom: 'PROCEDURE'
     }
   ]
 };
