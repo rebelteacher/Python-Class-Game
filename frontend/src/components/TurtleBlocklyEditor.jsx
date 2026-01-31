@@ -823,28 +823,7 @@ const TurtleBlocklyEditor = forwardRef(({
   const [generatedCode, setGeneratedCode] = useState("");
   const [showCode, setShowCode] = useState(false);
   const [isRunning, setIsRunning] = useState(false);
-  const [flyoutOpen, setFlyoutOpen] = useState(false);
   const blocksDefinedRef = useRef(false);
-
-  // Function to close the flyout
-  const closeFlyout = useCallback(() => {
-    if (workspaceRef.current) {
-      try {
-        Blockly.hideChaff();
-        const toolbox = workspaceRef.current.getToolbox();
-        if (toolbox) {
-          toolbox.clearSelection();
-          const flyout = toolbox.getFlyout();
-          if (flyout) {
-            flyout.hide();
-          }
-        }
-        setFlyoutOpen(false);
-      } catch (e) {
-        console.log('Close flyout error:', e);
-      }
-    }
-  }, []);
 
   // Expose methods via ref
   useImperativeHandle(ref, () => ({
