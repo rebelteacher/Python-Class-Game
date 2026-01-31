@@ -23,7 +23,7 @@ const DialogOverlay = React.forwardRef(({ className, ...props }, ref) => (
 ))
 DialogOverlay.displayName = DialogPrimitive.Overlay.displayName
 
-const DialogContent = React.forwardRef(({ className, children, onPointerDownOutside, ...props }, ref) => (
+const DialogContent = React.forwardRef(({ className, children, onPointerDownOutside, onFocusOutside, ...props }, ref) => (
   <DialogPortal>
     <DialogOverlay />
     <DialogPrimitive.Content
@@ -41,6 +41,29 @@ const DialogContent = React.forwardRef(({ className, children, onPointerDownOuts
         // Call original handler if provided
         if (onPointerDownOutside) {
           onPointerDownOutside(e);
+        }
+      }}
+      onFocusOutside={(e) => {
+        // Prevent dialog from stealing focus from Blockly input
+        const target = e.target;
+        if (target?.closest?.('.blocklyWidgetDiv') || 
+            target?.closest?.('.blocklyDropDownDiv') ||
+            target?.classList?.contains('blocklyHtmlInput')) {
+          e.preventDefault();
+          return;
+        }
+        if (onFocusOutside) {
+          onFocusOutside(e);
+        }
+      }}
+      onInteractOutside={(e) => {
+        // Prevent any interaction outside handling for Blockly elements
+        const target = e.target;
+        if (target?.closest?.('.blocklyWidgetDiv') || 
+            target?.closest?.('.blocklyDropDownDiv') ||
+            target?.classList?.contains('blocklyHtmlInput')) {
+          e.preventDefault();
+          return;
         }
       }}
       className={cn(
