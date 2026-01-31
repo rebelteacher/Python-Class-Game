@@ -3,6 +3,8 @@ import { Button } from "@/components/ui/button";
 import { Play, RotateCcw, Code, Blocks } from "lucide-react";
 import { toast } from "sonner";
 import * as Blockly from 'blockly';
+// Import standard Blockly blocks library (math, logic, loops, etc.)
+import 'blockly/blocks';
 import AnimatedTurtle from "@/components/AnimatedTurtle";
 
 // CSS to fix Blockly layout issues and hide flyout scrollbar
