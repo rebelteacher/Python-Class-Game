@@ -55,33 +55,37 @@ const blocklyStyles = `
   }
 `;
 
-// Workaround for Blockly 12.3.x FocusManager bug
-// This patches the FocusManager to prevent "Attempted to focus unregistered tree" errors
-const patchBlocklyFocusManager = () => {
-  if (Blockly.FocusManager && !Blockly.FocusManager._patched) {
-    const originalFocusTree = Blockly.FocusManager.prototype.focusTree;
-    if (originalFocusTree) {
-      Blockly.FocusManager.prototype.focusTree = function(tree) {
-        try {
-          if (tree && typeof tree.isRegistered === 'function' && !tree.isRegistered()) {
-            console.warn('Blockly: Skipping focus on unregistered tree');
-            return;
-          }
-          originalFocusTree.call(this, tree);
-        } catch (e) {
-          console.warn('Blockly FocusManager error suppressed:', e.message);
-        }
-      };
-    }
-    Blockly.FocusManager._patched = true;
+// Suppress Blockly FocusManager errors that occur in v12.3.x
+// This is a known bug fixed in later versions
+const suppressBlocklyFocusErrors = () => {
+  if (typeof window !== 'undefined' && !window._blocklyErrorSuppressed) {
+    const originalConsoleError = console.error;
+    console.error = function(...args) {
+      // Filter out Blockly focus manager errors
+      const message = args[0]?.toString() || '';
+      if (message.includes('Attempted to focus unregistered tree')) {
+        return; // Suppress this specific error
+      }
+      originalConsoleError.apply(console, args);
+    };
+    
+    // Also catch unhandled errors from Blockly
+    window.addEventListener('error', (event) => {
+      if (event.message?.includes('Attempted to focus unregistered tree')) {
+        event.preventDefault();
+        return false;
+      }
+    }, true);
+    
+    window._blocklyErrorSuppressed = true;
   }
 };
 
+// Call immediately to suppress errors before Blockly initializes
+suppressBlocklyFocusErrors();
+
 // Define turtle-specific blocks
 const defineTurtleBlocks = () => {
-  // Apply FocusManager patch
-  patchBlocklyFocusManager();
-  
   // ===== MOTION BLOCKS (Blue - Color 230) =====
   
   Blockly.Blocks['turtle_forward'] = {
