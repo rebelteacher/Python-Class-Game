@@ -26,42 +26,16 @@ const blocklyStyles = `
   .blocklyFlyoutScrollbar {
     display: none !important;
   }
-  /* CRITICAL: Force Blockly widget div to be visible and interactive */
+  /* Ensure Blockly widget div is visible and interactive */
   .blocklyWidgetDiv {
     z-index: 10000 !important;
-    position: fixed !important;
-    display: block !important;
-    pointer-events: auto !important;
-    visibility: visible !important;
   }
-  /* Force the HTML input to be editable */
   .blocklyHtmlInput {
     z-index: 10001 !important;
     pointer-events: auto !important;
-    -webkit-user-select: text !important;
-    user-select: text !important;
-    display: block !important;
   }
   .blocklyDropDownDiv {
     z-index: 10000 !important;
-    pointer-events: auto !important;
-  }
-  /* Ensure number and text field inputs are clickable and editable */
-  .blocklyEditableText {
-    cursor: text !important;
-    pointer-events: auto !important;
-  }
-  /* Make sure the input overlay appears and is interactive */
-  .blocklyHtmlTextAreaInput,
-  .blocklyTextInput {
-    z-index: 10002 !important;
-    pointer-events: auto !important;
-    -webkit-user-select: text !important;
-    user-select: text !important;
-  }
-  /* Override any inline pointer-events: none that Blockly might apply */
-  .blocklyWidgetDiv * {
-    pointer-events: auto !important;
   }
 `;
 
