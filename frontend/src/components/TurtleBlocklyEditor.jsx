@@ -475,7 +475,6 @@ const TOOLBOX = {
       kind: 'category',
       name: '🐢 Motion',
       colour: '230',
-      custom: null,
       contents: [
         { kind: 'block', type: 'turtle_forward', inputs: { STEPS: { shadow: { type: 'math_number', fields: { NUM: 50 } } } } },
         { kind: 'block', type: 'turtle_backward', inputs: { STEPS: { shadow: { type: 'math_number', fields: { NUM: 50 } } } } },
