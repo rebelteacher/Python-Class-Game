@@ -872,11 +872,9 @@ const TurtleBlocklyEditor = forwardRef(({
       blocksDefinedRef.current = true;
     }
 
-    // Create workspace with horizontal toolbox at top
+    // Create workspace - standard vertical layout
     const workspace = Blockly.inject(blocklyDivRef.current, {
       toolbox: TOOLBOX,
-      horizontalLayout: true,
-      toolboxPosition: 'start',
       grid: {
         spacing: 20,
         length: 3,
@@ -902,16 +900,6 @@ const TurtleBlocklyEditor = forwardRef(({
     });
 
     workspaceRef.current = workspace;
-
-    // Explicitly set autoClose on the flyout
-    const toolbox = workspace.getToolbox();
-    if (toolbox) {
-      const flyout = toolbox.getFlyout();
-      if (flyout) {
-        flyout.autoClose = true;
-        console.log('Set flyout.autoClose = true');
-      }
-    }
 
     // Load initial XML if provided
     if (initialXml) {
