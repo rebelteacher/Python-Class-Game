@@ -27,13 +27,29 @@ const blocklyStyles = `
   /* Ensure Blockly text input fields are properly accessible and editable */
   .blocklyWidgetDiv {
     z-index: 10000 !important;
+    position: fixed !important;
   }
   .blocklyHtmlInput {
     z-index: 10001 !important;
     pointer-events: auto !important;
+    -webkit-user-select: text !important;
+    user-select: text !important;
   }
   .blocklyDropDownDiv {
     z-index: 10000 !important;
+  }
+  /* Ensure number and text field inputs are clickable and editable */
+  .blocklyEditableText {
+    cursor: text !important;
+    pointer-events: auto !important;
+  }
+  /* Make sure the input overlay appears and is interactive */
+  .blocklyHtmlTextAreaInput,
+  .blocklyTextInput {
+    z-index: 10002 !important;
+    pointer-events: auto !important;
+    -webkit-user-select: text !important;
+    user-select: text !important;
   }
 `;
 
