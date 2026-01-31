@@ -969,7 +969,7 @@ const TurtleBlocklyEditor = forwardRef(({
       zoom: {
         controls: true,
         wheel: true,
-        startScale: compact ? 0.8 : 1.0,
+        startScale: compact ? 0.6 : 0.75,
         maxScale: 2,
         minScale: 0.3,
         scaleSpeed: 1.2
