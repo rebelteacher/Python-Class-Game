@@ -1054,6 +1054,10 @@ const TurtleBlocklyEditor = forwardRef(({
               code={generatedCode}
               width={compact ? 260 : 300}
               height={compact ? 260 : 300}
+              onRun={() => {
+                console.log("AnimatedTurtle onRun callback triggered");
+                if (onRun) onRun(generatedCode);
+              }}
             />
           </div>
         )}
