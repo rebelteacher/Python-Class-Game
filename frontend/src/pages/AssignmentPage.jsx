@@ -438,6 +438,12 @@ export default function AssignmentPage({ user }) {
     const currentProblem = assignment.problems?.[currentProblemIndex];
     const isBlockType = currentProblem?.assignment_type === "block";
     
+    console.log("handleSubmit called");
+    console.log("hasRun:", hasRun);
+    console.log("hasRunPerProblem:", hasRunPerProblem);
+    console.log("getCurrentProblemId():", getCurrentProblemId());
+    console.log("code length:", code?.length);
+    
     // Block assignments now use code (like turtle), so require run and code
     if (!hasRun) {
       toast.error("Please run your code first before submitting!");
