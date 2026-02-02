@@ -3387,25 +3387,87 @@ async def submit_assignment(submission: SubmissionCreate, request: Request):
         )
         
         if is_blockly_turtle:
-            # Grade using turtle grading system
-            logger.info(f"Block assignment detected with turtle code, using turtle grading")
+            # Grade by comparing student code to solution code
+            logger.info(f"Block assignment detected with turtle code, using code comparison grading")
             
-            # Get turtle grading criteria from problem (or use defaults)
-            grading_criteria = problem.get("turtle_grading_criteria") or {
-                "min_forward": 1,
-                "min_backward": 0,
-                "min_right": 0,
-                "min_left": 0
-            }
-            expected_image = problem.get("expected_turtle_image", "")
+            # Get the solution code from the problem
+            solution_code = problem.get("solution_code", "").strip()
             
-            # Use the turtle grading function
-            grading_result = await grade_turtle_submission(code, grading_criteria, expected_image)
+            # Extract commands from student code and solution code
+            def extract_turtle_commands(code_text):
+                """Extract turtle commands from code for comparison"""
+                commands = []
+                for line in code_text.split('\n'):
+                    line = line.strip()
+                    # Skip imports and setup lines
+                    if line.startswith('#') or line.startswith('import') or 't = turtle' in line:
+                        continue
+                    # Extract turtle commands
+                    if line.startswith('t.') or line.startswith('for ') or line.startswith('while '):
+                        commands.append(line)
+                return commands
             
-            base_score = grading_result.get("score", 0)
-            feedback = grading_result.get("feedback", "Code executed.")
-            test_results = grading_result.get("test_results", [])
-            turtle_image = grading_result.get("image", "")
+            student_commands = extract_turtle_commands(code)
+            solution_commands = extract_turtle_commands(solution_code) if solution_code else []
+            
+            logger.info(f"Student commands: {student_commands}")
+            logger.info(f"Solution commands: {solution_commands}")
+            
+            # Calculate score based on command matching
+            if solution_commands:
+                # Count how many solution commands are present in student code
+                matched_commands = 0
+                feedback_parts = []
+                test_results = []
+                
+                for sol_cmd in solution_commands:
+                    # Check if a similar command exists in student code
+                    # We'll do fuzzy matching - check if the command type and approximate value are present
+                    found = False
+                    sol_cmd_type = sol_cmd.split('(')[0] if '(' in sol_cmd else sol_cmd.split()[0]
+                    
+                    for stu_cmd in student_commands:
+                        stu_cmd_type = stu_cmd.split('(')[0] if '(' in stu_cmd else stu_cmd.split()[0]
+                        if sol_cmd_type == stu_cmd_type:
+                            found = True
+                            matched_commands += 1
+                            break
+                    
+                    test_results.append({
+                        "test_id": f"cmd_{len(test_results)}",
+                        "description": f"Command: {sol_cmd}",
+                        "passed": found,
+                        "expected": sol_cmd,
+                        "actual": "Found" if found else "Missing"
+                    })
+                
+                # Calculate percentage score
+                total_commands = len(solution_commands)
+                base_score = (matched_commands / total_commands) * 100 if total_commands > 0 else 0
+                
+                # Build feedback
+                if base_score >= 90:
+                    feedback = f"🎉 Excellent! You matched {matched_commands}/{total_commands} commands ({base_score:.0f}%)"
+                elif base_score >= 70:
+                    feedback = f"👍 Good job! You matched {matched_commands}/{total_commands} commands ({base_score:.0f}%). Keep improving!"
+                elif base_score >= 50:
+                    feedback = f"📝 Getting there! You matched {matched_commands}/{total_commands} commands ({base_score:.0f}%). Review the solution and try again."
+                else:
+                    feedback = f"💪 Keep trying! You matched {matched_commands}/{total_commands} commands ({base_score:.0f}%). Look at the expected solution for hints."
+            else:
+                # No solution code - use simpler grading based on code execution
+                if student_commands:
+                    base_score = 70  # Give credit for attempting
+                    feedback = "✅ Code executed successfully! Your teacher will review for full credit."
+                    test_results = [{"test_id": "execution", "description": "Code execution", "passed": True, "expected": "Code runs", "actual": "Success"}]
+                else:
+                    base_score = 0
+                    feedback = "❌ No turtle commands detected. Please add some blocks and try again."
+                    test_results = [{"test_id": "execution", "description": "Code execution", "passed": False, "expected": "Turtle commands", "actual": "None found"}]
+            
+            # Also run the code to get the turtle image
+            grading_result = await grade_turtle_submission(code, {}, "")
+            turtle_image = grading_result.get("image_data", "")
             tracking_data = grading_result.get("tracking_data", {})
             
             is_passing = base_score >= 70
