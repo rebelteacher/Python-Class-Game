@@ -3366,11 +3366,88 @@ async def submit_assignment(submission: SubmissionCreate, request: Request):
         new_submission.pop("_id", None)
         return new_submission
     
-    # Handle Block-Based (Scratch) assignments - Screenshot AI Vision grading
+    # Handle Block-Based assignments
     is_block = problem.get("assignment_type") == "block"
     if is_block:
         screenshot_data = submission.screenshot if hasattr(submission, 'screenshot') else None
-        scratch_url = submission.code.strip() if submission.code else ""
+        code = submission.code.strip() if submission.code else ""
+        
+        # NEW: Check if this is a Blockly-based block assignment (has Python turtle code)
+        # These assignments generate Python code from blocks and should be graded like turtle assignments
+        is_blockly_turtle = code and (
+            "t.forward" in code or 
+            "t.backward" in code or 
+            "t.right" in code or 
+            "t.left" in code or
+            "t.goto" in code or
+            "t.penup" in code or
+            "t.pendown" in code or
+            "import turtle" in code or
+            "t = turtle.Turtle()" in code
+        )
+        
+        if is_blockly_turtle:
+            # Grade using turtle grading system
+            logger.info(f"Block assignment detected with turtle code, using turtle grading")
+            
+            # Get turtle grading criteria from problem (or use defaults)
+            grading_criteria = problem.get("turtle_grading_criteria") or {
+                "min_forward": 1,
+                "min_backward": 0,
+                "min_right": 0,
+                "min_left": 0
+            }
+            expected_image = problem.get("expected_turtle_image", "")
+            
+            # Use the turtle grading function
+            grading_result = await grade_turtle_submission(code, grading_criteria, expected_image)
+            
+            base_score = grading_result.get("score", 0)
+            feedback = grading_result.get("feedback", "Code executed.")
+            test_results = grading_result.get("test_results", [])
+            turtle_image = grading_result.get("image", "")
+            tracking_data = grading_result.get("tracking_data", {})
+            
+            is_passing = base_score >= 70
+            
+            # Check if late
+            is_late = False
+            try:
+                due_date = datetime.fromisoformat(assignment["due_date"]) if assignment.get("due_date") else None
+                if due_date and datetime.now(timezone.utc) > due_date:
+                    is_late = True
+                    if assignment.get("late_penalty_percent", 0) > 0:
+                        base_score *= (1 - assignment["late_penalty_percent"] / 100)
+            except (ValueError, TypeError):
+                pass
+            
+            # Create submission with turtle data
+            new_submission = {
+                "id": str(uuid.uuid4()),
+                "assignment_id": submission.assignment_id,
+                "problem_id": submission.problem_id,
+                "student_id": user["id"],
+                "code": code,
+                "score": base_score,
+                "feedback": feedback,
+                "test_results": test_results,
+                "submitted_at": datetime.now(timezone.utc).isoformat(),
+                "is_passing": is_passing,
+                "is_late": is_late,
+                "is_final": False,
+                "xp_earned": 0,
+                "coins_earned": 0,
+                "turtle_image": turtle_image,
+                "turtle_tracking_data": tracking_data,
+                "submission_type": "blockly_turtle"
+            }
+            
+            await db.submissions.insert_one(new_submission)
+            new_submission.pop("_id", None)
+            return new_submission
+        
+        # LEGACY: Handle old Scratch screenshot-based block assignments
+        scratch_url = code
         
         # If no screenshot provided, check for URL fallback
         if not screenshot_data:
