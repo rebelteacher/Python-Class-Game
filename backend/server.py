@@ -3368,9 +3368,12 @@ async def submit_assignment(submission: SubmissionCreate, request: Request):
     
     # Handle Block-Based assignments
     is_block = problem.get("assignment_type") == "block"
+    logger.info(f"Submission check - assignment_type: {problem.get('assignment_type')}, is_block: {is_block}")
     if is_block:
         screenshot_data = submission.screenshot if hasattr(submission, 'screenshot') else None
         code = submission.code.strip() if submission.code else ""
+        
+        logger.info(f"Block submission - code length: {len(code)}, code preview: {code[:100] if code else 'NONE'}")
         
         # NEW: Check if this is a Blockly-based block assignment (has Python turtle code)
         # These assignments generate Python code from blocks and should be graded like turtle assignments
@@ -3386,12 +3389,15 @@ async def submit_assignment(submission: SubmissionCreate, request: Request):
             "t = turtle.Turtle()" in code
         )
         
+        logger.info(f"is_blockly_turtle: {is_blockly_turtle}")
+        
         if is_blockly_turtle:
             # Grade by comparing student code to solution code
             logger.info(f"Block assignment detected with turtle code, using code comparison grading")
             
             # Get the solution code from the problem
             solution_code = problem.get("solution_code", "").strip()
+            logger.info(f"Solution code from problem: {solution_code[:100] if solution_code else 'NONE'}")
             
             # Extract commands from student code and solution code
             def extract_turtle_commands(code_text):
