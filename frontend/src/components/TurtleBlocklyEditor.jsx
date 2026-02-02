@@ -746,6 +746,7 @@ const TurtleBlocklyEditor = forwardRef(({
   initialXml = "",
   onCodeChange,
   onXmlChange,
+  onRun,
   readOnly = false,
   showPreview = true,
   showCodeToggle = true,
