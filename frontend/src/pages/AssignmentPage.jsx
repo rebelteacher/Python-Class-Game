@@ -1275,6 +1275,12 @@ export default function AssignmentPage({ user }) {
                           [getCurrentProblemId()]: false
                         }));
                       }}
+                      onRun={() => {
+                        setHasRunPerProblem(prev => ({
+                          ...prev,
+                          [getCurrentProblemId()]: true
+                        }));
+                      }}
                       readOnly={problemsFinal[getCurrentProblemId()]}
                       showPreview={true}
                       showCodeToggle={true}
