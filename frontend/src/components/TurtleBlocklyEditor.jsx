@@ -946,6 +946,8 @@ const TurtleBlocklyEditor = forwardRef(({
   }, []);
 
   const handleRun = useCallback(() => {
+    console.log("handleRun called, generatedCode:", generatedCode?.substring(0, 50));
+    console.log("turtleRef.current:", !!turtleRef.current);
     if (turtleRef.current && generatedCode) {
       setIsRunning(true);
       turtleRef.current.reset();
@@ -953,10 +955,13 @@ const TurtleBlocklyEditor = forwardRef(({
         turtleRef.current.runInstant();
         setIsRunning(false);
         // Notify parent that code was run
+        console.log("Run complete, calling onRun callback:", !!onRun);
         if (onRun) {
           onRun(generatedCode);
         }
       }, 100);
+    } else {
+      console.log("Cannot run - missing turtleRef or generatedCode");
     }
   }, [generatedCode, onRun]);
 
