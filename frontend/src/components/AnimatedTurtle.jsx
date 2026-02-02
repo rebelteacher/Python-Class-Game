@@ -302,7 +302,8 @@ const getInitialTurtleState = () => ({
 
 const AnimatedTurtle = forwardRef(function AnimatedTurtle({ 
   code, 
-  onLineHighlight, 
+  onLineHighlight,
+  onRun, 
   width = 600, 
   height = 600,
   // Maze/Background props
