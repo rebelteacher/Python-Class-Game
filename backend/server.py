@@ -3395,72 +3395,127 @@ async def submit_assignment(submission: SubmissionCreate, request: Request):
             # Grade by comparing student code to solution code
             logger.info(f"Block assignment detected with turtle code, using code comparison grading")
             
-            # Get the solution code from the problem
+            # Get test_cases from problem - these have pattern and min_count for block grading
+            test_cases = problem.get("test_cases", [])
             solution_code = problem.get("solution_code", "").strip()
+            
+            logger.info(f"Test cases from problem: {test_cases}")
             logger.info(f"Solution code from problem: {solution_code[:100] if solution_code else 'NONE'}")
             
-            # Extract commands from student code and solution code
+            # Extract commands from student code
             def extract_turtle_commands(code_text):
                 """Extract turtle commands from code for comparison"""
                 commands = []
                 for line in code_text.split('\n'):
                     line = line.strip()
-                    # Skip imports and setup lines
                     if line.startswith('#') or line.startswith('import') or 't = turtle' in line:
                         continue
-                    # Extract turtle commands
                     if line.startswith('t.') or line.startswith('for ') or line.startswith('while '):
                         commands.append(line)
                 return commands
             
             student_commands = extract_turtle_commands(code)
-            solution_commands = extract_turtle_commands(solution_code) if solution_code else []
-            
             logger.info(f"Student commands: {student_commands}")
-            logger.info(f"Solution commands: {solution_commands}")
             
-            # Calculate score based on command matching
-            if solution_commands:
-                # Count how many solution commands are present in student code
-                matched_commands = 0
-                feedback_parts = []
-                test_results = []
+            # Count command types in student code
+            def count_command_types(commands):
+                counts = {
+                    'forward': 0, 'backward': 0, 'right': 0, 'left': 0,
+                    'goto': 0, 'penup': 0, 'pendown': 0, 'color': 0,
+                    'repeat': 0, 'say': 0, 'hide': 0, 'show': 0
+                }
+                for cmd in commands:
+                    if 't.forward' in cmd or 't.fd(' in cmd:
+                        counts['forward'] += 1
+                    elif 't.backward' in cmd or 't.bk(' in cmd:
+                        counts['backward'] += 1
+                    elif 't.right' in cmd or 't.rt(' in cmd:
+                        counts['right'] += 1
+                    elif 't.left' in cmd or 't.lt(' in cmd:
+                        counts['left'] += 1
+                    elif 't.goto' in cmd:
+                        counts['goto'] += 1
+                    elif 't.penup' in cmd or 't.pu()' in cmd:
+                        counts['penup'] += 1
+                    elif 't.pendown' in cmd or 't.pd()' in cmd:
+                        counts['pendown'] += 1
+                    elif 't.color' in cmd or 't.pencolor' in cmd:
+                        counts['color'] += 1
+                    elif 't.write' in cmd:
+                        counts['say'] += 1
+                    elif 't.hideturtle' in cmd or 't.ht()' in cmd:
+                        counts['hide'] += 1
+                    elif 't.showturtle' in cmd or 't.st()' in cmd:
+                        counts['show'] += 1
+                    elif cmd.startswith('for '):
+                        counts['repeat'] += 1
+                return counts
+            
+            student_counts = count_command_types(student_commands)
+            logger.info(f"Student command counts: {student_counts}")
+            
+            # Map test case patterns to command types
+            pattern_to_command = {
+                'move_forward': 'forward', 'forward': 'forward',
+                'move_backward': 'backward', 'backward': 'backward',
+                'turn_right': 'right', 'right': 'right',
+                'turn_left': 'left', 'left': 'left',
+                'go_to': 'goto', 'goto': 'goto',
+                'pen_up': 'penup', 'penup': 'penup',
+                'pen_down': 'pendown', 'pendown': 'pendown',
+                'set_color': 'color', 'color': 'color',
+                'repeat': 'repeat', 'loop': 'repeat',
+                'say': 'say', 'write': 'say',
+                'hide': 'hide', 'show': 'show'
+            }
+            
+            test_results = []
+            total_points = 0
+            earned_points = 0
+            
+            # Grade based on test_cases if they exist
+            if test_cases and any(tc.get('pattern') for tc in test_cases):
+                logger.info(f"Grading using {len(test_cases)} test cases with patterns")
                 
-                for sol_cmd in solution_commands:
-                    # Check if a similar command exists in student code
-                    # We'll do fuzzy matching - check if the command type and approximate value are present
-                    found = False
-                    sol_cmd_type = sol_cmd.split('(')[0] if '(' in sol_cmd else sol_cmd.split()[0]
+                for tc in test_cases:
+                    pattern = tc.get('pattern', '').lower()
+                    min_count = int(tc.get('min_count', 1))
+                    points = int(tc.get('points', 20))
+                    description = tc.get('description', f'Uses {pattern}')
                     
-                    for stu_cmd in student_commands:
-                        stu_cmd_type = stu_cmd.split('(')[0] if '(' in stu_cmd else stu_cmd.split()[0]
-                        if sol_cmd_type == stu_cmd_type:
-                            found = True
-                            matched_commands += 1
-                            break
+                    total_points += points
+                    
+                    # Map pattern to command type
+                    cmd_type = pattern_to_command.get(pattern, pattern)
+                    actual_count = student_counts.get(cmd_type, 0)
+                    
+                    passed = actual_count >= min_count
+                    if passed:
+                        earned_points += points
                     
                     test_results.append({
-                        "test_id": f"cmd_{len(test_results)}",
-                        "description": f"Command: {sol_cmd}",
-                        "passed": found,
-                        "expected": sol_cmd,
-                        "actual": "Found" if found else "Missing"
+                        "test_id": f"test_{len(test_results)}",
+                        "description": description,
+                        "passed": passed,
+                        "expected": f"At least {min_count} {cmd_type} block(s)",
+                        "actual": f"Found {actual_count}"
                     })
+                    
+                    logger.info(f"Test '{description}': pattern={pattern}, cmd_type={cmd_type}, min_count={min_count}, actual={actual_count}, passed={passed}")
                 
-                # Calculate percentage score
-                total_commands = len(solution_commands)
-                base_score = (matched_commands / total_commands) * 100 if total_commands > 0 else 0
+                base_score = (earned_points / total_points * 100) if total_points > 0 else 0
                 
-                # Build feedback
                 if base_score >= 90:
-                    feedback = f"🎉 Excellent! You matched {matched_commands}/{total_commands} commands ({base_score:.0f}%)"
+                    feedback = f"🎉 Excellent! You passed {sum(1 for t in test_results if t['passed'])}/{len(test_results)} tests ({base_score:.0f}%)"
                 elif base_score >= 70:
-                    feedback = f"👍 Good job! You matched {matched_commands}/{total_commands} commands ({base_score:.0f}%). Keep improving!"
+                    feedback = f"👍 Good job! You passed {sum(1 for t in test_results if t['passed'])}/{len(test_results)} tests ({base_score:.0f}%)"
                 elif base_score >= 50:
-                    feedback = f"📝 Getting there! You matched {matched_commands}/{total_commands} commands ({base_score:.0f}%). Review the solution and try again."
+                    feedback = f"📝 Getting there! {sum(1 for t in test_results if t['passed'])}/{len(test_results)} tests passed ({base_score:.0f}%)"
                 else:
-                    feedback = f"💪 Keep trying! You matched {matched_commands}/{total_commands} commands ({base_score:.0f}%). Look at the expected solution for hints."
-            else:
+                    feedback = f"💪 Keep trying! {sum(1 for t in test_results if t['passed'])}/{len(test_results)} tests passed ({base_score:.0f}%)"
+            
+            # Fall back to solution code comparison if no pattern-based test cases
+            elif solution_code:
                 # No solution code - grade based on code complexity
                 # Count different command types used
                 command_types = set()
