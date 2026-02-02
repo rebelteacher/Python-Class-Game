@@ -1026,7 +1026,10 @@ const AnimatedTurtle = forwardRef(function AnimatedTurtle({
     playingRef.current = false;
     setIsPlaying(false);
     if (onLineHighlight) onLineHighlight(-1);
-  }, [commands, executeCommand, onLineHighlight, resetTurtle]);
+    
+    // Notify parent that code was run
+    if (onRun) onRun();
+  }, [commands, executeCommand, onLineHighlight, resetTurtle, onRun]);
   
   // Run instantly (no animation)
   const runInstant = useCallback(async () => {
@@ -1036,7 +1039,10 @@ const AnimatedTurtle = forwardRef(function AnimatedTurtle({
     for (const cmd of commands) {
       await executeCommand(cmd, false);
     }
-  }, [commands, executeCommand, resetTurtle]);
+    
+    // Notify parent that code was run
+    if (onRun) onRun();
+  }, [commands, executeCommand, resetTurtle, onRun]);
   
   // Stop animation
   const stop = useCallback(() => {
