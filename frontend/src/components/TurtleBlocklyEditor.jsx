@@ -997,6 +997,7 @@ const TurtleBlocklyEditor = forwardRef(({
           {showPreview && (
             <>
               <Button
+                type="button"
                 size="sm"
                 variant="ghost"
                 className="text-white hover:bg-white/20 text-xs h-7"
@@ -1006,9 +1007,13 @@ const TurtleBlocklyEditor = forwardRef(({
                 Reset
               </Button>
               <Button
+                type="button"
                 size="sm"
                 className="bg-green-500 hover:bg-green-600 text-xs h-7"
-                onClick={handleRun}
+                onClick={() => {
+                  console.log("Run button clicked directly");
+                  handleRun();
+                }}
                 disabled={isRunning || !generatedCode}
               >
                 <Play className="w-3 h-3 mr-1" />
