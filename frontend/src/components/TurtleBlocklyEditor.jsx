@@ -952,9 +952,13 @@ const TurtleBlocklyEditor = forwardRef(({
       setTimeout(() => {
         turtleRef.current.runInstant();
         setIsRunning(false);
+        // Notify parent that code was run
+        if (onRun) {
+          onRun(generatedCode);
+        }
       }, 100);
     }
-  }, [generatedCode]);
+  }, [generatedCode, onRun]);
 
   const handleReset = useCallback(() => {
     if (turtleRef.current) {
