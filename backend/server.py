@@ -3516,8 +3516,48 @@ async def submit_assignment(submission: SubmissionCreate, request: Request):
             
             # Fall back to solution code comparison if no pattern-based test cases
             elif solution_code:
-                # No solution code - grade based on code complexity
-                # Count different command types used
+                # Compare student code to solution code
+                solution_commands = extract_turtle_commands(solution_code)
+                solution_counts = count_command_types(solution_commands)
+                
+                logger.info(f"Solution commands: {solution_commands}")
+                logger.info(f"Solution counts: {solution_counts}")
+                
+                # Compare each command type
+                total_possible = 0
+                earned = 0
+                test_results = []
+                
+                for cmd_type, expected_count in solution_counts.items():
+                    if expected_count > 0:
+                        total_possible += expected_count
+                        actual_count = student_counts.get(cmd_type, 0)
+                        # Give partial credit - student gets points for each matching command up to expected
+                        matches = min(actual_count, expected_count)
+                        earned += matches
+                        
+                        passed = actual_count >= expected_count
+                        test_results.append({
+                            "test_id": f"cmd_{cmd_type}",
+                            "description": f"Uses {cmd_type} blocks",
+                            "passed": passed,
+                            "expected": f"{expected_count} {cmd_type} command(s)",
+                            "actual": f"Found {actual_count}"
+                        })
+                
+                base_score = (earned / total_possible * 100) if total_possible > 0 else 0
+                
+                if base_score >= 90:
+                    feedback = f"🎉 Excellent! Score: {base_score:.0f}%"
+                elif base_score >= 70:
+                    feedback = f"👍 Good job! Score: {base_score:.0f}%"
+                elif base_score >= 50:
+                    feedback = f"📝 Getting there! Score: {base_score:.0f}%"
+                else:
+                    feedback = f"💪 Keep trying! Score: {base_score:.0f}%"
+            
+            else:
+                # No test cases and no solution code - grade based on code complexity
                 command_types = set()
                 loop_count = 0
                 for cmd in student_commands:
@@ -3546,15 +3586,13 @@ async def submit_assignment(submission: SubmissionCreate, request: Request):
                     feedback = "❌ No turtle commands detected. Please add some blocks and try again."
                     test_results = [{"test_id": "commands", "description": "Turtle commands", "passed": False, "expected": "At least one command", "actual": "None found"}]
                 else:
-                    # Score based on variety of commands (max 50 for having code)
-                    # Plus bonus for loops and complexity
-                    variety_score = min(len(command_types) * 10, 50)  # Up to 50 points for variety
-                    complexity_score = min(len(student_commands) * 5, 30)  # Up to 30 points for more commands
-                    loop_bonus = min(loop_count * 10, 20)  # Up to 20 points for using loops
+                    variety_score = min(len(command_types) * 10, 50)
+                    complexity_score = min(len(student_commands) * 5, 30)
+                    loop_bonus = min(loop_count * 10, 20)
                     
-                    base_score = min(variety_score + complexity_score + loop_bonus, 80)  # Cap at 80 without solution comparison
+                    base_score = min(variety_score + complexity_score + loop_bonus, 80)
                     
-                    feedback = f"📝 Code executed! Commands used: {', '.join(sorted(command_types))}. Score: {base_score:.0f}%. Note: Add solution code to problem for accurate grading."
+                    feedback = f"📝 Code executed! Commands used: {', '.join(sorted(command_types))}. Score: {base_score:.0f}%. Add solution code to problem for accurate grading."
                     test_results = [
                         {"test_id": "commands", "description": "Commands detected", "passed": True, "expected": "Turtle commands", "actual": f"{len(student_commands)} commands, {len(command_types)} types"},
                         {"test_id": "loops", "description": "Loop usage", "passed": loop_count > 0, "expected": "Use loops for patterns", "actual": f"{loop_count} loop(s)"}
