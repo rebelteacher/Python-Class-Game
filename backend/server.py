@@ -3455,15 +3455,49 @@ async def submit_assignment(submission: SubmissionCreate, request: Request):
                 else:
                     feedback = f"💪 Keep trying! You matched {matched_commands}/{total_commands} commands ({base_score:.0f}%). Look at the expected solution for hints."
             else:
-                # No solution code - use simpler grading based on code execution
-                if student_commands:
-                    base_score = 70  # Give credit for attempting
-                    feedback = "✅ Code executed successfully! Your teacher will review for full credit."
-                    test_results = [{"test_id": "execution", "description": "Code execution", "passed": True, "expected": "Code runs", "actual": "Success"}]
-                else:
+                # No solution code - grade based on code complexity
+                # Count different command types used
+                command_types = set()
+                loop_count = 0
+                for cmd in student_commands:
+                    if cmd.startswith('t.forward') or cmd.startswith('t.fd'):
+                        command_types.add('forward')
+                    elif cmd.startswith('t.backward') or cmd.startswith('t.bk'):
+                        command_types.add('backward')
+                    elif cmd.startswith('t.right') or cmd.startswith('t.rt'):
+                        command_types.add('right')
+                    elif cmd.startswith('t.left') or cmd.startswith('t.lt'):
+                        command_types.add('left')
+                    elif cmd.startswith('t.goto'):
+                        command_types.add('goto')
+                    elif cmd.startswith('t.penup') or cmd.startswith('t.pu'):
+                        command_types.add('penup')
+                    elif cmd.startswith('t.pendown') or cmd.startswith('t.pd'):
+                        command_types.add('pendown')
+                    elif cmd.startswith('t.color') or cmd.startswith('t.pencolor'):
+                        command_types.add('color')
+                    elif cmd.startswith('for ') or cmd.startswith('while '):
+                        loop_count += 1
+                        command_types.add('loop')
+                
+                if len(command_types) == 0:
                     base_score = 0
                     feedback = "❌ No turtle commands detected. Please add some blocks and try again."
-                    test_results = [{"test_id": "execution", "description": "Code execution", "passed": False, "expected": "Turtle commands", "actual": "None found"}]
+                    test_results = [{"test_id": "commands", "description": "Turtle commands", "passed": False, "expected": "At least one command", "actual": "None found"}]
+                else:
+                    # Score based on variety of commands (max 50 for having code)
+                    # Plus bonus for loops and complexity
+                    variety_score = min(len(command_types) * 10, 50)  # Up to 50 points for variety
+                    complexity_score = min(len(student_commands) * 5, 30)  # Up to 30 points for more commands
+                    loop_bonus = min(loop_count * 10, 20)  # Up to 20 points for using loops
+                    
+                    base_score = min(variety_score + complexity_score + loop_bonus, 80)  # Cap at 80 without solution comparison
+                    
+                    feedback = f"📝 Code executed! Commands used: {', '.join(sorted(command_types))}. Score: {base_score:.0f}%. Note: Add solution code to problem for accurate grading."
+                    test_results = [
+                        {"test_id": "commands", "description": "Commands detected", "passed": True, "expected": "Turtle commands", "actual": f"{len(student_commands)} commands, {len(command_types)} types"},
+                        {"test_id": "loops", "description": "Loop usage", "passed": loop_count > 0, "expected": "Use loops for patterns", "actual": f"{loop_count} loop(s)"}
+                    ]
             
             # Also run the code to get the turtle image
             grading_result = await grade_turtle_submission(code, {}, "")
