@@ -1276,10 +1276,16 @@ export default function AssignmentPage({ user }) {
                         }));
                       }}
                       onRun={() => {
-                        setHasRunPerProblem(prev => ({
-                          ...prev,
-                          [getCurrentProblemId()]: true
-                        }));
+                        console.log("onRun callback received in AssignmentPage");
+                        console.log("Setting hasRun for problem:", getCurrentProblemId());
+                        setHasRunPerProblem(prev => {
+                          const newState = {
+                            ...prev,
+                            [getCurrentProblemId()]: true
+                          };
+                          console.log("New hasRunPerProblem state:", newState);
+                          return newState;
+                        });
                       }}
                       readOnly={problemsFinal[getCurrentProblemId()]}
                       showPreview={true}
