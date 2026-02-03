@@ -406,6 +406,17 @@ const TOOLBOX = {
   contents: [
     {
       kind: 'category',
+      name: '🚩 Events',
+      colour: '65',
+      contents: [
+        { kind: 'block', type: 'event_start' },
+        { kind: 'block', type: 'event_key_pressed' },
+        { kind: 'block', type: 'event_clicked' },
+        { kind: 'block', type: 'event_mouse_move' }
+      ]
+    },
+    {
+      kind: 'category',
       name: '🐢 Motion',
       colour: '230',
       contents: [
