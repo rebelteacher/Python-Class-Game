@@ -1263,10 +1263,16 @@ const AnimatedTurtle = forwardRef(function AnimatedTurtle({
   
   // Keyboard event handler
   useEffect(() => {
+    console.log("⌨️ Keyboard effect - enableEvents:", enableEvents, "eventModeActive:", eventModeActive);
     if (!enableEvents || !eventModeActive) return;
+    
+    console.log("⌨️ Keyboard listener ATTACHED");
+    console.log("⌨️ Available handlers:", Object.keys(eventHandlersRef.current.keyHandlers));
     
     const handleKeyDown = (e) => {
       const handlers = eventHandlersRef.current.keyHandlers;
+      console.log("🔑 Key pressed:", e.code, "handlers:", Object.keys(handlers));
+      
       if (!handlers || Object.keys(handlers).length === 0) return;
       
       // Map key codes to handler keys
@@ -1284,6 +1290,8 @@ const AnimatedTurtle = forwardRef(function AnimatedTurtle({
           }
       }
       
+      console.log("🔑 Mapped to:", key);
+      
       // Check for 'any' key handler
       if (handlers['any']) {
         e.preventDefault();
@@ -1292,13 +1300,17 @@ const AnimatedTurtle = forwardRef(function AnimatedTurtle({
       
       // Check for specific key handler
       if (key && handlers[key]) {
+        console.log("✅ Found handler for", key, "with", handlers[key].length, "commands");
         e.preventDefault();
         executeEventHandler(handlers[key]);
       }
     };
     
     window.addEventListener('keydown', handleKeyDown);
-    return () => window.removeEventListener('keydown', handleKeyDown);
+    return () => {
+      console.log("⌨️ Keyboard listener REMOVED");
+      window.removeEventListener('keydown', handleKeyDown);
+    };
   }, [enableEvents, eventModeActive, executeEventHandler]);
   
   // Canvas click handler for "when turtle clicked" events
