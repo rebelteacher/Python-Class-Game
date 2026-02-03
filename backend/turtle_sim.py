@@ -355,10 +355,50 @@ class TurtleSim:
     
     def get_image_base64(self) -> str:
         """Return the canvas image as base64 PNG"""
+        # Draw the turtle icon on the image before saving
+        self._draw_turtle_icon()
+        
         buffer = io.BytesIO()
         self.image.save(buffer, format='PNG')
         buffer.seek(0)
         return base64.b64encode(buffer.getvalue()).decode('utf-8')
+    
+    def _draw_turtle_icon(self):
+        """Draw a turtle icon at the current position and heading"""
+        if not self.visible:
+            return
+            
+        # Turtle size
+        size = 15
+        
+        # Get canvas position
+        cx, cy = self._to_canvas_coords(self.x, self.y)
+        
+        # Calculate triangle points for turtle shape (pointing in heading direction)
+        import math
+        angle_rad = math.radians(self.heading)
+        
+        # Front point (nose)
+        front_x = cx + size * math.cos(angle_rad)
+        front_y = cy - size * math.sin(angle_rad)  # Y is inverted in canvas
+        
+        # Back left point
+        back_left_angle = angle_rad + math.radians(140)
+        back_left_x = cx + size * 0.7 * math.cos(back_left_angle)
+        back_left_y = cy - size * 0.7 * math.sin(back_left_angle)
+        
+        # Back right point
+        back_right_angle = angle_rad - math.radians(140)
+        back_right_x = cx + size * 0.7 * math.cos(back_right_angle)
+        back_right_y = cy - size * 0.7 * math.sin(back_right_angle)
+        
+        # Draw filled triangle for turtle
+        turtle_points = [
+            (front_x, front_y),
+            (back_left_x, back_left_y),
+            (back_right_x, back_right_y)
+        ]
+        self.draw.polygon(turtle_points, fill='#228B22', outline='#1a6b1a')
     
     def get_tracking_data(self) -> Dict[str, Any]:
         """Return tracking data for auto-grading"""
