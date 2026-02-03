@@ -465,8 +465,16 @@ const AnimatedTurtle = forwardRef(function AnimatedTurtle({
   
   // Parse code into commands (memoized) and extract turtle name/color
   const { commands, turtleName, turtleColor, eventHandlers } = useMemo(() => {
+    console.log("📝 Parsing code:", code?.substring(0, 100));
     const result = parseCode(code);
     const handlers = parseEventHandlers(code);
+    
+    console.log("📝 Parsed commands:", result.length);
+    console.log("📝 Parsed event handlers:", {
+      keyHandlers: Object.keys(handlers.keyHandlers),
+      clickHandler: handlers.clickHandler.length,
+      mouseMoveHandler: handlers.mouseMoveHandler.length
+    });
     
     // Detect turtle variable name from code
     const nameMatch = code.match(/(\w+)\s*=\s*turtle\.Turtle\(\)|(\w+)\s*=\s*Turtle\(\)/);
