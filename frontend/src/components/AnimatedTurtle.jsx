@@ -1208,12 +1208,18 @@ const AnimatedTurtle = forwardRef(function AnimatedTurtle({
   
   // Execute event handler commands (for key/click events)
   const executeEventHandler = useCallback(async (handlerCommands) => {
-    if (!handlerCommands || handlerCommands.length === 0) return;
+    console.log("🎯 executeEventHandler called with", handlerCommands?.length, "commands");
+    if (!handlerCommands || handlerCommands.length === 0) {
+      console.log("⚠️ No commands to execute");
+      return;
+    }
     
     for (const cmd of handlerCommands) {
+      console.log("🎯 Executing command:", cmd.type, cmd);
       await executeCommand(cmd, false);  // Execute instantly for responsiveness
     }
     drawCanvas();
+    console.log("✅ Event handler execution complete");
   }, [executeCommand, drawCanvas]);
   
   // Start event mode - runs startup code and activates event listeners
