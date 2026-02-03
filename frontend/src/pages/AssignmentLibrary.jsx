@@ -3365,7 +3365,7 @@ export default function AssignmentLibrary({ user }) {
       </Dialog>
       
       {/* Turtle Preview Dialog - Shows live AnimatedTurtle with maze or static image */}
-      <Dialog open={turtlePreviewOpen} onOpenChange={setTurtlePreviewOpen}>
+      <Dialog modal={false} open={turtlePreviewOpen} onOpenChange={setTurtlePreviewOpen}>
         <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle>🐢 Turtle Graphics Preview</DialogTitle>
