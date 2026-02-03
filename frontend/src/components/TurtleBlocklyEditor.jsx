@@ -790,6 +790,13 @@ const generatePythonCode = (workspace) => {
         blockCode = `${indent}${varName} = ${varName} + ${delta}\n`;
         break;
       }
+      // Event blocks - these are "hat" blocks that mark the start of event handlers
+      case 'event_start':
+      case 'event_key_pressed':
+      case 'event_clicked':
+      case 'event_mouse_move':
+        // These are handled specially at the top level - no code generated here
+        break;
       default:
         break;
     }
