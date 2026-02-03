@@ -120,6 +120,17 @@ export default function AssignmentPage({ user }) {
         console.error("Error loading saved code:", e);
       }
     }
+    
+    // Load saved block XML from localStorage (for block-type assignments)
+    const savedXmlData = localStorage.getItem(`saved_xml_${assignmentId}`);
+    if (savedXmlData) {
+      try {
+        const parsedXml = JSON.parse(savedXmlData);
+        setSavedXmlPerProblem(parsedXml);
+      } catch (e) {
+        console.error("Error loading saved block XML:", e);
+      }
+    }
   }, [assignmentId]);
   
   // Fetch submissions whenever assignment or navigation changes
