@@ -1239,11 +1239,21 @@ const AnimatedTurtle = forwardRef(function AnimatedTurtle({
   
   // Keyboard event handler
   useEffect(() => {
-    if (!enableEvents || !eventModeActive) return;
+    if (!enableEvents || !eventModeActive) {
+      console.log("⌨️ Keyboard listener NOT active - enableEvents:", enableEvents, "eventModeActive:", eventModeActive);
+      return;
+    }
+    
+    console.log("⌨️ Keyboard listener ATTACHED - waiting for key presses");
     
     const handleKeyDown = (e) => {
       const handlers = eventHandlersRef.current.keyHandlers;
-      if (!handlers || Object.keys(handlers).length === 0) return;
+      console.log("🔑 Key pressed:", e.code, "Available handlers:", Object.keys(handlers || {}));
+      
+      if (!handlers || Object.keys(handlers).length === 0) {
+        console.log("⚠️ No handlers found in eventHandlersRef");
+        return;
+      }
       
       // Map key codes to handler keys
       let key = null;
@@ -1260,21 +1270,30 @@ const AnimatedTurtle = forwardRef(function AnimatedTurtle({
           }
       }
       
+      console.log("🔑 Mapped key:", key);
+      
       // Check for 'any' key handler
       if (handlers['any']) {
+        console.log("✅ Executing 'any' key handler");
         e.preventDefault();
         executeEventHandler(handlers['any']);
       }
       
       // Check for specific key handler
       if (key && handlers[key]) {
+        console.log("✅ Executing handler for key:", key);
         e.preventDefault();
         executeEventHandler(handlers[key]);
+      } else if (key) {
+        console.log("❌ No handler for key:", key);
       }
     };
     
     window.addEventListener('keydown', handleKeyDown);
-    return () => window.removeEventListener('keydown', handleKeyDown);
+    return () => {
+      console.log("⌨️ Keyboard listener REMOVED");
+      window.removeEventListener('keydown', handleKeyDown);
+    };
   }, [enableEvents, eventModeActive, executeEventHandler]);
   
   // Canvas click handler for "when turtle clicked" events
