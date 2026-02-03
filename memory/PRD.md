@@ -117,6 +117,9 @@ Teachers can now create "Block" type assignments using drag-and-drop Blockly edi
 - [x] Keyboard event listeners in AnimatedTurtle for real-time key detection
 - [x] "Events Active" indicator when event mode is running
 - [x] Lesson 3: Events & Triggers problems now solvable
+- [x] **Fixed Event Handler Timing Bug** - Fixed issue where eventHandlersRef was stale when startEventMode ran (Feb 3, 2025)
+  - Root cause: eventHandlersRef was updated in useEffect (async) but startEventMode accessed it synchronously
+  - Fix: Use eventHandlers directly from useMemo and update ref synchronously before activating event mode
 
 ### Completed (Jan 2025)
 - [x] Problem library limit increased (1000 → 10000)
