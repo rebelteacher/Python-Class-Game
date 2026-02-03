@@ -107,6 +107,17 @@ Teachers can now create "Block" type assignments using drag-and-drop Blockly edi
 
 ## Roadmap
 
+### Completed (Feb 2025)
+- [x] **Events Blocks Implementation** - 4 new event blocks for interactive programs:
+  - "when program starts" - runs code at startup
+  - "when key pressed" - responds to keyboard events (space, arrows, letters, any)
+  - "when turtle clicked" - responds to mouse clicks on turtle
+  - "when mouse moves" - responds to mouse movement
+- [x] Event handlers generate Python functions (def on_key_space(): etc.)
+- [x] Keyboard event listeners in AnimatedTurtle for real-time key detection
+- [x] "Events Active" indicator when event mode is running
+- [x] Lesson 3: Events & Triggers problems now solvable
+
 ### Completed (Jan 2025)
 - [x] Problem library limit increased (1000 → 10000)
 - [x] Test case grading bugs fixed
