@@ -1198,13 +1198,26 @@ const AnimatedTurtle = forwardRef(function AnimatedTurtle({
     if (onRun) onRun();
   }, [commands, executeCommand, onLineHighlight, resetTurtle, onRun]);
   
-  // Run instantly (no animation)
+  // Run instantly (no animation) - also activates event mode if handlers exist
   const runInstant = useCallback(async () => {
     resetTurtle();
     await new Promise(r => setTimeout(r, 50)); // Let reset complete
     
+    // Run startup commands
     for (const cmd of commands) {
       await executeCommand(cmd, false);
+    }
+    
+    // Check if there are event handlers and activate event mode
+    const hasEventHandlers = 
+      Object.keys(eventHandlers.keyHandlers).length > 0 ||
+      eventHandlers.clickHandler.length > 0 ||
+      eventHandlers.mouseMoveHandler.length > 0;
+    
+    if (hasEventHandlers) {
+      console.log("🚀 runInstant: Activating event mode");
+      eventHandlersRef.current = eventHandlers;
+      setEventModeActive(true);
     }
     
     // Notify parent that code was run
