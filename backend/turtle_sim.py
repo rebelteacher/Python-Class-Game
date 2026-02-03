@@ -371,8 +371,8 @@ class TurtleSim:
         if not self.is_visible:
             return
             
-        # Turtle size - make it larger and more visible
-        size = 20
+        # Turtle size
+        size = 12
         
         # Get canvas position
         cx, cy = self._to_canvas_coords(self.x, self.y)
@@ -386,44 +386,22 @@ class TurtleSim:
         front_y = cy - size * math.sin(angle_rad)  # Y is inverted in canvas
         
         # Back left point
-        back_left_angle = angle_rad + math.radians(135)
-        back_left_x = cx + size * 0.8 * math.cos(back_left_angle)
-        back_left_y = cy - size * 0.8 * math.sin(back_left_angle)
+        back_left_angle = angle_rad + math.radians(140)
+        back_left_x = cx + size * 0.7 * math.cos(back_left_angle)
+        back_left_y = cy - size * 0.7 * math.sin(back_left_angle)
         
-        # Back right point
-        back_right_angle = angle_rad - math.radians(135)
-        back_right_x = cx + size * 0.8 * math.cos(back_right_angle)
-        back_right_y = cy - size * 0.8 * math.sin(back_right_angle)
+        # Back right point  
+        back_right_angle = angle_rad - math.radians(140)
+        back_right_x = cx + size * 0.7 * math.cos(back_right_angle)
+        back_right_y = cy - size * 0.7 * math.sin(back_right_angle)
         
-        # Draw turtle body (ellipse)
-        body_size = size * 0.8
-        self.draw.ellipse(
-            [cx - body_size, cy - body_size * 0.6, cx + body_size, cy + body_size * 0.6],
-            fill='#228B22', outline='#1a6b1a', width=2
-        )
-        
-        # Draw turtle head (pointing in heading direction)
-        head_x = cx + size * 0.9 * math.cos(angle_rad)
-        head_y = cy - size * 0.9 * math.sin(angle_rad)
-        head_size = size * 0.4
-        self.draw.ellipse(
-            [head_x - head_size, head_y - head_size, head_x + head_size, head_y + head_size],
-            fill='#228B22', outline='#1a6b1a', width=2
-        )
-        
-        # Draw small eyes
-        eye_offset = size * 0.3
-        eye_size = 3
-        left_eye_angle = angle_rad + math.radians(25)
-        right_eye_angle = angle_rad - math.radians(25)
-        
-        left_eye_x = head_x + eye_offset * 0.5 * math.cos(left_eye_angle)
-        left_eye_y = head_y - eye_offset * 0.5 * math.sin(left_eye_angle)
-        right_eye_x = head_x + eye_offset * 0.5 * math.cos(right_eye_angle)
-        right_eye_y = head_y - eye_offset * 0.5 * math.sin(right_eye_angle)
-        
-        self.draw.ellipse([left_eye_x - eye_size, left_eye_y - eye_size, left_eye_x + eye_size, left_eye_y + eye_size], fill='black')
-        self.draw.ellipse([right_eye_x - eye_size, right_eye_y - eye_size, right_eye_x + eye_size, right_eye_y + eye_size], fill='black')
+        # Draw filled triangle for turtle
+        turtle_points = [
+            (front_x, front_y),
+            (back_left_x, back_left_y),
+            (back_right_x, back_right_y)
+        ]
+        self.draw.polygon(turtle_points, fill='#228B22', outline='#1a6b1a')
     
     def get_tracking_data(self) -> Dict[str, Any]:
         """Return tracking data for auto-grading"""
