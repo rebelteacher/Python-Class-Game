@@ -324,6 +324,35 @@ class TurtleSim:
         # Note: Full implementation would require tracking individual stamps
         pass
     
+    def write(self, text: str, move: bool = False, align: str = "left", font: tuple = ("Arial", 8, "normal")):
+        """Write text at current turtle position"""
+        self.commands_used.append(f"write('{text}')")
+        
+        # Get canvas position
+        pos = self._to_canvas_coords(self.x, self.y)
+        
+        # Try to use a font - Pillow might not have all fonts available
+        try:
+            from PIL import ImageFont
+            font_name, font_size, font_style = font
+            # Try to load a truetype font, fall back to default
+            try:
+                pil_font = ImageFont.truetype("arial.ttf", font_size)
+            except:
+                pil_font = ImageFont.load_default()
+        except:
+            pil_font = None
+        
+        # Draw the text
+        # Adjust position based on alignment
+        text_x = pos[0]
+        text_y = pos[1]
+        
+        if pil_font:
+            self.draw.text((text_x, text_y), str(text), fill=self.pen_color, font=pil_font, anchor="mm" if align == "center" else "lm")
+        else:
+            self.draw.text((text_x, text_y), str(text), fill=self.pen_color)
+    
     def get_image_base64(self) -> str:
         """Return the canvas image as base64 PNG"""
         buffer = io.BytesIO()
