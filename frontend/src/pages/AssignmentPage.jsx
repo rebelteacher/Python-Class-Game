@@ -36,6 +36,7 @@ export default function AssignmentPage({ user }) {
   const [loading, setLoading] = useState(true);
   const [code, setCode] = useState("");
   const [savedCodePerProblem, setSavedCodePerProblem] = useState({}); // Save code for each problem
+  const [savedXmlPerProblem, setSavedXmlPerProblem] = useState({}); // Save block XML for each problem
   const [output, setOutput] = useState("");
   const [running, setRunning] = useState(false);
   const [submitting, setSubmitting] = useState(false);
