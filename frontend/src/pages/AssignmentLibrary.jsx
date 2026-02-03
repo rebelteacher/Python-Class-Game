@@ -742,6 +742,10 @@ export default function AssignmentLibrary({ user }) {
               </Dialog>
 
               <Dialog modal={false} open={createDialogOpen} onOpenChange={(open) => {
+                // Prevent closing if turtle preview is open
+                if (!open && turtlePreviewOpen) {
+                  return; // Don't close the editor if preview is open
+                }
                 setCreateDialogOpen(open);
                 // When opening, set assignment_type based on current filter
                 if (open && typeFilter) {
