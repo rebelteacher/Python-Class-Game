@@ -445,10 +445,13 @@ const AnimatedTurtle = forwardRef(function AnimatedTurtle({
   const turtleRef = useRef(getInitialTurtleState());
   const pathsRef = useRef([]);
   const playingRef = useRef(false);
+  const eventHandlersRef = useRef({ keyHandlers: {}, clickHandler: [], mouseMoveHandler: [] });
+  const [eventModeActive, setEventModeActive] = useState(false);  // Track if event mode is running
   
   // Parse code into commands (memoized) and extract turtle name/color
-  const { commands, turtleName, turtleColor } = useMemo(() => {
+  const { commands, turtleName, turtleColor, eventHandlers } = useMemo(() => {
     const result = parseCode(code);
+    const handlers = parseEventHandlers(code);
     
     // Detect turtle variable name from code
     const nameMatch = code.match(/(\w+)\s*=\s*turtle\.Turtle\(\)|(\w+)\s*=\s*Turtle\(\)/);
@@ -458,8 +461,13 @@ const AnimatedTurtle = forwardRef(function AnimatedTurtle({
     const colorMatch = code.match(/(?:\w+\.)?color\s*\(\s*['"]([\w#]+)['"]\s*\)/);
     const color = colorMatch ? colorMatch[1] : '#228B22';
     
-    return { commands: result, turtleName: name, turtleColor: color };
+    return { commands: result, turtleName: name, turtleColor: color, eventHandlers: handlers };
   }, [code]);
+  
+  // Store event handlers in ref for use in event listeners
+  useEffect(() => {
+    eventHandlersRef.current = eventHandlers;
+  }, [eventHandlers]);
   
   // Convert turtle coordinates to canvas coordinates
   const toCanvasCoords = useCallback((x, y) => ({
