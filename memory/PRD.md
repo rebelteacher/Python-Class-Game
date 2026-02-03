@@ -123,6 +123,7 @@ Teachers can now create "Block" type assignments using drag-and-drop Blockly edi
 - [x] **Fixed event mode activation** - runInstant() and play() now properly activate event mode after running startup code
 - [x] **Fixed dialog closing on button click** - Added e.stopPropagation() to AnimatedTurtle control buttons
 - [x] **Fixed block code saving** - Student block XML now saves to localStorage and restores on page refresh
+- [x] **Fixed backend preview for event-based code** - Backend now auto-executes all event handler functions when generating preview images, so "Expected Output" shows the complete result
 
 ### Completed (Jan 2025)
 - [x] Problem library limit increased (1000 → 10000)
