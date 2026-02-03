@@ -28,6 +28,92 @@ function evaluateExpression(expr, variables) {
   return null;
 }
 
+// Parse event handlers from generated code
+// Returns: { keyHandlers: { 'space': [...commands], 'up': [...] }, clickHandler: [...], mouseMoveHandler: [...] }
+function parseEventHandlers(code) {
+  const handlers = {
+    keyHandlers: {},
+    clickHandler: [],
+    mouseMoveHandler: []
+  };
+  
+  const lines = code.split('\n');
+  let i = 0;
+  
+  while (i < lines.length) {
+    const line = lines[i];
+    const trimmed = line.trim();
+    
+    // Look for event handler function definitions
+    // Pattern: def on_key_space(): or def on_key_up(): etc.
+    const keyMatch = trimmed.match(/^def\s+on_key_(\w+)\s*\(\s*\)\s*:/);
+    if (keyMatch) {
+      const key = keyMatch[1].replace(/_/g, ' ').trim();
+      const funcBody = extractFunctionBody(lines, i);
+      handlers.keyHandlers[key] = parseCode(funcBody);
+      // Skip past function body
+      i = skipFunctionBody(lines, i);
+      continue;
+    }
+    
+    // Pattern: def on_turtle_clicked():
+    const clickMatch = trimmed.match(/^def\s+on_turtle_clicked\s*\(\s*\)\s*:/);
+    if (clickMatch) {
+      const funcBody = extractFunctionBody(lines, i);
+      handlers.clickHandler = parseCode(funcBody);
+      i = skipFunctionBody(lines, i);
+      continue;
+    }
+    
+    // Pattern: def on_mouse_move():
+    const mouseMatch = trimmed.match(/^def\s+on_mouse_move\s*\(\s*\)\s*:/);
+    if (mouseMatch) {
+      const funcBody = extractFunctionBody(lines, i);
+      handlers.mouseMoveHandler = parseCode(funcBody);
+      i = skipFunctionBody(lines, i);
+      continue;
+    }
+    
+    i++;
+  }
+  
+  return handlers;
+}
+
+// Extract function body (indented lines after def)
+function extractFunctionBody(lines, defLineIndex) {
+  const bodyLines = [];
+  const defIndent = lines[defLineIndex].search(/\S/);
+  
+  for (let j = defLineIndex + 1; j < lines.length; j++) {
+    const line = lines[j];
+    if (line.trim() === '') {
+      bodyLines.push('');
+      continue;
+    }
+    const lineIndent = line.search(/\S/);
+    if (lineIndent <= defIndent) break;
+    // Remove one level of indentation
+    bodyLines.push(line.substring(defIndent + 4));
+  }
+  
+  return bodyLines.join('\n');
+}
+
+// Skip past function body and return new index
+function skipFunctionBody(lines, defLineIndex) {
+  const defIndent = lines[defLineIndex].search(/\S/);
+  
+  for (let j = defLineIndex + 1; j < lines.length; j++) {
+    const line = lines[j];
+    if (line.trim() === '') continue;
+    const lineIndent = line.search(/\S/);
+    if (lineIndent <= defIndent) return j;
+  }
+  
+  return lines.length;
+}
+
 // Parse Python turtle code into commands
 function parseCode(code, parentVars = {}) {
   const commands = [];
