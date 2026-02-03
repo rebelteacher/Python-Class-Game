@@ -2384,6 +2384,8 @@ try:
         def stamp(self): return self._sim.stamp()
         def clearstamp(self, stamp_id=None): self._sim.clearstamp(stamp_id)
         def clearstamps(self, n=None): self._sim.clearstamps(n)
+        def write(self, text, move=False, align="left", font=("Arial", 8, "normal")): 
+            self._sim.write(str(text), move, align, font)
         def bye(self): pass
         fd = forward
         bk = backward
