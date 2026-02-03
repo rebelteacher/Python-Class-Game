@@ -1323,8 +1323,10 @@ const AnimatedTurtle = forwardRef(function AnimatedTurtle({
     play,
     stop,
     reset: resetTurtle,
-    runInstant
-  }), [play, stop, resetTurtle, runInstant]);
+    runInstant,
+    startEventMode,
+    isEventModeActive: () => eventModeActive
+  }), [play, stop, resetTurtle, runInstant, startEventMode, eventModeActive]);
   
   return (
     <div className="flex flex-col items-center gap-3">
