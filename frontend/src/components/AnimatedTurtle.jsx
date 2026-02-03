@@ -1194,9 +1194,21 @@ const AnimatedTurtle = forwardRef(function AnimatedTurtle({
     setIsPlaying(false);
     if (onLineHighlight) onLineHighlight(-1);
     
+    // After playing, check if there are event handlers and activate event mode
+    const hasEventHandlers = 
+      Object.keys(eventHandlers.keyHandlers).length > 0 ||
+      eventHandlers.clickHandler.length > 0 ||
+      eventHandlers.mouseMoveHandler.length > 0;
+    
+    if (hasEventHandlers) {
+      console.log("🚀 play: Activating event mode after playback");
+      eventHandlersRef.current = eventHandlers;
+      setEventModeActive(true);
+    }
+    
     // Notify parent that code was run
     if (onRun) onRun();
-  }, [commands, executeCommand, onLineHighlight, resetTurtle, onRun]);
+  }, [commands, executeCommand, onLineHighlight, resetTurtle, onRun, eventHandlers]);
   
   // Run instantly (no animation) - also activates event mode if handlers exist
   const runInstant = useCallback(async () => {
