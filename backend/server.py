@@ -3422,7 +3422,8 @@ async def submit_assignment(submission: SubmissionCreate, request: Request):
                 counts = {
                     'forward': 0, 'backward': 0, 'right': 0, 'left': 0,
                     'goto': 0, 'penup': 0, 'pendown': 0, 'color': 0,
-                    'repeat': 0, 'say': 0, 'hide': 0, 'show': 0
+                    'repeat': 0, 'for': 0, 'while': 0, 'if': 0,
+                    'say': 0, 'hide': 0, 'show': 0, 'home': 0, 'pensize': 0
                 }
                 for cmd in commands:
                     if 't.forward' in cmd or 't.fd(' in cmd:
@@ -3435,12 +3436,16 @@ async def submit_assignment(submission: SubmissionCreate, request: Request):
                         counts['left'] += 1
                     elif 't.goto' in cmd:
                         counts['goto'] += 1
+                    elif 't.home' in cmd:
+                        counts['home'] += 1
                     elif 't.penup' in cmd or 't.pu()' in cmd:
                         counts['penup'] += 1
                     elif 't.pendown' in cmd or 't.pd()' in cmd:
                         counts['pendown'] += 1
                     elif 't.color' in cmd or 't.pencolor' in cmd:
                         counts['color'] += 1
+                    elif 't.pensize' in cmd:
+                        counts['pensize'] += 1
                     elif 't.write' in cmd:
                         counts['say'] += 1
                     elif 't.hideturtle' in cmd or 't.ht()' in cmd:
@@ -3448,7 +3453,12 @@ async def submit_assignment(submission: SubmissionCreate, request: Request):
                     elif 't.showturtle' in cmd or 't.st()' in cmd:
                         counts['show'] += 1
                     elif cmd.startswith('for '):
-                        counts['repeat'] += 1
+                        counts['for'] += 1
+                        counts['repeat'] += 1  # Also count as repeat for backwards compatibility
+                    elif cmd.startswith('while '):
+                        counts['while'] += 1
+                    elif cmd.startswith('if '):
+                        counts['if'] += 1
                 return counts
             
             student_counts = count_command_types(student_commands)
