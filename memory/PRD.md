@@ -36,12 +36,13 @@ A coding education platform for K-12 students featuring multiple programming env
 - Code line highlighting during animation
 - Support for: forward, backward, left, right, goto, circle (with extent), penup, pendown, color, home, write, hideturtle, showturtle, etc.
 
-### Turtle Blocks (Unit 1) - UPDATED Jan 2025
+### Turtle Blocks (Unit 1) - UPDATED Feb 2025
 - Visual block-based programming using Blockly
 - **Full-screen layout** for students (Instructions | TurtleBlocklyEditor with inline preview)
 - **Flyout auto-close** fixed via CSS scrollbar hiding
 - **25% smaller blocks** for better workspace utilization
 - **Full Blockly toolbox** with all standard categories:
+  - **🚩 Events blocks** (NEW Feb 2025): when program starts, when key pressed, when turtle clicked, when mouse moves
   - **Motion blocks**: forward, backward, left, right, goto, home
   - **Pen blocks**: penup, pendown, color, pensize
   - **Looks blocks**: say (write text), say for seconds, hide turtle, show turtle
@@ -53,6 +54,12 @@ A coding education platform for K-12 students featuring multiple programming env
   - **Lists blocks**: create, repeat, length, indexOf, getIndex, setIndex, sort, reverse
   - **Variables**: Custom variable creation with "Create variable..." button
   - **Functions**: Custom function/procedure creation
+- **Event-driven programming** - Students can create interactive programs that respond to:
+  - Keyboard events (space, arrow keys, letters a-d, w, s, any key)
+  - Turtle click events
+  - Mouse movement events
+  - Program start events
+- "Events Active" indicator shows when event handlers are running
 - Code toggle: Show generated Python code from blocks
 - Live turtle canvas preview (larger size: 300x300px)
 - Replaces external Scratch integration
