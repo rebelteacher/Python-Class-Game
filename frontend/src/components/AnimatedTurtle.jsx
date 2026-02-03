@@ -42,8 +42,6 @@ function parseEventHandlers(code) {
   const lines = code.split('\n');
   let i = 0;
   
-  console.log("🔍 parseEventHandlers: Scanning", lines.length, "lines");
-  
   while (i < lines.length) {
     const line = lines[i];
     const trimmed = line.trim();
@@ -53,11 +51,8 @@ function parseEventHandlers(code) {
     const keyMatch = trimmed.match(/^def\s+on_key_(\w+)\s*\(\s*\)\s*:/);
     if (keyMatch) {
       const key = keyMatch[1].replace(/_/g, ' ').trim();
-      console.log("🔍 Found key handler for:", key);
       const funcBody = extractFunctionBody(lines, i);
-      console.log("🔍 Function body:", funcBody.substring(0, 100));
       const parsedCommands = parseCode(funcBody);
-      console.log("🔍 Parsed commands:", parsedCommands.length);
       handlers.keyHandlers[key] = parsedCommands;
       // Skip past function body
       i = skipFunctionBody(lines, i);
@@ -67,7 +62,6 @@ function parseEventHandlers(code) {
     // Pattern: def on_turtle_clicked():
     const clickMatch = trimmed.match(/^def\s+on_turtle_clicked\s*\(\s*\)\s*:/);
     if (clickMatch) {
-      console.log("🔍 Found turtle clicked handler");
       const funcBody = extractFunctionBody(lines, i);
       handlers.clickHandler = parseCode(funcBody);
       i = skipFunctionBody(lines, i);
@@ -77,7 +71,6 @@ function parseEventHandlers(code) {
     // Pattern: def on_mouse_move():
     const mouseMatch = trimmed.match(/^def\s+on_mouse_move\s*\(\s*\)\s*:/);
     if (mouseMatch) {
-      console.log("🔍 Found mouse move handler");
       const funcBody = extractFunctionBody(lines, i);
       handlers.mouseMoveHandler = parseCode(funcBody);
       i = skipFunctionBody(lines, i);
@@ -86,12 +79,6 @@ function parseEventHandlers(code) {
     
     i++;
   }
-  
-  console.log("🔍 parseEventHandlers result:", {
-    keyHandlers: Object.keys(handlers.keyHandlers),
-    clickHandler: handlers.clickHandler.length,
-    mouseMoveHandler: handlers.mouseMoveHandler.length
-  });
   
   return handlers;
 }
