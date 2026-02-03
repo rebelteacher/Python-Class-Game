@@ -2509,7 +2509,13 @@ export default function AssignmentLibrary({ user }) {
 
         {/* Edit Problem Dialog */}
         {editingProblem && (
-          <Dialog modal={false} open={editDialogOpen} onOpenChange={setEditDialogOpen}>
+          <Dialog modal={false} open={editDialogOpen} onOpenChange={(open) => {
+            // Prevent closing if turtle preview or maze builder is open
+            if (!open && (turtlePreviewOpen || mazeBuilderOpen)) {
+              return;
+            }
+            setEditDialogOpen(open);
+          }}>
             <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto">
               <DialogHeader>
                 <DialogTitle>Edit Problem</DialogTitle>
