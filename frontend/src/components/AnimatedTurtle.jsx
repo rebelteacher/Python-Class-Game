@@ -207,6 +207,12 @@ function parseCode(code, parentVars = {}) {
       continue;
     }
     
+    // Parse home command - t.home() - returns turtle to origin (0, 0) and resets heading
+    if (trimmed.match(new RegExp(`${turtlePrefix}home\\s*\\(\\s*\\)`))) {
+      commands.push({ type: 'home', line: lineNum });
+      continue;
+    }
+    
     // Parse setheading/seth with variable support
     match = trimmed.match(new RegExp(`${turtlePrefix}(?:setheading|seth)\\s*\\(\\s*([^)]+)\\s*\\)`));
     if (match) {
