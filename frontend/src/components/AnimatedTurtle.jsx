@@ -970,6 +970,24 @@ const AnimatedTurtle = forwardRef(function AnimatedTurtle({
           drawCanvas();
           setTimeout(resolve, baseDelay);
           break;
+        
+        case 'home':
+          // Move turtle to origin (0, 0) and reset heading to 90 (facing up)
+          if (turtle.penDown) {
+            pathsRef.current.push({
+              type: 'line',
+              x1: turtle.x, y1: turtle.y,
+              x2: 0, y2: 0,
+              color: turtle.penColor,
+              width: turtle.penSize
+            });
+          }
+          turtle.x = 0;
+          turtle.y = 0;
+          turtle.heading = 90; // Reset to facing up
+          drawCanvas();
+          setTimeout(resolve, baseDelay);
+          break;
           
         case 'setheading':
           turtle.heading = cmd.value;
