@@ -1222,7 +1222,7 @@ const AnimatedTurtle = forwardRef(function AnimatedTurtle({
     
     // Notify parent that code was run
     if (onRun) onRun();
-  }, [commands, executeCommand, resetTurtle, onRun]);
+  }, [commands, executeCommand, resetTurtle, onRun, eventHandlers]);
   
   // Stop animation
   const stop = useCallback(() => {
