@@ -1948,6 +1948,12 @@ export default function AssignmentLibrary({ user }) {
                                       className="h-8 text-sm w-full border rounded px-2"
                                     >
                                       <option value="">Select block...</option>
+                                      <optgroup label="🚩 Events">
+                                        <option value="event_start">When Program Starts</option>
+                                        <option value="event_key">When Key Pressed</option>
+                                        <option value="event_click">When Clicked</option>
+                                        <option value="event_mouse">When Mouse Moves</option>
+                                      </optgroup>
                                       <optgroup label="🐢 Motion">
                                         <option value="forward">Forward</option>
                                         <option value="backward">Backward</option>
