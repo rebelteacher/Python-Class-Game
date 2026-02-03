@@ -514,6 +514,9 @@ class Turtle:
     def clearstamps(self, n=None):
         self.sim.clearstamps(n)
     
+    def write(self, text, move=False, align="left", font=("Arial", 8, "normal")):
+        self.sim.write(str(text), move, align, font)
+    
     # Aliases
     fd = forward
     bk = backward
