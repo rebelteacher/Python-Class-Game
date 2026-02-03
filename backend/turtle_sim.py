@@ -365,7 +365,7 @@ class TurtleSim:
     
     def _draw_turtle_icon(self):
         """Draw a turtle icon at the current position and heading"""
-        if not self.visible:
+        if not self.is_visible:
             return
             
         # Turtle size
