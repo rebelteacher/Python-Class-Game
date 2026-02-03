@@ -1285,13 +1285,31 @@ export default function AssignmentPage({ user }) {
                     <TurtleBlocklyEditor
                       key={`block-editor-${currentProblemIndex}-${assignment.problems[currentProblemIndex]?.id || 'new'}`}
                       ref={turtleBlocksRef}
-                      initialXml={assignment.problems[currentProblemIndex]?.starter_blocks_xml || ""}
+                      initialXml={
+                        // Priority: 1. Saved XML from localStorage, 2. Starter blocks from problem
+                        savedXmlPerProblem[getCurrentProblemId()] || 
+                        assignment.problems[currentProblemIndex]?.starter_blocks_xml || 
+                        ""
+                      }
                       onCodeChange={(newCode) => {
                         setCode(newCode);
                         setHasRunPerProblem(prev => ({
                           ...prev,
                           [getCurrentProblemId()]: false
                         }));
+                      }}
+                      onXmlChange={(newXml) => {
+                        // Auto-save XML to localStorage when blocks change
+                        const problemId = getCurrentProblemId();
+                        setSavedXmlPerProblem(prev => {
+                          const newState = {
+                            ...prev,
+                            [problemId]: newXml
+                          };
+                          // Save to localStorage for persistence
+                          localStorage.setItem(`saved_xml_${assignmentId}`, JSON.stringify(newState));
+                          return newState;
+                        });
                       }}
                       onRun={() => {
                         console.log("onRun callback received in AssignmentPage");
