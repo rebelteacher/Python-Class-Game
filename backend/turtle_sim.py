@@ -331,27 +331,30 @@ class TurtleSim:
         # Get canvas position
         pos = self._to_canvas_coords(self.x, self.y)
         
-        # Try to use a font - Pillow might not have all fonts available
+        # Use a larger font size for visibility (minimum 16px, or use provided size * 2)
         try:
             from PIL import ImageFont
             font_name, font_size, font_style = font
-            # Try to load a truetype font, fall back to default
+            actual_size = max(16, font_size * 2)  # Scale up for visibility
             try:
-                pil_font = ImageFont.truetype("arial.ttf", font_size)
+                pil_font = ImageFont.truetype("/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf", actual_size)
             except:
-                pil_font = ImageFont.load_default()
+                try:
+                    pil_font = ImageFont.truetype("arial.ttf", actual_size)
+                except:
+                    pil_font = ImageFont.load_default()
         except:
             pil_font = None
         
-        # Draw the text
-        # Adjust position based on alignment
+        # Draw the text above the turtle position
         text_x = pos[0]
-        text_y = pos[1]
+        text_y = pos[1] - 30  # Position text above turtle
         
         if pil_font:
-            self.draw.text((text_x, text_y), str(text), fill=self.pen_color, font=pil_font, anchor="mm" if align == "center" else "lm")
+            anchor = "mm" if align == "center" else ("rm" if align == "right" else "lm")
+            self.draw.text((text_x, text_y), str(text), fill='black', font=pil_font, anchor=anchor)
         else:
-            self.draw.text((text_x, text_y), str(text), fill=self.pen_color)
+            self.draw.text((text_x, text_y), str(text), fill='black')
     
     def get_image_base64(self) -> str:
         """Return the canvas image as base64 PNG"""
