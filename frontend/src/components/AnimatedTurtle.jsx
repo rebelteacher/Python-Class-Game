@@ -55,6 +55,25 @@ function parseCode(code, parentVars = {}) {
       continue;
     }
     
+    // Skip function definitions (event handlers) - they'll be parsed separately
+    if (trimmed.startsWith('def ')) {
+      // Find the end of this function by looking for next non-indented line
+      const funcIndent = line.search(/\S/);
+      for (let j = lineNum + 1; j < lines.length; j++) {
+        const nextLine = lines[j];
+        if (nextLine.trim() === '') continue;
+        const nextIndent = nextLine.search(/\S/);
+        if (nextIndent <= funcIndent) {
+          lineNum = j - 1;
+          break;
+        }
+        if (j === lines.length - 1) {
+          lineNum = j;
+        }
+      }
+      continue;
+    }
+    
     // Parse variable assignments (e.g., sides = 6, angle = 360 / sides)
     let match = trimmed.match(/^(\w+)\s*=\s*(.+)$/);
     if (match && !trimmed.includes('turtle') && !trimmed.includes('Turtle')) {
