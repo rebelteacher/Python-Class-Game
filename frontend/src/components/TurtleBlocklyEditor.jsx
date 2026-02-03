@@ -1114,16 +1114,31 @@ const TurtleBlocklyEditor = forwardRef(({
     console.log("turtleRef.current:", !!turtleRef.current);
     if (turtleRef.current && generatedCode) {
       setIsRunning(true);
-      turtleRef.current.reset();
-      setTimeout(() => {
-        turtleRef.current.runInstant();
+      
+      // Check if code has event handlers (look for "def on_key_" or similar patterns)
+      const hasEventHandlers = /def on_key_|def on_turtle_clicked|def on_mouse_move/.test(generatedCode);
+      
+      if (hasEventHandlers) {
+        // Use event mode which runs startup code and activates event listeners
+        console.log("Event handlers detected, starting event mode");
+        turtleRef.current.startEventMode();
         setIsRunning(false);
-        // Notify parent that code was run
-        console.log("Run complete, calling onRun callback:", !!onRun);
         if (onRun) {
           onRun(generatedCode);
         }
-      }, 100);
+      } else {
+        // Standard mode - just run the code
+        turtleRef.current.reset();
+        setTimeout(() => {
+          turtleRef.current.runInstant();
+          setIsRunning(false);
+          // Notify parent that code was run
+          console.log("Run complete, calling onRun callback:", !!onRun);
+          if (onRun) {
+            onRun(generatedCode);
+          }
+        }, 100);
+      }
     } else {
       console.log("Cannot run - missing turtleRef or generatedCode");
     }
