@@ -1450,7 +1450,10 @@ const AnimatedTurtle = forwardRef(function AnimatedTurtle({
         <Button
           type="button"
           size="sm"
-          onClick={isPlaying ? stop : play}
+          onClick={(e) => {
+            e.stopPropagation();
+            isPlaying ? stop() : play();
+          }}
           className={isPlaying ? "bg-yellow-600 hover:bg-yellow-700" : "bg-green-600 hover:bg-green-700"}
         >
           {isPlaying ? <Pause className="w-4 h-4" /> : <Play className="w-4 h-4" />}
@@ -1460,7 +1463,10 @@ const AnimatedTurtle = forwardRef(function AnimatedTurtle({
           type="button"
           size="sm"
           variant="outline"
-          onClick={runInstant}
+          onClick={(e) => {
+            e.stopPropagation();
+            runInstant();
+          }}
           className="bg-gray-700 border-gray-600 hover:bg-gray-600"
           title="Run instantly"
         >
@@ -1471,7 +1477,8 @@ const AnimatedTurtle = forwardRef(function AnimatedTurtle({
           type="button"
           size="sm"
           variant="outline"
-          onClick={() => {
+          onClick={(e) => {
+            e.stopPropagation();
             setShowGrid(!showGrid);
             // Trigger redraw
             setTimeout(() => drawCanvas(), 50);
