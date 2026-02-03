@@ -3429,7 +3429,10 @@ export default function AssignmentLibrary({ user }) {
             </div>
           )}
           
-          <Button onClick={() => setTurtlePreviewOpen(false)}>
+          <Button onClick={(e) => {
+            e.stopPropagation();
+            setTurtlePreviewOpen(false);
+          }}>
             Close
           </Button>
         </DialogContent>
