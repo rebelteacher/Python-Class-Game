@@ -1225,11 +1225,20 @@ const AnimatedTurtle = forwardRef(function AnimatedTurtle({
   
   // Start event mode - runs startup code and activates event listeners
   const startEventMode = useCallback(async () => {
+    console.log("🚀 startEventMode called");
+    console.log("🚀 eventHandlers:", JSON.stringify({
+      keyHandlers: Object.keys(eventHandlers.keyHandlers),
+      keyHandlerCommands: Object.fromEntries(
+        Object.entries(eventHandlers.keyHandlers).map(([k, v]) => [k, v.length])
+      )
+    }));
+    
     // Reset first
     resetTurtle();
     await new Promise(r => setTimeout(r, 50));
     
     // Run startup/main code
+    console.log("🚀 Running", commands.length, "startup commands");
     for (const cmd of commands) {
       await executeCommand(cmd, false);
     }
@@ -1240,10 +1249,13 @@ const AnimatedTurtle = forwardRef(function AnimatedTurtle({
       eventHandlers.clickHandler.length > 0 ||
       eventHandlers.mouseMoveHandler.length > 0;
     
+    console.log("🚀 Has event handlers:", hasEventHandlers);
+    
     if (hasEventHandlers) {
       // Update the ref synchronously before activating event mode
       eventHandlersRef.current = eventHandlers;
       setEventModeActive(true);
+      console.log("✅ Event mode ACTIVATED");
     }
     
     if (onRun) onRun();
