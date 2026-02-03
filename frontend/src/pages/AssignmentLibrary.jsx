@@ -1944,38 +1944,33 @@ export default function AssignmentLibrary({ user }) {
                                       className="h-8 text-sm w-full border rounded px-2"
                                     >
                                       <option value="">Select block...</option>
-                                      <optgroup label="Motion">
-                                        <option value="move_forward">Move Forward</option>
-                                        <option value="move_backward">Move Backward</option>
-                                        <option value="turn_right">Turn Right</option>
-                                        <option value="turn_left">Turn Left</option>
-                                        <option value="go_to">Go To Position</option>
-                                        <option value="glide">Glide</option>
+                                      <optgroup label="🐢 Motion">
+                                        <option value="forward">Forward</option>
+                                        <option value="backward">Backward</option>
+                                        <option value="right">Turn Right</option>
+                                        <option value="left">Turn Left</option>
+                                        <option value="goto">Go To X Y</option>
+                                        <option value="home">Go Home</option>
                                       </optgroup>
-                                      <optgroup label="Looks">
+                                      <optgroup label="🖊️ Pen">
+                                        <option value="pendown">Pen Down</option>
+                                        <option value="penup">Pen Up</option>
+                                        <option value="color">Set Color</option>
+                                        <option value="pensize">Set Pen Size</option>
+                                      </optgroup>
+                                      <optgroup label="💬 Looks">
                                         <option value="say">Say</option>
-                                        <option value="think">Think</option>
-                                        <option value="show">Show</option>
-                                        <option value="hide">Hide</option>
-                                        <option value="change_size">Change Size</option>
+                                        <option value="hide">Hide Turtle</option>
+                                        <option value="show">Show Turtle</option>
                                       </optgroup>
-                                      <optgroup label="Control">
+                                      <optgroup label="🔄 Loops">
                                         <option value="repeat">Repeat Loop</option>
-                                        <option value="forever">Forever Loop</option>
+                                        <option value="for">Count Loop (For)</option>
+                                        <option value="while">While Loop</option>
+                                      </optgroup>
+                                      <optgroup label="🧠 Logic">
                                         <option value="if">If Statement</option>
                                         <option value="if_else">If-Else</option>
-                                        <option value="wait">Wait</option>
-                                      </optgroup>
-                                      <optgroup label="Events">
-                                        <option value="when_start">When Start Clicked</option>
-                                        <option value="when_key">When Key Pressed</option>
-                                        <option value="when_clicked">When Sprite Clicked</option>
-                                      </optgroup>
-                                      <optgroup label="Pen">
-                                        <option value="pen_down">Pen Down</option>
-                                        <option value="pen_up">Pen Up</option>
-                                        <option value="set_pen_color">Set Pen Color</option>
-                                        <option value="change_pen_size">Change Pen Size</option>
                                       </optgroup>
                                     </select>
                                   </td>
