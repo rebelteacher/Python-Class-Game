@@ -42,6 +42,8 @@ function parseEventHandlers(code) {
   const lines = code.split('\n');
   let i = 0;
   
+  console.log("🔍 parseEventHandlers scanning", lines.length, "lines");
+  
   while (i < lines.length) {
     const line = lines[i];
     const trimmed = line.trim();
@@ -51,8 +53,11 @@ function parseEventHandlers(code) {
     const keyMatch = trimmed.match(/^def\s+on_key_(\w+)\s*\(\s*\)\s*:/);
     if (keyMatch) {
       const key = keyMatch[1].replace(/_/g, ' ').trim();
+      console.log("🔍 Found key handler:", key);
       const funcBody = extractFunctionBody(lines, i);
+      console.log("🔍 Function body:", funcBody.substring(0, 100));
       const parsedCommands = parseCode(funcBody);
+      console.log("🔍 Parsed", parsedCommands.length, "commands for", key);
       handlers.keyHandlers[key] = parsedCommands;
       // Skip past function body
       i = skipFunctionBody(lines, i);
@@ -80,6 +85,7 @@ function parseEventHandlers(code) {
     i++;
   }
   
+  console.log("🔍 parseEventHandlers result:", Object.keys(handlers.keyHandlers));
   return handlers;
 }
 
