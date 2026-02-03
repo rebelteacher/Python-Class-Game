@@ -1202,27 +1202,40 @@ const AnimatedTurtle = forwardRef(function AnimatedTurtle({
   
   // Start event mode - runs startup code and activates event listeners
   const startEventMode = useCallback(async () => {
+    console.log("🚀 startEventMode called");
+    console.log("📋 Event handlers:", JSON.stringify({
+      keyHandlers: Object.keys(eventHandlers.keyHandlers),
+      clickHandler: eventHandlers.clickHandler.length,
+      mouseMoveHandler: eventHandlers.mouseMoveHandler.length
+    }));
+    
     // Reset first
     resetTurtle();
     await new Promise(r => setTimeout(r, 50));
     
     // Run startup/main code
+    console.log("▶️ Running startup commands:", commands.length);
     for (const cmd of commands) {
       await executeCommand(cmd, false);
     }
     
-    // Check if there are any event handlers defined
+    // Use eventHandlers directly (from useMemo) - not the ref which may be stale
     const hasEventHandlers = 
-      Object.keys(eventHandlersRef.current.keyHandlers).length > 0 ||
-      eventHandlersRef.current.clickHandler.length > 0 ||
-      eventHandlersRef.current.mouseMoveHandler.length > 0;
+      Object.keys(eventHandlers.keyHandlers).length > 0 ||
+      eventHandlers.clickHandler.length > 0 ||
+      eventHandlers.mouseMoveHandler.length > 0;
+    
+    console.log("🎮 Has event handlers:", hasEventHandlers);
     
     if (hasEventHandlers) {
+      // Update the ref synchronously before activating event mode
+      eventHandlersRef.current = eventHandlers;
       setEventModeActive(true);
+      console.log("✅ Event mode ACTIVATED - listening for keyboard/mouse events");
     }
     
     if (onRun) onRun();
-  }, [commands, executeCommand, resetTurtle, onRun]);
+  }, [commands, executeCommand, resetTurtle, onRun, eventHandlers]);
   
   // Keyboard event handler
   useEffect(() => {
