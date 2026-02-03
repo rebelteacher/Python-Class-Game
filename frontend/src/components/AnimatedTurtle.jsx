@@ -1338,11 +1338,19 @@ const AnimatedTurtle = forwardRef(function AnimatedTurtle({
           className="border border-gray-300 rounded cursor-crosshair"
           onMouseMove={handleMouseMove}
           onMouseLeave={handleMouseLeave}
+          onClick={handleCanvasClick}
+          tabIndex={0}
         />
         {/* Coordinate display overlay */}
         {mouseCoords && (
           <div className="absolute top-2 right-2 bg-black/70 text-white text-xs px-2 py-1 rounded font-mono">
             ({mouseCoords.x}, {mouseCoords.y})
+          </div>
+        )}
+        {/* Event mode indicator */}
+        {eventModeActive && (
+          <div className="absolute top-2 left-2 bg-green-500 text-white text-xs px-2 py-1 rounded font-bold animate-pulse">
+            ⌨️ Events Active
           </div>
         )}
       </div>
