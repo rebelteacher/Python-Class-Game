@@ -587,6 +587,14 @@ const generatePythonCode = (workspace) => {
   
   let code = "import turtle\nimport random\nt = turtle.Turtle()\n\n";
   
+  // Track event handlers separately
+  const eventHandlers = {
+    onStart: [],
+    onKeyPressed: {},  // key -> [blocks]
+    onClicked: [],
+    onMouseMove: []
+  };
+  
   const getValueCode = (block, inputName, defaultVal) => {
     const input = block.getInput(inputName);
     if (!input || !input.connection || !input.connection.targetBlock()) {
