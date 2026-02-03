@@ -1440,7 +1440,10 @@ const AnimatedTurtle = forwardRef(function AnimatedTurtle({
           type="button"
           size="sm"
           variant="outline"
-          onClick={resetTurtle}
+          onClick={(e) => {
+            e.stopPropagation();
+            resetTurtle();
+          }}
           className="bg-gray-700 border-gray-600 hover:bg-gray-600"
           title="Reset"
         >
