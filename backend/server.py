@@ -3456,17 +3456,28 @@ async def submit_assignment(submission: SubmissionCreate, request: Request):
             
             # Map test case patterns to command types
             pattern_to_command = {
+                # Motion blocks
                 'move_forward': 'forward', 'forward': 'forward',
                 'move_backward': 'backward', 'backward': 'backward',
                 'turn_right': 'right', 'right': 'right',
                 'turn_left': 'left', 'left': 'left',
                 'go_to': 'goto', 'goto': 'goto',
+                'home': 'home', 'go_home': 'home',
+                # Pen blocks
                 'pen_up': 'penup', 'penup': 'penup',
                 'pen_down': 'pendown', 'pendown': 'pendown',
                 'set_color': 'color', 'color': 'color',
-                'repeat': 'repeat', 'loop': 'repeat',
+                'set_pen_color': 'color',
+                'pensize': 'pensize', 'change_pen_size': 'pensize',
+                # Looks blocks
                 'say': 'say', 'write': 'say',
-                'hide': 'hide', 'show': 'show'
+                'hide': 'hide', 'show': 'show',
+                # Loop blocks
+                'repeat': 'repeat', 'loop': 'repeat',
+                'for': 'for', 'count': 'for',
+                'while': 'while',
+                # Logic blocks
+                'if': 'if', 'if_else': 'if'
             }
             
             test_results = []
