@@ -338,6 +338,63 @@ const defineTurtleBlocks = () => {
     }
   };
 
+  // ===== EVENT BLOCKS (Yellow - Color 65) =====
+  
+  Blockly.Blocks['event_start'] = {
+    init: function() {
+      this.appendDummyInput()
+          .appendField("🚩 when program starts");
+      this.setNextStatement(true, null);
+      this.setColour(65);
+      this.setTooltip("Run this code when the program starts");
+    }
+  };
+
+  Blockly.Blocks['event_key_pressed'] = {
+    init: function() {
+      this.appendDummyInput()
+          .appendField("⌨️ when")
+          .appendField(new Blockly.FieldDropdown([
+            ["space", "space"],
+            ["up arrow", "up"],
+            ["down arrow", "down"],
+            ["left arrow", "left"],
+            ["right arrow", "right"],
+            ["a", "a"],
+            ["b", "b"],
+            ["c", "c"],
+            ["d", "d"],
+            ["w", "w"],
+            ["s", "s"],
+            ["any", "any"]
+          ]), "KEY")
+          .appendField("key pressed");
+      this.setNextStatement(true, null);
+      this.setColour(65);
+      this.setTooltip("Run this code when a key is pressed");
+    }
+  };
+
+  Blockly.Blocks['event_clicked'] = {
+    init: function() {
+      this.appendDummyInput()
+          .appendField("🖱️ when turtle clicked");
+      this.setNextStatement(true, null);
+      this.setColour(65);
+      this.setTooltip("Run this code when the turtle is clicked");
+    }
+  };
+
+  Blockly.Blocks['event_mouse_move'] = {
+    init: function() {
+      this.appendDummyInput()
+          .appendField("🖱️ when mouse moves");
+      this.setNextStatement(true, null);
+      this.setColour(65);
+      this.setTooltip("Run this code when the mouse moves");
+    }
+  };
+
   // NOTE: Standard Blockly blocks (logic_*, math_*, variables_*, etc.) 
   // are now imported from 'blockly/blocks' - no need to redefine them here
 };
