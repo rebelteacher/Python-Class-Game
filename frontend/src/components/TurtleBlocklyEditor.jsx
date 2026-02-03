@@ -814,8 +814,89 @@ const generatePythonCode = (workspace) => {
     return chainCode;
   };
   
+  // First pass: categorize blocks by their event type
   for (const block of blocks) {
-    code += processBlockChain(block);
+    const blockType = block.type;
+    
+    if (blockType === 'event_start') {
+      // Blocks attached to "when program starts" run at startup
+      const nextBlock = block.getNextBlock();
+      if (nextBlock) {
+        eventHandlers.onStart.push(nextBlock);
+      }
+    } else if (blockType === 'event_key_pressed') {
+      // Blocks attached to "when key pressed" run when that key is pressed
+      const key = block.getFieldValue('KEY') || 'space';
+      if (!eventHandlers.onKeyPressed[key]) {
+        eventHandlers.onKeyPressed[key] = [];
+      }
+      const nextBlock = block.getNextBlock();
+      if (nextBlock) {
+        eventHandlers.onKeyPressed[key].push(nextBlock);
+      }
+    } else if (blockType === 'event_clicked') {
+      // Blocks attached to "when clicked" run when turtle is clicked
+      const nextBlock = block.getNextBlock();
+      if (nextBlock) {
+        eventHandlers.onClicked.push(nextBlock);
+      }
+    } else if (blockType === 'event_mouse_move') {
+      // Blocks attached to "when mouse moves"
+      const nextBlock = block.getNextBlock();
+      if (nextBlock) {
+        eventHandlers.onMouseMove.push(nextBlock);
+      }
+    } else {
+      // Regular blocks (not under any event) - run at startup
+      eventHandlers.onStart.push(block);
+    }
+  }
+  
+  // Generate startup code
+  if (eventHandlers.onStart.length > 0) {
+    code += "# Startup code\n";
+    for (const block of eventHandlers.onStart) {
+      code += processBlockChain(block);
+    }
+    code += "\n";
+  }
+  
+  // Generate key event handler functions
+  const keyNames = Object.keys(eventHandlers.onKeyPressed);
+  if (keyNames.length > 0) {
+    for (const key of keyNames) {
+      const handlerBlocks = eventHandlers.onKeyPressed[key];
+      const funcName = `on_key_${key.replace(/\s+/g, '_')}`;
+      code += `# EVENT: When "${key}" key pressed\n`;
+      code += `def ${funcName}():\n`;
+      for (const block of handlerBlocks) {
+        code += processBlockChain(block, '    ');
+      }
+      if (handlerBlocks.length === 0) {
+        code += "    pass\n";
+      }
+      code += "\n";
+    }
+  }
+  
+  // Generate click event handler
+  if (eventHandlers.onClicked.length > 0) {
+    code += "# EVENT: When turtle clicked\n";
+    code += "def on_turtle_clicked():\n";
+    for (const block of eventHandlers.onClicked) {
+      code += processBlockChain(block, '    ');
+    }
+    code += "\n";
+  }
+  
+  // Generate mouse move event handler
+  if (eventHandlers.onMouseMove.length > 0) {
+    code += "# EVENT: When mouse moves\n";
+    code += "def on_mouse_move():\n";
+    for (const block of eventHandlers.onMouseMove) {
+      code += processBlockChain(block, '    ');
+    }
+    code += "\n";
   }
   
   return code;
