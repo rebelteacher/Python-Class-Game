@@ -118,8 +118,11 @@ Teachers can now create "Block" type assignments using drag-and-drop Blockly edi
 - [x] "Events Active" indicator when event mode is running
 - [x] Lesson 3: Events & Triggers problems now solvable
 - [x] **Fixed Event Handler Timing Bug** - Fixed issue where eventHandlersRef was stale when startEventMode ran (Feb 3, 2025)
-  - Root cause: eventHandlersRef was updated in useEffect (async) but startEventMode accessed it synchronously
-  - Fix: Use eventHandlers directly from useMemo and update ref synchronously before activating event mode
+- [x] **Fixed "say" block (write command)** - Added write() method to turtle_sim.py and both MockTurtle classes in server.py
+- [x] **Fixed function-skipping in parseCode** - Code inside event handler functions was incorrectly running on startup
+- [x] **Fixed event mode activation** - runInstant() and play() now properly activate event mode after running startup code
+- [x] **Fixed dialog closing on button click** - Added e.stopPropagation() to AnimatedTurtle control buttons
+- [x] **Fixed block code saving** - Student block XML now saves to localStorage and restores on page refresh
 
 ### Completed (Jan 2025)
 - [x] Problem library limit increased (1000 → 10000)
