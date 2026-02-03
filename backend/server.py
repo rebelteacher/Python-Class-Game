@@ -2745,6 +2745,24 @@ try:
     # Execute student code
 {chr(10).join("    " + line for line in execute_req.code.split(chr(10)))}
     
+    # AUTO-EXECUTE all event handlers for preview
+    # Find and call any on_key_* or on_turtle_* functions that were defined
+    import re
+    user_code = """
+{execute_req.code}
+"""
+    # Find all event handler function names
+    handler_pattern = r'def (on_key_\w+|on_turtle_clicked|on_mouse_move)\s*\(\s*\)\s*:'
+    handlers = re.findall(handler_pattern, user_code)
+    
+    # Call each handler to show the expected final output
+    for handler in handlers:
+        if handler in dir():
+            try:
+                eval(handler + "()")
+            except:
+                pass
+    
     # Restore stdout/stderr
     sys.stdout = original_stdout
     sys.stderr = original_stderr
