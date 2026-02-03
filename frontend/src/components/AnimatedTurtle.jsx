@@ -323,7 +323,8 @@ const AnimatedTurtle = forwardRef(function AnimatedTurtle({
   challengeMode = false,
   onGoalReached = null,
   onCollision = null,
-  onComplete = null
+  onComplete = null,
+  enableEvents = true  // Enable keyboard/mouse event listeners
 }, ref) {
   const canvasRef = useRef(null);
   const bgCanvasRef = useRef(null);  // Separate canvas for background
