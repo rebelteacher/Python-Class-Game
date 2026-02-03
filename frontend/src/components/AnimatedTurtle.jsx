@@ -148,17 +148,29 @@ function parseCode(code, parentVars = {}) {
     if (trimmed.startsWith('def ')) {
       // Find the end of this function by looking for next non-indented line
       const funcIndent = line.search(/\S/);
+      let lastFuncLine = lineNum;
       for (let j = lineNum + 1; j < lines.length; j++) {
         const nextLine = lines[j];
-        if (nextLine.trim() === '') continue;
+        if (nextLine.trim() === '') {
+          lastFuncLine = j;
+          continue;
+        }
         const nextIndent = nextLine.search(/\S/);
         if (nextIndent <= funcIndent) {
+          // Found a line with same or less indentation - function ends before this
           lineNum = j - 1;
           break;
         }
+        // This line is part of the function
+        lastFuncLine = j;
+        // If we're at the last line, set lineNum to skip past it
         if (j === lines.length - 1) {
           lineNum = j;
         }
+      }
+      // If loop ended without finding end of function, skip to last line we saw
+      if (lineNum < lastFuncLine) {
+        lineNum = lastFuncLine;
       }
       continue;
     }
