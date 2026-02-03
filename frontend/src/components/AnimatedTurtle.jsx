@@ -1186,8 +1186,113 @@ const AnimatedTurtle = forwardRef(function AnimatedTurtle({
   const stop = useCallback(() => {
     playingRef.current = false;
     setIsPlaying(false);
+    setEventModeActive(false);
     if (onLineHighlight) onLineHighlight(-1);
   }, [onLineHighlight]);
+  
+  // Execute event handler commands (for key/click events)
+  const executeEventHandler = useCallback(async (handlerCommands) => {
+    if (!handlerCommands || handlerCommands.length === 0) return;
+    
+    for (const cmd of handlerCommands) {
+      await executeCommand(cmd, false);  // Execute instantly for responsiveness
+    }
+    drawCanvas();
+  }, [executeCommand, drawCanvas]);
+  
+  // Start event mode - runs startup code and activates event listeners
+  const startEventMode = useCallback(async () => {
+    // Reset first
+    resetTurtle();
+    await new Promise(r => setTimeout(r, 50));
+    
+    // Run startup/main code
+    for (const cmd of commands) {
+      await executeCommand(cmd, false);
+    }
+    
+    // Check if there are any event handlers defined
+    const hasEventHandlers = 
+      Object.keys(eventHandlersRef.current.keyHandlers).length > 0 ||
+      eventHandlersRef.current.clickHandler.length > 0 ||
+      eventHandlersRef.current.mouseMoveHandler.length > 0;
+    
+    if (hasEventHandlers) {
+      setEventModeActive(true);
+    }
+    
+    if (onRun) onRun();
+  }, [commands, executeCommand, resetTurtle, onRun]);
+  
+  // Keyboard event handler
+  useEffect(() => {
+    if (!enableEvents || !eventModeActive) return;
+    
+    const handleKeyDown = (e) => {
+      const handlers = eventHandlersRef.current.keyHandlers;
+      if (!handlers || Object.keys(handlers).length === 0) return;
+      
+      // Map key codes to handler keys
+      let key = null;
+      switch (e.code) {
+        case 'Space': key = 'space'; break;
+        case 'ArrowUp': key = 'up'; break;
+        case 'ArrowDown': key = 'down'; break;
+        case 'ArrowLeft': key = 'left'; break;
+        case 'ArrowRight': key = 'right'; break;
+        default:
+          // For letter keys
+          if (e.key.length === 1) {
+            key = e.key.toLowerCase();
+          }
+      }
+      
+      // Check for 'any' key handler
+      if (handlers['any']) {
+        e.preventDefault();
+        executeEventHandler(handlers['any']);
+      }
+      
+      // Check for specific key handler
+      if (key && handlers[key]) {
+        e.preventDefault();
+        executeEventHandler(handlers[key]);
+      }
+    };
+    
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [enableEvents, eventModeActive, executeEventHandler]);
+  
+  // Canvas click handler for "when turtle clicked" events
+  const handleCanvasClick = useCallback((e) => {
+    if (!eventModeActive) return;
+    
+    const handlers = eventHandlersRef.current;
+    if (!handlers.clickHandler || handlers.clickHandler.length === 0) return;
+    
+    // Check if click is near turtle position
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+    
+    const rect = canvas.getBoundingClientRect();
+    const scaleX = canvas.width / rect.width;
+    const scaleY = canvas.height / rect.height;
+    const canvasX = (e.clientX - rect.left) * scaleX;
+    const canvasY = (e.clientY - rect.top) * scaleY;
+    
+    // Convert to turtle coordinates
+    const clickX = canvasX - width / 2;
+    const clickY = height / 2 - canvasY;
+    
+    // Check if click is within ~30 pixels of turtle
+    const turtle = turtleRef.current;
+    const dist = Math.sqrt((clickX - turtle.x) ** 2 + (clickY - turtle.y) ** 2);
+    
+    if (dist < 30) {
+      executeEventHandler(handlers.clickHandler);
+    }
+  }, [eventModeActive, executeEventHandler, width, height]);
   
   // Handle mouse move for coordinate display
   const handleMouseMove = useCallback((e) => {
