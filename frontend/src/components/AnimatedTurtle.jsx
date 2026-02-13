@@ -467,6 +467,8 @@ function parseCode(code, parentVars = {}) {
       const rangeExpr = match[2];
       const iterations = getNumericValue(rangeExpr);
       
+      console.log(`🔄 For loop detected: ${loopVar} in range(${rangeExpr}), iterations:`, iterations);
+      
       if (iterations !== null && iterations > 0) {
         const loopIndent = line.search(/\S/);
         const loopBody = [];
