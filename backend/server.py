@@ -995,6 +995,9 @@ class GenerateLessonPlanRequest(BaseModel):
     pacingIndependentPractice: str = "10"
     pacingClosure: str = "5"
     nextMajorAssessment: str = ""
+    # Standards and objectives
+    standards: str = ""
+    objectives: str = ""
     # Lesson input
     subject: str
     topic: str
