@@ -7145,6 +7145,53 @@ async def generate_lesson_plan(req: GenerateLessonPlanRequest, request: Request)
         day_date = start_date + timedelta(days=day_num - 1)
         dates.append(day_date.strftime("%A, %B %d, %Y"))
     
+    # Fetch relevant problems from the database for practice activities
+    search_terms = [req.subject.lower(), req.topic.lower()]
+    problems_cursor = db.problems.find({
+        "$or": [
+            {"title": {"$regex": req.topic, "$options": "i"}},
+            {"chapter": {"$regex": req.topic, "$options": "i"}},
+            {"lesson": {"$regex": req.topic, "$options": "i"}},
+            {"title": {"$regex": req.subject, "$options": "i"}},
+            {"chapter": {"$regex": req.subject, "$options": "i"}},
+        ]
+    }).limit(20)
+    
+    available_problems = []
+    async for prob in problems_cursor:
+        available_problems.append({
+            "id": prob.get("id"),
+            "title": prob.get("title"),
+            "chapter": prob.get("chapter", ""),
+            "lesson": prob.get("lesson", ""),
+            "unit_type": prob.get("unit_type", ""),
+            "difficulty": prob.get("difficulty", "medium")
+        })
+    
+    # If no specific matches, get general problems
+    if len(available_problems) < 5:
+        general_cursor = db.problems.find({}).limit(30)
+        async for prob in general_cursor:
+            if prob.get("id") not in [p["id"] for p in available_problems]:
+                available_problems.append({
+                    "id": prob.get("id"),
+                    "title": prob.get("title"),
+                    "chapter": prob.get("chapter", ""),
+                    "lesson": prob.get("lesson", ""),
+                    "unit_type": prob.get("unit_type", ""),
+                    "difficulty": prob.get("difficulty", "medium")
+                })
+                if len(available_problems) >= 20:
+                    break
+    
+    # Format problem list for AI context
+    problems_context = ""
+    if available_problems:
+        problems_context = "\n\n**AVAILABLE PRACTICE PROBLEMS FROM APP:**\n"
+        for i, prob in enumerate(available_problems[:15], 1):
+            problems_context += f"{i}. \"{prob['title']}\" (ID: {prob['id']}) - {prob['chapter']} {prob['lesson']}\n"
+        problems_context += "\nFor guidedPractice and independentPractice sections, SUGGEST specific problems from this list by including their titles and IDs. Format as: \"Use app problem: [Problem Title] (ID: xxx)\" so teachers can easily assign them."
+    
     # Generate all days in a single prompt for efficiency
     prompt = f"""You are an expert K-12 curriculum designer. Create a detailed multi-day lesson plan for:
 
@@ -7157,6 +7204,7 @@ async def generate_lesson_plan(req: GenerateLessonPlanRequest, request: Request)
 **Lesson Range:** {req.lessonRange}
 **Number of Days:** {req.numberOfDays}
 **Dates:** {', '.join(dates)}
+{problems_context}
 
 Create a lesson plan for EACH of the {req.numberOfDays} days. For key questions, make them **bold**.
 
@@ -7168,13 +7216,14 @@ For EACH DAY, provide these sections:
 - modeling: How teacher demonstrates concepts
 - instructionalStrategies: 2-3 specific strategies
 - checksForUnderstanding: Ways to gauge understanding with **bold questions**
-- guidedPractice: Activities with teacher support
-- independentPractice: Solo activities/problems
+- guidedPractice: Activities with teacher support. Include specific app problems if available.
+- independentPractice: Solo activities/problems. Include specific app problems if available.
 - closure: Wrap-up with **bold exit ticket question**
 - formativeAssessment: Informal assessment methods
 - summativeAssessmentDate: When summative occurs
 - extendedActivities: For early finishers
 - reviewReteachActivities: For struggling students
+- suggestedProblems: Array of problem IDs from the available problems list that match this day's content (can be empty if none match)
 
 Day 1 should be introductory, middle days build skills, final day should review/synthesize.
 
@@ -7182,8 +7231,8 @@ Respond with a JSON array of {req.numberOfDays} objects, each with dayNumber (1-
 
 Example format:
 [
-  {{"dayNumber": 1, "date": "{dates[0] if dates else ''}", "learnerOutcomes": "...", "standards": "...", ...}},
-  {{"dayNumber": 2, "date": "...", ...}}
+  {{"dayNumber": 1, "date": "{dates[0] if dates else ''}", "learnerOutcomes": "...", "standards": "...", "suggestedProblems": ["problem-id-1", "problem-id-2"], ...}},
+  {{"dayNumber": 2, "date": "...", "suggestedProblems": [], ...}}
 ]
 
 Return ONLY valid JSON array, no other text."""
