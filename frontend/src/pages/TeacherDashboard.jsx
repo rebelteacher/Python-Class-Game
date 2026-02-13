@@ -199,6 +199,15 @@ export default function TeacherDashboard({ user, setUser }) {
             Library
           </Button>
           <Button 
+            data-testid="lesson-plans-nav-btn" 
+            onClick={() => navigate("/lesson-plans")} 
+            variant="ghost"
+            className="w-full justify-start gap-2 text-white hover:bg-white/20 text-sm"
+          >
+            <FileText className="w-4 h-4" />
+            Lesson Plans
+          </Button>
+          <Button 
             data-testid="reports-nav-btn" 
             onClick={() => navigate("/teacher-reports")} 
             variant="ghost"
