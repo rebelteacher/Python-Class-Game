@@ -13,7 +13,8 @@ import { Separator } from "@/components/ui/separator";
 import { 
   ArrowLeft, Save, Sparkles, Printer, FileText, Calendar, Clock, 
   GraduationCap, BookOpen, Target, Users, CheckCircle, Loader2,
-  ChevronDown, ChevronUp, Edit3, Trash2, Plus, Download
+  ChevronDown, ChevronUp, Edit3, Trash2, Plus, Download, 
+  ListChecks, ExternalLink, Copy
 } from "lucide-react";
 
 const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
