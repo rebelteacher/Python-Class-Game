@@ -347,17 +347,23 @@ function parseCode(code, parentVars = {}) {
       continue;
     }
     
-    // Parse pencolor
-    match = trimmed.match(new RegExp(`${turtlePrefix}pencolor\\s*\\(\\s*['"](.*?)['"]\s*\\)`));
+    // Parse pencolor with variable support (e.g., pencolor("red"), pencolor(colors[i]), pencolor(myColor))
+    match = trimmed.match(new RegExp(`${turtlePrefix}pencolor\\s*\\(\\s*([^)]+)\\s*\\)`));
     if (match) {
-      commands.push({ type: 'pencolor', value: match[1], line: lineNum });
+      const colorValue = getColorValue(match[1]);
+      if (colorValue) {
+        commands.push({ type: 'pencolor', value: colorValue, line: lineNum });
+      }
       continue;
     }
     
-    // Parse fillcolor
-    match = trimmed.match(new RegExp(`${turtlePrefix}fillcolor\\s*\\(\\s*['"](.*?)['"]\s*\\)`));
+    // Parse fillcolor with variable support
+    match = trimmed.match(new RegExp(`${turtlePrefix}fillcolor\\s*\\(\\s*([^)]+)\\s*\\)`));
     if (match) {
-      commands.push({ type: 'fillcolor', value: match[1], line: lineNum });
+      const colorValue = getColorValue(match[1]);
+      if (colorValue) {
+        commands.push({ type: 'fillcolor', value: colorValue, line: lineNum });
+      }
       continue;
     }
     
