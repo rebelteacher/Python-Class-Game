@@ -50,7 +50,10 @@ export default function LessonPlanCreator({ user }) {
     pacingGuidedPractice: "15",
     pacingIndependentPractice: "10",
     pacingClosure: "5",
-    nextMajorAssessment: ""
+    nextMajorAssessment: "",
+    // Standards and objectives that the AI should use
+    standards: "",
+    objectives: ""
   });
 
   // Lesson plan generation inputs
