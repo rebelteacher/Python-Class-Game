@@ -674,6 +674,47 @@ export default function LessonPlanCreator({ user }) {
                                       }}
                                     />
                                   )}
+                                  
+                                  {/* Show suggested problems for practice sections */}
+                                  {section.showProblems && day.suggestedProblems?.length > 0 && (
+                                    <div className="mt-3 p-3 bg-green-50 border border-green-200 rounded-lg no-print">
+                                      <h5 className="text-sm font-semibold text-green-800 flex items-center gap-2 mb-2">
+                                        <ListChecks className="w-4 h-4" />
+                                        Suggested App Problems
+                                      </h5>
+                                      <div className="space-y-1">
+                                        {day.suggestedProblems.map((problemId, idx) => {
+                                          const problem = getProblemById(problemId);
+                                          if (!problem) return null;
+                                          return (
+                                            <div key={idx} className="flex items-center justify-between text-sm bg-white p-2 rounded border border-green-100">
+                                              <span className="text-gray-700">{problem.title}</span>
+                                              <div className="flex items-center gap-1">
+                                                <Button
+                                                  variant="ghost"
+                                                  size="sm"
+                                                  onClick={() => copyProblemLink(problemId)}
+                                                  className="h-6 px-2 text-green-600 hover:text-green-800"
+                                                  title="Copy link"
+                                                >
+                                                  <Copy className="w-3 h-3" />
+                                                </Button>
+                                                <Button
+                                                  variant="ghost"
+                                                  size="sm"
+                                                  onClick={() => window.open(`/library?problem=${problemId}`, '_blank')}
+                                                  className="h-6 px-2 text-green-600 hover:text-green-800"
+                                                  title="Open in library"
+                                                >
+                                                  <ExternalLink className="w-3 h-3" />
+                                                </Button>
+                                              </div>
+                                            </div>
+                                          );
+                                        })}
+                                      </div>
+                                    </div>
+                                  )}
                                 </div>
                               </div>
                             </div>
