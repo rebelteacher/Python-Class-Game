@@ -241,6 +241,7 @@ function parseCode(code, parentVars = {}) {
       // Try to parse as a list first
       const listValue = parseListLiteral(varExpr);
       if (listValue !== null) {
+        console.log(`📝 Storing list variable: ${varName} =`, listValue);
         variables[varName] = listValue;
         continue;
       }
