@@ -210,8 +210,9 @@ export default function LessonPlanCreator({ user }) {
   };
 
   const formatDate = (dateStr, dayOffset) => {
-    const date = new Date(dateStr);
-    date.setDate(date.getDate() + dayOffset);
+    // Parse date parts to avoid timezone issues
+    const [year, month, day] = dateStr.split('-').map(Number);
+    const date = new Date(year, month - 1, day + dayOffset);
     return date.toLocaleDateString('en-US', { 
       weekday: 'long', 
       year: 'numeric', 
