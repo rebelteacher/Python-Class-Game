@@ -4,10 +4,37 @@ import { Play, Pause, RotateCcw, FastForward, Grid } from "lucide-react";
 
 // Simple expression evaluator for variables
 function evaluateExpression(expr, variables) {
-  // Replace variable names with their values
+  if (expr === null || expr === undefined) return null;
+  expr = String(expr).trim();
+  
+  // Check for list indexing: varName[index] (e.g., colors[i], colors[0])
+  const listIndexMatch = expr.match(/^(\w+)\[([^\]]+)\]$/);
+  if (listIndexMatch) {
+    const listName = listIndexMatch[1];
+    const indexExpr = listIndexMatch[2];
+    const list = variables[listName];
+    
+    if (Array.isArray(list)) {
+      // Evaluate the index (could be a number or variable like 'i')
+      const index = evaluateExpression(indexExpr, variables);
+      if (index !== null && index >= 0 && index < list.length) {
+        return list[Math.floor(index)];
+      }
+    }
+    return null;
+  }
+  
+  // Check if it's a direct variable reference
+  if (variables.hasOwnProperty(expr)) {
+    return variables[expr];
+  }
+  
+  // Replace variable names with their values for math expressions
   let evaluated = expr;
   for (const [name, value] of Object.entries(variables)) {
-    evaluated = evaluated.replace(new RegExp(`\\b${name}\\b`, 'g'), value);
+    if (typeof value === 'number') {
+      evaluated = evaluated.replace(new RegExp(`\\b${name}\\b`, 'g'), value);
+    }
   }
   
   // Try to evaluate simple math expressions
@@ -26,6 +53,30 @@ function evaluateExpression(expr, variables) {
   if (!isNaN(num)) return num;
   
   return null;
+}
+
+// Parse a Python list literal: ["red", "blue", "green"]
+function parseListLiteral(str) {
+  str = str.trim();
+  if (!str.startsWith('[') || !str.endsWith(']')) return null;
+  
+  const inner = str.slice(1, -1).trim();
+  if (inner === '') return [];
+  
+  // Match items (strings with quotes or numbers)
+  const items = [];
+  const regex = /(['"])(.*?)\1|(-?\d+\.?\d*)/g;
+  let match;
+  while ((match = regex.exec(inner)) !== null) {
+    if (match[2] !== undefined) {
+      // String item
+      items.push(match[2]);
+    } else if (match[3] !== undefined) {
+      // Number item
+      items.push(parseFloat(match[3]));
+    }
+  }
+  return items;
 }
 
 // Parse event handlers from generated code
