@@ -229,14 +229,26 @@ export default function LessonPlanCreator({ user }) {
     { key: 'modeling', label: 'Modeling', icon: Users },
     { key: 'instructionalStrategies', label: 'Instructional Strategies', icon: FileText },
     { key: 'checksForUnderstanding', label: 'Checks for Understanding', icon: CheckCircle },
-    { key: 'guidedPractice', label: 'Guided Practice', icon: Users },
-    { key: 'independentPractice', label: 'Independent Practice', icon: Edit3 },
+    { key: 'guidedPractice', label: 'Guided Practice', icon: Users, showProblems: true },
+    { key: 'independentPractice', label: 'Independent Practice', icon: Edit3, showProblems: true },
     { key: 'closure', label: 'Closure', icon: CheckCircle },
     { key: 'formativeAssessment', label: 'Formative Assessment', icon: FileText },
     { key: 'summativeAssessmentDate', label: 'Summative Assessment Date', icon: Calendar },
     { key: 'extendedActivities', label: 'Extended Activities', icon: Plus },
     { key: 'reviewReteachActivities', label: 'Review/Reteach Activities', icon: BookOpen }
   ];
+
+  // Helper to get problem details by ID
+  const getProblemById = (problemId) => {
+    return availableProblems.find(p => p.id === problemId);
+  };
+
+  // Copy problem link to clipboard
+  const copyProblemLink = (problemId) => {
+    const link = `${window.location.origin}/library?problem=${problemId}`;
+    navigator.clipboard.writeText(link);
+    toast.success("Problem link copied!");
+  };
 
   return (
     <div data-testid="lesson-plan-generator" className="min-h-screen bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50">
