@@ -21,6 +21,11 @@ A coding education platform for K-12 students featuring multiple programming env
 - Skill quiz manager
 - **Teacher Panel** - View student progress and code submissions (Jan 2025)
 - **Block Problem Creation** - Teachers create block assignments using Blockly editors (Jan 2025)
+- **AI Lesson Plan Generator** - Generate multi-day lesson plans using Gemini AI (Feb 2025)
+  - Custom standards & learning objectives input
+  - Problem filtering by Unit/Chapter (with dropdown showing "Unit - Chapter" format)
+  - Word document (.docx) export
+  - Properly formatted Learner Outcomes section
 
 ### Student Features
 - Assignment completion with auto-grading
