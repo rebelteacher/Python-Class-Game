@@ -7139,14 +7139,14 @@ async def generate_lesson_plan(req: GenerateLessonPlanRequest, request: Request)
     from datetime import timedelta
     start_date = datetime.strptime(req.startDate, "%Y-%m-%d") if req.startDate else datetime.now()
     
-    daily_plans = []
-    
+    # Build date list
+    dates = []
     for day_num in range(1, req.numberOfDays + 1):
         day_date = start_date + timedelta(days=day_num - 1)
-        date_str = day_date.strftime("%A, %B %d, %Y")
-        
-        # Generate lesson plan for this day
-        prompt = f"""You are an expert educational curriculum designer. Create a detailed lesson plan for Day {day_num} of {req.numberOfDays} for the following:
+        dates.append(day_date.strftime("%A, %B %d, %Y"))
+    
+    # Generate all days in a single prompt for efficiency
+    prompt = f"""You are an expert K-12 curriculum designer. Create a detailed multi-day lesson plan for:
 
 **Subject:** {req.subject}
 **Topic/Unit:** {req.topic}
@@ -7155,6 +7155,84 @@ async def generate_lesson_plan(req: GenerateLessonPlanRequest, request: Request)
 **Class Period:** {req.timePerPeriod} minutes
 **Pacing:** Intro ({req.pacingIntro}m), Direct Instruction ({req.pacingDirectInstruction}m), Guided Practice ({req.pacingGuidedPractice}m), Independent Practice ({req.pacingIndependentPractice}m), Closure ({req.pacingClosure}m)
 **Lesson Range:** {req.lessonRange}
+**Number of Days:** {req.numberOfDays}
+**Dates:** {', '.join(dates)}
+
+Create a lesson plan for EACH of the {req.numberOfDays} days. For key questions, make them **bold**.
+
+For EACH DAY, provide these sections:
+- learnerOutcomes: "By the end of the lesson, students will be able to:" + 2-3 specific objectives
+- standards: Relevant state/national standards
+- anticipatorySet: Hook activity with **bold question**
+- teachingTheLesson: Main instruction with **bold questions**
+- modeling: How teacher demonstrates concepts
+- instructionalStrategies: 2-3 specific strategies
+- checksForUnderstanding: Ways to gauge understanding with **bold questions**
+- guidedPractice: Activities with teacher support
+- independentPractice: Solo activities/problems
+- closure: Wrap-up with **bold exit ticket question**
+- formativeAssessment: Informal assessment methods
+- summativeAssessmentDate: When summative occurs
+- extendedActivities: For early finishers
+- reviewReteachActivities: For struggling students
+
+Day 1 should be introductory, middle days build skills, final day should review/synthesize.
+
+Respond with a JSON array of {req.numberOfDays} objects, each with dayNumber (1-{req.numberOfDays}), date (use: {', '.join(dates)}), and all sections above.
+
+Example format:
+[
+  {{"dayNumber": 1, "date": "{dates[0] if dates else ''}", "learnerOutcomes": "...", "standards": "...", ...}},
+  {{"dayNumber": 2, "date": "...", ...}}
+]
+
+Return ONLY valid JSON array, no other text."""
+
+    try:
+        chat = LlmChat(
+            api_key=llm_key,
+            session_id=f"lesson-plan-{user['id']}-{uuid.uuid4()}",
+            system_message="You are an expert K-12 curriculum designer. Always respond with valid JSON only."
+        ).with_model("openai", "gpt-5.2")
+        
+        response = await chat.send_message(UserMessage(text=prompt))
+        
+        # Parse JSON response
+        import json
+        import re
+        
+        # Try to extract JSON array from response
+        json_match = re.search(r'\[[\s\S]*\]', response)
+        if json_match:
+            daily_plans = json.loads(json_match.group())
+        else:
+            # Fallback - create placeholder plans
+            daily_plans = []
+            for i, date in enumerate(dates):
+                daily_plans.append({
+                    "dayNumber": i + 1,
+                    "date": date,
+                    "learnerOutcomes": f"Day {i+1} content generation failed. Please try again or edit manually.",
+                    "standards": "",
+                    "anticipatorySet": "",
+                    "teachingTheLesson": "",
+                    "modeling": "",
+                    "instructionalStrategies": "",
+                    "checksForUnderstanding": "",
+                    "guidedPractice": "",
+                    "independentPractice": "",
+                    "closure": "",
+                    "formativeAssessment": "",
+                    "summativeAssessmentDate": "",
+                    "extendedActivities": "",
+                    "reviewReteachActivities": ""
+                })
+        
+        return {"dailyPlans": daily_plans}
+        
+    except Exception as e:
+        logger.error(f"Error generating lesson plan: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"Failed to generate lesson plan: {str(e)}")
 
 Generate content for each section below. For key questions or discussion prompts, make them **bold** using double asterisks.
 
