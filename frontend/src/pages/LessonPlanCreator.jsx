@@ -631,7 +631,7 @@ export default function LessonPlanCreator({ user }) {
                                     <div 
                                       className="text-gray-600 mt-1 whitespace-pre-wrap"
                                       dangerouslySetInnerHTML={{ 
-                                        __html: (day[section.key] || 'Not specified').replace(
+                                        __html: String(day[section.key] || 'Not specified').replace(
                                           /\*\*(.*?)\*\*/g, 
                                           '<strong class="text-gray-900">$1</strong>'
                                         )
