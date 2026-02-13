@@ -113,6 +113,7 @@ export default function LessonPlanCreator({ user }) {
       );
       
       setGeneratedPlans(response.data.dailyPlans);
+      setAvailableProblems(response.data.availableProblems || []);
       
       // Expand all days by default
       const expanded = {};
@@ -120,6 +121,11 @@ export default function LessonPlanCreator({ user }) {
         expanded[index] = true;
       });
       setExpandedDays(expanded);
+      
+      // Show problems panel if we have problems
+      if (response.data.availableProblems?.length > 0) {
+        setShowProblemsPanel(true);
+      }
       
       toast.success("Lesson plan generated successfully!");
     } catch (error) {
