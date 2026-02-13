@@ -264,12 +264,34 @@ function parseCode(code, parentVars = {}) {
       return evaluateExpression(str, variables);
     };
     
-    // Parse color() - changes both pen and turtle color
-    match = trimmed.match(new RegExp(`${turtlePrefix}color\\s*\\(\\s*['"](\\w+|#[0-9a-fA-F]{6})['"](\\s*,\\s*['"](\\w+|#[0-9a-fA-F]{6})['"])?\\s*\\)`));
+    // Helper to get color value (string literal, variable, or list index)
+    const getColorValue = (str) => {
+      if (!str) return null;
+      str = str.trim();
+      
+      // Check for string literal with quotes
+      const quotedMatch = str.match(/^['"](.+)['"]$/);
+      if (quotedMatch) {
+        return quotedMatch[1];
+      }
+      
+      // Try as variable or list index (e.g., colors[i], myColor)
+      const value = evaluateExpression(str, variables);
+      if (value !== null && typeof value === 'string') {
+        return value;
+      }
+      
+      return null;
+    };
+    
+    // Parse color() - changes both pen and turtle color (with variable support)
+    match = trimmed.match(new RegExp(`${turtlePrefix}color\\s*\\(\\s*([^,)]+)(?:\\s*,\\s*([^)]+))?\\s*\\)`));
     if (match) {
-      const penColor = match[1];
-      const fillColor = match[3] || match[1];
-      commands.push({ type: 'color', penColor, fillColor, line: lineNum });
+      const penColor = getColorValue(match[1]);
+      const fillColor = match[2] ? getColorValue(match[2]) : penColor;
+      if (penColor) {
+        commands.push({ type: 'color', penColor, fillColor: fillColor || penColor, line: lineNum });
+      }
       continue;
     }
     
