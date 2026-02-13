@@ -1,738 +1,235 @@
 import { useState, useEffect } from "react";
-import { useNavigate, useSearchParams } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { Badge } from "@/components/ui/badge";
+import { Separator } from "@/components/ui/separator";
 import { 
-  BookOpen, Plus, ArrowLeft, Edit, Trash2, Eye, Copy, ChevronDown, ChevronRight, 
-  Save, FileText, Code, Target, Zap, GraduationCap, Play, CheckCircle, 
-  Video, Image, Link, ExternalLink, Dumbbell, HelpCircle
+  ArrowLeft, Save, Sparkles, Printer, FileText, Calendar, Clock, 
+  GraduationCap, BookOpen, Target, Users, CheckCircle, Loader2,
+  ChevronDown, ChevronUp, Edit3, Trash2, Plus, Download
 } from "lucide-react";
 
 const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
 const API = `${BACKEND_URL}/api`;
 
-// Format lesson content (markdown-like) to HTML for preview
-const formatLessonContent = (content) => {
-  if (!content) return "";
-  
-  const escapeHtml = (text) => {
-    return text
-      .replace(/&/g, '&amp;')
-      .replace(/</g, '&lt;')
-      .replace(/>/g, '&gt;')
-      .replace(/"/g, '&quot;')
-      .replace(/'/g, '&#039;');
-  };
-
-  let result = content;
-  
-  // First, convert escaped newlines to actual newlines
-  result = result.replace(/\\n/g, '\n');
-
-  // Process fenced code blocks first
-  result = result.replace(/```(\w+)?\n([\s\S]*?)```/g, (match, lang, code) => {
-    const escapedCode = escapeHtml(code.trim());
-    return `<pre class="bg-gray-900 text-green-400 p-4 rounded-lg overflow-x-auto my-4 text-sm font-mono"><code>${escapedCode}</code></pre>`;
-  });
-
-  // Process inline code
-  result = result.replace(/`([^`]+)`/g, (match, code) => {
-    const escapedCode = escapeHtml(code);
-    return `<code class="bg-gray-200 px-1.5 py-0.5 rounded text-purple-700 font-mono text-sm">${escapedCode}</code>`;
-  });
-
-  // Process markdown formatting
-  result = result
-    .replace(/^# (.*$)/gim, '<h1 class="text-2xl font-bold text-indigo-700 mb-4">$1</h1>')
-    .replace(/^## (.*$)/gim, '<h2 class="text-xl font-bold text-purple-600 mb-3 mt-6">$1</h2>')
-    .replace(/^### (.*$)/gim, '<h3 class="text-lg font-bold text-green-600 mb-2 mt-4">$1</h3>')
-    .replace(/\*\*(.*?)\*\*/g, '<strong class="text-indigo-600">$1</strong>')
-    .replace(/\*(.*?)\*/g, '<em class="text-purple-500">$1</em>')
-    .replace(/^- (.*$)/gim, '<li class="ml-4 mb-1">• $1</li>')
-    .replace(/^\d+\. (.*$)/gim, '<li class="ml-4 mb-1 list-decimal">$1</li>')
-    .replace(/\n\n/g, '</p><p class="mb-4">')
-    .replace(/\n/g, '<br>');
-
-  return result;
-};
-
 export default function LessonPlanCreator({ user }) {
   const navigate = useNavigate();
-  const [searchParams] = useSearchParams();
   
-  const [lessons, setLessons] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [createDialogOpen, setCreateDialogOpen] = useState(false);
-  const [editDialogOpen, setEditDialogOpen] = useState(false);
-  const [previewDialogOpen, setPreviewDialogOpen] = useState(false);
-  const [editingLesson, setEditingLesson] = useState(null);
-  const [previewLesson, setPreviewLesson] = useState(null);
-  const [activeTab, setActiveTab] = useState("content");
-  const [searchTerm, setSearchTerm] = useState("");
-  const [moduleFilter, setModuleFilter] = useState("all");
-  
-  // New lesson form state
-  const [newLesson, setNewLesson] = useState({
-    lesson_id: "",
-    module_id: "batesville-jh",
-    title: "",
-    description: "",
-    order: 1,
-    content: "",
-    exercise_type: "code",
-    starter_code: "",
-    solution_code: "",
-    validation_rules: {
-      required_tags: [],
-      required_attributes: [],
-      required_text: [],
-      css_properties: []
-    },
-    xp_reward: 100,
-    practice: []
+  // Header fields (saved to localStorage and DB)
+  const [headerFields, setHeaderFields] = useState({
+    schoolName: "Batesville Junior High School",
+    teacherName: "",
+    className: "",
+    lessonRange: "",
+    timePerPeriod: "50",
+    pacingIntro: "5",
+    pacingDirectInstruction: "15",
+    pacingGuidedPractice: "15",
+    pacingIndependentPractice: "10",
+    pacingClosure: "5",
+    nextMajorAssessment: ""
   });
 
+  // Lesson plan generation inputs
+  const [lessonInput, setLessonInput] = useState({
+    subject: "",
+    topic: "",
+    gradeLevel: "7th Grade",
+    startDate: new Date().toISOString().split('T')[0],
+    numberOfDays: 5
+  });
+
+  // Generated lesson plans
+  const [generatedPlans, setGeneratedPlans] = useState([]);
+  const [isGenerating, setIsGenerating] = useState(false);
+  const [savedPlans, setSavedPlans] = useState([]);
+  const [expandedDays, setExpandedDays] = useState({});
+  const [editingSection, setEditingSection] = useState(null);
+
+  // Load saved header fields from localStorage
   useEffect(() => {
-    fetchLessons();
+    const savedHeader = localStorage.getItem('lessonPlanHeader');
+    if (savedHeader) {
+      setHeaderFields(JSON.parse(savedHeader));
+    }
+    fetchSavedPlans();
   }, []);
 
-  const fetchLessons = async () => {
+  // Save header fields to localStorage when changed
+  useEffect(() => {
+    localStorage.setItem('lessonPlanHeader', JSON.stringify(headerFields));
+  }, [headerFields]);
+
+  const fetchSavedPlans = async () => {
     try {
       const response = await axios.get(`${API}/lesson-plans`, {
-        withCredentials: true,
+        withCredentials: true
       });
-      setLessons(response.data);
+      setSavedPlans(response.data);
     } catch (error) {
-      console.error("Error fetching lesson plans:", error);
-      // If endpoint doesn't exist yet, show empty state
-      setLessons([]);
-    } finally {
-      setLoading(false);
+      console.error("Error fetching saved plans:", error);
     }
   };
 
-  const handleCreateLesson = async (e) => {
-    e.preventDefault();
-    
-    if (!newLesson.title.trim()) {
-      toast.error("Please enter a lesson title");
+  const generateLessonPlan = async () => {
+    if (!lessonInput.subject.trim() || !lessonInput.topic.trim()) {
+      toast.error("Please enter both subject and topic");
       return;
     }
-    
-    if (!newLesson.lesson_id.trim()) {
-      toast.error("Please enter a lesson ID");
+
+    setIsGenerating(true);
+    try {
+      const response = await axios.post(
+        `${API}/generate-lesson-plan`,
+        {
+          ...headerFields,
+          ...lessonInput
+        },
+        { withCredentials: true }
+      );
+      
+      setGeneratedPlans(response.data.dailyPlans);
+      
+      // Expand all days by default
+      const expanded = {};
+      response.data.dailyPlans.forEach((_, index) => {
+        expanded[index] = true;
+      });
+      setExpandedDays(expanded);
+      
+      toast.success("Lesson plan generated successfully!");
+    } catch (error) {
+      console.error("Error generating lesson plan:", error);
+      toast.error(error.response?.data?.detail || "Failed to generate lesson plan");
+    } finally {
+      setIsGenerating(false);
+    }
+  };
+
+  const saveLessonPlan = async () => {
+    if (generatedPlans.length === 0) {
+      toast.error("No lesson plan to save");
       return;
     }
 
     try {
       await axios.post(
         `${API}/lesson-plans`,
-        newLesson,
+        {
+          headerFields,
+          lessonInput,
+          dailyPlans: generatedPlans
+        },
         { withCredentials: true }
       );
-      toast.success("Lesson plan created!");
-      setCreateDialogOpen(false);
-      resetNewLesson();
-      fetchLessons();
+      toast.success("Lesson plan saved!");
+      fetchSavedPlans();
     } catch (error) {
-      console.error("Error creating lesson plan:", error);
-      toast.error(error.response?.data?.detail || "Failed to create lesson plan");
+      console.error("Error saving lesson plan:", error);
+      toast.error("Failed to save lesson plan");
     }
   };
 
-  const handleUpdateLesson = async (e) => {
-    e.preventDefault();
+  const deleteSavedPlan = async (planId) => {
+    if (!window.confirm("Delete this saved lesson plan?")) return;
     
-    if (!editingLesson) return;
-
     try {
-      await axios.put(
-        `${API}/lesson-plans/${editingLesson._id || editingLesson.id}`,
-        editingLesson,
-        { withCredentials: true }
-      );
-      toast.success("Lesson plan updated!");
-      setEditDialogOpen(false);
-      setEditingLesson(null);
-      fetchLessons();
-    } catch (error) {
-      console.error("Error updating lesson plan:", error);
-      toast.error("Failed to update lesson plan");
-    }
-  };
-
-  const handleDeleteLesson = async (lessonId, lessonTitle) => {
-    const confirmed = window.confirm(
-      `Are you sure you want to delete "${lessonTitle}"? This action cannot be undone.`
-    );
-    
-    if (!confirmed) return;
-
-    try {
-      await axios.delete(`${API}/lesson-plans/${lessonId}`, {
+      await axios.delete(`${API}/lesson-plans/${planId}`, {
         withCredentials: true
       });
-      toast.success("Lesson plan deleted!");
-      fetchLessons();
+      toast.success("Lesson plan deleted");
+      fetchSavedPlans();
     } catch (error) {
-      console.error("Error deleting lesson plan:", error);
       toast.error("Failed to delete lesson plan");
     }
   };
 
-  const handleDuplicateLesson = async (lesson) => {
-    const duplicated = {
-      ...lesson,
-      lesson_id: `${lesson.lesson_id}-copy`,
-      title: `${lesson.title} (Copy)`,
+  const loadSavedPlan = (plan) => {
+    setHeaderFields(plan.headerFields);
+    setLessonInput(plan.lessonInput);
+    setGeneratedPlans(plan.dailyPlans);
+    
+    const expanded = {};
+    plan.dailyPlans.forEach((_, index) => {
+      expanded[index] = true;
+    });
+    setExpandedDays(expanded);
+    
+    toast.success("Lesson plan loaded");
+  };
+
+  const toggleDay = (dayIndex) => {
+    setExpandedDays(prev => ({
+      ...prev,
+      [dayIndex]: !prev[dayIndex]
+    }));
+  };
+
+  const updateDayContent = (dayIndex, section, value) => {
+    const updated = [...generatedPlans];
+    updated[dayIndex] = {
+      ...updated[dayIndex],
+      [section]: value
     };
-    delete duplicated._id;
-    delete duplicated.id;
-
-    try {
-      await axios.post(
-        `${API}/lesson-plans`,
-        duplicated,
-        { withCredentials: true }
-      );
-      toast.success("Lesson plan duplicated!");
-      fetchLessons();
-    } catch (error) {
-      console.error("Error duplicating lesson plan:", error);
-      toast.error("Failed to duplicate lesson plan");
-    }
+    setGeneratedPlans(updated);
   };
 
-  const resetNewLesson = () => {
-    setNewLesson({
-      lesson_id: "",
-      module_id: "batesville-jh",
-      title: "",
-      description: "",
-      order: 1,
-      content: "",
-      exercise_type: "code",
-      starter_code: "",
-      solution_code: "",
-      validation_rules: {
-        required_tags: [],
-        required_attributes: [],
-        required_text: [],
-        css_properties: []
-      },
-      xp_reward: 100,
-      practice: []
+  const printLessonPlan = () => {
+    window.print();
+  };
+
+  const formatDate = (dateStr, dayOffset) => {
+    const date = new Date(dateStr);
+    date.setDate(date.getDate() + dayOffset);
+    return date.toLocaleDateString('en-US', { 
+      weekday: 'long', 
+      year: 'numeric', 
+      month: 'long', 
+      day: 'numeric' 
     });
-    setActiveTab("content");
   };
 
-  const openEditDialog = (lesson) => {
-    setEditingLesson({
-      ...lesson,
-      validation_rules: lesson.validation_rules || {
-        required_tags: [],
-        required_attributes: [],
-        required_text: [],
-        css_properties: []
-      },
-      practice: lesson.practice || []
-    });
-    setEditDialogOpen(true);
-    setActiveTab("content");
-  };
-
-  const openPreview = (lesson) => {
-    setPreviewLesson(lesson);
-    setPreviewDialogOpen(true);
-  };
-
-  // Filter lessons
-  const filteredLessons = lessons.filter(lesson => {
-    const matchesSearch = !searchTerm || 
-      lesson.title?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      lesson.description?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      lesson.lesson_id?.toLowerCase().includes(searchTerm.toLowerCase());
-    
-    const matchesModule = moduleFilter === "all" || lesson.module_id === moduleFilter;
-    
-    return matchesSearch && matchesModule;
-  });
-
-  // Get unique modules
-  const modules = [...new Set(lessons.map(l => l.module_id).filter(Boolean))];
-
-  // Add practice exercise to lesson
-  const addPracticeExercise = (lessonState, setLessonState) => {
-    const practice = [...(lessonState.practice || [])];
-    const exerciseNum = practice.length + 1;
-    practice.push({
-      exercise_id: `${lessonState.lesson_id}-p${exerciseNum}`,
-      title: `Practice Exercise ${exerciseNum}`,
-      instructions: "",
-      starter_code: "",
-      solution_code: "",
-      validation_rules: {
-        required_tags: [],
-        required_text: []
-      },
-      hints: [],
-      xp_reward: 25
-    });
-    setLessonState({ ...lessonState, practice });
-  };
-
-  // Remove practice exercise
-  const removePracticeExercise = (lessonState, setLessonState, index) => {
-    const practice = lessonState.practice.filter((_, i) => i !== index);
-    setLessonState({ ...lessonState, practice });
-  };
-
-  // Update practice exercise
-  const updatePracticeExercise = (lessonState, setLessonState, index, field, value) => {
-    const practice = [...lessonState.practice];
-    practice[index] = { ...practice[index], [field]: value };
-    setLessonState({ ...lessonState, practice });
-  };
-
-  // Render the lesson form (used in both create and edit dialogs)
-  const renderLessonForm = (lessonState, setLessonState, onSubmit, submitLabel) => (
-    <form onSubmit={onSubmit} className="space-y-4">
-      <Tabs value={activeTab} onValueChange={setActiveTab}>
-        <TabsList className="w-full grid grid-cols-4">
-          <TabsTrigger value="content" className="gap-1">
-            <FileText className="w-4 h-4" />
-            Content
-          </TabsTrigger>
-          <TabsTrigger value="code" className="gap-1">
-            <Code className="w-4 h-4" />
-            Code
-          </TabsTrigger>
-          <TabsTrigger value="validation" className="gap-1">
-            <Target className="w-4 h-4" />
-            Validation
-          </TabsTrigger>
-          <TabsTrigger value="practice" className="gap-1">
-            <Dumbbell className="w-4 h-4" />
-            Practice
-          </TabsTrigger>
-        </TabsList>
-
-        {/* Content Tab */}
-        <TabsContent value="content" className="space-y-4 mt-4">
-          <div className="grid grid-cols-2 gap-4">
-            <div>
-              <Label htmlFor="lesson_id">Lesson ID *</Label>
-              <Input
-                id="lesson_id"
-                placeholder="e.g., python-01-intro"
-                value={lessonState.lesson_id}
-                onChange={(e) => setLessonState({ ...lessonState, lesson_id: e.target.value })}
-                className="mt-1"
-              />
-              <p className="text-xs text-gray-500 mt-1">Unique identifier (module-number-name)</p>
-            </div>
-            <div>
-              <Label htmlFor="module_id">Module</Label>
-              <Input
-                id="module_id"
-                placeholder="e.g., batesville-jh"
-                value={lessonState.module_id}
-                onChange={(e) => setLessonState({ ...lessonState, module_id: e.target.value })}
-                className="mt-1"
-              />
-              <p className="text-xs text-gray-500 mt-1">Batesville Junior High School</p>
-            </div>
-          </div>
-
-          <div>
-            <Label htmlFor="title">Title *</Label>
-            <Input
-              id="title"
-              placeholder="e.g., Introduction to Variables"
-              value={lessonState.title}
-              onChange={(e) => setLessonState({ ...lessonState, title: e.target.value })}
-              className="mt-1"
-            />
-          </div>
-
-          <div>
-            <Label htmlFor="description">Description</Label>
-            <Input
-              id="description"
-              placeholder="Short description for curriculum page"
-              value={lessonState.description}
-              onChange={(e) => setLessonState({ ...lessonState, description: e.target.value })}
-              className="mt-1"
-            />
-          </div>
-
-          <div className="grid grid-cols-2 gap-4">
-            <div>
-              <Label htmlFor="order">Order</Label>
-              <Input
-                id="order"
-                type="number"
-                min="1"
-                value={lessonState.order}
-                onChange={(e) => setLessonState({ ...lessonState, order: parseInt(e.target.value) || 1 })}
-                className="mt-1"
-              />
-            </div>
-            <div>
-              <Label htmlFor="xp_reward">XP Reward</Label>
-              <Input
-                id="xp_reward"
-                type="number"
-                min="0"
-                step="25"
-                value={lessonState.xp_reward}
-                onChange={(e) => setLessonState({ ...lessonState, xp_reward: parseInt(e.target.value) || 0 })}
-                className="mt-1"
-              />
-            </div>
-          </div>
-
-          <div>
-            <Label htmlFor="exercise_type">Exercise Type</Label>
-            <Select 
-              value={lessonState.exercise_type} 
-              onValueChange={(val) => setLessonState({ ...lessonState, exercise_type: val })}
-            >
-              <SelectTrigger className="mt-1">
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="code">Code Exercise</SelectItem>
-                <SelectItem value="project">Project</SelectItem>
-                <SelectItem value="quiz">Quiz Only</SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
-
-          <div>
-            <div className="flex items-center justify-between mb-2">
-              <Label htmlFor="content">Lesson Content</Label>
-              <Button
-                type="button"
-                variant="outline"
-                size="sm"
-                onClick={() => openPreview(lessonState)}
-                className="gap-1"
-              >
-                <Eye className="w-3 h-3" />
-                Preview
-              </Button>
-            </div>
-            <Textarea
-              id="content"
-              placeholder={`# Lesson Title 📚
-
-Write your lesson content using markdown-like formatting:
-
-## Section Title
-
-Regular text with **bold** and *italic*.
-
-### Subsection
-
-Use \`backticks\` for inline code.
-
-\`\`\`python
-# Code blocks
-print("Hello World!")
-\`\`\`
-
-- Bullet points
-- Another item
-
-1. Numbered lists
-2. Second item
-
-## Your Challenge 🎯
-
-Describe what students should do.`}
-              value={lessonState.content}
-              onChange={(e) => setLessonState({ ...lessonState, content: e.target.value })}
-              className="mt-1 font-mono text-sm"
-              rows={12}
-            />
-            <p className="text-xs text-gray-500 mt-1">
-              Use markdown: # H1, ## H2, **bold**, *italic*, `code`, ```code blocks```
-            </p>
-          </div>
-        </TabsContent>
-
-        {/* Code Tab */}
-        <TabsContent value="code" className="space-y-4 mt-4">
-          <div>
-            <Label htmlFor="starter_code">Starter Code</Label>
-            <p className="text-xs text-gray-500 mb-2">Pre-filled code that students will see</p>
-            <Textarea
-              id="starter_code"
-              placeholder="# Write your code here..."
-              value={lessonState.starter_code}
-              onChange={(e) => setLessonState({ ...lessonState, starter_code: e.target.value })}
-              className="mt-1 font-mono text-sm"
-              rows={8}
-            />
-          </div>
-
-          <div>
-            <Label htmlFor="solution_code">Solution Code *</Label>
-            <p className="text-xs text-gray-500 mb-2">Correct solution (for reference/grading)</p>
-            <Textarea
-              id="solution_code"
-              placeholder="# Solution:\nprint('Hello World!')"
-              value={lessonState.solution_code}
-              onChange={(e) => setLessonState({ ...lessonState, solution_code: e.target.value })}
-              className="mt-1 font-mono text-sm"
-              rows={8}
-            />
-          </div>
-        </TabsContent>
-
-        {/* Validation Tab */}
-        <TabsContent value="validation" className="space-y-4 mt-4">
-          <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-4">
-            <h4 className="font-semibold text-blue-800 flex items-center gap-2 mb-2">
-              <HelpCircle className="w-4 h-4" />
-              Validation Rules Help
-            </h4>
-            <p className="text-sm text-blue-700">
-              These rules auto-check student code. Leave empty for AI-only grading.
-            </p>
-          </div>
-
-          <div>
-            <Label>Required Tags (one per line)</Label>
-            <Textarea
-              placeholder="h1&#10;p&#10;div"
-              value={lessonState.validation_rules?.required_tags?.join('\n') || ''}
-              onChange={(e) => setLessonState({
-                ...lessonState,
-                validation_rules: {
-                  ...lessonState.validation_rules,
-                  required_tags: e.target.value.split('\n').filter(t => t.trim())
-                }
-              })}
-              className="mt-1 font-mono text-sm"
-              rows={4}
-            />
-          </div>
-
-          <div>
-            <Label>Required Attributes (one per line)</Label>
-            <Textarea
-              placeholder="src&#10;href&#10;alt"
-              value={lessonState.validation_rules?.required_attributes?.join('\n') || ''}
-              onChange={(e) => setLessonState({
-                ...lessonState,
-                validation_rules: {
-                  ...lessonState.validation_rules,
-                  required_attributes: e.target.value.split('\n').filter(a => a.trim())
-                }
-              })}
-              className="mt-1 font-mono text-sm"
-              rows={4}
-            />
-          </div>
-
-          <div>
-            <Label>Required Text (one per line)</Label>
-            <Textarea
-              placeholder="Hello&#10;World"
-              value={lessonState.validation_rules?.required_text?.join('\n') || ''}
-              onChange={(e) => setLessonState({
-                ...lessonState,
-                validation_rules: {
-                  ...lessonState.validation_rules,
-                  required_text: e.target.value.split('\n').filter(t => t.trim())
-                }
-              })}
-              className="mt-1 font-mono text-sm"
-              rows={4}
-            />
-          </div>
-
-          <div>
-            <Label>CSS Properties (one per line)</Label>
-            <Textarea
-              placeholder="color&#10;background-color&#10;padding"
-              value={lessonState.validation_rules?.css_properties?.join('\n') || ''}
-              onChange={(e) => setLessonState({
-                ...lessonState,
-                validation_rules: {
-                  ...lessonState.validation_rules,
-                  css_properties: e.target.value.split('\n').filter(p => p.trim())
-                }
-              })}
-              className="mt-1 font-mono text-sm"
-              rows={4}
-            />
-          </div>
-        </TabsContent>
-
-        {/* Practice Tab */}
-        <TabsContent value="practice" className="space-y-4 mt-4">
-          <div className="flex items-center justify-between">
-            <div>
-              <h3 className="font-semibold">Practice Exercises</h3>
-              <p className="text-sm text-gray-500">
-                Add practice exercises for students to complete after the main lesson
-              </p>
-            </div>
-            <Button
-              type="button"
-              variant="outline"
-              onClick={() => addPracticeExercise(lessonState, setLessonState)}
-              className="gap-1"
-            >
-              <Plus className="w-4 h-4" />
-              Add Exercise
-            </Button>
-          </div>
-
-          {lessonState.practice?.length > 0 ? (
-            <div className="space-y-4">
-              {lessonState.practice.map((exercise, index) => (
-                <Card key={index} className="border-purple-200 bg-purple-50">
-                  <CardHeader className="py-3">
-                    <div className="flex items-center justify-between">
-                      <CardTitle className="text-base flex items-center gap-2">
-                        <Dumbbell className="w-4 h-4 text-purple-600" />
-                        Exercise {index + 1}
-                      </CardTitle>
-                      <Button
-                        type="button"
-                        variant="ghost"
-                        size="sm"
-                        onClick={() => removePracticeExercise(lessonState, setLessonState, index)}
-                        className="text-red-500 hover:text-red-700 hover:bg-red-50"
-                      >
-                        <Trash2 className="w-4 h-4" />
-                      </Button>
-                    </div>
-                  </CardHeader>
-                  <CardContent className="space-y-3">
-                    <div className="grid grid-cols-2 gap-3">
-                      <div>
-                        <Label className="text-sm">Exercise ID</Label>
-                        <Input
-                          value={exercise.exercise_id}
-                          onChange={(e) => updatePracticeExercise(lessonState, setLessonState, index, 'exercise_id', e.target.value)}
-                          className="mt-1"
-                          placeholder="lesson-p1"
-                        />
-                      </div>
-                      <div>
-                        <Label className="text-sm">XP Reward</Label>
-                        <Input
-                          type="number"
-                          value={exercise.xp_reward}
-                          onChange={(e) => updatePracticeExercise(lessonState, setLessonState, index, 'xp_reward', parseInt(e.target.value) || 0)}
-                          className="mt-1"
-                          min="0"
-                          step="5"
-                        />
-                      </div>
-                    </div>
-                    <div>
-                      <Label className="text-sm">Title</Label>
-                      <Input
-                        value={exercise.title}
-                        onChange={(e) => updatePracticeExercise(lessonState, setLessonState, index, 'title', e.target.value)}
-                        className="mt-1"
-                        placeholder="Create an H1 Heading"
-                      />
-                    </div>
-                    <div>
-                      <Label className="text-sm">Instructions</Label>
-                      <Textarea
-                        value={exercise.instructions}
-                        onChange={(e) => updatePracticeExercise(lessonState, setLessonState, index, 'instructions', e.target.value)}
-                        className="mt-1"
-                        rows={2}
-                        placeholder="Create an `<h1>` heading that says 'My First Heading'"
-                      />
-                    </div>
-                    <div>
-                      <Label className="text-sm">Starter Code</Label>
-                      <Textarea
-                        value={exercise.starter_code}
-                        onChange={(e) => updatePracticeExercise(lessonState, setLessonState, index, 'starter_code', e.target.value)}
-                        className="mt-1 font-mono text-sm"
-                        rows={3}
-                        placeholder="<!-- Create your heading below -->"
-                      />
-                    </div>
-                    <div>
-                      <Label className="text-sm">Solution Code</Label>
-                      <Textarea
-                        value={exercise.solution_code}
-                        onChange={(e) => updatePracticeExercise(lessonState, setLessonState, index, 'solution_code', e.target.value)}
-                        className="mt-1 font-mono text-sm"
-                        rows={3}
-                        placeholder="<h1>My First Heading</h1>"
-                      />
-                    </div>
-                    <div>
-                      <Label className="text-sm">Hints (one per line)</Label>
-                      <Textarea
-                        value={exercise.hints?.join('\n') || ''}
-                        onChange={(e) => updatePracticeExercise(
-                          lessonState, setLessonState, index, 'hints', 
-                          e.target.value.split('\n').filter(h => h.trim())
-                        )}
-                        className="mt-1"
-                        rows={2}
-                        placeholder="Start with <h1>&#10;Don't forget </h1> at the end"
-                      />
-                    </div>
-                  </CardContent>
-                </Card>
-              ))}
-            </div>
-          ) : (
-            <div className="text-center py-8 text-gray-500 bg-gray-50 rounded-lg">
-              <Dumbbell className="w-8 h-8 mx-auto mb-2 opacity-40" />
-              <p>No practice exercises yet</p>
-              <p className="text-sm">Click "Add Exercise" to create practice problems</p>
-            </div>
-          )}
-        </TabsContent>
-      </Tabs>
-
-      <div className="flex justify-end gap-2 pt-4 border-t">
-        <Button type="submit" className="bg-indigo-600 hover:bg-indigo-700 gap-2">
-          <Save className="w-4 h-4" />
-          {submitLabel}
-        </Button>
-      </div>
-    </form>
-  );
-
-  if (loading) {
-    return (
-      <div className="min-h-screen bg-gradient-to-br from-purple-50 via-indigo-50 to-blue-50 flex items-center justify-center">
-        <div className="text-xl text-gray-600">Loading lesson plans...</div>
-      </div>
-    );
-  }
+  // Lesson plan sections configuration
+  const lessonSections = [
+    { key: 'learnerOutcomes', label: 'Learner Outcomes/Objectives', icon: Target, description: 'By the end of the lesson, students will be able to:' },
+    { key: 'standards', label: 'Standards', icon: BookOpen },
+    { key: 'anticipatorySet', label: 'Anticipatory Set', icon: Sparkles },
+    { key: 'teachingTheLesson', label: 'Teaching the Lesson', icon: GraduationCap },
+    { key: 'modeling', label: 'Modeling', icon: Users },
+    { key: 'instructionalStrategies', label: 'Instructional Strategies', icon: FileText },
+    { key: 'checksForUnderstanding', label: 'Checks for Understanding', icon: CheckCircle },
+    { key: 'guidedPractice', label: 'Guided Practice', icon: Users },
+    { key: 'independentPractice', label: 'Independent Practice', icon: Edit3 },
+    { key: 'closure', label: 'Closure', icon: CheckCircle },
+    { key: 'formativeAssessment', label: 'Formative Assessment', icon: FileText },
+    { key: 'summativeAssessmentDate', label: 'Summative Assessment Date', icon: Calendar },
+    { key: 'extendedActivities', label: 'Extended Activities', icon: Plus },
+    { key: 'reviewReteachActivities', label: 'Review/Reteach Activities', icon: BookOpen }
+  ];
 
   return (
-    <div data-testid="lesson-plan-creator" className="min-h-screen bg-gradient-to-br from-purple-50 via-indigo-50 to-blue-50">
+    <div data-testid="lesson-plan-generator" className="min-h-screen bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50">
+      {/* Print Styles */}
+      <style>{`
+        @media print {
+          .no-print { display: none !important; }
+          .print-only { display: block !important; }
+          body { background: white !important; }
+          .lesson-day { page-break-after: always; }
+          .lesson-day:last-child { page-break-after: avoid; }
+        }
+        .print-only { display: none; }
+      `}</style>
+
       {/* Navigation */}
-      <nav className="bg-white shadow-sm border-b border-gray-200">
+      <nav className="bg-white shadow-sm border-b border-gray-200 no-print">
         <div className="container mx-auto px-6 py-4 flex justify-between items-center">
           <div className="flex items-center space-x-4">
             <Button onClick={() => navigate("/teacher/dashboard")} variant="ghost" size="sm">
@@ -740,260 +237,421 @@ Describe what students should do.`}
               Back to Dashboard
             </Button>
             <div className="flex items-center space-x-2">
-              <GraduationCap className="w-7 h-7 text-purple-600" />
+              <GraduationCap className="w-7 h-7 text-indigo-600" />
               <div>
-                <span className="text-xl font-bold text-gray-900">Lesson Plan Creator</span>
-                <p className="text-xs text-gray-500">Batesville Junior High School</p>
+                <span className="text-xl font-bold text-gray-900">Lesson Plan Generator</span>
+                <p className="text-xs text-gray-500">{headerFields.schoolName}</p>
               </div>
             </div>
           </div>
           
-          <Dialog open={createDialogOpen} onOpenChange={setCreateDialogOpen}>
-            <DialogTrigger asChild>
-              <Button data-testid="create-lesson-btn" className="bg-purple-600 hover:bg-purple-700 gap-2">
-                <Plus className="w-5 h-5" />
-                Create Lesson Plan
-              </Button>
-            </DialogTrigger>
-            <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
-              <DialogHeader>
-                <DialogTitle>Create New Lesson Plan</DialogTitle>
-                <DialogDescription>
-                  Design an interactive lesson with content, code exercises, and practice problems
-                </DialogDescription>
-              </DialogHeader>
-              {renderLessonForm(newLesson, setNewLesson, handleCreateLesson, "Create Lesson")}
-            </DialogContent>
-          </Dialog>
+          <div className="flex gap-2">
+            {generatedPlans.length > 0 && (
+              <>
+                <Button onClick={printLessonPlan} variant="outline" className="gap-2">
+                  <Printer className="w-4 h-4" />
+                  Print
+                </Button>
+                <Button onClick={saveLessonPlan} className="bg-green-600 hover:bg-green-700 gap-2">
+                  <Save className="w-4 h-4" />
+                  Save Plan
+                </Button>
+              </>
+            )}
+          </div>
         </div>
       </nav>
 
-      {/* Main Content */}
       <div className="container mx-auto px-6 py-8">
-        {/* Filters */}
-        <div className="flex flex-col md:flex-row gap-4 mb-6">
-          <div className="flex-1">
-            <Input
-              placeholder="Search lessons..."
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              className="w-full"
-            />
-          </div>
-          <Select value={moduleFilter} onValueChange={setModuleFilter}>
-            <SelectTrigger className="w-[200px]">
-              <SelectValue placeholder="All Modules" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="all">All Modules</SelectItem>
-              {modules.map(mod => (
-                <SelectItem key={mod} value={mod}>{mod}</SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-        </div>
+        <div className="grid lg:grid-cols-3 gap-6">
+          {/* Left Column - Configuration */}
+          <div className="lg:col-span-1 space-y-6 no-print">
+            {/* Header Fields Card */}
+            <Card>
+              <CardHeader className="pb-3">
+                <CardTitle className="text-lg flex items-center gap-2">
+                  <FileText className="w-5 h-5 text-indigo-600" />
+                  Plan Information
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div>
+                  <Label htmlFor="schoolName">School Name</Label>
+                  <Input
+                    id="schoolName"
+                    value={headerFields.schoolName}
+                    onChange={(e) => setHeaderFields({ ...headerFields, schoolName: e.target.value })}
+                    className="mt-1"
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="teacherName">Teacher Name</Label>
+                  <Input
+                    id="teacherName"
+                    value={headerFields.teacherName}
+                    onChange={(e) => setHeaderFields({ ...headerFields, teacherName: e.target.value })}
+                    placeholder="Enter your name"
+                    className="mt-1"
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="className">Class Name</Label>
+                  <Input
+                    id="className"
+                    value={headerFields.className}
+                    onChange={(e) => setHeaderFields({ ...headerFields, className: e.target.value })}
+                    placeholder="e.g., 7th Grade Math - Period 3"
+                    className="mt-1"
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="lessonRange">Lesson Range</Label>
+                  <Input
+                    id="lessonRange"
+                    value={headerFields.lessonRange}
+                    onChange={(e) => setHeaderFields({ ...headerFields, lessonRange: e.target.value })}
+                    placeholder="e.g., Chapter 2/Lessons 1-6"
+                    className="mt-1"
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="nextMajorAssessment">Next Major Assessment</Label>
+                  <Input
+                    id="nextMajorAssessment"
+                    type="date"
+                    value={headerFields.nextMajorAssessment}
+                    onChange={(e) => setHeaderFields({ ...headerFields, nextMajorAssessment: e.target.value })}
+                    className="mt-1"
+                  />
+                </div>
+              </CardContent>
+            </Card>
 
-        {/* Lessons Grid */}
-        {filteredLessons.length === 0 ? (
-          <Card className="text-center py-12">
-            <CardContent>
-              <GraduationCap className="w-16 h-16 mx-auto text-gray-300 mb-4" />
-              <h3 className="text-xl font-semibold text-gray-600 mb-2">No Lesson Plans Yet</h3>
-              <p className="text-gray-500 mb-4">
-                Create your first lesson plan to get started
-              </p>
-              <Button 
-                onClick={() => setCreateDialogOpen(true)}
-                className="bg-purple-600 hover:bg-purple-700"
-              >
-                <Plus className="w-4 h-4 mr-2" />
-                Create First Lesson
-              </Button>
-            </CardContent>
-          </Card>
-        ) : (
-          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
-            {filteredLessons.map((lesson) => (
-              <Card key={lesson._id || lesson.id} className="hover:shadow-lg transition-shadow">
-                <CardHeader className="pb-2">
-                  <div className="flex items-start justify-between">
-                    <div className="flex-1">
-                      <CardTitle className="text-lg flex items-center gap-2">
-                        <BookOpen className="w-5 h-5 text-purple-600" />
-                        {lesson.title}
-                      </CardTitle>
-                      <CardDescription className="mt-1">
-                        {lesson.description || "No description"}
-                      </CardDescription>
-                    </div>
-                    <Badge variant="outline" className="bg-purple-50 text-purple-700">
-                      #{lesson.order}
-                    </Badge>
+            {/* Pacing Card */}
+            <Card>
+              <CardHeader className="pb-3">
+                <CardTitle className="text-lg flex items-center gap-2">
+                  <Clock className="w-5 h-5 text-indigo-600" />
+                  Pacing (minutes)
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-3">
+                <div>
+                  <Label htmlFor="timePerPeriod">Time per Class Period</Label>
+                  <Input
+                    id="timePerPeriod"
+                    type="number"
+                    value={headerFields.timePerPeriod}
+                    onChange={(e) => setHeaderFields({ ...headerFields, timePerPeriod: e.target.value })}
+                    className="mt-1"
+                  />
+                </div>
+                <Separator />
+                <div className="grid grid-cols-2 gap-3">
+                  <div>
+                    <Label className="text-xs">Intro</Label>
+                    <Input
+                      type="number"
+                      value={headerFields.pacingIntro}
+                      onChange={(e) => setHeaderFields({ ...headerFields, pacingIntro: e.target.value })}
+                      className="mt-1"
+                    />
                   </div>
+                  <div>
+                    <Label className="text-xs">Direct Instruction</Label>
+                    <Input
+                      type="number"
+                      value={headerFields.pacingDirectInstruction}
+                      onChange={(e) => setHeaderFields({ ...headerFields, pacingDirectInstruction: e.target.value })}
+                      className="mt-1"
+                    />
+                  </div>
+                  <div>
+                    <Label className="text-xs">Guided Practice</Label>
+                    <Input
+                      type="number"
+                      value={headerFields.pacingGuidedPractice}
+                      onChange={(e) => setHeaderFields({ ...headerFields, pacingGuidedPractice: e.target.value })}
+                      className="mt-1"
+                    />
+                  </div>
+                  <div>
+                    <Label className="text-xs">Independent Practice</Label>
+                    <Input
+                      type="number"
+                      value={headerFields.pacingIndependentPractice}
+                      onChange={(e) => setHeaderFields({ ...headerFields, pacingIndependentPractice: e.target.value })}
+                      className="mt-1"
+                    />
+                  </div>
+                  <div className="col-span-2">
+                    <Label className="text-xs">Closure</Label>
+                    <Input
+                      type="number"
+                      value={headerFields.pacingClosure}
+                      onChange={(e) => setHeaderFields({ ...headerFields, pacingClosure: e.target.value })}
+                      className="mt-1"
+                    />
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Generate Card */}
+            <Card className="border-indigo-200 bg-indigo-50">
+              <CardHeader className="pb-3">
+                <CardTitle className="text-lg flex items-center gap-2">
+                  <Sparkles className="w-5 h-5 text-indigo-600" />
+                  Generate Lesson Plan
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div>
+                  <Label htmlFor="subject">Subject *</Label>
+                  <Input
+                    id="subject"
+                    value={lessonInput.subject}
+                    onChange={(e) => setLessonInput({ ...lessonInput, subject: e.target.value })}
+                    placeholder="e.g., Mathematics, English, Science"
+                    className="mt-1 bg-white"
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="topic">Topic/Unit *</Label>
+                  <Input
+                    id="topic"
+                    value={lessonInput.topic}
+                    onChange={(e) => setLessonInput({ ...lessonInput, topic: e.target.value })}
+                    placeholder="e.g., Fractions and Decimals"
+                    className="mt-1 bg-white"
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="gradeLevel">Grade Level</Label>
+                  <Input
+                    id="gradeLevel"
+                    value={lessonInput.gradeLevel}
+                    onChange={(e) => setLessonInput({ ...lessonInput, gradeLevel: e.target.value })}
+                    placeholder="e.g., 7th Grade"
+                    className="mt-1 bg-white"
+                  />
+                </div>
+                <div className="grid grid-cols-2 gap-3">
+                  <div>
+                    <Label htmlFor="startDate">Start Date</Label>
+                    <Input
+                      id="startDate"
+                      type="date"
+                      value={lessonInput.startDate}
+                      onChange={(e) => setLessonInput({ ...lessonInput, startDate: e.target.value })}
+                      className="mt-1 bg-white"
+                    />
+                  </div>
+                  <div>
+                    <Label htmlFor="numberOfDays">Number of Days</Label>
+                    <Input
+                      id="numberOfDays"
+                      type="number"
+                      min="1"
+                      max="10"
+                      value={lessonInput.numberOfDays}
+                      onChange={(e) => setLessonInput({ ...lessonInput, numberOfDays: parseInt(e.target.value) || 1 })}
+                      className="mt-1 bg-white"
+                    />
+                  </div>
+                </div>
+                <Button 
+                  onClick={generateLessonPlan} 
+                  disabled={isGenerating}
+                  className="w-full bg-indigo-600 hover:bg-indigo-700 gap-2"
+                  data-testid="generate-plan-btn"
+                >
+                  {isGenerating ? (
+                    <>
+                      <Loader2 className="w-4 h-4 animate-spin" />
+                      Generating...
+                    </>
+                  ) : (
+                    <>
+                      <Sparkles className="w-4 h-4" />
+                      Generate Plan
+                    </>
+                  )}
+                </Button>
+              </CardContent>
+            </Card>
+
+            {/* Saved Plans */}
+            {savedPlans.length > 0 && (
+              <Card>
+                <CardHeader className="pb-3">
+                  <CardTitle className="text-lg flex items-center gap-2">
+                    <Save className="w-5 h-5 text-green-600" />
+                    Saved Plans ({savedPlans.length})
+                  </CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <div className="space-y-3">
-                    <div className="flex items-center gap-4 text-sm text-gray-500">
-                      <span className="flex items-center gap-1">
-                        <Code className="w-4 h-4" />
-                        {lesson.exercise_type}
-                      </span>
-                      <span className="flex items-center gap-1">
-                        <Zap className="w-4 h-4 text-yellow-500" />
-                        {lesson.xp_reward} XP
-                      </span>
-                      {lesson.practice?.length > 0 && (
-                        <span className="flex items-center gap-1">
-                          <Dumbbell className="w-4 h-4 text-purple-500" />
-                          {lesson.practice.length} practice
-                        </span>
-                      )}
+                  <ScrollArea className="h-48">
+                    <div className="space-y-2">
+                      {savedPlans.map((plan) => (
+                        <div 
+                          key={plan.id} 
+                          className="p-3 bg-gray-50 rounded-lg flex items-center justify-between"
+                        >
+                          <div 
+                            className="flex-1 cursor-pointer"
+                            onClick={() => loadSavedPlan(plan)}
+                          >
+                            <p className="font-medium text-sm">{plan.lessonInput?.topic || "Untitled"}</p>
+                            <p className="text-xs text-gray-500">
+                              {plan.lessonInput?.subject} • {plan.dailyPlans?.length || 0} days
+                            </p>
+                          </div>
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => deleteSavedPlan(plan.id)}
+                            className="text-red-500 hover:text-red-700"
+                          >
+                            <Trash2 className="w-4 h-4" />
+                          </Button>
+                        </div>
+                      ))}
                     </div>
-                    
-                    <div className="text-xs text-gray-400 font-mono">
-                      ID: {lesson.lesson_id}
-                    </div>
-                    
-                    <div className="flex gap-2 pt-2 border-t">
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={() => openPreview(lesson)}
-                        className="flex-1 gap-1"
-                      >
-                        <Eye className="w-4 h-4" />
-                        Preview
-                      </Button>
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={() => openEditDialog(lesson)}
-                        className="flex-1 gap-1"
-                      >
-                        <Edit className="w-4 h-4" />
-                        Edit
-                      </Button>
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={() => handleDuplicateLesson(lesson)}
-                        className="text-gray-500"
-                      >
-                        <Copy className="w-4 h-4" />
-                      </Button>
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={() => handleDeleteLesson(lesson._id || lesson.id, lesson.title)}
-                        className="text-red-500 hover:text-red-700"
-                      >
-                        <Trash2 className="w-4 h-4" />
-                      </Button>
-                    </div>
-                  </div>
+                  </ScrollArea>
                 </CardContent>
               </Card>
-            ))}
+            )}
           </div>
-        )}
-      </div>
 
-      {/* Edit Dialog */}
-      <Dialog open={editDialogOpen} onOpenChange={setEditDialogOpen}>
-        <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
-          <DialogHeader>
-            <DialogTitle>Edit Lesson Plan</DialogTitle>
-            <DialogDescription>
-              Update the lesson content, code, and practice exercises
-            </DialogDescription>
-          </DialogHeader>
-          {editingLesson && renderLessonForm(editingLesson, setEditingLesson, handleUpdateLesson, "Save Changes")}
-        </DialogContent>
-      </Dialog>
-
-      {/* Preview Dialog */}
-      <Dialog open={previewDialogOpen} onOpenChange={setPreviewDialogOpen}>
-        <DialogContent className="max-w-4xl max-h-[90vh] overflow-hidden flex flex-col">
-          <DialogHeader>
-            <DialogTitle className="flex items-center gap-2">
-              <Eye className="w-5 h-5 text-purple-600" />
-              Preview: {previewLesson?.title}
-            </DialogTitle>
-            <DialogDescription>
-              This is how students will see the lesson content
-            </DialogDescription>
-          </DialogHeader>
-          
-          <ScrollArea className="flex-1 pr-4">
-            <div className="space-y-6 py-4">
-              {/* Lesson Header */}
-              <div className="flex items-center gap-3 pb-4 border-b">
-                <div className="p-3 bg-purple-100 rounded-xl">
-                  <BookOpen className="w-6 h-6 text-purple-600" />
-                </div>
-                <div>
-                  <h2 className="text-xl font-bold">{previewLesson?.title}</h2>
-                  <p className="text-gray-600">{previewLesson?.description}</p>
-                </div>
-                <Badge className="ml-auto bg-yellow-100 text-yellow-800">
-                  <Zap className="w-3 h-3 mr-1" />
-                  +{previewLesson?.xp_reward} XP
-                </Badge>
-              </div>
-
-              {/* Lesson Content */}
-              <div className="prose prose-sm max-w-none">
-                <div 
-                  dangerouslySetInnerHTML={{ 
-                    __html: formatLessonContent(previewLesson?.content || "") 
-                  }}
-                />
-              </div>
-
-              {/* Starter Code Preview */}
-              {previewLesson?.starter_code && (
-                <div>
-                  <h3 className="font-semibold text-gray-700 mb-2 flex items-center gap-2">
-                    <Code className="w-4 h-4" />
-                    Starter Code
-                  </h3>
-                  <pre className="bg-gray-900 text-green-400 p-4 rounded-lg overflow-x-auto text-sm">
-                    <code>{previewLesson.starter_code}</code>
-                  </pre>
-                </div>
-              )}
-
-              {/* Practice Exercises Preview */}
-              {previewLesson?.practice?.length > 0 && (
-                <div>
-                  <h3 className="font-semibold text-gray-700 mb-3 flex items-center gap-2">
-                    <Dumbbell className="w-4 h-4 text-purple-600" />
-                    Practice Exercises ({previewLesson.practice.length})
-                  </h3>
-                  <div className="space-y-3">
-                    {previewLesson.practice.map((ex, i) => (
-                      <div key={i} className="p-4 bg-purple-50 border border-purple-200 rounded-lg">
-                        <div className="flex items-center justify-between mb-2">
-                          <span className="font-medium text-purple-800">{ex.title}</span>
-                          <Badge variant="outline" className="text-purple-600">
-                            +{ex.xp_reward} XP
-                          </Badge>
-                        </div>
-                        <p className="text-sm text-gray-600">{ex.instructions}</p>
-                        {ex.hints?.length > 0 && (
-                          <div className="mt-2 text-xs text-gray-500">
-                            💡 {ex.hints.length} hint(s) available
-                          </div>
-                        )}
-                      </div>
-                    ))}
+          {/* Right Column - Generated Plan */}
+          <div className="lg:col-span-2">
+            {generatedPlans.length === 0 ? (
+              <Card className="h-full flex items-center justify-center min-h-[500px]">
+                <CardContent className="text-center py-12">
+                  <GraduationCap className="w-16 h-16 mx-auto text-gray-300 mb-4" />
+                  <h3 className="text-xl font-semibold text-gray-600 mb-2">No Lesson Plan Generated</h3>
+                  <p className="text-gray-500 max-w-md">
+                    Fill in the subject and topic on the left, then click "Generate Plan" to create a comprehensive multi-day lesson plan with AI.
+                  </p>
+                </CardContent>
+              </Card>
+            ) : (
+              <div className="space-y-4">
+                {/* Plan Header - Print Version */}
+                <div className="print-only bg-white p-6 rounded-lg">
+                  <div className="text-center mb-4">
+                    <h1 className="text-2xl font-bold">{headerFields.schoolName}</h1>
+                    <h2 className="text-lg">{lessonInput.subject} - {lessonInput.topic}</h2>
+                  </div>
+                  <div className="grid grid-cols-2 gap-4 text-sm">
+                    <p><strong>Teacher:</strong> {headerFields.teacherName}</p>
+                    <p><strong>Class:</strong> {headerFields.className}</p>
+                    <p><strong>Lesson Range:</strong> {headerFields.lessonRange}</p>
+                    <p><strong>Grade Level:</strong> {lessonInput.gradeLevel}</p>
+                    <p><strong>Time per Period:</strong> {headerFields.timePerPeriod} minutes</p>
+                    <p><strong>Next Assessment:</strong> {headerFields.nextMajorAssessment}</p>
+                  </div>
+                  <div className="mt-4 text-sm">
+                    <strong>Pacing:</strong> Intro ({headerFields.pacingIntro}m) → Direct Instruction ({headerFields.pacingDirectInstruction}m) → Guided Practice ({headerFields.pacingGuidedPractice}m) → Independent Practice ({headerFields.pacingIndependentPractice}m) → Closure ({headerFields.pacingClosure}m)
                   </div>
                 </div>
-              )}
-            </div>
-          </ScrollArea>
-        </DialogContent>
-      </Dialog>
+
+                {/* Daily Plans */}
+                {generatedPlans.map((day, dayIndex) => (
+                  <Card key={dayIndex} className="lesson-day">
+                    <CardHeader 
+                      className="cursor-pointer hover:bg-gray-50 no-print"
+                      onClick={() => toggleDay(dayIndex)}
+                    >
+                      <CardTitle className="flex items-center justify-between">
+                        <div className="flex items-center gap-3">
+                          <div className="w-10 h-10 bg-indigo-100 rounded-full flex items-center justify-center">
+                            <span className="text-indigo-700 font-bold">D{dayIndex + 1}</span>
+                          </div>
+                          <div>
+                            <h3 className="text-lg font-semibold">Day {dayIndex + 1}</h3>
+                            <p className="text-sm text-gray-500 font-normal">
+                              {formatDate(lessonInput.startDate, dayIndex)}
+                            </p>
+                          </div>
+                        </div>
+                        {expandedDays[dayIndex] ? (
+                          <ChevronUp className="w-5 h-5 text-gray-400" />
+                        ) : (
+                          <ChevronDown className="w-5 h-5 text-gray-400" />
+                        )}
+                      </CardTitle>
+                    </CardHeader>
+
+                    {/* Print header for each day */}
+                    <div className="print-only px-6 pb-2 border-b">
+                      <h3 className="text-lg font-bold">Day {dayIndex + 1} - {formatDate(lessonInput.startDate, dayIndex)}</h3>
+                    </div>
+
+                    {(expandedDays[dayIndex] || true) && (
+                      <CardContent className={`space-y-4 ${!expandedDays[dayIndex] ? 'no-print hidden' : ''}`}>
+                        {lessonSections.map((section) => {
+                          const Icon = section.icon;
+                          const isEditing = editingSection === `${dayIndex}-${section.key}`;
+                          
+                          return (
+                            <div key={section.key} className="border-b border-gray-100 pb-4 last:border-0">
+                              <div className="flex items-start gap-2 mb-2">
+                                <Icon className="w-4 h-4 text-indigo-600 mt-1 flex-shrink-0" />
+                                <div className="flex-1">
+                                  <div className="flex items-center justify-between">
+                                    <h4 className="font-semibold text-gray-800">
+                                      {section.label}
+                                      {section.description && (
+                                        <span className="font-normal text-gray-500 text-sm ml-2">
+                                          ({section.description})
+                                        </span>
+                                      )}
+                                    </h4>
+                                    <Button
+                                      variant="ghost"
+                                      size="sm"
+                                      onClick={() => setEditingSection(isEditing ? null : `${dayIndex}-${section.key}`)}
+                                      className="no-print h-7 px-2"
+                                    >
+                                      <Edit3 className="w-3 h-3" />
+                                    </Button>
+                                  </div>
+                                  
+                                  {isEditing ? (
+                                    <Textarea
+                                      value={day[section.key] || ''}
+                                      onChange={(e) => updateDayContent(dayIndex, section.key, e.target.value)}
+                                      className="mt-2 min-h-[100px]"
+                                      onBlur={() => setEditingSection(null)}
+                                      autoFocus
+                                    />
+                                  ) : (
+                                    <div 
+                                      className="text-gray-600 mt-1 whitespace-pre-wrap"
+                                      dangerouslySetInnerHTML={{ 
+                                        __html: (day[section.key] || 'Not specified').replace(
+                                          /\*\*(.*?)\*\*/g, 
+                                          '<strong class="text-gray-900">$1</strong>'
+                                        )
+                                      }}
+                                    />
+                                  )}
+                                </div>
+                              </div>
+                            </div>
+                          );
+                        })}
+                      </CardContent>
+                    )}
+                  </Card>
+                ))}
+              </div>
+            )}
+          </div>
+        </div>
+      </div>
     </div>
   );
 }
