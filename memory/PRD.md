@@ -110,6 +110,7 @@ Teachers can now create "Block" type assignments using drag-and-drop Blockly edi
 ### Completed (Feb 2025)
 - [x] **Lesson Plan Generator** (Feb 13, 2025) - AI-powered lesson plan creator for teachers:
   - Editable header fields saved to localStorage (School Name, Teacher Name, Class Name, Lesson Range, Pacing times, Next Major Assessment)
+  - **Standards & Objectives Input**: Teachers can paste their specific standards (CCSS, ISTE, etc.) and learning objectives - AI incorporates them into generated lessons
   - AI generates comprehensive multi-day lesson plans using Gemini (gemini-3-flash-preview)
   - 14 lesson plan sections per day: Learner Outcomes, Standards, Anticipatory Set, Teaching the Lesson, Modeling, Instructional Strategies, Checks for Understanding, Guided Practice, Independent Practice, Closure, Formative Assessment, Summative Assessment Date, Extended Activities, Review/Reteach Activities
   - Bold questions/prompts generated for teacher use
