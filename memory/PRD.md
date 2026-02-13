@@ -111,12 +111,14 @@ Teachers can now create "Block" type assignments using drag-and-drop Blockly edi
 - [x] **Lesson Plan Generator** (Feb 13, 2025) - AI-powered lesson plan creator for teachers:
   - Editable header fields saved to localStorage (School Name, Teacher Name, Class Name, Lesson Range, Pacing times, Next Major Assessment)
   - **Standards & Objectives Input**: Teachers can paste their specific standards (CCSS, ISTE, etc.) and learning objectives - AI incorporates them into generated lessons
+  - **Unit/Chapter Problem Filter**: Specify exact unit/chapter (e.g., "Unit 2: Turtle Graphics", "Chapter 3: Colors") to pull practice problems ONLY from that section
   - AI generates comprehensive multi-day lesson plans using Gemini (gemini-3-flash-preview)
-  - 14 lesson plan sections per day: Learner Outcomes, Standards, Anticipatory Set, Teaching the Lesson, Modeling, Instructional Strategies, Checks for Understanding, Guided Practice, Independent Practice, Closure, Formative Assessment, Summative Assessment Date, Extended Activities, Review/Reteach Activities
+  - 14 lesson plan sections per day: Learner Outcomes (bulleted list format), Standards, Anticipatory Set, Teaching the Lesson, Modeling, Instructional Strategies, Checks for Understanding, Guided Practice, Independent Practice, Closure, Formative Assessment, Summative Assessment Date, Extended Activities, Review/Reteach Activities
   - Bold questions/prompts generated for teacher use
   - **App Problem Integration**: Automatically pulls relevant problems from the app's library for Guided Practice and Independent Practice sections
   - "Suggested App Problems" panels with copy/open links for easy assignment
   - All sections editable after generation
+  - **Export as Word Document**: Download button generates .docx file for admin submission
   - Save, load, delete lesson plans
   - Print-friendly output
   - Route: /lesson-plans (teacher-only)
