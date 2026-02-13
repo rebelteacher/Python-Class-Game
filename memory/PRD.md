@@ -113,6 +113,8 @@ Teachers can now create "Block" type assignments using drag-and-drop Blockly edi
   - AI generates comprehensive multi-day lesson plans using Gemini (gemini-3-flash-preview)
   - 14 lesson plan sections per day: Learner Outcomes, Standards, Anticipatory Set, Teaching the Lesson, Modeling, Instructional Strategies, Checks for Understanding, Guided Practice, Independent Practice, Closure, Formative Assessment, Summative Assessment Date, Extended Activities, Review/Reteach Activities
   - Bold questions/prompts generated for teacher use
+  - **App Problem Integration**: Automatically pulls relevant problems from the app's library for Guided Practice and Independent Practice sections
+  - "Suggested App Problems" panels with copy/open links for easy assignment
   - All sections editable after generation
   - Save, load, delete lesson plans
   - Print-friendly output
