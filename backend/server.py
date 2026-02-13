@@ -7086,6 +7086,142 @@ async def delete_note(note_id: str, request: Request):
     return {"message": "Note deleted successfully"}
 
 
+# ----- Lesson Plan Creator Routes -----
+
+@api_router.get("/lesson-plans")
+async def get_lesson_plans(request: Request):
+    """Get all lesson plans for the current teacher"""
+    user = await get_current_user(request)
+    
+    if user["role"] != "teacher":
+        raise HTTPException(status_code=403, detail="Only teachers can access lesson plans")
+    
+    # Get lesson plans created by this teacher or shared/public ones
+    cursor = db.lesson_plans.find({
+        "$or": [
+            {"created_by": user["id"]},
+            {"module_id": "batesville-jh"}  # Include Batesville JH plans for all teachers
+        ]
+    }).sort("order", 1)
+    
+    lesson_plans = []
+    async for plan in cursor:
+        plan["_id"] = str(plan["_id"])
+        lesson_plans.append(plan)
+    
+    return lesson_plans
+
+@api_router.post("/lesson-plans")
+async def create_lesson_plan(plan: LessonPlanCreate, request: Request):
+    """Create a new lesson plan"""
+    user = await get_current_user(request)
+    
+    if user["role"] != "teacher":
+        raise HTTPException(status_code=403, detail="Only teachers can create lesson plans")
+    
+    # Check if lesson_id already exists
+    existing = await db.lesson_plans.find_one({"lesson_id": plan.lesson_id})
+    if existing:
+        raise HTTPException(status_code=400, detail=f"Lesson ID '{plan.lesson_id}' already exists")
+    
+    lesson_plan = LessonPlan(
+        lesson_id=plan.lesson_id,
+        module_id=plan.module_id,
+        title=plan.title,
+        description=plan.description,
+        order=plan.order,
+        content=plan.content,
+        exercise_type=plan.exercise_type,
+        starter_code=plan.starter_code,
+        solution_code=plan.solution_code,
+        validation_rules=plan.validation_rules,
+        xp_reward=plan.xp_reward,
+        practice=[ex.model_dump() for ex in (plan.practice or [])],
+        created_by=user["id"]
+    )
+    
+    plan_dict = lesson_plan.model_dump()
+    plan_dict["validation_rules"] = plan_dict["validation_rules"].model_dump() if plan_dict["validation_rules"] else None
+    
+    await db.lesson_plans.insert_one(plan_dict)
+    
+    # Return without _id ObjectId
+    plan_dict.pop("_id", None)
+    return plan_dict
+
+@api_router.get("/lesson-plans/{plan_id}")
+async def get_lesson_plan(plan_id: str, request: Request):
+    """Get a specific lesson plan"""
+    user = await get_current_user(request)
+    
+    if user["role"] != "teacher":
+        raise HTTPException(status_code=403, detail="Only teachers can access lesson plans")
+    
+    plan = await db.lesson_plans.find_one({"id": plan_id})
+    if not plan:
+        raise HTTPException(status_code=404, detail="Lesson plan not found")
+    
+    plan["_id"] = str(plan["_id"])
+    return plan
+
+@api_router.put("/lesson-plans/{plan_id}")
+async def update_lesson_plan(plan_id: str, updates: LessonPlanUpdate, request: Request):
+    """Update a lesson plan"""
+    user = await get_current_user(request)
+    
+    if user["role"] != "teacher":
+        raise HTTPException(status_code=403, detail="Only teachers can update lesson plans")
+    
+    plan = await db.lesson_plans.find_one({"id": plan_id})
+    if not plan:
+        raise HTTPException(status_code=404, detail="Lesson plan not found")
+    
+    # Only creator can update
+    if plan.get("created_by") and plan["created_by"] != user["id"]:
+        raise HTTPException(status_code=403, detail="You can only update your own lesson plans")
+    
+    # Build update dict
+    update_dict = {}
+    for field, value in updates.model_dump(exclude_unset=True).items():
+        if value is not None:
+            if field == "validation_rules" and value:
+                update_dict[field] = value
+            elif field == "practice" and value:
+                update_dict[field] = [ex if isinstance(ex, dict) else ex.model_dump() for ex in value]
+            else:
+                update_dict[field] = value
+    
+    update_dict["updated_at"] = datetime.now(timezone.utc)
+    
+    await db.lesson_plans.update_one(
+        {"id": plan_id},
+        {"$set": update_dict}
+    )
+    
+    updated_plan = await db.lesson_plans.find_one({"id": plan_id})
+    updated_plan["_id"] = str(updated_plan["_id"])
+    return updated_plan
+
+@api_router.delete("/lesson-plans/{plan_id}")
+async def delete_lesson_plan(plan_id: str, request: Request):
+    """Delete a lesson plan"""
+    user = await get_current_user(request)
+    
+    if user["role"] != "teacher":
+        raise HTTPException(status_code=403, detail="Only teachers can delete lesson plans")
+    
+    plan = await db.lesson_plans.find_one({"id": plan_id})
+    if not plan:
+        raise HTTPException(status_code=404, detail="Lesson plan not found")
+    
+    # Only creator can delete
+    if plan.get("created_by") and plan["created_by"] != user["id"]:
+        raise HTTPException(status_code=403, detail="You can only delete your own lesson plans")
+    
+    await db.lesson_plans.delete_one({"id": plan_id})
+    return {"message": "Lesson plan deleted successfully"}
+
+
 # ----- Multiple Choice Testing Routes -----
 
 @api_router.post("/mc-questions")
