@@ -228,6 +228,48 @@ export default function LessonPlanCreator({ user }) {
     });
   };
 
+  // Export lesson plan as Word document
+  const exportAsDocument = async () => {
+    if (generatedPlans.length === 0) {
+      toast.error("No lesson plan to export");
+      return;
+    }
+
+    setIsExporting(true);
+    try {
+      const response = await axios.post(
+        `${API}/export-lesson-plan`,
+        {
+          headerFields,
+          lessonInput,
+          dailyPlans: generatedPlans
+        },
+        { 
+          withCredentials: true,
+          responseType: 'blob'
+        }
+      );
+      
+      // Create download link
+      const url = window.URL.createObjectURL(new Blob([response.data]));
+      const link = document.createElement('a');
+      link.href = url;
+      const filename = `Lesson_Plan_${lessonInput.topic.replace(/\s+/g, '_')}_${lessonInput.startDate}.docx`;
+      link.setAttribute('download', filename);
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      window.URL.revokeObjectURL(url);
+      
+      toast.success("Lesson plan downloaded!");
+    } catch (error) {
+      console.error("Error exporting lesson plan:", error);
+      toast.error("Failed to export lesson plan");
+    } finally {
+      setIsExporting(false);
+    }
+  };
+
   // Lesson plan sections configuration
   const lessonSections = [
     { key: 'learnerOutcomes', label: 'Learner Outcomes/Objectives', icon: Target, description: 'By the end of the lesson, students will be able to:' },
