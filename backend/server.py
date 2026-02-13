@@ -7142,36 +7142,70 @@ async def get_curriculum_structure(request: Request):
     if user["role"] != "teacher":
         raise HTTPException(status_code=403, detail="Only teachers can access curriculum structure")
     
-    # Get all problems and extract unique unit_types, chapters, and lessons
-    cursor = db.problems.find({}, {"unit_type": 1, "chapter": 1, "lesson": 1, "_id": 0})
+    # Get all problems and extract chapters, lessons, and categories to determine curriculum unit
+    cursor = db.problems.find({}, {"chapter": 1, "lesson": 1, "category": 1, "_id": 0})
     
-    units = set()
-    chapters = {}  # chapter -> set of lessons
+    # Track chapter info: lessons and categories to determine unit
+    chapter_info = {}  # chapter -> {"lessons": set(), "categories": set()}
     
     async for prob in cursor:
-        unit_type = prob.get("unit_type", "").strip()
         chapter = prob.get("chapter", "").strip()
         lesson = prob.get("lesson", "").strip()
-        
-        if unit_type:
-            units.add(unit_type)
+        category = prob.get("category", "").strip()
         
         if chapter:
-            if chapter not in chapters:
-                chapters[chapter] = set()
+            if chapter not in chapter_info:
+                chapter_info[chapter] = {"lessons": set(), "categories": set()}
             if lesson:
-                chapters[chapter].add(lesson)
+                chapter_info[chapter]["lessons"].add(lesson)
+            if category:
+                chapter_info[chapter]["categories"].add(category)
     
-    # Convert to sorted lists
+    # Determine curriculum unit from categories
+    def determine_unit(chapter_name, categories):
+        categories_lower = [c.lower() for c in categories]
+        # Check for known curriculum types
+        if any("turtle" in c for c in categories_lower):
+            return "Turtle Graphics"
+        if any("micro:bit" in c or "microbit" in c for c in categories_lower):
+            return "Micro:bit"
+        if any("block" in c for c in categories_lower):
+            return "Block Programming"
+        # Python-related keywords
+        if any(kw in c for c in categories_lower for kw in ["print", "python", "string", "variable", "math", "loop", "function", "conditional"]):
+            return "Python"
+        # Try to infer from chapter name
+        chapter_lower = chapter_name.lower()
+        if "turtle" in chapter_lower:
+            return "Turtle Graphics"
+        if "micro" in chapter_lower or "led" in chapter_lower or "button" in chapter_lower or "sensor" in chapter_lower or "circuit" in chapter_lower:
+            return "Micro:bit"
+        if "block" in chapter_lower:
+            return "Block Programming"
+        if "print" in chapter_lower or "variable" in chapter_lower or "loop" in chapter_lower or "math" in chapter_lower or "function" in chapter_lower or "conditional" in chapter_lower:
+            return "Python"
+        return "General"
+    
+    # Build chapters with unit info
+    chapters_with_units = []
+    for ch_name, info in chapter_info.items():
+        unit = determine_unit(ch_name, info["categories"])
+        chapters_with_units.append({
+            "name": ch_name,
+            "unit": unit,
+            "displayName": f"{unit} - {ch_name}",
+            "lessons": sorted(list(info["lessons"]))
+        })
+    
+    # Sort by unit first, then by chapter name
+    chapters_with_units.sort(key=lambda x: (x["unit"], x["name"]))
+    
+    # Get unique units
+    units = sorted(set(ch["unit"] for ch in chapters_with_units))
+    
     result = {
-        "units": sorted(list(units)),
-        "chapters": [
-            {
-                "name": ch,
-                "lessons": sorted(list(lessons))
-            }
-            for ch, lessons in sorted(chapters.items())
-        ]
+        "units": units,
+        "chapters": chapters_with_units
     }
     
     return result
