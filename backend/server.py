@@ -7157,33 +7157,22 @@ async def generate_lesson_plan(req: GenerateLessonPlanRequest, request: Request)
         dates.append(day_date.strftime("%A, %B %d, %Y"))
     
     # Fetch relevant problems from the database for practice activities
-    search_terms = [req.subject.lower(), req.topic.lower()]
-    problems_cursor = db.problems.find({
-        "$or": [
-            {"title": {"$regex": req.topic, "$options": "i"}},
-            {"chapter": {"$regex": req.topic, "$options": "i"}},
-            {"lesson": {"$regex": req.topic, "$options": "i"}},
-            {"title": {"$regex": req.subject, "$options": "i"}},
-            {"chapter": {"$regex": req.subject, "$options": "i"}},
-        ]
-    }).limit(20)
-    
+    # If specific unit/chapter provided, filter strictly by those
     available_problems = []
-    async for prob in problems_cursor:
-        available_problems.append({
-            "id": prob.get("id"),
-            "title": prob.get("title"),
-            "chapter": prob.get("chapter", ""),
-            "lesson": prob.get("lesson", ""),
-            "unit_type": prob.get("unit_type", ""),
-            "difficulty": prob.get("difficulty", "medium")
-        })
     
-    # If no specific matches, get general problems
-    if len(available_problems) < 5:
-        general_cursor = db.problems.find({}).limit(30)
-        async for prob in general_cursor:
-            if prob.get("id") not in [p["id"] for p in available_problems]:
+    if req.problemUnit or req.problemChapter:
+        # Strict filtering by unit and/or chapter
+        filter_conditions = []
+        if req.problemUnit:
+            filter_conditions.append({"unit_type": {"$regex": req.problemUnit, "$options": "i"}})
+            filter_conditions.append({"chapter": {"$regex": req.problemUnit, "$options": "i"}})
+        if req.problemChapter:
+            filter_conditions.append({"chapter": {"$regex": req.problemChapter, "$options": "i"}})
+            filter_conditions.append({"lesson": {"$regex": req.problemChapter, "$options": "i"}})
+        
+        if filter_conditions:
+            problems_cursor = db.problems.find({"$or": filter_conditions}).limit(30)
+            async for prob in problems_cursor:
                 available_problems.append({
                     "id": prob.get("id"),
                     "title": prob.get("title"),
@@ -7192,7 +7181,42 @@ async def generate_lesson_plan(req: GenerateLessonPlanRequest, request: Request)
                     "unit_type": prob.get("unit_type", ""),
                     "difficulty": prob.get("difficulty", "medium")
                 })
-                if len(available_problems) >= 20:
+    else:
+        # Fallback to topic/subject matching
+        problems_cursor = db.problems.find({
+            "$or": [
+                {"title": {"$regex": req.topic, "$options": "i"}},
+                {"chapter": {"$regex": req.topic, "$options": "i"}},
+                {"lesson": {"$regex": req.topic, "$options": "i"}},
+                {"title": {"$regex": req.subject, "$options": "i"}},
+                {"chapter": {"$regex": req.subject, "$options": "i"}},
+            ]
+        }).limit(20)
+        
+        async for prob in problems_cursor:
+            available_problems.append({
+                "id": prob.get("id"),
+                "title": prob.get("title"),
+                "chapter": prob.get("chapter", ""),
+                "lesson": prob.get("lesson", ""),
+                "unit_type": prob.get("unit_type", ""),
+                "difficulty": prob.get("difficulty", "medium")
+            })
+        
+        # If no specific matches, get general problems
+        if len(available_problems) < 5:
+            general_cursor = db.problems.find({}).limit(30)
+            async for prob in general_cursor:
+                if prob.get("id") not in [p["id"] for p in available_problems]:
+                    available_problems.append({
+                        "id": prob.get("id"),
+                        "title": prob.get("title"),
+                        "chapter": prob.get("chapter", ""),
+                        "lesson": prob.get("lesson", ""),
+                        "unit_type": prob.get("unit_type", ""),
+                        "difficulty": prob.get("difficulty", "medium")
+                    })
+                    if len(available_problems) >= 20:
                     break
     
     # Format problem list for AI context
