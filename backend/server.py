@@ -7189,11 +7189,12 @@ Example format:
 Return ONLY valid JSON array, no other text."""
 
     try:
+        # Use Gemini for faster response times
         chat = LlmChat(
             api_key=llm_key,
             session_id=f"lesson-plan-{user['id']}-{uuid.uuid4()}",
             system_message="You are an expert K-12 curriculum designer. Always respond with valid JSON only."
-        ).with_model("openai", "gpt-5.2")
+        ).with_model("gemini", "gemini-3-flash-preview")
         
         response = await chat.send_message(UserMessage(text=prompt))
         
