@@ -7104,121 +7104,198 @@ async def delete_note(note_id: str, request: Request):
     return {"message": "Note deleted successfully"}
 
 
-# ----- Lesson Plan Creator Routes -----
+# ----- Teacher Lesson Plan Generator Routes -----
 
 @api_router.get("/lesson-plans")
 async def get_lesson_plans(request: Request):
-    """Get all lesson plans for the current teacher"""
+    """Get all saved lesson plans for the current teacher"""
     user = await get_current_user(request)
     
     if user["role"] != "teacher":
         raise HTTPException(status_code=403, detail="Only teachers can access lesson plans")
     
-    # Get lesson plans created by this teacher or shared/public ones
-    cursor = db.lesson_plans.find({
-        "$or": [
-            {"created_by": user["id"]},
-            {"module_id": "batesville-jh"}  # Include Batesville JH plans for all teachers
-        ]
-    }).sort("order", 1)
+    cursor = db.lesson_plans.find({"created_by": user["id"]}).sort("created_at", -1)
     
     lesson_plans = []
     async for plan in cursor:
-        plan["_id"] = str(plan["_id"])
+        plan.pop("_id", None)
         lesson_plans.append(plan)
     
     return lesson_plans
 
-@api_router.post("/lesson-plans")
-async def create_lesson_plan(plan: LessonPlanCreate, request: Request):
-    """Create a new lesson plan"""
+@api_router.post("/generate-lesson-plan")
+async def generate_lesson_plan(req: GenerateLessonPlanRequest, request: Request):
+    """Generate a multi-day lesson plan using AI"""
     user = await get_current_user(request)
     
     if user["role"] != "teacher":
-        raise HTTPException(status_code=403, detail="Only teachers can create lesson plans")
+        raise HTTPException(status_code=403, detail="Only teachers can generate lesson plans")
     
-    # Check if lesson_id already exists
-    existing = await db.lesson_plans.find_one({"lesson_id": plan.lesson_id})
-    if existing:
-        raise HTTPException(status_code=400, detail=f"Lesson ID '{plan.lesson_id}' already exists")
+    llm_key = os.environ.get("EMERGENT_LLM_KEY")
+    if not llm_key:
+        raise HTTPException(status_code=500, detail="LLM key not configured")
     
-    lesson_plan = LessonPlan(
-        lesson_id=plan.lesson_id,
-        module_id=plan.module_id,
-        title=plan.title,
-        description=plan.description,
-        order=plan.order,
-        content=plan.content,
-        exercise_type=plan.exercise_type,
-        starter_code=plan.starter_code,
-        solution_code=plan.solution_code,
-        validation_rules=plan.validation_rules,
-        xp_reward=plan.xp_reward,
-        practice=[ex.model_dump() if hasattr(ex, 'model_dump') else ex for ex in (plan.practice or [])],
-        created_by=user["id"]
-    )
+    # Calculate dates for each day
+    from datetime import timedelta
+    start_date = datetime.strptime(req.startDate, "%Y-%m-%d") if req.startDate else datetime.now()
     
-    plan_dict = lesson_plan.model_dump()
-    # validation_rules is already converted to dict by model_dump()
+    daily_plans = []
     
-    await db.lesson_plans.insert_one(plan_dict)
-    
-    # Return without _id ObjectId
-    plan_dict.pop("_id", None)
-    return plan_dict
+    for day_num in range(1, req.numberOfDays + 1):
+        day_date = start_date + timedelta(days=day_num - 1)
+        date_str = day_date.strftime("%A, %B %d, %Y")
+        
+        # Generate lesson plan for this day
+        prompt = f"""You are an expert educational curriculum designer. Create a detailed lesson plan for Day {day_num} of {req.numberOfDays} for the following:
 
-@api_router.get("/lesson-plans/{plan_id}")
-async def get_lesson_plan(plan_id: str, request: Request):
-    """Get a specific lesson plan"""
-    user = await get_current_user(request)
-    
-    if user["role"] != "teacher":
-        raise HTTPException(status_code=403, detail="Only teachers can access lesson plans")
-    
-    plan = await db.lesson_plans.find_one({"id": plan_id})
-    if not plan:
-        raise HTTPException(status_code=404, detail="Lesson plan not found")
-    
-    plan["_id"] = str(plan["_id"])
-    return plan
+**Subject:** {req.subject}
+**Topic/Unit:** {req.topic}
+**Grade Level:** {req.gradeLevel}
+**School:** {req.schoolName}
+**Class Period:** {req.timePerPeriod} minutes
+**Pacing:** Intro ({req.pacingIntro}m), Direct Instruction ({req.pacingDirectInstruction}m), Guided Practice ({req.pacingGuidedPractice}m), Independent Practice ({req.pacingIndependentPractice}m), Closure ({req.pacingClosure}m)
+**Lesson Range:** {req.lessonRange}
 
-@api_router.put("/lesson-plans/{plan_id}")
-async def update_lesson_plan(plan_id: str, updates: LessonPlanUpdate, request: Request):
-    """Update a lesson plan"""
-    user = await get_current_user(request)
-    
-    if user["role"] != "teacher":
-        raise HTTPException(status_code=403, detail="Only teachers can update lesson plans")
-    
-    plan = await db.lesson_plans.find_one({"id": plan_id})
-    if not plan:
-        raise HTTPException(status_code=404, detail="Lesson plan not found")
-    
-    # Only creator can update
-    if plan.get("created_by") and plan["created_by"] != user["id"]:
-        raise HTTPException(status_code=403, detail="You can only update your own lesson plans")
-    
-    # Build update dict
-    update_dict = {}
-    for field, value in updates.model_dump(exclude_unset=True).items():
-        if value is not None:
-            if field == "validation_rules" and value:
-                update_dict[field] = value
-            elif field == "practice" and value:
-                update_dict[field] = [ex if isinstance(ex, dict) else ex.model_dump() for ex in value]
+Generate content for each section below. For key questions or discussion prompts, make them **bold** using double asterisks.
+
+Provide the following sections (be specific and practical):
+
+1. **Learner Outcomes/Objectives** - Start with "By the end of the lesson, students will be able to:" and list 2-3 specific, measurable objectives for Day {day_num}.
+
+2. **Standards** - List relevant state/national standards that apply.
+
+3. **Anticipatory Set** - Describe a hook or engagement activity to start the lesson (2-3 sentences). Include a **bold question** to ask students.
+
+4. **Teaching the Lesson** - Detailed description of the main instruction for Day {day_num}. Include **bold questions** to pose to the class.
+
+5. **Modeling** - How the teacher will demonstrate the concept. Include specific examples.
+
+6. **Instructional Strategies** - List 2-3 specific strategies (e.g., think-pair-share, graphic organizers, etc.)
+
+7. **Checks for Understanding** - 2-3 ways to gauge student understanding during the lesson. Include **bold questions**.
+
+8. **Guided Practice** - Activities students do with teacher support. Be specific about the activity.
+
+9. **Independent Practice** - What students will do on their own. Include specific tasks or problems.
+
+10. **Closure** - How to wrap up the lesson (2-3 sentences). Include a **bold exit ticket question**.
+
+11. **Formative Assessment** - How you'll assess understanding informally during this lesson.
+
+12. **Summative Assessment Date** - When the summative assessment will occur (or "See unit assessment schedule").
+
+13. **Extended Activities** - Activities for students who finish early or need enrichment.
+
+14. **Review/Reteach Activities** - Activities for students who need additional support.
+
+Format your response as a JSON object with these exact keys:
+{{
+  "learnerOutcomes": "...",
+  "standards": "...",
+  "anticipatorySet": "...",
+  "teachingTheLesson": "...",
+  "modeling": "...",
+  "instructionalStrategies": "...",
+  "checksForUnderstanding": "...",
+  "guidedPractice": "...",
+  "independentPractice": "...",
+  "closure": "...",
+  "formativeAssessment": "...",
+  "summativeAssessmentDate": "...",
+  "extendedActivities": "...",
+  "reviewReteachActivities": "..."
+}}
+
+Remember this is Day {day_num} of {req.numberOfDays}, so content should progress logically through the unit. Day 1 should be introductory, middle days should build skills, and the final day should include review/synthesis."""
+
+        try:
+            chat = LlmChat(
+                api_key=llm_key,
+                session_id=f"lesson-plan-{user['id']}-{day_num}",
+                system_message="You are an expert K-12 curriculum designer. You create detailed, practical lesson plans that teachers can use directly in their classrooms. Always respond with valid JSON."
+            ).with_model("openai", "gpt-5.2")
+            
+            response = await chat.send_message(UserMessage(text=prompt))
+            
+            # Parse JSON response
+            import json
+            import re
+            
+            # Try to extract JSON from response
+            json_match = re.search(r'\{[\s\S]*\}', response)
+            if json_match:
+                day_content = json.loads(json_match.group())
             else:
-                update_dict[field] = value
+                # Fallback if JSON parsing fails
+                day_content = {
+                    "learnerOutcomes": response,
+                    "standards": "",
+                    "anticipatorySet": "",
+                    "teachingTheLesson": "",
+                    "modeling": "",
+                    "instructionalStrategies": "",
+                    "checksForUnderstanding": "",
+                    "guidedPractice": "",
+                    "independentPractice": "",
+                    "closure": "",
+                    "formativeAssessment": "",
+                    "summativeAssessmentDate": "",
+                    "extendedActivities": "",
+                    "reviewReteachActivities": ""
+                }
+            
+            daily_plans.append({
+                "dayNumber": day_num,
+                "date": date_str,
+                **day_content
+            })
+            
+        except Exception as e:
+            logger.error(f"Error generating day {day_num} lesson plan: {str(e)}")
+            # Add placeholder for failed day
+            daily_plans.append({
+                "dayNumber": day_num,
+                "date": date_str,
+                "learnerOutcomes": f"Error generating content for Day {day_num}. Please try again or edit manually.",
+                "standards": "",
+                "anticipatorySet": "",
+                "teachingTheLesson": "",
+                "modeling": "",
+                "instructionalStrategies": "",
+                "checksForUnderstanding": "",
+                "guidedPractice": "",
+                "independentPractice": "",
+                "closure": "",
+                "formativeAssessment": "",
+                "summativeAssessmentDate": "",
+                "extendedActivities": "",
+                "reviewReteachActivities": ""
+            })
     
-    update_dict["updated_at"] = datetime.now(timezone.utc)
+    return {"dailyPlans": daily_plans}
+
+@api_router.post("/lesson-plans")
+async def save_lesson_plan(plan_data: SaveLessonPlanRequest, request: Request):
+    """Save a lesson plan"""
+    user = await get_current_user(request)
     
-    await db.lesson_plans.update_one(
-        {"id": plan_id},
-        {"$set": update_dict}
-    )
+    if user["role"] != "teacher":
+        raise HTTPException(status_code=403, detail="Only teachers can save lesson plans")
     
-    updated_plan = await db.lesson_plans.find_one({"id": plan_id})
-    updated_plan["_id"] = str(updated_plan["_id"])
-    return updated_plan
+    lesson_plan = {
+        "id": str(uuid.uuid4()),
+        "headerFields": plan_data.headerFields,
+        "lessonInput": plan_data.lessonInput,
+        "dailyPlans": plan_data.dailyPlans,
+        "created_by": user["id"],
+        "created_at": datetime.now(timezone.utc),
+        "updated_at": datetime.now(timezone.utc)
+    }
+    
+    await db.lesson_plans.insert_one(lesson_plan)
+    lesson_plan.pop("_id", None)
+    
+    return lesson_plan
 
 @api_router.delete("/lesson-plans/{plan_id}")
 async def delete_lesson_plan(plan_id: str, request: Request):
@@ -7232,8 +7309,7 @@ async def delete_lesson_plan(plan_id: str, request: Request):
     if not plan:
         raise HTTPException(status_code=404, detail="Lesson plan not found")
     
-    # Only creator can delete
-    if plan.get("created_by") and plan["created_by"] != user["id"]:
+    if plan.get("created_by") != user["id"]:
         raise HTTPException(status_code=403, detail="You can only delete your own lesson plans")
     
     await db.lesson_plans.delete_one({"id": plan_id})
