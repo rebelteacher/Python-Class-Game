@@ -7275,10 +7275,11 @@ Return ONLY valid JSON array, no other text."""
                     "formativeAssessment": "",
                     "summativeAssessmentDate": "",
                     "extendedActivities": "",
-                    "reviewReteachActivities": ""
+                    "reviewReteachActivities": "",
+                    "suggestedProblems": []
                 })
         
-        return {"dailyPlans": daily_plans}
+        return {"dailyPlans": daily_plans, "availableProblems": available_problems}
         
     except Exception as e:
         logger.error(f"Error generating lesson plan: {str(e)}")
