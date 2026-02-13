@@ -62,7 +62,10 @@ export default function LessonPlanCreator({ user }) {
     topic: "",
     gradeLevel: "7th Grade",
     startDate: new Date().toISOString().split('T')[0],
-    numberOfDays: 5
+    numberOfDays: 5,
+    // Specific unit/chapter for problem filtering
+    problemUnit: "",
+    problemChapter: ""
   });
 
   // Generated lesson plans
@@ -73,6 +76,7 @@ export default function LessonPlanCreator({ user }) {
   const [expandedDays, setExpandedDays] = useState({});
   const [editingSection, setEditingSection] = useState(null);
   const [showProblemsPanel, setShowProblemsPanel] = useState(false);
+  const [isExporting, setIsExporting] = useState(false);
 
   // Load saved header fields from localStorage
   useEffect(() => {
