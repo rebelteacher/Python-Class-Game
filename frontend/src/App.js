@@ -56,6 +56,7 @@ import TurtleBlocks from "./pages/TurtleBlocks";
 import SkillQuizManager from "./pages/SkillQuizManager";
 import PythonCurriculum from "./pages/PythonCurriculum";
 import PythonTeaching from "./pages/PythonTeaching";
+import LessonPlanCreator from "./pages/LessonPlanCreator";
 
 const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
 const API = `${BACKEND_URL}/api`;
