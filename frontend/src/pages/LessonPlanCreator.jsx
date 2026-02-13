@@ -334,6 +334,19 @@ export default function LessonPlanCreator({ user }) {
           <div className="flex gap-2">
             {generatedPlans.length > 0 && (
               <>
+                <Button 
+                  onClick={exportAsDocument} 
+                  disabled={isExporting}
+                  variant="outline" 
+                  className="gap-2"
+                >
+                  {isExporting ? (
+                    <Loader2 className="w-4 h-4 animate-spin" />
+                  ) : (
+                    <Download className="w-4 h-4" />
+                  )}
+                  Download
+                </Button>
                 <Button onClick={printLessonPlan} variant="outline" className="gap-2">
                   <Printer className="w-4 h-4" />
                   Print
