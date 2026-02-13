@@ -61,7 +61,7 @@
 ENVIRONMENT="production"
 MONGO_URL="mongodb://localhost:27017"
 DB_NAME="test_database"
-CORS_ORIGINS="https://code-triggers.preview.emergentagent.com,https://byte-dashboard.emergent.host,http://localhost:3000"
+CORS_ORIGINS="https://planmaster-32.preview.emergentagent.com,https://byte-dashboard.emergent.host,http://localhost:3000"
 EMERGENT_LLM_KEY=sk-emergent-6BbB19f9c6f63CfB05
 ```
 
