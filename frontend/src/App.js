@@ -385,6 +385,15 @@ function App() {
               />
               
               <Route
+                path="/lesson-plans"
+                element={
+                  <ProtectedRoute user={user} requiredRole="teacher">
+                    <LessonPlanCreator user={user} />
+                  </ProtectedRoute>
+                }
+              />
+              
+              <Route
                 path="/question-bank"
                 element={
                   <ProtectedRoute user={user} requiredRole="teacher">
