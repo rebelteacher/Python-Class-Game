@@ -632,7 +632,7 @@ ISTE 1.1.c - Students use technology to seek feedback..."
                   {curriculumStructure.chapters.length > 0 ? (
                     <div className="space-y-2">
                       <div>
-                        <Label className="text-xs text-green-700">Chapter</Label>
+                        <Label className="text-xs text-green-700">Unit / Chapter</Label>
                         <Select
                           value={lessonInput.problemChapter}
                           onValueChange={(value) => setLessonInput({ 
@@ -641,13 +641,13 @@ ISTE 1.1.c - Students use technology to seek feedback..."
                           })}
                         >
                           <SelectTrigger className="mt-1 bg-white">
-                            <SelectValue placeholder="Select a chapter..." />
+                            <SelectValue placeholder="Select a unit/chapter..." />
                           </SelectTrigger>
                           <SelectContent>
                             <SelectItem value="none">-- All Chapters --</SelectItem>
                             {curriculumStructure.chapters.map((ch) => (
                               <SelectItem key={ch.name} value={ch.name}>
-                                {ch.name}
+                                {ch.displayName || ch.name}
                               </SelectItem>
                             ))}
                           </SelectContent>
