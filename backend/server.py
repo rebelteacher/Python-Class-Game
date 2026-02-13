@@ -7136,12 +7136,12 @@ async def create_lesson_plan(plan: LessonPlanCreate, request: Request):
         solution_code=plan.solution_code,
         validation_rules=plan.validation_rules,
         xp_reward=plan.xp_reward,
-        practice=[ex.model_dump() for ex in (plan.practice or [])],
+        practice=[ex.model_dump() if hasattr(ex, 'model_dump') else ex for ex in (plan.practice or [])],
         created_by=user["id"]
     )
     
     plan_dict = lesson_plan.model_dump()
-    plan_dict["validation_rules"] = plan_dict["validation_rules"].model_dump() if plan_dict["validation_rules"] else None
+    # validation_rules is already converted to dict by model_dump()
     
     await db.lesson_plans.insert_one(plan_dict)
     
