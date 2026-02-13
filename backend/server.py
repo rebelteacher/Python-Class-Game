@@ -926,6 +926,69 @@ class PDFNoteUpdate(BaseModel):
     is_shared: Optional[bool] = None
     tags: Optional[List[str]] = None
 
+class ValidationRules(BaseModel):
+    required_tags: List[str] = Field(default_factory=list)
+    required_attributes: List[str] = Field(default_factory=list)
+    required_text: List[str] = Field(default_factory=list)
+    css_properties: List[str] = Field(default_factory=list)
+
+class PracticeExercise(BaseModel):
+    exercise_id: str
+    title: str
+    instructions: str = ""
+    starter_code: str = ""
+    solution_code: str = ""
+    validation_rules: Optional[ValidationRules] = None
+    hints: List[str] = Field(default_factory=list)
+    xp_reward: int = 25
+
+class LessonPlan(BaseModel):
+    model_config = ConfigDict(extra="ignore")
+    id: str = Field(default_factory=lambda: str(uuid.uuid4()))
+    lesson_id: str  # Unique ID like "python-01-intro"
+    module_id: str = "batesville-jh"  # Default to Batesville Junior High
+    title: str
+    description: str = ""
+    order: int = 1
+    content: str = ""  # Markdown-like lesson content
+    exercise_type: str = "code"  # "code", "project", "quiz"
+    starter_code: str = ""
+    solution_code: str = ""
+    validation_rules: Optional[ValidationRules] = None
+    xp_reward: int = 100
+    practice: List[PracticeExercise] = Field(default_factory=list)
+    created_by: str = ""
+    created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+    updated_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+
+class LessonPlanCreate(BaseModel):
+    lesson_id: str
+    module_id: str = "batesville-jh"
+    title: str
+    description: str = ""
+    order: int = 1
+    content: str = ""
+    exercise_type: str = "code"
+    starter_code: str = ""
+    solution_code: str = ""
+    validation_rules: Optional[ValidationRules] = None
+    xp_reward: int = 100
+    practice: List[PracticeExercise] = Field(default_factory=list)
+
+class LessonPlanUpdate(BaseModel):
+    lesson_id: Optional[str] = None
+    module_id: Optional[str] = None
+    title: Optional[str] = None
+    description: Optional[str] = None
+    order: Optional[int] = None
+    content: Optional[str] = None
+    exercise_type: Optional[str] = None
+    starter_code: Optional[str] = None
+    solution_code: Optional[str] = None
+    validation_rules: Optional[ValidationRules] = None
+    xp_reward: Optional[int] = None
+    practice: Optional[List[PracticeExercise]] = None
+
 # ----- Auth Routes -----
 
 # Add your routes to the router instead of directly to app
