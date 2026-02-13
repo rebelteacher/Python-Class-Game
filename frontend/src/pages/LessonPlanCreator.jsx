@@ -35,6 +35,9 @@ const formatLessonContent = (content) => {
   };
 
   let result = content;
+  
+  // First, convert escaped newlines to actual newlines
+  result = result.replace(/\\n/g, '\n');
 
   // Process fenced code blocks first
   result = result.replace(/```(\w+)?\n([\s\S]*?)```/g, (match, lang, code) => {
