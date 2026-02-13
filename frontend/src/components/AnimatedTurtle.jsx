@@ -277,6 +277,7 @@ function parseCode(code, parentVars = {}) {
       
       // Try as variable or list index (e.g., colors[i], myColor)
       const value = evaluateExpression(str, variables);
+      console.log(`🎨 getColorValue("${str}") with variables:`, Object.keys(variables), `=> ${value}`);
       if (value !== null && typeof value === 'string') {
         return value;
       }
