@@ -437,6 +437,51 @@ export default function LessonPlanCreator({ user }) {
               </CardContent>
             </Card>
 
+            {/* Standards & Objectives Card */}
+            <Card className="border-purple-200">
+              <CardHeader className="pb-3">
+                <CardTitle className="text-lg flex items-center gap-2">
+                  <Target className="w-5 h-5 text-purple-600" />
+                  Standards & Objectives
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div>
+                  <Label htmlFor="standards">Standards (for AI to use)</Label>
+                  <Textarea
+                    id="standards"
+                    value={headerFields.standards}
+                    onChange={(e) => setHeaderFields({ ...headerFields, standards: e.target.value })}
+                    placeholder="Paste your state/district standards here, e.g.:
+CCSS.MATH.CONTENT.7.NS.A.1
+ISTE 1.1.c - Students use technology to seek feedback..."
+                    className="mt-1 text-sm"
+                    rows={4}
+                  />
+                  <p className="text-xs text-gray-500 mt-1">
+                    These standards will be incorporated into generated lessons
+                  </p>
+                </div>
+                <div>
+                  <Label htmlFor="objectives">Learning Objectives (for AI to use)</Label>
+                  <Textarea
+                    id="objectives"
+                    value={headerFields.objectives}
+                    onChange={(e) => setHeaderFields({ ...headerFields, objectives: e.target.value })}
+                    placeholder="Enter specific learning objectives, e.g.:
+- Students will understand variables and data types
+- Students will be able to write basic loops
+- Students will debug simple programs"
+                    className="mt-1 text-sm"
+                    rows={4}
+                  />
+                  <p className="text-xs text-gray-500 mt-1">
+                    These objectives will guide the AI's lesson content
+                  </p>
+                </div>
+              </CardContent>
+            </Card>
+
             {/* Generate Card */}
             <Card className="border-indigo-200 bg-indigo-50">
               <CardHeader className="pb-3">
