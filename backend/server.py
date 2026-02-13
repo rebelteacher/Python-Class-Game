@@ -932,62 +932,80 @@ class ValidationRules(BaseModel):
     required_text: List[str] = Field(default_factory=list)
     css_properties: List[str] = Field(default_factory=list)
 
-class PracticeExercise(BaseModel):
-    exercise_id: str
-    title: str
-    instructions: str = ""
-    starter_code: str = ""
-    solution_code: str = ""
-    validation_rules: Optional[ValidationRules] = None
-    hints: List[str] = Field(default_factory=list)
-    xp_reward: int = 25
+# ----- Teacher Lesson Plan Generator Models -----
 
-class LessonPlan(BaseModel):
+class LessonPlanHeaderFields(BaseModel):
+    schoolName: str = "Batesville Junior High School"
+    teacherName: str = ""
+    className: str = ""
+    lessonRange: str = ""
+    timePerPeriod: str = "50"
+    pacingIntro: str = "5"
+    pacingDirectInstruction: str = "15"
+    pacingGuidedPractice: str = "15"
+    pacingIndependentPractice: str = "10"
+    pacingClosure: str = "5"
+    nextMajorAssessment: str = ""
+
+class LessonPlanInput(BaseModel):
+    subject: str
+    topic: str
+    gradeLevel: str = "7th Grade"
+    startDate: str = ""
+    numberOfDays: int = 5
+
+class DailyLessonPlan(BaseModel):
+    dayNumber: int
+    date: str
+    learnerOutcomes: str = ""
+    standards: str = ""
+    anticipatorySet: str = ""
+    teachingTheLesson: str = ""
+    modeling: str = ""
+    instructionalStrategies: str = ""
+    checksForUnderstanding: str = ""
+    guidedPractice: str = ""
+    independentPractice: str = ""
+    closure: str = ""
+    formativeAssessment: str = ""
+    summativeAssessmentDate: str = ""
+    extendedActivities: str = ""
+    reviewReteachActivities: str = ""
+
+class TeacherLessonPlan(BaseModel):
     model_config = ConfigDict(extra="ignore")
     id: str = Field(default_factory=lambda: str(uuid.uuid4()))
-    lesson_id: str  # Unique ID like "python-01-intro"
-    module_id: str = "batesville-jh"  # Default to Batesville Junior High
-    title: str
-    description: str = ""
-    order: int = 1
-    content: str = ""  # Markdown-like lesson content
-    exercise_type: str = "code"  # "code", "project", "quiz"
-    starter_code: str = ""
-    solution_code: str = ""
-    validation_rules: Optional[ValidationRules] = None
-    xp_reward: int = 100
-    practice: List[PracticeExercise] = Field(default_factory=list)
+    headerFields: LessonPlanHeaderFields
+    lessonInput: LessonPlanInput
+    dailyPlans: List[DailyLessonPlan] = Field(default_factory=list)
     created_by: str = ""
     created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
     updated_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
 
-class LessonPlanCreate(BaseModel):
-    lesson_id: str
-    module_id: str = "batesville-jh"
-    title: str
-    description: str = ""
-    order: int = 1
-    content: str = ""
-    exercise_type: str = "code"
-    starter_code: str = ""
-    solution_code: str = ""
-    validation_rules: Optional[ValidationRules] = None
-    xp_reward: int = 100
-    practice: List[PracticeExercise] = Field(default_factory=list)
+class GenerateLessonPlanRequest(BaseModel):
+    # Header fields
+    schoolName: str = "Batesville Junior High School"
+    teacherName: str = ""
+    className: str = ""
+    lessonRange: str = ""
+    timePerPeriod: str = "50"
+    pacingIntro: str = "5"
+    pacingDirectInstruction: str = "15"
+    pacingGuidedPractice: str = "15"
+    pacingIndependentPractice: str = "10"
+    pacingClosure: str = "5"
+    nextMajorAssessment: str = ""
+    # Lesson input
+    subject: str
+    topic: str
+    gradeLevel: str = "7th Grade"
+    startDate: str = ""
+    numberOfDays: int = 5
 
-class LessonPlanUpdate(BaseModel):
-    lesson_id: Optional[str] = None
-    module_id: Optional[str] = None
-    title: Optional[str] = None
-    description: Optional[str] = None
-    order: Optional[int] = None
-    content: Optional[str] = None
-    exercise_type: Optional[str] = None
-    starter_code: Optional[str] = None
-    solution_code: Optional[str] = None
-    validation_rules: Optional[ValidationRules] = None
-    xp_reward: Optional[int] = None
-    practice: Optional[List[PracticeExercise]] = None
+class SaveLessonPlanRequest(BaseModel):
+    headerFields: dict
+    lessonInput: dict
+    dailyPlans: List[dict]
 
 # ----- Auth Routes -----
 
