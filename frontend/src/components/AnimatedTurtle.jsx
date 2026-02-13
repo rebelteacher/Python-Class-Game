@@ -39,8 +39,8 @@ function evaluateExpression(expr, variables) {
   
   // Try to evaluate simple math expressions
   try {
-    // Only allow numbers, operators, parentheses, and spaces
-    if (/^[\d\s+\-*/().]+$/.test(evaluated)) {
+    // Only allow numbers, operators, parentheses, and spaces (including modulo %)
+    if (/^[\d\s+\-*/().%]+$/.test(evaluated)) {
       const fn = new Function(`return ${evaluated}`);
       return fn();
     }
