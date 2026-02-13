@@ -19,6 +19,21 @@ import {
 const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
 const API = `${BACKEND_URL}/api`;
 
+// Helper to safely convert any value to displayable string
+const toDisplayString = (value) => {
+  if (value === null || value === undefined) return 'Not specified';
+  if (typeof value === 'string') return value;
+  if (Array.isArray(value)) return value.join('\n• ');
+  if (typeof value === 'object') {
+    try {
+      return JSON.stringify(value, null, 2);
+    } catch {
+      return String(value);
+    }
+  }
+  return String(value);
+};
+
 export default function LessonPlanCreator({ user }) {
   const navigate = useNavigate();
   
