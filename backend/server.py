@@ -7255,6 +7255,7 @@ Return ONLY valid JSON array, no other text."""
         json_match = re.search(r'\[[\s\S]*\]', response)
         if json_match:
             daily_plans = json.loads(json_match.group())
+            return {"dailyPlans": daily_plans, "availableProblems": available_problems}
         else:
             # Fallback - create placeholder plans
             daily_plans = []
