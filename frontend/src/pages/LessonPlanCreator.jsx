@@ -558,6 +558,72 @@ export default function LessonPlanCreator({ user }) {
                 </CardContent>
               </Card>
             )}
+
+            {/* Available Problems Panel */}
+            {availableProblems.length > 0 && (
+              <Card className="border-green-200">
+                <CardHeader className="pb-3">
+                  <CardTitle 
+                    className="text-lg flex items-center justify-between cursor-pointer"
+                    onClick={() => setShowProblemsPanel(!showProblemsPanel)}
+                  >
+                    <span className="flex items-center gap-2">
+                      <ListChecks className="w-5 h-5 text-green-600" />
+                      App Problems ({availableProblems.length})
+                    </span>
+                    {showProblemsPanel ? (
+                      <ChevronUp className="w-4 h-4 text-gray-400" />
+                    ) : (
+                      <ChevronDown className="w-4 h-4 text-gray-400" />
+                    )}
+                  </CardTitle>
+                </CardHeader>
+                {showProblemsPanel && (
+                  <CardContent>
+                    <p className="text-xs text-gray-500 mb-3">
+                      These problems from your library match the lesson topic. Use them for class practice!
+                    </p>
+                    <ScrollArea className="h-48">
+                      <div className="space-y-2">
+                        {availableProblems.map((problem) => (
+                          <div 
+                            key={problem.id}
+                            className="p-2 bg-green-50 rounded-lg text-sm"
+                          >
+                            <div className="flex items-center justify-between">
+                              <span className="font-medium text-gray-800">{problem.title}</span>
+                              <div className="flex items-center gap-1">
+                                <Button
+                                  variant="ghost"
+                                  size="sm"
+                                  onClick={() => copyProblemLink(problem.id)}
+                                  className="h-6 px-2 text-green-600"
+                                  title="Copy link"
+                                >
+                                  <Copy className="w-3 h-3" />
+                                </Button>
+                                <Button
+                                  variant="ghost"
+                                  size="sm"
+                                  onClick={() => window.open(`/library?problem=${problem.id}`, '_blank')}
+                                  className="h-6 px-2 text-green-600"
+                                  title="Open"
+                                >
+                                  <ExternalLink className="w-3 h-3" />
+                                </Button>
+                              </div>
+                            </div>
+                            {problem.chapter && (
+                              <p className="text-xs text-gray-500 mt-1">{problem.chapter}</p>
+                            )}
+                          </div>
+                        ))}
+                      </div>
+                    </ScrollArea>
+                  </CardContent>
+                )}
+              </Card>
+            )}
           </div>
 
           {/* Right Column - Generated Plan */}
