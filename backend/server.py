@@ -7223,7 +7223,7 @@ async def generate_lesson_plan(req: GenerateLessonPlanRequest, request: Request)
 Create a lesson plan for EACH of the {req.numberOfDays} days. For key questions, make them **bold**.
 
 For EACH DAY, provide these sections:
-- learnerOutcomes: "By the end of the lesson, students will be able to:" + 2-3 specific objectives{' (MUST align with teacher-provided objectives above)' if req.objectives else ''}
+- learnerOutcomes: MUST start with "By the end of this lesson, the student will be able to:" followed by a bulleted list of 2-4 specific, measurable objectives. Format as: "By the end of this lesson, the student will be able to:\n• [objective 1]\n• [objective 2]\n• [objective 3]"{' Align objectives with teacher-provided objectives above.' if req.objectives else ''}
 - standards: Relevant standards{' (MUST use teacher-provided standards above)' if req.standards else ''}
 - anticipatorySet: Hook activity with **bold question**
 - teachingTheLesson: Main instruction with **bold questions**
