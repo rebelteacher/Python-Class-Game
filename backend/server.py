@@ -7217,7 +7217,7 @@ async def generate_lesson_plan(req: GenerateLessonPlanRequest, request: Request)
                         "difficulty": prob.get("difficulty", "medium")
                     })
                     if len(available_problems) >= 20:
-                    break
+                        break
     
     # Format problem list for AI context
     problems_context = ""
