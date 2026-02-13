@@ -232,11 +232,20 @@ function parseCode(code, parentVars = {}) {
       continue;
     }
     
-    // Parse variable assignments (e.g., sides = 6, angle = 360 / sides)
+    // Parse variable assignments (e.g., sides = 6, angle = 360 / sides, colors = ["red", "blue"])
     let match = trimmed.match(/^(\w+)\s*=\s*(.+)$/);
     if (match && !trimmed.includes('turtle') && !trimmed.includes('Turtle')) {
       const varName = match[1];
-      const varExpr = match[2];
+      const varExpr = match[2].trim();
+      
+      // Try to parse as a list first
+      const listValue = parseListLiteral(varExpr);
+      if (listValue !== null) {
+        variables[varName] = listValue;
+        continue;
+      }
+      
+      // Try as a number or expression
       const value = evaluateExpression(varExpr, variables);
       if (value !== null) {
         variables[varName] = value;
