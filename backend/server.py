@@ -7134,6 +7134,49 @@ async def get_lesson_plans(request: Request):
     
     return lesson_plans
 
+@api_router.get("/curriculum-structure")
+async def get_curriculum_structure(request: Request):
+    """Get available units and chapters from the problems database for dropdown selection"""
+    user = await get_current_user(request)
+    
+    if user["role"] != "teacher":
+        raise HTTPException(status_code=403, detail="Only teachers can access curriculum structure")
+    
+    # Get all problems and extract unique unit_types, chapters, and lessons
+    cursor = db.problems.find({}, {"unit_type": 1, "chapter": 1, "lesson": 1, "_id": 0})
+    
+    units = set()
+    chapters = {}  # chapter -> set of lessons
+    
+    async for prob in cursor:
+        unit_type = prob.get("unit_type", "").strip()
+        chapter = prob.get("chapter", "").strip()
+        lesson = prob.get("lesson", "").strip()
+        
+        if unit_type:
+            units.add(unit_type)
+        
+        if chapter:
+            if chapter not in chapters:
+                chapters[chapter] = set()
+            if lesson:
+                chapters[chapter].add(lesson)
+    
+    # Convert to sorted lists
+    result = {
+        "units": sorted(list(units)),
+        "chapters": [
+            {
+                "name": ch,
+                "lessons": sorted(list(lessons))
+            }
+            for ch, lessons in sorted(chapters.items())
+        ]
+    }
+    
+    return result
+
+
 @api_router.post("/generate-lesson-plan")
 async def generate_lesson_plan(req: GenerateLessonPlanRequest, request: Request):
     """Generate a multi-day lesson plan using AI"""
