@@ -477,13 +477,23 @@ function parseCode(code, parentVars = {}) {
         // Collect loop body lines
         for (let j = lineNum + 1; j < lines.length; j++) {
           const bodyLine = lines[j];
-          if (bodyLine.trim() === '') {
+          const trimmedBody = bodyLine.trim();
+          
+          // Skip empty lines
+          if (trimmedBody === '') {
             lastBodyLine = j;
             continue;
           }
+          
+          // Skip comment-only lines (but still track them for lastBodyLine)
+          if (trimmedBody.startsWith('#')) {
+            lastBodyLine = j;
+            continue;
+          }
+          
           const bodyIndent = bodyLine.search(/\S/);
-          if (bodyIndent <= loopIndent && bodyLine.trim() !== '') break;
-          loopBody.push({ code: bodyLine.trim(), lineNum: j });
+          if (bodyIndent <= loopIndent) break;
+          loopBody.push({ code: trimmedBody, lineNum: j });
           lastBodyLine = j;
         }
         
