@@ -497,9 +497,7 @@ function parseCode(code, parentVars = {}) {
         for (let i = 0; i < iterations; i++) {
           const loopVars = { ...variables, [loopVar]: i };
           for (const bodyCmd of loopBody) {
-            console.log(`🔄 Iteration ${i}: parsing "${bodyCmd.code.substring(0, 40)}" with vars:`, Object.keys(loopVars));
             const parsed = parseCode(bodyCmd.code, loopVars);
-            console.log(`🔄 Iteration ${i}: parsed ${parsed.length} commands`);
             for (const p of parsed) {
               p.line = bodyCmd.lineNum;
               commands.push(p);
