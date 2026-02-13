@@ -7374,6 +7374,144 @@ async def delete_lesson_plan(plan_id: str, request: Request):
     return {"message": "Lesson plan deleted successfully"}
 
 
+from fastapi.responses import StreamingResponse
+import io
+
+@api_router.post("/export-lesson-plan")
+async def export_lesson_plan(plan_data: ExportLessonPlanRequest, request: Request):
+    """Export lesson plan as Word document"""
+    user = await get_current_user(request)
+    
+    if user["role"] != "teacher":
+        raise HTTPException(status_code=403, detail="Only teachers can export lesson plans")
+    
+    from docx import Document
+    from docx.shared import Inches, Pt, RGBColor
+    from docx.enum.text import WD_ALIGN_PARAGRAPH
+    from docx.enum.style import WD_STYLE_TYPE
+    
+    # Create document
+    doc = Document()
+    
+    # Set margins
+    for section in doc.sections:
+        section.top_margin = Inches(0.75)
+        section.bottom_margin = Inches(0.75)
+        section.left_margin = Inches(0.75)
+        section.right_margin = Inches(0.75)
+    
+    header_fields = plan_data.headerFields
+    lesson_input = plan_data.lessonInput
+    daily_plans = plan_data.dailyPlans
+    
+    # Title
+    title = doc.add_heading(header_fields.get('schoolName', 'Lesson Plan'), level=0)
+    title.alignment = WD_ALIGN_PARAGRAPH.CENTER
+    
+    # Subtitle
+    subtitle = doc.add_paragraph()
+    subtitle.alignment = WD_ALIGN_PARAGRAPH.CENTER
+    run = subtitle.add_run(f"{lesson_input.get('subject', '')} - {lesson_input.get('topic', '')}")
+    run.bold = True
+    run.font.size = Pt(14)
+    
+    # Header info table
+    header_table = doc.add_table(rows=2, cols=3)
+    header_table.style = 'Table Grid'
+    
+    cells = [
+        (f"Teacher: {header_fields.get('teacherName', '')}", f"Class: {header_fields.get('className', '')}", f"Grade: {lesson_input.get('gradeLevel', '')}"),
+        (f"Lesson Range: {header_fields.get('lessonRange', '')}", f"Time per Period: {header_fields.get('timePerPeriod', '')} min", f"Next Assessment: {header_fields.get('nextMajorAssessment', '')}")
+    ]
+    
+    for row_idx, row_data in enumerate(cells):
+        for col_idx, cell_text in enumerate(row_data):
+            cell = header_table.rows[row_idx].cells[col_idx]
+            cell.text = cell_text
+            for paragraph in cell.paragraphs:
+                for run in paragraph.runs:
+                    run.font.size = Pt(10)
+    
+    # Pacing info
+    pacing = doc.add_paragraph()
+    pacing.add_run("Pacing: ").bold = True
+    pacing.add_run(f"Intro ({header_fields.get('pacingIntro', '5')}m) → Direct Instruction ({header_fields.get('pacingDirectInstruction', '15')}m) → Guided Practice ({header_fields.get('pacingGuidedPractice', '15')}m) → Independent Practice ({header_fields.get('pacingIndependentPractice', '10')}m) → Closure ({header_fields.get('pacingClosure', '5')}m)")
+    
+    doc.add_paragraph()  # Spacer
+    
+    # Section labels
+    section_labels = {
+        'learnerOutcomes': 'Learner Outcomes/Objectives',
+        'standards': 'Standards',
+        'anticipatorySet': 'Anticipatory Set',
+        'teachingTheLesson': 'Teaching the Lesson',
+        'modeling': 'Modeling',
+        'instructionalStrategies': 'Instructional Strategies',
+        'checksForUnderstanding': 'Checks for Understanding',
+        'guidedPractice': 'Guided Practice',
+        'independentPractice': 'Independent Practice',
+        'closure': 'Closure',
+        'formativeAssessment': 'Formative Assessment',
+        'summativeAssessmentDate': 'Summative Assessment Date',
+        'extendedActivities': 'Extended Activities',
+        'reviewReteachActivities': 'Review/Reteach Activities'
+    }
+    
+    # Each day
+    for day in daily_plans:
+        # Day header
+        day_heading = doc.add_heading(f"Day {day.get('dayNumber', '')}", level=1)
+        
+        date_para = doc.add_paragraph()
+        date_run = date_para.add_run(day.get('date', ''))
+        date_run.italic = True
+        date_run.font.size = Pt(11)
+        
+        # Each section
+        for section_key, section_label in section_labels.items():
+            content = day.get(section_key, '')
+            if not content:
+                continue
+                
+            # Section label
+            section_para = doc.add_paragraph()
+            label_run = section_para.add_run(f"{section_label}: ")
+            label_run.bold = True
+            label_run.font.size = Pt(11)
+            
+            # Content - handle string conversion
+            content_str = str(content) if not isinstance(content, str) else content
+            
+            # Handle bold markers **text**
+            import re
+            parts = re.split(r'(\*\*.*?\*\*)', content_str)
+            for part in parts:
+                if part.startswith('**') and part.endswith('**'):
+                    bold_run = section_para.add_run(part[2:-2])
+                    bold_run.bold = True
+                    bold_run.font.size = Pt(11)
+                else:
+                    normal_run = section_para.add_run(part)
+                    normal_run.font.size = Pt(11)
+        
+        # Add page break between days (except last)
+        if day != daily_plans[-1]:
+            doc.add_page_break()
+    
+    # Save to bytes
+    file_stream = io.BytesIO()
+    doc.save(file_stream)
+    file_stream.seek(0)
+    
+    filename = f"Lesson_Plan_{lesson_input.get('topic', 'Untitled').replace(' ', '_')}_{lesson_input.get('startDate', '')}.docx"
+    
+    return StreamingResponse(
+        file_stream,
+        media_type="application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+        headers={"Content-Disposition": f"attachment; filename={filename}"}
+    )
+
+
 # ----- Multiple Choice Testing Routes -----
 
 @api_router.post("/mc-questions")
