@@ -1004,8 +1004,16 @@ class GenerateLessonPlanRequest(BaseModel):
     gradeLevel: str = "7th Grade"
     startDate: str = ""
     numberOfDays: int = 5
+    # Problem filtering
+    problemUnit: str = ""
+    problemChapter: str = ""
 
 class SaveLessonPlanRequest(BaseModel):
+    headerFields: dict
+    lessonInput: dict
+    dailyPlans: List[dict]
+
+class ExportLessonPlanRequest(BaseModel):
     headerFields: dict
     lessonInput: dict
     dailyPlans: List[dict]
