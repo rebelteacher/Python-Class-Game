@@ -591,6 +591,41 @@ ISTE 1.1.c - Students use technology to seek feedback..."
                     />
                   </div>
                 </div>
+                
+                {/* Problem Source Filter */}
+                <Separator className="my-2" />
+                <div className="bg-green-50 border border-green-200 rounded-lg p-3">
+                  <Label className="text-green-800 font-semibold text-sm flex items-center gap-2 mb-2">
+                    <ListChecks className="w-4 h-4" />
+                    Pull Problems From (Optional)
+                  </Label>
+                  <div className="grid grid-cols-2 gap-2">
+                    <div>
+                      <Label htmlFor="problemUnit" className="text-xs text-green-700">Unit</Label>
+                      <Input
+                        id="problemUnit"
+                        value={lessonInput.problemUnit}
+                        onChange={(e) => setLessonInput({ ...lessonInput, problemUnit: e.target.value })}
+                        placeholder="e.g., Unit 2: Turtle Graphics"
+                        className="mt-1 bg-white text-sm"
+                      />
+                    </div>
+                    <div>
+                      <Label htmlFor="problemChapter" className="text-xs text-green-700">Chapter</Label>
+                      <Input
+                        id="problemChapter"
+                        value={lessonInput.problemChapter}
+                        onChange={(e) => setLessonInput({ ...lessonInput, problemChapter: e.target.value })}
+                        placeholder="e.g., Chapter 3: Colors"
+                        className="mt-1 bg-white text-sm"
+                      />
+                    </div>
+                  </div>
+                  <p className="text-xs text-green-600 mt-1">
+                    Only pull practice problems from this specific unit/chapter
+                  </p>
+                </div>
+                
                 <Button 
                   onClick={generateLessonPlan} 
                   disabled={isGenerating}
