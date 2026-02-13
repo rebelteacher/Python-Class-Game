@@ -7195,6 +7195,15 @@ async def generate_lesson_plan(req: GenerateLessonPlanRequest, request: Request)
             problems_context += f"{i}. \"{prob['title']}\" (ID: {prob['id']}) - {prob['chapter']} {prob['lesson']}\n"
         problems_context += "\nFor guidedPractice and independentPractice sections, SUGGEST specific problems from this list by including their titles and IDs. Format as: \"Use app problem: [Problem Title] (ID: xxx)\" so teachers can easily assign them."
     
+    # Add teacher-provided standards and objectives
+    standards_context = ""
+    if req.standards:
+        standards_context = f"\n\n**TEACHER-PROVIDED STANDARDS (USE THESE):**\n{req.standards}\n\nYou MUST incorporate these specific standards into the 'standards' field for each day."
+    
+    objectives_context = ""
+    if req.objectives:
+        objectives_context = f"\n\n**TEACHER-PROVIDED LEARNING OBJECTIVES (USE THESE):**\n{req.objectives}\n\nYou MUST align each day's 'learnerOutcomes' with these specific objectives."
+    
     # Generate all days in a single prompt for efficiency
     prompt = f"""You are an expert K-12 curriculum designer. Create a detailed multi-day lesson plan for:
 
@@ -7207,13 +7216,15 @@ async def generate_lesson_plan(req: GenerateLessonPlanRequest, request: Request)
 **Lesson Range:** {req.lessonRange}
 **Number of Days:** {req.numberOfDays}
 **Dates:** {', '.join(dates)}
+{standards_context}
+{objectives_context}
 {problems_context}
 
 Create a lesson plan for EACH of the {req.numberOfDays} days. For key questions, make them **bold**.
 
 For EACH DAY, provide these sections:
-- learnerOutcomes: "By the end of the lesson, students will be able to:" + 2-3 specific objectives
-- standards: Relevant state/national standards
+- learnerOutcomes: "By the end of the lesson, students will be able to:" + 2-3 specific objectives{' (MUST align with teacher-provided objectives above)' if req.objectives else ''}
+- standards: Relevant standards{' (MUST use teacher-provided standards above)' if req.standards else ''}
 - anticipatorySet: Hook activity with **bold question**
 - teachingTheLesson: Main instruction with **bold questions**
 - modeling: How teacher demonstrates concepts
