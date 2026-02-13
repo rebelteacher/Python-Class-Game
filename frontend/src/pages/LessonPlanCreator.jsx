@@ -63,10 +63,12 @@ export default function LessonPlanCreator({ user }) {
 
   // Generated lesson plans
   const [generatedPlans, setGeneratedPlans] = useState([]);
+  const [availableProblems, setAvailableProblems] = useState([]);
   const [isGenerating, setIsGenerating] = useState(false);
   const [savedPlans, setSavedPlans] = useState([]);
   const [expandedDays, setExpandedDays] = useState({});
   const [editingSection, setEditingSection] = useState(null);
+  const [showProblemsPanel, setShowProblemsPanel] = useState(false);
 
   // Load saved header fields from localStorage
   useEffect(() => {
