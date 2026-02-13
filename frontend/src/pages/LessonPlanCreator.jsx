@@ -78,20 +78,35 @@ export default function LessonPlanCreator({ user }) {
   const [editingSection, setEditingSection] = useState(null);
   const [showProblemsPanel, setShowProblemsPanel] = useState(false);
   const [isExporting, setIsExporting] = useState(false);
+  
+  // Curriculum structure for dropdowns
+  const [curriculumStructure, setCurriculumStructure] = useState({ units: [], chapters: [] });
 
-  // Load saved header fields from localStorage
+  // Load saved header fields from localStorage and fetch curriculum structure
   useEffect(() => {
     const savedHeader = localStorage.getItem('lessonPlanHeader');
     if (savedHeader) {
       setHeaderFields(JSON.parse(savedHeader));
     }
     fetchSavedPlans();
+    fetchCurriculumStructure();
   }, []);
 
   // Save header fields to localStorage when changed
   useEffect(() => {
     localStorage.setItem('lessonPlanHeader', JSON.stringify(headerFields));
   }, [headerFields]);
+
+  const fetchCurriculumStructure = async () => {
+    try {
+      const response = await axios.get(`${API}/curriculum-structure`, {
+        withCredentials: true
+      });
+      setCurriculumStructure(response.data);
+    } catch (error) {
+      console.error("Error fetching curriculum structure:", error);
+    }
+  };
 
   const fetchSavedPlans = async () => {
     try {
