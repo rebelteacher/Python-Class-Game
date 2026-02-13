@@ -491,8 +491,6 @@ function parseCode(code, parentVars = {}) {
           lastBodyLine = j;
         }
         
-        console.log(`🔄 Loop body collected: ${loopBody.length} lines:`, loopBody.map(b => b.code.substring(0, 30)));
-        
         // Expand loop - execute body for each iteration
         for (let i = 0; i < iterations; i++) {
           const loopVars = { ...variables, [loopVar]: i };
