@@ -515,13 +515,10 @@ function parseCode(code, parentVars = {}) {
         }
         
         // Expand loop - execute body for each iteration
-        console.log('🐢 Loop expansion: iterations=', iterations, 'body lines=', loopBody.length, 'variables at start:', Object.keys(variables), 'colors=', variables.colors);
         for (let i = 0; i < iterations; i++) {
           const loopVars = { ...variables, [loopVar]: i };
-          if (i === 0) console.log('🐢 First iteration loopVars:', Object.keys(loopVars), 'colors=', loopVars.colors);
           for (const bodyCmd of loopBody) {
             const parsed = parseCode(bodyCmd.code, loopVars);
-            if (i === 0) console.log('🐢 Iteration 0, parsed', bodyCmd.code.substring(0, 30), '->', parsed.length, 'commands');
             for (const p of parsed) {
               p.line = bodyCmd.lineNum;
               commands.push(p);
