@@ -5,7 +5,7 @@ import json
 
 class TurtleProblemsTest:
     def __init__(self):
-        self.base_url = "https://lesson-builder-pro.preview.emergentagent.com"
+        self.base_url = "https://turtle-fix-preview.preview.emergentagent.com"
         self.api_url = f"{self.base_url}/api"
         self.session_token = None
         self.tests_run = 0

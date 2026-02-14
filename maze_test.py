@@ -5,7 +5,7 @@ import json
 import sys
 
 class MazeChallengeTester:
-    def __init__(self, base_url="https://lesson-builder-pro.preview.emergentagent.com"):
+    def __init__(self, base_url="https://turtle-fix-preview.preview.emergentagent.com"):
         self.base_url = base_url
         self.api_url = f"{base_url}/api"
         self.session_token = None
