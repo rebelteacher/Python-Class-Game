@@ -40,6 +40,7 @@ A coding education platform for K-12 students featuring multiple programming env
 - Grid toggle and coordinate hover display
 - Code line highlighting during animation
 - **List variable support** (Feb 2025): `colors = ["red", "blue"]` with `pencolor(colors[i])` and modulo cycling
+- **Multi-line list support** (Feb 2025): Parser now handles lists spanning multiple lines with inline comments
 - Support for: forward, backward, left, right, goto, circle (with extent), penup, pendown, color, pencolor, fillcolor, home, write, hideturtle, showturtle, etc.
 
 ### Turtle Blocks (Unit 1) - UPDATED Feb 2025
