@@ -314,10 +314,14 @@ function parseCode(code, parentVars = {}) {
     // Parse color() - changes both pen and turtle color (with variable support)
     match = trimmed.match(new RegExp(`${turtlePrefix}color\\s*\\(\\s*([^,)]+)(?:\\s*,\\s*([^)]+))?\\s*\\)`));
     if (match) {
+      console.log('🐢 Color match found:', match[1], '| variables:', Object.keys(variables), '| colors in vars:', variables.colors ? 'YES' : 'NO');
       const penColor = getColorValue(match[1]);
+      console.log('🐢 Resolved penColor:', penColor);
       const fillColor = match[2] ? getColorValue(match[2]) : penColor;
       if (penColor) {
         commands.push({ type: 'color', penColor, fillColor: fillColor || penColor, line: lineNum });
+      } else {
+        console.log('🐢 WARNING: penColor is null, skipping color command');
       }
       continue;
     }
