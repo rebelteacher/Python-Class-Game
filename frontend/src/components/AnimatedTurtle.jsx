@@ -236,7 +236,30 @@ function parseCode(code, parentVars = {}) {
     let match = trimmed.match(/^(\w+)\s*=\s*(.+)$/);
     if (match && !trimmed.includes('turtle') && !trimmed.includes('Turtle')) {
       const varName = match[1];
-      const varExpr = match[2].trim();
+      let varExpr = match[2].trim();
+      
+      // Handle multi-line list definitions: colors = ["red", "blue",
+      //                                               "green"]
+      if (varExpr.includes('[') && !varExpr.includes(']')) {
+        // List starts but doesn't close on this line - collect continuation lines
+        for (let j = lineNum + 1; j < lines.length; j++) {
+          // Strip inline comments from continuation lines
+          let contLine = lines[j].split('#')[0].trim();
+          varExpr += ' ' + contLine;
+          if (contLine.includes(']')) {
+            lineNum = j; // Skip past the continuation lines
+            break;
+          }
+        }
+      }
+      
+      // Strip any inline comments from the final expression
+      // Be careful not to strip # inside string literals
+      // Simple approach: if ] exists, trim everything after the first ] that's not inside quotes
+      if (varExpr.includes(']')) {
+        const closeBracketIdx = varExpr.indexOf(']');
+        varExpr = varExpr.substring(0, closeBracketIdx + 1);
+      }
       
       // Try to parse as a list first
       const listValue = parseListLiteral(varExpr);
