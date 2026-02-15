@@ -76,11 +76,14 @@ class TurtleSim:
         self.y = new_y
         self.positions_visited.append((self.x, self.y))
         # Track in turtle coordinates (0,0 at center, Y-up)
-        # Internal coords: Y increases when turtle moves up (heading=90)
         turtle_x = self.x - self.width / 2
         turtle_y = self.y - self.height / 2
         self.path_history.append({"x": round(turtle_x, 2), "y": round(turtle_y, 2)})
         self.total_distance += abs(distance)
+        
+        # Track fill points
+        if self.is_filling:
+            self.fill_points.append(self._to_canvas_coords(self.x, self.y))
     
     def backward(self, distance: float):
         """Move turtle backward by distance"""
