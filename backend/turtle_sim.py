@@ -181,13 +181,19 @@ class TurtleSim:
         self.pen_color = color
         self.colors_used.add(color)
     
+    def fillcolor(self, color: str):
+        """Set fill color"""
+        self.commands_used.append(f"fillcolor('{color}')")
+        self.fill_color = color
+        self.colors_used.add(color)
+    
     def color(self, *args):
         """Set pen color (and fill color if two args)"""
         if len(args) == 1:
             self.pencolor(args[0])
         elif len(args) == 2:
             self.pencolor(args[0])
-            # Fill color would go here
+            self.fillcolor(args[1])
     
     def speed(self, speed: int):
         """Set turtle speed (ignored in simulation)"""
