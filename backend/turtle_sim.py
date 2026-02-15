@@ -507,6 +507,9 @@ class Turtle:
     def pencolor(self, color: str):
         self.sim.pencolor(color)
     
+    def fillcolor(self, color: str):
+        self.sim.fillcolor(color)
+    
     def color(self, *args):
         self.sim.color(*args)
     
