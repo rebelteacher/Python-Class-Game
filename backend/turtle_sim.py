@@ -216,12 +216,19 @@ class TurtleSim:
         self.is_visible = True
     
     def begin_fill(self):
-        """Begin filling shape (not fully implemented)"""
+        """Begin filling shape"""
         self.commands_used.append("begin_fill()")
+        self.is_filling = True
+        self.fill_points = [self._to_canvas_coords(self.x, self.y)]
     
     def end_fill(self):
-        """End filling shape (not fully implemented)"""
+        """End filling shape and draw the filled polygon"""
         self.commands_used.append("end_fill()")
+        if self.is_filling and len(self.fill_points) >= 3:
+            # Draw filled polygon
+            self.draw.polygon(self.fill_points, fill=self.fill_color, outline=self.pen_color)
+        self.is_filling = False
+        self.fill_points = []
     
     def width(self, width: int):
         """Alias for pensize"""
