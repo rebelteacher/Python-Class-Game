@@ -43,6 +43,10 @@ class TurtleSim:
         self.total_distance = 0
         self.colors_used = {self.pen_color}
         
+        # Fill tracking
+        self.is_filling = False
+        self.fill_points = []
+        
     def _to_canvas_coords(self, x: float, y: float) -> Tuple[int, int]:
         """Convert turtle coordinates to canvas coordinates"""
         # Turtle: (0,0) at center, Y-up
