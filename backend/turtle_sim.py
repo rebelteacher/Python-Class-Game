@@ -29,6 +29,7 @@ class TurtleSim:
         self._heading = 90  # Degrees (0=right, 90=up, 180=left, 270=down)
         self.pen_down = True
         self.pen_color = "black"
+        self.fill_color = "black"
         self.pen_width = 3  # Thicker default for visibility
         self._speed = 3
         self.is_visible = True
