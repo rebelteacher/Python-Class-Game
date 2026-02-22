@@ -28,11 +28,11 @@ print('User ID: ' + userId);
 ## Step 2: Test Backend API
 ```bash
 # Test auth endpoint
-curl -X GET "https://turtle-fix-preview.preview.emergentagent.com/api/auth/me" \
+curl -X GET "https://fill-feature-stage.preview.emergentagent.com/api/auth/me" \
   -H "Authorization: Bearer YOUR_SESSION_TOKEN"
 
 # Test protected endpoints
-curl -X GET "https://turtle-fix-preview.preview.emergentagent.com/api/classrooms" \
+curl -X GET "https://fill-feature-stage.preview.emergentagent.com/api/classrooms" \
   -H "Authorization: Bearer YOUR_SESSION_TOKEN"
 ```
 
