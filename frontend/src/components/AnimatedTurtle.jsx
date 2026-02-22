@@ -998,7 +998,9 @@ const AnimatedTurtle = forwardRef(function AnimatedTurtle({
           ctx.lineTo(pt.x, pt.y);
         }
         ctx.closePath();
-        ctx.fill();
+        // Use 'nonzero' fill rule to fill self-intersecting shapes (like stars) completely
+        // This matches Python turtle's default fill behavior
+        ctx.fill('nonzero');
       }
     }
     
