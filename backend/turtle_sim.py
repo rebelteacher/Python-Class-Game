@@ -232,10 +232,74 @@ class TurtleSim:
         """End filling shape and draw the filled polygon"""
         self.commands_used.append("end_fill()")
         if self.is_filling and len(self.fill_points) >= 3:
-            # Draw filled polygon
-            self.draw.polygon(self.fill_points, fill=self.fill_color, outline=self.pen_color)
+            # Draw filled polygon with nonzero winding rule support
+            # Pillow's default polygon fill uses even-odd rule which leaves centers of 
+            # self-intersecting shapes (like stars) unfilled. To match Python turtle's
+            # behavior, we need to fill the inner regions separately.
+            self._fill_polygon_nonzero(self.fill_points)
         self.is_filling = False
         self.fill_points = []
+    
+    def _line_intersection(self, p1, p2, p3, p4):
+        """Find intersection point of line segment p1-p2 and p3-p4"""
+        x1, y1 = p1
+        x2, y2 = p2
+        x3, y3 = p3
+        x4, y4 = p4
+        
+        denom = (x1-x2)*(y3-y4) - (y1-y2)*(x3-x4)
+        if abs(denom) < 0.001:
+            return None
+        
+        t = ((x1-x3)*(y3-y4) - (y1-y3)*(x3-x4)) / denom
+        # Check if intersection is within the line segments
+        if t < 0.01 or t > 0.99:
+            return None
+            
+        s = -((x1-x2)*(y1-y3) - (y1-y2)*(x1-x3)) / denom
+        if s < 0.01 or s > 0.99:
+            return None
+        
+        x = x1 + t*(x2-x1)
+        y = y1 + t*(y2-y1)
+        return (x, y)
+    
+    def _fill_polygon_nonzero(self, points):
+        """Fill a polygon using nonzero winding rule (matches Python turtle behavior)"""
+        # First, draw the main polygon outline
+        self.draw.polygon(points, fill=self.fill_color, outline=self.pen_color)
+        
+        # For self-intersecting polygons (like stars), find and fill inner regions
+        # Check if polygon is self-intersecting by looking for edge intersections
+        n = len(points)
+        if n < 5:
+            return  # Simple polygons don't need special handling
+        
+        # Build list of edges
+        edges = [(points[i], points[(i+1) % n]) for i in range(n)]
+        
+        # Find all internal intersection points
+        inner_points = []
+        for i in range(n):
+            for j in range(i + 2, n):
+                # Don't check adjacent edges or the wrap-around
+                if j == (i + n - 1) % n:
+                    continue
+                p1, p2 = edges[i]
+                p3, p4 = edges[j]
+                intersection = self._line_intersection(p1, p2, p3, p4)
+                if intersection:
+                    inner_points.append(intersection)
+        
+        # If we found inner intersection points, they form inner polygon(s) to fill
+        if len(inner_points) >= 3:
+            # Sort points by angle from centroid to form a proper polygon
+            if inner_points:
+                cx = sum(p[0] for p in inner_points) / len(inner_points)
+                cy = sum(p[1] for p in inner_points) / len(inner_points)
+                inner_points.sort(key=lambda p: math.atan2(p[1] - cy, p[0] - cx))
+                # Fill the inner polygon
+                self.draw.polygon(inner_points, fill=self.fill_color)
     
     def width(self, width: int):
         """Alias for pensize"""
