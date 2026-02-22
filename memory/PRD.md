@@ -115,6 +115,12 @@ Teachers can now create "Block" type assignments using drag-and-drop Blockly edi
 ## Roadmap
 
 ### Completed (Feb 2025)
+- [x] **Turtle Fill Bug Fix** (Feb 22, 2025) - Fixed self-intersecting polygon fill for shapes like 5-pointed stars:
+  - Backend `turtle_sim.py`: Added `_fill_polygon_nonzero()` method that calculates inner intersection points and fills them separately to match Python turtle's nonzero winding rule behavior
+  - Frontend `AnimatedTurtle.jsx`: Updated to use `ctx.fill('nonzero')` for canvas rendering
+  - Stars, pentagrams, and other self-intersecting shapes now fill completely including the center
+- [x] **fillcolor() Command Support** (Feb 22, 2025) - Added `fillcolor()` method to turtle simulator for setting fill color
+- [x] **begin_fill()/end_fill() Support** (Feb 22, 2025) - Implemented fill tracking and polygon rendering
 - [x] **Lesson Plan Generator** (Feb 13, 2025) - AI-powered lesson plan creator for teachers:
   - Editable header fields saved to localStorage (School Name, Teacher Name, Class Name, Lesson Range, Pacing times, Next Major Assessment)
   - **Standards & Objectives Input**: Teachers can paste their specific standards (CCSS, ISTE, etc.) and learning objectives - AI incorporates them into generated lessons
