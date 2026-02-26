@@ -495,41 +495,47 @@ function parseCode(code, parentVars = {}) {
       
       if (iterations !== null && iterations > 0) {
         const loopIndent = line.search(/\S/);
-        const loopBody = [];
+        const loopBodyLines = [];
         let lastBodyLine = lineNum;
         
-        // Collect loop body lines
+        // Collect loop body lines (preserve multi-line structure for nested loops)
         for (let j = lineNum + 1; j < lines.length; j++) {
           const bodyLine = lines[j];
           const trimmedBody = bodyLine.trim();
           
-          // Skip empty lines
+          // Skip empty lines but include them in body
           if (trimmedBody === '') {
+            loopBodyLines.push('');
             lastBodyLine = j;
             continue;
           }
           
-          // Skip comment-only lines (but still track them for lastBodyLine)
+          // Skip comment-only lines
           if (trimmedBody.startsWith('#')) {
+            loopBodyLines.push(bodyLine);
             lastBodyLine = j;
             continue;
           }
           
           const bodyIndent = bodyLine.search(/\S/);
           if (bodyIndent <= loopIndent) break;
-          loopBody.push({ code: trimmedBody, lineNum: j });
+          
+          // Remove the outer loop's indentation level to create valid nested code
+          const dedentedLine = bodyLine.substring(loopIndent + 4); // Remove one indent level
+          loopBodyLines.push(dedentedLine);
           lastBodyLine = j;
         }
+        
+        // Join body lines back together to preserve nested loop structure
+        const loopBodyCode = loopBodyLines.join('\n');
         
         // Expand loop - execute body for each iteration
         for (let i = 0; i < iterations; i++) {
           const loopVars = { ...variables, [loopVar]: i };
-          for (const bodyCmd of loopBody) {
-            const parsed = parseCode(bodyCmd.code, loopVars);
-            for (const p of parsed) {
-              p.line = bodyCmd.lineNum;
-              commands.push(p);
-            }
+          // Parse the entire loop body as a block (handles nested loops correctly)
+          const parsed = parseCode(loopBodyCode, loopVars);
+          for (const p of parsed) {
+            commands.push(p);
           }
         }
         
