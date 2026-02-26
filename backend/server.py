@@ -2457,6 +2457,7 @@ try:
         def pendown(self): self._sim.pendown()
         def pensize(self, w): self._sim.pensize(w)
         def pencolor(self, c): self._sim.pencolor(c)
+        def fillcolor(self, c): self._sim.fillcolor(c)
         def color(self, *args): self._sim.color(*args)
         def speed(self, s): self._sim.speed(s)
         def hideturtle(self): self._sim.hideturtle()
