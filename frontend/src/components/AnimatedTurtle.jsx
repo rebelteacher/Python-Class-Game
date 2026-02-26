@@ -540,8 +540,8 @@ function parseCode(code, parentVars = {}) {
         const loopBodyCode = loopBodyLines.join('\n');
         
         // Expand loop - execute body for each iteration
-        for (let i = 0; i < iterations; i++) {
-          const loopVars = { ...variables, [loopVar]: i };
+        for (let iter = 0; iter < iterations; iter++) {
+          const loopVars = { ...variables, [loopVar]: iter };
           // Parse the entire loop body as a block (handles nested loops correctly)
           const parsed = parseCode(loopBodyCode, loopVars);
           for (const p of parsed) {
