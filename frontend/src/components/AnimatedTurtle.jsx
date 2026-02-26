@@ -1300,6 +1300,13 @@ const AnimatedTurtle = forwardRef(function AnimatedTurtle({
           resolve();
           break;
         }
+        
+        case 'bgcolor':
+          setCanvasBgColor(cmd.value);
+          // Force immediate redraw with new background
+          setTimeout(() => drawCanvas(), 0);
+          resolve();
+          break;
           
         default:
           resolve();
