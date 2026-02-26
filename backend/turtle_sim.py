@@ -526,7 +526,9 @@ class Screen:
     
     def bgcolor(self, color: str):
         """Set background color"""
-        pass
+        self.turtle_sim.bg_color = color
+        # Redraw the background
+        self.turtle_sim.draw.rectangle([0, 0, self.turtle_sim.width, self.turtle_sim.height], fill=color)
     
     def update(self):
         """Update screen (no-op in simulation)"""
