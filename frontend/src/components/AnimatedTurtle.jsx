@@ -1031,7 +1031,7 @@ const AnimatedTurtle = forwardRef(function AnimatedTurtle({
     if (turtle.visible) {
       drawTurtle(ctx, turtle.x, turtle.y, turtle.heading, turtle.turtleColor);
     }
-  }, [width, height, toCanvasCoords, drawTurtle, backgroundColor, backgroundType, drawGrid, drawMaze, drawRaceway, drawGoals, goals, checkpoints, showGrid]);
+  }, [width, height, toCanvasCoords, drawTurtle, backgroundColor, canvasBgColor, backgroundType, drawGrid, drawMaze, drawRaceway, drawGoals, goals, checkpoints, showGrid]);
   
   // Reset turtle
   const resetTurtle = useCallback(() => {
