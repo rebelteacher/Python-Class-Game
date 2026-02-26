@@ -180,11 +180,6 @@ function parseCode(code, parentVars = {}) {
   const lines = code.split('\n');
   const variables = { ...parentVars };
   
-  // DEBUG: Log when parseCode is called
-  if (Object.keys(parentVars).length > 0) {
-    console.log('[parseCode] Called with vars:', JSON.stringify(parentVars));
-  }
-  
   // Detect turtle variable name (e.g., bob = turtle.Turtle())
   const turtleNameMatch = code.match(/(\w+)\s*=\s*(?:turtle\.)?Turtle\(\)/);
   const turtleName = turtleNameMatch ? turtleNameMatch[1] : 't';
