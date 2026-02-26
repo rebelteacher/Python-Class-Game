@@ -1210,6 +1210,11 @@ const AnimatedTurtle = forwardRef(function AnimatedTurtle({
               });
             }
             
+            // Track fill points for circle (important for filled circles!)
+            if (turtle.filling) {
+              turtle.fillPath.push({ x: newX, y: newY });
+            }
+            
             turtle.x = newX;
             turtle.y = newY;
             drawCanvas();
