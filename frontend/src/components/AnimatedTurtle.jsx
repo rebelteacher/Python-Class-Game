@@ -590,6 +590,7 @@ const AnimatedTurtle = forwardRef(function AnimatedTurtle({
   const [pathLength, setPathLength] = useState(0);
   const [showGrid, setShowGrid] = useState(false); // Grid toggle state
   const [mouseCoords, setMouseCoords] = useState(null); // For hover coordinate display
+  const [canvasBgColor, setCanvasBgColor] = useState(backgroundColor); // Dynamic background color from code
   
   const turtleRef = useRef(getInitialTurtleState());
   const pathsRef = useRef([]);
