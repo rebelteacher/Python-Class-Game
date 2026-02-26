@@ -280,9 +280,11 @@ function parseCode(code, parentVars = {}) {
     const getNumericValue = (str) => {
       if (!str) return null;
       str = str.trim();
-      // Try as number first
-      const num = parseFloat(str);
-      if (!isNaN(num)) return num;
+      // Only try parseFloat if the string is purely a number (no expressions)
+      // This prevents "10 + i * 10" from being parsed as just "10"
+      if (/^-?\d+\.?\d*$/.test(str)) {
+        return parseFloat(str);
+      }
       // Try as variable or expression
       return evaluateExpression(str, variables);
     };
