@@ -1041,12 +1041,13 @@ const AnimatedTurtle = forwardRef(function AnimatedTurtle({
     setGoalsReached(new Set());
     setCollisionCount(0);
     setPathLength(0);
+    setCanvasBgColor(backgroundColor); // Reset background color
     
     turtleRef.current = getInitialTurtleState();
     pathsRef.current = [];
     drawCanvas();
     if (onLineHighlight) onLineHighlight(-1);
-  }, [drawCanvas, onLineHighlight]);
+  }, [drawCanvas, onLineHighlight, backgroundColor]);
   
   // Initial draw
   useEffect(() => {
