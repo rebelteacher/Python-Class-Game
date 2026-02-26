@@ -479,6 +479,13 @@ function parseCode(code, parentVars = {}) {
       continue;
     }
     
+    // Parse bgcolor - screen.bgcolor("color") or turtle.bgcolor("color")
+    match = trimmed.match(/(?:screen|turtle)?\.?bgcolor\s*\(\s*['"]([^'"]+)['"]\s*\)/);
+    if (match) {
+      commands.push({ type: 'bgcolor', value: match[1], line: lineNum });
+      continue;
+    }
+    
     // Parse for loop with variable or literal support
     match = trimmed.match(/for\s+(\w+)\s+in\s+range\s*\(\s*([^)]+)\s*\)\s*:/);
     if (match) {
