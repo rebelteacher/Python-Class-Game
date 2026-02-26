@@ -963,8 +963,8 @@ const AnimatedTurtle = forwardRef(function AnimatedTurtle({
     
     const ctx = canvas.getContext('2d');
     
-    // Draw background color
-    ctx.fillStyle = backgroundColor;
+    // Draw background color (use dynamic canvasBgColor if set, otherwise prop)
+    ctx.fillStyle = canvasBgColor || backgroundColor;
     ctx.fillRect(0, 0, width, height);
     
     // Draw grid if enabled (user toggle or background type)
