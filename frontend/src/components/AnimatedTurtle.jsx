@@ -289,7 +289,12 @@ function parseCode(code, parentVars = {}) {
       const num = parseFloat(str);
       if (!isNaN(num)) return num;
       // Try as variable or expression
-      return evaluateExpression(str, variables);
+      const result = evaluateExpression(str, variables);
+      // DEBUG: Log expression evaluation
+      if (str.includes('+') || str.includes('*')) {
+        console.log(`[getNumericValue] "${str}" with vars=${JSON.stringify(variables)} => ${result}`);
+      }
+      return result;
     };
     
     // Helper to get color value (string literal, variable, or list index)
