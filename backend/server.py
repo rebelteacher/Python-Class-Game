@@ -2818,6 +2818,9 @@ try:
             self._sim.clearstamps(n)
         def write(self, text, move=False, align="left", font=("Arial", 8, "normal")):
             self._sim.write(str(text), move, align, font)
+        def bgcolor(self, color):
+            screen = Screen(self._sim)
+            screen.bgcolor(color)
         def bye(self):
             pass
         fd = forward
