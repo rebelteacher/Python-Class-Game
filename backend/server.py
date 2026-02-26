@@ -2773,6 +2773,8 @@ try:
             self._sim.pensize(w)
         def pencolor(self, c):
             self._sim.pencolor(c)
+        def fillcolor(self, c):
+            self._sim.fillcolor(c)
         def color(self, *args):
             self._sim.color(*args)
         def speed(self, s):
