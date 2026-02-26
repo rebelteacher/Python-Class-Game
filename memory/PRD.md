@@ -122,6 +122,10 @@ Teachers can now create "Block" type assignments using drag-and-drop Blockly edi
 - [x] **Circle Fill Bug Fix** (Feb 22, 2025) - Fixed circles not filling when using `fillcolor()` + `begin_fill()`/`end_fill()`:
   - Backend `server.py`: Added missing `fillcolor()` method to both MockTurtleModule classes in execute endpoints
   - Frontend `AnimatedTurtle.jsx`: Added fill path tracking in the `circle` command so fill points are recorded during circle drawing
+- [x] **Background Color Support** (Feb 22, 2025) - Added `screen.bgcolor("color")` and `turtle.bgcolor("color")` commands:
+  - Backend `turtle_sim.py`: Implemented `bgcolor()` in Screen class to change canvas background
+  - Backend `server.py`: Added `bgcolor()` method to both MockTurtleModule classes
+  - Frontend `AnimatedTurtle.jsx`: Added bgcolor command parsing and execution with dynamic state
 - [x] **fillcolor() Command Support** (Feb 22, 2025) - Added `fillcolor()` method to turtle simulator for setting fill color
 - [x] **begin_fill()/end_fill() Support** (Feb 22, 2025) - Implemented fill tracking and polygon rendering
 - [x] **Lesson Plan Generator** (Feb 13, 2025) - AI-powered lesson plan creator for teachers:
