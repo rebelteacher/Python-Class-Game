@@ -597,10 +597,19 @@ function parseCode(code, parentVars = {}) {
       const ifCommands = ifBodyCode ? parseCode(ifBodyCode, variables) : [];
       const elseCommands = elseBodyCode ? parseCode(elseBodyCode, variables) : [];
       
+      // Substitute known variables (like loop counters) into the condition
+      // This allows conditions like "if i % 2 == 0:" to work
+      let processedCondition = condition;
+      for (const [name, value] of Object.entries(variables)) {
+        if (typeof value === 'number') {
+          processedCondition = processedCondition.replace(new RegExp(`\\b${name}\\b`, 'g'), value.toString());
+        }
+      }
+      
       // Create a conditional command that will be evaluated at runtime
       commands.push({
         type: 'conditional',
-        condition: condition,
+        condition: processedCondition,
         ifCommands: ifCommands,
         elseCommands: elseCommands,
         line: lineNum
