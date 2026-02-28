@@ -1409,18 +1409,21 @@ const AnimatedTurtle = forwardRef(function AnimatedTurtle({
           const commandsToRun = conditionResult ? cmd.ifCommands : cmd.elseCommands;
           
           // Execute the appropriate branch's commands sequentially
-          const executeSequentially = async (cmds) => {
-            for (const subCmd of cmds) {
-              if (!playingRef.current) break;
-              await executeCommand(subCmd, true);
+          const executeSequentially = (cmds, index = 0) => {
+            if (index >= cmds.length || !playingRef.current) {
+              resolve();
+              return;
             }
+            executeCommand(cmds[index], true).then(() => {
+              executeSequentially(cmds, index + 1);
+            });
           };
           
           if (commandsToRun && commandsToRun.length > 0) {
-            await executeSequentially(commandsToRun);
+            executeSequentially(commandsToRun);
+          } else {
+            resolve();
           }
-          
-          resolve();
           break;
         }
         
