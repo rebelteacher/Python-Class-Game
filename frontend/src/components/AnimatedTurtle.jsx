@@ -546,6 +546,69 @@ function parseCode(code, parentVars = {}) {
       }
       continue;
     }
+    
+    // Parse if statements with turtle position conditions (e.g., if t.xcor() > 0:)
+    // This creates conditional commands that are evaluated at runtime
+    match = trimmed.match(/^if\s+(.+)\s*:\s*$/);
+    if (match) {
+      const condition = match[1].trim();
+      const ifIndent = line.search(/\S/);
+      
+      // Collect if body and optional else body
+      const ifBodyLines = [];
+      const elseBodyLines = [];
+      let inElse = false;
+      let lastIfLine = lineNum;
+      
+      for (let j = lineNum + 1; j < lines.length; j++) {
+        const bodyLine = lines[j];
+        const trimmedBody = bodyLine.trim();
+        
+        // Check for else clause at same indentation level
+        if (trimmedBody === 'else:' && bodyLine.search(/\S/) === ifIndent) {
+          inElse = true;
+          lastIfLine = j;
+          continue;
+        }
+        
+        // Skip empty lines
+        if (trimmedBody === '') {
+          lastIfLine = j;
+          continue;
+        }
+        
+        const bodyIndent = bodyLine.search(/\S/);
+        if (bodyIndent <= ifIndent && trimmedBody !== 'else:') break;
+        
+        const dedentedLine = bodyLine.substring(ifIndent + 4);
+        if (inElse) {
+          elseBodyLines.push(dedentedLine);
+        } else {
+          ifBodyLines.push(dedentedLine);
+        }
+        lastIfLine = j;
+      }
+      
+      // Create conditional command with parsed bodies
+      const ifBodyCode = ifBodyLines.join('\n');
+      const elseBodyCode = elseBodyLines.join('\n');
+      
+      // Parse the bodies to get commands
+      const ifCommands = ifBodyCode ? parseCode(ifBodyCode, variables) : [];
+      const elseCommands = elseBodyCode ? parseCode(elseBodyCode, variables) : [];
+      
+      // Create a conditional command that will be evaluated at runtime
+      commands.push({
+        type: 'conditional',
+        condition: condition,
+        ifCommands: ifCommands,
+        elseCommands: elseCommands,
+        line: lineNum
+      });
+      
+      lineNum = lastIfLine;
+      continue;
+    }
   }
   
   return commands;
