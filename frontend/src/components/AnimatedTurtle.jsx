@@ -489,13 +489,31 @@ function parseCode(code, parentVars = {}) {
     }
     
     // Parse for loop with variable or literal support
+    // Supports: range(n), range(start, end), range(start, end, step)
     match = trimmed.match(/for\s+(\w+)\s+in\s+range\s*\(\s*([^)]+)\s*\)\s*:/);
     if (match) {
       const loopVar = match[1];
       const rangeExpr = match[2];
-      const iterations = getNumericValue(rangeExpr);
       
-      if (iterations !== null && iterations > 0) {
+      // Parse range arguments (can be 1, 2, or 3 arguments)
+      const rangeArgs = rangeExpr.split(',').map(arg => getNumericValue(arg.trim()));
+      
+      let start = 0, end = 0, step = 1;
+      if (rangeArgs.length === 1 && rangeArgs[0] !== null) {
+        // range(n) -> 0 to n-1
+        end = rangeArgs[0];
+      } else if (rangeArgs.length === 2 && rangeArgs[0] !== null && rangeArgs[1] !== null) {
+        // range(start, end) -> start to end-1
+        start = rangeArgs[0];
+        end = rangeArgs[1];
+      } else if (rangeArgs.length === 3 && rangeArgs[0] !== null && rangeArgs[1] !== null && rangeArgs[2] !== null) {
+        // range(start, end, step)
+        start = rangeArgs[0];
+        end = rangeArgs[1];
+        step = rangeArgs[2];
+      }
+      
+      if (step !== 0 && ((step > 0 && start < end) || (step < 0 && start > end))) {
         const loopIndent = line.search(/\S/);
         const loopBodyLines = [];
         let lastBodyLine = lineNum;
@@ -532,7 +550,7 @@ function parseCode(code, parentVars = {}) {
         const loopBodyCode = loopBodyLines.join('\n');
         
         // Expand loop - execute body for each iteration
-        for (let iter = 0; iter < iterations; iter++) {
+        for (let iter = start; (step > 0 ? iter < end : iter > end); iter += step) {
           const loopVars = { ...variables, [loopVar]: iter };
           // Parse the entire loop body as a block (handles nested loops correctly)
           const parsed = parseCode(loopBodyCode, loopVars);
