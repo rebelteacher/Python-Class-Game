@@ -1373,6 +1373,57 @@ const AnimatedTurtle = forwardRef(function AnimatedTurtle({
           break;
         }
         
+        case 'conditional': {
+          // Evaluate condition at runtime using current turtle state
+          const evaluateCondition = (condition) => {
+            // Replace turtle method calls with actual values
+            let evalStr = condition;
+            
+            // Handle t.xcor(), turtle.xcor(), xcor()
+            evalStr = evalStr.replace(/(?:t\.|turtle\.)?xcor\s*\(\s*\)/g, turtle.x.toString());
+            // Handle t.ycor(), turtle.ycor(), ycor()
+            evalStr = evalStr.replace(/(?:t\.|turtle\.)?ycor\s*\(\s*\)/g, turtle.y.toString());
+            // Handle t.heading(), turtle.heading(), heading()
+            evalStr = evalStr.replace(/(?:t\.|turtle\.)?heading\s*\(\s*\)/g, turtle.heading.toString());
+            // Handle t.isdown(), turtle.isdown(), isdown()
+            evalStr = evalStr.replace(/(?:t\.|turtle\.)?isdown\s*\(\s*\)/g, turtle.penDown.toString());
+            // Handle t.isvisible(), turtle.isvisible(), isvisible()
+            evalStr = evalStr.replace(/(?:t\.|turtle\.)?isvisible\s*\(\s*\)/g, turtle.visible.toString());
+            
+            // Now evaluate the condition
+            try {
+              // Only allow safe comparisons
+              if (/^[\d\s.+\-*/<>=!()andortruefalseTrueFalse]+$/.test(evalStr.replace(/\s/g, ''))) {
+                // Convert Python-style operators to JavaScript
+                evalStr = evalStr.replace(/\band\b/g, '&&').replace(/\bor\b/g, '||').replace(/\bnot\b/g, '!');
+                evalStr = evalStr.replace(/\bTrue\b/g, 'true').replace(/\bFalse\b/g, 'false');
+                return new Function(`return ${evalStr}`)();
+              }
+            } catch (e) {
+              console.warn('Condition evaluation failed:', condition, e);
+            }
+            return false;
+          };
+          
+          const conditionResult = evaluateCondition(cmd.condition);
+          const commandsToRun = conditionResult ? cmd.ifCommands : cmd.elseCommands;
+          
+          // Execute the appropriate branch's commands sequentially
+          const executeSequentially = async (cmds) => {
+            for (const subCmd of cmds) {
+              if (!playingRef.current) break;
+              await executeCommand(subCmd, true);
+            }
+          };
+          
+          if (commandsToRun && commandsToRun.length > 0) {
+            await executeSequentially(commandsToRun);
+          }
+          
+          resolve();
+          break;
+        }
+        
         case 'bgcolor':
           setCanvasBgColor(cmd.value);
           // Force immediate redraw with new background
