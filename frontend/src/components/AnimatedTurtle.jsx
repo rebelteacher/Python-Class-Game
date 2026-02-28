@@ -1401,8 +1401,8 @@ const AnimatedTurtle = forwardRef(function AnimatedTurtle({
             
             // Now evaluate the condition
             try {
-              // Only allow safe comparisons
-              if (/^[\d\s.+\-*/<>=!()andortruefalseTrueFalse]+$/.test(evalStr.replace(/\s/g, ''))) {
+              // Only allow safe comparisons (including % for modulus)
+              if (/^[\d\s.+\-*/%<>=!()andortruefalseTrueFalse]+$/.test(evalStr.replace(/\s/g, ''))) {
                 // Convert Python-style operators to JavaScript
                 evalStr = evalStr.replace(/\band\b/g, '&&').replace(/\bor\b/g, '||').replace(/\bnot\b/g, '!');
                 evalStr = evalStr.replace(/\bTrue\b/g, 'true').replace(/\bFalse\b/g, 'false');
