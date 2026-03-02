@@ -148,7 +148,24 @@ export default function TestTaking({ user }) {
       }
     } catch (error) {
       console.error("Error submitting test:", error);
-      toast.error("Failed to submit test");
+      const errorMessage = error.response?.data?.detail || "Failed to submit test";
+      
+      // Handle specific error cases
+      if (error.response?.status === 400 && errorMessage.includes("already been submitted")) {
+        toast.error("This test was already submitted. Refreshing to show your results...");
+        // Refresh to get the submitted state
+        setTimeout(() => {
+          window.location.reload();
+        }, 2000);
+      } else if (error.response?.status === 404 && errorMessage.includes("start the test")) {
+        toast.error("Test session expired. Starting a new attempt...");
+        // Restart the test
+        setTimeout(() => {
+          startTest();
+        }, 1500);
+      } else {
+        toast.error(errorMessage);
+      }
     } finally {
       setSubmitting(false);
     }

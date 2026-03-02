@@ -7995,12 +7995,18 @@ async def start_mc_test(test_id: str, request: Request):
     if existing_attempt:
         # Check if retakes are allowed
         if test.get("allow_retake", False):
-            # Delete old attempt to allow retake
+            # Delete old completed attempt to allow retake
             await db.mc_test_attempts.delete_one({"id": existing_attempt["id"]})
+            # Also delete any incomplete attempts from previous retakes
+            await db.mc_test_attempts.delete_many({
+                "test_id": test_id,
+                "student_id": user["id"],
+                "is_complete": False
+            })
         else:
             raise HTTPException(status_code=400, detail="Test already completed. Retakes are not allowed.")
     
-    # Check for incomplete attempt
+    # Check for incomplete attempt (only if we haven't just cleared them for a retake)
     incomplete_attempt = await db.mc_test_attempts.find_one({
         "test_id": test_id,
         "student_id": user["id"],
@@ -8105,7 +8111,16 @@ async def submit_mc_test(test_id: str, submission: MCTestSubmission, request: Re
     })
     
     if not attempt:
-        raise HTTPException(status_code=404, detail="Test attempt not found or already completed")
+        # Check if there's a completed attempt
+        completed_attempt = await db.mc_test_attempts.find_one({
+            "test_id": test_id,
+            "student_id": user["id"],
+            "is_complete": True
+        })
+        if completed_attempt:
+            raise HTTPException(status_code=400, detail="This test has already been submitted. Please start a new attempt if retakes are allowed.")
+        else:
+            raise HTTPException(status_code=404, detail="Test attempt not found. Please start the test first.")
     
     # Get test settings
     test = await db.mc_tests.find_one({"id": test_id})
