@@ -21,7 +21,9 @@ import {
   BarChart3,
   ChevronDown,
   ChevronRight,
-  Download
+  Download,
+  Send,
+  Calendar
 } from "lucide-react";
 import * as XLSX from "xlsx";
 
@@ -64,6 +66,14 @@ export default function SkillQuizManager({ user }) {
   const [selectedClassroom, setSelectedClassroom] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("");
   const [quizResults, setQuizResults] = useState(null);
+  
+  // Assign quiz state
+  const [showAssignDialog, setShowAssignDialog] = useState(false);
+  const [assignCategory, setAssignCategory] = useState("");
+  const [assignClassroom, setAssignClassroom] = useState("");
+  const [assignTitle, setAssignTitle] = useState("");
+  const [assignDueDate, setAssignDueDate] = useState("");
+  const [assigning, setAssigning] = useState(false);
   
   // New question form
   const [newQuestion, setNewQuestion] = useState({
@@ -197,6 +207,52 @@ export default function SkillQuizManager({ user }) {
     toast.success("Results exported!");
   };
 
+  const handleAssignQuiz = async () => {
+    if (!assignCategory) {
+      toast.error("Please select a skill category");
+      return;
+    }
+    if (!assignClassroom) {
+      toast.error("Please select a classroom");
+      return;
+    }
+    
+    // Check if there are questions for this category
+    const categoryQuestions = questionsByCategory[assignCategory];
+    if (!categoryQuestions || categoryQuestions.length === 0) {
+      toast.error("No questions available for this skill category");
+      return;
+    }
+    
+    setAssigning(true);
+    try {
+      const response = await axios.post(`${API}/skill-quiz/assign`, {
+        skill_category: assignCategory,
+        classroom_id: assignClassroom,
+        title: assignTitle || `${assignCategory} Quiz`,
+        due_date: assignDueDate || null
+      }, { withCredentials: true });
+      
+      toast.success(`Quiz assigned! ${categoryQuestions.length} questions assigned to class.`);
+      setShowAssignDialog(false);
+      setAssignCategory("");
+      setAssignClassroom("");
+      setAssignTitle("");
+      setAssignDueDate("");
+    } catch (error) {
+      console.error("Error assigning quiz:", error);
+      toast.error(error.response?.data?.detail || "Failed to assign quiz");
+    } finally {
+      setAssigning(false);
+    }
+  };
+
+  const openAssignDialog = (category = "") => {
+    setAssignCategory(category);
+    setAssignTitle(category ? `${category} Quiz` : "");
+    setShowAssignDialog(true);
+  };
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-purple-50 to-pink-50">
       {/* Header */}
@@ -247,10 +303,16 @@ export default function SkillQuizManager({ user }) {
                       {questions.length} questions across {Object.keys(questionsByCategory).length} skills
                     </CardDescription>
                   </div>
-                  <Button onClick={() => setShowAddDialog(true)} className="bg-purple-600 hover:bg-purple-700">
-                    <Plus className="w-4 h-4 mr-2" />
-                    Add Question
-                  </Button>
+                  <div className="flex gap-2">
+                    <Button onClick={() => openAssignDialog()} variant="outline" className="border-purple-300 text-purple-600 hover:bg-purple-50">
+                      <Send className="w-4 h-4 mr-2" />
+                      Assign Quiz
+                    </Button>
+                    <Button onClick={() => setShowAddDialog(true)} className="bg-purple-600 hover:bg-purple-700">
+                      <Plus className="w-4 h-4 mr-2" />
+                      Add Question
+                    </Button>
+                  </div>
                 </div>
               </CardHeader>
               <CardContent>
@@ -265,22 +327,34 @@ export default function SkillQuizManager({ user }) {
                   <div className="space-y-2">
                     {Object.entries(questionsByCategory).map(([category, categoryQuestions]) => (
                       <div key={category} className="border rounded-lg overflow-hidden">
-                        <button
-                          onClick={() => toggleCategory(category)}
-                          className="w-full flex items-center justify-between p-4 bg-gray-50 hover:bg-gray-100 transition-colors"
-                        >
-                          <div className="flex items-center gap-3">
+                        <div className="flex items-center justify-between p-4 bg-gray-50 hover:bg-gray-100 transition-colors">
+                          <button
+                            onClick={() => toggleCategory(category)}
+                            className="flex items-center gap-3 flex-1"
+                          >
                             {expandedCategories[category] ? (
                               <ChevronDown className="w-5 h-5 text-gray-500" />
                             ) : (
                               <ChevronRight className="w-5 h-5 text-gray-500" />
                             )}
                             <span className="font-medium">{category}</span>
-                          </div>
-                          <span className="text-sm text-gray-500">
-                            {categoryQuestions.length} questions
-                          </span>
-                        </button>
+                            <span className="text-sm text-gray-500">
+                              ({categoryQuestions.length} questions)
+                            </span>
+                          </button>
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              openAssignDialog(category);
+                            }}
+                            className="border-purple-300 text-purple-600 hover:bg-purple-50"
+                          >
+                            <Send className="w-3 h-3 mr-1" />
+                            Assign
+                          </Button>
+                        </div>
                         
                         {expandedCategories[category] && (
                           <div className="divide-y">
@@ -598,6 +672,102 @@ export default function SkillQuizManager({ user }) {
             </Button>
             <Button onClick={handleAddQuestion} className="bg-purple-600 hover:bg-purple-700">
               Add Question
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Assign Quiz Dialog */}
+      <Dialog open={showAssignDialog} onOpenChange={setShowAssignDialog}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Send className="w-5 h-5 text-purple-600" />
+              Assign Quiz to Class
+            </DialogTitle>
+            <DialogDescription>
+              Assign a skill quiz to your students
+            </DialogDescription>
+          </DialogHeader>
+
+          <div className="space-y-4 py-4">
+            <div>
+              <Label>Skill Category *</Label>
+              <Select value={assignCategory} onValueChange={setAssignCategory}>
+                <SelectTrigger className="mt-1">
+                  <SelectValue placeholder="Select a skill category" />
+                </SelectTrigger>
+                <SelectContent>
+                  {Object.keys(questionsByCategory).map((cat) => (
+                    <SelectItem key={cat} value={cat}>
+                      {cat} ({questionsByCategory[cat].length} questions)
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+
+            <div>
+              <Label>Classroom *</Label>
+              <Select value={assignClassroom} onValueChange={setAssignClassroom}>
+                <SelectTrigger className="mt-1">
+                  <SelectValue placeholder="Select a classroom" />
+                </SelectTrigger>
+                <SelectContent>
+                  {classrooms.map((c) => (
+                    <SelectItem key={c.id} value={c.id}>
+                      {c.name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+
+            <div>
+              <Label>Quiz Title</Label>
+              <Input
+                value={assignTitle}
+                onChange={(e) => setAssignTitle(e.target.value)}
+                placeholder="e.g., Loops Practice Quiz"
+                className="mt-1"
+              />
+            </div>
+
+            <div>
+              <Label className="flex items-center gap-2">
+                <Calendar className="w-4 h-4" />
+                Due Date (optional)
+              </Label>
+              <Input
+                type="date"
+                value={assignDueDate}
+                onChange={(e) => setAssignDueDate(e.target.value)}
+                className="mt-1"
+              />
+            </div>
+
+            {assignCategory && questionsByCategory[assignCategory] && (
+              <div className="bg-purple-50 p-3 rounded-lg text-sm">
+                <p className="font-medium text-purple-800">
+                  This quiz will include {questionsByCategory[assignCategory].length} questions
+                </p>
+                <p className="text-purple-600 mt-1">
+                  Students will see it in their assignments list
+                </p>
+              </div>
+            )}
+          </div>
+
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowAssignDialog(false)}>
+              Cancel
+            </Button>
+            <Button 
+              onClick={handleAssignQuiz} 
+              disabled={assigning || !assignCategory || !assignClassroom}
+              className="bg-purple-600 hover:bg-purple-700"
+            >
+              {assigning ? "Assigning..." : "Assign Quiz"}
             </Button>
           </DialogFooter>
         </DialogContent>

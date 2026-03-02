@@ -8757,6 +8757,98 @@ async def delete_skill_quiz_question(question_id: str, request: Request):
     return {"success": True, "message": "Question deleted"}
 
 
+@api_router.post("/skill-quiz/assign")
+async def assign_skill_quiz(request: Request):
+    """Assign a skill quiz to a classroom"""
+    user = await get_current_user(request)
+    
+    if user["role"] != "teacher":
+        raise HTTPException(status_code=403, detail="Only teachers can assign quizzes")
+    
+    data = await request.json()
+    skill_category = data.get("skill_category")
+    classroom_id = data.get("classroom_id")
+    title = data.get("title", f"{skill_category} Quiz")
+    due_date_str = data.get("due_date")
+    
+    if not skill_category or not classroom_id:
+        raise HTTPException(status_code=400, detail="skill_category and classroom_id are required")
+    
+    # Verify classroom belongs to teacher
+    classroom = await db.classrooms.find_one({"id": classroom_id, "teacher_id": user["id"]})
+    if not classroom:
+        raise HTTPException(status_code=404, detail="Classroom not found")
+    
+    # Get questions for this category
+    questions = await db.skill_quiz_questions.find({"skill_category": skill_category}).to_list(100)
+    if not questions:
+        raise HTTPException(status_code=400, detail="No questions found for this skill category")
+    
+    # Parse due date if provided
+    due_date = None
+    if due_date_str:
+        try:
+            central = pytz.timezone('America/Chicago')
+            due_date = datetime.strptime(due_date_str, "%Y-%m-%d")
+            due_date = central.localize(due_date.replace(hour=23, minute=59, second=59))
+        except ValueError:
+            pass
+    
+    # Create the quiz assignment
+    quiz_assignment = {
+        "id": str(uuid.uuid4()),
+        "type": "skill_quiz",
+        "title": title,
+        "skill_category": skill_category,
+        "classroom_id": classroom_id,
+        "teacher_id": user["id"],
+        "question_count": len(questions),
+        "question_ids": [q["id"] for q in questions],
+        "due_date": due_date,
+        "created_at": datetime.now(timezone.utc),
+        "status": "active"
+    }
+    
+    await db.quiz_assignments.insert_one(quiz_assignment)
+    
+    return {
+        "success": True,
+        "message": f"Quiz assigned with {len(questions)} questions",
+        "assignment_id": quiz_assignment["id"]
+    }
+
+
+@api_router.get("/skill-quiz/assignments")
+async def get_quiz_assignments(request: Request, classroom_id: str = None):
+    """Get skill quiz assignments for a student or teacher"""
+    user = await get_current_user(request)
+    
+    if user["role"] == "teacher":
+        # Teachers see all their quiz assignments
+        query = {"teacher_id": user["id"]}
+        if classroom_id:
+            query["classroom_id"] = classroom_id
+    else:
+        # Students see assignments for their classrooms
+        student_classrooms = await db.classroom_students.find(
+            {"student_id": user["id"]}
+        ).to_list(100)
+        classroom_ids = [sc["classroom_id"] for sc in student_classrooms]
+        query = {"classroom_id": {"$in": classroom_ids}, "status": "active"}
+    
+    assignments = await db.quiz_assignments.find(query).sort("created_at", -1).to_list(100)
+    
+    # Convert dates for JSON
+    for a in assignments:
+        a.pop("_id", None)
+        if a.get("due_date"):
+            a["due_date"] = a["due_date"].isoformat()
+        if a.get("created_at"):
+            a["created_at"] = a["created_at"].isoformat()
+    
+    return {"assignments": assignments}
+
+
 # ==================== CODING TESTS ====================
 
 @api_router.post("/coding-tests")
