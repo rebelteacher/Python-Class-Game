@@ -32,6 +32,17 @@ export default function TestTaking({ user }) {
   const [correctCount, setCorrectCount] = useState(0);
   const timerRef = useRef(null);
 
+  // Helper function to render text with line breaks - MUST be defined before any early returns
+  const renderTextWithLineBreaks = (text) => {
+    if (!text) return null;
+    return text.split('\n').map((line, index) => (
+      <span key={index}>
+        {line}
+        {index < text.split('\n').length - 1 && <br />}
+      </span>
+    ));
+  };
+
   useEffect(() => {
     startTest();
     return () => {
@@ -359,17 +370,6 @@ export default function TestTaking({ user }) {
     if (currentQuestionIndex > 0) {
       setCurrentQuestionIndex(currentQuestionIndex - 1);
     }
-  };
-
-  // Helper function to render text with line breaks
-  const renderTextWithLineBreaks = (text) => {
-    if (!text) return null;
-    return text.split('\n').map((line, index) => (
-      <span key={index}>
-        {line}
-        {index < text.split('\n').length - 1 && <br />}
-      </span>
-    ));
   };
 
   return (
