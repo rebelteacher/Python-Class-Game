@@ -28,6 +28,8 @@ export default function TestTaking({ user }) {
   const [timeRemaining, setTimeRemaining] = useState(null);
   const [attemptId, setAttemptId] = useState(null);
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
+  const [totalQuestions, setTotalQuestions] = useState(0);
+  const [correctCount, setCorrectCount] = useState(0);
   const timerRef = useRef(null);
 
   useEffect(() => {
@@ -135,6 +137,8 @@ export default function TestTaking({ user }) {
       setQuestionResults(response.data.question_results || []);
       setShowAnswers(response.data.show_answers !== false);
       setResultsReleased(response.data.results_released !== false);
+      setTotalQuestions(response.data.total_questions || questions.length);
+      setCorrectCount(response.data.correct_count || 0);
       setSubmitted(true);
       
       if (timerRef.current) {
@@ -149,23 +153,7 @@ export default function TestTaking({ user }) {
     } catch (error) {
       console.error("Error submitting test:", error);
       const errorMessage = error.response?.data?.detail || "Failed to submit test";
-      
-      // Handle specific error cases
-      if (error.response?.status === 400 && errorMessage.includes("already been submitted")) {
-        toast.error("This test was already submitted. Refreshing to show your results...");
-        // Refresh to get the submitted state
-        setTimeout(() => {
-          window.location.reload();
-        }, 2000);
-      } else if (error.response?.status === 404 && errorMessage.includes("start the test")) {
-        toast.error("Test session expired. Starting a new attempt...");
-        // Restart the test
-        setTimeout(() => {
-          startTest();
-        }, 1500);
-      } else {
-        toast.error(errorMessage);
-      }
+      toast.error(errorMessage);
     } finally {
       setSubmitting(false);
     }
@@ -215,13 +203,12 @@ export default function TestTaking({ user }) {
 
   if (submitted && score !== null) {
     const missedQuestions = questionResults.filter(q => !q.is_correct);
-    const correctQuestions = questionResults.filter(q => q.is_correct);
     
     return (
       <div className="min-h-screen bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50">
         <nav className="bg-white shadow-sm border-b border-gray-200">
           <div className="container mx-auto px-6 py-4">
-            <h1 className="text-2xl font-bold text-gray-900">{testData.title}</h1>
+            <h1 className="text-2xl font-bold text-gray-900">{testData?.title || "Test"}</h1>
           </div>
         </nav>
 
@@ -244,7 +231,7 @@ export default function TestTaking({ user }) {
                   {score}%
                 </p>
                 <p className="text-gray-500 mt-2">
-                  {correctQuestions.length} correct out of {questionResults.length} questions
+                  {correctCount} correct out of {totalQuestions} questions
                 </p>
               </div>
               
