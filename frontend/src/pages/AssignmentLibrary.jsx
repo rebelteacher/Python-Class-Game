@@ -1955,32 +1955,33 @@ export default function AssignmentLibrary({ user }) {
                                         <option value="event_mouse">When Mouse Moves</option>
                                       </optgroup>
                                       <optgroup label="🐢 Motion">
-                                        <option value="forward">Forward</option>
-                                        <option value="backward">Backward</option>
-                                        <option value="right">Turn Right</option>
-                                        <option value="left">Turn Left</option>
-                                        <option value="goto">Go To X Y</option>
-                                        <option value="home">Go Home</option>
+                                        <option value="turtle_forward">Forward</option>
+                                        <option value="turtle_backward">Backward</option>
+                                        <option value="turtle_right">Turn Right</option>
+                                        <option value="turtle_left">Turn Left</option>
+                                        <option value="turtle_goto">Go To X Y</option>
+                                        <option value="turtle_home">Go Home</option>
                                       </optgroup>
                                       <optgroup label="🖊️ Pen">
-                                        <option value="pendown">Pen Down</option>
-                                        <option value="penup">Pen Up</option>
-                                        <option value="color">Set Color</option>
-                                        <option value="pensize">Set Pen Size</option>
+                                        <option value="turtle_pendown">Pen Down</option>
+                                        <option value="turtle_penup">Pen Up</option>
+                                        <option value="turtle_color">Set Color</option>
+                                        <option value="turtle_pensize">Set Pen Size</option>
                                       </optgroup>
                                       <optgroup label="💬 Looks">
-                                        <option value="say">Say</option>
-                                        <option value="hide">Hide Turtle</option>
-                                        <option value="show">Show Turtle</option>
+                                        <option value="turtle_say">Say</option>
+                                        <option value="turtle_say_for">Say for Seconds</option>
+                                        <option value="turtle_hide">Hide Turtle</option>
+                                        <option value="turtle_show">Show Turtle</option>
                                       </optgroup>
                                       <optgroup label="🔄 Loops">
-                                        <option value="repeat">Repeat Loop</option>
-                                        <option value="for">Count Loop (For)</option>
-                                        <option value="while">While Loop</option>
+                                        <option value="turtle_repeat">Repeat Loop</option>
+                                        <option value="turtle_for">Count Loop (For)</option>
+                                        <option value="turtle_while">While Loop</option>
                                       </optgroup>
                                       <optgroup label="🧠 Logic">
-                                        <option value="if">If Statement</option>
-                                        <option value="if_else">If-Else</option>
+                                        <option value="turtle_if">If Statement</option>
+                                        <option value="turtle_if_else">If-Else</option>
                                       </optgroup>
                                     </select>
                                   </td>
@@ -3121,22 +3122,40 @@ export default function AssignmentLibrary({ user }) {
                                     className="h-8 text-sm w-full border rounded px-2"
                                   >
                                     <option value="">Select block...</option>
-                                    <optgroup label="Motion">
-                                      <option value="move_forward">Move Forward</option>
-                                      <option value="turn_right">Turn Right</option>
-                                      <option value="turn_left">Turn Left</option>
+                                    <optgroup label="🚩 Events">
+                                      <option value="event_start">When Program Starts</option>
+                                      <option value="event_key">When Key Pressed</option>
+                                      <option value="event_click">When Clicked</option>
+                                      <option value="event_mouse">When Mouse Moves</option>
                                     </optgroup>
-                                    <optgroup label="Control">
-                                      <option value="repeat">Repeat Loop</option>
-                                      <option value="forever">Forever Loop</option>
-                                      <option value="if">If Statement</option>
-                                      <option value="if_else">If-Else</option>
-                                      <option value="wait">Wait</option>
+                                    <optgroup label="🐢 Motion">
+                                      <option value="turtle_forward">Forward</option>
+                                      <option value="turtle_backward">Backward</option>
+                                      <option value="turtle_right">Turn Right</option>
+                                      <option value="turtle_left">Turn Left</option>
+                                      <option value="turtle_goto">Go To X Y</option>
+                                      <option value="turtle_home">Go Home</option>
                                     </optgroup>
-                                    <optgroup label="Pen">
-                                      <option value="pen_down">Pen Down</option>
-                                      <option value="pen_up">Pen Up</option>
-                                      <option value="set_pen_color">Set Pen Color</option>
+                                    <optgroup label="🖊️ Pen">
+                                      <option value="turtle_pendown">Pen Down</option>
+                                      <option value="turtle_penup">Pen Up</option>
+                                      <option value="turtle_color">Set Color</option>
+                                      <option value="turtle_pensize">Set Pen Size</option>
+                                    </optgroup>
+                                    <optgroup label="💬 Looks">
+                                      <option value="turtle_say">Say</option>
+                                      <option value="turtle_say_for">Say for Seconds</option>
+                                      <option value="turtle_hide">Hide Turtle</option>
+                                      <option value="turtle_show">Show Turtle</option>
+                                    </optgroup>
+                                    <optgroup label="🔄 Loops">
+                                      <option value="turtle_repeat">Repeat Loop</option>
+                                      <option value="turtle_for">Count Loop (For)</option>
+                                      <option value="turtle_while">While Loop</option>
+                                    </optgroup>
+                                    <optgroup label="🧠 Logic">
+                                      <option value="turtle_if">If Statement</option>
+                                      <option value="turtle_if_else">If-Else</option>
                                     </optgroup>
                                   </select>
                                 </td>
