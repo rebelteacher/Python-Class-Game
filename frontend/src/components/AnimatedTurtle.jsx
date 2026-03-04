@@ -80,12 +80,13 @@ function parseListLiteral(str) {
 }
 
 // Parse event handlers from generated code
-// Returns: { keyHandlers: { 'space': [...commands], 'up': [...] }, clickHandler: [...], mouseMoveHandler: [...] }
+// Returns: { keyHandlers: { 'space': [...commands], 'up': [...] }, clickHandler: [...], mouseMoveHandler: [], onStartHandler: [] }
 function parseEventHandlers(code) {
   const handlers = {
     keyHandlers: {},
     clickHandler: [],
-    mouseMoveHandler: []
+    mouseMoveHandler: [],
+    onStartHandler: []  // New: on_start() handler
   };
   
   if (!code) return handlers;
@@ -133,10 +134,26 @@ function parseEventHandlers(code) {
       continue;
     }
     
+    // Pattern: def on_start(): - runs once when program starts
+    const startMatch = trimmed.match(/^def\s+on_start\s*\(\s*\)\s*:/);
+    if (startMatch) {
+      console.log("🔍 Found on_start handler");
+      const funcBody = extractFunctionBody(lines, i);
+      handlers.onStartHandler = parseCode(funcBody);
+      console.log("🔍 on_start has", handlers.onStartHandler.length, "commands");
+      i = skipFunctionBody(lines, i);
+      continue;
+    }
+    
     i++;
   }
   
-  console.log("🔍 parseEventHandlers result:", Object.keys(handlers.keyHandlers));
+  console.log("🔍 parseEventHandlers result:", {
+    keyHandlers: Object.keys(handlers.keyHandlers),
+    hasClickHandler: handlers.clickHandler.length > 0,
+    hasMouseMoveHandler: handlers.mouseMoveHandler.length > 0,
+    hasOnStartHandler: handlers.onStartHandler.length > 0
+  });
   return handlers;
 }
 
@@ -693,7 +710,7 @@ const AnimatedTurtle = forwardRef(function AnimatedTurtle({
   const turtleRef = useRef(getInitialTurtleState());
   const pathsRef = useRef([]);
   const playingRef = useRef(false);
-  const eventHandlersRef = useRef({ keyHandlers: {}, clickHandler: [], mouseMoveHandler: [] });
+  const eventHandlersRef = useRef({ keyHandlers: {}, clickHandler: [], mouseMoveHandler: [], onStartHandler: [] });
   const [eventModeActive, setEventModeActive] = useState(false);  // Track if event mode is running
   
   // Parse code into commands (memoized) and extract turtle name/color
@@ -706,7 +723,8 @@ const AnimatedTurtle = forwardRef(function AnimatedTurtle({
     console.log("📝 Parsed event handlers:", {
       keyHandlers: Object.keys(handlers.keyHandlers),
       clickHandler: handlers.clickHandler.length,
-      mouseMoveHandler: handlers.mouseMoveHandler.length
+      mouseMoveHandler: handlers.mouseMoveHandler.length,
+      onStartHandler: handlers.onStartHandler.length
     });
     
     // Detect turtle variable name from code
@@ -1476,6 +1494,15 @@ const AnimatedTurtle = forwardRef(function AnimatedTurtle({
     playingRef.current = true;
     setIsPlaying(true);
     
+    // Run on_start() handler first if it exists
+    if (eventHandlers.onStartHandler && eventHandlers.onStartHandler.length > 0) {
+      console.log("🚀 Running on_start handler with", eventHandlers.onStartHandler.length, "commands");
+      for (const cmd of eventHandlers.onStartHandler) {
+        if (!playingRef.current) break;
+        await executeCommand(cmd, true);
+      }
+    }
+    
     for (let i = 0; i < commands.length; i++) {
       if (!playingRef.current) break;
       
@@ -1510,6 +1537,14 @@ const AnimatedTurtle = forwardRef(function AnimatedTurtle({
   const runInstant = useCallback(async () => {
     resetTurtle();
     await new Promise(r => setTimeout(r, 50)); // Let reset complete
+    
+    // Run on_start() handler first if it exists
+    if (eventHandlers.onStartHandler && eventHandlers.onStartHandler.length > 0) {
+      console.log("🚀 Running on_start handler (instant) with", eventHandlers.onStartHandler.length, "commands");
+      for (const cmd of eventHandlers.onStartHandler) {
+        await executeCommand(cmd, false);
+      }
+    }
     
     // Run startup commands
     for (const cmd of commands) {
@@ -1557,12 +1592,21 @@ const AnimatedTurtle = forwardRef(function AnimatedTurtle({
       keyHandlers: Object.keys(eventHandlers.keyHandlers),
       keyHandlerCommands: Object.fromEntries(
         Object.entries(eventHandlers.keyHandlers).map(([k, v]) => [k, v.length])
-      )
+      ),
+      onStartHandler: eventHandlers.onStartHandler?.length || 0
     }));
     
     // Reset first
     resetTurtle();
     await new Promise(r => setTimeout(r, 50));
+    
+    // Run on_start() handler first if it exists
+    if (eventHandlers.onStartHandler && eventHandlers.onStartHandler.length > 0) {
+      console.log("🚀 Running on_start handler with", eventHandlers.onStartHandler.length, "commands");
+      for (const cmd of eventHandlers.onStartHandler) {
+        await executeCommand(cmd, false);
+      }
+    }
     
     // Run startup/main code
     console.log("🚀 Running", commands.length, "startup commands");
