@@ -117,6 +117,28 @@ const defineTurtleBlocks = () => {
     }
   };
 
+  // Set Heading - Point in a specific direction
+  Blockly.Blocks['turtle_setheading'] = {
+    init: function() {
+      this.appendValueInput("ANGLE")
+          .setCheck("Number")
+          .appendField("point in direction");
+      this.appendDummyInput()
+          .appendField(new Blockly.FieldDropdown([
+            ["(use number)", ""],
+            ["→ right (0°)", "0"],
+            ["↑ up (90°)", "90"],
+            ["← left (180°)", "180"],
+            ["↓ down (270°)", "270"]
+          ]), "PRESET");
+      this.setInputsInline(true);
+      this.setPreviousStatement(true, null);
+      this.setNextStatement(true, null);
+      this.setColour(230);
+      this.setTooltip("Point the turtle in a specific direction: 0=right, 90=up, 180=left, 270=down");
+    }
+  };
+
   // ===== PEN BLOCKS (Green - Color 160) =====
 
   // Pen down
@@ -580,6 +602,12 @@ const generatePythonCode = (workspace) => {
         blockCode = `${indent}t.goto(0, 0)\n${indent}t.setheading(90)\n`;
         break;
       }
+      case 'turtle_setheading': {
+        const preset = block.getFieldValue('PRESET');
+        const angle = preset || getValueCode(block, 'ANGLE', '90');
+        blockCode = `${indent}t.setheading(${angle})\n`;
+        break;
+      }
       case 'turtle_pendown': {
         blockCode = `${indent}t.pendown()\n`;
         break;
@@ -732,6 +760,7 @@ const TOOLBOX = {
         { kind: 'block', type: 'turtle_backward', inputs: { STEPS: { shadow: { type: 'math_number', fields: { NUM: 50 } } } } },
         { kind: 'block', type: 'turtle_right', inputs: { DEGREES: { shadow: { type: 'math_number', fields: { NUM: 90 } } } } },
         { kind: 'block', type: 'turtle_left', inputs: { DEGREES: { shadow: { type: 'math_number', fields: { NUM: 90 } } } } },
+        { kind: 'block', type: 'turtle_setheading', inputs: { ANGLE: { shadow: { type: 'math_number', fields: { NUM: 90 } } } } },
         { kind: 'block', type: 'turtle_goto', inputs: { 
           X: { shadow: { type: 'math_number', fields: { NUM: 0 } } },
           Y: { shadow: { type: 'math_number', fields: { NUM: 0 } } }

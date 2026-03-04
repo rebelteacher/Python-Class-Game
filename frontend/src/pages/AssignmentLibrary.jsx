@@ -1959,6 +1959,7 @@ export default function AssignmentLibrary({ user }) {
                                         <option value="turtle_backward">Backward</option>
                                         <option value="turtle_right">Turn Right</option>
                                         <option value="turtle_left">Turn Left</option>
+                                        <option value="turtle_setheading">Point Direction</option>
                                         <option value="turtle_goto">Go To X Y</option>
                                         <option value="turtle_home">Go Home</option>
                                       </optgroup>
@@ -3133,6 +3134,7 @@ export default function AssignmentLibrary({ user }) {
                                       <option value="turtle_backward">Backward</option>
                                       <option value="turtle_right">Turn Right</option>
                                       <option value="turtle_left">Turn Left</option>
+                                      <option value="turtle_setheading">Point Direction</option>
                                       <option value="turtle_goto">Go To X Y</option>
                                       <option value="turtle_home">Go Home</option>
                                     </optgroup>
