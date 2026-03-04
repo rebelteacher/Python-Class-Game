@@ -41,7 +41,13 @@ A coding education platform for K-12 students featuring multiple programming env
 - Code line highlighting during animation
 - **List variable support** (Feb 2025): `colors = ["red", "blue"]` with `pencolor(colors[i])` and modulo cycling
 - **Multi-line list support** (Feb 2025): Parser now handles lists spanning multiple lines with inline comments
-- Support for: forward, backward, left, right, goto, circle (with extent), penup, pendown, color, pencolor, fillcolor, home, write, hideturtle, showturtle, etc.
+- **Event-driven programming** (March 2025): Full event support for text-based turtle code
+  - `setheading(angle)` / `seth(angle)` for precise heading control
+  - `def on_start():` - Code runs at program start
+  - `def on_key_<key>():` - Keyboard event handlers (space, up, down, left, right, letters)
+  - `def on_turtle_clicked():` - Mouse click event
+  - `def on_mouse_move():` - Mouse movement event
+- Support for: forward, backward, left, right, goto, circle (with extent), penup, pendown, color, pencolor, fillcolor, home, write, hideturtle, showturtle, setheading, etc.
 
 ### Turtle Blocks (Unit 1) - UPDATED Feb 2025
 - Visual block-based programming using Blockly
@@ -113,6 +119,16 @@ Teachers can now create "Block" type assignments using drag-and-drop Blockly edi
 ---
 
 ## Roadmap
+
+### Completed (March 2025)
+- [x] **Text-Based Turtle Events Support** (March 4, 2025) - Added full event support to text-based Python turtle (Unit 2):
+  - `setheading(angle)` / `seth(angle)` command - Set turtle heading to specific angle (0=East, 90=North, 180=West, 270=South)
+  - `def on_start():` event handler - Runs code when program starts (before other main code)
+  - `def on_key_space():` etc. - Keyboard event handlers for interactive programs
+  - `def on_turtle_clicked():` - Mouse click on turtle event handler
+  - `def on_mouse_move():` - Mouse movement event handler
+  - "Events Active" badge appears when event mode is running
+  - All event handlers parsed from Python code and executed at appropriate times
 
 ### Completed (Feb 2025)
 - [x] **Turtle Fill Bug Fix** (Feb 22, 2025) - Fixed self-intersecting polygon fill for shapes like 5-pointed stars:
@@ -238,4 +254,4 @@ Teachers can now create "Block" type assignments using drag-and-drop Blockly edi
 
 ---
 
-*Last Updated: February 3, 2025*
+*Last Updated: March 4, 2025*
