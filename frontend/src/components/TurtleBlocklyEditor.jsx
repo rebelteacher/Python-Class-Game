@@ -141,6 +141,61 @@ const defineTurtleBlocks = () => {
     }
   };
 
+  // Point in direction (setheading)
+  Blockly.Blocks['turtle_setheading'] = {
+    init: function() {
+      this.appendDummyInput()
+          .appendField("point in direction")
+          .appendField(new Blockly.FieldDropdown([
+            ["→ right (0°)", "0"],
+            ["↑ up (90°)", "90"],
+            ["← left (180°)", "180"],
+            ["↓ down (270°)", "270"]
+          ]), "DIRECTION")
+          .appendField(new Blockly.FieldNumber(0, 0, 360, 1), "ANGLE");
+      this.setInputsInline(true);
+      this.setPreviousStatement(true, null);
+      this.setNextStatement(true, null);
+      this.setColour(230);
+      this.setTooltip("Point the turtle in a specific direction. 0=right, 90=up, 180=left, 270=down");
+    }
+  };
+
+  // ===== SENSING BLOCKS (Cyan - Color 180) =====
+  
+  // X Position reporter block
+  Blockly.Blocks['turtle_xposition'] = {
+    init: function() {
+      this.appendDummyInput()
+          .appendField("x position");
+      this.setOutput(true, "Number");
+      this.setColour(180);
+      this.setTooltip("Get the turtle's current x position (horizontal). Center is 0.");
+    }
+  };
+  
+  // Y Position reporter block
+  Blockly.Blocks['turtle_yposition'] = {
+    init: function() {
+      this.appendDummyInput()
+          .appendField("y position");
+      this.setOutput(true, "Number");
+      this.setColour(180);
+      this.setTooltip("Get the turtle's current y position (vertical). Center is 0.");
+    }
+  };
+  
+  // Direction reporter block
+  Blockly.Blocks['turtle_direction'] = {
+    init: function() {
+      this.appendDummyInput()
+          .appendField("direction");
+      this.setOutput(true, "Number");
+      this.setColour(180);
+      this.setTooltip("Get the turtle's current direction. 0=right, 90=up, 180=left, 270=down.");
+    }
+  };
+
   // ===== PEN BLOCKS (Green - Color 160) =====
   
   Blockly.Blocks['turtle_pendown'] = {
@@ -200,6 +255,20 @@ const defineTurtleBlocks = () => {
       this.setNextStatement(true, null);
       this.setColour(160);
       this.setTooltip("Set the pen thickness");
+    }
+  };
+
+  // Draw a dot at current position
+  Blockly.Blocks['turtle_dot'] = {
+    init: function() {
+      this.appendDummyInput()
+          .appendField("draw dot size")
+          .appendField(new Blockly.FieldNumber(20, 1, 200, 1), "SIZE");
+      this.setInputsInline(true);
+      this.setPreviousStatement(true, null);
+      this.setNextStatement(true, null);
+      this.setColour(160);
+      this.setTooltip("Draw a filled circle (dot) at the turtle's current position");
     }
   };
 
@@ -424,6 +493,7 @@ const TOOLBOX = {
         { kind: 'block', type: 'turtle_backward' },
         { kind: 'block', type: 'turtle_right' },
         { kind: 'block', type: 'turtle_left' },
+        { kind: 'block', type: 'turtle_setheading' },
         { kind: 'block', type: 'turtle_goto' },
         { kind: 'block', type: 'turtle_home' }
       ]
@@ -436,7 +506,8 @@ const TOOLBOX = {
         { kind: 'block', type: 'turtle_pendown' },
         { kind: 'block', type: 'turtle_penup' },
         { kind: 'block', type: 'turtle_color' },
-        { kind: 'block', type: 'turtle_pensize' }
+        { kind: 'block', type: 'turtle_pensize' },
+        { kind: 'block', type: 'turtle_dot' }
       ]
     },
     {
@@ -448,6 +519,16 @@ const TOOLBOX = {
         { kind: 'block', type: 'turtle_say_for' },
         { kind: 'block', type: 'turtle_hide' },
         { kind: 'block', type: 'turtle_show' }
+      ]
+    },
+    {
+      kind: 'category',
+      name: '👁️ Sensing',
+      colour: '180',
+      contents: [
+        { kind: 'block', type: 'turtle_xposition' },
+        { kind: 'block', type: 'turtle_yposition' },
+        { kind: 'block', type: 'turtle_direction' }
       ]
     },
     {
@@ -643,6 +724,12 @@ const generatePythonCode = (workspace) => {
       }
       case 'logic_boolean':
         return block.getFieldValue('BOOL') === 'TRUE' ? 'True' : 'False';
+      case 'turtle_xposition':
+        return 't.xcor()';
+      case 'turtle_yposition':
+        return 't.ycor()';
+      case 'turtle_direction':
+        return 't.heading()';
       default:
         return "0";
     }
@@ -682,6 +769,19 @@ const generatePythonCode = (workspace) => {
       case 'turtle_home':
         blockCode = `${indent}t.home()\n`;
         break;
+      case 'turtle_setheading': {
+        const direction = block.getFieldValue('DIRECTION') || '0';
+        const angle = block.getFieldValue('ANGLE') || '0';
+        // Use the dropdown direction if it's set, otherwise use the angle field
+        const finalAngle = direction !== '0' ? direction : angle;
+        blockCode = `${indent}t.setheading(${finalAngle})\n`;
+        break;
+      }
+      case 'turtle_dot': {
+        const size = block.getFieldValue('SIZE') || '20';
+        blockCode = `${indent}t.dot(${size})\n`;
+        break;
+      }
       case 'turtle_pendown':
         blockCode = `${indent}t.pendown()\n`;
         break;
