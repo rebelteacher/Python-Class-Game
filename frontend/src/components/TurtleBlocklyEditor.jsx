@@ -144,15 +144,17 @@ const defineTurtleBlocks = () => {
   // Point in direction (setheading)
   Blockly.Blocks['turtle_setheading'] = {
     init: function() {
+      this.appendValueInput("ANGLE")
+          .setCheck("Number")
+          .appendField("point in direction");
       this.appendDummyInput()
-          .appendField("point in direction")
           .appendField(new Blockly.FieldDropdown([
+            ["(use number)", ""],
             ["→ right (0°)", "0"],
             ["↑ up (90°)", "90"],
             ["← left (180°)", "180"],
             ["↓ down (270°)", "270"]
-          ]), "DIRECTION")
-          .appendField(new Blockly.FieldNumber(0, 0, 360, 1), "ANGLE");
+          ]), "PRESET");
       this.setInputsInline(true);
       this.setPreviousStatement(true, null);
       this.setNextStatement(true, null);
@@ -664,6 +666,10 @@ const generatePythonCode = (workspace) => {
   if (!workspace) return "";
   
   const blocks = workspace.getTopBlocks(true);
+  console.log("🔧 generatePythonCode: Found", blocks.length, "top-level blocks");
+  if (blocks.length > 0) {
+    console.log("🔧 Block types:", blocks.map(b => b.type));
+  }
   if (blocks.length === 0) return "";
   
   let code = "import turtle\nimport random\nt = turtle.Turtle()\n\n";
@@ -770,11 +776,14 @@ const generatePythonCode = (workspace) => {
         blockCode = `${indent}t.home()\n`;
         break;
       case 'turtle_setheading': {
-        const direction = block.getFieldValue('DIRECTION') || '0';
-        const angle = block.getFieldValue('ANGLE') || '0';
-        // Use the dropdown direction if it's set, otherwise use the angle field
-        const finalAngle = direction !== '0' ? direction : angle;
-        blockCode = `${indent}t.setheading(${finalAngle})\n`;
+        const preset = block.getFieldValue('PRESET');
+        let angle;
+        if (preset && preset !== '') {
+          angle = preset;
+        } else {
+          angle = getValueCode(block, 'ANGLE', '0');
+        }
+        blockCode = `${indent}t.setheading(${angle})\n`;
         break;
       }
       case 'turtle_dot': {
@@ -907,10 +916,15 @@ const generatePythonCode = (workspace) => {
   const processBlockChain = (block, indent = '') => {
     let chainCode = "";
     let currentBlock = block;
+    let blockCount = 0;
     while (currentBlock) {
-      chainCode += processBlock(currentBlock, indent);
+      const generatedBlock = processBlock(currentBlock, indent);
+      console.log("🔧 processBlockChain: block type", currentBlock.type, "generated:", generatedBlock?.substring(0, 50) || "(empty)");
+      chainCode += generatedBlock;
       currentBlock = currentBlock.getNextBlock();
+      blockCount++;
     }
+    console.log("🔧 processBlockChain: processed", blockCount, "blocks");
     return chainCode;
   };
   
@@ -997,6 +1011,15 @@ const generatePythonCode = (workspace) => {
       code += processBlockChain(block, '    ');
     }
     code += "\n";
+  }
+  
+  console.log("🔧 Generated code length:", code.length, "chars");
+  console.log("🔧 Generated code preview:", code.substring(0, 200));
+  
+  // Check if we have any actual turtle commands (not just imports)
+  const hasCommands = /t\.\w+\(/.test(code);
+  if (!hasCommands && blocks.length > 0) {
+    console.warn("⚠️ Warning: Blocks found but no turtle commands generated. Make sure to use command blocks like 'forward', 'turn right', etc.");
   }
   
   return code;
