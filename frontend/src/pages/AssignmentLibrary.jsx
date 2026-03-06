@@ -1390,16 +1390,16 @@ export default function AssignmentLibrary({ user }) {
                       <p className="text-sm text-gray-600 mb-3">
                         Drag blocks here to create what students will start with. Leave empty for a blank canvas.
                       </p>
-                      <div className="h-[400px] border rounded-lg overflow-hidden">
+                      <div className="h-[500px] border rounded-lg overflow-hidden">
                         <TurtleBlocklyEditor
                           ref={starterBlocksRef}
                           initialXml={newProblem.starter_blocks_xml}
                           onCodeChange={(code) => setNewProblem(prev => ({ ...prev, starter_code: code }))}
                           onXmlChange={(xml) => setNewProblem(prev => ({ ...prev, starter_blocks_xml: xml }))}
-                          showPreview={false}
+                          showPreview={true}
                           showCodeToggle={true}
-                          height="360px"
-                          compact={true}
+                          height="460px"
+                          compact={false}
                         />
                       </div>
                     </div>
@@ -1467,16 +1467,16 @@ export default function AssignmentLibrary({ user }) {
                           🐢 Preview Output
                         </Button>
                       </div>
-                      <div className="h-[400px] border rounded-lg overflow-hidden">
+                      <div className="h-[500px] border rounded-lg overflow-hidden">
                         <TurtleBlocklyEditor
                           ref={solutionBlocksRef}
                           initialXml={newProblem.solution_blocks_xml}
                           onCodeChange={(code) => setNewProblem(prev => ({ ...prev, solution_code: code }))}
                           onXmlChange={(xml) => setNewProblem(prev => ({ ...prev, solution_blocks_xml: xml }))}
-                          showPreview={false}
+                          showPreview={true}
                           showCodeToggle={true}
-                          height="360px"
-                          compact={true}
+                          height="460px"
+                          compact={false}
                         />
                       </div>
                     </div>
@@ -2680,15 +2680,15 @@ export default function AssignmentLibrary({ user }) {
                     <p className="text-sm text-gray-600 mb-3">
                       Drag blocks here to create what students will start with. Leave empty for a blank canvas.
                     </p>
-                    <div className="h-[400px] border rounded-lg overflow-hidden">
+                    <div className="h-[500px] border rounded-lg overflow-hidden">
                       <TurtleBlocklyEditor
                         initialXml={editingProblem.starter_blocks_xml || ""}
                         onCodeChange={(code) => setEditingProblem(prev => ({ ...prev, starter_code: code }))}
                         onXmlChange={(xml) => setEditingProblem(prev => ({ ...prev, starter_blocks_xml: xml }))}
-                        showPreview={false}
+                        showPreview={true}
                         showCodeToggle={true}
-                        height="360px"
-                        compact={true}
+                        height="460px"
+                        compact={false}
                       />
                     </div>
                   </div>
@@ -2753,16 +2753,16 @@ export default function AssignmentLibrary({ user }) {
                         🐢 Preview Output
                       </Button>
                     </div>
-                    <div className="h-[400px] border rounded-lg overflow-hidden">
+                    <div className="h-[500px] border rounded-lg overflow-hidden">
                       <TurtleBlocklyEditor
                         ref={editSolutionBlocksRef}
                         initialXml={editingProblem.solution_blocks_xml || ""}
                         onCodeChange={(code) => setEditingProblem(prev => ({ ...prev, solution_code: code }))}
                         onXmlChange={(xml) => setEditingProblem(prev => ({ ...prev, solution_blocks_xml: xml }))}
-                        showPreview={false}
+                        showPreview={true}
                         showCodeToggle={true}
-                        height="360px"
-                        compact={true}
+                        height="460px"
+                        compact={false}
                       />
                     </div>
                   </div>
