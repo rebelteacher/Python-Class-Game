@@ -491,6 +491,17 @@ function parseCode(code, parentVars = {}) {
       continue;
     }
     
+    // Parse dot command - t.dot(size) or t.dot(size, color)
+    match = trimmed.match(new RegExp(`${turtlePrefix}dot\\s*\\(\\s*([^,)]+)(?:\\s*,\\s*['"](\\w+)['"])?\\s*\\)`));
+    if (match) {
+      const size = getNumericValue(match[1]);
+      const color = match[2] || null;  // Optional color parameter
+      if (size !== null) {
+        commands.push({ type: 'dot', size: size, color: color, line: lineNum });
+      }
+      continue;
+    }
+    
     // Parse write command - t.write("text", ...) - extracts just the text content
     match = trimmed.match(new RegExp(`${turtlePrefix}write\\s*\\(\\s*["']([^"']*?)["']`));
     if (match) {
@@ -1125,6 +1136,13 @@ const AnimatedTurtle = forwardRef(function AnimatedTurtle({
         // Use 'nonzero' fill rule to fill self-intersecting shapes (like stars) completely
         // This matches Python turtle's default fill behavior
         ctx.fill('nonzero');
+      } else if (path.type === 'dot') {
+        // Draw a filled circle (dot)
+        const pos = toCanvasCoords(path.x, path.y);
+        ctx.beginPath();
+        ctx.arc(pos.x, pos.y, path.size / 2, 0, Math.PI * 2);
+        ctx.fillStyle = path.color;
+        ctx.fill();
       }
     }
     
@@ -1402,6 +1420,25 @@ const AnimatedTurtle = forwardRef(function AnimatedTurtle({
           drawCanvas();
           resolve();
           break;
+          
+        case 'dot': {
+          // Draw a filled circle at current position
+          const dotSize = cmd.size || 10;
+          const dotColor = cmd.color || turtle.penColor;
+          
+          // Add the dot to paths
+          pathsRef.current.push({
+            type: 'dot',
+            x: turtle.x,
+            y: turtle.y,
+            size: dotSize,
+            color: dotColor
+          });
+          
+          drawCanvas();
+          setTimeout(resolve, baseDelay / 2);
+          break;
+        }
           
         case 'write': {
           // Store text at turtle's current position so it persists on canvas

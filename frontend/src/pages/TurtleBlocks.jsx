@@ -139,6 +139,41 @@ const defineTurtleBlocks = () => {
     }
   };
 
+  // ===== SENSING BLOCKS (Cyan - Color 180) =====
+  
+  // X Position - returns turtle's current x coordinate
+  Blockly.Blocks['turtle_xposition'] = {
+    init: function() {
+      this.appendDummyInput()
+          .appendField("x position");
+      this.setOutput(true, "Number");
+      this.setColour(180);
+      this.setTooltip("Get the turtle's current x position (horizontal). Center is 0, right is positive, left is negative.");
+    }
+  };
+  
+  // Y Position - returns turtle's current y coordinate
+  Blockly.Blocks['turtle_yposition'] = {
+    init: function() {
+      this.appendDummyInput()
+          .appendField("y position");
+      this.setOutput(true, "Number");
+      this.setColour(180);
+      this.setTooltip("Get the turtle's current y position (vertical). Center is 0, up is positive, down is negative.");
+    }
+  };
+  
+  // Direction/Heading - returns turtle's current heading
+  Blockly.Blocks['turtle_direction'] = {
+    init: function() {
+      this.appendDummyInput()
+          .appendField("direction");
+      this.setOutput(true, "Number");
+      this.setColour(180);
+      this.setTooltip("Get the turtle's current direction in degrees. 0=right, 90=up, 180=left, 270=down.");
+    }
+  };
+
   // ===== PEN BLOCKS (Green - Color 160) =====
 
   // Pen down
@@ -201,6 +236,20 @@ const defineTurtleBlocks = () => {
       this.setNextStatement(true, null);
       this.setColour(160);
       this.setTooltip("Set the pen thickness");
+    }
+  };
+
+  // Draw a dot/circle at current position
+  Blockly.Blocks['turtle_dot'] = {
+    init: function() {
+      this.appendValueInput("SIZE")
+          .setCheck("Number")
+          .appendField("draw dot size");
+      this.setInputsInline(true);
+      this.setPreviousStatement(true, null);
+      this.setNextStatement(true, null);
+      this.setColour(160);
+      this.setTooltip("Draw a filled circle (dot) at the turtle's current position");
     }
   };
 
@@ -563,6 +612,15 @@ const generatePythonCode = (workspace) => {
       case 'logic_boolean': {
         return targetBlock.getFieldValue('BOOL') === 'TRUE' ? 'True' : 'False';
       }
+      case 'turtle_xposition': {
+        return 't.xcor()';
+      }
+      case 'turtle_yposition': {
+        return 't.ycor()';
+      }
+      case 'turtle_direction': {
+        return 't.heading()';
+      }
       default:
         return defaultValue;
     }
@@ -624,6 +682,11 @@ const generatePythonCode = (workspace) => {
       case 'turtle_pensize': {
         const size = getValueCode(block, 'SIZE', '1');
         blockCode = `${indent}t.pensize(${size})\n`;
+        break;
+      }
+      case 'turtle_dot': {
+        const size = getValueCode(block, 'SIZE', '10');
+        blockCode = `${indent}t.dot(${size})\n`;
         break;
       }
       case 'turtle_repeat': {
@@ -723,6 +786,19 @@ const generatePythonCode = (workspace) => {
         blockCode = `${indent}t.showturtle()\n`;
         break;
       }
+      case 'turtle_xposition': {
+        // This is a reporter block, returns a value - should be handled by getValueCode
+        blockCode = 't.xcor()';
+        break;
+      }
+      case 'turtle_yposition': {
+        blockCode = 't.ycor()';
+        break;
+      }
+      case 'turtle_direction': {
+        blockCode = 't.heading()';
+        break;
+      }
       default:
         break;
     }
@@ -776,7 +852,8 @@ const TOOLBOX = {
         { kind: 'block', type: 'turtle_pendown' },
         { kind: 'block', type: 'turtle_penup' },
         { kind: 'block', type: 'turtle_color' },
-        { kind: 'block', type: 'turtle_pensize', inputs: { SIZE: { shadow: { type: 'math_number', fields: { NUM: 2 } } } } }
+        { kind: 'block', type: 'turtle_pensize', inputs: { SIZE: { shadow: { type: 'math_number', fields: { NUM: 2 } } } } },
+        { kind: 'block', type: 'turtle_dot', inputs: { SIZE: { shadow: { type: 'math_number', fields: { NUM: 20 } } } } }
       ]
     },
     {
@@ -788,6 +865,16 @@ const TOOLBOX = {
         { kind: 'block', type: 'turtle_say_for', inputs: { SECONDS: { shadow: { type: 'math_number', fields: { NUM: 2 } } } } },
         { kind: 'block', type: 'turtle_hide' },
         { kind: 'block', type: 'turtle_show' }
+      ]
+    },
+    {
+      kind: 'category',
+      name: '👁️ Sensing',
+      colour: '180',
+      contents: [
+        { kind: 'block', type: 'turtle_xposition' },
+        { kind: 'block', type: 'turtle_yposition' },
+        { kind: 'block', type: 'turtle_direction' }
       ]
     },
     {
