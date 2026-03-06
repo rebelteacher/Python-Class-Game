@@ -61,9 +61,10 @@ const defineTurtleBlocks = () => {
   
   Blockly.Blocks['turtle_forward'] = {
     init: function() {
+      this.appendValueInput("STEPS")
+          .setCheck("Number")
+          .appendField("forward");
       this.appendDummyInput()
-          .appendField("forward")
-          .appendField(new Blockly.FieldNumber(50, 0, 1000, 1), "STEPS")
           .appendField("steps");
       this.setInputsInline(true);
       this.setPreviousStatement(true, null);
@@ -75,9 +76,10 @@ const defineTurtleBlocks = () => {
 
   Blockly.Blocks['turtle_backward'] = {
     init: function() {
+      this.appendValueInput("STEPS")
+          .setCheck("Number")
+          .appendField("backward");
       this.appendDummyInput()
-          .appendField("backward")
-          .appendField(new Blockly.FieldNumber(50, 0, 1000, 1), "STEPS")
           .appendField("steps");
       this.setInputsInline(true);
       this.setPreviousStatement(true, null);
@@ -89,9 +91,10 @@ const defineTurtleBlocks = () => {
 
   Blockly.Blocks['turtle_right'] = {
     init: function() {
+      this.appendValueInput("DEGREES")
+          .setCheck("Number")
+          .appendField("turn right");
       this.appendDummyInput()
-          .appendField("turn right")
-          .appendField(new Blockly.FieldNumber(90, 0, 360, 1), "DEGREES")
           .appendField("degrees");
       this.setInputsInline(true);
       this.setPreviousStatement(true, null);
@@ -103,9 +106,10 @@ const defineTurtleBlocks = () => {
 
   Blockly.Blocks['turtle_left'] = {
     init: function() {
+      this.appendValueInput("DEGREES")
+          .setCheck("Number")
+          .appendField("turn left");
       this.appendDummyInput()
-          .appendField("turn left")
-          .appendField(new Blockly.FieldNumber(90, 0, 360, 1), "DEGREES")
           .appendField("degrees");
       this.setInputsInline(true);
       this.setPreviousStatement(true, null);
@@ -118,10 +122,13 @@ const defineTurtleBlocks = () => {
   Blockly.Blocks['turtle_goto'] = {
     init: function() {
       this.appendDummyInput()
-          .appendField("go to x:")
-          .appendField(new Blockly.FieldNumber(0, -500, 500, 1), "X")
-          .appendField("y:")
-          .appendField(new Blockly.FieldNumber(0, -500, 500, 1), "Y");
+          .appendField("go to x:");
+      this.appendValueInput("X")
+          .setCheck("Number");
+      this.appendDummyInput()
+          .appendField("y:");
+      this.appendValueInput("Y")
+          .setCheck("Number");
       this.setInputsInline(true);
       this.setPreviousStatement(true, null);
       this.setNextStatement(true, null);
@@ -249,9 +256,9 @@ const defineTurtleBlocks = () => {
 
   Blockly.Blocks['turtle_pensize'] = {
     init: function() {
-      this.appendDummyInput()
-          .appendField("set pen size to")
-          .appendField(new Blockly.FieldNumber(2, 1, 50, 1), "SIZE");
+      this.appendValueInput("SIZE")
+          .setCheck("Number")
+          .appendField("set pen size to");
       this.setInputsInline(true);
       this.setPreviousStatement(true, null);
       this.setNextStatement(true, null);
@@ -263,9 +270,9 @@ const defineTurtleBlocks = () => {
   // Draw a dot at current position
   Blockly.Blocks['turtle_dot'] = {
     init: function() {
-      this.appendDummyInput()
-          .appendField("draw dot size")
-          .appendField(new Blockly.FieldNumber(20, 1, 200, 1), "SIZE");
+      this.appendValueInput("SIZE")
+          .setCheck("Number")
+          .appendField("draw dot size");
       this.setInputsInline(true);
       this.setPreviousStatement(true, null);
       this.setNextStatement(true, null);
@@ -491,12 +498,15 @@ const TOOLBOX = {
       name: '🐢 Motion',
       colour: '230',
       contents: [
-        { kind: 'block', type: 'turtle_forward' },
-        { kind: 'block', type: 'turtle_backward' },
-        { kind: 'block', type: 'turtle_right' },
-        { kind: 'block', type: 'turtle_left' },
+        { kind: 'block', type: 'turtle_forward', inputs: { STEPS: { shadow: { type: 'math_number', fields: { NUM: 50 } } } } },
+        { kind: 'block', type: 'turtle_backward', inputs: { STEPS: { shadow: { type: 'math_number', fields: { NUM: 50 } } } } },
+        { kind: 'block', type: 'turtle_right', inputs: { DEGREES: { shadow: { type: 'math_number', fields: { NUM: 90 } } } } },
+        { kind: 'block', type: 'turtle_left', inputs: { DEGREES: { shadow: { type: 'math_number', fields: { NUM: 90 } } } } },
         { kind: 'block', type: 'turtle_setheading' },
-        { kind: 'block', type: 'turtle_goto' },
+        { kind: 'block', type: 'turtle_goto', inputs: { 
+          X: { shadow: { type: 'math_number', fields: { NUM: 0 } } },
+          Y: { shadow: { type: 'math_number', fields: { NUM: 0 } } }
+        } },
         { kind: 'block', type: 'turtle_home' }
       ]
     },
@@ -508,8 +518,8 @@ const TOOLBOX = {
         { kind: 'block', type: 'turtle_pendown' },
         { kind: 'block', type: 'turtle_penup' },
         { kind: 'block', type: 'turtle_color' },
-        { kind: 'block', type: 'turtle_pensize' },
-        { kind: 'block', type: 'turtle_dot' }
+        { kind: 'block', type: 'turtle_pensize', inputs: { SIZE: { shadow: { type: 'math_number', fields: { NUM: 2 } } } } },
+        { kind: 'block', type: 'turtle_dot', inputs: { SIZE: { shadow: { type: 'math_number', fields: { NUM: 20 } } } } }
       ]
     },
     {
@@ -738,28 +748,28 @@ const generatePythonCode = (workspace) => {
     
     switch (block.type) {
       case 'turtle_forward': {
-        const steps = block.getFieldValue('STEPS') || '50';
+        const steps = getValueCode(block, 'STEPS', '50');
         blockCode = `${indent}t.forward(${steps})\n`;
         break;
       }
       case 'turtle_backward': {
-        const steps = block.getFieldValue('STEPS') || '50';
+        const steps = getValueCode(block, 'STEPS', '50');
         blockCode = `${indent}t.backward(${steps})\n`;
         break;
       }
       case 'turtle_right': {
-        const degrees = block.getFieldValue('DEGREES') || '90';
+        const degrees = getValueCode(block, 'DEGREES', '90');
         blockCode = `${indent}t.right(${degrees})\n`;
         break;
       }
       case 'turtle_left': {
-        const degrees = block.getFieldValue('DEGREES') || '90';
+        const degrees = getValueCode(block, 'DEGREES', '90');
         blockCode = `${indent}t.left(${degrees})\n`;
         break;
       }
       case 'turtle_goto': {
-        const x = block.getFieldValue('X') || '0';
-        const y = block.getFieldValue('Y') || '0';
+        const x = getValueCode(block, 'X', '0');
+        const y = getValueCode(block, 'Y', '0');
         blockCode = `${indent}t.goto(${x}, ${y})\n`;
         break;
       }
@@ -778,7 +788,7 @@ const generatePythonCode = (workspace) => {
         break;
       }
       case 'turtle_dot': {
-        const size = block.getFieldValue('SIZE') || '20';
+        const size = getValueCode(block, 'SIZE', '20');
         blockCode = `${indent}t.dot(${size})\n`;
         break;
       }
@@ -794,7 +804,7 @@ const generatePythonCode = (workspace) => {
         break;
       }
       case 'turtle_pensize': {
-        const size = block.getFieldValue('SIZE') || '2';
+        const size = getValueCode(block, 'SIZE', '2');
         blockCode = `${indent}t.pensize(${size})\n`;
         break;
       }
