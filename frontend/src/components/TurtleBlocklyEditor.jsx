@@ -1233,8 +1233,9 @@ const TurtleBlocklyEditor = forwardRef(({
   }, []);
 
   const handleRun = useCallback(() => {
-    console.log("handleRun called, generatedCode:", generatedCode?.substring(0, 50));
-    console.log("turtleRef.current:", !!turtleRef.current);
+    console.log("🟢 handleRun called");
+    console.log("🟢 generatedCode:", generatedCode?.substring(0, 100));
+    console.log("🟢 turtleRef.current:", !!turtleRef.current);
     if (turtleRef.current && generatedCode) {
       setIsRunning(true);
       
@@ -1243,7 +1244,7 @@ const TurtleBlocklyEditor = forwardRef(({
       
       if (hasEventHandlers) {
         // Use event mode which runs startup code and activates event listeners
-        console.log("Event handlers detected, starting event mode");
+        console.log("🟢 Event handlers detected, starting event mode");
         turtleRef.current.startEventMode();
         setIsRunning(false);
         if (onRun) {
@@ -1251,19 +1252,21 @@ const TurtleBlocklyEditor = forwardRef(({
         }
       } else {
         // Standard mode - just run the code
+        console.log("🟢 Standard mode - calling reset then runInstant");
         turtleRef.current.reset();
         setTimeout(() => {
+          console.log("🟢 Calling runInstant now");
           turtleRef.current.runInstant();
           setIsRunning(false);
           // Notify parent that code was run
-          console.log("Run complete, calling onRun callback:", !!onRun);
+          console.log("🟢 Run complete");
           if (onRun) {
             onRun(generatedCode);
           }
         }, 100);
       }
     } else {
-      console.log("Cannot run - missing turtleRef or generatedCode");
+      console.log("🟢 Cannot run - missing turtleRef or generatedCode", { hasTurtleRef: !!turtleRef.current, hasCode: !!generatedCode });
     }
   }, [generatedCode, onRun]);
 
@@ -1287,6 +1290,7 @@ const TurtleBlocklyEditor = forwardRef(({
         <div className="flex items-center gap-1.5">
           {showCodeToggle && (
             <Button
+              type="button"
               size="sm"
               variant="ghost"
               className="text-white hover:bg-white/20 text-xs h-6 px-2"
@@ -1312,8 +1316,10 @@ const TurtleBlocklyEditor = forwardRef(({
                 type="button"
                 size="sm"
                 className="bg-green-500 hover:bg-green-600 text-xs h-7"
-                onClick={() => {
-                  console.log("Run button clicked directly");
+                onClick={(e) => {
+                  e.preventDefault();
+                  e.stopPropagation();
+                  console.log("🟢 Run button clicked directly");
                   handleRun();
                 }}
                 disabled={isRunning || !generatedCode}
