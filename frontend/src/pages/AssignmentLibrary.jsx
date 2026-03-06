@@ -2709,49 +2709,13 @@ export default function AssignmentLibrary({ user }) {
                 {/* Solution Code/Blocks - conditional based on assignment type */}
                 {editingProblem.assignment_type === "block" ? (
                   <div className="border-2 border-green-200 bg-green-50 rounded-lg p-4">
-                    <div className="flex items-center justify-between mb-3">
-                      <div>
-                        <Label className="text-lg font-semibold flex items-center gap-2">
-                          ✅ Solution Blocks *
-                        </Label>
-                        <p className="text-sm text-gray-600 mt-1">
-                          Create the correct solution using blocks. This will be used for grading.
-                        </p>
-                      </div>
-                      <Button
-                        type="button"
-                        size="sm"
-                        variant="outline"
-                        onClick={async () => {
-                          const code = editSolutionBlocksRef.current?.getCode();
-                          if (!code || !code.trim()) {
-                            toast.error("Please create solution blocks first");
-                            return;
-                          }
-                          try {
-                            const response = await axios.post(`${API}/code/execute-turtle`, {
-                              code: code,
-                              test_input: ""
-                            });
-                            if (response.data.success && response.data.image_data) {
-                              setTurtlePreviewImage(response.data.image_data);
-                              setTurtlePreviewOpen(true);
-                              setEditingProblem(prev => ({
-                                ...prev,
-                                expected_turtle_image: response.data.image_data
-                              }));
-                              toast.success("Preview generated!");
-                            } else {
-                              toast.error("Failed to generate preview: " + (response.data.error || "Unknown error"));
-                            }
-                          } catch (error) {
-                            toast.error("Failed to preview: " + (error.response?.data?.detail || error.message));
-                          }
-                        }}
-                        className="bg-green-600 hover:bg-green-700 text-white"
-                      >
-                        🐢 Preview Output
-                      </Button>
+                    <div className="mb-3">
+                      <Label className="text-lg font-semibold flex items-center gap-2">
+                        ✅ Solution Blocks *
+                      </Label>
+                      <p className="text-sm text-gray-600 mt-1">
+                        Create the correct solution using blocks. This will be used for grading.
+                      </p>
                     </div>
                     <div className="h-[500px] border rounded-lg overflow-hidden">
                       <TurtleBlocklyEditor

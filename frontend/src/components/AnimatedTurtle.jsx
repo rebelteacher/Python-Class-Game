@@ -593,6 +593,48 @@ function parseCode(code, parentVars = {}) {
       continue;
     }
     
+    // Parse while loop with dynamic condition (e.g., while t.xcor() < 250:)
+    // This creates a 'while' command that is evaluated at runtime
+    match = trimmed.match(/^while\s+(.+)\s*:\s*$/);
+    if (match) {
+      const condition = match[1].trim();
+      const whileIndent = line.search(/\S/);
+      const whileBodyLines = [];
+      let lastBodyLine = lineNum;
+      
+      // Collect while body lines
+      for (let j = lineNum + 1; j < lines.length; j++) {
+        const bodyLine = lines[j];
+        const trimmedBody = bodyLine.trim();
+        
+        if (trimmedBody === '' || trimmedBody.startsWith('#')) {
+          whileBodyLines.push(bodyLine);
+          lastBodyLine = j;
+          continue;
+        }
+        
+        const bodyIndent = bodyLine.search(/\S/);
+        if (bodyIndent <= whileIndent) break;
+        
+        const dedentedLine = bodyLine.substring(whileIndent + 4);
+        whileBodyLines.push(dedentedLine);
+        lastBodyLine = j;
+      }
+      
+      const whileBodyCode = whileBodyLines.join('\n');
+      const whileBodyCommands = parseCode(whileBodyCode, variables);
+      
+      commands.push({
+        type: 'while',
+        condition: condition,
+        body: whileBodyCommands,
+        line: lineNum
+      });
+      
+      lineNum = lastBodyLine;
+      continue;
+    }
+    
     // Parse if statements with turtle position conditions (e.g., if t.xcor() > 0:)
     // This creates conditional commands that are evaluated at runtime
     match = trimmed.match(/^if\s+(.+)\s*:\s*$/);
@@ -1506,6 +1548,71 @@ const AnimatedTurtle = forwardRef(function AnimatedTurtle({
           } else {
             resolve();
           }
+          break;
+        }
+        
+        case 'while': {
+          // Evaluate while condition at runtime using current turtle state
+          const evaluateWhileCondition = (condition) => {
+            let evalStr = condition;
+            
+            // Handle t.xcor(), turtle.xcor(), xcor()
+            evalStr = evalStr.replace(/(?:t\.|turtle\.)?xcor\s*\(\s*\)/g, turtle.x.toString());
+            // Handle t.ycor(), turtle.ycor(), ycor()
+            evalStr = evalStr.replace(/(?:t\.|turtle\.)?ycor\s*\(\s*\)/g, turtle.y.toString());
+            // Handle t.heading(), turtle.heading(), heading()
+            evalStr = evalStr.replace(/(?:t\.|turtle\.)?heading\s*\(\s*\)/g, turtle.heading.toString());
+            // Handle t.isdown(), turtle.isdown(), isdown()
+            evalStr = evalStr.replace(/(?:t\.|turtle\.)?isdown\s*\(\s*\)/g, turtle.penDown.toString());
+            // Handle t.isvisible(), turtle.isvisible(), isvisible()
+            evalStr = evalStr.replace(/(?:t\.|turtle\.)?isvisible\s*\(\s*\)/g, turtle.visible.toString());
+            
+            try {
+              if (/^[\d\s.+\-*/%<>=!()andortruefalseTrueFalse]+$/.test(evalStr.replace(/\s/g, ''))) {
+                evalStr = evalStr.replace(/\band\b/g, '&&').replace(/\bor\b/g, '||').replace(/\bnot\b/g, '!');
+                evalStr = evalStr.replace(/\bTrue\b/g, 'true').replace(/\bFalse\b/g, 'false');
+                return new Function(`return ${evalStr}`)();
+              }
+            } catch (e) {
+              console.warn('While condition evaluation failed:', condition, e);
+            }
+            return false;
+          };
+          
+          // Execute while loop - iterate while condition is true
+          const executeWhileLoop = async (iterCount = 0) => {
+            // Safety limit to prevent infinite loops (max 10000 iterations)
+            if (iterCount > 10000) {
+              console.warn('While loop exceeded maximum iterations (10000)');
+              resolve();
+              return;
+            }
+            
+            if (!playingRef.current) {
+              resolve();
+              return;
+            }
+            
+            // Evaluate condition with current turtle state
+            const conditionResult = evaluateWhileCondition(cmd.condition);
+            
+            if (!conditionResult) {
+              // Condition is false, exit loop
+              resolve();
+              return;
+            }
+            
+            // Execute body commands sequentially
+            for (const bodyCmd of cmd.body) {
+              if (!playingRef.current) break;
+              await executeCommand(bodyCmd, animate);
+            }
+            
+            // Continue to next iteration
+            executeWhileLoop(iterCount + 1);
+          };
+          
+          executeWhileLoop();
           break;
         }
         
