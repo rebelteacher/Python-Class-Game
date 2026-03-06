@@ -975,6 +975,7 @@ export default function TurtleBlocks({ user }) {
     // Update code when blocks change
     workspaceRef.current.addChangeListener(() => {
       const code = generatePythonCode(workspaceRef.current);
+      console.log("🔵 TurtleBlocks: Setting generatedCode:", code?.substring(0, 80));
       setGeneratedCode(code);
     });
 
@@ -1019,10 +1020,12 @@ export default function TurtleBlocks({ user }) {
   }, []);
 
   const handleRun = useCallback(() => {
+    console.log("🔵 TurtleBlocks handleRun: turtleRef.current =", !!turtleRef.current);
+    console.log("🔵 TurtleBlocks handleRun: generatedCode length =", generatedCode?.length);
     if (turtleRef.current) {
       turtleRef.current.runInstant();
     }
-  }, []);
+  }, [generatedCode]);
 
   const handleReset = useCallback(() => {
     if (turtleRef.current) {

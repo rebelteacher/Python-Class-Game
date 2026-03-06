@@ -1572,6 +1572,10 @@ const AnimatedTurtle = forwardRef(function AnimatedTurtle({
   
   // Run instantly (no animation) - also activates event mode if handlers exist
   const runInstant = useCallback(async () => {
+    console.log("🔴 AnimatedTurtle runInstant called");
+    console.log("🔴 Commands count:", commands.length);
+    console.log("🔴 Commands:", commands.map(c => c.type).slice(0, 5));
+    
     resetTurtle();
     await new Promise(r => setTimeout(r, 50)); // Let reset complete
     
@@ -1584,6 +1588,7 @@ const AnimatedTurtle = forwardRef(function AnimatedTurtle({
     }
     
     // Run startup commands
+    console.log("🔴 Running", commands.length, "commands");
     for (const cmd of commands) {
       await executeCommand(cmd, false);
     }
