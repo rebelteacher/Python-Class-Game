@@ -2,6 +2,23 @@ import { useState, useEffect, useRef, useCallback, useMemo, forwardRef, useImper
 import { Button } from "@/components/ui/button";
 import { Play, Pause, RotateCcw, FastForward, Grid } from "lucide-react";
 
+// Helper function to extract content within parentheses, handling nested parens
+function extractParenthesesContent(str, startIdx) {
+  if (str[startIdx] !== '(') return null;
+  let depth = 0;
+  let start = startIdx + 1;
+  for (let i = startIdx; i < str.length; i++) {
+    if (str[i] === '(') depth++;
+    else if (str[i] === ')') {
+      depth--;
+      if (depth === 0) {
+        return str.substring(start, i).trim();
+      }
+    }
+  }
+  return null; // Unmatched parentheses
+}
+
 // Simple expression evaluator for variables
 function evaluateExpression(expr, variables) {
   if (expr === null || expr === undefined) return null;
@@ -353,41 +370,54 @@ function parseCode(code, parentVars = {}) {
     }
     
     // Parse forward/fd with variable support (handles nested parentheses like random.randint())
-    match = trimmed.match(new RegExp(`${turtlePrefix}(?:forward|fd)\\s*\\((.+)\\)\\s*$`));
-    if (match) {
-      const value = getNumericValue(match[1]);
-      if (value !== null) {
-        commands.push({ type: 'forward', value, line: lineNum });
+    if (trimmed.match(new RegExp(`${turtlePrefix}(?:forward|fd)\\s*\\(`))) {
+      const startIdx = trimmed.indexOf('(');
+      const content = extractParenthesesContent(trimmed, startIdx);
+      if (content !== null) {
+        const value = getNumericValue(content);
+        if (value !== null) {
+          commands.push({ type: 'forward', value, line: lineNum });
+        }
       }
       continue;
     }
     
     // Parse backward/bk/back with variable support (handles nested parentheses)
-    match = trimmed.match(new RegExp(`${turtlePrefix}(?:backward|bk|back)\\s*\\((.+)\\)\\s*$`));
-    if (match) {
-      const value = getNumericValue(match[1]);
-      if (value !== null) {
-        commands.push({ type: 'backward', value, line: lineNum });
+    if (trimmed.match(new RegExp(`${turtlePrefix}(?:backward|bk|back)\\s*\\(`))) {
+      const startIdx = trimmed.indexOf('(');
+      const content = extractParenthesesContent(trimmed, startIdx);
+      if (content !== null) {
+        const value = getNumericValue(content);
+        if (value !== null) {
+          commands.push({ type: 'backward', value, line: lineNum });
+        }
       }
       continue;
     }
     
     // Parse right/rt with variable support (handles nested parentheses like random.randint(0, 350))
-    match = trimmed.match(new RegExp(`${turtlePrefix}(?:right|rt)\\s*\\((.+)\\)\\s*$`));
-    if (match) {
-      const value = getNumericValue(match[1]);
-      if (value !== null) {
-        commands.push({ type: 'right', value, line: lineNum });
+    // Use a function to find the matching closing parenthesis
+    if (trimmed.match(new RegExp(`${turtlePrefix}(?:right|rt)\\s*\\(`))) {
+      const startIdx = trimmed.indexOf('(');
+      const content = extractParenthesesContent(trimmed, startIdx);
+      if (content !== null) {
+        const value = getNumericValue(content);
+        if (value !== null) {
+          commands.push({ type: 'right', value, line: lineNum });
+        }
       }
       continue;
     }
     
     // Parse left/lt with variable support (handles nested parentheses)
-    match = trimmed.match(new RegExp(`${turtlePrefix}(?:left|lt)\\s*\\((.+)\\)\\s*$`));
-    if (match) {
-      const value = getNumericValue(match[1]);
-      if (value !== null) {
-        commands.push({ type: 'left', value, line: lineNum });
+    if (trimmed.match(new RegExp(`${turtlePrefix}(?:left|lt)\\s*\\(`))) {
+      const startIdx = trimmed.indexOf('(');
+      const content = extractParenthesesContent(trimmed, startIdx);
+      if (content !== null) {
+        const value = getNumericValue(content);
+        if (value !== null) {
+          commands.push({ type: 'left', value, line: lineNum });
+        }
       }
       continue;
     }
