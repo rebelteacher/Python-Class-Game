@@ -502,7 +502,7 @@ const TOOLBOX = {
         { kind: 'block', type: 'turtle_backward', inputs: { STEPS: { shadow: { type: 'math_number', fields: { NUM: 50 } } } } },
         { kind: 'block', type: 'turtle_right', inputs: { DEGREES: { shadow: { type: 'math_number', fields: { NUM: 90 } } } } },
         { kind: 'block', type: 'turtle_left', inputs: { DEGREES: { shadow: { type: 'math_number', fields: { NUM: 90 } } } } },
-        { kind: 'block', type: 'turtle_setheading' },
+        { kind: 'block', type: 'turtle_setheading', inputs: { ANGLE: { shadow: { type: 'math_number', fields: { NUM: 90 } } } } },
         { kind: 'block', type: 'turtle_goto', inputs: { 
           X: { shadow: { type: 'math_number', fields: { NUM: 0 } } },
           Y: { shadow: { type: 'math_number', fields: { NUM: 0 } } }

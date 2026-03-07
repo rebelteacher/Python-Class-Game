@@ -1969,6 +1969,12 @@ export default function AssignmentLibrary({ user }) {
                                         <option value="turtle_penup">Pen Up</option>
                                         <option value="turtle_color">Set Color</option>
                                         <option value="turtle_pensize">Set Pen Size</option>
+                                        <option value="turtle_dot">Dot</option>
+                                      </optgroup>
+                                      <optgroup label="👁️ Sensing">
+                                        <option value="turtle_xposition">X Position</option>
+                                        <option value="turtle_yposition">Y Position</option>
+                                        <option value="turtle_direction">Direction</option>
                                       </optgroup>
                                       <optgroup label="💬 Looks">
                                         <option value="turtle_say">Say</option>
@@ -1984,6 +1990,29 @@ export default function AssignmentLibrary({ user }) {
                                       <optgroup label="🧠 Logic">
                                         <option value="turtle_if">If Statement</option>
                                         <option value="turtle_if_else">If-Else</option>
+                                        <option value="logic_compare">Comparison</option>
+                                        <option value="logic_operation">And/Or</option>
+                                        <option value="logic_negate">Not</option>
+                                      </optgroup>
+                                      <optgroup label="🔢 Math">
+                                        <option value="math_number">Number</option>
+                                        <option value="math_arithmetic">Math Operation (+−×÷)</option>
+                                        <option value="math_random_int">Random Integer</option>
+                                        <option value="math_modulo">Modulo (%)</option>
+                                      </optgroup>
+                                      <optgroup label="📦 Variables">
+                                        <option value="variables_set">Set Variable</option>
+                                        <option value="variables_get">Get Variable</option>
+                                        <option value="math_change">Change Variable</option>
+                                      </optgroup>
+                                      <optgroup label="📋 Lists">
+                                        <option value="lists_create_with">Create List</option>
+                                        <option value="lists_getIndex">Get Item from List</option>
+                                        <option value="lists_setIndex">Set Item in List</option>
+                                      </optgroup>
+                                      <optgroup label="🔧 Functions">
+                                        <option value="procedures_defnoreturn">Define Function</option>
+                                        <option value="procedures_callnoreturn">Call Function</option>
                                       </optgroup>
                                     </select>
                                   </td>
@@ -3147,6 +3176,12 @@ export default function AssignmentLibrary({ user }) {
                                       <option value="turtle_penup">Pen Up</option>
                                       <option value="turtle_color">Set Color</option>
                                       <option value="turtle_pensize">Set Pen Size</option>
+                                      <option value="turtle_dot">Dot</option>
+                                    </optgroup>
+                                    <optgroup label="👁️ Sensing">
+                                      <option value="turtle_xposition">X Position</option>
+                                      <option value="turtle_yposition">Y Position</option>
+                                      <option value="turtle_direction">Direction</option>
                                     </optgroup>
                                     <optgroup label="💬 Looks">
                                       <option value="turtle_say">Say</option>
@@ -3162,6 +3197,29 @@ export default function AssignmentLibrary({ user }) {
                                     <optgroup label="🧠 Logic">
                                       <option value="turtle_if">If Statement</option>
                                       <option value="turtle_if_else">If-Else</option>
+                                      <option value="logic_compare">Comparison</option>
+                                      <option value="logic_operation">And/Or</option>
+                                      <option value="logic_negate">Not</option>
+                                    </optgroup>
+                                    <optgroup label="🔢 Math">
+                                      <option value="math_number">Number</option>
+                                      <option value="math_arithmetic">Math Operation (+−×÷)</option>
+                                      <option value="math_random_int">Random Integer</option>
+                                      <option value="math_modulo">Modulo (%)</option>
+                                    </optgroup>
+                                    <optgroup label="📦 Variables">
+                                      <option value="variables_set">Set Variable</option>
+                                      <option value="variables_get">Get Variable</option>
+                                      <option value="math_change">Change Variable</option>
+                                    </optgroup>
+                                    <optgroup label="📋 Lists">
+                                      <option value="lists_create_with">Create List</option>
+                                      <option value="lists_getIndex">Get Item from List</option>
+                                      <option value="lists_setIndex">Set Item in List</option>
+                                    </optgroup>
+                                    <optgroup label="🔧 Functions">
+                                      <option value="procedures_defnoreturn">Define Function</option>
+                                      <option value="procedures_callnoreturn">Call Function</option>
                                     </optgroup>
                                   </select>
                                 </td>

@@ -467,44 +467,62 @@ function parseCode(code, parentVars = {}) {
       continue;
     }
     
-    // Parse pensize/width with variable support
-    match = trimmed.match(new RegExp(`${turtlePrefix}(?:pensize|width)\\s*\\(\\s*([^)]+)\\s*\\)`));
-    if (match) {
-      const value = getNumericValue(match[1]);
-      if (value !== null) {
-        commands.push({ type: 'pensize', value, line: lineNum });
+    // Parse pensize/width with variable support (handles nested parentheses)
+    if (trimmed.match(new RegExp(`${turtlePrefix}(?:pensize|width)\\s*\\(`))) {
+      const startIdx = trimmed.indexOf('(');
+      const content = extractParenthesesContent(trimmed, startIdx);
+      if (content !== null) {
+        const value = getNumericValue(content);
+        if (value !== null) {
+          commands.push({ type: 'pensize', value, line: lineNum });
+        }
       }
       continue;
     }
     
-    // Parse speed with variable support
-    match = trimmed.match(new RegExp(`${turtlePrefix}speed\\s*\\(\\s*([^)]+)\\s*\\)`));
-    if (match) {
-      const value = getNumericValue(match[1]);
-      if (value !== null) {
-        commands.push({ type: 'speed', value: Math.floor(value), line: lineNum });
+    // Parse speed with variable support (handles nested parentheses)
+    if (trimmed.match(new RegExp(`${turtlePrefix}speed\\s*\\(`))) {
+      const startIdx = trimmed.indexOf('(');
+      const content = extractParenthesesContent(trimmed, startIdx);
+      if (content !== null) {
+        const value = getNumericValue(content);
+        if (value !== null) {
+          commands.push({ type: 'speed', value: Math.floor(value), line: lineNum });
+        }
       }
       continue;
     }
     
-    // Parse circle with variable support (supports radius and optional extent)
-    match = trimmed.match(new RegExp(`${turtlePrefix}circle\\s*\\(\\s*([^,)]+)(?:\\s*,\\s*([^,)]+))?(?:\\s*,\\s*([^)]+))?\\s*\\)`));
-    if (match) {
-      const radius = getNumericValue(match[1]);
-      const extent = match[2] ? getNumericValue(match[2]) : 360; // Default to full circle
-      if (radius !== null) {
-        commands.push({ type: 'circle', value: radius, extent: extent || 360, line: lineNum });
+    // Parse circle with variable support (handles nested parentheses, supports radius and optional extent)
+    if (trimmed.match(new RegExp(`${turtlePrefix}circle\\s*\\(`))) {
+      const startIdx = trimmed.indexOf('(');
+      const content = extractParenthesesContent(trimmed, startIdx);
+      if (content !== null) {
+        // Split by comma, but need to be careful with nested parens
+        const args = content.split(',').map(s => s.trim());
+        const radius = getNumericValue(args[0]);
+        const extent = args[1] ? getNumericValue(args[1]) : 360;
+        if (radius !== null) {
+          commands.push({ type: 'circle', value: radius, extent: extent || 360, line: lineNum });
+        }
       }
       continue;
     }
     
-    // Parse goto/setpos/setposition with variable support
-    match = trimmed.match(new RegExp(`${turtlePrefix}(?:goto|setpos|setposition)\\s*\\(\\s*([^,]+)\\s*,\\s*([^)]+)\\s*\\)`));
-    if (match) {
-      const x = getNumericValue(match[1]);
-      const y = getNumericValue(match[2]);
-      if (x !== null && y !== null) {
-        commands.push({ type: 'goto', x, y, line: lineNum });
+    // Parse goto/setpos/setposition with variable support (handles nested parentheses)
+    if (trimmed.match(new RegExp(`${turtlePrefix}(?:goto|setpos|setposition)\\s*\\(`))) {
+      const startIdx = trimmed.indexOf('(');
+      const content = extractParenthesesContent(trimmed, startIdx);
+      if (content !== null) {
+        // Split by comma for x,y coordinates
+        const args = content.split(',').map(s => s.trim());
+        if (args.length >= 2) {
+          const x = getNumericValue(args[0]);
+          const y = getNumericValue(args[1]);
+          if (x !== null && y !== null) {
+            commands.push({ type: 'goto', x, y, line: lineNum });
+          }
+        }
       }
       continue;
     }
@@ -515,12 +533,15 @@ function parseCode(code, parentVars = {}) {
       continue;
     }
     
-    // Parse setheading/seth with variable support
-    match = trimmed.match(new RegExp(`${turtlePrefix}(?:setheading|seth)\\s*\\(\\s*([^)]+)\\s*\\)`));
-    if (match) {
-      const value = getNumericValue(match[1]);
-      if (value !== null) {
-        commands.push({ type: 'setheading', value, line: lineNum });
+    // Parse setheading/seth with variable support (handles nested parentheses like random.randint())
+    if (trimmed.match(new RegExp(`${turtlePrefix}(?:setheading|seth)\\s*\\(`))) {
+      const startIdx = trimmed.indexOf('(');
+      const content = extractParenthesesContent(trimmed, startIdx);
+      if (content !== null) {
+        const value = getNumericValue(content);
+        if (value !== null) {
+          commands.push({ type: 'setheading', value, line: lineNum });
+        }
       }
       continue;
     }
@@ -537,13 +558,23 @@ function parseCode(code, parentVars = {}) {
       continue;
     }
     
-    // Parse dot command - t.dot(size) or t.dot(size, color)
-    match = trimmed.match(new RegExp(`${turtlePrefix}dot\\s*\\(\\s*([^,)]+)(?:\\s*,\\s*['"](\\w+)['"])?\\s*\\)`));
-    if (match) {
-      const size = getNumericValue(match[1]);
-      const color = match[2] || null;  // Optional color parameter
-      if (size !== null) {
-        commands.push({ type: 'dot', size: size, color: color, line: lineNum });
+    // Parse dot command - t.dot(size) or t.dot(size, color) - handles nested parentheses
+    if (trimmed.match(new RegExp(`${turtlePrefix}dot\\s*\\(`))) {
+      const startIdx = trimmed.indexOf('(');
+      const content = extractParenthesesContent(trimmed, startIdx);
+      if (content !== null) {
+        // Split by comma for size and optional color
+        const args = content.split(',').map(s => s.trim());
+        const size = getNumericValue(args[0]);
+        // Extract color from second argument if present (remove quotes)
+        let color = null;
+        if (args[1]) {
+          const colorMatch = args[1].match(/['"](\w+)['"]/);
+          if (colorMatch) color = colorMatch[1];
+        }
+        if (size !== null) {
+          commands.push({ type: 'dot', size: size, color: color, line: lineNum });
+        }
       }
       continue;
     }
