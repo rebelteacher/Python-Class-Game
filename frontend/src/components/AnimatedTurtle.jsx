@@ -7,20 +7,15 @@ function evaluateExpression(expr, variables) {
   if (expr === null || expr === undefined) return null;
   expr = String(expr).trim();
   
-  // Debug: show hex codes of input
-  const hexCodes = [...expr].map(c => c.charCodeAt(0).toString(16).padStart(2, '0')).join(' ');
-  console.log("📝 evaluateExpression input hex:", hexCodes);
-  console.log("📝 evaluateExpression input str:", expr);
-  
   // Handle random.randint(a, b) - generate a random integer between a and b (inclusive)
-  const randintMatch = expr.match(/random\.randint\s*\(\s*(-?\d+)\s*,\s*(-?\d+)\s*\)/);
-  console.log("📝 randintMatch:", randintMatch);
-  if (randintMatch) {
-    const min = parseInt(randintMatch[1]);
-    const max = parseInt(randintMatch[2]);
-    const result = Math.floor(Math.random() * (max - min + 1)) + min;
-    console.log("📝 random.randint result:", result);
-    return result;
+  if (expr.includes('random.randint')) {
+    const randintMatch = expr.match(/random\.randint\s*\(\s*(-?\d+)\s*,\s*(-?\d+)\s*\)/);
+    if (randintMatch) {
+      const min = parseInt(randintMatch[1]);
+      const max = parseInt(randintMatch[2]);
+      const result = Math.floor(Math.random() * (max - min + 1)) + min;
+      return result;
+    }
   }
   
   // Handle random.random() - generate a random float between 0 and 1
@@ -318,18 +313,12 @@ function parseCode(code, parentVars = {}) {
     const getNumericValue = (str) => {
       if (!str) return null;
       str = str.trim();
-      console.log("📝 getNumericValue input:", str);
       // Only try parseFloat if the string is purely a number (no expressions)
-      // This prevents "10 + i * 10" from being parsed as just "10"
       if (/^-?\d+\.?\d*$/.test(str)) {
-        const result = parseFloat(str);
-        console.log("📝 getNumericValue (direct number):", result);
-        return result;
+        return parseFloat(str);
       }
-      // Try as variable or expression
-      const result = evaluateExpression(str, variables);
-      console.log("📝 getNumericValue (expression):", result);
-      return result;
+      // Try as variable or expression (handles random.randint, math expressions, etc.)
+      return evaluateExpression(str, variables);
     };
     
     // Helper to get color value (string literal, variable, or list index)
@@ -797,19 +786,8 @@ const AnimatedTurtle = forwardRef(function AnimatedTurtle({
   
   // Parse code into commands (memoized) and extract turtle name/color
   const { commands, turtleName, turtleColor, eventHandlers } = useMemo(() => {
-    console.log("📝 AnimatedTurtle parsing code, length:", code?.length || 0);
-    console.log("📝 Code content:\n", code);
     const result = parseCode(code);
     const handlers = parseEventHandlers(code);
-    
-    console.log("📝 Parsed commands:", result.length);
-    console.log("📝 Command types:", result.map(c => c.type));
-    console.log("📝 Parsed event handlers:", {
-      keyHandlers: Object.keys(handlers.keyHandlers),
-      clickHandler: handlers.clickHandler.length,
-      mouseMoveHandler: handlers.mouseMoveHandler.length,
-      onStartHandler: handlers.onStartHandler.length
-    });
     
     // Detect turtle variable name from code
     const nameMatch = code.match(/(\w+)\s*=\s*turtle\.Turtle\(\)|(\w+)\s*=\s*Turtle\(\)/);
