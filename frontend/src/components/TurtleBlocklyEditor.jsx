@@ -858,13 +858,18 @@ const generatePythonCode = (workspace) => {
       }
       case 'turtle_while': {
         const condition = getValueCode(block, 'CONDITION', 'True');
+        console.log("🔧 turtle_while condition:", condition);
         blockCode = `${indent}while ${condition}:\n`;
         const doBlock = block.getInputTargetBlock('DO');
+        console.log("🔧 turtle_while doBlock:", !!doBlock);
         if (doBlock) {
-          blockCode += processBlockChain(doBlock, indent + '    ');
+          const bodyCode = processBlockChain(doBlock, indent + '    ');
+          console.log("🔧 turtle_while bodyCode:", bodyCode);
+          blockCode += bodyCode;
         } else {
           blockCode += `${indent}    pass\n`;
         }
+        console.log("🔧 turtle_while final blockCode:", blockCode);
         break;
       }
       case 'turtle_if': {
@@ -1023,7 +1028,7 @@ const generatePythonCode = (workspace) => {
   }
   
   console.log("🔧 Generated code length:", code.length, "chars");
-  console.log("🔧 Generated code preview:", code.substring(0, 200));
+  console.log("🔧 Generated code FULL:\n" + code);
   
   // Check if we have any actual turtle commands (not just imports)
   const hasCommands = /t\.\w+\(/.test(code);

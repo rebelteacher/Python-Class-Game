@@ -610,6 +610,7 @@ function parseCode(code, parentVars = {}) {
     // This creates a 'while' command that is evaluated at runtime
     match = trimmed.match(/^while\s+(.+)\s*:\s*$/);
     if (match) {
+      console.log("📝 Found while loop! condition:", match[1]);
       const condition = match[1].trim();
       const whileIndent = line.search(/\S/);
       const whileBodyLines = [];
@@ -635,7 +636,9 @@ function parseCode(code, parentVars = {}) {
       }
       
       const whileBodyCode = whileBodyLines.join('\n');
+      console.log("📝 while body code:", whileBodyCode);
       const whileBodyCommands = parseCode(whileBodyCode, variables);
+      console.log("📝 while body commands:", whileBodyCommands.length);
       
       commands.push({
         type: 'while',
