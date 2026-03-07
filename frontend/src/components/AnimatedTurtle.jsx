@@ -7,6 +7,19 @@ function evaluateExpression(expr, variables) {
   if (expr === null || expr === undefined) return null;
   expr = String(expr).trim();
   
+  // Handle random.randint(a, b) - generate a random integer between a and b (inclusive)
+  const randintMatch = expr.match(/^random\.randint\s*\(\s*(-?\d+)\s*,\s*(-?\d+)\s*\)$/);
+  if (randintMatch) {
+    const min = parseInt(randintMatch[1]);
+    const max = parseInt(randintMatch[2]);
+    return Math.floor(Math.random() * (max - min + 1)) + min;
+  }
+  
+  // Handle random.random() - generate a random float between 0 and 1
+  if (expr === 'random.random()') {
+    return Math.random();
+  }
+  
   // Check for list indexing: varName[index] (e.g., colors[i], colors[0])
   const listIndexMatch = expr.match(/^(\w+)\[([^\]]+)\]$/);
   if (listIndexMatch) {

@@ -710,6 +710,14 @@ const generatePythonCode = (workspace) => {
         const to = getValueCode(block, 'TO', '10');
         return `random.randint(${from}, ${to})`;
       }
+      case 'math_random_int': {
+        const from = getValueCode(block, 'FROM', '1');
+        const to = getValueCode(block, 'TO', '10');
+        return `random.randint(${from}, ${to})`;
+      }
+      case 'math_random_float': {
+        return `random.random()`;
+      }
       case 'variables_get':
         return block.getField('VAR')?.getText() || 'x';
       case 'logic_compare': {
