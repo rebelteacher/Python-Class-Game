@@ -1367,7 +1367,9 @@ const AnimatedTurtle = forwardRef(function AnimatedTurtle({
         case 'right':
           console.log("🟢 EXECUTING RIGHT command with value:", cmd.value, "Current heading:", turtle.heading);
           turtle.heading -= cmd.value;
-          console.log("🟢 New heading:", turtle.heading);
+          // Normalize heading to 0-360 range
+          turtle.heading = ((turtle.heading % 360) + 360) % 360;
+          console.log("🟢 New heading (normalized):", turtle.heading);
           drawCanvas();
           setTimeout(resolve, baseDelay / 2);
           break;
@@ -1375,6 +1377,8 @@ const AnimatedTurtle = forwardRef(function AnimatedTurtle({
         case 'left':
           console.log("🟢 EXECUTING LEFT command with value:", cmd.value);
           turtle.heading += cmd.value;
+          // Normalize heading to 0-360 range
+          turtle.heading = ((turtle.heading % 360) + 360) % 360;
           drawCanvas();
           setTimeout(resolve, baseDelay / 2);
           break;
@@ -1577,6 +1581,9 @@ const AnimatedTurtle = forwardRef(function AnimatedTurtle({
             // Replace turtle method calls with actual values
             let evalStr = condition;
             
+            // Normalize heading to 0-360 range for comparisons
+            const normalizedHeading = ((turtle.heading % 360) + 360) % 360;
+            
             // Handle t.distance(x, y), turtle.distance(x, y) - calculate distance to a point
             evalStr = evalStr.replace(/(?:t\.|turtle\.)?distance\s*\(\s*(-?\d+(?:\.\d+)?)\s*,\s*(-?\d+(?:\.\d+)?)\s*\)/g, (match, x, y) => {
               const dx = turtle.x - parseFloat(x);
@@ -1588,8 +1595,8 @@ const AnimatedTurtle = forwardRef(function AnimatedTurtle({
             evalStr = evalStr.replace(/(?:t\.|turtle\.)?xcor\s*\(\s*\)/g, turtle.x.toString());
             // Handle t.ycor(), turtle.ycor(), ycor()
             evalStr = evalStr.replace(/(?:t\.|turtle\.)?ycor\s*\(\s*\)/g, turtle.y.toString());
-            // Handle t.heading(), turtle.heading(), heading()
-            evalStr = evalStr.replace(/(?:t\.|turtle\.)?heading\s*\(\s*\)/g, turtle.heading.toString());
+            // Handle t.heading(), turtle.heading(), heading() - use normalized heading
+            evalStr = evalStr.replace(/(?:t\.|turtle\.)?heading\s*\(\s*\)/g, normalizedHeading.toString());
             // Handle t.isdown(), turtle.isdown(), isdown()
             evalStr = evalStr.replace(/(?:t\.|turtle\.)?isdown\s*\(\s*\)/g, turtle.penDown.toString());
             // Handle t.isvisible(), turtle.isvisible(), isvisible()
@@ -1637,6 +1644,9 @@ const AnimatedTurtle = forwardRef(function AnimatedTurtle({
           const evaluateWhileCondition = (condition) => {
             let evalStr = condition;
             
+            // Normalize heading to 0-360 range for comparisons
+            const normalizedHeading = ((turtle.heading % 360) + 360) % 360;
+            
             // Handle t.distance(x, y), turtle.distance(x, y) - calculate distance to a point
             evalStr = evalStr.replace(/(?:t\.|turtle\.)?distance\s*\(\s*(-?\d+(?:\.\d+)?)\s*,\s*(-?\d+(?:\.\d+)?)\s*\)/g, (match, x, y) => {
               const dx = turtle.x - parseFloat(x);
@@ -1648,8 +1658,8 @@ const AnimatedTurtle = forwardRef(function AnimatedTurtle({
             evalStr = evalStr.replace(/(?:t\.|turtle\.)?xcor\s*\(\s*\)/g, turtle.x.toString());
             // Handle t.ycor(), turtle.ycor(), ycor()
             evalStr = evalStr.replace(/(?:t\.|turtle\.)?ycor\s*\(\s*\)/g, turtle.y.toString());
-            // Handle t.heading(), turtle.heading(), heading()
-            evalStr = evalStr.replace(/(?:t\.|turtle\.)?heading\s*\(\s*\)/g, turtle.heading.toString());
+            // Handle t.heading(), turtle.heading(), heading() - use normalized heading
+            evalStr = evalStr.replace(/(?:t\.|turtle\.)?heading\s*\(\s*\)/g, normalizedHeading.toString());
             // Handle t.isdown(), turtle.isdown(), isdown()
             evalStr = evalStr.replace(/(?:t\.|turtle\.)?isdown\s*\(\s*\)/g, turtle.penDown.toString());
             // Handle t.isvisible(), turtle.isvisible(), isvisible()
