@@ -6,13 +6,16 @@ import { Play, Pause, RotateCcw, FastForward, Grid } from "lucide-react";
 function evaluateExpression(expr, variables) {
   if (expr === null || expr === undefined) return null;
   expr = String(expr).trim();
+  console.log("📝 evaluateExpression input:", expr);
   
   // Handle random.randint(a, b) - generate a random integer between a and b (inclusive)
   const randintMatch = expr.match(/^random\.randint\s*\(\s*(-?\d+)\s*,\s*(-?\d+)\s*\)$/);
   if (randintMatch) {
     const min = parseInt(randintMatch[1]);
     const max = parseInt(randintMatch[2]);
-    return Math.floor(Math.random() * (max - min + 1)) + min;
+    const result = Math.floor(Math.random() * (max - min + 1)) + min;
+    console.log("📝 random.randint result:", result);
+    return result;
   }
   
   // Handle random.random() - generate a random float between 0 and 1
@@ -310,13 +313,18 @@ function parseCode(code, parentVars = {}) {
     const getNumericValue = (str) => {
       if (!str) return null;
       str = str.trim();
+      console.log("📝 getNumericValue input:", str);
       // Only try parseFloat if the string is purely a number (no expressions)
       // This prevents "10 + i * 10" from being parsed as just "10"
       if (/^-?\d+\.?\d*$/.test(str)) {
-        return parseFloat(str);
+        const result = parseFloat(str);
+        console.log("📝 getNumericValue (direct number):", result);
+        return result;
       }
       // Try as variable or expression
-      return evaluateExpression(str, variables);
+      const result = evaluateExpression(str, variables);
+      console.log("📝 getNumericValue (expression):", result);
+      return result;
     };
     
     // Helper to get color value (string literal, variable, or list index)
