@@ -235,8 +235,14 @@ function skipFunctionBody(lines, defLineIndex) {
 
 // Parse Python turtle code into commands
 function parseCode(code, parentVars = {}) {
+  console.log("🟠 parseCode called with code length:", code?.length || 0);
+  if (!code) {
+    console.log("🟠 parseCode: code is empty/null!");
+    return [];
+  }
   const commands = [];
   const lines = code.split('\n');
+  console.log("🟠 parseCode: splitting into", lines.length, "lines");
   const variables = { ...parentVars };
   
   // Detect turtle variable name (e.g., bob = turtle.Turtle())
@@ -838,7 +844,11 @@ const AnimatedTurtle = forwardRef(function AnimatedTurtle({
   
   // Parse code into commands (memoized) and extract turtle name/color
   const { commands, turtleName, turtleColor, eventHandlers } = useMemo(() => {
+    console.log("🔶 useMemo: Parsing code. Code length:", code?.length || 0);
+    console.log("🔶 useMemo: Code preview:", code?.substring(0, 150));
     const result = parseCode(code);
+    console.log("🔶 useMemo: parseCode returned", result.length, "commands");
+    console.log("🔶 useMemo: Command types:", result.map(c => c.type));
     const handlers = parseEventHandlers(code);
     
     // Detect turtle variable name from code
