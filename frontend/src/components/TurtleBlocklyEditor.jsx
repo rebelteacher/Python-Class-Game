@@ -667,7 +667,10 @@ const generatePythonCode = (workspace) => {
   if (!workspace) return "";
   
   const blocks = workspace.getTopBlocks(true);
+  const allBlocks = workspace.getAllBlocks();
   console.log("🔧 generatePythonCode: Found", blocks.length, "top-level blocks");
+  console.log("🔧 Total blocks in workspace:", allBlocks.length);
+  console.log("🔧 All block types:", allBlocks.map(b => b.type));
   if (blocks.length > 0) {
     console.log("🔧 Block types:", blocks.map(b => b.type));
   }
