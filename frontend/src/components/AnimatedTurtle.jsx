@@ -371,53 +371,72 @@ function parseCode(code, parentVars = {}) {
     }
     
     // Parse forward/fd with variable support (handles nested parentheses like random.randint())
+    // Store expression for runtime evaluation if it contains random
     if (trimmed.match(new RegExp(`${turtlePrefix}(?:forward|fd)\\s*\\(`))) {
       const startIdx = trimmed.indexOf('(');
       const content = extractParenthesesContent(trimmed, startIdx);
       if (content !== null) {
-        const value = getNumericValue(content);
-        if (value !== null) {
-          commands.push({ type: 'forward', value, line: lineNum });
+        if (content.includes('random.')) {
+          commands.push({ type: 'forward', expression: content, line: lineNum });
+        } else {
+          const value = getNumericValue(content);
+          if (value !== null) {
+            commands.push({ type: 'forward', value, line: lineNum });
+          }
         }
       }
       continue;
     }
     
     // Parse backward/bk/back with variable support (handles nested parentheses)
+    // Store expression for runtime evaluation if it contains random
     if (trimmed.match(new RegExp(`${turtlePrefix}(?:backward|bk|back)\\s*\\(`))) {
       const startIdx = trimmed.indexOf('(');
       const content = extractParenthesesContent(trimmed, startIdx);
       if (content !== null) {
-        const value = getNumericValue(content);
-        if (value !== null) {
-          commands.push({ type: 'backward', value, line: lineNum });
+        if (content.includes('random.')) {
+          commands.push({ type: 'backward', expression: content, line: lineNum });
+        } else {
+          const value = getNumericValue(content);
+          if (value !== null) {
+            commands.push({ type: 'backward', value, line: lineNum });
+          }
         }
       }
       continue;
     }
     
     // Parse right/rt with variable support (handles nested parentheses like random.randint(0, 350))
-    // Use a function to find the matching closing parenthesis
+    // Store expression for runtime evaluation if it contains random
     if (trimmed.match(new RegExp(`${turtlePrefix}(?:right|rt)\\s*\\(`))) {
       const startIdx = trimmed.indexOf('(');
       const content = extractParenthesesContent(trimmed, startIdx);
       if (content !== null) {
-        const value = getNumericValue(content);
-        if (value !== null) {
-          commands.push({ type: 'right', value, line: lineNum });
+        if (content.includes('random.')) {
+          commands.push({ type: 'right', expression: content, line: lineNum });
+        } else {
+          const value = getNumericValue(content);
+          if (value !== null) {
+            commands.push({ type: 'right', value, line: lineNum });
+          }
         }
       }
       continue;
     }
     
     // Parse left/lt with variable support (handles nested parentheses)
+    // Store expression for runtime evaluation if it contains random
     if (trimmed.match(new RegExp(`${turtlePrefix}(?:left|lt)\\s*\\(`))) {
       const startIdx = trimmed.indexOf('(');
       const content = extractParenthesesContent(trimmed, startIdx);
       if (content !== null) {
-        const value = getNumericValue(content);
-        if (value !== null) {
-          commands.push({ type: 'left', value, line: lineNum });
+        if (content.includes('random.')) {
+          commands.push({ type: 'left', expression: content, line: lineNum });
+        } else {
+          const value = getNumericValue(content);
+          if (value !== null) {
+            commands.push({ type: 'left', value, line: lineNum });
+          }
         }
       }
       continue;
@@ -534,13 +553,19 @@ function parseCode(code, parentVars = {}) {
     }
     
     // Parse setheading/seth with variable support (handles nested parentheses like random.randint())
+    // Store expression for runtime evaluation if it contains random
     if (trimmed.match(new RegExp(`${turtlePrefix}(?:setheading|seth)\\s*\\(`))) {
       const startIdx = trimmed.indexOf('(');
       const content = extractParenthesesContent(trimmed, startIdx);
       if (content !== null) {
-        const value = getNumericValue(content);
-        if (value !== null) {
-          commands.push({ type: 'setheading', value, line: lineNum });
+        // Check if this needs runtime evaluation (contains random)
+        if (content.includes('random.')) {
+          commands.push({ type: 'setheading', expression: content, line: lineNum });
+        } else {
+          const value = getNumericValue(content);
+          if (value !== null) {
+            commands.push({ type: 'setheading', value, line: lineNum });
+          }
         }
       }
       continue;
@@ -1311,7 +1336,12 @@ const AnimatedTurtle = forwardRef(function AnimatedTurtle({
       switch (cmd.type) {
         case 'forward':
         case 'backward': {
-          const distance = cmd.type === 'backward' ? -cmd.value : cmd.value;
+          // Evaluate expression at runtime if present (for random values)
+          let cmdValue = cmd.value;
+          if (cmd.expression) {
+            cmdValue = evaluateExpression(cmd.expression, {});
+          }
+          const distance = cmd.type === 'backward' ? -cmdValue : cmdValue;
           const rad = turtle.heading * Math.PI / 180;
           const dx = distance * Math.cos(rad);
           const dy = distance * Math.sin(rad);
@@ -1364,21 +1394,33 @@ const AnimatedTurtle = forwardRef(function AnimatedTurtle({
           break;
         }
         
-        case 'right':
-          turtle.heading -= cmd.value;
+        case 'right': {
+          // Evaluate expression at runtime if present (for random values)
+          let cmdValue = cmd.value;
+          if (cmd.expression) {
+            cmdValue = evaluateExpression(cmd.expression, {});
+          }
+          turtle.heading -= cmdValue;
           // Normalize heading to 0-360 range
           turtle.heading = ((turtle.heading % 360) + 360) % 360;
           drawCanvas();
           setTimeout(resolve, baseDelay / 2);
           break;
+        }
           
-        case 'left':
-          turtle.heading += cmd.value;
+        case 'left': {
+          // Evaluate expression at runtime if present (for random values)
+          let cmdValue = cmd.value;
+          if (cmd.expression) {
+            cmdValue = evaluateExpression(cmd.expression, {});
+          }
+          turtle.heading += cmdValue;
           // Normalize heading to 0-360 range
           turtle.heading = ((turtle.heading % 360) + 360) % 360;
           drawCanvas();
           setTimeout(resolve, baseDelay / 2);
           break;
+        }
           
         case 'penup':
           turtle.penDown = false;
@@ -1520,11 +1562,19 @@ const AnimatedTurtle = forwardRef(function AnimatedTurtle({
           setTimeout(resolve, baseDelay);
           break;
           
-        case 'setheading':
-          turtle.heading = cmd.value;
+        case 'setheading': {
+          // Evaluate expression at runtime if present (for random values)
+          let cmdValue = cmd.value;
+          if (cmd.expression) {
+            cmdValue = evaluateExpression(cmd.expression, {});
+          }
+          turtle.heading = cmdValue;
+          // Normalize heading to 0-360 range
+          turtle.heading = ((turtle.heading % 360) + 360) % 360;
           drawCanvas();
           setTimeout(resolve, baseDelay / 2);
           break;
+        }
           
         case 'hideturtle':
           turtle.visible = false;
