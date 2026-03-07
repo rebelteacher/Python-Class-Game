@@ -753,6 +753,7 @@ const generatePythonCode = (workspace) => {
   const processBlock = (block, indent = '') => {
     if (!block) return "";
     let blockCode = "";
+    console.log("🔧 processBlock: type=", block.type);
     
     switch (block.type) {
       case 'turtle_forward': {
@@ -767,6 +768,7 @@ const generatePythonCode = (workspace) => {
       }
       case 'turtle_right': {
         const degrees = getValueCode(block, 'DEGREES', '90');
+        console.log("🔧 turtle_right degrees=", degrees);
         blockCode = `${indent}t.right(${degrees})\n`;
         break;
       }
@@ -1205,8 +1207,11 @@ const TurtleBlocklyEditor = forwardRef(({
     }
 
     // Listen for changes
-    const handleChange = () => {
+    const handleChange = (event) => {
+      console.log("📣 Blockly change event:", event?.type);
       const code = generatePythonCode(workspace);
+      console.log("📣 Generated code length:", code?.length || 0);
+      console.log("📣 Generated code preview:", code?.substring(0, 100));
       setGeneratedCode(code);
       
       if (onCodeChange) {
