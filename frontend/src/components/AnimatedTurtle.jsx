@@ -1505,6 +1505,13 @@ const AnimatedTurtle = forwardRef(function AnimatedTurtle({
             // Replace turtle method calls with actual values
             let evalStr = condition;
             
+            // Handle t.distance(x, y), turtle.distance(x, y) - calculate distance to a point
+            evalStr = evalStr.replace(/(?:t\.|turtle\.)?distance\s*\(\s*(-?\d+(?:\.\d+)?)\s*,\s*(-?\d+(?:\.\d+)?)\s*\)/g, (match, x, y) => {
+              const dx = turtle.x - parseFloat(x);
+              const dy = turtle.y - parseFloat(y);
+              return Math.sqrt(dx * dx + dy * dy).toString();
+            });
+            
             // Handle t.xcor(), turtle.xcor(), xcor()
             evalStr = evalStr.replace(/(?:t\.|turtle\.)?xcor\s*\(\s*\)/g, turtle.x.toString());
             // Handle t.ycor(), turtle.ycor(), ycor()
@@ -1557,6 +1564,13 @@ const AnimatedTurtle = forwardRef(function AnimatedTurtle({
           // Evaluate while condition at runtime using current turtle state
           const evaluateWhileCondition = (condition) => {
             let evalStr = condition;
+            
+            // Handle t.distance(x, y), turtle.distance(x, y) - calculate distance to a point
+            evalStr = evalStr.replace(/(?:t\.|turtle\.)?distance\s*\(\s*(-?\d+(?:\.\d+)?)\s*,\s*(-?\d+(?:\.\d+)?)\s*\)/g, (match, x, y) => {
+              const dx = turtle.x - parseFloat(x);
+              const dy = turtle.y - parseFloat(y);
+              return Math.sqrt(dx * dx + dy * dy).toString();
+            });
             
             // Handle t.xcor(), turtle.xcor(), xcor()
             evalStr = evalStr.replace(/(?:t\.|turtle\.)?xcor\s*\(\s*\)/g, turtle.x.toString());
