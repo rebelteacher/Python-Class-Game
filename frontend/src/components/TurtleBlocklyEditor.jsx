@@ -682,18 +682,24 @@ const generatePythonCode = (workspace) => {
   const getValueCode = (block, inputName, defaultVal) => {
     const input = block.getInput(inputName);
     if (!input || !input.connection || !input.connection.targetBlock()) {
+      console.log(`getValueCode: No target block for ${inputName}, using default: ${defaultVal}`);
       return defaultVal;
     }
     const targetBlock = input.connection.targetBlock();
+    console.log(`getValueCode: Found target block type=${targetBlock.type} for ${inputName}`);
     return processValueBlock(targetBlock);
   };
   
   const processValueBlock = (block) => {
     if (!block) return "0";
+    console.log(`processValueBlock: Processing block type=${block.type}`);
     
     switch (block.type) {
-      case 'math_number':
-        return block.getFieldValue('NUM')?.toString() || "0";
+      case 'math_number': {
+        const num = block.getFieldValue('NUM');
+        console.log(`processValueBlock: math_number NUM=${num}`);
+        return num?.toString() || "0";
+      }
       case 'math_arithmetic': {
         const a = getValueCode(block, 'A', '0');
         const b = getValueCode(block, 'B', '0');
@@ -704,11 +710,13 @@ const generatePythonCode = (workspace) => {
       case 'math_random': {
         const from = getValueCode(block, 'FROM', '1');
         const to = getValueCode(block, 'TO', '10');
+        console.log(`processValueBlock: math_random from=${from} to=${to}`);
         return `random.randint(${from}, ${to})`;
       }
       case 'math_random_int': {
         const from = getValueCode(block, 'FROM', '1');
         const to = getValueCode(block, 'TO', '10');
+        console.log(`processValueBlock: math_random_int from=${from} to=${to}`);
         return `random.randint(${from}, ${to})`;
       }
       case 'math_random_float': {
