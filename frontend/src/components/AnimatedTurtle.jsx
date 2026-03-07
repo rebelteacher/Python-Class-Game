@@ -398,12 +398,17 @@ function parseCode(code, parentVars = {}) {
     // Parse right/rt with variable support (handles nested parentheses like random.randint(0, 350))
     // Use a function to find the matching closing parenthesis
     if (trimmed.match(new RegExp(`${turtlePrefix}(?:right|rt)\\s*\\(`))) {
+      console.log("🔴 RIGHT MATCH! trimmed:", trimmed);
       const startIdx = trimmed.indexOf('(');
+      console.log("🔴 startIdx:", startIdx);
       const content = extractParenthesesContent(trimmed, startIdx);
+      console.log("🔴 extracted content:", content);
       if (content !== null) {
         const value = getNumericValue(content);
+        console.log("🔴 value:", value);
         if (value !== null) {
           commands.push({ type: 'right', value, line: lineNum });
+          console.log("🔴 pushed right command!");
         }
       }
       continue;
