@@ -6,11 +6,15 @@ import { Play, Pause, RotateCcw, FastForward, Grid } from "lucide-react";
 function evaluateExpression(expr, variables) {
   if (expr === null || expr === undefined) return null;
   expr = String(expr).trim();
-  console.log("📝 evaluateExpression input:", JSON.stringify(expr));
+  
+  // Debug: show hex codes of input
+  const hexCodes = [...expr].map(c => c.charCodeAt(0).toString(16).padStart(2, '0')).join(' ');
+  console.log("📝 evaluateExpression input hex:", hexCodes);
+  console.log("📝 evaluateExpression input str:", expr);
   
   // Handle random.randint(a, b) - generate a random integer between a and b (inclusive)
   const randintMatch = expr.match(/random\.randint\s*\(\s*(-?\d+)\s*,\s*(-?\d+)\s*\)/);
-  console.log("📝 randintMatch result:", randintMatch);
+  console.log("📝 randintMatch:", randintMatch);
   if (randintMatch) {
     const min = parseInt(randintMatch[1]);
     const max = parseInt(randintMatch[2]);
