@@ -784,13 +784,13 @@ const AnimatedTurtle = forwardRef(function AnimatedTurtle({
   
   // Parse code into commands (memoized) and extract turtle name/color
   const { commands, turtleName, turtleColor, eventHandlers } = useMemo(() => {
-    console.log("📝 Parsing code:", code?.substring(0, 100));
-    console.log("📝 Code length:", code?.length || 0);
+    console.log("📝 AnimatedTurtle parsing code, length:", code?.length || 0);
+    console.log("📝 Code content:\n", code);
     const result = parseCode(code);
     const handlers = parseEventHandlers(code);
     
     console.log("📝 Parsed commands:", result.length);
-    console.log("📝 First 3 commands:", result.slice(0, 3).map(c => c.type));
+    console.log("📝 Command types:", result.map(c => c.type));
     console.log("📝 Parsed event handlers:", {
       keyHandlers: Object.keys(handlers.keyHandlers),
       clickHandler: handlers.clickHandler.length,
