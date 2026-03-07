@@ -487,13 +487,18 @@ function parseCode(code, parentVars = {}) {
     }
     
     // Parse pensize/width with variable support (handles nested parentheses)
+    // Store expression for runtime evaluation if it contains random
     if (trimmed.match(new RegExp(`${turtlePrefix}(?:pensize|width)\\s*\\(`))) {
       const startIdx = trimmed.indexOf('(');
       const content = extractParenthesesContent(trimmed, startIdx);
       if (content !== null) {
-        const value = getNumericValue(content);
-        if (value !== null) {
-          commands.push({ type: 'pensize', value, line: lineNum });
+        if (content.includes('random.')) {
+          commands.push({ type: 'pensize', expression: content, line: lineNum });
+        } else {
+          const value = getNumericValue(content);
+          if (value !== null) {
+            commands.push({ type: 'pensize', value, line: lineNum });
+          }
         }
       }
       continue;
@@ -507,6 +512,7 @@ function parseCode(code, parentVars = {}) {
         const value = getNumericValue(content);
         if (value !== null) {
           commands.push({ type: 'speed', value: Math.floor(value), line: lineNum });
+        }
         }
       }
       continue;
@@ -529,6 +535,7 @@ function parseCode(code, parentVars = {}) {
     }
     
     // Parse goto/setpos/setposition with variable support (handles nested parentheses)
+    // Store expressions for runtime evaluation if they contain random
     if (trimmed.match(new RegExp(`${turtlePrefix}(?:goto|setpos|setposition)\\s*\\(`))) {
       const startIdx = trimmed.indexOf('(');
       const content = extractParenthesesContent(trimmed, startIdx);
@@ -536,10 +543,24 @@ function parseCode(code, parentVars = {}) {
         // Split by comma for x,y coordinates
         const args = content.split(',').map(s => s.trim());
         if (args.length >= 2) {
-          const x = getNumericValue(args[0]);
-          const y = getNumericValue(args[1]);
-          if (x !== null && y !== null) {
-            commands.push({ type: 'goto', x, y, line: lineNum });
+          const xArg = args[0];
+          const yArg = args[1];
+          // Check if either coordinate needs runtime evaluation
+          if (xArg.includes('random.') || yArg.includes('random.')) {
+            commands.push({ 
+              type: 'goto', 
+              xExpression: xArg.includes('random.') ? xArg : null,
+              yExpression: yArg.includes('random.') ? yArg : null,
+              x: xArg.includes('random.') ? null : getNumericValue(xArg),
+              y: yArg.includes('random.') ? null : getNumericValue(yArg),
+              line: lineNum 
+            });
+          } else {
+            const x = getNumericValue(xArg);
+            const y = getNumericValue(yArg);
+            if (x !== null && y !== null) {
+              commands.push({ type: 'goto', x, y, line: lineNum });
+            }
           }
         }
       }
@@ -590,15 +611,21 @@ function parseCode(code, parentVars = {}) {
       if (content !== null) {
         // Split by comma for size and optional color
         const args = content.split(',').map(s => s.trim());
-        const size = getNumericValue(args[0]);
+        const sizeArg = args[0];
         // Extract color from second argument if present (remove quotes)
         let color = null;
         if (args[1]) {
           const colorMatch = args[1].match(/['"](\w+)['"]/);
           if (colorMatch) color = colorMatch[1];
         }
-        if (size !== null) {
-          commands.push({ type: 'dot', size: size, color: color, line: lineNum });
+        // Check if size needs runtime evaluation
+        if (sizeArg.includes('random.')) {
+          commands.push({ type: 'dot', sizeExpression: sizeArg, color: color, line: lineNum });
+        } else {
+          const size = getNumericValue(sizeArg);
+          if (size !== null) {
+            commands.push({ type: 'dot', size: size, color: color, line: lineNum });
+          }
         }
       }
       continue;
@@ -1472,10 +1499,16 @@ const AnimatedTurtle = forwardRef(function AnimatedTurtle({
           resolve();
           break;
           
-        case 'pensize':
-          turtle.penSize = cmd.value;
+        case 'pensize': {
+          // Evaluate expression at runtime if present (for random values)
+          let cmdValue = cmd.value;
+          if (cmd.expression) {
+            cmdValue = evaluateExpression(cmd.expression, {});
+          }
+          turtle.penSize = cmdValue;
           resolve();
           break;
+        }
           
         case 'speed':
           resolve();
@@ -1528,21 +1561,32 @@ const AnimatedTurtle = forwardRef(function AnimatedTurtle({
           break;
         }
           
-        case 'goto':
+        case 'goto': {
+          // Evaluate expressions at runtime if present (for random values)
+          let gotoX = cmd.x;
+          let gotoY = cmd.y;
+          if (cmd.xExpression) {
+            gotoX = evaluateExpression(cmd.xExpression, {});
+          }
+          if (cmd.yExpression) {
+            gotoY = evaluateExpression(cmd.yExpression, {});
+          }
+          
           if (turtle.penDown) {
             pathsRef.current.push({
               type: 'line',
               x1: turtle.x, y1: turtle.y,
-              x2: cmd.x, y2: cmd.y,
+              x2: gotoX, y2: gotoY,
               color: turtle.penColor,
               width: turtle.penSize
             });
           }
-          turtle.x = cmd.x;
-          turtle.y = cmd.y;
+          turtle.x = gotoX;
+          turtle.y = gotoY;
           drawCanvas();
           setTimeout(resolve, baseDelay);
           break;
+        }
         
         case 'home':
           // Move turtle to origin (0, 0) and reset heading to 90 (facing up)
@@ -1590,7 +1634,11 @@ const AnimatedTurtle = forwardRef(function AnimatedTurtle({
           
         case 'dot': {
           // Draw a filled circle at current position
-          const dotSize = cmd.size || 10;
+          // Evaluate expression at runtime if present (for random values)
+          let dotSize = cmd.size || 10;
+          if (cmd.sizeExpression) {
+            dotSize = evaluateExpression(cmd.sizeExpression, {}) || 10;
+          }
           const dotColor = cmd.color || turtle.penColor;
           
           // Add the dot to paths
