@@ -2,9 +2,6 @@ import { useState, useEffect, useRef, useCallback, useMemo, forwardRef, useImper
 import { Button } from "@/components/ui/button";
 import { Play, Pause, RotateCcw, FastForward, Grid } from "lucide-react";
 
-// BUILD MARKER: v2.0 - Fixed nested function parsing
-console.log("🚀 AnimatedTurtle.jsx LOADED - VERSION 2.0 WITH NESTED FUNCTION FIX");
-
 // Helper function to extract content within parentheses, handling nested parens
 function extractParenthesesContent(str, startIdx) {
   if (str[startIdx] !== '(') return null;
@@ -27,20 +24,14 @@ function evaluateExpression(expr, variables) {
   if (expr === null || expr === undefined) return null;
   expr = String(expr).trim();
   
-  console.log("🔵 evaluateExpression input:", expr);
-  
   // Handle random.randint(a, b) - generate a random integer between a and b (inclusive)
   if (expr.includes('random.randint')) {
-    console.log("🔵 Found random.randint in expression");
     const randintMatch = expr.match(/random\.randint\s*\(\s*(-?\d+)\s*,\s*(-?\d+)\s*\)/);
     if (randintMatch) {
       const min = parseInt(randintMatch[1]);
       const max = parseInt(randintMatch[2]);
       const result = Math.floor(Math.random() * (max - min + 1)) + min;
-      console.log(`🔵 random.randint(${min}, ${max}) => ${result}`);
       return result;
-    } else {
-      console.log("🔵 FAILED to match random.randint regex pattern");
     }
   }
   
@@ -235,14 +226,9 @@ function skipFunctionBody(lines, defLineIndex) {
 
 // Parse Python turtle code into commands
 function parseCode(code, parentVars = {}) {
-  console.log("🟠 parseCode called with code length:", code?.length || 0);
-  if (!code) {
-    console.log("🟠 parseCode: code is empty/null!");
-    return [];
-  }
+  if (!code) return [];
   const commands = [];
   const lines = code.split('\n');
-  console.log("🟠 parseCode: splitting into", lines.length, "lines");
   const variables = { ...parentVars };
   
   // Detect turtle variable name (e.g., bob = turtle.Turtle())
@@ -255,9 +241,6 @@ function parseCode(code, parentVars = {}) {
   for (let lineNum = 0; lineNum < lines.length; lineNum++) {
     const line = lines[lineNum];
     const trimmed = line.trim();
-    
-    // Log every line being processed
-    console.log("🟣 Processing line", lineNum, ":", trimmed.substring(0, 50));
     
     // Skip comments, empty lines, imports
     if (trimmed.startsWith('#') || trimmed === '' || trimmed.startsWith('import') || trimmed.startsWith('from')) {
@@ -348,17 +331,12 @@ function parseCode(code, parentVars = {}) {
     const getNumericValue = (str) => {
       if (!str) return null;
       str = str.trim();
-      console.log("🟡 getNumericValue input:", str);
       // Only try parseFloat if the string is purely a number (no expressions)
       if (/^-?\d+\.?\d*$/.test(str)) {
-        const val = parseFloat(str);
-        console.log("🟡 Pure number detected:", val);
-        return val;
+        return parseFloat(str);
       }
       // Try as variable or expression (handles random.randint, math expressions, etc.)
-      const result = evaluateExpression(str, variables);
-      console.log("🟡 Expression evaluated to:", result);
-      return result;
+      return evaluateExpression(str, variables);
     };
     
     // Helper to get color value (string literal, variable, or list index)
@@ -421,17 +399,12 @@ function parseCode(code, parentVars = {}) {
     // Parse right/rt with variable support (handles nested parentheses like random.randint(0, 350))
     // Use a function to find the matching closing parenthesis
     if (trimmed.match(new RegExp(`${turtlePrefix}(?:right|rt)\\s*\\(`))) {
-      console.log("🔴 RIGHT MATCH! trimmed:", trimmed);
       const startIdx = trimmed.indexOf('(');
-      console.log("🔴 startIdx:", startIdx);
       const content = extractParenthesesContent(trimmed, startIdx);
-      console.log("🔴 extracted content:", content);
       if (content !== null) {
         const value = getNumericValue(content);
-        console.log("🔴 value:", value);
         if (value !== null) {
           commands.push({ type: 'right', value, line: lineNum });
-          console.log("🔴 pushed right command!");
         }
       }
       continue;
@@ -844,11 +817,7 @@ const AnimatedTurtle = forwardRef(function AnimatedTurtle({
   
   // Parse code into commands (memoized) and extract turtle name/color
   const { commands, turtleName, turtleColor, eventHandlers } = useMemo(() => {
-    console.log("🔶 useMemo: Parsing code. Code length:", code?.length || 0);
-    console.log("🔶 useMemo: Code preview:", code?.substring(0, 150));
     const result = parseCode(code);
-    console.log("🔶 useMemo: parseCode returned", result.length, "commands");
-    console.log("🔶 useMemo: Command types:", result.map(c => c.type));
     const handlers = parseEventHandlers(code);
     
     // Detect turtle variable name from code
@@ -1365,17 +1334,14 @@ const AnimatedTurtle = forwardRef(function AnimatedTurtle({
         }
         
         case 'right':
-          console.log("🟢 EXECUTING RIGHT command with value:", cmd.value, "Current heading:", turtle.heading);
           turtle.heading -= cmd.value;
           // Normalize heading to 0-360 range
           turtle.heading = ((turtle.heading % 360) + 360) % 360;
-          console.log("🟢 New heading (normalized):", turtle.heading);
           drawCanvas();
           setTimeout(resolve, baseDelay / 2);
           break;
           
         case 'left':
-          console.log("🟢 EXECUTING LEFT command with value:", cmd.value);
           turtle.heading += cmd.value;
           // Normalize heading to 0-360 range
           turtle.heading = ((turtle.heading % 360) + 360) % 360;

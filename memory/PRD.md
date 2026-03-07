@@ -49,15 +49,25 @@ A coding education platform for K-12 students featuring multiple programming env
   - `def on_mouse_move():` - Mouse movement event
 - Support for: forward, backward, left, right, goto, circle (with extent), penup, pendown, color, pencolor, fillcolor, home, write, hideturtle, showturtle, setheading, etc.
 
-### Turtle Blocks (Unit 1) - UPDATED Feb 2025
+### Turtle Blocks (Unit 1) - UPDATED March 2025
 - Visual block-based programming using Blockly
 - **Full-screen layout** for students (Instructions | TurtleBlocklyEditor with inline preview)
 - **Flyout auto-close** fixed via CSS scrollbar hiding
 - **25% smaller blocks** for better workspace utilization
+- **Nested function parsing** (March 2025): Motion blocks now support `random.randint()` as arguments
+  - `t.right(random.randint(0, 350))` works correctly
+  - Parentheses-balanced argument extraction using `extractParenthesesContent` helper
+- **Heading normalization** (March 2025): Turtle heading stays in 0-360 range
+  - Fixes infinite while loops when checking direction conditions
+  - `while direction ≠ 270` now works reliably
+- **Sensing blocks** (March 2025): x position, y position, direction blocks for while loop conditions
+- **Dot block** (March 2025): Pen category includes dot(size) for drawing circles
+- **Math in motion blocks** (March 2025): Motion blocks accept math expressions and variables
 - **Full Blockly toolbox** with all standard categories:
-  - **🚩 Events blocks** (NEW Feb 2025): when program starts, when key pressed, when turtle clicked, when mouse moves
-  - **Motion blocks**: forward, backward, left, right, goto, home
-  - **Pen blocks**: penup, pendown, color, pensize
+  - **🚩 Events blocks**: when program starts, when key pressed, when turtle clicked, when mouse moves
+  - **Motion blocks**: forward, backward, left, right, goto, home, setheading
+  - **Pen blocks**: penup, pendown, color, pensize, dot
+  - **Sensing blocks**: x position, y position, direction
   - **Looks blocks**: say (write text), say for seconds, hide turtle, show turtle
   - **Loop blocks**: repeat, for, while, forEach, flow control
   - **Control blocks**: if, if-else (both turtle-specific and standard Blockly)
