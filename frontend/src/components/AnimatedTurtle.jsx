@@ -363,8 +363,8 @@ function parseCode(code, parentVars = {}) {
       continue;
     }
     
-    // Parse forward/fd with variable support
-    match = trimmed.match(new RegExp(`${turtlePrefix}(?:forward|fd)\\s*\\(\\s*([^)]+)\\s*\\)`));
+    // Parse forward/fd with variable support (handles nested parentheses like random.randint())
+    match = trimmed.match(new RegExp(`${turtlePrefix}(?:forward|fd)\\s*\\((.+)\\)\\s*$`));
     if (match) {
       const value = getNumericValue(match[1]);
       if (value !== null) {
@@ -373,8 +373,8 @@ function parseCode(code, parentVars = {}) {
       continue;
     }
     
-    // Parse backward/bk/back with variable support
-    match = trimmed.match(new RegExp(`${turtlePrefix}(?:backward|bk|back)\\s*\\(\\s*([^)]+)\\s*\\)`));
+    // Parse backward/bk/back with variable support (handles nested parentheses)
+    match = trimmed.match(new RegExp(`${turtlePrefix}(?:backward|bk|back)\\s*\\((.+)\\)\\s*$`));
     if (match) {
       const value = getNumericValue(match[1]);
       if (value !== null) {
@@ -383,8 +383,8 @@ function parseCode(code, parentVars = {}) {
       continue;
     }
     
-    // Parse right/rt with variable support
-    match = trimmed.match(new RegExp(`${turtlePrefix}(?:right|rt)\\s*\\(\\s*([^)]+)\\s*\\)`));
+    // Parse right/rt with variable support (handles nested parentheses like random.randint(0, 350))
+    match = trimmed.match(new RegExp(`${turtlePrefix}(?:right|rt)\\s*\\((.+)\\)\\s*$`));
     if (match) {
       const value = getNumericValue(match[1]);
       if (value !== null) {
@@ -393,8 +393,8 @@ function parseCode(code, parentVars = {}) {
       continue;
     }
     
-    // Parse left/lt with variable support
-    match = trimmed.match(new RegExp(`${turtlePrefix}(?:left|lt)\\s*\\(\\s*([^)]+)\\s*\\)`));
+    // Parse left/lt with variable support (handles nested parentheses)
+    match = trimmed.match(new RegExp(`${turtlePrefix}(?:left|lt)\\s*\\((.+)\\)\\s*$`));
     if (match) {
       const value = getNumericValue(match[1]);
       if (value !== null) {
