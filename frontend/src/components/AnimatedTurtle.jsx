@@ -2,6 +2,9 @@ import { useState, useEffect, useRef, useCallback, useMemo, forwardRef, useImper
 import { Button } from "@/components/ui/button";
 import { Play, Pause, RotateCcw, FastForward, Grid } from "lucide-react";
 
+// BUILD MARKER: v2.0 - Fixed nested function parsing
+console.log("🚀 AnimatedTurtle.jsx LOADED - VERSION 2.0 WITH NESTED FUNCTION FIX");
+
 // Helper function to extract content within parentheses, handling nested parens
 function extractParenthesesContent(str, startIdx) {
   if (str[startIdx] !== '(') return null;
@@ -24,14 +27,20 @@ function evaluateExpression(expr, variables) {
   if (expr === null || expr === undefined) return null;
   expr = String(expr).trim();
   
+  console.log("🔵 evaluateExpression input:", expr);
+  
   // Handle random.randint(a, b) - generate a random integer between a and b (inclusive)
   if (expr.includes('random.randint')) {
+    console.log("🔵 Found random.randint in expression");
     const randintMatch = expr.match(/random\.randint\s*\(\s*(-?\d+)\s*,\s*(-?\d+)\s*\)/);
     if (randintMatch) {
       const min = parseInt(randintMatch[1]);
       const max = parseInt(randintMatch[2]);
       const result = Math.floor(Math.random() * (max - min + 1)) + min;
+      console.log(`🔵 random.randint(${min}, ${max}) => ${result}`);
       return result;
+    } else {
+      console.log("🔵 FAILED to match random.randint regex pattern");
     }
   }
   
@@ -241,6 +250,9 @@ function parseCode(code, parentVars = {}) {
     const line = lines[lineNum];
     const trimmed = line.trim();
     
+    // Log every line being processed
+    console.log("🟣 Processing line", lineNum, ":", trimmed.substring(0, 50));
+    
     // Skip comments, empty lines, imports
     if (trimmed.startsWith('#') || trimmed === '' || trimmed.startsWith('import') || trimmed.startsWith('from')) {
       continue;
@@ -330,12 +342,17 @@ function parseCode(code, parentVars = {}) {
     const getNumericValue = (str) => {
       if (!str) return null;
       str = str.trim();
+      console.log("🟡 getNumericValue input:", str);
       // Only try parseFloat if the string is purely a number (no expressions)
       if (/^-?\d+\.?\d*$/.test(str)) {
-        return parseFloat(str);
+        const val = parseFloat(str);
+        console.log("🟡 Pure number detected:", val);
+        return val;
       }
       // Try as variable or expression (handles random.randint, math expressions, etc.)
-      return evaluateExpression(str, variables);
+      const result = evaluateExpression(str, variables);
+      console.log("🟡 Expression evaluated to:", result);
+      return result;
     };
     
     // Helper to get color value (string literal, variable, or list index)
@@ -1338,12 +1355,15 @@ const AnimatedTurtle = forwardRef(function AnimatedTurtle({
         }
         
         case 'right':
+          console.log("🟢 EXECUTING RIGHT command with value:", cmd.value, "Current heading:", turtle.heading);
           turtle.heading -= cmd.value;
+          console.log("🟢 New heading:", turtle.heading);
           drawCanvas();
           setTimeout(resolve, baseDelay / 2);
           break;
           
         case 'left':
+          console.log("🟢 EXECUTING LEFT command with value:", cmd.value);
           turtle.heading += cmd.value;
           drawCanvas();
           setTimeout(resolve, baseDelay / 2);
