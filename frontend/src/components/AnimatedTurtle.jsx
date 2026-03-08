@@ -751,9 +751,10 @@ function parseCode(code, parentVars = {}) {
       }
       
       const whileBodyCode = whileBodyLines.join('\n');
-      console.log("📝 while body code:", whileBodyCode);
+      console.log("📝 while body code FULL:", JSON.stringify(whileBodyCode));
       const whileBodyCommands = parseCode(whileBodyCode, variables);
-      console.log("📝 while body commands:", whileBodyCommands.length);
+      console.log("📝 while body commands count:", whileBodyCommands.length);
+      console.log("📝 while body commands types:", whileBodyCommands.map(c => c.type));
       
       commands.push({
         type: 'while',

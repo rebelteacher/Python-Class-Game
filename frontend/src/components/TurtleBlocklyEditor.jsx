@@ -857,15 +857,15 @@ const generatePythonCode = (workspace) => {
         console.log("🔧 turtle_while condition:", condition);
         blockCode = `${indent}while ${condition}:\n`;
         const doBlock = block.getInputTargetBlock('DO');
-        console.log("🔧 turtle_while doBlock:", !!doBlock);
+        console.log("🔧 turtle_while doBlock:", !!doBlock, doBlock?.type);
         if (doBlock) {
           const bodyCode = processBlockChain(doBlock, indent + '    ');
-          console.log("🔧 turtle_while bodyCode:", bodyCode);
+          console.log("🔧 turtle_while bodyCode FULL:", JSON.stringify(bodyCode));
           blockCode += bodyCode;
         } else {
           blockCode += `${indent}    pass\n`;
         }
-        console.log("🔧 turtle_while final blockCode:", blockCode);
+        console.log("🔧 turtle_while final blockCode FULL:", JSON.stringify(blockCode));
         break;
       }
       case 'turtle_if': {
