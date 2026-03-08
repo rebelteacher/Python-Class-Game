@@ -316,13 +316,27 @@ function parseCode(code, parentVars = {}) {
       const listValue = parseListLiteral(varExpr);
       if (listValue !== null) {
         variables[varName] = listValue;
+        // Also push as a command for runtime execution
+        commands.push({ type: 'set_variable', name: varName, value: listValue, line: lineNum });
         continue;
       }
       
-      // Try as a number or expression
-      const value = evaluateExpression(varExpr, variables);
-      if (value !== null) {
-        variables[varName] = value;
+      // Check if expression needs runtime evaluation (contains random or variable references)
+      if (varExpr.includes('random.') || /[a-zA-Z_]\w*/.test(varExpr.replace(/random|True|False/g, ''))) {
+        // Push as command with expression for runtime evaluation
+        commands.push({ type: 'set_variable', name: varName, expression: varExpr, line: lineNum });
+        // Still set initial value for parsing purposes
+        const value = evaluateExpression(varExpr, variables);
+        if (value !== null) {
+          variables[varName] = value;
+        }
+      } else {
+        // Simple numeric value - set at parse time and as command
+        const value = evaluateExpression(varExpr, variables);
+        if (value !== null) {
+          variables[varName] = value;
+          commands.push({ type: 'set_variable', name: varName, value: value, line: lineNum });
+        }
       }
       continue;
     }
@@ -895,6 +909,7 @@ const AnimatedTurtle = forwardRef(function AnimatedTurtle({
   const turtleRef = useRef(getInitialTurtleState());
   const pathsRef = useRef([]);
   const playingRef = useRef(false);
+  const variablesRef = useRef({});  // Track runtime variables for while loop conditions
   const eventHandlersRef = useRef({ keyHandlers: {}, clickHandler: [], mouseMoveHandler: [], onStartHandler: [] });
   const [eventModeActive, setEventModeActive] = useState(false);  // Track if event mode is running
   
@@ -1344,6 +1359,7 @@ const AnimatedTurtle = forwardRef(function AnimatedTurtle({
     
     turtleRef.current = getInitialTurtleState();
     pathsRef.current = [];
+    variablesRef.current = {}; // Reset runtime variables
     drawCanvas();
     if (onLineHighlight) onLineHighlight(-1);
   }, [drawCanvas, onLineHighlight, backgroundColor]);
@@ -1735,12 +1751,22 @@ const AnimatedTurtle = forwardRef(function AnimatedTurtle({
         }
         
         case 'while': {
-          // Evaluate while condition at runtime using current turtle state
+          // Evaluate while condition at runtime using current turtle state and variables
           const evaluateWhileCondition = (condition) => {
             let evalStr = condition;
             
             // Normalize heading to 0-360 range for comparisons
             const normalizedHeading = ((turtle.heading % 360) + 360) % 360;
+            
+            // Replace variable names with their values from variablesRef
+            const vars = variablesRef.current;
+            for (const [varName, varValue] of Object.entries(vars)) {
+              // Use word boundary to avoid partial replacements
+              const varRegex = new RegExp(`\\b${varName}\\b`, 'g');
+              evalStr = evalStr.replace(varRegex, varValue.toString());
+            }
+            
+            console.log("🔄 While condition after variable substitution:", evalStr);
             
             // Handle t.distance(x, y), turtle.distance(x, y) - calculate distance to a point
             evalStr = evalStr.replace(/(?:t\.|turtle\.)?distance\s*\(\s*(-?\d+(?:\.\d+)?)\s*,\s*(-?\d+(?:\.\d+)?)\s*\)/g, (match, x, y) => {
@@ -1761,10 +1787,16 @@ const AnimatedTurtle = forwardRef(function AnimatedTurtle({
             evalStr = evalStr.replace(/(?:t\.|turtle\.)?isvisible\s*\(\s*\)/g, turtle.visible.toString());
             
             try {
+              // Allow digits, operators, parentheses, and boolean keywords
               if (/^[\d\s.+\-*/%<>=!()andortruefalseTrueFalse]+$/.test(evalStr.replace(/\s/g, ''))) {
                 evalStr = evalStr.replace(/\band\b/g, '&&').replace(/\bor\b/g, '||').replace(/\bnot\b/g, '!');
                 evalStr = evalStr.replace(/\bTrue\b/g, 'true').replace(/\bFalse\b/g, 'false');
-                return new Function(`return ${evalStr}`)();
+                console.log("🔄 Evaluating while condition:", evalStr);
+                const result = new Function(`return ${evalStr}`)();
+                console.log("🔄 While condition result:", result);
+                return result;
+              } else {
+                console.warn("🔄 While condition contains unsupported characters:", evalStr);
               }
             } catch (e) {
               console.warn('While condition evaluation failed:', condition, e);
@@ -1815,6 +1847,21 @@ const AnimatedTurtle = forwardRef(function AnimatedTurtle({
           setTimeout(() => drawCanvas(), 0);
           resolve();
           break;
+        
+        case 'set_variable': {
+          // Set a variable value at runtime (used for while loop variable tracking)
+          let value;
+          if (cmd.expression) {
+            // Evaluate expression with current runtime variable values
+            value = evaluateExpression(cmd.expression, variablesRef.current);
+          } else {
+            value = cmd.value;
+          }
+          console.log("🔧 Setting variable", cmd.name, "=", value);
+          variablesRef.current[cmd.name] = value;
+          resolve();
+          break;
+        }
           
         default:
           resolve();
