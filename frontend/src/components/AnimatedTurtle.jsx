@@ -513,7 +513,6 @@ function parseCode(code, parentVars = {}) {
         if (value !== null) {
           commands.push({ type: 'speed', value: Math.floor(value), line: lineNum });
         }
-        }
       }
       continue;
     }
