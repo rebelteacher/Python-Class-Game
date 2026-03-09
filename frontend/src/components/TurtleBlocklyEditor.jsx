@@ -285,21 +285,22 @@ const defineTurtleBlocks = () => {
 
   Blockly.Blocks['turtle_say'] = {
     init: function() {
-      this.appendDummyInput()
-          .appendField("say")
-          .appendField(new Blockly.FieldTextInput("Hello!"), "TEXT");
+      this.appendValueInput("MESSAGE")
+          .setCheck(["String", "Number"])
+          .appendField("say");
       this.setPreviousStatement(true, null);
       this.setNextStatement(true, null);
       this.setColour(260);
-      this.setTooltip("Display text at turtle's position");
+      this.setTooltip("Display text or variable at turtle's position");
     }
   };
 
   Blockly.Blocks['turtle_say_for'] = {
     init: function() {
+      this.appendValueInput("MESSAGE")
+          .setCheck(["String", "Number"])
+          .appendField("say");
       this.appendDummyInput()
-          .appendField("say")
-          .appendField(new Blockly.FieldTextInput("Hello!"), "TEXT")
           .appendField("for")
           .appendField(new Blockly.FieldNumber(2, 0.1, 60, 0.1), "SECONDS")
           .appendField("seconds");
@@ -527,8 +528,8 @@ const TOOLBOX = {
       name: '💬 Looks',
       colour: '260',
       contents: [
-        { kind: 'block', type: 'turtle_say' },
-        { kind: 'block', type: 'turtle_say_for' },
+        { kind: 'block', type: 'turtle_say', inputs: { MESSAGE: { shadow: { type: 'text', fields: { TEXT: 'Hello!' } } } } },
+        { kind: 'block', type: 'turtle_say_for', inputs: { MESSAGE: { shadow: { type: 'text', fields: { TEXT: 'Hello!' } } } } },
         { kind: 'block', type: 'turtle_hide' },
         { kind: 'block', type: 'turtle_show' }
       ]
@@ -714,6 +715,8 @@ const generatePythonCode = (workspace) => {
       case 'math_random_float': {
         return `random.random()`;
       }
+      case 'text':
+        return `"${block.getFieldValue('TEXT') || ''}"`;
       case 'variables_get':
         return block.getField('VAR')?.getText() || 'x';
       case 'logic_compare': {
@@ -813,13 +816,19 @@ const generatePythonCode = (workspace) => {
         break;
       }
       case 'turtle_say': {
-        const text = block.getFieldValue('TEXT');
-        blockCode = `${indent}t.write("${text}", align="center", font=("Arial", 12, "normal"))\n`;
+        const message = getValueCode(block, 'MESSAGE', '"Hello!"');
+        // Check if it's a variable (no quotes) or literal string
+        const isVariable = !message.startsWith('"') && !message.startsWith("'") && !/^\d/.test(message);
+        if (isVariable) {
+          blockCode = `${indent}t.write(${message}, align="center", font=("Arial", 12, "normal"))\n`;
+        } else {
+          blockCode = `${indent}t.write(${message}, align="center", font=("Arial", 12, "normal"))\n`;
+        }
         break;
       }
       case 'turtle_say_for': {
-        const text = block.getFieldValue('TEXT');
-        blockCode = `${indent}t.write("${text}", align="center", font=("Arial", 12, "normal"))\n`;
+        const message = getValueCode(block, 'MESSAGE', '"Hello!"');
+        blockCode = `${indent}t.write(${message}, align="center", font=("Arial", 12, "normal"))\n`;
         break;
       }
       case 'turtle_hide':

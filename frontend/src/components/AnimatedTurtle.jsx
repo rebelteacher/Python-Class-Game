@@ -644,10 +644,18 @@ function parseCode(code, parentVars = {}) {
       continue;
     }
     
-    // Parse write command - t.write("text", ...) - extracts just the text content
+    // Parse write command - t.write("text", ...) or t.write(variable, ...)
+    // First try to match quoted string
     match = trimmed.match(new RegExp(`${turtlePrefix}write\\s*\\(\\s*["']([^"']*?)["']`));
     if (match) {
       commands.push({ type: 'write', args: [match[1]], line: lineNum });
+      continue;
+    }
+    // Then try to match variable reference (unquoted identifier)
+    match = trimmed.match(new RegExp(`${turtlePrefix}write\\s*\\(\\s*([a-zA-Z_]\\w*)`));
+    if (match) {
+      const varName = match[1];
+      commands.push({ type: 'write', args: [varName], isVariable: true, varName: varName, line: lineNum });
       continue;
     }
     
@@ -1669,7 +1677,14 @@ const AnimatedTurtle = forwardRef(function AnimatedTurtle({
           
         case 'write': {
           // Store text at turtle's current position so it persists on canvas
-          const text = cmd.args?.[0] || '';
+          let text = cmd.args?.[0] || '';
+          
+          // Check if text is a variable reference (no quotes) and resolve it
+          if (cmd.isVariable && cmd.varName) {
+            const varValue = variablesRef.current[cmd.varName];
+            text = varValue !== undefined ? String(varValue) : cmd.varName;
+          }
+          
           if (!turtle.texts) turtle.texts = [];
           turtle.texts.push({
             text: text,
