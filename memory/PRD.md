@@ -54,6 +54,13 @@ A coding education platform for K-12 students featuring multiple programming env
 - **Full-screen layout** for students (Instructions | TurtleBlocklyEditor with inline preview)
 - **Flyout auto-close** fixed via CSS scrollbar hiding
 - **25% smaller blocks** for better workspace utilization
+- **Runtime random evaluation** (March 2025): Random values re-evaluated each time Run is clicked
+  - Applies to: `forward`, `backward`, `right`, `left`, `setheading`, `pensize`, `dot`, `goto`
+  - Each run produces different random results
+- **While loop variable support** (March 2025): Variables work correctly in while loop conditions
+  - `while count < 8:` now evaluates `count` at runtime
+  - Variable assignments (`set count to 0`) execute at runtime
+  - Variable changes (`change count by 1`) properly increment/decrement
 - **Nested function parsing** (March 2025): Motion blocks now support `random.randint()` as arguments
   - `t.right(random.randint(0, 350))` works correctly
   - Parentheses-balanced argument extraction using `extractParenthesesContent` helper
@@ -63,7 +70,9 @@ A coding education platform for K-12 students featuring multiple programming env
 - **Sensing blocks** (March 2025): x position, y position, direction blocks for while loop conditions
 - **Dot block** (March 2025): Pen category includes dot(size) for drawing circles
 - **Math in motion blocks** (March 2025): Motion blocks accept math expressions and variables
-- **Full Blockly toolbox** with all standard categories:
+- **Complete test cases dropdown** (March 2025): All block types now available in test case selection
+  - Added: Sensing, Math, Variables, Lists, Functions categories
+- **Full Blockly toolbox** with all standard categories
   - **🚩 Events blocks**: when program starts, when key pressed, when turtle clicked, when mouse moves
   - **Motion blocks**: forward, backward, left, right, goto, home, setheading
   - **Pen blocks**: penup, pendown, color, pensize, dot

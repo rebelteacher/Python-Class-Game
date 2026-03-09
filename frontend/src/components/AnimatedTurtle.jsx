@@ -739,7 +739,6 @@ function parseCode(code, parentVars = {}) {
     // This creates a 'while' command that is evaluated at runtime
     match = trimmed.match(/^while\s+(.+)\s*:\s*$/);
     if (match) {
-      console.log("📝 Found while loop! condition:", match[1]);
       const condition = match[1].trim();
       const whileIndent = line.search(/\S/);
       const whileBodyLines = [];
@@ -765,10 +764,7 @@ function parseCode(code, parentVars = {}) {
       }
       
       const whileBodyCode = whileBodyLines.join('\n');
-      console.log("📝 while body code FULL:", JSON.stringify(whileBodyCode));
       const whileBodyCommands = parseCode(whileBodyCode, variables);
-      console.log("📝 while body commands count:", whileBodyCommands.length);
-      console.log("📝 while body commands types:", whileBodyCommands.map(c => c.type));
       
       commands.push({
         type: 'while',
@@ -1766,7 +1762,6 @@ const AnimatedTurtle = forwardRef(function AnimatedTurtle({
               evalStr = evalStr.replace(varRegex, varValue.toString());
             }
             
-            console.log("🔄 While condition after variable substitution:", evalStr);
             
             // Handle t.distance(x, y), turtle.distance(x, y) - calculate distance to a point
             evalStr = evalStr.replace(/(?:t\.|turtle\.)?distance\s*\(\s*(-?\d+(?:\.\d+)?)\s*,\s*(-?\d+(?:\.\d+)?)\s*\)/g, (match, x, y) => {
@@ -1791,9 +1786,7 @@ const AnimatedTurtle = forwardRef(function AnimatedTurtle({
               if (/^[\d\s.+\-*/%<>=!()andortruefalseTrueFalse]+$/.test(evalStr.replace(/\s/g, ''))) {
                 evalStr = evalStr.replace(/\band\b/g, '&&').replace(/\bor\b/g, '||').replace(/\bnot\b/g, '!');
                 evalStr = evalStr.replace(/\bTrue\b/g, 'true').replace(/\bFalse\b/g, 'false');
-                console.log("🔄 Evaluating while condition:", evalStr);
                 const result = new Function(`return ${evalStr}`)();
-                console.log("🔄 While condition result:", result);
                 return result;
               } else {
                 console.warn("🔄 While condition contains unsupported characters:", evalStr);
@@ -1857,7 +1850,6 @@ const AnimatedTurtle = forwardRef(function AnimatedTurtle({
           } else {
             value = cmd.value;
           }
-          console.log("🔧 Setting variable", cmd.name, "=", value);
           variablesRef.current[cmd.name] = value;
           resolve();
           break;

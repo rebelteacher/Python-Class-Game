@@ -854,18 +854,14 @@ const generatePythonCode = (workspace) => {
       }
       case 'turtle_while': {
         const condition = getValueCode(block, 'CONDITION', 'True');
-        console.log("🔧 turtle_while condition:", condition);
         blockCode = `${indent}while ${condition}:\n`;
         const doBlock = block.getInputTargetBlock('DO');
-        console.log("🔧 turtle_while doBlock:", !!doBlock, doBlock?.type);
         if (doBlock) {
           const bodyCode = processBlockChain(doBlock, indent + '    ');
-          console.log("🔧 turtle_while bodyCode FULL:", JSON.stringify(bodyCode));
           blockCode += bodyCode;
         } else {
           blockCode += `${indent}    pass\n`;
         }
-        console.log("🔧 turtle_while final blockCode FULL:", JSON.stringify(blockCode));
         break;
       }
       case 'turtle_if': {
@@ -907,7 +903,6 @@ const generatePythonCode = (workspace) => {
       case 'math_change': {
         const varName = block.getField('VAR')?.getText() || 'x';
         const delta = getValueCode(block, 'DELTA', '1');
-        console.log("🔧 variables_change/math_change: varName=", varName, "delta=", delta);
         blockCode = `${indent}${varName} = ${varName} + ${delta}\n`;
         break;
       }
@@ -931,12 +926,10 @@ const generatePythonCode = (workspace) => {
     let blockCount = 0;
     while (currentBlock) {
       const generatedBlock = processBlock(currentBlock, indent);
-      console.log("🔧 processBlockChain: block type", currentBlock.type, "generated:", generatedBlock?.substring(0, 50) || "(empty)");
       chainCode += generatedBlock;
       currentBlock = currentBlock.getNextBlock();
       blockCount++;
     }
-    console.log("🔧 processBlockChain: processed", blockCount, "blocks");
     return chainCode;
   };
   
@@ -1025,8 +1018,6 @@ const generatePythonCode = (workspace) => {
     code += "\n";
   }
   
-  console.log("🔧 Generated code length:", code.length, "chars");
-  console.log("🔧 Generated code FULL:\n" + code);
   
   // Check if we have any actual turtle commands (not just imports)
   const hasCommands = /t\.\w+\(/.test(code);
