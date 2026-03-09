@@ -903,9 +903,11 @@ const generatePythonCode = (workspace) => {
         blockCode = `${indent}${varName} = ${value}\n`;
         break;
       }
-      case 'variables_change': {
+      case 'variables_change':
+      case 'math_change': {
         const varName = block.getField('VAR')?.getText() || 'x';
         const delta = getValueCode(block, 'DELTA', '1');
+        console.log("🔧 variables_change/math_change: varName=", varName, "delta=", delta);
         blockCode = `${indent}${varName} = ${varName} + ${delta}\n`;
         break;
       }
