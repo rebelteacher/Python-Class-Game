@@ -139,6 +139,11 @@ Teachers can now create "Block" type assignments using drag-and-drop Blockly edi
 ## Roadmap
 
 ### Completed (March 2025)
+- [x] **Runtime Variable Evaluation Fix** (March 10, 2025) - Fixed critical bug where turtle commands (goto, forward, backward, right, left, setheading, pensize, dot, circle) used parse-time variable values instead of runtime values.
+  - Parser now checks if argument is a simple number literal; if not, stores as expression object for runtime evaluation
+  - All runtime evaluateExpression calls now use variablesRef.current instead of empty object
+  - Enables nested loops with dynamic positions (e.g., `goto(-100, y)` where `y` changes per iteration)
+  - Prevents recurring "parse-time vs runtime" evaluation bugs across all numeric-input commands
 - [x] **Text-Based Turtle Events Support** (March 4, 2025) - Added full event support to text-based Python turtle (Unit 2):
   - `setheading(angle)` / `seth(angle)` command - Set turtle heading to specific angle (0=East, 90=North, 180=West, 270=South)
   - `def on_start():` event handler - Runs code when program starts (before other main code)
