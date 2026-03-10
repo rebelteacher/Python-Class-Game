@@ -385,72 +385,60 @@ function parseCode(code, parentVars = {}) {
     }
     
     // Parse forward/fd with variable support (handles nested parentheses like random.randint())
-    // Store expression for runtime evaluation if it contains random
+    // Store expression for runtime evaluation if not a simple number literal
     if (trimmed.match(new RegExp(`${turtlePrefix}(?:forward|fd)\\s*\\(`))) {
       const startIdx = trimmed.indexOf('(');
       const content = extractParenthesesContent(trimmed, startIdx);
       if (content !== null) {
-        if (content.includes('random.')) {
-          commands.push({ type: 'forward', expression: content, line: lineNum });
+        if (/^-?\d+\.?\d*$/.test(content.trim())) {
+          commands.push({ type: 'forward', value: parseFloat(content), line: lineNum });
         } else {
-          const value = getNumericValue(content);
-          if (value !== null) {
-            commands.push({ type: 'forward', value, line: lineNum });
-          }
+          commands.push({ type: 'forward', expression: content, line: lineNum });
         }
       }
       continue;
     }
     
     // Parse backward/bk/back with variable support (handles nested parentheses)
-    // Store expression for runtime evaluation if it contains random
+    // Store expression for runtime evaluation if not a simple number literal
     if (trimmed.match(new RegExp(`${turtlePrefix}(?:backward|bk|back)\\s*\\(`))) {
       const startIdx = trimmed.indexOf('(');
       const content = extractParenthesesContent(trimmed, startIdx);
       if (content !== null) {
-        if (content.includes('random.')) {
-          commands.push({ type: 'backward', expression: content, line: lineNum });
+        if (/^-?\d+\.?\d*$/.test(content.trim())) {
+          commands.push({ type: 'backward', value: parseFloat(content), line: lineNum });
         } else {
-          const value = getNumericValue(content);
-          if (value !== null) {
-            commands.push({ type: 'backward', value, line: lineNum });
-          }
+          commands.push({ type: 'backward', expression: content, line: lineNum });
         }
       }
       continue;
     }
     
     // Parse right/rt with variable support (handles nested parentheses like random.randint(0, 350))
-    // Store expression for runtime evaluation if it contains random
+    // Store expression for runtime evaluation if not a simple number literal
     if (trimmed.match(new RegExp(`${turtlePrefix}(?:right|rt)\\s*\\(`))) {
       const startIdx = trimmed.indexOf('(');
       const content = extractParenthesesContent(trimmed, startIdx);
       if (content !== null) {
-        if (content.includes('random.')) {
-          commands.push({ type: 'right', expression: content, line: lineNum });
+        if (/^-?\d+\.?\d*$/.test(content.trim())) {
+          commands.push({ type: 'right', value: parseFloat(content), line: lineNum });
         } else {
-          const value = getNumericValue(content);
-          if (value !== null) {
-            commands.push({ type: 'right', value, line: lineNum });
-          }
+          commands.push({ type: 'right', expression: content, line: lineNum });
         }
       }
       continue;
     }
     
     // Parse left/lt with variable support (handles nested parentheses)
-    // Store expression for runtime evaluation if it contains random
+    // Store expression for runtime evaluation if not a simple number literal
     if (trimmed.match(new RegExp(`${turtlePrefix}(?:left|lt)\\s*\\(`))) {
       const startIdx = trimmed.indexOf('(');
       const content = extractParenthesesContent(trimmed, startIdx);
       if (content !== null) {
-        if (content.includes('random.')) {
-          commands.push({ type: 'left', expression: content, line: lineNum });
+        if (/^-?\d+\.?\d*$/.test(content.trim())) {
+          commands.push({ type: 'left', value: parseFloat(content), line: lineNum });
         } else {
-          const value = getNumericValue(content);
-          if (value !== null) {
-            commands.push({ type: 'left', value, line: lineNum });
-          }
+          commands.push({ type: 'left', expression: content, line: lineNum });
         }
       }
       continue;
@@ -501,18 +489,15 @@ function parseCode(code, parentVars = {}) {
     }
     
     // Parse pensize/width with variable support (handles nested parentheses)
-    // Store expression for runtime evaluation if it contains random
+    // Store expression for runtime evaluation if not a simple number literal
     if (trimmed.match(new RegExp(`${turtlePrefix}(?:pensize|width)\\s*\\(`))) {
       const startIdx = trimmed.indexOf('(');
       const content = extractParenthesesContent(trimmed, startIdx);
       if (content !== null) {
-        if (content.includes('random.')) {
-          commands.push({ type: 'pensize', expression: content, line: lineNum });
+        if (/^-?\d+\.?\d*$/.test(content.trim())) {
+          commands.push({ type: 'pensize', value: parseFloat(content), line: lineNum });
         } else {
-          const value = getNumericValue(content);
-          if (value !== null) {
-            commands.push({ type: 'pensize', value, line: lineNum });
-          }
+          commands.push({ type: 'pensize', expression: content, line: lineNum });
         }
       }
       continue;
@@ -538,17 +523,19 @@ function parseCode(code, parentVars = {}) {
       if (content !== null) {
         // Split by comma, but need to be careful with nested parens
         const args = content.split(',').map(s => s.trim());
-        const radius = getNumericValue(args[0]);
         const extent = args[1] ? getNumericValue(args[1]) : 360;
-        if (radius !== null) {
-          commands.push({ type: 'circle', value: radius, extent: extent || 360, line: lineNum });
+        // Store as expression if radius is not a simple number literal
+        if (/^-?\d+\.?\d*$/.test(args[0].trim())) {
+          commands.push({ type: 'circle', value: parseFloat(args[0]), extent: extent || 360, line: lineNum });
+        } else {
+          commands.push({ type: 'circle', expression: args[0], extent: extent || 360, line: lineNum });
         }
       }
       continue;
     }
     
     // Parse goto/setpos/setposition with variable support (handles nested parentheses)
-    // Store expressions for runtime evaluation if they contain random
+    // Store expressions for runtime evaluation if they are not simple number literals
     if (trimmed.match(new RegExp(`${turtlePrefix}(?:goto|setpos|setposition)\\s*\\(`))) {
       const startIdx = trimmed.indexOf('(');
       const content = extractParenthesesContent(trimmed, startIdx);
@@ -573,22 +560,21 @@ function parseCode(code, parentVars = {}) {
         if (args.length >= 2) {
           const xArg = args[0];
           const yArg = args[1];
-          // Check if either coordinate needs runtime evaluation
-          if (xArg.includes('random.') || yArg.includes('random.')) {
+          const isSimpleNum = (s) => /^-?\d+\.?\d*$/.test(s.trim());
+          const xNeedsRuntime = !isSimpleNum(xArg);
+          const yNeedsRuntime = !isSimpleNum(yArg);
+          
+          if (xNeedsRuntime || yNeedsRuntime) {
             commands.push({ 
               type: 'goto', 
-              xExpression: xArg.includes('random.') ? xArg : null,
-              yExpression: yArg.includes('random.') ? yArg : null,
-              x: xArg.includes('random.') ? null : getNumericValue(xArg),
-              y: yArg.includes('random.') ? null : getNumericValue(yArg),
+              xExpression: xNeedsRuntime ? xArg : null,
+              yExpression: yNeedsRuntime ? yArg : null,
+              x: xNeedsRuntime ? null : parseFloat(xArg),
+              y: yNeedsRuntime ? null : parseFloat(yArg),
               line: lineNum 
             });
           } else {
-            const x = getNumericValue(xArg);
-            const y = getNumericValue(yArg);
-            if (x !== null && y !== null) {
-              commands.push({ type: 'goto', x, y, line: lineNum });
-            }
+            commands.push({ type: 'goto', x: parseFloat(xArg), y: parseFloat(yArg), line: lineNum });
           }
         }
       }
@@ -602,19 +588,15 @@ function parseCode(code, parentVars = {}) {
     }
     
     // Parse setheading/seth with variable support (handles nested parentheses like random.randint())
-    // Store expression for runtime evaluation if it contains random
+    // Store expression for runtime evaluation if not a simple number literal
     if (trimmed.match(new RegExp(`${turtlePrefix}(?:setheading|seth)\\s*\\(`))) {
       const startIdx = trimmed.indexOf('(');
       const content = extractParenthesesContent(trimmed, startIdx);
       if (content !== null) {
-        // Check if this needs runtime evaluation (contains random)
-        if (content.includes('random.')) {
-          commands.push({ type: 'setheading', expression: content, line: lineNum });
+        if (/^-?\d+\.?\d*$/.test(content.trim())) {
+          commands.push({ type: 'setheading', value: parseFloat(content), line: lineNum });
         } else {
-          const value = getNumericValue(content);
-          if (value !== null) {
-            commands.push({ type: 'setheading', value, line: lineNum });
-          }
+          commands.push({ type: 'setheading', expression: content, line: lineNum });
         }
       }
       continue;
@@ -646,14 +628,11 @@ function parseCode(code, parentVars = {}) {
           const colorMatch = args[1].match(/['"](\w+)['"]/);
           if (colorMatch) color = colorMatch[1];
         }
-        // Check if size needs runtime evaluation
-        if (sizeArg.includes('random.')) {
-          commands.push({ type: 'dot', sizeExpression: sizeArg, color: color, line: lineNum });
+        // Store as expression if not a simple number literal
+        if (/^-?\d+\.?\d*$/.test(sizeArg.trim())) {
+          commands.push({ type: 'dot', size: parseFloat(sizeArg), color: color, line: lineNum });
         } else {
-          const size = getNumericValue(sizeArg);
-          if (size !== null) {
-            commands.push({ type: 'dot', size: size, color: color, line: lineNum });
-          }
+          commands.push({ type: 'dot', sizeExpression: sizeArg, color: color, line: lineNum });
         }
       }
       continue;
@@ -1398,10 +1377,10 @@ const AnimatedTurtle = forwardRef(function AnimatedTurtle({
       switch (cmd.type) {
         case 'forward':
         case 'backward': {
-          // Evaluate expression at runtime if present (for random values)
+          // Evaluate expression at runtime if present (for random/variable values)
           let cmdValue = cmd.value;
           if (cmd.expression) {
-            cmdValue = evaluateExpression(cmd.expression, {});
+            cmdValue = evaluateExpression(cmd.expression, variablesRef.current);
           }
           const distance = cmd.type === 'backward' ? -cmdValue : cmdValue;
           const rad = turtle.heading * Math.PI / 180;
@@ -1457,10 +1436,10 @@ const AnimatedTurtle = forwardRef(function AnimatedTurtle({
         }
         
         case 'right': {
-          // Evaluate expression at runtime if present (for random values)
+          // Evaluate expression at runtime if present (for random/variable values)
           let cmdValue = cmd.value;
           if (cmd.expression) {
-            cmdValue = evaluateExpression(cmd.expression, {});
+            cmdValue = evaluateExpression(cmd.expression, variablesRef.current);
           }
           turtle.heading -= cmdValue;
           // Normalize heading to 0-360 range
@@ -1471,10 +1450,10 @@ const AnimatedTurtle = forwardRef(function AnimatedTurtle({
         }
           
         case 'left': {
-          // Evaluate expression at runtime if present (for random values)
+          // Evaluate expression at runtime if present (for random/variable values)
           let cmdValue = cmd.value;
           if (cmd.expression) {
-            cmdValue = evaluateExpression(cmd.expression, {});
+            cmdValue = evaluateExpression(cmd.expression, variablesRef.current);
           }
           turtle.heading += cmdValue;
           // Normalize heading to 0-360 range
@@ -1535,10 +1514,10 @@ const AnimatedTurtle = forwardRef(function AnimatedTurtle({
           break;
           
         case 'pensize': {
-          // Evaluate expression at runtime if present (for random values)
+          // Evaluate expression at runtime if present (for random/variable values)
           let cmdValue = cmd.value;
           if (cmd.expression) {
-            cmdValue = evaluateExpression(cmd.expression, {});
+            cmdValue = evaluateExpression(cmd.expression, variablesRef.current);
           }
           turtle.penSize = cmdValue;
           resolve();
@@ -1550,7 +1529,10 @@ const AnimatedTurtle = forwardRef(function AnimatedTurtle({
           break;
           
         case 'circle': {
-          const r = cmd.value;
+          let r = cmd.value;
+          if (cmd.expression) {
+            r = evaluateExpression(cmd.expression, variablesRef.current);
+          }
           const extent = cmd.extent || 360; // Use extent from command, default to 360
           const fullCircleSteps = Math.abs(r) < 50 ? 36 : 72;
           const steps = Math.round(fullCircleSteps * Math.abs(extent) / 360); // Proportional steps
@@ -1597,14 +1579,14 @@ const AnimatedTurtle = forwardRef(function AnimatedTurtle({
         }
           
         case 'goto': {
-          // Evaluate expressions at runtime if present (for random values)
+          // Evaluate expressions at runtime if present (for random/variable values)
           let gotoX = cmd.x;
           let gotoY = cmd.y;
           if (cmd.xExpression) {
-            gotoX = evaluateExpression(cmd.xExpression, {});
+            gotoX = evaluateExpression(cmd.xExpression, variablesRef.current);
           }
           if (cmd.yExpression) {
-            gotoY = evaluateExpression(cmd.yExpression, {});
+            gotoY = evaluateExpression(cmd.yExpression, variablesRef.current);
           }
           
           if (turtle.penDown) {
@@ -1642,10 +1624,10 @@ const AnimatedTurtle = forwardRef(function AnimatedTurtle({
           break;
           
         case 'setheading': {
-          // Evaluate expression at runtime if present (for random values)
+          // Evaluate expression at runtime if present (for random/variable values)
           let cmdValue = cmd.value;
           if (cmd.expression) {
-            cmdValue = evaluateExpression(cmd.expression, {});
+            cmdValue = evaluateExpression(cmd.expression, variablesRef.current);
           }
           turtle.heading = cmdValue;
           // Normalize heading to 0-360 range
@@ -1669,10 +1651,10 @@ const AnimatedTurtle = forwardRef(function AnimatedTurtle({
           
         case 'dot': {
           // Draw a filled circle at current position
-          // Evaluate expression at runtime if present (for random values)
+          // Evaluate expression at runtime if present (for random/variable values)
           let dotSize = cmd.size || 10;
           if (cmd.sizeExpression) {
-            dotSize = evaluateExpression(cmd.sizeExpression, {}) || 10;
+            dotSize = evaluateExpression(cmd.sizeExpression, variablesRef.current) || 10;
           }
           const dotColor = cmd.color || turtle.penColor;
           
