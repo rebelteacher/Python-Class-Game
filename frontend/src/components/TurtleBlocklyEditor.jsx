@@ -1371,12 +1371,12 @@ const TurtleBlocklyEditor = forwardRef(({
 
         {/* Turtle preview - only when enabled */}
         {showPreview && (
-          <div className="w-80 border-l bg-white flex items-center justify-center p-2 flex-shrink-0">
+          <div className="w-[420px] border-l bg-white flex items-center justify-center p-2 flex-shrink-0">
             <AnimatedTurtle
               ref={turtleRef}
               code={generatedCode}
-              width={compact ? 260 : 300}
-              height={compact ? 260 : 300}
+              width={compact ? 300 : 400}
+              height={compact ? 300 : 400}
               onRun={() => {
                 console.log("AnimatedTurtle onRun callback triggered");
                 if (onRun) onRun(generatedCode);
