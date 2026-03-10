@@ -570,7 +570,10 @@ const TOOLBOX = {
       name: '⚖️ Logic',
       colour: '210',
       contents: [
-        { kind: 'block', type: 'logic_compare' },
+        { kind: 'block', type: 'logic_compare', inputs: {
+          A: { shadow: { type: 'math_number', fields: { NUM: 0 } } },
+          B: { shadow: { type: 'math_number', fields: { NUM: 0 } } }
+        }},
         { kind: 'block', type: 'logic_operation' },
         { kind: 'block', type: 'logic_negate' },
         { kind: 'block', type: 'logic_boolean' },

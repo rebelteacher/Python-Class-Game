@@ -553,8 +553,23 @@ function parseCode(code, parentVars = {}) {
       const startIdx = trimmed.indexOf('(');
       const content = extractParenthesesContent(trimmed, startIdx);
       if (content !== null) {
-        // Split by comma for x,y coordinates
-        const args = content.split(',').map(s => s.trim());
+        // Smart split by comma that respects parentheses
+        const args = [];
+        let depth = 0;
+        let current = '';
+        for (let i = 0; i < content.length; i++) {
+          const char = content[i];
+          if (char === '(') depth++;
+          else if (char === ')') depth--;
+          else if (char === ',' && depth === 0) {
+            args.push(current.trim());
+            current = '';
+            continue;
+          }
+          current += char;
+        }
+        if (current.trim()) args.push(current.trim());
+        
         if (args.length >= 2) {
           const xArg = args[0];
           const yArg = args[1];
