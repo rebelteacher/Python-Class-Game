@@ -759,7 +759,7 @@ export default function AssignmentLibrary({ user }) {
                     Add to Library
                   </Button>
                 </DialogTrigger>
-              <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto" data-testid="create-library-dialog">
+              <DialogContent className="max-w-6xl max-h-[95vh] overflow-y-auto w-[95vw]" data-testid="create-library-dialog">
                 <DialogHeader>
                   <DialogTitle>Add Problem to Library</DialogTitle>
                   <DialogDescription>
@@ -1390,7 +1390,7 @@ export default function AssignmentLibrary({ user }) {
                       <p className="text-sm text-gray-600 mb-3">
                         Drag blocks here to create what students will start with. Leave empty for a blank canvas.
                       </p>
-                      <div className="h-[500px] border rounded-lg overflow-hidden">
+                      <div className="h-[600px] border rounded-lg overflow-hidden">
                         <TurtleBlocklyEditor
                           ref={starterBlocksRef}
                           initialXml={newProblem.starter_blocks_xml}
@@ -1398,7 +1398,7 @@ export default function AssignmentLibrary({ user }) {
                           onXmlChange={(xml) => setNewProblem(prev => ({ ...prev, starter_blocks_xml: xml }))}
                           showPreview={true}
                           showCodeToggle={true}
-                          height="460px"
+                          height="560px"
                           compact={false}
                         />
                       </div>
@@ -1467,7 +1467,7 @@ export default function AssignmentLibrary({ user }) {
                           🐢 Preview Output
                         </Button>
                       </div>
-                      <div className="h-[500px] border rounded-lg overflow-hidden">
+                      <div className="h-[600px] border rounded-lg overflow-hidden">
                         <TurtleBlocklyEditor
                           ref={solutionBlocksRef}
                           initialXml={newProblem.solution_blocks_xml}
@@ -1475,7 +1475,7 @@ export default function AssignmentLibrary({ user }) {
                           onXmlChange={(xml) => setNewProblem(prev => ({ ...prev, solution_blocks_xml: xml }))}
                           showPreview={true}
                           showCodeToggle={true}
-                          height="460px"
+                          height="560px"
                           compact={false}
                         />
                       </div>
@@ -2554,7 +2554,7 @@ export default function AssignmentLibrary({ user }) {
             }
             setEditDialogOpen(open);
           }}>
-            <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto">
+            <DialogContent className="max-w-6xl max-h-[95vh] overflow-y-auto w-[95vw]">
               <DialogHeader>
                 <DialogTitle>Edit Problem</DialogTitle>
                 <DialogDescription>
@@ -2709,14 +2709,14 @@ export default function AssignmentLibrary({ user }) {
                     <p className="text-sm text-gray-600 mb-3">
                       Drag blocks here to create what students will start with. Leave empty for a blank canvas.
                     </p>
-                    <div className="h-[500px] border rounded-lg overflow-hidden">
+                    <div className="h-[600px] border rounded-lg overflow-hidden">
                       <TurtleBlocklyEditor
                         initialXml={editingProblem.starter_blocks_xml || ""}
                         onCodeChange={(code) => setEditingProblem(prev => ({ ...prev, starter_code: code }))}
                         onXmlChange={(xml) => setEditingProblem(prev => ({ ...prev, starter_blocks_xml: xml }))}
                         showPreview={true}
                         showCodeToggle={true}
-                        height="460px"
+                        height="560px"
                         compact={false}
                       />
                     </div>
@@ -2746,7 +2746,7 @@ export default function AssignmentLibrary({ user }) {
                         Create the correct solution using blocks. This will be used for grading.
                       </p>
                     </div>
-                    <div className="h-[500px] border rounded-lg overflow-hidden">
+                    <div className="h-[600px] border rounded-lg overflow-hidden">
                       <TurtleBlocklyEditor
                         ref={editSolutionBlocksRef}
                         initialXml={editingProblem.solution_blocks_xml || ""}
@@ -2754,7 +2754,7 @@ export default function AssignmentLibrary({ user }) {
                         onXmlChange={(xml) => setEditingProblem(prev => ({ ...prev, solution_blocks_xml: xml }))}
                         showPreview={true}
                         showCodeToggle={true}
-                        height="460px"
+                        height="560px"
                         compact={false}
                       />
                     </div>
