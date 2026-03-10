@@ -54,24 +54,23 @@ A coding education platform for K-12 students featuring multiple programming env
 - **Full-screen layout** for students (Instructions | TurtleBlocklyEditor with inline preview)
 - **Flyout auto-close** fixed via CSS scrollbar hiding
 - **25% smaller blocks** for better workspace utilization
+- **Larger editor dialogs** (March 2025): Create/Edit problem modals now 95% viewport width
+- **Larger canvas preview** (March 2025): 400x400 canvas matches student view (-200 to 200)
 - **Runtime random evaluation** (March 2025): Random values re-evaluated each time Run is clicked
   - Applies to: `forward`, `backward`, `right`, `left`, `setheading`, `pensize`, `dot`, `goto`
-  - Each run produces different random results
+  - Smart comma parsing handles `random.randint(-100, 100)` in goto coordinates
 - **While loop variable support** (March 2025): Variables work correctly in while loop conditions
   - `while count < 8:` now evaluates `count` at runtime
   - Variable assignments (`set count to 0`) execute at runtime
   - Variable changes (`change count by 1`) properly increment/decrement
+- **Say block with variables** (March 2025): Say blocks accept variable inputs to display current values
 - **Nested function parsing** (March 2025): Motion blocks now support `random.randint()` as arguments
-  - `t.right(random.randint(0, 350))` works correctly
-  - Parentheses-balanced argument extraction using `extractParenthesesContent` helper
 - **Heading normalization** (March 2025): Turtle heading stays in 0-360 range
-  - Fixes infinite while loops when checking direction conditions
-  - `while direction ≠ 270` now works reliably
 - **Sensing blocks** (March 2025): x position, y position, direction blocks for while loop conditions
 - **Dot block** (March 2025): Pen category includes dot(size) for drawing circles
 - **Math in motion blocks** (March 2025): Motion blocks accept math expressions and variables
 - **Complete test cases dropdown** (March 2025): All block types now available in test case selection
-  - Added: Sensing, Math, Variables, Lists, Functions categories
+- **Logic blocks enhanced** (March 2025): Comparison blocks have number shadow inputs for easier use with sensing blocks
 - **Full Blockly toolbox** with all standard categories
   - **🚩 Events blocks**: when program starts, when key pressed, when turtle clicked, when mouse moves
   - **Motion blocks**: forward, backward, left, right, goto, home, setheading
