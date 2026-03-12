@@ -40,6 +40,16 @@ function evaluateExpression(expr, variables) {
     return Math.random();
   }
   
+  // Handle string literals (quoted values like "Hello" or 'Hello')
+  const strLiteralMatch = expr.match(/^['"](.*)['"]$/);
+  if (strLiteralMatch) {
+    return strLiteralMatch[1];
+  }
+  
+  // Handle boolean values
+  if (expr === 'True' || expr === 'true') return true;
+  if (expr === 'False' || expr === 'false') return false;
+  
   // Check for list indexing: varName[index] (e.g., colors[i], colors[0])
   const listIndexMatch = expr.match(/^(\w+)\[([^\]]+)\]$/);
   if (listIndexMatch) {
