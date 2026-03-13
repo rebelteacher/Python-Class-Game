@@ -702,7 +702,7 @@ const generatePythonCode = (workspace) => {
         const a = getValueCode(block, 'A', '0');
         const b = getValueCode(block, 'B', '0');
         const op = block.getFieldValue('OP');
-        const opMap = { ADD: '+', SUBTRACT: '-', MULTIPLY: '*', DIVIDE: '/' };
+        const opMap = { ADD: '+', MINUS: '-', MULTIPLY: '*', DIVIDE: '/', POWER: '**' };
         return `(${a} ${opMap[op] || '+'} ${b})`;
       }
       case 'math_random': {
