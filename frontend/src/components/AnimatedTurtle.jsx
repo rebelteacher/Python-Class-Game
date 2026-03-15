@@ -733,7 +733,10 @@ function parseCode(code, parentVars = {}) {
         const loopBodyCode = loopBodyLines.join('\n');
         
         // Expand loop - execute body for each iteration
+        // Add set_variable for loop counter so it's available in variablesRef at runtime
         for (let iter = start; (step > 0 ? iter < end : iter > end); iter += step) {
+          // Inject a set_variable command so the loop counter is in variablesRef at runtime
+          commands.push({ type: 'set_variable', name: loopVar, value: iter, line: lineNum });
           const loopVars = { ...variables, [loopVar]: iter };
           // Parse the entire loop body as a block (handles nested loops correctly)
           const parsed = parseCode(loopBodyCode, loopVars);
@@ -840,21 +843,11 @@ function parseCode(code, parentVars = {}) {
       const ifCommands = ifBodyCode ? parseCode(ifBodyCode, variables) : [];
       const elseCommands = elseBodyCode ? parseCode(elseBodyCode, variables) : [];
       
-      // Substitute known variables (like loop counters) into the condition
-      // This allows conditions like "if i % 2 == 0:" to work in for loops
-      let processedCondition = condition;
-      for (const [name, value] of Object.entries(variables)) {
-        if (typeof value === 'number') {
-          processedCondition = processedCondition.replace(new RegExp(`\\b${name}\\b`, 'g'), value.toString());
-        }
-      }
-      
       // Create a conditional command that will be evaluated at runtime
-      // Store original condition for runtime variable evaluation (e.g., random values)
+      // The condition is stored raw - variables are substituted at runtime from variablesRef
       commands.push({
         type: 'conditional',
-        condition: processedCondition,
-        originalCondition: condition,
+        condition: condition,
         ifCommands: ifCommands,
         elseCommands: elseCommands,
         line: lineNum
@@ -1758,19 +1751,8 @@ const AnimatedTurtle = forwardRef(function AnimatedTurtle({
             return false;
           };
           
-          // Use original condition with runtime variables when available
-          // This ensures variables set by set_variable (e.g., random values) are evaluated at runtime
-          let conditionToEvaluate = cmd.condition;
-          if (cmd.originalCondition && Object.keys(variablesRef.current).length > 0) {
-            // Check if any runtime variable appears in the original condition
-            const hasRuntimeVars = Object.keys(variablesRef.current).some(name => 
-              new RegExp(`\\b${name}\\b`).test(cmd.originalCondition)
-            );
-            if (hasRuntimeVars) {
-              conditionToEvaluate = cmd.originalCondition;
-            }
-          }
-          const conditionResult = evaluateCondition(conditionToEvaluate);
+          // Evaluate condition using runtime variables from variablesRef
+          const conditionResult = evaluateCondition(cmd.condition);
           const commandsToRun = conditionResult ? cmd.ifCommands : cmd.elseCommands;
           
           // Execute the appropriate branch's commands sequentially
