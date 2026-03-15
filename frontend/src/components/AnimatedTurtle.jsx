@@ -1734,6 +1734,13 @@ const AnimatedTurtle = forwardRef(function AnimatedTurtle({
             // Handle t.isvisible(), turtle.isvisible(), isvisible()
             evalStr = evalStr.replace(/(?:t\.|turtle\.)?isvisible\s*\(\s*\)/g, turtle.visible.toString());
             
+            // Substitute user-defined variables from variablesRef
+            const vars = variablesRef.current || {};
+            for (const [name, value] of Object.entries(vars)) {
+              const regex = new RegExp(`\\b${name}\\b`, 'g');
+              evalStr = evalStr.replace(regex, String(value));
+            }
+            
             // Now evaluate the condition
             try {
               // Only allow safe comparisons (including % for modulus)

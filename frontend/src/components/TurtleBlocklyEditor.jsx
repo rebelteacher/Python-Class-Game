@@ -746,6 +746,26 @@ const generatePythonCode = (workspace) => {
       case 'math_random_float': {
         return `random.random()`;
       }
+      case 'math_number_property': {
+        const numVal = getValueCode(block, 'NUMBER_TO_CHECK', '0');
+        const prop = block.getFieldValue('PROPERTY');
+        switch (prop) {
+          case 'EVEN': return `(${numVal} % 2 == 0)`;
+          case 'ODD': return `(${numVal} % 2 != 0)`;
+          case 'POSITIVE': return `(${numVal} > 0)`;
+          case 'NEGATIVE': return `(${numVal} < 0)`;
+          case 'DIVISIBLE_BY': {
+            const divisor = getValueCode(block, 'DIVISOR', '1');
+            return `(${numVal} % ${divisor} == 0)`;
+          }
+          default: return `(${numVal} % 2 == 0)`;
+        }
+      }
+      case 'math_modulo': {
+        const dividend = getValueCode(block, 'DIVIDEND', '0');
+        const divisor = getValueCode(block, 'DIVISOR', '1');
+        return `(${dividend} % ${divisor})`;
+      }
       case 'text':
         return `"${block.getFieldValue('TEXT') || ''}"`;
       case 'variables_get':
