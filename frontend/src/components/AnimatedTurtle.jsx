@@ -919,6 +919,7 @@ const AnimatedTurtle = forwardRef(function AnimatedTurtle({
   const pathsRef = useRef([]);
   const playingRef = useRef(false);
   const variablesRef = useRef({});  // Track runtime variables for while loop conditions
+  const bgColorRef = useRef(backgroundColor);  // Synchronous bg color for loop rendering
   const eventHandlersRef = useRef({ keyHandlers: {}, clickHandler: [], mouseMoveHandler: [], onStartHandler: [] });
   const [eventModeActive, setEventModeActive] = useState(false);  // Track if event mode is running
   
@@ -1279,8 +1280,8 @@ const AnimatedTurtle = forwardRef(function AnimatedTurtle({
     
     const ctx = canvas.getContext('2d');
     
-    // Draw background color (use dynamic canvasBgColor if set, otherwise prop)
-    ctx.fillStyle = canvasBgColor || backgroundColor;
+    // Draw background color (use dynamic bgColorRef if set, otherwise prop)
+    ctx.fillStyle = bgColorRef.current || backgroundColor;
     ctx.fillRect(0, 0, width, height);
     
     // Draw grid if enabled (user toggle or background type)
@@ -1354,7 +1355,7 @@ const AnimatedTurtle = forwardRef(function AnimatedTurtle({
     if (turtle.visible) {
       drawTurtle(ctx, turtle.x, turtle.y, turtle.heading, turtle.turtleColor);
     }
-  }, [width, height, toCanvasCoords, drawTurtle, backgroundColor, canvasBgColor, backgroundType, drawGrid, drawMaze, drawRaceway, drawGoals, goals, checkpoints, showGrid]);
+  }, [width, height, toCanvasCoords, drawTurtle, backgroundColor, backgroundType, drawGrid, drawMaze, drawRaceway, drawGoals, goals, checkpoints, showGrid]);
   
   // Reset turtle
   const resetTurtle = useCallback(() => {
@@ -1365,6 +1366,7 @@ const AnimatedTurtle = forwardRef(function AnimatedTurtle({
     setCollisionCount(0);
     setPathLength(0);
     setCanvasBgColor(backgroundColor); // Reset background color
+    bgColorRef.current = backgroundColor; // Reset ref too
     
     turtleRef.current = getInitialTurtleState();
     pathsRef.current = [];
@@ -1858,9 +1860,8 @@ const AnimatedTurtle = forwardRef(function AnimatedTurtle({
         }
         
         case 'bgcolor':
-          setCanvasBgColor(cmd.value);
-          // Force immediate redraw with new background
-          setTimeout(() => drawCanvas(), 0);
+          bgColorRef.current = cmd.value;
+          drawCanvas();
           resolve();
           break;
         
