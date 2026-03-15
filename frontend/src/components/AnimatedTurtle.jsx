@@ -841,7 +841,7 @@ function parseCode(code, parentVars = {}) {
       const elseCommands = elseBodyCode ? parseCode(elseBodyCode, variables) : [];
       
       // Substitute known variables (like loop counters) into the condition
-      // This allows conditions like "if i % 2 == 0:" to work
+      // This allows conditions like "if i % 2 == 0:" to work in for loops
       let processedCondition = condition;
       for (const [name, value] of Object.entries(variables)) {
         if (typeof value === 'number') {
@@ -850,9 +850,11 @@ function parseCode(code, parentVars = {}) {
       }
       
       // Create a conditional command that will be evaluated at runtime
+      // Store original condition for runtime variable evaluation (e.g., random values)
       commands.push({
         type: 'conditional',
         condition: processedCondition,
+        originalCondition: condition,
         ifCommands: ifCommands,
         elseCommands: elseCommands,
         line: lineNum
@@ -1756,7 +1758,19 @@ const AnimatedTurtle = forwardRef(function AnimatedTurtle({
             return false;
           };
           
-          const conditionResult = evaluateCondition(cmd.condition);
+          // Use original condition with runtime variables when available
+          // This ensures variables set by set_variable (e.g., random values) are evaluated at runtime
+          let conditionToEvaluate = cmd.condition;
+          if (cmd.originalCondition && Object.keys(variablesRef.current).length > 0) {
+            // Check if any runtime variable appears in the original condition
+            const hasRuntimeVars = Object.keys(variablesRef.current).some(name => 
+              new RegExp(`\\b${name}\\b`).test(cmd.originalCondition)
+            );
+            if (hasRuntimeVars) {
+              conditionToEvaluate = cmd.originalCondition;
+            }
+          }
+          const conditionResult = evaluateCondition(conditionToEvaluate);
           const commandsToRun = conditionResult ? cmd.ifCommands : cmd.elseCommands;
           
           // Execute the appropriate branch's commands sequentially
