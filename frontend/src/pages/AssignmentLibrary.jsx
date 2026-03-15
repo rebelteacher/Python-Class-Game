@@ -3189,6 +3189,7 @@ export default function AssignmentLibrary({ user }) {
                                       <option value="turtle_say_for">Say for Seconds</option>
                                       <option value="turtle_hide">Hide Turtle</option>
                                       <option value="turtle_show">Show Turtle</option>
+                                      <option value="turtle_bgcolor">Set Background</option>
                                     </optgroup>
                                     <optgroup label="🔄 Loops">
                                       <option value="turtle_repeat">Repeat Loop</option>
