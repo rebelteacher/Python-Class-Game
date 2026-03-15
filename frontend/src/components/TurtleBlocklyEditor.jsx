@@ -334,6 +334,33 @@ const defineTurtleBlocks = () => {
     }
   };
 
+  Blockly.Blocks['turtle_bgcolor'] = {
+    init: function() {
+      this.appendDummyInput()
+          .appendField("set background to")
+          .appendField(new Blockly.FieldDropdown([
+            ["white", "white"],
+            ["black", "black"],
+            ["lightblue", "lightblue"],
+            ["lightgreen", "lightgreen"],
+            ["lightyellow", "lightyellow"],
+            ["pink", "pink"],
+            ["gray", "gray"],
+            ["red", "red"],
+            ["blue", "blue"],
+            ["green", "green"],
+            ["yellow", "yellow"],
+            ["orange", "orange"],
+            ["purple", "purple"],
+            ["cyan", "cyan"]
+          ]), "COLOR");
+      this.setPreviousStatement(true, null);
+      this.setNextStatement(true, null);
+      this.setColour(260);
+      this.setTooltip("Set the canvas background color");
+    }
+  };
+
   // ===== LOOP BLOCKS (Orange - Color 20) =====
   
   Blockly.Blocks['turtle_repeat'] = {
@@ -531,7 +558,8 @@ const TOOLBOX = {
         { kind: 'block', type: 'turtle_say', inputs: { MESSAGE: { shadow: { type: 'text', fields: { TEXT: 'Hello!' } } } } },
         { kind: 'block', type: 'turtle_say_for', inputs: { MESSAGE: { shadow: { type: 'text', fields: { TEXT: 'Hello!' } } } } },
         { kind: 'block', type: 'turtle_hide' },
-        { kind: 'block', type: 'turtle_show' }
+        { kind: 'block', type: 'turtle_show' },
+        { kind: 'block', type: 'turtle_bgcolor' }
       ]
     },
     {
@@ -840,6 +868,11 @@ const generatePythonCode = (workspace) => {
       case 'turtle_show':
         blockCode = `${indent}t.showturtle()\n`;
         break;
+      case 'turtle_bgcolor': {
+        const color = block.getFieldValue('COLOR') || 'white';
+        blockCode = `${indent}turtle.bgcolor("${color}")\n`;
+        break;
+      }
       case 'turtle_repeat': {
         const times = block.getFieldValue('TIMES') || '4';
         blockCode = `${indent}for _ in range(${times}):\n`;
