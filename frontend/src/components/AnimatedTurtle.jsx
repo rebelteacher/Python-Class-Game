@@ -383,6 +383,14 @@ function parseCode(code, parentVars = {}) {
       return null;
     };
     
+    // Parse bgcolor - screen.bgcolor("color") or turtle.bgcolor("color")
+    // Must be before color() parser to prevent "color" matching inside "bgcolor"
+    match = trimmed.match(/(?:screen|turtle)?\.?bgcolor\s*\(\s*['"]([^'"]+)['"]\s*\)/);
+    if (match) {
+      commands.push({ type: 'bgcolor', value: match[1], line: lineNum });
+      continue;
+    }
+    
     // Parse color() - changes both pen and turtle color (with variable support)
     match = trimmed.match(new RegExp(`${turtlePrefix}color\\s*\\(\\s*([^,)]+)(?:\\s*,\\s*([^)]+))?\\s*\\)`));
     if (match) {
@@ -660,13 +668,6 @@ function parseCode(code, parentVars = {}) {
     if (match) {
       const varName = match[1];
       commands.push({ type: 'write', args: [varName], isVariable: true, varName: varName, line: lineNum });
-      continue;
-    }
-    
-    // Parse bgcolor - screen.bgcolor("color") or turtle.bgcolor("color")
-    match = trimmed.match(/(?:screen|turtle)?\.?bgcolor\s*\(\s*['"]([^'"]+)['"]\s*\)/);
-    if (match) {
-      commands.push({ type: 'bgcolor', value: match[1], line: lineNum });
       continue;
     }
     
