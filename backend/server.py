@@ -3531,7 +3531,13 @@ async def submit_assignment(submission: SubmissionCreate, request: Request):
                     line = line.strip()
                     if line.startswith('#') or line.startswith('import') or 't = turtle' in line:
                         continue
-                    if line.startswith('t.') or line.startswith('for ') or line.startswith('while '):
+                    if not line:
+                        continue
+                    # Include turtle commands, loops, conditionals, variable assignments, and screen commands
+                    if (line.startswith('t.') or line.startswith('for ') or 
+                        line.startswith('while ') or line.startswith('if ') or 
+                        line.startswith('else:') or line.startswith('turtle.') or
+                        line.startswith('screen.') or '=' in line):
                         commands.append(line)
                 return commands
             
@@ -3544,7 +3550,9 @@ async def submit_assignment(submission: SubmissionCreate, request: Request):
                     'forward': 0, 'backward': 0, 'right': 0, 'left': 0,
                     'goto': 0, 'penup': 0, 'pendown': 0, 'color': 0,
                     'repeat': 0, 'for': 0, 'while': 0, 'if': 0,
-                    'say': 0, 'hide': 0, 'show': 0, 'home': 0, 'pensize': 0
+                    'say': 0, 'hide': 0, 'show': 0, 'home': 0, 'pensize': 0,
+                    'variable': 0, 'random': 0, 'comparison': 0, 'bgcolor': 0,
+                    'dot': 0, 'circle': 0, 'math': 0, 'sensing': 0
                 }
                 for cmd in commands:
                     if 't.forward' in cmd or 't.fd(' in cmd:
@@ -3569,17 +3577,35 @@ async def submit_assignment(submission: SubmissionCreate, request: Request):
                         counts['pensize'] += 1
                     elif 't.write' in cmd:
                         counts['say'] += 1
+                    elif 't.dot' in cmd:
+                        counts['dot'] += 1
+                    elif 't.circle' in cmd:
+                        counts['circle'] += 1
                     elif 't.hideturtle' in cmd or 't.ht()' in cmd:
                         counts['hide'] += 1
                     elif 't.showturtle' in cmd or 't.st()' in cmd:
                         counts['show'] += 1
+                    elif 'turtle.bgcolor' in cmd or 'screen.bgcolor' in cmd:
+                        counts['bgcolor'] += 1
                     elif cmd.startswith('for '):
                         counts['for'] += 1
-                        counts['repeat'] += 1  # Also count as repeat for backwards compatibility
+                        counts['repeat'] += 1
                     elif cmd.startswith('while '):
                         counts['while'] += 1
                     elif cmd.startswith('if '):
                         counts['if'] += 1
+                    
+                    # Also check for cross-cutting concerns (not elif - can overlap)
+                    if 'random.randint' in cmd or 'random.random' in cmd:
+                        counts['random'] += 1
+                    if '=' in cmd and not cmd.startswith('if ') and not cmd.startswith('while ') and not '==' in cmd.split('=')[0]:
+                        counts['variable'] += 1
+                    if ' > ' in cmd or ' < ' in cmd or ' >= ' in cmd or ' <= ' in cmd or ' == ' in cmd or ' != ' in cmd:
+                        counts['comparison'] += 1
+                    if 't.xcor' in cmd or 't.ycor' in cmd or 't.heading' in cmd:
+                        counts['sensing'] += 1
+                    if ' + ' in cmd or ' - ' in cmd or ' * ' in cmd or ' / ' in cmd or ' % ' in cmd:
+                        counts['math'] += 1
                 return counts
             
             student_counts = count_command_types(student_commands)
@@ -3587,28 +3613,46 @@ async def submit_assignment(submission: SubmissionCreate, request: Request):
             
             # Map test case patterns to command types
             pattern_to_command = {
-                # Motion blocks
-                'move_forward': 'forward', 'forward': 'forward',
-                'move_backward': 'backward', 'backward': 'backward',
-                'turn_right': 'right', 'right': 'right',
-                'turn_left': 'left', 'left': 'left',
-                'go_to': 'goto', 'goto': 'goto',
-                'home': 'home', 'go_home': 'home',
+                # Motion blocks (both readable names and block type names)
+                'move_forward': 'forward', 'forward': 'forward', 'turtle_forward': 'forward',
+                'move_backward': 'backward', 'backward': 'backward', 'turtle_backward': 'backward',
+                'turn_right': 'right', 'right': 'right', 'turtle_right': 'right',
+                'turn_left': 'left', 'left': 'left', 'turtle_left': 'left',
+                'go_to': 'goto', 'goto': 'goto', 'turtle_goto': 'goto',
+                'home': 'home', 'go_home': 'home', 'turtle_home': 'home',
                 # Pen blocks
-                'pen_up': 'penup', 'penup': 'penup',
-                'pen_down': 'pendown', 'pendown': 'pendown',
-                'set_color': 'color', 'color': 'color',
+                'pen_up': 'penup', 'penup': 'penup', 'turtle_penup': 'penup',
+                'pen_down': 'pendown', 'pendown': 'pendown', 'turtle_pendown': 'pendown',
+                'set_color': 'color', 'color': 'color', 'turtle_pencolor': 'color',
                 'set_pen_color': 'color',
-                'pensize': 'pensize', 'change_pen_size': 'pensize',
+                'pensize': 'pensize', 'change_pen_size': 'pensize', 'turtle_pensize': 'pensize',
                 # Looks blocks
-                'say': 'say', 'write': 'say',
-                'hide': 'hide', 'show': 'show',
+                'say': 'say', 'write': 'say', 'turtle_say': 'say', 'turtle_say_for': 'say',
+                'hide': 'hide', 'show': 'show', 'turtle_hide': 'hide', 'turtle_show': 'show',
+                'turtle_bgcolor': 'bgcolor', 'bgcolor': 'bgcolor', 'set_background': 'bgcolor',
+                # Dot/Circle blocks
+                'turtle_dot': 'dot', 'dot': 'dot',
+                'turtle_circle': 'circle', 'circle': 'circle',
+                # Sensing blocks
+                'turtle_xposition': 'sensing', 'turtle_yposition': 'sensing', 'turtle_direction': 'sensing',
+                'x_position': 'sensing', 'y_position': 'sensing', 'direction': 'sensing',
                 # Loop blocks
-                'repeat': 'repeat', 'loop': 'repeat',
+                'repeat': 'repeat', 'loop': 'repeat', 'turtle_repeat': 'repeat',
+                'controls_repeat_ext': 'repeat',
                 'for': 'for', 'count': 'for',
-                'while': 'while',
-                # Logic blocks
-                'if': 'if', 'if_else': 'if'
+                'while': 'while', 'turtle_while': 'while',
+                # Logic/Control blocks
+                'if': 'if', 'if_else': 'if', 'turtle_if': 'if', 'turtle_if_else': 'if',
+                'controls_if': 'if', 'controls_ifelse': 'if',
+                'logic_compare': 'comparison', 'comparison': 'comparison',
+                'logic_operation': 'comparison', 'logic_negate': 'comparison',
+                # Variable blocks
+                'variables_set': 'variable', 'variables_get': 'variable', 'variables_change': 'variable',
+                'set_variable': 'variable', 'variable': 'variable',
+                # Math blocks
+                'math_random_int': 'random', 'random': 'random', 'random_integer': 'random',
+                'math_arithmetic': 'math', 'math_number': 'math',
+                'math_number_property': 'comparison', 'math_modulo': 'math',
             }
             
             test_results = []
