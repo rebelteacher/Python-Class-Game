@@ -248,17 +248,18 @@ function parseCode(code, parentVars = {}) {
   // Create regex pattern that matches the turtle name, 't.', or 'turtle.'
   const turtlePrefix = `(?:${turtleName}\\.|t\\.|turtle\\.)?`;
   
-  // First pass: collect user-defined function bodies
+  // First pass: collect user-defined function bodies and parameters
   const userFunctions = {};
   for (let i = 0; i < lines.length; i++) {
     const trimmedLine = lines[i].trim();
-    const funcMatch = trimmedLine.match(/^def\s+(\w+)\s*\(\s*\)\s*:/);
+    const funcMatch = trimmedLine.match(/^def\s+(\w+)\s*\(([^)]*)\)\s*:/);
     if (funcMatch) {
       const funcName = funcMatch[1];
       // Skip event handlers - those are parsed separately
       if (funcName.startsWith('on_')) continue;
+      const params = funcMatch[2].trim() ? funcMatch[2].split(',').map(p => p.trim()) : [];
       const funcBody = extractFunctionBody(lines, i);
-      userFunctions[funcName] = funcBody;
+      userFunctions[funcName] = { body: funcBody, params };
     }
   }
   
@@ -307,11 +308,28 @@ function parseCode(code, parentVars = {}) {
       continue;
     }
     
-    // Handle user-defined function calls (e.g., draw_square())
-    const funcCallMatch = trimmed.match(/^(\w+)\s*\(\s*\)$/);
+    // Handle user-defined function calls (e.g., draw_square() or draw_square(50, 'red'))
+    const funcCallMatch = trimmed.match(/^(\w+)\s*\(([^)]*)\)$/);
     if (funcCallMatch && userFunctions[funcCallMatch[1]]) {
-      const funcBody = userFunctions[funcCallMatch[1]];
-      const funcCommands = parseCode(funcBody, variables);
+      const func = userFunctions[funcCallMatch[1]];
+      // Parse arguments from the call
+      const argStr = funcCallMatch[2].trim();
+      const args = argStr ? argStr.split(',').map(a => a.trim()) : [];
+      // Map parameters to argument values
+      const funcVars = { ...variables };
+      for (let p = 0; p < func.params.length; p++) {
+        const paramName = func.params[p];
+        const argVal = args[p] || '0';
+        // Remove quotes from string arguments
+        const strMatch = argVal.match(/^['"](.*)['"]$/);
+        if (strMatch) {
+          funcVars[paramName] = strMatch[1];
+        } else {
+          const numVal = evaluateExpression(argVal, variables);
+          funcVars[paramName] = numVal !== null ? numVal : argVal;
+        }
+      }
+      const funcCommands = parseCode(func.body, funcVars);
       for (const cmd of funcCommands) {
         commands.push(cmd);
       }
