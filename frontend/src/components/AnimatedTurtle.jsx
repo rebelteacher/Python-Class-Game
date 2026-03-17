@@ -315,21 +315,14 @@ function parseCode(code, parentVars = {}) {
       // Parse arguments from the call
       const argStr = funcCallMatch[2].trim();
       const args = argStr ? argStr.split(',').map(a => a.trim()) : [];
-      // Map parameters to argument values
-      const funcVars = { ...variables };
+      // Substitute parameter values directly into function body code
+      let funcBodyCode = func.body;
       for (let p = 0; p < func.params.length; p++) {
         const paramName = func.params[p];
         const argVal = args[p] || '0';
-        // Remove quotes from string arguments
-        const strMatch = argVal.match(/^['"](.*)['"]$/);
-        if (strMatch) {
-          funcVars[paramName] = strMatch[1];
-        } else {
-          const numVal = evaluateExpression(argVal, variables);
-          funcVars[paramName] = numVal !== null ? numVal : argVal;
-        }
+        funcBodyCode = funcBodyCode.replace(new RegExp(`\\b${paramName}\\b`, 'g'), argVal);
       }
-      const funcCommands = parseCode(func.body, funcVars);
+      const funcCommands = parseCode(funcBodyCode, variables);
       for (const cmd of funcCommands) {
         commands.push(cmd);
       }
