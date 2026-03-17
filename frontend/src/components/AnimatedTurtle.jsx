@@ -248,6 +248,20 @@ function parseCode(code, parentVars = {}) {
   // Create regex pattern that matches the turtle name, 't.', or 'turtle.'
   const turtlePrefix = `(?:${turtleName}\\.|t\\.|turtle\\.)?`;
   
+  // First pass: collect user-defined function bodies
+  const userFunctions = {};
+  for (let i = 0; i < lines.length; i++) {
+    const trimmedLine = lines[i].trim();
+    const funcMatch = trimmedLine.match(/^def\s+(\w+)\s*\(\s*\)\s*:/);
+    if (funcMatch) {
+      const funcName = funcMatch[1];
+      // Skip event handlers - those are parsed separately
+      if (funcName.startsWith('on_')) continue;
+      const funcBody = extractFunctionBody(lines, i);
+      userFunctions[funcName] = funcBody;
+    }
+  }
+  
   for (let lineNum = 0; lineNum < lines.length; lineNum++) {
     const line = lines[lineNum];
     const trimmed = line.trim();
@@ -262,7 +276,7 @@ function parseCode(code, parentVars = {}) {
       continue;
     }
     
-    // Skip function definitions (event handlers) - they'll be parsed separately
+    // Skip function definitions - user functions were already collected above, event handlers parsed separately
     if (trimmed.startsWith('def ')) {
       // Find the end of this function by looking for next non-indented line
       const funcIndent = line.search(/\S/);
@@ -289,6 +303,17 @@ function parseCode(code, parentVars = {}) {
       // If loop ended without finding end of function, skip to last line we saw
       if (lineNum < lastFuncLine) {
         lineNum = lastFuncLine;
+      }
+      continue;
+    }
+    
+    // Handle user-defined function calls (e.g., draw_square())
+    const funcCallMatch = trimmed.match(/^(\w+)\s*\(\s*\)$/);
+    if (funcCallMatch && userFunctions[funcCallMatch[1]]) {
+      const funcBody = userFunctions[funcCallMatch[1]];
+      const funcCommands = parseCode(funcBody, variables);
+      for (const cmd of funcCommands) {
+        commands.push(cmd);
       }
       continue;
     }
