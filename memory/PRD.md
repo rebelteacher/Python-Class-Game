@@ -22,16 +22,16 @@ A coding education platform for K-12 students featuring multiple programming env
 - **Teacher Panel** - View student progress and code submissions (Jan 2025)
 - **Block Problem Creation** - Teachers create block assignments using Blockly editors (Jan 2025)
 - **AI Lesson Plan Generator** - Generate multi-day lesson plans using Gemini AI (Feb 2025)
-  - Custom standards & learning objectives input
-  - Problem filtering by Unit/Chapter (with dropdown showing "Unit - Chapter" format)
-  - Word document (.docx) export
-  - Properly formatted Learner Outcomes section
+- **Question Bank Block Mode** (March 2025) - Teachers can use visual Blockly-style blocks as answer choices in multiple choice questions
+  - Toggle between Text Mode and Block Mode
+  - Dropdown with all block categories: Motion, Pen, Looks, Sensing, Events, Loops, Control, Logic, Variables, Math, Text, Lists
+  - Visual CSS-rendered blocks matching Blockly appearance (not actual Blockly instances)
 
 ### Student Features
 - Assignment completion with auto-grading
 - Live turtle graphics preview
 - Code editor with syntax highlighting
-- Test taking with results review
+- Test taking with results review (now supports visual block answers)
 - Progress tracking and XP system
 
 ### Turtle Graphics System
@@ -39,202 +39,97 @@ A coding education platform for K-12 students featuring multiple programming env
 - Pattern-based test case grading with count support
 - Grid toggle and coordinate hover display
 - Code line highlighting during animation
-- **List variable support** (Feb 2025): `colors = ["red", "blue"]` with `pencolor(colors[i])` and modulo cycling
-- **Multi-line list support** (Feb 2025): Parser now handles lists spanning multiple lines with inline comments
-- **Event-driven programming** (March 2025): Full event support for text-based turtle code
-  - `setheading(angle)` / `seth(angle)` for precise heading control
-  - `def on_start():` - Code runs at program start
-  - `def on_key_<key>():` - Keyboard event handlers (space, up, down, left, right, letters)
-  - `def on_turtle_clicked():` - Mouse click event
-  - `def on_mouse_move():` - Mouse movement event
-- Support for: forward, backward, left, right, goto, circle (with extent), penup, pendown, color, pencolor, fillcolor, home, write, hideturtle, showturtle, setheading, etc.
+- **List variable support** (Feb 2025)
+- **Multi-line list support** (Feb 2025)
+- **Event-driven programming** (March 2025)
+- **User-defined function support** (March 2025): `def` and parameterized function calls parsed and executed
+- **Runtime variable evaluation** (March 2025): All numeric commands evaluate variables at runtime, not parse-time
+- **Background color block** (March 2025): `turtle_bgcolor` block sets canvas background color
 
 ### Turtle Blocks (Unit 1) - UPDATED March 2025
 - Visual block-based programming using Blockly
-- **Full-screen layout** for students (Instructions | TurtleBlocklyEditor with inline preview)
-- **Flyout auto-close** fixed via CSS scrollbar hiding
-- **25% smaller blocks** for better workspace utilization
-- **Larger editor dialogs** (March 2025): Create/Edit problem modals now 95% viewport width
-- **Larger canvas preview** (March 2025): 400x400 canvas matches student view (-200 to 200)
-- **Runtime random evaluation** (March 2025): Random values re-evaluated each time Run is clicked
-  - Applies to: `forward`, `backward`, `right`, `left`, `setheading`, `pensize`, `dot`, `goto`
-  - Smart comma parsing handles `random.randint(-100, 100)` in goto coordinates
-- **While loop variable support** (March 2025): Variables work correctly in while loop conditions
-  - `while count < 8:` now evaluates `count` at runtime
-  - Variable assignments (`set count to 0`) execute at runtime
-  - Variable changes (`change count by 1`) properly increment/decrement
-- **Say block with variables** (March 2025): Say blocks accept variable inputs to display current values
-- **Nested function parsing** (March 2025): Motion blocks now support `random.randint()` as arguments
-- **Heading normalization** (March 2025): Turtle heading stays in 0-360 range
-- **Sensing blocks** (March 2025): x position, y position, direction blocks for while loop conditions
-- **Dot block** (March 2025): Pen category includes dot(size) for drawing circles
-- **Math in motion blocks** (March 2025): Motion blocks accept math expressions and variables
-- **Complete test cases dropdown** (March 2025): All block types now available in test case selection
-- **Logic blocks enhanced** (March 2025): Comparison blocks have number shadow inputs for easier use with sensing blocks
-- **Full Blockly toolbox** with all standard categories
-  - **🚩 Events blocks**: when program starts, when key pressed, when turtle clicked, when mouse moves
-  - **Motion blocks**: forward, backward, left, right, goto, home, setheading
-  - **Pen blocks**: penup, pendown, color, pensize, dot
-  - **Sensing blocks**: x position, y position, direction
-  - **Looks blocks**: say (write text), say for seconds, hide turtle, show turtle
-  - **Loop blocks**: repeat, for, while, forEach, flow control
-  - **Control blocks**: if, if-else (both turtle-specific and standard Blockly)
-  - **Logic blocks**: comparisons, and/or, not, boolean values, null, ternary
-  - **Math blocks**: numbers, arithmetic, trig, constants, random, modulo, constrain
-  - **Text blocks**: text manipulation, join, length, indexOf, substring, print, prompt
-  - **Lists blocks**: create, repeat, length, indexOf, getIndex, setIndex, sort, reverse
-  - **Variables**: Custom variable creation with "Create variable..." button
-  - **Functions**: Custom function/procedure creation
-- **Event-driven programming** - Students can create interactive programs that respond to:
-  - Keyboard events (space, arrow keys, letters a-d, w, s, any key)
-  - Turtle click events
-  - Mouse movement events
-  - Program start events
-- "Events Active" indicator shows when event handlers are running
-- Code toggle: Show generated Python code from blocks
-- Live turtle canvas preview (larger size: 300x300px)
-- Replaces external Scratch integration
+- **Full-screen layout** for students
+- **Runtime random evaluation** (March 2025): Random values re-evaluated each run
+- **While loop variable support** (March 2025): Variables in while conditions evaluated at runtime
+- **Say block with variables** (March 2025): Say blocks display variable values
+- **Runtime variable evaluation for all commands** (March 2025): goto, forward, backward, right, left, setheading, pensize, dot, circle all evaluate variables at runtime
+- **If block runtime conditions** (March 2025): Conditions evaluated with active variable state
+- **For loop counter injection** (March 2025): For loop counters accessible as variables inside conditional logic
+- **Background color block** (March 2025): bgcolor block with canvas sync via useRef
+- **Math subtraction fix** (March 2025): SUBTRACT maps correctly to MINUS operator
+- **Complete block dropdown in Question Bank** (March 2025): All 85+ block types across 12 categories available for test choices
+
+### Question Bank & Test System (March 2025)
+- **Block Mode for answer choices**: Visual Blockly-style blocks as MC answer options
+- **BlockRenderer component**: Pure CSS/React rendering of block shapes with colors, input slots, and connectors
+- **Hidden select overlay**: Native HTML select with transparent overlay for seamless block selection
+- **Category-grouped dropdown**: Blocks organized by Motion, Pen, Looks, Sensing, Events, Loops, Control, Logic, Variables, Math, Text, Lists
+- **Backend AST grading updates**: Correctly counts if statements, variables, say, and bgcolor commands
 
 ### Teacher Panel (Jan 2025)
-A sidebar panel similar to code.org that allows teachers to view student progress and code submissions during live lessons.
-
-**Features:**
 - Collapsible sidebar on right side of AssignmentPage
-- "Me" section for teacher demo/example solution
-- Student list with color-coded badges:
-  - 🟢 Green = Done (student clicked "Done")
-  - 🟡 Yellow = Started (has submissions but not done)
-  - 🔴 Red = Not started (no work)
-- Click any student to view their code (read-only)
-- Section/Classroom filter
-- Sort options (display name, status, score)
-- Summary footer showing completion counts
-
-**API Endpoints:**
-- `GET /api/assignments/{id}/student-progress` - Returns aggregated student progress per problem
-- `GET /api/assignments/{id}/student-code/{student_id}/{problem_id}` - Returns specific student's code submission
+- Student list with color-coded progress badges
+- Click to view student code (read-only)
+- Section/Classroom filter and sort options
 
 ### Block Problem Creation Workflow (Jan 2025)
-Teachers can now create "Block" type assignments using drag-and-drop Blockly editors instead of typing Python code.
-
-**Features:**
-- Blockly editor for creating Starter Blocks (what students see initially)
-- Blockly editor for creating Solution Blocks (used for grading reference)
-- Lesson Materials support (video URLs, image URLs, text, links)
+- Blockly editor for Starter Blocks and Solution Blocks
+- Lesson Materials support
 - Automatic Python code generation from blocks
 - XML persistence for block configurations
-- Edit dialog also shows Blockly editors for existing block problems
-
-**New Database Fields in Problem model:**
-- `starter_blocks_xml: string` - XML representation of starter blocks
-- `solution_blocks_xml: string` - XML representation of solution blocks
-- `lesson_materials: List[dict]` - Array of {type, title, content} for instructional content
-
-**Frontend Changes:**
-- `AssignmentLibrary.jsx`: Create/Edit dialogs conditionally show TurtleBlocklyEditor for block type
-- Validation checks `solution_blocks_xml` instead of `solution_code` for block assignments
 
 ---
 
 ## Roadmap
 
 ### Completed (March 2025)
-- [x] **Runtime Variable Evaluation Fix** (March 10, 2025) - Fixed critical bug where turtle commands (goto, forward, backward, right, left, setheading, pensize, dot, circle) used parse-time variable values instead of runtime values.
-  - Parser now checks if argument is a simple number literal; if not, stores as expression object for runtime evaluation
-  - All runtime evaluateExpression calls now use variablesRef.current instead of empty object
-  - Enables nested loops with dynamic positions (e.g., `goto(-100, y)` where `y` changes per iteration)
-  - Prevents recurring "parse-time vs runtime" evaluation bugs across all numeric-input commands
-- [x] **Text-Based Turtle Events Support** (March 4, 2025) - Added full event support to text-based Python turtle (Unit 2):
-  - `setheading(angle)` / `seth(angle)` command - Set turtle heading to specific angle (0=East, 90=North, 180=West, 270=South)
-  - `def on_start():` event handler - Runs code when program starts (before other main code)
-  - `def on_key_space():` etc. - Keyboard event handlers for interactive programs
-  - `def on_turtle_clicked():` - Mouse click on turtle event handler
-  - `def on_mouse_move():` - Mouse movement event handler
-  - "Events Active" badge appears when event mode is running
-  - All event handlers parsed from Python code and executed at appropriate times
+- [x] **Question Bank Block Mode** (March 2025) - Visual block rendering in MC question choices
+  - BlockRenderer with Blockly CSS styling
+  - 85+ block types across 12 categories in dropdown
+  - Matching renderer in TestTaking.jsx for students
+- [x] **User-Defined Function Support** (March 2025) - AnimatedTurtle parser handles `def` and parameterized function calls
+- [x] **Background Color Block** (March 2025) - turtle_bgcolor block with canvas sync via useRef (no flashing)
+- [x] **If Block Runtime Evaluation** (March 2025) - Raw conditions evaluated at runtime with active variables
+- [x] **For Loop Counter Injection** (March 2025) - Loop counters injected as hidden set_variable for conditional access
+- [x] **Backend Grading Fixes** (March 2025) - AST logic correctly counts if, variables, say, bgcolor
+- [x] **Math Subtraction Fix** (March 2025) - SUBTRACT correctly maps to MINUS operator
+- [x] **Say Block String Fix** (March 2025) - Handles string literals properly
+- [x] **Runtime Variable Evaluation Fix** (March 2025) - goto, forward, backward, right, left, setheading, pensize, dot, circle use runtime values
+- [x] **Text-Based Turtle Events Support** (March 2025) - Full event support for Python turtle (Unit 2)
 
 ### Completed (Feb 2025)
-- [x] **Turtle Fill Bug Fix** (Feb 22, 2025) - Fixed self-intersecting polygon fill for shapes like 5-pointed stars:
-  - Backend `turtle_sim.py`: Added `_fill_polygon_nonzero()` method that calculates inner intersection points and fills them separately to match Python turtle's nonzero winding rule behavior
-  - Frontend `AnimatedTurtle.jsx`: Updated to use `ctx.fill('nonzero')` for canvas rendering
-  - Stars, pentagrams, and other self-intersecting shapes now fill completely including the center
-- [x] **Circle Fill Bug Fix** (Feb 22, 2025) - Fixed circles not filling when using `fillcolor()` + `begin_fill()`/`end_fill()`:
-  - Backend `server.py`: Added missing `fillcolor()` method to both MockTurtleModule classes in execute endpoints
-  - Frontend `AnimatedTurtle.jsx`: Added fill path tracking in the `circle` command so fill points are recorded during circle drawing
-- [x] **Background Color Support** (Feb 22, 2025) - Added `screen.bgcolor("color")` and `turtle.bgcolor("color")` commands:
-  - Backend `turtle_sim.py`: Implemented `bgcolor()` in Screen class to change canvas background
-  - Backend `server.py`: Added `bgcolor()` method to both MockTurtleModule classes
-  - Frontend `AnimatedTurtle.jsx`: Added bgcolor command parsing and execution with dynamic state
-- [x] **fillcolor() Command Support** (Feb 22, 2025) - Added `fillcolor()` method to turtle simulator for setting fill color
-- [x] **begin_fill()/end_fill() Support** (Feb 22, 2025) - Implemented fill tracking and polygon rendering
-- [x] **Lesson Plan Generator** (Feb 13, 2025) - AI-powered lesson plan creator for teachers:
-  - Editable header fields saved to localStorage (School Name, Teacher Name, Class Name, Lesson Range, Pacing times, Next Major Assessment)
-  - **Standards & Objectives Input**: Teachers can paste their specific standards (CCSS, ISTE, etc.) and learning objectives - AI incorporates them into generated lessons
-  - **Unit/Chapter Problem Filter**: Specify exact unit/chapter (e.g., "Unit 2: Turtle Graphics", "Chapter 3: Colors") to pull practice problems ONLY from that section
-  - AI generates comprehensive multi-day lesson plans using Gemini (gemini-3-flash-preview)
-  - 14 lesson plan sections per day: Learner Outcomes (bulleted list format), Standards, Anticipatory Set, Teaching the Lesson, Modeling, Instructional Strategies, Checks for Understanding, Guided Practice, Independent Practice, Closure, Formative Assessment, Summative Assessment Date, Extended Activities, Review/Reteach Activities
-  - Bold questions/prompts generated for teacher use
-  - **App Problem Integration**: Automatically pulls relevant problems from the app's library for Guided Practice and Independent Practice sections
-  - "Suggested App Problems" panels with copy/open links for easy assignment
-  - All sections editable after generation
-  - **Export as Word Document**: Download button generates .docx file for admin submission
-  - Save, load, delete lesson plans
-  - Print-friendly output
-  - Route: /lesson-plans (teacher-only)
-- [x] **Events Blocks Implementation** - 4 new event blocks for interactive programs:
-  - "when program starts" - runs code at startup
-  - "when key pressed" - responds to keyboard events (space, arrows, letters, any)
-  - "when turtle clicked" - responds to mouse clicks on turtle
-  - "when mouse moves" - responds to mouse movement
-- [x] Event handlers generate Python functions (def on_key_space(): etc.)
-- [x] Keyboard event listeners in AnimatedTurtle for real-time key detection
-- [x] "Events Active" indicator when event mode is running
-- [x] Lesson 3: Events & Triggers problems now solvable
-- [x] **Fixed Event Handler Timing Bug** - Fixed issue where eventHandlersRef was stale when startEventMode ran (Feb 3, 2025)
-- [x] **Fixed "say" block (write command)** - Added write() method to turtle_sim.py and both MockTurtle classes in server.py
-- [x] **Fixed function-skipping in parseCode** - Code inside event handler functions was incorrectly running on startup
-- [x] **Fixed event mode activation** - runInstant() and play() now properly activate event mode after running startup code
-- [x] **Fixed dialog closing on button click** - Added e.stopPropagation() to AnimatedTurtle control buttons
-- [x] **Fixed block code saving** - Student block XML now saves to localStorage and restores on page refresh
-- [x] **Fixed backend preview for event-based code** - Backend now auto-executes all event handler functions when generating preview images, so "Expected Output" shows the complete result
+- [x] **Turtle Fill Bug Fix** - Self-intersecting polygon fill
+- [x] **Circle Fill Bug Fix** - Circles fill with fillcolor/begin_fill/end_fill
+- [x] **Background Color Support** - screen.bgcolor() and turtle.bgcolor()
+- [x] **Lesson Plan Generator** - AI-powered multi-day lesson plans with Gemini
+- [x] **Events Blocks Implementation** - 4 event blocks for interactive programs
 
 ### Completed (Jan 2025)
-- [x] Problem library limit increased (1000 → 10000)
+- [x] Problem library limit increased
 - [x] Test case grading bugs fixed
-- [x] Turtle functions expanded (home, circle extent, etc.)
-- [x] Test case table UI for turtle problems
-- [x] Grid toggle button for students
-- [x] MC Test: Show missed questions
-- [x] MC Test: Allow retakes setting
-- [x] MC Test: Release results feature
-- [x] Question bank line breaks preserved
-- [x] Turtle coding tests show turtle canvas
-- [x] Preview vs Expected Output now match
-- [x] Hover coordinates display on turtle canvas
-- [x] Teacher preview with run controls
-- [x] Code line highlighting during turtle animation
-- [x] Turtle Blocks feature (replaces Scratch)
-- [x] **Teacher Panel** - View student progress and code during live lessons
-- [x] **Looks blocks** - say, say for seconds, hide/show turtle
-- [x] **Block Problem Creation Workflow** - Teachers create block problems with Blockly editors
-- [x] **Blockly Number Input Bug Fix** - Fixed issue where users couldn't type in number fields inside dialogs (Jan 31, 2025)
+- [x] Teacher Panel
+- [x] Block Problem Creation Workflow
+- [x] Looks blocks, MC Test features, Grid toggle, etc.
+
+### P0 - Immediate
+- [ ] Verify sensing blocks (x position, y position) have correct shape for logic comparison blocks
 
 ### P1 - Next Priority
-- [ ] Direct Image Upload for Lesson Materials (instead of pasting URLs, with click-to-enlarge for students)
-- [ ] Extend custom curriculum feature to Python/Turtle/Micro:bit
-- [ ] Fix students not seeing expected output image (may need backend check)
+- [ ] Synchronize TurtleBlocks.jsx and TurtleBlocklyEditor.jsx features
+- [ ] Implement "One-Click Assign" feature (add problem to class from lesson plan)
+- [ ] Direct Image Upload for Lesson Materials
 - [ ] End-to-end quiz flow testing
 
 ### P2 - Upcoming
-- [ ] Brain Break Games integration
-- [ ] Build out remaining curriculum units
+- [ ] Add "distance to x, y" block to block editor
+- [ ] Refactor AnimatedTurtle.jsx parser into separate testable module
+- [ ] Unify block definitions between editor components (reduce duplication)
+- [ ] Build out remaining curriculum units (Networking, Cybersecurity, AI)
 
 ### P3 - Future
 - [ ] Self-Paced Learning Module
 - [ ] AI-powered code feedback
 - [ ] Parent portal
-- [ ] Add more Turtle Blocks types (circle, fill, stamp)
-- [ ] Student-facing features for Turtle Blocks (save/load projects, challenges)
 
 ---
 
@@ -243,9 +138,9 @@ Teachers can now create "Block" type assignments using drag-and-drop Blockly edi
 ### Frontend Stack
 - React 18
 - Monaco Editor (code editing)
-- Blockly 10.4.3 (block programming - downgraded from v12 for stability)
+- Blockly 10.4.3 (block programming)
 - Tailwind CSS + shadcn/ui
-- AnimatedTurtle component (custom)
+- AnimatedTurtle component (custom parser + runtime engine)
 
 ### Backend Stack
 - FastAPI (Python)
@@ -254,15 +149,14 @@ Teachers can now create "Block" type assignments using drag-and-drop Blockly edi
 - Custom turtle_sim.py simulator
 
 ### Key Files
-- `/app/frontend/src/components/AnimatedTurtle.jsx` - Turtle graphics engine (supports write command)
-- `/app/frontend/src/components/TeacherPanel.jsx` - Teacher Panel sidebar
-- `/app/frontend/src/components/TurtleBlocklyEditor.jsx` - Reusable Blockly editor component for block problems
-- `/app/frontend/src/components/ui/dialog.jsx` - Dialog component (modified to support `modal={false}` for Blockly compatibility)
+- `/app/frontend/src/components/AnimatedTurtle.jsx` - Turtle graphics engine (2300+ lines, monolithic)
+- `/app/frontend/src/components/TurtleBlocklyEditor.jsx` - Blockly editor component
+- `/app/frontend/src/pages/QuestionBank.jsx` - Question bank with Block Mode
+- `/app/frontend/src/pages/TestTaking.jsx` - Student test UI with block rendering
+- `/app/frontend/src/pages/AssignmentLibrary.jsx` - Teacher problem management
 - `/app/frontend/src/pages/AssignmentPage.jsx` - Student/Teacher assignment view
-- `/app/frontend/src/pages/AssignmentLibrary.jsx` - Teacher problem management (with Blockly editors for block type)
-- `/app/frontend/src/pages/TurtleBlocks.jsx` - Blockly editor for turtle programming (with Looks category)
-- `/app/backend/server.py` - API endpoints
-- `/app/backend/turtle_sim.py` - Backend turtle simulator
+- `/app/frontend/src/pages/TurtleBlocks.jsx` - Standalone Blockly turtle editor
+- `/app/backend/server.py` - API endpoints + grading logic
 
 ---
 
@@ -271,10 +165,13 @@ Teachers can now create "Block" type assignments using drag-and-drop Blockly edi
 ### Carried Over (P2)
 - Fragile layout on AssignmentPage.jsx (react-resizable-panels)
 - Assignment creation classroom_ids bug (potential)
+- Sensing blocks may have wrong shape for logic comparison blocks (needs verification)
 
-### To Investigate
-- Students may not see expected turtle output image in some cases
+### Architecture Debt
+- AnimatedTurtle.jsx is a 2300+ line monolith with fragile regex-based parsing
+- Block definitions duplicated between TurtleBlocks.jsx and TurtleBlocklyEditor.jsx
+- Parse-time vs runtime evaluation pattern has been a recurring source of bugs
 
 ---
 
-*Last Updated: March 4, 2025*
+*Last Updated: March 28, 2025*
