@@ -12,6 +12,74 @@ import { ArrowLeft, ArrowRight, Clock, CheckCircle, AlertCircle, Lock } from "lu
 const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
 const API = `${BACKEND_URL}/api`;
 
+// Block type definitions for rendering visual blocks in quiz choices
+const BLOCK_TYPES = {
+  'forward': { label: 'move forward __ steps', color: '#4C97FF' },
+  'backward': { label: 'move backward __ steps', color: '#4C97FF' },
+  'right': { label: 'turn right __ degrees', color: '#4C97FF' },
+  'left': { label: 'turn left __ degrees', color: '#4C97FF' },
+  'goto': { label: 'go to x: __ y: __', color: '#4C97FF' },
+  'home': { label: 'go home', color: '#4C97FF' },
+  'setheading': { label: 'point in direction __', color: '#4C97FF' },
+  'pendown': { label: 'pen down', color: '#0fBD8C' },
+  'penup': { label: 'pen up', color: '#0fBD8C' },
+  'pencolor': { label: 'set pen color to __', color: '#0fBD8C' },
+  'pensize': { label: 'set pen size to __', color: '#0fBD8C' },
+  'fillcolor': { label: 'set fill color to __', color: '#0fBD8C' },
+  'begin_fill': { label: 'begin fill', color: '#0fBD8C' },
+  'end_fill': { label: 'end fill', color: '#0fBD8C' },
+  'say': { label: 'say __', color: '#9966FF' },
+  'hide': { label: 'hide turtle', color: '#9966FF' },
+  'show': { label: 'show turtle', color: '#9966FF' },
+  'bgcolor': { label: 'set background to __', color: '#9966FF' },
+  'dot': { label: 'stamp dot size __', color: '#9966FF' },
+  'repeat': { label: 'repeat __ times', color: '#FFAB19' },
+  'if_block': { label: 'if __ then', color: '#FFAB19' },
+  'if_else': { label: 'if __ then ... else ...', color: '#FFAB19' },
+  'while_block': { label: 'while __', color: '#FFAB19' },
+  'xposition': { label: 'x position', color: '#5CB1D6' },
+  'yposition': { label: 'y position', color: '#5CB1D6' },
+  'direction': { label: 'direction', color: '#5CB1D6' },
+  'set_variable': { label: 'set __ to __', color: '#FF8C1A' },
+  'change_variable': { label: 'change __ by __', color: '#FF8C1A' },
+  'random_int': { label: 'random integer from __ to __', color: '#59C059' },
+  'math_add': { label: '__ + __', color: '#59C059' },
+  'math_subtract': { label: '__ - __', color: '#59C059' },
+  'compare_gt': { label: '__ > __', color: '#59C059' },
+  'compare_lt': { label: '__ < __', color: '#59C059' },
+  'compare_eq': { label: '__ = __', color: '#59C059' },
+  'is_even': { label: '__ is even', color: '#59C059' },
+  'is_odd': { label: '__ is odd', color: '#59C059' },
+};
+
+const BlockRenderer = ({ blockType, customText }) => {
+  const block = BLOCK_TYPES[blockType];
+  if (!block) return <span>{customText || blockType}</span>;
+  const label = customText || block.label;
+  return (
+    <span
+      className="inline-flex items-center rounded-md px-3 py-1.5 text-white font-medium text-sm shadow-sm"
+      style={{ 
+        backgroundColor: block.color,
+        borderBottom: `3px solid ${block.color}CC`,
+        fontFamily: '"Helvetica Neue", Helvetica, sans-serif',
+        letterSpacing: '0.3px'
+      }}
+    >
+      {label}
+    </span>
+  );
+};
+
+const renderChoice = (text) => {
+  if (!text) return null;
+  const blockMatch = text.match(/^\[block:(\w+)\](.*)$/);
+  if (blockMatch) {
+    return <BlockRenderer blockType={blockMatch[1]} customText={blockMatch[2].trim() || undefined} />;
+  }
+  return renderTextWithLineBreaks(text);
+};
+
 export default function TestTaking({ user }) {
   const { testId } = useParams();
   const navigate = useNavigate();
@@ -331,7 +399,7 @@ export default function TestTaking({ user }) {
                                       : 'bg-white'
                                   }`}
                                 >
-                                  {letter}. {renderTextWithLineBreaks(text || '')}
+                                  {letter}. {renderChoice(text || '')}
                                   {letter === result.correct_answer && (
                                     <span className="ml-2 text-green-600">✓ Correct Answer</span>
                                   )}
@@ -448,7 +516,7 @@ export default function TestTaking({ user }) {
                         htmlFor={`${currentQuestion.id}-${idx}`}
                         className="flex-1 cursor-pointer text-base whitespace-pre-line"
                       >
-                        {renderTextWithLineBreaks(choiceText)}
+                        {renderChoice(choiceText)}
                       </Label>
                     </div>
                   ))}

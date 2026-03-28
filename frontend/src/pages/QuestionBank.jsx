@@ -11,10 +11,100 @@ import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Checkbox } from "@/components/ui/checkbox";
-import { ArrowLeft, Plus, Edit, Trash2, FileQuestion, Folder, FolderOpen, ChevronRight, ChevronDown, Upload, FolderInput, Search, Filter, X, CheckSquare, Square } from "lucide-react";
+import { ArrowLeft, Plus, Edit, Trash2, FileQuestion, Folder, FolderOpen, ChevronRight, ChevronDown, Upload, FolderInput, Search, Filter, X, CheckSquare, Square, ToggleLeft, ToggleRight } from "lucide-react";
 
 const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
 const API = `${BACKEND_URL}/api`;
+
+// Block type definitions with visual properties
+const BLOCK_TYPES = {
+  // Motion (blue)
+  'forward': { label: 'move forward __ steps', color: '#4C97FF', category: 'Motion' },
+  'backward': { label: 'move backward __ steps', color: '#4C97FF', category: 'Motion' },
+  'right': { label: 'turn right __ degrees', color: '#4C97FF', category: 'Motion' },
+  'left': { label: 'turn left __ degrees', color: '#4C97FF', category: 'Motion' },
+  'goto': { label: 'go to x: __ y: __', color: '#4C97FF', category: 'Motion' },
+  'home': { label: 'go home', color: '#4C97FF', category: 'Motion' },
+  'setheading': { label: 'point in direction __', color: '#4C97FF', category: 'Motion' },
+  // Pen (green)
+  'pendown': { label: 'pen down', color: '#0fBD8C', category: 'Pen' },
+  'penup': { label: 'pen up', color: '#0fBD8C', category: 'Pen' },
+  'pencolor': { label: 'set pen color to __', color: '#0fBD8C', category: 'Pen' },
+  'pensize': { label: 'set pen size to __', color: '#0fBD8C', category: 'Pen' },
+  'fillcolor': { label: 'set fill color to __', color: '#0fBD8C', category: 'Pen' },
+  'begin_fill': { label: 'begin fill', color: '#0fBD8C', category: 'Pen' },
+  'end_fill': { label: 'end fill', color: '#0fBD8C', category: 'Pen' },
+  // Looks (purple)
+  'say': { label: 'say __', color: '#9966FF', category: 'Looks' },
+  'hide': { label: 'hide turtle', color: '#9966FF', category: 'Looks' },
+  'show': { label: 'show turtle', color: '#9966FF', category: 'Looks' },
+  'bgcolor': { label: 'set background to __', color: '#9966FF', category: 'Looks' },
+  'dot': { label: 'stamp dot size __', color: '#9966FF', category: 'Looks' },
+  // Control (amber)
+  'repeat': { label: 'repeat __ times', color: '#FFAB19', category: 'Control' },
+  'if_block': { label: 'if __ then', color: '#FFAB19', category: 'Control' },
+  'if_else': { label: 'if __ then ... else ...', color: '#FFAB19', category: 'Control' },
+  'while_block': { label: 'while __', color: '#FFAB19', category: 'Control' },
+  // Sensing (cyan)
+  'xposition': { label: 'x position', color: '#5CB1D6', category: 'Sensing' },
+  'yposition': { label: 'y position', color: '#5CB1D6', category: 'Sensing' },
+  'direction': { label: 'direction', color: '#5CB1D6', category: 'Sensing' },
+  // Variables (orange)
+  'set_variable': { label: 'set __ to __', color: '#FF8C1A', category: 'Variables' },
+  'change_variable': { label: 'change __ by __', color: '#FF8C1A', category: 'Variables' },
+  // Math (green)
+  'random_int': { label: 'random integer from __ to __', color: '#59C059', category: 'Math' },
+  'math_add': { label: '__ + __', color: '#59C059', category: 'Math' },
+  'math_subtract': { label: '__ - __', color: '#59C059', category: 'Math' },
+  'math_multiply': { label: '__ * __', color: '#59C059', category: 'Math' },
+  'math_divide': { label: '__ / __', color: '#59C059', category: 'Math' },
+  'math_modulo': { label: '__ mod __', color: '#59C059', category: 'Math' },
+  // Logic (teal)
+  'compare_gt': { label: '__ > __', color: '#59C059', category: 'Logic' },
+  'compare_lt': { label: '__ < __', color: '#59C059', category: 'Logic' },
+  'compare_eq': { label: '__ = __', color: '#59C059', category: 'Logic' },
+  'logic_and': { label: '__ and __', color: '#59C059', category: 'Logic' },
+  'logic_or': { label: '__ or __', color: '#59C059', category: 'Logic' },
+  'logic_not': { label: 'not __', color: '#59C059', category: 'Logic' },
+  'is_even': { label: '__ is even', color: '#59C059', category: 'Logic' },
+  'is_odd': { label: '__ is odd', color: '#59C059', category: 'Logic' },
+};
+
+// Render a visual block
+const BlockRenderer = ({ blockType, customText }) => {
+  const block = BLOCK_TYPES[blockType];
+  if (!block) return <span>{customText || blockType}</span>;
+  
+  const label = customText || block.label;
+  const darkerColor = block.color + 'CC';
+  
+  return (
+    <span
+      data-testid={`block-${blockType}`}
+      className="inline-flex items-center rounded-md px-3 py-1.5 text-white font-medium text-sm shadow-sm"
+      style={{ 
+        backgroundColor: block.color,
+        borderBottom: `3px solid ${darkerColor}`,
+        fontFamily: '"Helvetica Neue", Helvetica, sans-serif',
+        letterSpacing: '0.3px'
+      }}
+    >
+      {label}
+    </span>
+  );
+};
+
+// Detect and render a choice - either as block or text
+const renderChoice = (text) => {
+  if (!text) return null;
+  const blockMatch = text.match(/^\[block:(\w+)\](.*)$/);
+  if (blockMatch) {
+    const blockType = blockMatch[1];
+    const customLabel = blockMatch[2].trim();
+    return <BlockRenderer blockType={blockType} customText={customLabel || undefined} />;
+  }
+  return renderTextWithLineBreaks(text);
+};
 
 // Unit type to unit name mapping
 const UNIT_TYPE_MAP = {
@@ -90,6 +180,8 @@ export default function QuestionBank({ user }) {
     lesson: "",
     difficulty: "Easy"
   });
+  const [blockMode, setBlockMode] = useState(false);
+  const [editBlockMode, setEditBlockMode] = useState(false);
 
   useEffect(() => {
     fetchQuestions();
@@ -634,7 +726,62 @@ What is 2+2?,3,4,5,6,B,code,Unit 3: Python Text,Chapter 1,Lesson 1,Easy</pre>
                   </div>
 
                   <div className="space-y-2">
-                    <Label>Answer Choices *</Label>
+                    <div className="flex items-center justify-between">
+                      <Label>Answer Choices *</Label>
+                      <button
+                        type="button"
+                        onClick={() => setBlockMode(!blockMode)}
+                        className={`flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-medium transition-colors ${
+                          blockMode 
+                            ? 'bg-indigo-100 text-indigo-700 border border-indigo-300' 
+                            : 'bg-gray-100 text-gray-600 border border-gray-300'
+                        }`}
+                      >
+                        {blockMode ? <ToggleRight className="w-3.5 h-3.5" /> : <ToggleLeft className="w-3.5 h-3.5" />}
+                        {blockMode ? 'Block Mode' : 'Text Mode'}
+                      </button>
+                    </div>
+                    {blockMode ? (
+                      <div className="space-y-2">
+                        {['a', 'b', 'c', 'd'].map((letter) => (
+                          <div key={letter} className="flex items-center gap-2">
+                            <span className="text-sm font-medium w-6 text-gray-500">{letter.toUpperCase()}.</span>
+                            <select
+                              className="flex-1 border rounded-md px-3 py-2 text-sm bg-white"
+                              value={newQuestion[`choice_${letter}`].replace(/^\[block:(\w+)\].*$/, '$1')}
+                              onChange={(e) => {
+                                const blockType = e.target.value;
+                                const block = BLOCK_TYPES[blockType];
+                                setNewQuestion({ 
+                                  ...newQuestion, 
+                                  [`choice_${letter}`]: blockType ? `[block:${blockType}]${block?.label || ''}` : ''
+                                });
+                              }}
+                            >
+                              <option value="">Select a block...</option>
+                              {Object.entries(
+                                Object.entries(BLOCK_TYPES).reduce((acc, [key, val]) => {
+                                  if (!acc[val.category]) acc[val.category] = [];
+                                  acc[val.category].push({ key, ...val });
+                                  return acc;
+                                }, {})
+                              ).map(([category, blocks]) => (
+                                <optgroup key={category} label={category}>
+                                  {blocks.map(b => (
+                                    <option key={b.key} value={b.key}>{b.label}</option>
+                                  ))}
+                                </optgroup>
+                              ))}
+                            </select>
+                            {newQuestion[`choice_${letter}`].startsWith('[block:') && (
+                              <BlockRenderer 
+                                blockType={newQuestion[`choice_${letter}`].match(/^\[block:(\w+)\]/)?.[1]} 
+                              />
+                            )}
+                          </div>
+                        ))}
+                      </div>
+                    ) : (
                     <div className="space-y-2">
                       <Input
                         placeholder="A. First choice"
@@ -657,6 +804,7 @@ What is 2+2?,3,4,5,6,B,code,Unit 3: Python Text,Chapter 1,Lesson 1,Easy</pre>
                         onChange={(e) => setNewQuestion({ ...newQuestion, choice_d: e.target.value })}
                       />
                     </div>
+                    )}
                   </div>
 
                   <div>
@@ -1006,16 +1154,16 @@ What is 2+2?,3,4,5,6,B,code,Unit 3: Python Text,Chapter 1,Lesson 1,Easy</pre>
                                       <CardContent>
                                         <div className="space-y-1 text-sm mb-3">
                                           <div className={question.correct_answer === "A" ? "text-green-600 font-medium" : ""}>
-                                            A. {renderTextWithLineBreaks(question.choice_a)}
+                                            A. {renderChoice(question.choice_a)}
                                           </div>
                                           <div className={question.correct_answer === "B" ? "text-green-600 font-medium" : ""}>
-                                            B. {renderTextWithLineBreaks(question.choice_b)}
+                                            B. {renderChoice(question.choice_b)}
                                           </div>
                                           <div className={question.correct_answer === "C" ? "text-green-600 font-medium" : ""}>
-                                            C. {renderTextWithLineBreaks(question.choice_c)}
+                                            C. {renderChoice(question.choice_c)}
                                           </div>
                                           <div className={question.correct_answer === "D" ? "text-green-600 font-medium" : ""}>
-                                            D. {renderTextWithLineBreaks(question.choice_d)}
+                                            D. {renderChoice(question.choice_d)}
                                           </div>
                                         </div>
                                         <div className="text-sm text-green-600 font-medium mb-3">
@@ -1040,6 +1188,10 @@ What is 2+2?,3,4,5,6,B,code,Unit 3: Python Text,Chapter 1,Lesson 1,Easy</pre>
                                             <Button
                                               onClick={() => {
                                                 setEditingQuestion(question);
+                                                // Auto-detect block mode
+                                                const hasBlocks = [question.choice_a, question.choice_b, question.choice_c, question.choice_d]
+                                                  .some(c => c && c.startsWith('[block:'));
+                                                setEditBlockMode(hasBlocks);
                                                 setEditDialogOpen(true);
                                               }}
                                               variant="outline"
@@ -1097,7 +1249,63 @@ What is 2+2?,3,4,5,6,B,code,Unit 3: Python Text,Chapter 1,Lesson 1,Easy</pre>
               </div>
 
               <div className="space-y-2">
-                <Label>Answer Choices *</Label>
+                <div className="flex items-center justify-between">
+                  <Label>Answer Choices *</Label>
+                  <button
+                    type="button"
+                    onClick={() => setEditBlockMode(!editBlockMode)}
+                    className={`flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-medium transition-colors ${
+                      editBlockMode 
+                        ? 'bg-indigo-100 text-indigo-700 border border-indigo-300' 
+                        : 'bg-gray-100 text-gray-600 border border-gray-300'
+                    }`}
+                  >
+                    {editBlockMode ? <ToggleRight className="w-3.5 h-3.5" /> : <ToggleLeft className="w-3.5 h-3.5" />}
+                    {editBlockMode ? 'Block Mode' : 'Text Mode'}
+                  </button>
+                </div>
+                {editBlockMode ? (
+                  <div className="space-y-2">
+                    {['a', 'b', 'c', 'd'].map((letter) => (
+                      <div key={letter} className="flex items-center gap-2">
+                        <span className="text-sm font-medium w-6 text-gray-500">{letter.toUpperCase()}.</span>
+                        <select
+                          className="flex-1 border rounded-md px-3 py-2 text-sm bg-white"
+                          value={editingQuestion[`choice_${letter}`]?.replace(/^\[block:(\w+)\].*$/, '$1') || ''}
+                          onChange={(e) => {
+                            const blockType = e.target.value;
+                            const block = BLOCK_TYPES[blockType];
+                            setEditingQuestion({ 
+                              ...editingQuestion, 
+                              [`choice_${letter}`]: blockType ? `[block:${blockType}]${block?.label || ''}` : ''
+                            });
+                          }}
+                        >
+                          <option value="">Select a block...</option>
+                          {Object.entries(
+                            Object.entries(BLOCK_TYPES).reduce((acc, [key, val]) => {
+                              if (!acc[val.category]) acc[val.category] = [];
+                              acc[val.category].push({ key, ...val });
+                              return acc;
+                            }, {})
+                          ).map(([category, blocks]) => (
+                            <optgroup key={category} label={category}>
+                              {blocks.map(b => (
+                                <option key={b.key} value={b.key}>{b.label}</option>
+                              ))}
+                            </optgroup>
+                          ))}
+                        </select>
+                        {editingQuestion[`choice_${letter}`]?.startsWith('[block:') && (
+                          <BlockRenderer 
+                            blockType={editingQuestion[`choice_${letter}`].match(/^\[block:(\w+)\]/)?.[1]} 
+                          />
+                        )}
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                <div className="space-y-2">
                 <Input
                   placeholder="A."
                   value={editingQuestion.choice_a}
@@ -1118,6 +1326,8 @@ What is 2+2?,3,4,5,6,B,code,Unit 3: Python Text,Chapter 1,Lesson 1,Easy</pre>
                   value={editingQuestion.choice_d}
                   onChange={(e) => setEditingQuestion({ ...editingQuestion, choice_d: e.target.value })}
                 />
+                </div>
+                )}
               </div>
 
               <div>
