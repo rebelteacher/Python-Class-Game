@@ -793,44 +793,53 @@ What is 2+2?,3,4,5,6,B,code,Unit 3: Python Text,Chapter 1,Lesson 1,Easy</pre>
                       </button>
                     </div>
                     {blockMode ? (
-                      <div className="space-y-2">
-                        {['a', 'b', 'c', 'd'].map((letter) => (
-                          <div key={letter} className="flex items-center gap-2">
-                            <span className="text-sm font-medium w-6 text-gray-500">{letter.toUpperCase()}.</span>
-                            <select
-                              className="flex-1 border rounded-md px-3 py-2 text-sm bg-white"
-                              value={newQuestion[`choice_${letter}`].replace(/^\[block:(\w+)\].*$/, '$1')}
-                              onChange={(e) => {
-                                const blockType = e.target.value;
-                                const block = BLOCK_TYPES[blockType];
-                                setNewQuestion({ 
-                                  ...newQuestion, 
-                                  [`choice_${letter}`]: blockType ? `[block:${blockType}]${block?.label || ''}` : ''
-                                });
-                              }}
-                            >
-                              <option value="">Select a block...</option>
-                              {Object.entries(
-                                Object.entries(BLOCK_TYPES).reduce((acc, [key, val]) => {
-                                  if (!acc[val.category]) acc[val.category] = [];
-                                  acc[val.category].push({ key, ...val });
-                                  return acc;
-                                }, {})
-                              ).map(([category, blocks]) => (
-                                <optgroup key={category} label={category}>
-                                  {blocks.map(b => (
-                                    <option key={b.key} value={b.key}>{b.label}</option>
+                      <div className="space-y-3">
+                        {['a', 'b', 'c', 'd'].map((letter) => {
+                          const currentValue = newQuestion[`choice_${letter}`].replace(/^\[block:(\w+)\].*$/, '$1');
+                          return (
+                            <div key={letter} className="flex items-center gap-2">
+                              <span className="text-sm font-medium w-6 text-gray-500">{letter.toUpperCase()}.</span>
+                              <div className="relative flex-1">
+                                <select
+                                  className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10"
+                                  value={currentValue}
+                                  onChange={(e) => {
+                                    const blockType = e.target.value;
+                                    const block = BLOCK_TYPES[blockType];
+                                    setNewQuestion({ 
+                                      ...newQuestion, 
+                                      [`choice_${letter}`]: blockType ? `[block:${blockType}]${block?.label || ''}` : ''
+                                    });
+                                  }}
+                                >
+                                  <option value="">Select a block...</option>
+                                  {Object.entries(
+                                    Object.entries(BLOCK_TYPES).reduce((acc, [key, val]) => {
+                                      if (!acc[val.category]) acc[val.category] = [];
+                                      acc[val.category].push({ key, ...val });
+                                      return acc;
+                                    }, {})
+                                  ).map(([category, blocks]) => (
+                                    <optgroup key={category} label={category}>
+                                      {blocks.map(b => (
+                                        <option key={b.key} value={b.key}>{b.label}</option>
+                                      ))}
+                                    </optgroup>
                                   ))}
-                                </optgroup>
-                              ))}
-                            </select>
-                            {newQuestion[`choice_${letter}`].startsWith('[block:') && (
-                              <BlockRenderer 
-                                blockType={newQuestion[`choice_${letter}`].match(/^\[block:(\w+)\]/)?.[1]} 
-                              />
-                            )}
-                          </div>
-                        ))}
+                                </select>
+                                {currentValue && BLOCK_TYPES[currentValue] ? (
+                                  <div className="flex items-center gap-2 p-1.5 border border-gray-200 rounded-lg bg-gray-50 cursor-pointer hover:bg-gray-100 transition-colors">
+                                    <BlockRenderer blockType={currentValue} />
+                                  </div>
+                                ) : (
+                                  <div className="flex items-center gap-2 p-3 border-2 border-dashed border-gray-300 rounded-lg text-gray-400 text-sm cursor-pointer hover:border-gray-400 transition-colors">
+                                    Click to select a block...
+                                  </div>
+                                )}
+                              </div>
+                            </div>
+                          );
+                        })}
                       </div>
                     ) : (
                     <div className="space-y-2">
@@ -1316,44 +1325,53 @@ What is 2+2?,3,4,5,6,B,code,Unit 3: Python Text,Chapter 1,Lesson 1,Easy</pre>
                   </button>
                 </div>
                 {editBlockMode ? (
-                  <div className="space-y-2">
-                    {['a', 'b', 'c', 'd'].map((letter) => (
-                      <div key={letter} className="flex items-center gap-2">
-                        <span className="text-sm font-medium w-6 text-gray-500">{letter.toUpperCase()}.</span>
-                        <select
-                          className="flex-1 border rounded-md px-3 py-2 text-sm bg-white"
-                          value={editingQuestion[`choice_${letter}`]?.replace(/^\[block:(\w+)\].*$/, '$1') || ''}
-                          onChange={(e) => {
-                            const blockType = e.target.value;
-                            const block = BLOCK_TYPES[blockType];
-                            setEditingQuestion({ 
-                              ...editingQuestion, 
-                              [`choice_${letter}`]: blockType ? `[block:${blockType}]${block?.label || ''}` : ''
-                            });
-                          }}
-                        >
-                          <option value="">Select a block...</option>
-                          {Object.entries(
-                            Object.entries(BLOCK_TYPES).reduce((acc, [key, val]) => {
-                              if (!acc[val.category]) acc[val.category] = [];
-                              acc[val.category].push({ key, ...val });
-                              return acc;
-                            }, {})
-                          ).map(([category, blocks]) => (
-                            <optgroup key={category} label={category}>
-                              {blocks.map(b => (
-                                <option key={b.key} value={b.key}>{b.label}</option>
+                  <div className="space-y-3">
+                    {['a', 'b', 'c', 'd'].map((letter) => {
+                      const currentValue = editingQuestion[`choice_${letter}`]?.replace(/^\[block:(\w+)\].*$/, '$1') || '';
+                      return (
+                        <div key={letter} className="flex items-center gap-2">
+                          <span className="text-sm font-medium w-6 text-gray-500">{letter.toUpperCase()}.</span>
+                          <div className="relative flex-1">
+                            <select
+                              className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10"
+                              value={currentValue}
+                              onChange={(e) => {
+                                const blockType = e.target.value;
+                                const block = BLOCK_TYPES[blockType];
+                                setEditingQuestion({ 
+                                  ...editingQuestion, 
+                                  [`choice_${letter}`]: blockType ? `[block:${blockType}]${block?.label || ''}` : ''
+                                });
+                              }}
+                            >
+                              <option value="">Select a block...</option>
+                              {Object.entries(
+                                Object.entries(BLOCK_TYPES).reduce((acc, [key, val]) => {
+                                  if (!acc[val.category]) acc[val.category] = [];
+                                  acc[val.category].push({ key, ...val });
+                                  return acc;
+                                }, {})
+                              ).map(([category, blocks]) => (
+                                <optgroup key={category} label={category}>
+                                  {blocks.map(b => (
+                                    <option key={b.key} value={b.key}>{b.label}</option>
+                                  ))}
+                                </optgroup>
                               ))}
-                            </optgroup>
-                          ))}
-                        </select>
-                        {editingQuestion[`choice_${letter}`]?.startsWith('[block:') && (
-                          <BlockRenderer 
-                            blockType={editingQuestion[`choice_${letter}`].match(/^\[block:(\w+)\]/)?.[1]} 
-                          />
-                        )}
-                      </div>
-                    ))}
+                            </select>
+                            {currentValue && BLOCK_TYPES[currentValue] ? (
+                              <div className="flex items-center gap-2 p-1.5 border border-gray-200 rounded-lg bg-gray-50 cursor-pointer hover:bg-gray-100 transition-colors">
+                                <BlockRenderer blockType={currentValue} />
+                              </div>
+                            ) : (
+                              <div className="flex items-center gap-2 p-3 border-2 border-dashed border-gray-300 rounded-lg text-gray-400 text-sm cursor-pointer hover:border-gray-400 transition-colors">
+                                Click to select a block...
+                              </div>
+                            )}
+                          </div>
+                        </div>
+                      );
+                    })}
                   </div>
                 ) : (
                 <div className="space-y-2">
