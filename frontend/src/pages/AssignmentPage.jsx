@@ -1326,6 +1326,7 @@ export default function AssignmentPage({ user }) {
                       readOnly={problemsFinal[getCurrentProblemId()]}
                       showPreview={true}
                       showCodeToggle={true}
+                      editableCode={/chapter\s*5/i.test(assignment.problems?.[currentProblemIndex]?.chapter || '')}
                       height="100%"
                     />
                   </div>

@@ -1,10 +1,11 @@
 import { useState, useEffect, useRef, useCallback, forwardRef, useImperativeHandle } from "react";
 import { Button } from "@/components/ui/button";
-import { Play, RotateCcw, Code, Blocks } from "lucide-react";
+import { Play, RotateCcw, Code, Blocks, Pencil } from "lucide-react";
 import { toast } from "sonner";
 import * as Blockly from 'blockly';
 // Import standard Blockly blocks library (math, logic, loops, etc.)
 import 'blockly/blocks';
+import Editor from "@monaco-editor/react";
 import AnimatedTurtle from "@/components/AnimatedTurtle";
 
 // CSS to fix Blockly layout issues and hide flyout scrollbar
@@ -1105,6 +1106,7 @@ const TurtleBlocklyEditor = forwardRef(({
   readOnly = false,
   showPreview = true,
   showCodeToggle = true,
+  editableCode = false,
   height = "400px",
   compact = false
 }, ref) => {
@@ -1112,9 +1114,13 @@ const TurtleBlocklyEditor = forwardRef(({
   const workspaceRef = useRef(null);
   const turtleRef = useRef(null);
   const [generatedCode, setGeneratedCode] = useState("");
+  const [manualCode, setManualCode] = useState(null); // null = use generatedCode
   const [showCode, setShowCode] = useState(false);
   const [isRunning, setIsRunning] = useState(false);
   const blocksDefinedRef = useRef(false);
+
+  // The active code is manual edits if present, otherwise block-generated
+  const activeCode = manualCode !== null ? manualCode : generatedCode;
 
   // Expose methods via ref
   useImperativeHandle(ref, () => ({
@@ -1125,7 +1131,7 @@ const TurtleBlocklyEditor = forwardRef(({
       }
       return "";
     },
-    getCode: () => generatedCode,
+    getCode: () => manualCode !== null ? manualCode : generatedCode,
     setXml: (xml) => {
       if (workspaceRef.current && xml) {
         try {
@@ -1301,14 +1307,15 @@ const TurtleBlocklyEditor = forwardRef(({
   }, []);
 
   const handleRun = useCallback(() => {
+    const codeToRun = manualCode !== null ? manualCode : generatedCode;
     console.log("🟢 handleRun called");
-    console.log("🟢 generatedCode:", generatedCode?.substring(0, 100));
+    console.log("🟢 codeToRun:", codeToRun?.substring(0, 100));
     console.log("🟢 turtleRef.current:", !!turtleRef.current);
-    if (turtleRef.current && generatedCode) {
+    if (turtleRef.current && codeToRun) {
       setIsRunning(true);
       
       // Check if code has event handlers (look for "def on_key_" or similar patterns)
-      const hasEventHandlers = /def on_key_|def on_turtle_clicked|def on_mouse_move/.test(generatedCode);
+      const hasEventHandlers = /def on_key_|def on_turtle_clicked|def on_mouse_move/.test(codeToRun);
       
       if (hasEventHandlers) {
         // Use event mode which runs startup code and activates event listeners
@@ -1316,7 +1323,7 @@ const TurtleBlocklyEditor = forwardRef(({
         turtleRef.current.startEventMode();
         setIsRunning(false);
         if (onRun) {
-          onRun(generatedCode);
+          onRun(codeToRun);
         }
       } else {
         // Standard mode - just run the code
@@ -1329,14 +1336,14 @@ const TurtleBlocklyEditor = forwardRef(({
           // Notify parent that code was run
           console.log("🟢 Run complete");
           if (onRun) {
-            onRun(generatedCode);
+            onRun(codeToRun);
           }
         }, 100);
       }
     } else {
-      console.log("🟢 Cannot run - missing turtleRef or generatedCode", { hasTurtleRef: !!turtleRef.current, hasCode: !!generatedCode });
+      console.log("🟢 Cannot run - missing turtleRef or code", { hasTurtleRef: !!turtleRef.current, hasCode: !!codeToRun });
     }
-  }, [generatedCode, onRun]);
+  }, [generatedCode, manualCode, onRun]);
 
   const handleReset = useCallback(() => {
     if (turtleRef.current) {
@@ -1364,8 +1371,7 @@ const TurtleBlocklyEditor = forwardRef(({
               className="text-white hover:bg-white/20 text-xs h-6 px-2"
               onClick={() => setShowCode(!showCode)}
             >
-              <Code className="w-3 h-3 mr-1" />
-              {showCode ? "Blocks" : "Code"}
+              {showCode ? <><Blocks className="w-3 h-3 mr-1" />Blocks</> : <><Code className="w-3 h-3 mr-1" />{editableCode ? "Code" : "Code"}</>}
             </Button>
           )}
           {showPreview && (
@@ -1390,7 +1396,7 @@ const TurtleBlocklyEditor = forwardRef(({
                   console.log("🟢 Run button clicked directly");
                   handleRun();
                 }}
-                disabled={isRunning || !generatedCode}
+                disabled={isRunning || !activeCode}
               >
                 <Play className="w-3 h-3 mr-1" />
                 Run
@@ -1415,11 +1421,52 @@ const TurtleBlocklyEditor = forwardRef(({
         </div>
         
         {showCode && (
-          <div className="flex-1 bg-gray-900 p-2 overflow-auto">
-            <pre className="text-green-400 font-mono text-xs whitespace-pre-wrap">
-              {generatedCode || "# No blocks yet - drag blocks to generate code"}
-            </pre>
-          </div>
+          editableCode ? (
+            <div className="flex-1 min-w-0 flex flex-col">
+              <div className="flex items-center justify-between bg-gray-800 px-3 py-1 border-b border-gray-700">
+                <span className="text-xs text-gray-400 flex items-center gap-1">
+                  <Pencil className="w-3 h-3" /> Write Python code here
+                </span>
+                {manualCode !== null && (
+                  <button 
+                    className="text-xs text-yellow-400 hover:text-yellow-300"
+                    onClick={() => { setManualCode(null); }}
+                  >
+                    Reset to blocks
+                  </button>
+                )}
+              </div>
+              <div className="flex-1 min-h-0">
+                <Editor
+                  height="100%"
+                  defaultLanguage="python"
+                  value={activeCode || "# Type your Python turtle code here\nimport turtle\nt = turtle.Turtle()\n"}
+                  onChange={(value) => {
+                    setManualCode(value || "");
+                    if (onCodeChange) onCodeChange(value || "");
+                  }}
+                  theme="vs-dark"
+                  options={{
+                    minimap: { enabled: false },
+                    fontSize: 13,
+                    lineNumbers: "on",
+                    scrollBeyondLastLine: false,
+                    wordWrap: "on",
+                    tabSize: 4,
+                    insertSpaces: true,
+                    automaticLayout: true,
+                    padding: { top: 8 },
+                  }}
+                />
+              </div>
+            </div>
+          ) : (
+            <div className="flex-1 bg-gray-900 p-2 overflow-auto">
+              <pre className="text-green-400 font-mono text-xs whitespace-pre-wrap">
+                {generatedCode || "# No blocks yet - drag blocks to generate code"}
+              </pre>
+            </div>
+          )
         )}
 
         {/* Turtle preview - only when enabled */}
@@ -1427,7 +1474,7 @@ const TurtleBlocklyEditor = forwardRef(({
           <div className="w-[420px] border-l bg-white flex items-center justify-center p-2 flex-shrink-0">
             <AnimatedTurtle
               ref={turtleRef}
-              code={generatedCode}
+              code={activeCode}
               width={compact ? 300 : 400}
               height={compact ? 300 : 400}
               onRun={() => {
