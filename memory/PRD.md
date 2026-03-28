@@ -111,6 +111,10 @@ A coding education platform for K-12 students featuring multiple programming env
 - [x] Block Problem Creation Workflow
 - [x] Looks blocks, MC Test features, Grid toggle, etc.
 
+### Completed (March 28, 2025)
+- [x] **Question Bank Block Dropdown** - Verified all 85+ block types across 12 categories render correctly in QuestionBank.jsx and TestTaking.jsx
+- [x] **Chapter 5 Editable Code** - Added `editableCode` prop to TurtleBlocklyEditor. When enabled (auto-detected for Chapter 5 problems), the Code view shows a full Monaco Python editor instead of read-only output. Students can type Python code, run it, and toggle back to blocks. Includes "Reset to blocks" button.
+
 ### P0 - Immediate
 - [ ] Verify sensing blocks (x position, y position) have correct shape for logic comparison blocks
 
