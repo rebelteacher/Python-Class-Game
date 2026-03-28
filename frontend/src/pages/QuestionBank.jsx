@@ -70,26 +70,77 @@ const BLOCK_TYPES = {
   'is_odd': { label: '__ is odd', color: '#59C059', category: 'Logic' },
 };
 
-// Render a visual block
+// Render a visual block that matches the Blockly block style
 const BlockRenderer = ({ blockType, customText }) => {
   const block = BLOCK_TYPES[blockType];
   if (!block) return <span>{customText || blockType}</span>;
   
   const label = customText || block.label;
-  const darkerColor = block.color + 'CC';
+  const color = block.color;
+  
+  // Parse label to split text and input holes (marked with __)
+  const parts = label.split(/(__)/);
   
   return (
     <span
       data-testid={`block-${blockType}`}
-      className="inline-flex items-center rounded-md px-3 py-1.5 text-white font-medium text-sm shadow-sm"
+      className="inline-flex items-center relative"
       style={{ 
-        backgroundColor: block.color,
-        borderBottom: `3px solid ${darkerColor}`,
+        backgroundColor: color,
+        borderRadius: '4px',
+        padding: '5px 10px 5px 10px',
+        color: 'white',
         fontFamily: '"Helvetica Neue", Helvetica, sans-serif',
-        letterSpacing: '0.3px'
+        fontSize: '13px',
+        fontWeight: 600,
+        letterSpacing: '0.3px',
+        boxShadow: `0 2px 0 0 ${color}99`,
+        marginTop: '5px',
+        marginBottom: '5px',
       }}
     >
-      {label}
+      {/* Top notch connector */}
+      <span style={{
+        position: 'absolute',
+        top: '-4px',
+        left: '14px',
+        width: '12px',
+        height: '4px',
+        backgroundColor: color,
+        borderRadius: '2px 2px 0 0',
+      }} />
+      {/* Bottom tab connector */}
+      <span style={{
+        position: 'absolute',
+        bottom: '-4px',
+        left: '14px',
+        width: '12px',
+        height: '4px',
+        backgroundColor: color,
+        borderRadius: '0 0 2px 2px',
+      }} />
+      {parts.map((part, i) => 
+        part === '__' ? (
+          <span key={i} style={{
+            display: 'inline-flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            minWidth: '26px',
+            height: '20px',
+            padding: '0 8px',
+            margin: '0 3px',
+            backgroundColor: 'white',
+            color: '#555',
+            borderRadius: '10px',
+            fontSize: '11px',
+            fontWeight: 700,
+          }}>
+            {'  '}
+          </span>
+        ) : (
+          <span key={i}>{part}</span>
+        )
+      )}
     </span>
   );
 };
