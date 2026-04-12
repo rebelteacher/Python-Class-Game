@@ -833,6 +833,7 @@ export default function MicrobitSimulator({ code, onButtonPress }) {
             <Button
               size="sm"
               variant="outline"
+              type="button"
               onClick={handleReset}
               className="h-7 px-2 text-xs bg-gray-800 border-gray-600 hover:bg-gray-700"
               title="Reset Simulator"
@@ -841,6 +842,7 @@ export default function MicrobitSimulator({ code, onButtonPress }) {
             </Button>
             <Button
               size="sm"
+              type="button"
               onClick={handleRun}
               className={`h-7 px-2 text-xs ${isRunning ? 'bg-red-600 hover:bg-red-700' : 'bg-green-600 hover:bg-green-700'}`}
               title="Run in Simulator"
@@ -849,6 +851,7 @@ export default function MicrobitSimulator({ code, onButtonPress }) {
             </Button>
             <Button
               size="sm"
+              type="button"
               onClick={openInMicrobitEditor}
               className="h-7 px-2 text-xs bg-cyan-600 hover:bg-cyan-700"
               title="Flash to Real Micro:bit (opens official editor)"
@@ -871,6 +874,7 @@ export default function MicrobitSimulator({ code, onButtonPress }) {
             
             {/* Button A */}
             <button
+              type="button"
               onClick={handleButtonA}
               className={`absolute left-2 top-1/2 transform -translate-y-1/2 w-8 h-8 rounded-full border-2 transition-all ${
                 buttonAPressed 
@@ -901,6 +905,7 @@ export default function MicrobitSimulator({ code, onButtonPress }) {
             
             {/* Button B */}
             <button
+              type="button"
               onClick={handleButtonB}
               className={`absolute right-2 top-1/2 transform -translate-y-1/2 w-8 h-8 rounded-full border-2 transition-all ${
                 buttonBPressed 
@@ -949,6 +954,7 @@ export default function MicrobitSimulator({ code, onButtonPress }) {
           </p>
           <div className="flex justify-center">
             <button
+              type="button"
               onClick={flashToMicrobit}
               className="text-gray-500 hover:text-gray-300 underline text-xs"
             >
