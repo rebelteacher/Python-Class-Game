@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import ContactForm from "@/components/ContactForm";
 
 const REDIRECT_URL = window.location.origin + "/student/dashboard";
-const AUTH_BASE_URL = process.env.REACT_APP_AUTH_URL || "https://auth.emergentagent.com";
+const AUTH_BASE_URL = "https://auth.emergentagent.com";
 const AUTH_URL = `${AUTH_BASE_URL}/?redirect=${encodeURIComponent(REDIRECT_URL)}`;
 
 export default function LandingPage() {
