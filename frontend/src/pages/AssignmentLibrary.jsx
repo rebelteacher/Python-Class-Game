@@ -17,6 +17,7 @@ import { BookOpen, Plus, Search, Filter, Code2, ArrowLeft, Download, Edit, Folde
 import MazeBuilder from "@/components/MazeBuilder";
 import AnimatedTurtle from "@/components/AnimatedTurtle";
 import TurtleBlocklyEditor from "@/components/TurtleBlocklyEditor";
+import MicrobitSimulator from "@/components/MicrobitSimulator";
 
 const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
 const API = `${BACKEND_URL}/api`;
@@ -1480,8 +1481,36 @@ export default function AssignmentLibrary({ user }) {
                         />
                       </div>
                     </div>
+                  ) : newProblem.assignment_type === "microbit" ? (
+                    /* Micro:bit Type - Show Code Editor + Simulator */
+                    <div className="border-2 border-cyan-200 bg-cyan-50 rounded-lg p-4">
+                      <Label className="text-lg font-semibold flex items-center gap-2">
+                        ⚡ Solution Code & Simulator Test *
+                      </Label>
+                      <p className="text-sm text-gray-600 mt-1 mb-3">
+                        Write your MicroPython solution and test it in the simulator.
+                      </p>
+                      <div className="flex gap-4" style={{ height: '420px' }}>
+                        <div className="flex-1 flex flex-col min-w-0">
+                          <Label className="text-sm font-medium mb-1">MicroPython Code</Label>
+                          <Textarea
+                            data-testid="microbit-solution-code"
+                            placeholder={"from microbit import *\n\nwhile True:\n    display.show(Image.HEART)\n    sleep(500)\n    display.clear()\n    sleep(500)"}
+                            value={newProblem.solution_code}
+                            onChange={(e) => setNewProblem({ ...newProblem, solution_code: e.target.value })}
+                            className="flex-1 font-mono text-sm resize-none"
+                            style={{ minHeight: '360px' }}
+                          />
+                        </div>
+                        <div className="flex flex-col" style={{ width: '320px' }}>
+                          <Label className="text-sm font-medium mb-1">Simulator Preview</Label>
+                          <div className="flex-1 border rounded-lg bg-white overflow-hidden">
+                            <MicrobitSimulator code={newProblem.solution_code} />
+                          </div>
+                        </div>
+                      </div>
+                    </div>
                   ) : (
-                    /* Other Types - Show Text Area for Solution Code */
                     <div>
                       <div className="flex items-center justify-between mb-2">
                         <Label htmlFor="solutionCode">Solution Code *</Label>
@@ -2758,6 +2787,34 @@ export default function AssignmentLibrary({ user }) {
                         height="560px"
                         compact={false}
                       />
+                    </div>
+                  </div>
+                ) : editingProblem.assignment_type === "microbit" ? (
+                  <div className="border-2 border-cyan-200 bg-cyan-50 rounded-lg p-4">
+                    <Label className="text-lg font-semibold flex items-center gap-2">
+                      ⚡ Solution Code & Simulator Test *
+                    </Label>
+                    <p className="text-sm text-gray-600 mt-1 mb-3">
+                      Write your MicroPython solution and test it in the simulator.
+                    </p>
+                    <div className="flex gap-4" style={{ height: '420px' }}>
+                      <div className="flex-1 flex flex-col min-w-0">
+                        <Label className="text-sm font-medium mb-1">MicroPython Code</Label>
+                        <Textarea
+                          data-testid="microbit-edit-solution-code"
+                          placeholder={"from microbit import *\n\nwhile True:\n    display.show(Image.HEART)\n    sleep(500)\n    display.clear()\n    sleep(500)"}
+                          value={editingProblem.solution_code}
+                          onChange={(e) => setEditingProblem({ ...editingProblem, solution_code: e.target.value })}
+                          className="flex-1 font-mono text-sm resize-none"
+                          style={{ minHeight: '360px' }}
+                        />
+                      </div>
+                      <div className="flex flex-col" style={{ width: '320px' }}>
+                        <Label className="text-sm font-medium mb-1">Simulator Preview</Label>
+                        <div className="flex-1 border rounded-lg bg-white overflow-hidden">
+                          <MicrobitSimulator code={editingProblem.solution_code} />
+                        </div>
+                      </div>
                     </div>
                   </div>
                 ) : (
