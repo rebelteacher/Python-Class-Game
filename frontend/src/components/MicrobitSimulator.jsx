@@ -1016,11 +1016,21 @@ export default function MicrobitSimulator({ code, onButtonPress }) {
 
   // Open the official micro:bit Python editor with the current code
   const openInMicrobitEditor = () => {
-    // Encode the Python code for URL
-    const encodedCode = encodeURIComponent(code);
-    // Open the official micro:bit Python editor
-    window.open(`https://python.microbit.org/v/3?code=${encodedCode}`, '_blank');
-    toast.info('Opening micro:bit Python Editor...', { duration: 3000 });
+    // Download the code as a .py file
+    const blob = new Blob([code || ''], { type: 'text/x-python' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'main.py';
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+    
+    // Open the micro:bit Python editor in a new tab
+    window.open('https://python.microbit.org/v/3', '_blank');
+    
+    toast.info('Your code was downloaded as main.py — drag it into the micro:bit editor that just opened!', { duration: 6000 });
   };
 
   // Create a micro:bit hex file with embedded Python code
