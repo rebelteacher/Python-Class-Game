@@ -719,8 +719,10 @@ export default function MicrobitSimulator({ code, onButtonPress }) {
           case 'show':
             const pattern = getPattern(cmd.arg);
             if (pattern) {
-              ledsRef.current = copyGrid(pattern);
-              setLeds(copyGrid(pattern));
+              // Map binary patterns (0/1) to full brightness (0/9)
+              const brightPattern = pattern.map(row => row.map(v => v > 0 ? 9 : 0));
+              ledsRef.current = brightPattern;
+              setLeds(copyGrid(brightPattern));
               setConsoleOutput(prev => [...prev, `show(${cmd.arg})`]);
             }
             break;
@@ -734,8 +736,9 @@ export default function MicrobitSimulator({ code, onButtonPress }) {
               for (const char of text) {
                 if (!runningRef.current) break;
                 const charPattern = CHAR_PATTERNS[char] || EMPTY_GRID;
-                ledsRef.current = copyGrid(charPattern);
-                setLeds(copyGrid(charPattern));
+                const brightChar = charPattern.map(row => row.map(v => v > 0 ? 9 : 0));
+                ledsRef.current = brightChar;
+                setLeds(copyGrid(brightChar));
                 await new Promise(r => setTimeout(r, 400));
               }
             }
