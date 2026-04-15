@@ -111,6 +111,9 @@ A coding education platform for K-12 students featuring multiple programming env
 - [x] Block Problem Creation Workflow
 - [x] Looks blocks, MC Test features, Grid toggle, etc.
 
+### Completed (April 15, 2025)
+- [x] **WebUSB Flash with LittleFS Code Embedding** - Fixed P0 bug where flashing to physical micro:bit devices silently failed. The `flashToDevice` function now uses client-side `@microbit/microbit-fs` to embed user Python code as `main.py` into the MicroPython V2.1.2 firmware's LittleFS filesystem, creates a Universal Hex, and flashes via WebUSB. No backend API dependency.
+
 ### Completed (April 12, 2025)
 - [x] **Micro:bit Simulator in Teacher Problem Editor** - Teachers now have a split-view code editor + Micro:bit simulator when creating or editing Micro:bit problems in the Assignment Library. Mirrors the student experience. Works in both Create and Edit dialogs.
 
@@ -119,6 +122,7 @@ A coding education platform for K-12 students featuring multiple programming env
 - [x] **Chapter 5 Editable Code** - Added `editableCode` prop to TurtleBlocklyEditor. When enabled (auto-detected for Chapter 5 problems), the Code view shows a full Monaco Python editor instead of read-only output. Students can type Python code, run it, and toggle back to blocks. Includes "Reset to blocks" button.
 
 ### P0 - Immediate
+- [x] WebUSB Flash with LittleFS Code Embedding (Fixed April 15, 2025)
 - [ ] Verify sensing blocks (x position, y position) have correct shape for logic comparison blocks
 
 ### P1 - Next Priority
@@ -181,4 +185,4 @@ A coding education platform for K-12 students featuring multiple programming env
 
 ---
 
-*Last Updated: April 12, 2025*
+*Last Updated: April 15, 2025*
