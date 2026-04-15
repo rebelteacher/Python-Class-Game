@@ -11154,6 +11154,22 @@ async def delete_custom_lesson(unit_type: str, lesson_id: str, request: Request)
     return {"message": "Lesson deleted successfully"}
 
 
+@api_router.post("/microbit/hex")
+async def generate_microbit_hex(request: Request):
+    """Generate a micro:bit hex file from MicroPython code"""
+    import uflash
+    body = await request.json()
+    python_code = body.get("code", "")
+    if not python_code.strip():
+        raise HTTPException(status_code=400, detail="No code provided")
+    hex_content = uflash.embed_fs_uhex(uflash._RUNTIME, python_code.encode("utf-8"))
+    return Response(
+        content=hex_content,
+        media_type="application/octet-stream",
+        headers={"Content-Disposition": "attachment; filename=microbit.hex"}
+    )
+
+
 # Include the router in the main app
 app.include_router(api_router)
 

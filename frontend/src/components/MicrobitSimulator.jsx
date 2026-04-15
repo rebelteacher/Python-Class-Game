@@ -1015,22 +1015,34 @@ export default function MicrobitSimulator({ code, onButtonPress }) {
   };
 
   // Open the official micro:bit Python editor with the current code
-  const openInMicrobitEditor = () => {
-    // Download the code as a .py file
-    const blob = new Blob([code || ''], { type: 'text/x-python' });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = 'main.py';
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
-    URL.revokeObjectURL(url);
-    
-    // Open the micro:bit Python editor in a new tab
-    window.open('https://python.microbit.org/v/3', '_blank');
-    
-    toast.info('Your code was downloaded as main.py — drag it into the micro:bit editor that just opened!', { duration: 6000 });
+  const openInMicrobitEditor = async () => {
+    if (!code || !code.trim()) {
+      toast.error('No code to flash. Write some code first!');
+      return;
+    }
+    try {
+      toast.info('Generating hex file...', { duration: 2000 });
+      const API_URL = process.env.REACT_APP_BACKEND_URL;
+      const resp = await fetch(`${API_URL}/api/microbit/hex`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ code }),
+      });
+      if (!resp.ok) throw new Error('Failed to generate hex');
+      const blob = await resp.blob();
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = 'microbit.hex';
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+      toast.success('Hex file downloaded! Drag it onto your MICROBIT drive.', { duration: 5000 });
+    } catch (err) {
+      console.error(err);
+      toast.error('Could not generate hex file. Try copying your code to python.microbit.org instead.');
+    }
   };
 
   // Create a micro:bit hex file with embedded Python code
