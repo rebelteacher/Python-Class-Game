@@ -867,46 +867,54 @@ export default function MicrobitSimulator({ code, onButtonPress }) {
     setConnectionStatus('flashing');
 
     try {
-      // Step 1: Generate hex from backend
-      setConsoleOutput(prev => [...prev, '> Generating hex file...']);
-      setFlashProgress(10);
-      const API_URL = process.env.REACT_APP_BACKEND_URL;
-      const resp = await fetch(`${API_URL}/api/microbit/hex`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ code }),
-      });
-      if (!resp.ok) throw new Error('Failed to generate hex file');
-      const hexString = await resp.text();
+      // Step 1: Fetch base MicroPython V2 firmware from public folder
+      setConsoleOutput(prev => [...prev, '> Fetching MicroPython firmware...']);
+      setFlashProgress(5);
+      const firmwareResp = await fetch('/micropython-v2.hex');
+      if (!firmwareResp.ok) throw new Error('Failed to load MicroPython firmware');
+      const firmwareHex = await firmwareResp.text();
+      setFlashProgress(15);
+
+      // Step 2: Embed user code as main.py into the firmware filesystem
+      setConsoleOutput(prev => [...prev, '> Embedding code into firmware...']);
+      const { MicropythonFsHex } = await import('@microbit/microbit-fs');
+      const fsHex = new MicropythonFsHex(firmwareHex);
+      fsHex.write('main.py', code);
+      const v2HexWithCode = fsHex.getIntelHex();
       setFlashProgress(30);
-      // Step 2: Convert V2-only hex to universal hex format
-      setConsoleOutput(prev => [...prev, '> Preparing universal hex...']);
+
+      // Step 3: Create Universal Hex format (V1 stub + V2 with code)
+      setConsoleOutput(prev => [...prev, '> Creating universal hex...']);
       const { createUniversalHex, microbitBoardId } = await import('@microbit/microbit-universal-hex');
-      const v1Stub = ':020000040000FA\n:1000000000000000000000000000000000000000F0\n:00000001FF';
+      const v1Stub = ':020000040000FA\n:0400000500000000F7\n:00000001FF';
       const universalHex = createUniversalHex([
         { hex: v1Stub, boardId: microbitBoardId.V1 },
-        { hex: hexString, boardId: microbitBoardId.V2 }
+        { hex: v2HexWithCode, boardId: microbitBoardId.V2 }
       ]);
       setFlashProgress(40);
-      setConsoleOutput(prev => [...prev, '> Universal hex ready. Connecting to micro:bit...']);
 
-      // Step 3: Connect via WebUSB
+      // Step 4: Connect to micro:bit via WebUSB
+      setConsoleOutput(prev => [...prev, '> Connecting to micro:bit via USB...']);
       const { createWebUSBConnection, createUniversalHexFlashDataSource } = await import('@microbit/microbit-connection');
       const usb = createWebUSBConnection();
       const status = await usb.connect();
-      if (status !== 'CONNECTED') throw new Error('Could not connect to micro:bit');
-      
+      if (status !== 'CONNECTED') throw new Error('Could not connect to micro:bit. Status: ' + status);
+
       setFlashProgress(50);
       setConsoleOutput(prev => [...prev, '> Connected! Flashing code...']);
       connectionRef.current = usb;
       setMicrobitConnected(true);
 
-      // Step 4: Flash the universal hex
+      // Step 5: Flash the universal hex to the device
       await usb.flash(
         createUniversalHexFlashDataSource(universalHex),
         {
           partial: false,
-          progress: (pct) => setFlashProgress(50 + Math.round(pct * 0.5)),
+          progress: (pct) => {
+            if (pct !== undefined) {
+              setFlashProgress(50 + Math.round(pct * 0.5));
+            }
+          },
         }
       );
 
@@ -917,8 +925,8 @@ export default function MicrobitSimulator({ code, onButtonPress }) {
     } catch (error) {
       console.error('Flash error:', error);
       setConnectionStatus('error');
-      if (error.name === 'NotFoundError') {
-        setConsoleOutput(prev => [...prev, '> No micro:bit found. Plug it in via USB and try again.']);
+      if (error.name === 'NotFoundError' || error.code === 'no-device-selected') {
+        setConsoleOutput(prev => [...prev, '> No micro:bit selected. Plug it in via USB and try again.']);
         toast.error('No micro:bit found. Plug it in and try again.');
       } else {
         setConsoleOutput(prev => [...prev, `> Error: ${error.message}`]);
