@@ -879,9 +879,18 @@ export default function MicrobitSimulator({ code, onButtonPress }) {
       if (!resp.ok) throw new Error('Failed to generate hex file');
       const hexString = await resp.text();
       setFlashProgress(30);
-      setConsoleOutput(prev => [...prev, '> Hex ready. Connecting to micro:bit...']);
+      // Step 2: Convert V2-only hex to universal hex format
+      setConsoleOutput(prev => [...prev, '> Preparing universal hex...']);
+      const { createUniversalHex, microbitBoardId } = await import('@microbit/microbit-universal-hex');
+      const v1Stub = ':020000040000FA\n:1000000000000000000000000000000000000000F0\n:00000001FF';
+      const universalHex = createUniversalHex([
+        { hex: v1Stub, boardId: microbitBoardId.V1 },
+        { hex: hexString, boardId: microbitBoardId.V2 }
+      ]);
+      setFlashProgress(40);
+      setConsoleOutput(prev => [...prev, '> Universal hex ready. Connecting to micro:bit...']);
 
-      // Step 2: Connect via WebUSB using @microbit/microbit-connection
+      // Step 3: Connect via WebUSB
       const { createWebUSBConnection, createUniversalHexFlashDataSource } = await import('@microbit/microbit-connection');
       const usb = createWebUSBConnection();
       const status = await usb.connect();
@@ -892,11 +901,11 @@ export default function MicrobitSimulator({ code, onButtonPress }) {
       connectionRef.current = usb;
       setMicrobitConnected(true);
 
-      // Step 3: Flash the hex
+      // Step 4: Flash the universal hex
       await usb.flash(
-        createUniversalHexFlashDataSource(hexString),
+        createUniversalHexFlashDataSource(universalHex),
         {
-          partial: true,
+          partial: false,
           progress: (pct) => setFlashProgress(50 + Math.round(pct * 0.5)),
         }
       );

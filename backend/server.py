@@ -11156,16 +11156,36 @@ async def delete_custom_lesson(unit_type: str, lesson_id: str, request: Request)
 
 @api_router.post("/microbit/hex")
 async def generate_microbit_hex(request: Request):
-    """Generate a micro:bit hex file from MicroPython code"""
-    import uflash
+    """Generate a micro:bit V2 hex file with embedded MicroPython script"""
+    from intelhex import IntelHex
+    import struct, io
     body = await request.json()
     python_code = body.get("code", "")
     if not python_code.strip():
         raise HTTPException(status_code=400, detail="No code provided")
-    hex_content = uflash.embed_fs_uhex(uflash._RUNTIME, python_code.encode("utf-8"))
+    
+    # Load the latest MicroPython V2 runtime hex
+    hex_path = os.path.join(os.path.dirname(__file__), "micropython-v2.hex")
+    ih = IntelHex(hex_path)
+    
+    # Embed user script at 0x0003e000 (MicroPython appended script format)
+    # Header: 'MP' (2 bytes) + script length (2 bytes, little-endian)
+    script_bytes = python_code.encode("utf-8")
+    header = b"MP" + struct.pack("<H", len(script_bytes))
+    full_data = header + script_bytes
+    
+    SCRIPT_ADDR = 0x0003e000
+    for i, byte_val in enumerate(full_data):
+        ih[SCRIPT_ADDR + i] = byte_val
+    
+    # Write to Intel HEX string
+    sio = io.StringIO()
+    ih.write_hex_file(sio)
+    hex_content = sio.getvalue()
+    
     return Response(
         content=hex_content,
-        media_type="application/octet-stream",
+        media_type="text/plain",
         headers={"Content-Disposition": "attachment; filename=microbit.hex"}
     )
 
