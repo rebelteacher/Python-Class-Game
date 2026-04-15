@@ -709,7 +709,7 @@ export default function MicrobitSimulator({ code, onButtonPress }) {
             // Set individual pixel: display.set_pixel(x, y, brightness)
             if (cmd.x >= 0 && cmd.x < 5 && cmd.y >= 0 && cmd.y < 5) {
               const newLeds = copyGrid(ledsRef.current);
-              newLeds[cmd.y][cmd.x] = cmd.brightness > 0 ? 1 : 0;
+              newLeds[cmd.y][cmd.x] = cmd.brightness;
               ledsRef.current = newLeds;
               setLeds(newLeds);
               setConsoleOutput(prev => [...prev, `set_pixel(${cmd.x}, ${cmd.y}, ${cmd.brightness})`]);
@@ -992,16 +992,23 @@ export default function MicrobitSimulator({ code, onButtonPress }) {
             <div className="flex justify-center">
               <div className="grid grid-cols-5 gap-1 p-2 bg-black rounded-lg">
                 {leds.map((row, rowIndex) =>
-                  row.map((led, colIndex) => (
-                    <div
-                      key={`${rowIndex}-${colIndex}`}
-                      className={`w-4 h-4 rounded-sm transition-all duration-100 ${
-                        led > 0 
-                          ? 'bg-red-500 shadow-[0_0_8px_rgba(239,68,68,0.8)]' 
-                          : 'bg-red-950'
-                      }`}
-                    />
-                  ))
+                  row.map((led, colIndex) => {
+                    const brightness = Math.min(9, Math.max(0, led));
+                    const opacity = brightness / 9;
+                    const glowSize = Math.round(2 + opacity * 6);
+                    return (
+                      <div
+                        key={`${rowIndex}-${colIndex}`}
+                        className="w-4 h-4 rounded-sm transition-all duration-100"
+                        style={brightness > 0 ? {
+                          backgroundColor: `rgba(239, 68, 68, ${0.2 + opacity * 0.8})`,
+                          boxShadow: `0 0 ${glowSize}px rgba(239, 68, 68, ${opacity * 0.8})`,
+                        } : {
+                          backgroundColor: 'rgb(69, 10, 10)',
+                        }}
+                      />
+                    );
+                  })
                 )}
               </div>
             </div>
