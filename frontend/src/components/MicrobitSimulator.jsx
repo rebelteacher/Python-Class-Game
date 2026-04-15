@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef, useCallback } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Play, Square, RotateCcw, Usb, Loader2, Check, AlertCircle } from "lucide-react";
+import { Play, Square, RotateCcw, Usb, Loader2, Check, AlertCircle, Zap } from "lucide-react";
 import { toast } from "sonner";
 
 // Predefined Micro:bit images (5x5 LED patterns)
@@ -847,247 +847,73 @@ export default function MicrobitSimulator({ code, onButtonPress }) {
     return 'usb' in navigator;
   };
 
-  // Generate a MicroPython hex file with the user's code
-  const generateMicroPythonHex = async (pythonCode) => {
-    // The MicroPython hex includes the runtime + user script
-    // We'll use the micro:bit Python editor's approach - append the script to a base hex
-    // For simplicity, we'll download from the official micro:bit Python editor API
-    
-    try {
-      setConsoleOutput(prev => [...prev, 'Generating hex file...']);
-      
-      // Use the micro:bit create API to generate a hex file
-      const response = await fetch('https://python.microbit.org/v/3/api/create', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          python: pythonCode,
-        }),
-      });
-      
-      if (!response.ok) {
-        throw new Error('Failed to generate hex file');
-      }
-      
-      const hexData = await response.text();
-      return hexData;
-    } catch (error) {
-      console.error('Error generating hex:', error);
-      // Fallback: create a basic hex with the code embedded
-      // This is a simplified approach - in production, you'd want proper hex generation
-      throw new Error('Could not generate hex file. Try using the simulator instead.');
-    }
-  };
-
-  // Connect to Micro:bit via WebUSB
-  const connectToMicrobit = async () => {
-    if (!isWebUSBSupported()) {
-      toast.error('WebUSB is not supported in this browser. Please use Chrome or Edge.');
-      setConsoleOutput(prev => [...prev, '❌ WebUSB not supported. Use Chrome or Edge.']);
-      return false;
-    }
-
-    try {
-      setConnectionStatus('connecting');
-      setConsoleOutput(prev => [...prev, 'Requesting USB device access...']);
-      
-      // Request access to micro:bit device
-      const device = await navigator.usb.requestDevice({
-        filters: [
-          { vendorId: 0x0d28, productId: 0x0204 }, // micro:bit
-        ]
-      });
-      
-      setConsoleOutput(prev => [...prev, `Found: ${device.productName || 'micro:bit'}`]);
-      
-      // Open the device
-      await device.open();
-      setConsoleOutput(prev => [...prev, 'Device opened']);
-      
-      // Select configuration and claim interface
-      if (device.configuration === null) {
-        await device.selectConfiguration(1);
-      }
-      
-      // Find the DAPLink interface (usually interface 4 for CMSIS-DAP)
-      const interfaceNumber = 4; // CMSIS-DAP interface
-      await device.claimInterface(interfaceNumber);
-      
-      connectionRef.current = device;
-      setMicrobitConnected(true);
-      setConnectionStatus('connected');
-      setConsoleOutput(prev => [...prev, '✅ Connected to micro:bit!']);
-      toast.success('Connected to micro:bit!');
-      
-      return true;
-    } catch (error) {
-      console.error('Connection error:', error);
-      setConnectionStatus('error');
-      
-      if (error.name === 'NotFoundError') {
-        setConsoleOutput(prev => [...prev, '❌ No micro:bit found. Make sure it\'s connected via USB.']);
-        toast.error('No micro:bit found. Connect it via USB and try again.');
-      } else if (error.name === 'SecurityError') {
-        setConsoleOutput(prev => [...prev, '❌ USB access denied. Grant permission and try again.']);
-        toast.error('USB access denied. Please grant permission.');
-      } else {
-        setConsoleOutput(prev => [...prev, `❌ Connection failed: ${error.message}`]);
-        toast.error(`Connection failed: ${error.message}`);
-      }
-      
-      return false;
-    }
-  };
-
-  // Flash code to the real Micro:bit
-  const flashToMicrobit = async () => {
+  // One-click flash to micro:bit via WebUSB
+  const flashToDevice = async () => {
     if (!code || code.trim() === '') {
       toast.error('No code to flash. Write some code first!');
+      return;
+    }
+
+    if (!isWebUSBSupported()) {
+      toast.error('WebUSB not supported. Use Chrome or Edge browser.');
       return;
     }
 
     setIsFlashing(true);
     setFlashProgress(0);
     setConnectionStatus('flashing');
-    setConsoleOutput([]);
-    
-    try {
-      setConsoleOutput(prev => [...prev, '🔧 Preparing your code...']);
-      setFlashProgress(20);
-      
-      // Clean up the code - remove any problematic characters
-      let cleanCode = code.trim();
-      
-      // Ensure the code has the microbit import if using display functions
-      if (!cleanCode.includes('from microbit import') && !cleanCode.includes('import microbit')) {
-        if (cleanCode.includes('display.') || cleanCode.includes('Image.') || cleanCode.includes('button_')) {
-          cleanCode = 'from microbit import *\n\n' + cleanCode;
-          setConsoleOutput(prev => [...prev, '📝 Added microbit import']);
-        }
-      }
-      
-      setFlashProgress(40);
-      setConsoleOutput(prev => [...prev, '📦 Creating Python file...']);
-      
-      // Create a .py file for the user to copy to the micro:bit
-      // The micro:bit will run main.py when it starts
-      const blob = new Blob([cleanCode], { type: 'text/x-python' });
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = 'main.py';
-      document.body.appendChild(a);
-      a.click();
-      document.body.removeChild(a);
-      URL.revokeObjectURL(url);
-      
-      setFlashProgress(70);
-      setConsoleOutput(prev => [...prev, '✅ Downloaded: main.py']);
-      
-      setFlashProgress(100);
-      setConsoleOutput(prev => [...prev, '']);
-      setConsoleOutput(prev => [...prev, '📋 Next steps:']);
-      setConsoleOutput(prev => [...prev, '1. Connect micro:bit via USB']);
-      setConsoleOutput(prev => [...prev, '2. Open MICROBIT drive']);
-      setConsoleOutput(prev => [...prev, '3. Copy main.py to the drive']);
-      setConsoleOutput(prev => [...prev, '4. Press reset button']);
-      
-      toast.success(
-        <div>
-          <strong>main.py downloaded!</strong>
-          <p className="text-sm mt-1">Copy it to your MICROBIT drive to run on device.</p>
-        </div>,
-        { duration: 5000 }
-      );
-      
-      setConnectionStatus('connected');
-      
-    } catch (error) {
-      console.error('Flash error:', error);
-      setConsoleOutput(prev => [...prev, `❌ Error: ${error.message}`]);
-      toast.error(`Failed: ${error.message}`);
-      setConnectionStatus('error');
-    } finally {
-      setIsFlashing(false);
-    }
-  };
 
-  // Open the official micro:bit Python editor with the current code
-  const openInMicrobitEditor = async () => {
-    if (!code || !code.trim()) {
-      toast.error('No code to flash. Write some code first!');
-      return;
-    }
     try {
-      toast.info('Generating hex file...', { duration: 2000 });
+      // Step 1: Generate hex from backend
+      setConsoleOutput(prev => [...prev, '> Generating hex file...']);
+      setFlashProgress(10);
       const API_URL = process.env.REACT_APP_BACKEND_URL;
       const resp = await fetch(`${API_URL}/api/microbit/hex`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ code }),
       });
-      if (!resp.ok) throw new Error('Failed to generate hex');
-      const blob = await resp.blob();
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = 'microbit.hex';
-      document.body.appendChild(a);
-      a.click();
-      document.body.removeChild(a);
-      URL.revokeObjectURL(url);
-      toast.success('Hex file downloaded! Drag it onto your MICROBIT drive.', { duration: 5000 });
-    } catch (err) {
-      console.error(err);
-      toast.error('Could not generate hex file. Try copying your code to python.microbit.org instead.');
-    }
-  };
+      if (!resp.ok) throw new Error('Failed to generate hex file');
+      const hexString = await resp.text();
+      setFlashProgress(30);
+      setConsoleOutput(prev => [...prev, '> Hex ready. Connecting to micro:bit...']);
 
-  // Create a micro:bit hex file with embedded Python code
-  // Uses the universal hex format that works with both micro:bit V1 and V2
-  const createMicrobitHex = async (pythonCode) => {
-    // MicroPython for micro:bit embeds Python code directly in the hex file
-    // The script is stored starting at a specific address with a magic marker
-    
-    // Convert Python code to bytes
-    const encoder = new TextEncoder();
-    const scriptBytes = encoder.encode(pythonCode);
-    
-    // Create the script region with micro:bit MicroPython format
-    // Magic header: MP (MicroPython script marker)
-    const scriptHeader = new Uint8Array([
-      0x4D, 0x50, // "MP" magic
-      (scriptBytes.length >> 8) & 0xFF, // Length high byte  
-      scriptBytes.length & 0xFF, // Length low byte
-    ]);
-    
-    // Combine header and script
-    const fullScript = new Uint8Array(scriptHeader.length + scriptBytes.length);
-    fullScript.set(scriptHeader, 0);
-    fullScript.set(scriptBytes, scriptHeader.length);
-    
-    // For a complete solution, we would need the MicroPython runtime hex
-    // For now, return the Python code for the user to use with the official editor
-    // or copy to the micro:bit as main.py
-    
-    return pythonCode;
-  };
+      // Step 2: Connect via WebUSB using @microbit/microbit-connection
+      const { createWebUSBConnection, createUniversalHexFlashDataSource } = await import('@microbit/microbit-connection');
+      const usb = createWebUSBConnection();
+      const status = await usb.connect();
+      if (status !== 'CONNECTED') throw new Error('Could not connect to micro:bit');
+      
+      setFlashProgress(50);
+      setConsoleOutput(prev => [...prev, '> Connected! Flashing code...']);
+      connectionRef.current = usb;
+      setMicrobitConnected(true);
 
-  // Disconnect from Micro:bit
-  const disconnectMicrobit = async () => {
-    if (connectionRef.current) {
-      try {
-        await connectionRef.current.close();
-        connectionRef.current = null;
-        setMicrobitConnected(false);
-        setConnectionStatus('disconnected');
-        setConsoleOutput(prev => [...prev, 'Disconnected from micro:bit']);
-        toast.info('Disconnected from micro:bit');
-      } catch (error) {
-        console.error('Disconnect error:', error);
+      // Step 3: Flash the hex
+      await usb.flash(
+        createUniversalHexFlashDataSource(hexString),
+        {
+          partial: true,
+          progress: (pct) => setFlashProgress(50 + Math.round(pct * 0.5)),
+        }
+      );
+
+      setFlashProgress(100);
+      setConnectionStatus('connected');
+      setConsoleOutput(prev => [...prev, '> Done! Your code is running on the micro:bit.']);
+      toast.success('Code flashed to micro:bit!');
+    } catch (error) {
+      console.error('Flash error:', error);
+      setConnectionStatus('error');
+      if (error.name === 'NotFoundError') {
+        setConsoleOutput(prev => [...prev, '> No micro:bit found. Plug it in via USB and try again.']);
+        toast.error('No micro:bit found. Plug it in and try again.');
+      } else {
+        setConsoleOutput(prev => [...prev, `> Error: ${error.message}`]);
+        toast.error(error.message);
       }
+    } finally {
+      setIsFlashing(false);
     }
   };
 
@@ -1128,11 +954,12 @@ export default function MicrobitSimulator({ code, onButtonPress }) {
             <Button
               size="sm"
               type="button"
-              onClick={openInMicrobitEditor}
+              onClick={flashToDevice}
+              disabled={isFlashing}
               className="h-7 px-2 text-xs bg-cyan-600 hover:bg-cyan-700"
-              title="Flash to Real Micro:bit (opens official editor)"
+              title="Flash to micro:bit via USB"
             >
-              <Usb className="w-3 h-3" />
+              {isFlashing ? <Loader2 className="w-3 h-3 animate-spin" /> : <Zap className="w-3 h-3" />}
             </Button>
           </div>
         </CardTitle>
@@ -1226,17 +1053,13 @@ export default function MicrobitSimulator({ code, onButtonPress }) {
         <div className="text-xs text-gray-400 mt-2 space-y-1">
           <p className="text-center">
             <span className="text-green-400">▶ Simulate</span> tests code here • 
-            <span className="text-cyan-400 ml-1">⇌ Flash</span> opens editor to send to device
+            <span className="text-cyan-400 ml-1">⚡ Flash</span> sends to device via USB
           </p>
-          <div className="flex justify-center">
-            <button
-              type="button"
-              onClick={flashToMicrobit}
-              className="text-gray-500 hover:text-gray-300 underline text-xs"
-            >
-              Or download main.py for manual transfer
-            </button>
-          </div>
+          {flashProgress > 0 && flashProgress < 100 && (
+            <div className="w-full bg-gray-700 rounded-full h-1.5 mt-1">
+              <div className="bg-cyan-500 h-1.5 rounded-full transition-all" style={{ width: `${flashProgress}%` }} />
+            </div>
+          )}
         </div>
       </CardContent>
     </Card>
