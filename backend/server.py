@@ -96,6 +96,51 @@ def calculate_rank(xp: int) -> dict:
             return RANK_THRESHOLDS[i]
     return RANK_THRESHOLDS[0]
 
+
+def normalize_code_whitespace(code_str: str) -> str:
+    """Normalize whitespace in code for flexible pattern matching.
+    Collapses spaces around commas, parentheses, and operators,
+    but preserves spaces inside string literals."""
+    result = []
+    in_string = False
+    string_char = None
+    i = 0
+    while i < len(code_str):
+        ch = code_str[i]
+        # Track string boundaries
+        if not in_string and ch in ('"', "'"):
+            in_string = True
+            string_char = ch
+            result.append(ch)
+            i += 1
+            continue
+        if in_string:
+            result.append(ch)
+            if ch == string_char and (i == 0 or code_str[i-1] != '\\'):
+                in_string = False
+            i += 1
+            continue
+        # Outside strings: collapse whitespace around , ( ) = + - * /
+        if ch == ' ' or ch == '\t':
+            # Look at previous non-space and next non-space
+            prev = result[-1] if result else ''
+            j = i + 1
+            while j < len(code_str) and code_str[j] in (' ', '\t'):
+                j += 1
+            nxt = code_str[j] if j < len(code_str) else ''
+            # Skip space if adjacent to comma, paren, or bracket
+            if prev in (',', '(', '[') or nxt in (',', ')', ']', '('):
+                i = j
+                continue
+            # Otherwise keep a single space
+            result.append(' ')
+            i = j
+            continue
+        result.append(ch)
+        i += 1
+    return ''.join(result)
+
+
 def calculate_xp_and_coins(score: float, is_first_try: bool, current_streak: int) -> dict:
     """Calculate XP and coins earned"""
     xp = 0
@@ -3275,11 +3320,11 @@ async def submit_assignment(submission: SubmissionCreate, request: Request):
                             pattern_score += points
                             actual_count = 1
                         else:
-                            code_lower = submission.code.lower()
-                            # Count occurrences of each pattern
+                            code_lower = normalize_code_whitespace(submission.code.lower())
+                            # Count occurrences of each pattern (whitespace-normalized)
                             pattern_counts = []
                             for p in patterns_to_check:
-                                count = code_lower.count(p.lower())
+                                count = code_lower.count(normalize_code_whitespace(p.lower()))
                                 pattern_counts.append(count)
                             
                             # All patterns must appear at least min_count times
@@ -3408,11 +3453,22 @@ async def submit_assignment(submission: SubmissionCreate, request: Request):
             pattern = test_case.get("pattern", "")
             description = test_case.get("description", "Code check")
             points = test_case.get("points", 20)
+            alternate_patterns = test_case.get("alternate_patterns", "")
             total_points += points
             
-            # Check if pattern exists in code (supports | for OR patterns)
-            patterns = pattern.split("|") if "|" in pattern else [pattern]
-            passed = any(p.strip() in submission.code for p in patterns)
+            # Collect all patterns: primary (supports |) + alternates
+            all_pattern_strings = []
+            if pattern:
+                all_pattern_strings.extend([p.strip() for p in pattern.split("|")])
+            if alternate_patterns:
+                all_pattern_strings.extend([p.strip() for p in alternate_patterns.split("|")])
+            
+            # Check with whitespace-normalized matching
+            normalized_code = normalize_code_whitespace(submission.code)
+            passed = any(
+                normalize_code_whitespace(p) in normalized_code
+                for p in all_pattern_strings if p
+            )
             
             if passed:
                 earned_points += points

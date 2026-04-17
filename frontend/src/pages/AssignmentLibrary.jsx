@@ -1892,7 +1892,7 @@ export default function AssignmentLibrary({ user }) {
                                   />
                                 </div>
                                 <div className="col-span-3">
-                                  <Label className="text-sm">Pattern to match (use | for OR)</Label>
+                                  <Label className="text-sm">Pattern to match</Label>
                                   <Input
                                     placeholder="e.g., display.show or while True:|for "
                                     value={testCase.pattern || ""}
@@ -1903,8 +1903,21 @@ export default function AssignmentLibrary({ user }) {
                                     }}
                                     className="mt-1 font-mono text-sm"
                                   />
+                                </div>
+                                <div className="col-span-3">
+                                  <Label className="text-sm text-gray-600">Alternate accepted patterns <span className="text-xs font-normal">(optional)</span></Label>
+                                  <Input
+                                    placeholder="e.g., display.set_pixel(0,0,9) if main pattern has spaces"
+                                    value={testCase.alternate_patterns || ""}
+                                    onChange={(e) => {
+                                      const newTestCases = [...newProblem.test_cases];
+                                      newTestCases[index].alternate_patterns = e.target.value;
+                                      setNewProblem({ ...newProblem, test_cases: newTestCases });
+                                    }}
+                                    className="mt-1 font-mono text-sm border-dashed"
+                                  />
                                   <p className="text-xs text-gray-500 mt-1">
-                                    Examples: <code>display.show</code>, <code>button_a|button_b</code>, <code>while True:</code>
+                                    Whitespace differences (spaces around commas/parens) are auto-matched. Use this for genuinely different code, separated by <code>|</code>
                                   </p>
                                 </div>
                               </div>
@@ -3142,6 +3155,22 @@ export default function AssignmentLibrary({ user }) {
                                   }}
                                   className="mt-1 font-mono text-sm"
                                 />
+                              </div>
+                              <div className="col-span-3">
+                                <Label className="text-sm text-gray-600">Alternate accepted patterns <span className="text-xs font-normal">(optional)</span></Label>
+                                <Input
+                                  placeholder="e.g., display.set_pixel(0,0,9) if main pattern has spaces"
+                                  value={testCase.alternate_patterns || ""}
+                                  onChange={(e) => {
+                                    const newTestCases = [...editingProblem.test_cases];
+                                    newTestCases[index].alternate_patterns = e.target.value;
+                                    setEditingProblem({ ...editingProblem, test_cases: newTestCases });
+                                  }}
+                                  className="mt-1 font-mono text-sm border-dashed"
+                                />
+                                <p className="text-xs text-gray-500 mt-1">
+                                  Whitespace differences are auto-matched. Use this for genuinely different code, separated by <code>|</code>
+                                </p>
                               </div>
                             </div>
                           </div>
