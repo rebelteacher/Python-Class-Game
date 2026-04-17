@@ -111,6 +111,10 @@ A coding education platform for K-12 students featuring multiple programming env
 - [x] Block Problem Creation Workflow
 - [x] Looks blocks, MC Test features, Grid toggle, etc.
 
+### Completed (April 17, 2025)
+- [x] **Whitespace-Tolerant Pattern Matching** - Pattern grading now normalizes whitespace around commas, parentheses, and brackets so `display.set_pixel(0,0,9)` matches `display.set_pixel(0, 0, 9)`. Preserves spaces inside string literals. Applied to both Micro:bit and Turtle/Block grading.
+- [x] **Alternate Patterns Field** - Teachers can add optional alternate accepted patterns per test case in the Micro:bit pattern check UI (both Create and Edit forms). Useful for accepting genuinely different code approaches.
+
 ### Completed (April 15, 2025)
 - [x] **WebUSB Flash with LittleFS Code Embedding** - Fixed P0 bug where flashing to physical micro:bit devices silently failed. The `flashToDevice` function now uses client-side `@microbit/microbit-fs` to embed user Python code as `main.py` into the MicroPython V2.1.2 firmware's LittleFS filesystem, creates a Universal Hex, and flashes via WebUSB. No backend API dependency.
 
@@ -185,4 +189,4 @@ A coding education platform for K-12 students featuring multiple programming env
 
 ---
 
-*Last Updated: April 15, 2025*
+*Last Updated: April 17, 2025*
