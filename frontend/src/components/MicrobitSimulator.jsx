@@ -501,6 +501,7 @@ export default function MicrobitSimulator({ code, onButtonPress }) {
   const ledsRef = useRef(copyGrid(EMPTY_GRID));
   const buttonARef = useRef(false);
   const buttonBRef = useRef(false);
+  const variablesRef = useRef({});
   
   // WebUSB state for real Micro:bit
   const [isFlashing, setIsFlashing] = useState(false);
@@ -509,7 +510,27 @@ export default function MicrobitSimulator({ code, onButtonPress }) {
   const [connectionStatus, setConnectionStatus] = useState('disconnected'); // 'disconnected', 'connecting', 'connected', 'flashing', 'error'
   const connectionRef = useRef(null);
 
-  // Parse the code and extract display commands
+  // Resolve a value expression using current variables
+  const resolveValue = useCallback((expr, vars) => {
+    if (expr === undefined || expr === null) return undefined;
+    const s = String(expr).trim();
+    // Number literal
+    if (/^-?\d+(\.\d+)?$/.test(s)) return parseFloat(s);
+    // Variable lookup
+    if (vars[s] !== undefined) return vars[s];
+    // Simple arithmetic: var + num, var - num, num + var, var + var
+    const arithMatch = s.match(/^(\w+)\s*([+\-*])\s*(\w+)$/);
+    if (arithMatch) {
+      const left = vars[arithMatch[1]] !== undefined ? vars[arithMatch[1]] : (isNaN(Number(arithMatch[1])) ? 0 : Number(arithMatch[1]));
+      const right = vars[arithMatch[3]] !== undefined ? vars[arithMatch[3]] : (isNaN(Number(arithMatch[3])) ? 0 : Number(arithMatch[3]));
+      if (arithMatch[2] === '+') return left + right;
+      if (arithMatch[2] === '-') return left - right;
+      if (arithMatch[2] === '*') return left * right;
+    }
+    return undefined;
+  }, []);
+
+  // Parse the code and extract display commands (with variable support)
   const parseCode = useCallback((pythonCode, buttonAState = false, buttonBState = false) => {
     const commands = [];
     const lines = pythonCode.split('\n');
@@ -594,18 +615,36 @@ export default function MicrobitSimulator({ code, onButtonPress }) {
       if (inButtonBBlock && !buttonBState) continue;
       if (inElseBlock && (buttonAState || buttonBState)) continue;
       
+      // When a button is pressed, skip initialization code (non-loop code outside button blocks)
+      // Only execute code that's inside the button block
+      if ((buttonAState || buttonBState) && !inWhileLoop && !inButtonABlock && !inButtonBBlock) continue;
+      
+      // Parse variable assignment: var = expression
+      const assignMatch = trimmed.match(/^(\w+)\s*=\s*(.+)$/);
+      if (assignMatch && !trimmed.includes('display.') && !trimmed.includes('(') && !trimmed.startsWith('if ') && !trimmed.startsWith('while ') && !trimmed.startsWith('for ')) {
+        const varName = assignMatch[1];
+        const valueExpr = assignMatch[2].trim();
+        // Skip import statements or class/function defs
+        if (!['from', 'import', 'def', 'class', 'return'].includes(varName)) {
+          commands.push({ type: 'set_var', name: varName, expr: valueExpr, loop: inWhileLoop });
+        }
+      }
+
+      // Parse augmented assignment: var += expr, var -= expr
+      const augAssignMatch = trimmed.match(/^(\w+)\s*([+\-*])=\s*(.+)$/);
+      if (augAssignMatch) {
+        commands.push({ type: 'set_var', name: augAssignMatch[1], expr: `${augAssignMatch[1]} ${augAssignMatch[2]} ${augAssignMatch[3].trim()}`, loop: inWhileLoop });
+      }
+
       // Parse display.set_pixel(x, y, brightness)
       if (trimmed.includes('display.set_pixel(') || trimmed.includes('set_pixel(')) {
-        const match = trimmed.match(/set_pixel\s*\(\s*(\d+)\s*,\s*(\d+)\s*,\s*(\d+)\s*\)/);
+        const match = trimmed.match(/set_pixel\s*\(\s*(\w+)\s*,\s*(\w+)\s*,\s*(\w+)\s*\)/);
         if (match) {
-          const x = parseInt(match[1]);
-          const y = parseInt(match[2]);
-          const brightness = parseInt(match[3]);
-          commands.push({ type: 'set_pixel', x, y, brightness, loop: inWhileLoop });
+          commands.push({ type: 'set_pixel', xExpr: match[1], yExpr: match[2], brightExpr: match[3], loop: inWhileLoop });
         }
       }
       
-      // Parse display.show(Image.XXX) or display.show('X')
+      // Parse display.show(Image.XXX) or display.show('X') or display.show(var)
       if (trimmed.includes('display.show(')) {
         const match = trimmed.match(/display\.show\((.*?)\)/);
         if (match) {
@@ -647,8 +686,8 @@ export default function MicrobitSimulator({ code, onButtonPress }) {
     return commands;
   }, []);
 
-  // Get LED pattern for a value
-  const getPattern = (value) => {
+  // Get LED pattern for a value (supports variables)
+  const getPattern = useCallback((value, vars = {}) => {
     // Check for Image.NAME pattern
     const imageMatch = value.match(/Image\.(\w+)/);
     if (imageMatch) {
@@ -667,82 +706,115 @@ export default function MicrobitSimulator({ code, onButtonPress }) {
       }
     }
     
-    // Check for number
-    const numMatch = value.match(/^(\d)$/);
-    if (numMatch) {
-      const char = numMatch[1];
+    // Check for number literal
+    if (/^\d+$/.test(value)) {
+      const char = String(parseInt(value) % 10);
       if (CHAR_PATTERNS[char]) {
         return CHAR_PATTERNS[char];
       }
     }
-    
-    // Check for variable that might be a number
-    if (!isNaN(parseInt(value))) {
-      const char = String(Math.abs(parseInt(value)) % 10);
-      if (CHAR_PATTERNS[char]) {
-        return CHAR_PATTERNS[char];
+
+    // Resolve variable or expression
+    const resolved = resolveValue(value, vars);
+    if (resolved !== undefined && typeof resolved === 'number') {
+      const digit = String(Math.abs(Math.floor(resolved)) % 10);
+      if (CHAR_PATTERNS[digit]) {
+        return CHAR_PATTERNS[digit];
       }
     }
     
     return null;
-  };
+  }, [resolveValue]);
 
-  // Execute commands
-  const executeCommands = useCallback(async (commands) => {
+  // Execute commands with variable state
+  const executeCommands = useCallback(async (commands, { keepState = false } = {}) => {
     runningRef.current = true;
-    setConsoleOutput([]);
-    ledsRef.current = copyGrid(EMPTY_GRID);
-    setLeds(copyGrid(EMPTY_GRID));
+    if (!keepState) {
+      setConsoleOutput([]);
+      ledsRef.current = copyGrid(EMPTY_GRID);
+      setLeds(copyGrid(EMPTY_GRID));
+      variablesRef.current = {};
+    }
     
     // Log what we're about to run
     setConsoleOutput(prev => [...prev, `Running ${commands.length} command(s)...`]);
     
     const hasLoop = commands.some(cmd => cmd.loop);
-    let iterations = hasLoop ? 5 : 1; // Run loop 5 times for demo
+    // When keepState is true (button press), only run once; otherwise run loop 5 times for demo
+    let iterations = keepState ? 1 : (hasLoop ? 5 : 1);
     
     for (let i = 0; i < iterations && runningRef.current; i++) {
       for (const cmd of commands) {
         if (!runningRef.current) break;
         
         switch (cmd.type) {
-          case 'set_pixel':
-            // Set individual pixel: display.set_pixel(x, y, brightness)
-            if (cmd.x >= 0 && cmd.x < 5 && cmd.y >= 0 && cmd.y < 5) {
-              const newLeds = copyGrid(ledsRef.current);
-              newLeds[cmd.y][cmd.x] = cmd.brightness;
-              ledsRef.current = newLeds;
-              setLeds(newLeds);
-              setConsoleOutput(prev => [...prev, `set_pixel(${cmd.x}, ${cmd.y}, ${cmd.brightness})`]);
+          case 'set_var': {
+            const resolved = resolveValue(cmd.expr, variablesRef.current);
+            if (resolved !== undefined) {
+              variablesRef.current[cmd.name] = resolved;
+            } else {
+              // Try to parse as a raw number
+              const num = parseFloat(cmd.expr);
+              variablesRef.current[cmd.name] = isNaN(num) ? 0 : num;
             }
             break;
+          }
+
+          case 'set_pixel': {
+            const x = resolveValue(cmd.xExpr, variablesRef.current) ?? parseInt(cmd.xExpr);
+            const y = resolveValue(cmd.yExpr, variablesRef.current) ?? parseInt(cmd.yExpr);
+            const brightness = resolveValue(cmd.brightExpr, variablesRef.current) ?? parseInt(cmd.brightExpr);
+            if (x >= 0 && x < 5 && y >= 0 && y < 5) {
+              const newLeds = copyGrid(ledsRef.current);
+              newLeds[y][x] = brightness;
+              ledsRef.current = newLeds;
+              setLeds(newLeds);
+              setConsoleOutput(prev => [...prev, `set_pixel(${x}, ${y}, ${brightness})`]);
+            }
+            break;
+          }
             
-          case 'show':
-            const pattern = getPattern(cmd.arg);
+          case 'show': {
+            const pattern = getPattern(cmd.arg, variablesRef.current);
             if (pattern) {
               // Map binary patterns (0/1) to full brightness (0/9)
               const brightPattern = pattern.map(row => row.map(v => v > 0 ? 9 : 0));
               ledsRef.current = brightPattern;
               setLeds(copyGrid(brightPattern));
-              setConsoleOutput(prev => [...prev, `show(${cmd.arg})`]);
+              // Show resolved value in console
+              const resolved = resolveValue(cmd.arg, variablesRef.current);
+              const displayVal = resolved !== undefined ? `${cmd.arg}=${resolved}` : cmd.arg;
+              setConsoleOutput(prev => [...prev, `show(${displayVal})`]);
+            } else {
+              setConsoleOutput(prev => [...prev, `show(${cmd.arg}) - no pattern`]);
             }
             break;
+          }
             
-          case 'scroll':
-            // Extract text from quotes
+          case 'scroll': {
+            // Check if arg is a variable
+            const unquoted = cmd.arg.replace(/['"]/g, '');
+            const varVal = variablesRef.current[cmd.arg];
+            let text;
             const textMatch = cmd.arg.match(/['"](.+?)['"]/);
             if (textMatch) {
-              const text = textMatch[1].toUpperCase();
-              setConsoleOutput(prev => [...prev, `scroll("${text}")`]);
-              for (const char of text) {
-                if (!runningRef.current) break;
-                const charPattern = CHAR_PATTERNS[char] || EMPTY_GRID;
-                const brightChar = charPattern.map(row => row.map(v => v > 0 ? 9 : 0));
-                ledsRef.current = brightChar;
-                setLeds(copyGrid(brightChar));
-                await new Promise(r => setTimeout(r, 400));
-              }
+              text = textMatch[1].toUpperCase();
+            } else if (varVal !== undefined) {
+              text = String(varVal).toUpperCase();
+            } else {
+              text = unquoted.toUpperCase();
+            }
+            setConsoleOutput(prev => [...prev, `scroll("${text}")`]);
+            for (const char of text) {
+              if (!runningRef.current) break;
+              const charPattern = CHAR_PATTERNS[char] || EMPTY_GRID;
+              const brightChar = charPattern.map(row => row.map(v => v > 0 ? 9 : 0));
+              ledsRef.current = brightChar;
+              setLeds(copyGrid(brightChar));
+              await new Promise(r => setTimeout(r, 400));
             }
             break;
+          }
             
           case 'clear':
             ledsRef.current = copyGrid(EMPTY_GRID);
@@ -754,16 +826,20 @@ export default function MicrobitSimulator({ code, onButtonPress }) {
             await new Promise(r => setTimeout(r, cmd.duration));
             break;
             
-          case 'print':
-            setConsoleOutput(prev => [...prev, cmd.arg.replace(/['"]/g, '')]);
+          case 'print': {
+            // Resolve variables in print argument
+            const printArg = cmd.arg.replace(/['"]/g, '');
+            const printResolved = variablesRef.current[printArg];
+            setConsoleOutput(prev => [...prev, printResolved !== undefined ? String(printResolved) : printArg]);
             break;
+          }
             
           default:
             break;
         }
         
         // Small delay between commands
-        if (cmd.type !== 'sleep') {
+        if (cmd.type !== 'sleep' && cmd.type !== 'set_var') {
           await new Promise(r => setTimeout(r, 100));
         }
       }
@@ -772,7 +848,7 @@ export default function MicrobitSimulator({ code, onButtonPress }) {
     runningRef.current = false;
     setIsRunning(false);
     setConsoleOutput(prev => [...prev, 'Done!']);
-  }, []);
+  }, [resolveValue, getPattern]);
 
   const handleRun = () => {
     if (isRunning) {
@@ -784,12 +860,13 @@ export default function MicrobitSimulator({ code, onButtonPress }) {
     
     setIsRunning(true);
     setConsoleOutput([]); // Clear previous output
+    variablesRef.current = {}; // Reset variables on fresh run
     buttonARef.current = false;
     buttonBRef.current = false;
     const commands = parseCode(code, false, false);
     
     if (commands.length === 0) {
-      setConsoleOutput(['No display commands found in your code.', '', 'Supported commands:', '• display.set_pixel(x, y, brightness)', '• display.show(Image.HEART)', '• display.show("A")', '• display.scroll("Hello")', '• display.clear()', '• sleep(500)']);
+      setConsoleOutput(['No display commands found in your code.', '', 'Supported commands:', '• display.set_pixel(x, y, brightness)', '• display.show(Image.HEART)', '• display.show("A")', '• display.scroll("Hello")', '• display.clear()', '• sleep(500)', '• Variables: count = 0, count = count + 1']);
       setIsRunning(false);
       return;
     }
@@ -802,6 +879,7 @@ export default function MicrobitSimulator({ code, onButtonPress }) {
     setIsRunning(false);
     buttonARef.current = false;
     buttonBRef.current = false;
+    variablesRef.current = {};
     ledsRef.current = copyGrid(EMPTY_GRID);
     setLeds(copyGrid(EMPTY_GRID));
     setConsoleOutput(['Reset. Ready to run.']);
@@ -811,11 +889,22 @@ export default function MicrobitSimulator({ code, onButtonPress }) {
     setButtonAPressed(true);
     buttonARef.current = true;
     
-    // Parse and execute code with button A pressed
+    // First run init code (non-button, non-loop) to set up variables if not yet set
+    if (Object.keys(variablesRef.current).length === 0) {
+      const initCommands = parseCode(code, false, false).filter(cmd => !cmd.loop);
+      for (const cmd of initCommands) {
+        if (cmd.type === 'set_var') {
+          const resolved = resolveValue(cmd.expr, variablesRef.current);
+          variablesRef.current[cmd.name] = resolved !== undefined ? resolved : 0;
+        }
+      }
+    }
+
+    // Parse and execute code with button A pressed (keep state)
     setConsoleOutput(prev => [...prev, 'Button A pressed!']);
     const commands = parseCode(code, true, false);
     if (commands.length > 0) {
-      executeCommands(commands);
+      executeCommands(commands, { keepState: true });
     }
     
     setTimeout(() => {
@@ -830,11 +919,22 @@ export default function MicrobitSimulator({ code, onButtonPress }) {
     setButtonBPressed(true);
     buttonBRef.current = true;
     
-    // Parse and execute code with button B pressed
+    // First run init code if variables not yet set
+    if (Object.keys(variablesRef.current).length === 0) {
+      const initCommands = parseCode(code, false, false).filter(cmd => !cmd.loop);
+      for (const cmd of initCommands) {
+        if (cmd.type === 'set_var') {
+          const resolved = resolveValue(cmd.expr, variablesRef.current);
+          variablesRef.current[cmd.name] = resolved !== undefined ? resolved : 0;
+        }
+      }
+    }
+
+    // Parse and execute code with button B pressed (keep state)
     setConsoleOutput(prev => [...prev, 'Button B pressed!']);
     const commands = parseCode(code, false, true);
     if (commands.length > 0) {
-      executeCommands(commands);
+      executeCommands(commands, { keepState: true });
     }
     
     setTimeout(() => {
