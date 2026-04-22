@@ -539,6 +539,7 @@ export default function MicrobitSimulator({ code, onButtonPress }) {
     let indentLevel = 0;
     let inButtonABlock = false;
     let inButtonBBlock = false;
+    let inButtonABBlock = false;
     let inElseBlock = false;
     let buttonBlockIndent = 0;
     
@@ -564,25 +565,39 @@ export default function MicrobitSimulator({ code, onButtonPress }) {
       }
       
       // Check if we're exiting button blocks
-      if ((inButtonABlock || inButtonBBlock || inElseBlock) && currentIndent <= buttonBlockIndent && trimmed !== '') {
+      if ((inButtonABlock || inButtonBBlock || inButtonABBlock || inElseBlock) && currentIndent <= buttonBlockIndent && trimmed !== '') {
         inButtonABlock = false;
         inButtonBBlock = false;
+        inButtonABBlock = false;
         inElseBlock = false;
       }
       
-      // Detect button_a.is_pressed() condition
-      if (trimmed.includes('button_a.is_pressed()') || trimmed.includes('button_a.was_pressed()')) {
-        inButtonABlock = true;
+      // Detect combined A+B condition (must check before individual buttons)
+      if ((trimmed.includes('button_a') && trimmed.includes('button_b') && trimmed.includes('and')) ||
+          (trimmed.includes('button_a') && trimmed.includes('button_b') && trimmed.includes('&'))) {
+        inButtonABBlock = true;
+        inButtonABlock = false;
         inButtonBBlock = false;
         inElseBlock = false;
         buttonBlockIndent = currentIndent;
         continue;
       }
+
+      // Detect button_a.is_pressed() condition (only if not combined)
+      if ((trimmed.includes('button_a.is_pressed()') || trimmed.includes('button_a.was_pressed()')) && !trimmed.includes('button_b')) {
+        inButtonABlock = true;
+        inButtonBBlock = false;
+        inButtonABBlock = false;
+        inElseBlock = false;
+        buttonBlockIndent = currentIndent;
+        continue;
+      }
       
-      // Detect button_b.is_pressed() condition
-      if (trimmed.includes('button_b.is_pressed()') || trimmed.includes('button_b.was_pressed()')) {
+      // Detect button_b.is_pressed() condition (only if not combined)
+      if ((trimmed.includes('button_b.is_pressed()') || trimmed.includes('button_b.was_pressed()')) && !trimmed.includes('button_a')) {
         inButtonBBlock = true;
         inButtonABlock = false;
+        inButtonABBlock = false;
         inElseBlock = false;
         buttonBlockIndent = currentIndent;
         continue;
@@ -593,31 +608,40 @@ export default function MicrobitSimulator({ code, onButtonPress }) {
         inElseBlock = true;
         inButtonABlock = false;
         inButtonBBlock = false;
+        inButtonABBlock = false;
         continue;
       }
       
-      // Detect elif block (treat like else for now)
+      // Detect elif block
       if (trimmed.startsWith('elif')) {
-        if (trimmed.includes('button_a')) {
+        if (trimmed.includes('button_a') && trimmed.includes('button_b')) {
+          inButtonABBlock = true;
+          inButtonABlock = false;
+          inButtonBBlock = false;
+          inElseBlock = false;
+        } else if (trimmed.includes('button_a')) {
           inButtonABlock = true;
           inButtonBBlock = false;
+          inButtonABBlock = false;
           inElseBlock = false;
         } else if (trimmed.includes('button_b')) {
           inButtonBBlock = true;
           inButtonABlock = false;
+          inButtonABBlock = false;
           inElseBlock = false;
         }
         continue;
       }
       
       // Skip commands if we're in a button block that doesn't match current button state
+      if (inButtonABBlock && !(buttonAState && buttonBState)) continue;
       if (inButtonABlock && !buttonAState) continue;
       if (inButtonBBlock && !buttonBState) continue;
       if (inElseBlock && (buttonAState || buttonBState)) continue;
       
       // When a button is pressed, skip initialization code (non-loop code outside button blocks)
       // Only execute code that's inside the button block
-      if ((buttonAState || buttonBState) && !inWhileLoop && !inButtonABlock && !inButtonBBlock) continue;
+      if ((buttonAState || buttonBState) && !inWhileLoop && !inButtonABlock && !inButtonBBlock && !inButtonABBlock) continue;
       
       // Parse variable assignment: var = expression
       const assignMatch = trimmed.match(/^(\w+)\s*=\s*(.+)$/);
@@ -945,6 +969,40 @@ export default function MicrobitSimulator({ code, onButtonPress }) {
     if (onButtonPress) onButtonPress('B');
   };
 
+  const handleButtonAB = () => {
+    setButtonAPressed(true);
+    setButtonBPressed(true);
+    buttonARef.current = true;
+    buttonBRef.current = true;
+    
+    // First run init code if variables not yet set
+    if (Object.keys(variablesRef.current).length === 0) {
+      const initCommands = parseCode(code, false, false).filter(cmd => !cmd.loop);
+      for (const cmd of initCommands) {
+        if (cmd.type === 'set_var') {
+          const resolved = resolveValue(cmd.expr, variablesRef.current);
+          variablesRef.current[cmd.name] = resolved !== undefined ? resolved : 0;
+        }
+      }
+    }
+
+    // Parse and execute code with both buttons pressed (keep state)
+    setConsoleOutput(prev => [...prev, 'Button A+B pressed!']);
+    const commands = parseCode(code, true, true);
+    if (commands.length > 0) {
+      executeCommands(commands, { keepState: true });
+    }
+    
+    setTimeout(() => {
+      setButtonAPressed(false);
+      setButtonBPressed(false);
+      buttonARef.current = false;
+      buttonBRef.current = false;
+    }, 200);
+    
+    if (onButtonPress) onButtonPress('AB');
+  };
+
   // Check if WebUSB is supported
   const isWebUSBSupported = () => {
     return 'usb' in navigator;
@@ -1098,6 +1156,7 @@ export default function MicrobitSimulator({ code, onButtonPress }) {
             {/* Button A */}
             <button
               type="button"
+              data-testid="microbit-button-a"
               onClick={handleButtonA}
               className={`absolute left-2 top-1/2 transform -translate-y-1/2 w-8 h-8 rounded-full border-2 transition-all ${
                 buttonAPressed 
@@ -1136,6 +1195,7 @@ export default function MicrobitSimulator({ code, onButtonPress }) {
             {/* Button B */}
             <button
               type="button"
+              data-testid="microbit-button-b"
               onClick={handleButtonB}
               className={`absolute right-2 top-1/2 transform -translate-y-1/2 w-8 h-8 rounded-full border-2 transition-all ${
                 buttonBPressed 
@@ -1163,6 +1223,22 @@ export default function MicrobitSimulator({ code, onButtonPress }) {
               micro:bit
             </div>
           </div>
+        </div>
+
+        {/* A+B Button */}
+        <div className="flex justify-center mt-2">
+          <button
+            type="button"
+            data-testid="microbit-button-ab"
+            onClick={handleButtonAB}
+            className={`px-3 py-1 rounded border-2 text-xs font-bold transition-all ${
+              buttonAPressed && buttonBPressed
+                ? 'bg-gray-500 border-gray-400 scale-95 text-white'
+                : 'bg-gray-700 border-gray-600 hover:bg-gray-600 text-gray-300'
+            }`}
+          >
+            A+B
+          </button>
         </div>
         
         {/* Console Output - Always show */}
