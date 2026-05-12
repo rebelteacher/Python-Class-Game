@@ -48,7 +48,7 @@ export default function AdminAddCoins() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-green-50 via-teal-50 to-blue-50 flex items-center justify-center p-4">
+    <div className="min-h-screen bg-cyber-black cyber-grid-bg flex items-center justify-center p-4">
       <Card className="w-full max-w-md border-green-200">
         <CardHeader className="space-y-1">
           <div className="flex items-center justify-between">

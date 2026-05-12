@@ -125,15 +125,15 @@ export default function ImportAssignment({ user }) {
 
   if (loading || !assignment) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 to-indigo-50">
+      <div className="min-h-screen flex items-center justify-center bg-cyber-black cyber-grid-bg">
         <div className="text-xl text-gray-600">Loading...</div>
       </div>
     );
   }
 
   return (
-    <div data-testid="import-assignment-page" className="min-h-screen bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50">
-      <nav className="bg-white shadow-sm border-b border-gray-200">
+    <div data-testid="import-assignment-page" className="min-h-screen bg-cyber-black cyber-grid-bg">
+      <nav className="bg-cyber-navy/80 backdrop-blur-xl border-b border-cyber-cyan/20">
         <div className="container mx-auto px-6 py-4 flex items-center space-x-4">
           <Button onClick={() => navigate(-1)} variant="ghost" size="sm">
             <ArrowLeft className="w-4 h-4 mr-2" />

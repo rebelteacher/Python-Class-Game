@@ -147,7 +147,7 @@ export default function CodingTestSubmissions({ user }) {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-indigo-50 via-white to-purple-50 p-8">
+      <div className="min-h-screen bg-cyber-black cyber-grid-bg">
         <div className="max-w-6xl mx-auto">
           <p className="text-center text-gray-600">Loading submissions...</p>
         </div>
@@ -156,7 +156,7 @@ export default function CodingTestSubmissions({ user }) {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-indigo-50 via-white to-purple-50 p-8">
+    <div className="min-h-screen bg-cyber-black cyber-grid-bg">
       <div className="max-w-6xl mx-auto">
         <Button
           variant="outline"

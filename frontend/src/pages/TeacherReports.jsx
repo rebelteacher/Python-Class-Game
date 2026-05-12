@@ -261,7 +261,7 @@ export default function TeacherReports({ user }) {
   return (
     <div className="min-h-screen bg-gray-50">
       {/* Header */}
-      <nav className="bg-white shadow-sm border-b border-gray-200">
+      <nav className="bg-cyber-navy/80 backdrop-blur-xl border-b border-cyber-cyan/20">
         <div className="container mx-auto px-6 py-4 flex justify-between items-center">
           <div className="flex items-center space-x-4">
             <Button onClick={() => navigate("/teacher/dashboard")} variant="ghost" size="sm">

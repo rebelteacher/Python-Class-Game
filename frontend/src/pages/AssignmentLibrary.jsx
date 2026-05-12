@@ -653,8 +653,8 @@ export default function AssignmentLibrary({ user }) {
   const groupedProblems = groupProblemsByChapterLessonType();
 
   return (
-    <div data-testid="assignment-library" className="min-h-screen bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50">
-      <nav className="bg-white shadow-sm border-b border-gray-200">
+    <div data-testid="assignment-library" className="min-h-screen bg-cyber-black cyber-grid-bg">
+      <nav className="bg-cyber-navy/80 backdrop-blur-xl border-b border-cyber-cyan/20">
         <div className="container mx-auto px-6 py-4 flex justify-between items-center">
           <div className="flex items-center space-x-4">
             <Button onClick={() => navigate("/teacher/dashboard")} variant="ghost" size="sm">
@@ -663,7 +663,7 @@ export default function AssignmentLibrary({ user }) {
             </Button>
             <div className="flex items-center space-x-2">
               <BookOpen className="w-7 h-7 text-indigo-600" />
-              <span className="text-xl font-bold text-gray-900">Assignment Library</span>
+              <span className="text-xl font-orbitron text-white uppercase tracking-wider">Assignment Library</span>
             </div>
           </div>
           {user.role === "teacher" && (
@@ -755,7 +755,7 @@ export default function AssignmentLibrary({ user }) {
                 }
               }}>
                 <DialogTrigger asChild>
-                  <Button data-testid="add-to-library-btn" className="bg-indigo-600 hover:bg-indigo-700 gap-2">
+                  <Button data-testid="add-to-library-btn" className="bg-cyber-cyan text-cyber-black hover:shadow-[0_0_15px_rgba(0,240,255,0.5)] font-orbitron text-xs uppercase tracking-widest rounded-none border border-cyber-cyan transition-all duration-300 font-bold gap-2">
                     <Plus className="w-5 h-5" />
                     Add to Library
                   </Button>
@@ -2129,7 +2129,7 @@ export default function AssignmentLibrary({ user }) {
                     </div>
                   )}
 
-                  <Button data-testid="lib-submit-btn" type="submit" className="w-full bg-indigo-600 hover:bg-indigo-700">
+                  <Button data-testid="lib-submit-btn" type="submit" className="w-full bg-cyber-cyan text-cyber-black hover:shadow-[0_0_15px_rgba(0,240,255,0.5)] font-orbitron text-xs uppercase tracking-widest rounded-none border border-cyber-cyan transition-all duration-300 font-bold">
                     Add to Library
                   </Button>
                 </form>

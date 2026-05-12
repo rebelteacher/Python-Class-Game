@@ -377,7 +377,7 @@ export default function BlockCurriculum({ user }) {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-purple-50 via-white to-indigo-50 flex items-center justify-center">
+      <div className="min-h-screen bg-cyber-black cyber-grid-bg">
         <div className="text-center">
           <Loader2 className="w-12 h-12 animate-spin text-purple-600 mx-auto mb-4" />
           <p className="text-gray-600">Loading curriculum...</p>
@@ -387,7 +387,7 @@ export default function BlockCurriculum({ user }) {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-purple-50 via-white to-indigo-50">
+    <div className="min-h-screen bg-cyber-black cyber-grid-bg">
       {/* Header */}
       <div className="bg-gradient-to-r from-purple-600 to-indigo-600 text-white py-8 px-6">
         <div className="max-w-6xl mx-auto">

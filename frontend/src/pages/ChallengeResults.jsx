@@ -51,7 +51,7 @@ function ChallengeResults() {
 
   if (loading || !challenge || !user) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-orange-50 via-red-50 to-pink-50 flex items-center justify-center">
+      <div className="min-h-screen bg-cyber-black cyber-grid-bg flex items-center justify-center">
         <p className="text-gray-600">Loading results...</p>
       </div>
     );
@@ -67,7 +67,7 @@ function ChallengeResults() {
   const bothCompleted = challenge.challenger_score !== null && challenge.challenged_score !== null;
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-orange-50 via-red-50 to-pink-50 p-8">
+    <div className="min-h-screen bg-cyber-black cyber-grid-bg p-8">
       <div className="max-w-4xl mx-auto">
         {/* Winner Banner */}
         {bothCompleted && (

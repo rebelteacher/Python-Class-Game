@@ -659,7 +659,7 @@ export default function PythonCurriculum({ user }) {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-50">
+    <div className="min-h-screen bg-cyber-black cyber-grid-bg">
       {/* Header */}
       <div className="bg-gradient-to-r from-blue-600 to-indigo-600 text-white py-8 px-6">
         <div className="max-w-6xl mx-auto">

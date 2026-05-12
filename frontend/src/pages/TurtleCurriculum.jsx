@@ -497,7 +497,7 @@ export default function TurtleCurriculum({ user }) {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-green-50 via-emerald-50 to-teal-50">
+    <div className="min-h-screen bg-cyber-black cyber-grid-bg">
       {/* Header */}
       <div className="bg-gradient-to-r from-green-600 to-emerald-600 text-white">
         <div className="container mx-auto px-6 py-8">

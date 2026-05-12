@@ -731,7 +731,7 @@ export default function AssignmentPage({ user }) {
 
   if (loading) {
     return (
-      <div data-testid="assignment-loading" className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 to-indigo-50">
+      <div data-testid="assignment-loading" className="min-h-screen flex items-center justify-center bg-cyber-black cyber-grid-bg">
         <div className="text-xl text-gray-600">Loading...</div>
       </div>
     );
@@ -739,7 +739,7 @@ export default function AssignmentPage({ user }) {
 
   if (!assignment) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 to-indigo-50">
+      <div className="min-h-screen flex items-center justify-center bg-cyber-black cyber-grid-bg">
         <div className="text-xl text-gray-600">Assignment not found</div>
       </div>
     );
@@ -749,8 +749,8 @@ export default function AssignmentPage({ user }) {
   const latestSubmission = submissions.length > 0 ? submissions[submissions.length - 1] : null;
 
   return (
-    <div data-testid="assignment-page" className="min-h-screen bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50">
-      <nav className="bg-white shadow-sm border-b border-gray-200">
+    <div data-testid="assignment-page" className="min-h-screen bg-cyber-black cyber-grid-bg">
+      <nav className="bg-cyber-navy/80 backdrop-blur-xl border-b border-cyber-cyan/20">
         <div className="container mx-auto px-6 py-4 flex justify-between items-center">
           <div className="flex items-center space-x-4">
             <Button 

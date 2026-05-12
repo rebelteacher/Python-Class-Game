@@ -87,7 +87,7 @@ export default function TeacherSignup() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 flex items-center justify-center p-6">
+    <div className="min-h-screen bg-cyber-black cyber-grid-bg flex items-center justify-center p-6">
       <Card className="w-full max-w-md">
         <CardHeader className="space-y-1">
           <div className="flex items-center justify-between">

@@ -41,7 +41,7 @@ function DistrictAdminDashboard({ user }) {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 flex items-center justify-center">
+      <div className="min-h-screen bg-cyber-black cyber-grid-bg flex items-center justify-center">
         <p className="text-gray-600">Loading dashboard...</p>
       </div>
     );
@@ -52,7 +52,7 @@ function DistrictAdminDashboard({ user }) {
   const teachers = dashboardData?.teachers || [];
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50">
+    <div className="min-h-screen bg-cyber-black cyber-grid-bg">
       {/* Navigation */}
       <nav className="bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-600 shadow-lg">
         <div className="px-6 py-3">
@@ -86,7 +86,7 @@ function DistrictAdminDashboard({ user }) {
 
         {/* Stats Cards */}
         <div className="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
-          <Card className="border-2 border-blue-200 bg-gradient-to-br from-blue-50 to-blue-100">
+          <Card className="border-2 border-blue-200 bg-cyber-black cyber-grid-bg">
             <CardContent className="pt-6">
               <div className="flex items-center justify-between">
                 <div>

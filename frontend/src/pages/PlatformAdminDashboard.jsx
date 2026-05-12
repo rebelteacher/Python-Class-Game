@@ -96,14 +96,14 @@ function PlatformAdminDashboard({ user }) {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-purple-50 via-pink-50 to-red-50 flex items-center justify-center">
+      <div className="min-h-screen bg-cyber-black cyber-grid-bg flex items-center justify-center">
         <p className="text-gray-600">Loading pending requests...</p>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-purple-50 via-pink-50 to-red-50">
+    <div className="min-h-screen bg-cyber-black cyber-grid-bg">
       {/* Navigation */}
       <nav className="bg-gradient-to-r from-purple-600 via-pink-600 to-red-600 shadow-lg">
         <div className="px-6 py-3">

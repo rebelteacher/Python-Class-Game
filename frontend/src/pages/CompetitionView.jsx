@@ -77,7 +77,7 @@ function CompetitionView() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-purple-50 via-pink-50 to-blue-50 flex items-center justify-center">
+      <div className="min-h-screen bg-cyber-black cyber-grid-bg flex items-center justify-center">
         <p className="text-gray-600">Loading competition...</p>
       </div>
     );
@@ -85,7 +85,7 @@ function CompetitionView() {
 
   if (!competition) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-purple-50 via-pink-50 to-blue-50 flex items-center justify-center">
+      <div className="min-h-screen bg-cyber-black cyber-grid-bg flex items-center justify-center">
         <Card className="p-8">
           <p className="text-gray-600 mb-4">Competition not found</p>
           <Button onClick={() => navigate(-1)}>Go Back</Button>
@@ -98,7 +98,7 @@ function CompetitionView() {
   const winner = standings.length > 0 ? standings[0] : null;
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-purple-50 via-pink-50 to-blue-50 p-8">
+    <div className="min-h-screen bg-cyber-black cyber-grid-bg p-8">
       <div className="max-w-7xl mx-auto">
         {/* Header */}
         <div className="mb-8">

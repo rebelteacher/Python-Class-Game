@@ -321,7 +321,7 @@ export default function TestTaking({ user }) {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 flex items-center justify-center">
+      <div className="min-h-screen bg-cyber-black cyber-grid-bg flex items-center justify-center">
         <p className="text-lg">Loading test...</p>
       </div>
     );
@@ -330,7 +330,7 @@ export default function TestTaking({ user }) {
   // Handle case where test data failed to load
   if (!testData || !questions || questions.length === 0) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 flex items-center justify-center">
+      <div className="min-h-screen bg-cyber-black cyber-grid-bg flex items-center justify-center">
         <Card className="max-w-md">
           <CardContent className="p-6 text-center">
             <AlertCircle className="w-12 h-12 text-red-500 mx-auto mb-4" />
@@ -355,8 +355,8 @@ export default function TestTaking({ user }) {
       : [];
     
     return (
-      <div className="min-h-screen bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50">
-        <nav className="bg-white shadow-sm border-b border-gray-200">
+      <div className="min-h-screen bg-cyber-black cyber-grid-bg">
+        <nav className="bg-cyber-navy/80 backdrop-blur-xl border-b border-cyber-cyan/20">
           <div className="container mx-auto px-6 py-4">
             <h1 className="text-2xl font-bold text-gray-900">{testData?.title || "Test"}</h1>
           </div>
@@ -507,9 +507,9 @@ export default function TestTaking({ user }) {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50">
+    <div className="min-h-screen bg-cyber-black cyber-grid-bg">
       {/* Header with timer */}
-      <nav className="bg-white shadow-sm border-b border-gray-200 sticky top-0 z-10">
+      <nav className="bg-cyber-navy/80 backdrop-blur-xl border-b border-cyber-cyan/20 sticky top-0 z-10">
         <div className="container mx-auto px-6 py-4">
           <div className="flex justify-between items-center mb-3">
             <div>

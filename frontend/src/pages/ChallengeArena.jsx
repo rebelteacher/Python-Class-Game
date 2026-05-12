@@ -128,7 +128,7 @@ function ChallengeArena() {
 
   if (!challenge || !problem) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-orange-50 via-red-50 to-pink-50 flex items-center justify-center">
+      <div className="min-h-screen bg-cyber-black cyber-grid-bg flex items-center justify-center">
         <p className="text-gray-600">Loading challenge...</p>
       </div>
     );
@@ -136,7 +136,7 @@ function ChallengeArena() {
 
   if (results) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-orange-50 via-red-50 to-pink-50 flex items-center justify-center">
+      <div className="min-h-screen bg-cyber-black cyber-grid-bg flex items-center justify-center">
         <Card className="max-w-md">
           <CardContent className="pt-6 text-center">
             <Zap className="w-16 h-16 text-yellow-500 mx-auto mb-4" />
@@ -152,7 +152,7 @@ function ChallengeArena() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-orange-50 via-red-50 to-pink-50">
+    <div className="min-h-screen bg-cyber-black cyber-grid-bg">
       {/* Header */}
       <div className="bg-gradient-to-r from-orange-600 to-red-600 text-white p-4 sticky top-0 z-10 shadow-lg">
         <div className="max-w-7xl mx-auto flex justify-between items-center">

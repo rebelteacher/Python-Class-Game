@@ -65,7 +65,7 @@ export default function SchoolAdminSignup() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-green-50 via-emerald-50 to-teal-50 flex items-center justify-center p-6">
+    <div className="min-h-screen bg-cyber-black cyber-grid-bg flex items-center justify-center p-6">
       <Card className="w-full max-w-md">
         <CardHeader className="space-y-1">
           <div className="flex items-center justify-between">

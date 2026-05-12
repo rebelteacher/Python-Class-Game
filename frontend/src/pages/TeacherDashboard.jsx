@@ -167,13 +167,13 @@ export default function TeacherDashboard({ user, setUser }) {
   };
 
   return (
-    <div data-testid="teacher-dashboard" className="min-h-screen bg-gradient-to-br from-teal-50 via-orange-50 to-pink-50 flex">
+    <div data-testid="teacher-dashboard" className="min-h-screen bg-cyber-black cyber-grid-bg flex">
       {/* Left Sidebar */}
-      <aside className="w-48 bg-gradient-to-b from-teal-700 via-cyan-700 to-blue-700 min-h-screen flex flex-col py-4 px-3 shadow-lg">
+      <aside className="w-48 bg-cyber-navy/90 backdrop-blur-xl min-h-screen flex flex-col py-4 px-3 border-r border-cyber-cyan/20">
         {/* Logo */}
         <div className="flex items-center gap-2 mb-6 px-2">
-          <Code2 className="w-6 h-6 text-white" />
-          <span className="text-sm font-bold text-white">ByteBattles</span>
+          <Code2 className="w-6 h-6 text-cyber-cyan drop-shadow-[0_0_6px_rgba(0,240,255,0.8)]" />
+          <span className="text-sm font-orbitron font-bold text-white tracking-wider">ByteBattles</span>
         </div>
         
         {/* Nav Links */}
@@ -183,9 +183,9 @@ export default function TeacherDashboard({ user, setUser }) {
               data-testid="admin-nav-btn" 
               onClick={() => navigate("/admin-dashboard")} 
               variant="ghost"
-              className="w-full justify-start gap-2 text-white hover:bg-white/20 text-sm"
+              className="w-full justify-start gap-2 text-slate-300 hover:bg-cyber-cyan/10 hover:text-cyber-cyan text-sm font-chakra rounded-none"
             >
-              <Shield className="w-4 h-4 text-yellow-300" />
+              <Shield className="w-4 h-4 text-yellow-400" />
               Admin
             </Button>
           )}
@@ -193,7 +193,7 @@ export default function TeacherDashboard({ user, setUser }) {
             data-testid="library-nav-btn" 
             onClick={() => navigate("/library")} 
             variant="ghost"
-            className="w-full justify-start gap-2 text-white hover:bg-white/20 text-sm"
+            className="w-full justify-start gap-2 text-slate-300 hover:bg-cyber-cyan/10 hover:text-cyber-cyan text-sm font-chakra rounded-none"
           >
             <BookOpen className="w-4 h-4" />
             Library
@@ -202,7 +202,7 @@ export default function TeacherDashboard({ user, setUser }) {
             data-testid="lesson-plans-nav-btn" 
             onClick={() => navigate("/lesson-plans")} 
             variant="ghost"
-            className="w-full justify-start gap-2 text-white hover:bg-white/20 text-sm"
+            className="w-full justify-start gap-2 text-slate-300 hover:bg-cyber-cyan/10 hover:text-cyber-cyan text-sm font-chakra rounded-none"
           >
             <FileText className="w-4 h-4" />
             Lesson Plans
@@ -211,7 +211,7 @@ export default function TeacherDashboard({ user, setUser }) {
             data-testid="reports-nav-btn" 
             onClick={() => navigate("/teacher-reports")} 
             variant="ghost"
-            className="w-full justify-start gap-2 text-white hover:bg-white/20 text-sm"
+            className="w-full justify-start gap-2 text-slate-300 hover:bg-cyber-cyan/10 hover:text-cyber-cyan text-sm font-chakra rounded-none"
           >
             <FileSpreadsheet className="w-4 h-4" />
             Reports
@@ -220,25 +220,25 @@ export default function TeacherDashboard({ user, setUser }) {
             <Button 
               onClick={() => navigate("/admin/messages")} 
               variant="ghost"
-              className="w-full justify-start gap-2 text-white hover:bg-white/20 text-sm relative"
+              className="w-full justify-start gap-2 text-slate-300 hover:bg-cyber-cyan/10 hover:text-cyber-cyan text-sm font-chakra rounded-none relative"
             >
               <Bell className="w-4 h-4" />
               Messages
               {unreadCount > 0 && (
-                <span className="ml-auto bg-red-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center">
+                <span className="ml-auto bg-cyber-pink text-white text-xs rounded-none w-5 h-5 flex items-center justify-center shadow-[0_0_8px_rgba(255,0,170,0.5)]">
                   {unreadCount}
                 </span>
               )}
             </Button>
           )}
           
-          <div className="border-t border-white/20 my-3"></div>
+          <div className="border-t border-cyber-cyan/10 my-3"></div>
           
           <Button 
             data-testid="switch-role-btn" 
             onClick={handleSwitchToStudent} 
             variant="ghost"
-            className="w-full justify-start gap-2 text-white hover:bg-white/20 text-sm"
+            className="w-full justify-start gap-2 text-slate-300 hover:bg-cyber-cyan/10 hover:text-cyber-cyan text-sm font-chakra rounded-none"
           >
             <RefreshCw className="w-4 h-4" />
             Student View
@@ -246,16 +246,16 @@ export default function TeacherDashboard({ user, setUser }) {
         </nav>
         
         {/* Bottom - User & Logout */}
-        <div className="border-t border-white/20 pt-3 mt-auto">
+        <div className="border-t border-cyber-cyan/10 pt-3 mt-auto">
           <div className="px-2 mb-2">
-            <p className="text-white/70 text-xs">Logged in as</p>
-            <p className="text-white text-sm font-medium truncate">{user.name}</p>
+            <p className="text-slate-500 text-xs font-chakra">Logged in as</p>
+            <p className="text-white text-sm font-medium truncate font-chakra">{user.name}</p>
           </div>
           <Button 
             data-testid="logout-btn" 
             onClick={handleLogout} 
             variant="ghost"
-            className="w-full justify-start gap-2 text-red-300 hover:bg-red-500/20 hover:text-red-200 text-sm"
+            className="w-full justify-start gap-2 text-cyber-red hover:bg-cyber-red/10 hover:text-cyber-red text-sm font-chakra rounded-none"
           >
             <LogOut className="w-4 h-4" />
             Logout
@@ -266,15 +266,15 @@ export default function TeacherDashboard({ user, setUser }) {
       {/* Main Content */}
       <div className="flex-1 overflow-auto">
         {/* Header */}
-        <header className="bg-gradient-to-r from-teal-600 via-cyan-600 to-blue-600 shadow-lg px-6 py-4">
+        <header className="bg-cyber-navy/80 backdrop-blur-xl border-b border-cyber-cyan/20 px-6 py-4">
           <div className="flex justify-between items-center">
             <div>
-              <h1 className="text-2xl font-bold text-white">Teacher Dashboard</h1>
-              <p className="text-teal-100 text-sm">Manage your classes and curriculum</p>
+              <h1 className="text-xl font-orbitron text-white uppercase tracking-wider">Teacher Dashboard</h1>
+              <p className="text-slate-400 text-sm font-chakra">Manage your classes and curriculum</p>
             </div>
             <div className="flex items-center gap-3">
               <WhatsNew />
-              <span className="px-3 py-1 bg-white/20 backdrop-blur-sm text-white text-sm font-medium rounded-full border border-white/30">
+              <span className="px-3 py-1 bg-cyber-cyan/10 text-cyber-cyan text-xs font-orbitron uppercase tracking-widest border border-cyber-cyan/30 rounded-none">
                 Teacher
               </span>
             </div>
@@ -286,53 +286,53 @@ export default function TeacherDashboard({ user, setUser }) {
           <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
             {/* Unit 1: Blocks */}
             <Card 
-              className="bg-gradient-to-br from-purple-500 to-indigo-600 text-white cursor-pointer hover:shadow-xl transition-all hover:scale-105 border-0"
+              className="bg-cyber-navy/60 border border-purple-500/30 text-white cursor-pointer hover:border-purple-500/80 hover:shadow-[0_0_15px_rgba(168,85,247,0.3)] transition-all duration-300 rounded-none"
               onClick={() => navigate("/blocks-curriculum")}
             >
             <CardContent className="p-6 text-center">
-              <div className="text-4xl mb-2">🧱</div>
-              <h3 className="font-bold text-lg">Unit 1</h3>
-              <p className="text-purple-100 text-sm">Block-Based Coding</p>
-              <p className="text-xs text-purple-200 mt-2">Visual Programming</p>
+              <div className="text-3xl mb-2">🧱</div>
+              <h3 className="font-orbitron font-bold text-sm uppercase tracking-wider">Unit 1</h3>
+              <p className="text-purple-300 text-xs font-chakra mt-1">Block-Based Coding</p>
+              <p className="text-xs text-slate-500 mt-1 font-chakra">Visual Programming</p>
             </CardContent>
           </Card>
 
           {/* Unit 2: Turtle */}
           <Card 
-            className="bg-gradient-to-br from-green-500 to-emerald-600 text-white cursor-pointer hover:shadow-xl transition-all hover:scale-105 border-0"
+            className="bg-cyber-navy/60 border border-cyber-lime/30 text-white cursor-pointer hover:border-cyber-lime/80 hover:shadow-[0_0_15px_rgba(57,255,20,0.3)] transition-all duration-300 rounded-none"
             onClick={() => navigate("/turtle-curriculum")}
           >
             <CardContent className="p-6 text-center">
-              <div className="text-4xl mb-2">🐢</div>
-              <h3 className="font-bold text-lg">Unit 2</h3>
-              <p className="text-green-100 text-sm">Turtle Graphics</p>
-              <p className="text-xs text-green-200 mt-2">Visual Output</p>
+              <div className="text-3xl mb-2">🐢</div>
+              <h3 className="font-orbitron font-bold text-sm uppercase tracking-wider">Unit 2</h3>
+              <p className="text-cyber-lime/80 text-xs font-chakra mt-1">Turtle Graphics</p>
+              <p className="text-xs text-slate-500 mt-1 font-chakra">Visual Output</p>
             </CardContent>
           </Card>
 
           {/* Unit 3: Python */}
           <Card 
-            className="bg-gradient-to-br from-blue-500 to-blue-700 text-white cursor-pointer hover:shadow-xl transition-all hover:scale-105 border-0"
+            className="bg-cyber-navy/60 border border-blue-500/30 text-white cursor-pointer hover:border-blue-500/80 hover:shadow-[0_0_15px_rgba(59,130,246,0.3)] transition-all duration-300 rounded-none"
             onClick={() => navigate("/python-curriculum")}
           >
             <CardContent className="p-6 text-center">
-              <div className="text-4xl mb-2">🐍</div>
-              <h3 className="font-bold text-lg">Unit 3</h3>
-              <p className="text-blue-100 text-sm">Python Text</p>
-              <p className="text-xs text-blue-200 mt-2">Text-Based Programming</p>
+              <div className="text-3xl mb-2">🐍</div>
+              <h3 className="font-orbitron font-bold text-sm uppercase tracking-wider">Unit 3</h3>
+              <p className="text-blue-300 text-xs font-chakra mt-1">Python Text</p>
+              <p className="text-xs text-slate-500 mt-1 font-chakra">Text-Based Programming</p>
             </CardContent>
           </Card>
 
           {/* Unit 4: Micro:bit */}
           <Card 
-            className="bg-gradient-to-br from-cyan-500 to-teal-600 text-white cursor-pointer hover:shadow-xl transition-all hover:scale-105 border-0"
+            className="bg-cyber-navy/60 border border-cyber-cyan/30 text-white cursor-pointer hover:border-cyber-cyan/80 hover:shadow-[0_0_15px_rgba(0,240,255,0.3)] transition-all duration-300 rounded-none"
             onClick={() => navigate("/microbit")}
           >
             <CardContent className="p-6 text-center">
-              <div className="text-4xl mb-2">⚡</div>
-              <h3 className="font-bold text-lg">Unit 4</h3>
-              <p className="text-cyan-100 text-sm">Micro:bit</p>
-              <p className="text-xs text-cyan-200 mt-2">Physical Computing</p>
+              <div className="text-3xl mb-2">⚡</div>
+              <h3 className="font-orbitron font-bold text-sm uppercase tracking-wider">Unit 4</h3>
+              <p className="text-cyber-cyan/80 text-xs font-chakra mt-1">Micro:bit</p>
+              <p className="text-xs text-slate-500 mt-1 font-chakra">Physical Computing</p>
             </CardContent>
           </Card>
         </div>
@@ -340,36 +340,36 @@ export default function TeacherDashboard({ user, setUser }) {
         {/* Tools & Reports Row */}
         <div className="grid grid-cols-2 gap-4 mb-6">
           {/* Tools Section */}
-          <Card className="bg-white shadow-md border border-gray-200">
-            <CardHeader className="pb-3 border-b bg-gray-50">
-              <CardTitle className="text-base font-semibold text-gray-700 flex items-center gap-2">
-                🛠️ Tools
+          <Card className="bg-cyber-navy/50 border border-cyber-cyan/20 rounded-none">
+            <CardHeader className="pb-3 border-b border-cyber-cyan/10">
+              <CardTitle className="text-sm font-orbitron text-cyber-cyan flex items-center gap-2 uppercase tracking-wider">
+                Tools
               </CardTitle>
             </CardHeader>
             <CardContent className="pt-4">
               <div className="grid grid-cols-2 gap-2">
-                <Button variant="outline" size="sm" onClick={() => navigate("/question-bank")} className="justify-start text-sm h-9">
-                  <FileQuestion className="w-4 h-4 mr-2 text-blue-500" />
+                <Button variant="outline" size="sm" onClick={() => navigate("/question-bank")} className="justify-start text-sm h-9 bg-transparent border-slate-700 text-slate-300 hover:border-cyber-cyan/50 hover:text-cyber-cyan rounded-none font-chakra">
+                  <FileQuestion className="w-4 h-4 mr-2 text-cyber-cyan" />
                   Question Bank
                 </Button>
-                <Button variant="outline" size="sm" onClick={() => navigate("/test-builder")} className="justify-start text-sm h-9">
-                  <FileQuestion className="w-4 h-4 mr-2 text-purple-500" />
+                <Button variant="outline" size="sm" onClick={() => navigate("/test-builder")} className="justify-start text-sm h-9 bg-transparent border-slate-700 text-slate-300 hover:border-cyber-pink/50 hover:text-cyber-pink rounded-none font-chakra">
+                  <FileQuestion className="w-4 h-4 mr-2 text-cyber-pink" />
                   MC Test Builder
                 </Button>
-                <Button variant="outline" size="sm" onClick={() => navigate("/coding-tests")} className="justify-start text-sm h-9">
-                  <Code2 className="w-4 h-4 mr-2 text-green-500" />
+                <Button variant="outline" size="sm" onClick={() => navigate("/coding-tests")} className="justify-start text-sm h-9 bg-transparent border-slate-700 text-slate-300 hover:border-cyber-lime/50 hover:text-cyber-lime rounded-none font-chakra">
+                  <Code2 className="w-4 h-4 mr-2 text-cyber-lime" />
                   Coding Tests
                 </Button>
-                <Button variant="outline" size="sm" onClick={() => navigate("/skill-quiz-manager")} className="justify-start text-sm h-9">
-                  <span className="mr-2">🧠</span>
+                <Button variant="outline" size="sm" onClick={() => navigate("/skill-quiz-manager")} className="justify-start text-sm h-9 bg-transparent border-slate-700 text-slate-300 hover:border-purple-400/50 hover:text-purple-400 rounded-none font-chakra">
+                  <Cpu className="w-4 h-4 mr-2 text-purple-400" />
                   Skill Quizzes
                 </Button>
-                <Button variant="outline" size="sm" onClick={() => navigate("/notes")} className="justify-start text-sm h-9">
-                  <FileText className="w-4 h-4 mr-2 text-orange-500" />
+                <Button variant="outline" size="sm" onClick={() => navigate("/notes")} className="justify-start text-sm h-9 bg-transparent border-slate-700 text-slate-300 hover:border-orange-400/50 hover:text-orange-400 rounded-none font-chakra">
+                  <FileText className="w-4 h-4 mr-2 text-orange-400" />
                   Notes
                 </Button>
-                <Button variant="outline" size="sm" onClick={() => navigate("/video-library")} className="justify-start text-sm h-9">
-                  <Video className="w-4 h-4 mr-2 text-red-500" />
+                <Button variant="outline" size="sm" onClick={() => navigate("/video-library")} className="justify-start text-sm h-9 bg-transparent border-slate-700 text-slate-300 hover:border-red-400/50 hover:text-red-400 rounded-none font-chakra">
+                  <Video className="w-4 h-4 mr-2 text-red-400" />
                   Videos
                 </Button>
               </div>
@@ -377,28 +377,28 @@ export default function TeacherDashboard({ user, setUser }) {
           </Card>
 
           {/* Reports Section */}
-          <Card className="bg-white shadow-md border border-gray-200">
-            <CardHeader className="pb-3 border-b bg-gray-50">
-              <CardTitle className="text-base font-semibold text-gray-700 flex items-center gap-2">
-                📊 Reports & Competitions
+          <Card className="bg-cyber-navy/50 border border-cyber-pink/20 rounded-none">
+            <CardHeader className="pb-3 border-b border-cyber-pink/10">
+              <CardTitle className="text-sm font-orbitron text-cyber-pink flex items-center gap-2 uppercase tracking-wider">
+                Reports & Competitions
               </CardTitle>
             </CardHeader>
             <CardContent className="pt-4">
               <div className="grid grid-cols-2 gap-2">
-                <Button variant="outline" size="sm" onClick={() => navigate("/teacher-reports")} className="justify-start text-sm h-9">
-                  <FileSpreadsheet className="w-4 h-4 mr-2 text-blue-500" />
+                <Button variant="outline" size="sm" onClick={() => navigate("/teacher-reports")} className="justify-start text-sm h-9 bg-transparent border-slate-700 text-slate-300 hover:border-cyber-cyan/50 hover:text-cyber-cyan rounded-none font-chakra">
+                  <FileSpreadsheet className="w-4 h-4 mr-2 text-cyber-cyan" />
                   Student Reports
                 </Button>
-                <Button variant="outline" size="sm" onClick={() => navigate("/test-reports")} className="justify-start text-sm h-9">
-                  <FileSpreadsheet className="w-4 h-4 mr-2 text-green-500" />
+                <Button variant="outline" size="sm" onClick={() => navigate("/test-reports")} className="justify-start text-sm h-9 bg-transparent border-slate-700 text-slate-300 hover:border-cyber-lime/50 hover:text-cyber-lime rounded-none font-chakra">
+                  <FileSpreadsheet className="w-4 h-4 mr-2 text-cyber-lime" />
                   Test Reports
                 </Button>
-                <Button variant="outline" size="sm" onClick={() => navigate("/teacher/competitions")} className="justify-start text-sm h-9">
-                  <Trophy className="w-4 h-4 mr-2 text-yellow-500" />
+                <Button variant="outline" size="sm" onClick={() => navigate("/teacher/competitions")} className="justify-start text-sm h-9 bg-transparent border-slate-700 text-slate-300 hover:border-yellow-400/50 hover:text-yellow-400 rounded-none font-chakra">
+                  <Trophy className="w-4 h-4 mr-2 text-yellow-400" />
                   Competitions
                 </Button>
-                <Button variant="outline" size="sm" onClick={() => navigate("/teacher/challenge-pool")} className="justify-start text-sm h-9">
-                  <Trophy className="w-4 h-4 mr-2 text-purple-500" />
+                <Button variant="outline" size="sm" onClick={() => navigate("/teacher/challenge-pool")} className="justify-start text-sm h-9 bg-transparent border-slate-700 text-slate-300 hover:border-purple-400/50 hover:text-purple-400 rounded-none font-chakra">
+                  <Trophy className="w-4 h-4 mr-2 text-purple-400" />
                   Challenge Pool
                 </Button>
               </div>
@@ -410,26 +410,26 @@ export default function TeacherDashboard({ user, setUser }) {
         <div className="mt-6">
           <div className="flex justify-between items-center mb-8">
             <div>
-              <h1 className="text-3xl font-bold text-gray-900 mb-2">My Classrooms</h1>
-              <p className="text-gray-600">Manage your classrooms and assignments</p>
+              <h1 className="text-2xl font-orbitron text-white uppercase tracking-wider mb-1">My Classrooms</h1>
+              <p className="text-slate-400 font-chakra text-sm">Manage your classrooms and assignments</p>
             </div>
             <Dialog open={createDialogOpen} onOpenChange={setCreateDialogOpen}>
               <DialogTrigger asChild>
-                <Button data-testid="create-classroom-btn" className="bg-gradient-to-r from-orange-500 to-pink-500 hover:from-orange-600 hover:to-pink-600 gap-2 shadow-lg">
+                <Button data-testid="create-classroom-btn" className="bg-cyber-pink text-white hover:shadow-[0_0_20px_rgba(255,0,170,0.5)] gap-2 font-orbitron text-xs uppercase tracking-widest rounded-none border border-cyber-pink transition-all duration-300">
                   <Plus className="w-5 h-5" />
                   Create Classroom
                 </Button>
               </DialogTrigger>
-              <DialogContent data-testid="create-classroom-dialog">
+              <DialogContent data-testid="create-classroom-dialog" className="bg-cyber-navy border border-cyber-cyan/30 rounded-none">
                 <DialogHeader>
-                  <DialogTitle>Create New Classroom</DialogTitle>
-                  <DialogDescription>
+                  <DialogTitle className="font-orbitron text-cyber-cyan uppercase tracking-wider">Create New Classroom</DialogTitle>
+                  <DialogDescription className="text-slate-400 font-chakra">
                     Enter a name for your new classroom. A unique class code will be generated.
                   </DialogDescription>
               </DialogHeader>
               <form onSubmit={handleCreateClassroom} className="space-y-4">
                 <div>
-                  <Label htmlFor="className">Classroom Name</Label>
+                  <Label htmlFor="className" className="text-slate-300 font-chakra">Classroom Name</Label>
                   <div className="flex gap-2 mt-1">
                     <Input
                       data-testid="classroom-name-input"
@@ -437,20 +437,20 @@ export default function TeacherDashboard({ user, setUser }) {
                       placeholder="e.g., Python Pandemonium"
                       value={newClassName}
                       onChange={(e) => setNewClassName(e.target.value)}
-                      className="flex-1"
+                      className="flex-1 bg-cyber-black/50 border-cyber-cyan/30 text-white placeholder:text-slate-600 focus:border-cyber-cyan rounded-none font-chakra"
                     />
                     <Button
                       type="button"
                       variant="outline"
                       onClick={() => setNewClassName(getRandomSuggestion())}
-                      className="whitespace-nowrap"
+                      className="whitespace-nowrap border-cyber-cyan/30 text-cyber-cyan hover:bg-cyber-cyan/10 rounded-none font-chakra"
                     >
-                      🎲 Inspire Me
+                      Inspire Me
                     </Button>
                   </div>
-                  <p className="text-xs text-gray-500 mt-1">Try: {classroomNameSuggestions.slice(0, 3).join(", ")}</p>
+                  <p className="text-xs text-slate-500 mt-1 font-chakra">Try: {classroomNameSuggestions.slice(0, 3).join(", ")}</p>
                 </div>
-                <Button data-testid="create-classroom-submit-btn" type="submit" className="w-full bg-gradient-to-r from-teal-500 to-cyan-500 hover:from-teal-600 hover:to-cyan-600">
+                <Button data-testid="create-classroom-submit-btn" type="submit" className="w-full bg-cyber-cyan text-cyber-black font-orbitron uppercase tracking-widest text-xs hover:shadow-[0_0_20px_rgba(0,240,255,0.5)] rounded-none border border-cyber-cyan transition-all duration-300 font-bold">
                   Create Classroom
                 </Button>
               </form>
@@ -460,14 +460,14 @@ export default function TeacherDashboard({ user, setUser }) {
 
         {loading ? (
           <div data-testid="classrooms-loading" className="text-center py-20">
-            <div className="text-gray-500">Loading classrooms...</div>
+            <div className="text-slate-500 font-chakra">Loading classrooms...</div>
           </div>
         ) : classrooms.length === 0 ? (
           <div data-testid="no-classrooms" className="text-center py-20">
-            <Users className="w-16 h-16 text-teal-400 mx-auto mb-4" />
-            <h3 className="text-xl font-semibold text-gray-700 mb-2">No classrooms yet</h3>
-            <p className="text-gray-500 mb-6">Create your first classroom to get started</p>
-            <Button data-testid="create-first-classroom-btn" onClick={() => setCreateDialogOpen(true)} className="bg-gradient-to-r from-orange-500 to-pink-500 hover:from-orange-600 hover:to-pink-600 shadow-lg">
+            <Users className="w-16 h-16 text-cyber-cyan/40 mx-auto mb-4" />
+            <h3 className="text-xl font-orbitron text-white mb-2 uppercase tracking-wider">No classrooms yet</h3>
+            <p className="text-slate-500 mb-6 font-chakra">Create your first classroom to get started</p>
+            <Button data-testid="create-first-classroom-btn" onClick={() => setCreateDialogOpen(true)} className="bg-cyber-pink text-white hover:shadow-[0_0_20px_rgba(255,0,170,0.5)] font-orbitron text-xs uppercase tracking-widest rounded-none border border-cyber-pink transition-all duration-300">
               <Plus className="w-4 h-4 mr-2" />
               Create Classroom
             </Button>
@@ -475,53 +475,43 @@ export default function TeacherDashboard({ user, setUser }) {
         ) : (
           <div data-testid="classrooms-grid" className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
             {classrooms.map((classroom, index) => {
-              // Rotate through vibrant colors for each classroom card
-              const colors = [
-                'from-teal-500 to-cyan-500',
-                'from-orange-500 to-pink-500', 
-                'from-purple-500 to-pink-500',
-                'from-blue-500 to-teal-500',
-                'from-pink-500 to-rose-500',
-                'from-cyan-500 to-blue-500'
+              const neonColors = [
+                { border: 'border-cyber-cyan/30 hover:border-cyber-cyan/80', glow: 'hover:shadow-[0_0_15px_rgba(0,240,255,0.3)]', accent: 'text-cyber-cyan', bg: 'bg-cyber-cyan/10' },
+                { border: 'border-cyber-pink/30 hover:border-cyber-pink/80', glow: 'hover:shadow-[0_0_15px_rgba(255,0,170,0.3)]', accent: 'text-cyber-pink', bg: 'bg-cyber-pink/10' },
+                { border: 'border-purple-500/30 hover:border-purple-500/80', glow: 'hover:shadow-[0_0_15px_rgba(168,85,247,0.3)]', accent: 'text-purple-400', bg: 'bg-purple-500/10' },
+                { border: 'border-blue-500/30 hover:border-blue-500/80', glow: 'hover:shadow-[0_0_15px_rgba(59,130,246,0.3)]', accent: 'text-blue-400', bg: 'bg-blue-500/10' },
+                { border: 'border-cyber-lime/30 hover:border-cyber-lime/80', glow: 'hover:shadow-[0_0_15px_rgba(57,255,20,0.3)]', accent: 'text-cyber-lime', bg: 'bg-cyber-lime/10' },
+                { border: 'border-orange-500/30 hover:border-orange-500/80', glow: 'hover:shadow-[0_0_15px_rgba(249,115,22,0.3)]', accent: 'text-orange-400', bg: 'bg-orange-500/10' },
               ];
-              const borderColors = [
-                'border-teal-200 hover:border-teal-400',
-                'border-orange-200 hover:border-orange-400',
-                'border-purple-200 hover:border-purple-400',
-                'border-blue-200 hover:border-blue-400',
-                'border-pink-200 hover:border-pink-400',
-                'border-cyan-200 hover:border-cyan-400'
-              ];
-              const gradientClass = colors[index % colors.length];
-              const borderClass = borderColors[index % borderColors.length];
+              const neon = neonColors[index % neonColors.length];
               
               return (
                 <Card
                   data-testid={`classroom-card-${classroom.id}`}
                   key={classroom.id}
-                  className={`hover:shadow-2xl transition-all cursor-pointer border-2 ${borderClass} transform hover:-translate-y-1 relative group`}
+                  className={`bg-cyber-navy/60 backdrop-blur-sm ${neon.border} ${neon.glow} transition-all duration-500 cursor-pointer rounded-none relative group`}
                   onClick={() => navigate(`/classroom/${classroom.id}`)}
                 >
                   {/* Delete Button - appears on hover */}
                   <button
                     onClick={(e) => handleDeleteClassroom(classroom.id, classroom.name, e)}
-                    className="absolute top-2 right-2 p-2 bg-red-500 text-white rounded-full opacity-0 group-hover:opacity-100 transition-opacity hover:bg-red-600 z-10"
+                    className="absolute top-2 right-2 p-2 bg-cyber-red/80 text-white rounded-none opacity-0 group-hover:opacity-100 transition-opacity hover:bg-cyber-red hover:shadow-[0_0_10px_rgba(255,51,102,0.5)] z-10"
                     title="Delete Classroom"
                   >
                     <Trash2 className="w-4 h-4" />
                   </button>
                   
-                  <CardHeader className={`bg-gradient-to-r ${gradientClass} text-white rounded-t-lg`}>
-                    <CardTitle className="text-xl">{classroom.name}</CardTitle>
-                    <CardDescription className="text-white/90">
-                      <span className="inline-block px-3 py-1 bg-white/20 backdrop-blur-sm text-white rounded-full text-sm font-mono font-semibold border border-white/30">
+                  <CardHeader className={`${neon.bg} border-b border-white/5`}>
+                    <CardTitle className={`text-lg font-orbitron ${neon.accent} uppercase tracking-wider`}>{classroom.name}</CardTitle>
+                    <CardDescription>
+                      <span className={`inline-block px-3 py-1 ${neon.bg} ${neon.accent} rounded-none text-xs font-fira font-semibold border ${neon.border.split(' ')[0]}`}>
                         {classroom.class_code}
                       </span>
                     </CardDescription>
                   </CardHeader>
                   <CardContent className="pt-4">
-                    <div className="flex items-center text-gray-700 font-medium">
-                      <Users className="w-4 h-4 mr-2 text-teal-600" />
+                    <div className="flex items-center text-slate-400 font-chakra text-sm">
+                      <Users className={`w-4 h-4 mr-2 ${neon.accent}`} />
                       <span>{classroom.students?.length || 0} students</span>
                     </div>
                   </CardContent>

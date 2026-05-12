@@ -71,7 +71,7 @@ function SchoolAdminDashboard({ user }) {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-green-50 via-teal-50 to-blue-50 flex items-center justify-center">
+      <div className="min-h-screen bg-cyber-black cyber-grid-bg flex items-center justify-center">
         <p className="text-gray-600">Loading dashboard...</p>
       </div>
     );
@@ -83,7 +83,7 @@ function SchoolAdminDashboard({ user }) {
   // If viewing a specific teacher's classrooms
   if (selectedTeacher) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-green-50 via-teal-50 to-blue-50">
+      <div className="min-h-screen bg-cyber-black cyber-grid-bg">
         {/* Navigation */}
         <nav className="bg-gradient-to-r from-green-600 via-teal-600 to-blue-600 shadow-lg">
           <div className="px-6 py-3">
@@ -183,7 +183,7 @@ function SchoolAdminDashboard({ user }) {
 
   // Main dashboard view
   return (
-    <div className="min-h-screen bg-gradient-to-br from-green-50 via-teal-50 to-blue-50">
+    <div className="min-h-screen bg-cyber-black cyber-grid-bg">
       {/* Navigation */}
       <nav className="bg-gradient-to-r from-green-600 via-teal-600 to-blue-600 shadow-lg">
         <div className="px-6 py-3">
@@ -229,7 +229,7 @@ function SchoolAdminDashboard({ user }) {
             </CardContent>
           </Card>
 
-          <Card className="border-2 border-teal-200 bg-gradient-to-br from-teal-50 to-teal-100">
+          <Card className="border-2 border-teal-200 bg-cyber-black cyber-grid-bg">
             <CardContent className="pt-6">
               <div className="flex items-center justify-between">
                 <div>
@@ -241,7 +241,7 @@ function SchoolAdminDashboard({ user }) {
             </CardContent>
           </Card>
 
-          <Card className="border-2 border-blue-200 bg-gradient-to-br from-blue-50 to-blue-100">
+          <Card className="border-2 border-blue-200 bg-cyber-black cyber-grid-bg">
             <CardContent className="pt-6">
               <div className="flex items-center justify-between">
                 <div>

@@ -265,7 +265,7 @@ export default function BlockTeaching({ user }) {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-orange-50 via-white to-yellow-50">
+    <div className="min-h-screen bg-cyber-black cyber-grid-bg">
       {/* Header */}
       <div className="bg-gradient-to-r from-orange-500 to-yellow-500 text-white py-4 px-6">
         <div className="max-w-7xl mx-auto flex items-center justify-between">

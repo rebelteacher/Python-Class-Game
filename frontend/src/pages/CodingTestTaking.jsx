@@ -449,7 +449,7 @@ export default function CodingTestTaking({ user }) {
   // Show start screen if not in fullscreen yet AND test hasn't started
   if (!isFullscreen && !isLocked && submittedProblemIds.length === 0) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-blue-900 via-indigo-900 to-purple-900 text-white flex items-center justify-center p-8">
+      <div className="min-h-screen bg-cyber-black cyber-grid-bg text-white flex items-center justify-center p-8">
         <Card className="max-w-2xl w-full">
           <CardHeader>
             <CardTitle className="text-2xl text-center">{test?.title}</CardTitle>
@@ -806,7 +806,7 @@ export default function CodingTestTaking({ user }) {
           {testResults && (
             <div className="space-y-6">
               {/* Overall Score */}
-              <div className="text-center p-6 bg-gradient-to-br from-blue-50 to-indigo-50 rounded-lg border-2">
+              <div className="text-center p-6 bg-cyber-black cyber-grid-bg">
                 <p className="text-sm text-gray-600 mb-2">Overall Score</p>
                 <p className={`text-6xl font-bold ${
                   testResults.overall_score >= 90 ? 'text-green-600' :

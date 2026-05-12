@@ -111,6 +111,19 @@ A coding education platform for K-12 students featuring multiple programming env
 - [x] Block Problem Creation Workflow
 - [x] Looks blocks, MC Test features, Grid toggle, etc.
 
+### Completed (May 2025)
+- [x] **Phase 1: Cyberpunk Design Overhaul** - Applied futuristic dark theme across the entire app inspired by CyberCode Nexus:
+  - CSS variables updated to dark cyberpunk palette (deep black #0A0E17, navy #0F172A, neon cyan #00F0FF, neon pink #FF00AA, neon lime #39FF14)
+  - Custom fonts: Chakra Petch (headings/body), Orbitron (buttons/badges/nav), Fira Code (code)
+  - Tailwind config extended with cyber-* color tokens and font families
+  - Landing page fully redesigned: dark background, neon glow effects, sharp edges, grid background
+  - Teacher login page: glassmorphism card with neon accents
+  - Teacher Dashboard: dark sidebar, neon unit cards, glowing classroom cards
+  - Assignment Library: dark nav, neon buttons
+  - All 50+ page backgrounds converted from light gradients to dark theme
+  - All nav bars updated to dark glassmorphism style
+  - Custom scrollbar styling, neon text glow utilities, cyber grid background
+
 ### Completed (April 17, 2025)
 - [x] **Whitespace-Tolerant Pattern Matching** - Pattern grading now normalizes whitespace around commas, parentheses, and brackets so `display.set_pixel(0,0,9)` matches `display.set_pixel(0, 0, 9)`. Preserves spaces inside string literals. Applied to both Micro:bit and Turtle/Block grading.
 - [x] **Alternate Patterns Field** - Teachers can add optional alternate accepted patterns per test case in the Micro:bit pattern check UI (both Create and Edit forms). Useful for accepting genuinely different code approaches.
@@ -191,4 +204,4 @@ A coding education platform for K-12 students featuring multiple programming env
 
 ---
 
-*Last Updated: April 17, 2025*
+*Last Updated: May 12, 2025*

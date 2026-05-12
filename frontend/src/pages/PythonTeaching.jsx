@@ -1960,7 +1960,7 @@ export default function PythonTeaching({ user }) {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-indigo-50">
+    <div className="min-h-screen bg-cyber-black cyber-grid-bg">
       {/* Header */}
       <div className="bg-gradient-to-r from-blue-600 to-indigo-600 text-white py-4 px-6">
         <div className="max-w-7xl mx-auto flex items-center justify-between">

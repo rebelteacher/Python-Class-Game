@@ -121,7 +121,7 @@ export default function MicrobitCurriculum({ user }) {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-cyan-50 via-blue-50 to-indigo-50 flex items-center justify-center">
+      <div className="min-h-screen bg-cyber-black cyber-grid-bg flex items-center justify-center">
         <div className="text-center">
           <Cpu className="w-12 h-12 text-cyan-600 animate-pulse mx-auto mb-4" />
           <p className="text-lg text-gray-600">Loading Micro:bit Curriculum...</p>
@@ -131,7 +131,7 @@ export default function MicrobitCurriculum({ user }) {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-cyan-50 via-blue-50 to-indigo-50">
+    <div className="min-h-screen bg-cyber-black cyber-grid-bg">
       {/* Header */}
       <nav className="bg-gradient-to-r from-cyan-600 to-blue-600 text-white shadow-lg">
         <div className="container mx-auto px-6 py-4">

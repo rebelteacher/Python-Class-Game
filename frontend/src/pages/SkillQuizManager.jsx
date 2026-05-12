@@ -254,7 +254,7 @@ export default function SkillQuizManager({ user }) {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-purple-50 to-pink-50">
+    <div className="min-h-screen bg-cyber-black cyber-grid-bg">
       {/* Header */}
       <div className="bg-gradient-to-r from-purple-600 to-pink-600 text-white py-6 px-6">
         <div className="max-w-7xl mx-auto">

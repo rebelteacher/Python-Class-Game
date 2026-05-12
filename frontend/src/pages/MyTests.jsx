@@ -92,7 +92,7 @@ export default function MyTests({ user }) {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-indigo-50 p-8">
+      <div className="min-h-screen bg-cyber-black cyber-grid-bg">
         <div className="max-w-6xl mx-auto">
           <p className="text-center text-gray-600">Loading tests...</p>
         </div>
@@ -101,7 +101,7 @@ export default function MyTests({ user }) {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-indigo-50 p-8">
+    <div className="min-h-screen bg-cyber-black cyber-grid-bg">
       <div className="max-w-6xl mx-auto">
         <Button
           variant="outline"

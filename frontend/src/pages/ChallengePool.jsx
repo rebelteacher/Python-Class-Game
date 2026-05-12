@@ -183,7 +183,7 @@ function ChallengePool() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-orange-50 via-red-50 to-pink-50 p-8">
+    <div className="min-h-screen bg-cyber-black cyber-grid-bg p-8">
       <div className="max-w-7xl mx-auto">
         {/* Header */}
         <div className="mb-8">
