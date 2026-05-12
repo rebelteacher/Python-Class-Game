@@ -7,12 +7,23 @@ module.exports = {
   ],
   theme: {
   	extend: {
+  		fontFamily: {
+  			chakra: ["'Chakra Petch'", 'sans-serif'],
+  			orbitron: ["'Orbitron'", 'sans-serif'],
+  			fira: ["'Fira Code'", 'monospace'],
+  		},
   		borderRadius: {
   			lg: 'var(--radius)',
   			md: 'calc(var(--radius) - 2px)',
   			sm: 'calc(var(--radius) - 4px)'
   		},
   		colors: {
+  			'cyber-black': '#0A0E17',
+  			'cyber-navy': '#0F172A',
+  			'cyber-cyan': '#00F0FF',
+  			'cyber-pink': '#FF00AA',
+  			'cyber-lime': '#39FF14',
+  			'cyber-red': '#FF3366',
   			background: 'hsl(var(--background))',
   			foreground: 'hsl(var(--foreground))',
   			card: {
@@ -56,25 +67,22 @@ module.exports = {
   		},
   		keyframes: {
   			'accordion-down': {
-  				from: {
-  					height: '0'
-  				},
-  				to: {
-  					height: 'var(--radix-accordion-content-height)'
-  				}
+  				from: { height: '0' },
+  				to: { height: 'var(--radix-accordion-content-height)' }
   			},
   			'accordion-up': {
-  				from: {
-  					height: 'var(--radix-accordion-content-height)'
-  				},
-  				to: {
-  					height: '0'
-  				}
+  				from: { height: 'var(--radix-accordion-content-height)' },
+  				to: { height: '0' }
+  			},
+  			'glow-pulse': {
+  				'0%, 100%': { boxShadow: '0 0 10px rgba(0,240,255,0.3)' },
+  				'50%': { boxShadow: '0 0 25px rgba(0,240,255,0.6)' }
   			}
   		},
   		animation: {
   			'accordion-down': 'accordion-down 0.2s ease-out',
-  			'accordion-up': 'accordion-up 0.2s ease-out'
+  			'accordion-up': 'accordion-up 0.2s ease-out',
+  			'glow-pulse': 'glow-pulse 2s ease-in-out infinite'
   		}
   	}
   },
