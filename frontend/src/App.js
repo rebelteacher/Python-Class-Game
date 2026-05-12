@@ -57,6 +57,7 @@ import SkillQuizManager from "./pages/SkillQuizManager";
 import PythonCurriculum from "./pages/PythonCurriculum";
 import PythonTeaching from "./pages/PythonTeaching";
 import LessonPlanCreator from "./pages/LessonPlanCreator";
+import LessonPageTemplate from "./pages/LessonPageTemplate";
 
 const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
 const API = `${BACKEND_URL}/api`;
@@ -564,6 +565,7 @@ function App() {
               <Route path="/teacher-login" element={<TeacherLogin />} />
               <Route path="/teacher-signup" element={<TeacherSignup />} />
               <Route path="/school-admin-signup" element={<SchoolAdminSignup />} />
+              <Route path="/lesson-demo" element={<LessonPageTemplate />} />
               <Route path="/emergency-fix" element={<AdminAccountFix />} />
 
               <Route
