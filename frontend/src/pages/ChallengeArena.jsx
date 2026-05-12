@@ -129,7 +129,7 @@ function ChallengeArena() {
   if (!challenge || !problem) {
     return (
       <div className="min-h-screen bg-cyber-black cyber-grid-bg flex items-center justify-center">
-        <p className="text-gray-600">Loading challenge...</p>
+        <p className="text-slate-400">Loading challenge...</p>
       </div>
     );
   }
@@ -141,10 +141,10 @@ function ChallengeArena() {
           <CardContent className="pt-6 text-center">
             <Zap className="w-16 h-16 text-yellow-500 mx-auto mb-4" />
             <h2 className="text-2xl font-bold mb-2">Submitted!</h2>
-            <p className="text-gray-600 mb-4">
+            <p className="text-slate-400 mb-4">
               Score: {results.score}% ({results.passed_tests}/{results.total_tests} tests passed)
             </p>
-            <p className="text-sm text-gray-500">Loading results...</p>
+            <p className="text-sm text-slate-500">Loading results...</p>
           </CardContent>
         </Card>
       </div>

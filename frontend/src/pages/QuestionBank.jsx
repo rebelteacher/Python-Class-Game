@@ -712,7 +712,7 @@ export default function QuestionBank({ user }) {
       "code": { bg: "bg-blue-100", text: "text-blue-700", label: "🐍 Python" },
       "microbit": { bg: "bg-cyan-100", text: "text-cyan-700", label: "⚡ Micro:bit" }
     };
-    return badges[unitType] || { bg: "bg-gray-100", text: "text-gray-700", label: "❓ Unassigned" };
+    return badges[unitType] || { bg: "bg-cyber-navy/30", text: "text-slate-300", label: "❓ Unassigned" };
   };
 
   return (
@@ -725,8 +725,8 @@ export default function QuestionBank({ user }) {
               Back to Dashboard
             </Button>
             <div className="flex items-center space-x-2">
-              <FileQuestion className="w-7 h-7 text-indigo-600" />
-              <span className="text-xl font-bold text-gray-900">Question Bank</span>
+              <FileQuestion className="w-7 h-7 text-cyber-cyan" />
+              <span className="text-xl font-bold text-white">Question Bank</span>
             </div>
           </div>
           <div className="flex gap-2">
@@ -739,7 +739,7 @@ export default function QuestionBank({ user }) {
                   setSelectedQuestions([]);
                 }
               }}
-              className={selectionMode ? "bg-indigo-600" : ""}
+              className={selectionMode ? "bg-cyber-cyan text-cyber-black" : ""}
             >
               <CheckSquare className="w-4 h-4 mr-2" />
               {selectionMode ? "Exit Selection" : "Select Multiple"}
@@ -760,10 +760,10 @@ export default function QuestionBank({ user }) {
                 <div className="space-y-4">
                   <div>
                     <Label>CSV Format:</Label>
-                    <pre className="text-xs bg-gray-100 p-3 rounded mt-2 overflow-x-auto whitespace-pre-wrap">
+                    <pre className="text-xs bg-cyber-navy/30 p-3 rounded mt-2 overflow-x-auto whitespace-pre-wrap">
 question_text,choice_a,choice_b,choice_c,choice_d,correct_answer,unit_type,unit,chapter,lesson,difficulty
 What is 2+2?,3,4,5,6,B,code,Unit 3: Python Text,Chapter 1,Lesson 1,Easy</pre>
-                    <p className="text-xs text-gray-600 mt-2">
+                    <p className="text-xs text-slate-400 mt-2">
                       • correct_answer should be A, B, C, or D<br/>
                       • unit_type should be block, turtle, code, or microbit<br/>
                       • difficulty should be Easy, Medium, or Hard
@@ -780,14 +780,14 @@ What is 2+2?,3,4,5,6,B,code,Unit 3: Python Text,Chapter 1,Lesson 1,Easy</pre>
                       className="mt-1"
                     />
                   </div>
-                  {uploading && <p className="text-sm text-gray-600">Uploading...</p>}
+                  {uploading && <p className="text-sm text-slate-400">Uploading...</p>}
                 </div>
               </DialogContent>
             </Dialog>
             
             <Dialog open={createDialogOpen} onOpenChange={setCreateDialogOpen}>
               <DialogTrigger asChild>
-                <Button className="bg-indigo-600 hover:bg-indigo-700">
+                <Button className="bg-cyber-cyan text-cyber-black hover:shadow-[0_0_15px_rgba(0,240,255,0.5)] font-bold">
                   <Plus className="w-4 h-4 mr-2" />
                   Create Question
                 </Button>
@@ -819,7 +819,7 @@ What is 2+2?,3,4,5,6,B,code,Unit 3: Python Text,Chapter 1,Lesson 1,Easy</pre>
                         className={`flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-medium transition-colors ${
                           blockMode 
                             ? 'bg-indigo-100 text-indigo-700 border border-indigo-300' 
-                            : 'bg-gray-100 text-gray-600 border border-gray-300'
+                            : 'bg-cyber-navy/30 text-slate-400 border border-cyber-cyan/15'
                         }`}
                       >
                         {blockMode ? <ToggleRight className="w-3.5 h-3.5" /> : <ToggleLeft className="w-3.5 h-3.5" />}
@@ -832,7 +832,7 @@ What is 2+2?,3,4,5,6,B,code,Unit 3: Python Text,Chapter 1,Lesson 1,Easy</pre>
                           const currentValue = newQuestion[`choice_${letter}`].replace(/^\[block:(\w+)\].*$/, '$1');
                           return (
                             <div key={letter} className="flex items-center gap-2">
-                              <span className="text-sm font-medium w-6 text-gray-500">{letter.toUpperCase()}.</span>
+                              <span className="text-sm font-medium w-6 text-slate-500">{letter.toUpperCase()}.</span>
                               <div className="relative flex-1">
                                 <select
                                   className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10"
@@ -862,11 +862,11 @@ What is 2+2?,3,4,5,6,B,code,Unit 3: Python Text,Chapter 1,Lesson 1,Easy</pre>
                                   ))}
                                 </select>
                                 {currentValue && BLOCK_TYPES[currentValue] ? (
-                                  <div className="flex items-center gap-2 p-1.5 border border-gray-200 rounded-lg bg-gray-50 cursor-pointer hover:bg-gray-100 transition-colors">
+                                  <div className="flex items-center gap-2 p-1.5 border border-cyber-cyan/10 rounded-lg bg-cyber-navy/40 cursor-pointer hover:bg-cyber-navy/30 transition-colors">
                                     <BlockRenderer blockType={currentValue} />
                                   </div>
                                 ) : (
-                                  <div className="flex items-center gap-2 p-3 border-2 border-dashed border-gray-300 rounded-lg text-gray-400 text-sm cursor-pointer hover:border-gray-400 transition-colors">
+                                  <div className="flex items-center gap-2 p-3 border-2 border-dashed border-cyber-cyan/15 rounded-lg text-slate-500 text-sm cursor-pointer hover:border-gray-400 transition-colors">
                                     Click to select a block...
                                   </div>
                                 )}
@@ -982,7 +982,7 @@ What is 2+2?,3,4,5,6,B,code,Unit 3: Python Text,Chapter 1,Lesson 1,Easy</pre>
                     </div>
                   </div>
 
-                  <Button type="submit" className="w-full bg-indigo-600 hover:bg-indigo-700">
+                  <Button type="submit" className="w-full bg-cyber-cyan text-cyber-black hover:shadow-[0_0_15px_rgba(0,240,255,0.5)] font-bold">
                     Create Question
                   </Button>
                 </form>
@@ -999,7 +999,7 @@ What is 2+2?,3,4,5,6,B,code,Unit 3: Python Text,Chapter 1,Lesson 1,Easy</pre>
             <div className="flex flex-wrap gap-3 items-center">
               {/* Search */}
               <div className="relative flex-grow max-w-md">
-                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400" />
+                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-slate-500" />
                 <Input
                   placeholder="Search questions..."
                   value={searchTerm}
@@ -1083,7 +1083,7 @@ What is 2+2?,3,4,5,6,B,code,Unit 3: Python Text,Chapter 1,Lesson 1,Easy</pre>
 
               {/* Clear Filters */}
               {hasActiveFilters && (
-                <Button variant="ghost" size="sm" onClick={clearFilters} className="text-gray-500">
+                <Button variant="ghost" size="sm" onClick={clearFilters} className="text-slate-500">
                   <X className="w-4 h-4 mr-1" />
                   Clear Filters
                 </Button>
@@ -1093,7 +1093,7 @@ What is 2+2?,3,4,5,6,B,code,Unit 3: Python Text,Chapter 1,Lesson 1,Easy</pre>
             {/* Selection Mode Actions */}
             {selectionMode && (
               <div className="flex items-center gap-3 mt-4 pt-4 border-t">
-                <span className="text-sm text-gray-600">
+                <span className="text-sm text-slate-400">
                   {selectedQuestions.length} selected
                 </span>
                 <Button variant="outline" size="sm" onClick={selectAllVisible}>
@@ -1106,7 +1106,7 @@ What is 2+2?,3,4,5,6,B,code,Unit 3: Python Text,Chapter 1,Lesson 1,Easy</pre>
                   size="sm" 
                   onClick={() => setBulkUpdateDialogOpen(true)}
                   disabled={selectedQuestions.length === 0}
-                  className="bg-indigo-600 hover:bg-indigo-700"
+                  className="bg-cyber-cyan text-cyber-black hover:shadow-[0_0_15px_rgba(0,240,255,0.5)] font-bold"
                 >
                   <Edit className="w-4 h-4 mr-1" />
                   Bulk Edit
@@ -1126,7 +1126,7 @@ What is 2+2?,3,4,5,6,B,code,Unit 3: Python Text,Chapter 1,Lesson 1,Easy</pre>
         </Card>
 
         {/* Results Summary */}
-        <div className="mb-4 text-sm text-gray-600">
+        <div className="mb-4 text-sm text-slate-400">
           Showing {filteredQuestions.length} of {questions.length} questions
         </div>
 
@@ -1134,17 +1134,17 @@ What is 2+2?,3,4,5,6,B,code,Unit 3: Python Text,Chapter 1,Lesson 1,Easy</pre>
           <div className="text-center py-20">Loading questions...</div>
         ) : filteredQuestions.length === 0 ? (
           <div className="text-center py-20">
-            <FileQuestion className="w-16 h-16 text-gray-400 mx-auto mb-4" />
-            <h3 className="text-xl font-semibold text-gray-700 mb-2">
+            <FileQuestion className="w-16 h-16 text-slate-500 mx-auto mb-4" />
+            <h3 className="text-xl font-semibold text-slate-300 mb-2">
               {questions.length === 0 ? "No questions yet" : "No questions match your filters"}
             </h3>
-            <p className="text-gray-500 mb-6">
+            <p className="text-slate-500 mb-6">
               {questions.length === 0 
                 ? "Create your first multiple choice question" 
                 : "Try adjusting your filters or search term"}
             </p>
             {questions.length === 0 && (
-              <Button onClick={() => setCreateDialogOpen(true)} className="bg-indigo-600 hover:bg-indigo-700">
+              <Button onClick={() => setCreateDialogOpen(true)} className="bg-cyber-cyan text-cyber-black hover:shadow-[0_0_15px_rgba(0,240,255,0.5)] font-bold">
                 <Plus className="w-4 h-4 mr-2" />
                 Create Question
               </Button>
@@ -1158,23 +1158,23 @@ What is 2+2?,3,4,5,6,B,code,Unit 3: Python Text,Chapter 1,Lesson 1,Easy</pre>
               const chapterQuestionCount = Object.values(lessonsList).reduce((sum, arr) => sum + arr.length, 0);
               
               return (
-                <div key={chapter} className="border rounded-lg bg-white shadow-sm">
+                <div key={chapter} className="border rounded-lg bg-cyber-navy/60 backdrop-blur-sm">
                   <div
-                    className="flex items-center gap-3 p-4 cursor-pointer hover:bg-gray-50 transition-colors"
+                    className="flex items-center gap-3 p-4 cursor-pointer hover:bg-cyber-navy/40 transition-colors"
                     onClick={() => toggleChapter(chapter)}
                   >
                     {isChapterExpanded ? (
-                      <ChevronDown className="w-5 h-5 text-gray-600" />
+                      <ChevronDown className="w-5 h-5 text-slate-400" />
                     ) : (
-                      <ChevronRight className="w-5 h-5 text-gray-600" />
+                      <ChevronRight className="w-5 h-5 text-slate-400" />
                     )}
                     {isChapterExpanded ? (
                       <FolderOpen className="w-6 h-6 text-blue-500" />
                     ) : (
                       <Folder className="w-6 h-6 text-blue-500" />
                     )}
-                    <h3 className="text-lg font-semibold text-gray-900">{chapter}</h3>
-                    <span className="ml-auto text-sm text-gray-500 bg-gray-100 px-3 py-1 rounded-full">
+                    <h3 className="text-lg font-semibold text-white">{chapter}</h3>
+                    <span className="ml-auto text-sm text-slate-500 bg-cyber-navy/30 px-3 py-1 rounded-full">
                       {chapterQuestionCount} question{chapterQuestionCount !== 1 ? 's' : ''}
                     </span>
                   </div>
@@ -1187,23 +1187,23 @@ What is 2+2?,3,4,5,6,B,code,Unit 3: Python Text,Chapter 1,Lesson 1,Easy</pre>
                         const lessonQuestions = lessonsList[lesson];
                         
                         return (
-                          <div key={lessonKey} className="border rounded-lg bg-gray-50">
+                          <div key={lessonKey} className="border rounded-lg bg-cyber-navy/40">
                             <div
-                              className="flex items-center gap-3 p-3 cursor-pointer hover:bg-gray-100 transition-colors rounded-lg"
+                              className="flex items-center gap-3 p-3 cursor-pointer hover:bg-cyber-navy/30 transition-colors rounded-lg"
                               onClick={() => toggleLesson(lessonKey)}
                             >
                               {isLessonExpanded ? (
-                                <ChevronDown className="w-4 h-4 text-gray-600" />
+                                <ChevronDown className="w-4 h-4 text-slate-400" />
                               ) : (
-                                <ChevronRight className="w-4 h-4 text-gray-600" />
+                                <ChevronRight className="w-4 h-4 text-slate-400" />
                               )}
                               {isLessonExpanded ? (
                                 <FolderOpen className="w-5 h-5 text-teal-500" />
                               ) : (
                                 <Folder className="w-5 h-5 text-teal-500" />
                               )}
-                              <h4 className="text-md font-medium text-gray-800">{lesson}</h4>
-                              <span className="ml-auto text-xs text-gray-500 bg-white px-2 py-1 rounded-full">
+                              <h4 className="text-md font-medium text-slate-200">{lesson}</h4>
+                              <span className="ml-auto text-xs text-slate-500 bg-white px-2 py-1 rounded-full">
                                 {lessonQuestions.length} question{lessonQuestions.length !== 1 ? 's' : ''}
                               </span>
                             </div>
@@ -1351,7 +1351,7 @@ What is 2+2?,3,4,5,6,B,code,Unit 3: Python Text,Chapter 1,Lesson 1,Easy</pre>
                     className={`flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-medium transition-colors ${
                       editBlockMode 
                         ? 'bg-indigo-100 text-indigo-700 border border-indigo-300' 
-                        : 'bg-gray-100 text-gray-600 border border-gray-300'
+                        : 'bg-cyber-navy/30 text-slate-400 border border-cyber-cyan/15'
                     }`}
                   >
                     {editBlockMode ? <ToggleRight className="w-3.5 h-3.5" /> : <ToggleLeft className="w-3.5 h-3.5" />}
@@ -1364,7 +1364,7 @@ What is 2+2?,3,4,5,6,B,code,Unit 3: Python Text,Chapter 1,Lesson 1,Easy</pre>
                       const currentValue = editingQuestion[`choice_${letter}`]?.replace(/^\[block:(\w+)\].*$/, '$1') || '';
                       return (
                         <div key={letter} className="flex items-center gap-2">
-                          <span className="text-sm font-medium w-6 text-gray-500">{letter.toUpperCase()}.</span>
+                          <span className="text-sm font-medium w-6 text-slate-500">{letter.toUpperCase()}.</span>
                           <div className="relative flex-1">
                             <select
                               className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10"
@@ -1394,11 +1394,11 @@ What is 2+2?,3,4,5,6,B,code,Unit 3: Python Text,Chapter 1,Lesson 1,Easy</pre>
                               ))}
                             </select>
                             {currentValue && BLOCK_TYPES[currentValue] ? (
-                              <div className="flex items-center gap-2 p-1.5 border border-gray-200 rounded-lg bg-gray-50 cursor-pointer hover:bg-gray-100 transition-colors">
+                              <div className="flex items-center gap-2 p-1.5 border border-cyber-cyan/10 rounded-lg bg-cyber-navy/40 cursor-pointer hover:bg-cyber-navy/30 transition-colors">
                                 <BlockRenderer blockType={currentValue} />
                               </div>
                             ) : (
-                              <div className="flex items-center gap-2 p-3 border-2 border-dashed border-gray-300 rounded-lg text-gray-400 text-sm cursor-pointer hover:border-gray-400 transition-colors">
+                              <div className="flex items-center gap-2 p-3 border-2 border-dashed border-cyber-cyan/15 rounded-lg text-slate-500 text-sm cursor-pointer hover:border-gray-400 transition-colors">
                                 Click to select a block...
                               </div>
                             )}
@@ -1510,7 +1510,7 @@ What is 2+2?,3,4,5,6,B,code,Unit 3: Python Text,Chapter 1,Lesson 1,Easy</pre>
                 </div>
               </div>
 
-              <Button type="submit" className="w-full bg-indigo-600 hover:bg-indigo-700">
+              <Button type="submit" className="w-full bg-cyber-cyan text-cyber-black hover:shadow-[0_0_15px_rgba(0,240,255,0.5)] font-bold">
                 Update Question
               </Button>
             </form>
@@ -1551,7 +1551,7 @@ What is 2+2?,3,4,5,6,B,code,Unit 3: Python Text,Chapter 1,Lesson 1,Easy</pre>
                 <Button onClick={() => setMoveDialogOpen(false)} variant="outline" className="flex-1">
                   Cancel
                 </Button>
-                <Button onClick={handleMoveQuestion} className="flex-1 bg-indigo-600 hover:bg-indigo-700">
+                <Button onClick={handleMoveQuestion} className="flex-1 bg-cyber-cyan text-cyber-black hover:shadow-[0_0_15px_rgba(0,240,255,0.5)] font-bold">
                   <FolderInput className="w-4 h-4 mr-2" />
                   Move Here
                 </Button>
@@ -1602,7 +1602,7 @@ What is 2+2?,3,4,5,6,B,code,Unit 3: Python Text,Chapter 1,Lesson 1,Easy</pre>
                 onChange={(e) => setBulkUpdateUnit(e.target.value)}
                 className="mt-1"
               />
-              <p className="text-xs text-gray-500 mt-1">
+              <p className="text-xs text-slate-500 mt-1">
                 Examples: "Unit 1: Block-Based Coding", "Unit 2: Turtle Graphics", "Unit 3: Python Text"
               </p>
             </div>
@@ -1629,7 +1629,7 @@ What is 2+2?,3,4,5,6,B,code,Unit 3: Python Text,Chapter 1,Lesson 1,Easy</pre>
             <Button variant="outline" onClick={() => setBulkUpdateDialogOpen(false)}>
               Cancel
             </Button>
-            <Button onClick={handleBulkUpdate} className="bg-indigo-600 hover:bg-indigo-700">
+            <Button onClick={handleBulkUpdate} className="bg-cyber-cyan text-cyber-black hover:shadow-[0_0_15px_rgba(0,240,255,0.5)] font-bold">
               Update {selectedQuestions.length} Questions
             </Button>
           </DialogFooter>

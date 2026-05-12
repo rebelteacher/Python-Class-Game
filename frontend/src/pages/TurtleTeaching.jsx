@@ -882,7 +882,7 @@ export default function TurtleTeaching({ user }) {
               variant="ghost"
               size="sm"
               onClick={() => navigate("/turtle")}
-              className="text-white hover:bg-white/20"
+              className="text-white hover:bg-cyber-navy/60/20"
             >
               <ArrowLeft className="w-4 h-4 mr-1" />
               Back
@@ -902,7 +902,7 @@ export default function TurtleTeaching({ user }) {
                 setCurrentLessonIndex(0);
               }}
             >
-              <SelectTrigger className="w-40 bg-white/10 border-white/30 text-white">
+              <SelectTrigger className="w-40 bg-cyber-navy/60/10 border-white/30 text-white">
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
@@ -919,7 +919,7 @@ export default function TurtleTeaching({ user }) {
                 size="sm"
                 onClick={prevLesson}
                 disabled={currentLessonIndex === 0}
-                className="text-white hover:bg-white/20 disabled:opacity-50"
+                className="text-white hover:bg-cyber-navy/60/20 disabled:opacity-50"
               >
                 <ChevronLeft className="w-4 h-4" />
               </Button>
@@ -931,7 +931,7 @@ export default function TurtleTeaching({ user }) {
                 size="sm"
                 onClick={nextLesson}
                 disabled={currentLessonIndex === currentTopic.lessons.length - 1}
-                className="text-white hover:bg-white/20 disabled:opacity-50"
+                className="text-white hover:bg-cyber-navy/60/20 disabled:opacity-50"
               >
                 <ChevronRight className="w-4 h-4" />
               </Button>
@@ -941,7 +941,7 @@ export default function TurtleTeaching({ user }) {
               variant="ghost"
               size="sm"
               onClick={() => setIsFullscreen(!isFullscreen)}
-              className="text-white hover:bg-white/20"
+              className="text-white hover:bg-cyber-navy/60/20"
             >
               <Maximize2 className="w-4 h-4" />
             </Button>
@@ -968,7 +968,7 @@ export default function TurtleTeaching({ user }) {
         <ResizablePanel defaultSize={50} minSize={30}>
           <div className="h-full flex flex-col">
             <div className="p-2 bg-gray-800 border-b border-gray-700 flex items-center justify-between">
-              <span className="text-sm text-gray-400">Code with Explanations</span>
+              <span className="text-sm text-slate-500">Code with Explanations</span>
               <Button
                 onClick={resetCode}
                 size="sm"
@@ -1005,7 +1005,7 @@ export default function TurtleTeaching({ user }) {
 
         {/* Turtle Canvas Panel */}
         <ResizablePanel defaultSize={50} minSize={30}>
-          <div className="h-full bg-white flex items-center justify-center">
+          <div className="h-full bg-cyber-navy/60 flex items-center justify-center">
             <AnimatedTurtle 
               code={code} 
               onLineHighlight={handleLineHighlight}

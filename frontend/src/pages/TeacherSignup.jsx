@@ -110,7 +110,7 @@ export default function TeacherSignup() {
             <div className="space-y-2">
               <Label htmlFor="name">Full Name</Label>
               <div className="relative">
-                <User className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
+                <User className="absolute left-3 top-3 h-4 w-4 text-slate-500" />
                 <Input
                   id="name"
                   type="text"
@@ -126,7 +126,7 @@ export default function TeacherSignup() {
             <div className="space-y-2">
               <Label htmlFor="email">Email</Label>
               <div className="relative">
-                <Mail className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
+                <Mail className="absolute left-3 top-3 h-4 w-4 text-slate-500" />
                 <Input
                   id="email"
                   type="email"
@@ -164,7 +164,7 @@ export default function TeacherSignup() {
             <div className="space-y-2">
               <Label htmlFor="password">Password</Label>
               <div className="relative">
-                <Lock className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
+                <Lock className="absolute left-3 top-3 h-4 w-4 text-slate-500" />
                 <Input
                   id="password"
                   type="password"
@@ -181,7 +181,7 @@ export default function TeacherSignup() {
             <div className="space-y-2">
               <Label htmlFor="confirmPassword">Confirm Password</Label>
               <div className="relative">
-                <Lock className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
+                <Lock className="absolute left-3 top-3 h-4 w-4 text-slate-500" />
                 <Input
                   id="confirmPassword"
                   type="password"
@@ -197,7 +197,7 @@ export default function TeacherSignup() {
             <div className="space-y-2">
               <Label htmlFor="inviteCode">Invite Code</Label>
               <div className="relative">
-                <Key className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
+                <Key className="absolute left-3 top-3 h-4 w-4 text-slate-500" />
                 <Input
                   id="inviteCode"
                   type="text"
@@ -208,28 +208,28 @@ export default function TeacherSignup() {
                   required
                 />
               </div>
-              <p className="text-xs text-gray-500">
+              <p className="text-xs text-slate-500">
                 Contact your administrator to get an invite code
               </p>
             </div>
 
             <Button
               type="submit"
-              className="w-full bg-indigo-600 hover:bg-indigo-700"
+              className="w-full bg-cyber-cyan text-cyber-black hover:shadow-[0_0_15px_rgba(0,240,255,0.5)] font-bold"
               disabled={loading}
             >
               {loading ? "Creating account..." : "Create Account"}
             </Button>
 
             <div className="text-center pt-4 border-t">
-              <p className="text-sm text-gray-600 mb-2">
+              <p className="text-sm text-slate-400 mb-2">
                 Already have an account?
               </p>
               <Button
                 type="button"
                 variant="link"
                 onClick={() => navigate("/teacher-login")}
-                className="text-indigo-600"
+                className="text-cyber-cyan"
               >
                 Sign in here
               </Button>

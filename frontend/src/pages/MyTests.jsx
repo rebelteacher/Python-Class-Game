@@ -94,7 +94,7 @@ export default function MyTests({ user }) {
     return (
       <div className="min-h-screen bg-cyber-black cyber-grid-bg">
         <div className="max-w-6xl mx-auto">
-          <p className="text-center text-gray-600">Loading tests...</p>
+          <p className="text-center text-slate-400">Loading tests...</p>
         </div>
       </div>
     );
@@ -112,7 +112,7 @@ export default function MyTests({ user }) {
           Back to Dashboard
         </Button>
 
-        <h1 className="text-3xl font-bold text-gray-900 mb-6">My Tests</h1>
+        <h1 className="text-3xl font-bold text-white mb-6">My Tests</h1>
 
         <Tabs defaultValue="coding" className="w-full">
           <TabsList className="grid w-full max-w-md grid-cols-2">
@@ -131,9 +131,9 @@ export default function MyTests({ user }) {
             {codingTests.length === 0 ? (
               <Card>
                 <CardContent className="py-12 text-center">
-                  <Code2 className="w-16 h-16 text-gray-400 mx-auto mb-4" />
-                  <h3 className="text-lg font-semibold text-gray-900 mb-2">No coding tests available</h3>
-                  <p className="text-gray-600">
+                  <Code2 className="w-16 h-16 text-slate-500 mx-auto mb-4" />
+                  <h3 className="text-lg font-semibold text-white mb-2">No coding tests available</h3>
+                  <p className="text-slate-400">
                     Check back later for new assignments
                   </p>
                 </CardContent>
@@ -164,7 +164,7 @@ export default function MyTests({ user }) {
                         <CardDescription>{test.classroom_name}</CardDescription>
                       </CardHeader>
                       <CardContent>
-                        <div className="space-y-2 text-sm text-gray-600 mb-4">
+                        <div className="space-y-2 text-sm text-slate-400 mb-4">
                           {test.time_limit_minutes > 0 && (
                             <div className="flex items-center gap-2">
                               <Clock className="w-4 h-4" />
@@ -192,7 +192,7 @@ export default function MyTests({ user }) {
                         ) : (
                           <Button
                             onClick={() => handleStartCodingTest(test.id)}
-                            className="w-full bg-indigo-600 hover:bg-indigo-700"
+                            className="w-full bg-cyber-cyan text-cyber-black hover:shadow-[0_0_15px_rgba(0,240,255,0.5)] font-bold"
                             disabled={overdue}
                           >
                             {overdue ? "Test Closed" : "Start Test"}
@@ -211,9 +211,9 @@ export default function MyTests({ user }) {
             {mcTests.length === 0 ? (
               <Card>
                 <CardContent className="py-12 text-center">
-                  <FileQuestion className="w-16 h-16 text-gray-400 mx-auto mb-4" />
-                  <h3 className="text-lg font-semibold text-gray-900 mb-2">No multiple choice tests available</h3>
-                  <p className="text-gray-600">
+                  <FileQuestion className="w-16 h-16 text-slate-500 mx-auto mb-4" />
+                  <h3 className="text-lg font-semibold text-white mb-2">No multiple choice tests available</h3>
+                  <p className="text-slate-400">
                     Check back later for new tests
                   </p>
                 </CardContent>
@@ -241,7 +241,7 @@ export default function MyTests({ user }) {
                         <CardDescription>{test.classroom_name}</CardDescription>
                       </CardHeader>
                       <CardContent>
-                        <div className="space-y-2 text-sm text-gray-600 mb-4">
+                        <div className="space-y-2 text-sm text-slate-400 mb-4">
                           <div className="flex items-center gap-2">
                             <FileQuestion className="w-4 h-4" />
                             <span>{test.num_questions} questions</span>

@@ -115,7 +115,7 @@ export default function CodingTestCreate({ user }) {
         <Card>
           <CardHeader>
             <CardTitle className="flex items-center gap-2 text-2xl">
-              <Code2 className="w-6 h-6 text-indigo-600" />
+              <Code2 className="w-6 h-6 text-cyber-cyan" />
               Create Coding Test
             </CardTitle>
             <CardDescription>
@@ -189,7 +189,7 @@ export default function CodingTestCreate({ user }) {
                   </SelectContent>
                 </Select>
                 {selectedProblem && (
-                  <p className="mt-2 text-sm text-gray-600">
+                  <p className="mt-2 text-sm text-slate-400">
                     {selectedProblem.description}
                   </p>
                 )}
@@ -209,7 +209,7 @@ export default function CodingTestCreate({ user }) {
                   onChange={(e) => setFormData({ ...formData, time_limit_minutes: parseInt(e.target.value) || 0 })}
                   placeholder="0 = no time limit"
                 />
-                <p className="text-xs text-gray-500 mt-1">
+                <p className="text-xs text-slate-500 mt-1">
                   Set to 0 for unlimited time
                 </p>
               </div>
@@ -221,7 +221,7 @@ export default function CodingTestCreate({ user }) {
                   {classrooms.map((classroom) => (
                     <label
                       key={classroom.id}
-                      className="flex items-center gap-2 p-3 border rounded hover:bg-gray-50 cursor-pointer"
+                      className="flex items-center gap-2 p-3 border rounded hover:bg-cyber-navy/40 cursor-pointer"
                     >
                       <input
                         type="checkbox"
@@ -276,7 +276,7 @@ export default function CodingTestCreate({ user }) {
                 <Button
                   type="submit"
                   disabled={loading}
-                  className="flex-1 bg-indigo-600 hover:bg-indigo-700"
+                  className="flex-1 bg-cyber-cyan text-cyber-black hover:shadow-[0_0_15px_rgba(0,240,255,0.5)] font-bold"
                 >
                   {loading ? "Creating..." : "Create Coding Test"}
                 </Button>

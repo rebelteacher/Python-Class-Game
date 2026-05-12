@@ -60,7 +60,7 @@ export default function CodingTestResult({ user }) {
     return (
       <div className="min-h-screen bg-cyber-black cyber-grid-bg">
         <div className="max-w-4xl mx-auto">
-          <p className="text-center text-gray-600">Loading result...</p>
+          <p className="text-center text-slate-400">Loading result...</p>
         </div>
       </div>
     );
@@ -83,10 +83,10 @@ export default function CodingTestResult({ user }) {
           <CardHeader className="text-center pb-2">
             <div className="flex justify-center mb-4">
               <div className={`w-32 h-32 rounded-full flex items-center justify-center ${
-                result.overall_score >= 70 ? 'bg-green-100' : 'bg-gray-100'
+                result.overall_score >= 70 ? 'bg-green-100' : 'bg-cyber-navy/30'
               }`}>
                 <Trophy className={`w-16 h-16 ${
-                  result.overall_score >= 70 ? 'text-green-600' : 'text-gray-400'
+                  result.overall_score >= 70 ? 'text-green-600' : 'text-slate-500'
                 }`} />
               </div>
             </div>
@@ -98,7 +98,7 @@ export default function CodingTestResult({ user }) {
             <CardDescription className="text-xl mt-2">
               {getScoreMessage(result.overall_score)}
             </CardDescription>
-            <p className="text-sm text-gray-600 mt-2">
+            <p className="text-sm text-slate-400 mt-2">
               {result.total_problems} {result.total_problems === 1 ? 'Problem' : 'Problems'} Completed
             </p>
           </CardHeader>
@@ -106,7 +106,7 @@ export default function CodingTestResult({ user }) {
 
         {/* Individual Problem Results */}
         <div className="space-y-4 mb-6">
-          <h2 className="text-2xl font-bold text-gray-900">Problem Results</h2>
+          <h2 className="text-2xl font-bold text-white">Problem Results</h2>
           {result.submissions?.map((submission, index) => (
             <Card key={submission.problem_id}>
               <CardHeader>
@@ -122,9 +122,9 @@ export default function CodingTestResult({ user }) {
               </CardHeader>
               <CardContent>
                 <div className="bg-blue-50 p-4 rounded-lg mb-3">
-                  <p className="text-gray-800 whitespace-pre-wrap">{submission.feedback}</p>
+                  <p className="text-slate-200 whitespace-pre-wrap">{submission.feedback}</p>
                 </div>
-                <div className="flex items-center gap-4 text-sm text-gray-600">
+                <div className="flex items-center gap-4 text-sm text-slate-400">
                   <div className="flex items-center gap-2">
                     <Clock className="w-4 h-4" />
                     <span>Time: {formatTime(submission.time_taken_seconds)}</span>
@@ -158,7 +158,7 @@ export default function CodingTestResult({ user }) {
             <CardTitle>Tips for Improvement</CardTitle>
           </CardHeader>
           <CardContent>
-            <ul className="space-y-2 text-sm text-gray-700">
+            <ul className="space-y-2 text-sm text-slate-300">
               <li className="flex items-start gap-2">
                 <span className="text-blue-600 mt-1">•</span>
                 <span>Review the problem description and make sure you understand all requirements</span>

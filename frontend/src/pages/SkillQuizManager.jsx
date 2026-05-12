@@ -317,9 +317,9 @@ export default function SkillQuizManager({ user }) {
               </CardHeader>
               <CardContent>
                 {loading ? (
-                  <div className="text-center py-8 text-gray-500">Loading questions...</div>
+                  <div className="text-center py-8 text-slate-500">Loading questions...</div>
                 ) : Object.keys(questionsByCategory).length === 0 ? (
-                  <div className="text-center py-8 text-gray-500">
+                  <div className="text-center py-8 text-slate-500">
                     <Brain className="w-12 h-12 mx-auto mb-3 opacity-50" />
                     <p>No quiz questions yet. Add your first question!</p>
                   </div>
@@ -327,18 +327,18 @@ export default function SkillQuizManager({ user }) {
                   <div className="space-y-2">
                     {Object.entries(questionsByCategory).map(([category, categoryQuestions]) => (
                       <div key={category} className="border rounded-lg overflow-hidden">
-                        <div className="flex items-center justify-between p-4 bg-gray-50 hover:bg-gray-100 transition-colors">
+                        <div className="flex items-center justify-between p-4 bg-cyber-navy/40 hover:bg-cyber-navy/30 transition-colors">
                           <button
                             onClick={() => toggleCategory(category)}
                             className="flex items-center gap-3 flex-1"
                           >
                             {expandedCategories[category] ? (
-                              <ChevronDown className="w-5 h-5 text-gray-500" />
+                              <ChevronDown className="w-5 h-5 text-slate-500" />
                             ) : (
-                              <ChevronRight className="w-5 h-5 text-gray-500" />
+                              <ChevronRight className="w-5 h-5 text-slate-500" />
                             )}
                             <span className="font-medium">{category}</span>
-                            <span className="text-sm text-gray-500">
+                            <span className="text-sm text-slate-500">
                               ({categoryQuestions.length} questions)
                             </span>
                           </button>
@@ -364,7 +364,7 @@ export default function SkillQuizManager({ user }) {
                                   <p className="font-medium text-sm mb-1">
                                     Q{idx + 1}: {q.question_text}
                                   </p>
-                                  <div className="grid grid-cols-2 gap-2 text-xs text-gray-600 mt-2">
+                                  <div className="grid grid-cols-2 gap-2 text-xs text-slate-400 mt-2">
                                     <span className={q.correct_answer === "A" ? "text-green-600 font-medium" : ""}>
                                       A: {q.choice_a}
                                     </span>
@@ -501,17 +501,17 @@ export default function SkillQuizManager({ user }) {
                     {quizResults.attempts && quizResults.attempts.length > 0 ? (
                       <div className="border rounded-lg overflow-hidden">
                         <table className="w-full">
-                          <thead className="bg-gray-50">
+                          <thead className="bg-cyber-navy/40">
                             <tr>
-                              <th className="px-4 py-3 text-left text-sm font-medium text-gray-700">Student</th>
-                              <th className="px-4 py-3 text-center text-sm font-medium text-gray-700">Score</th>
-                              <th className="px-4 py-3 text-center text-sm font-medium text-gray-700">Correct</th>
-                              <th className="px-4 py-3 text-center text-sm font-medium text-gray-700">Date</th>
+                              <th className="px-4 py-3 text-left text-sm font-medium text-slate-300">Student</th>
+                              <th className="px-4 py-3 text-center text-sm font-medium text-slate-300">Score</th>
+                              <th className="px-4 py-3 text-center text-sm font-medium text-slate-300">Correct</th>
+                              <th className="px-4 py-3 text-center text-sm font-medium text-slate-300">Date</th>
                             </tr>
                           </thead>
                           <tbody className="divide-y">
                             {quizResults.attempts.map((attempt) => (
-                              <tr key={attempt.id} className="hover:bg-gray-50">
+                              <tr key={attempt.id} className="hover:bg-cyber-navy/40">
                                 <td className="px-4 py-3">{attempt.student_name}</td>
                                 <td className="px-4 py-3 text-center">
                                   <span className={`font-medium ${
@@ -521,10 +521,10 @@ export default function SkillQuizManager({ user }) {
                                     {attempt.score.toFixed(1)}%
                                   </span>
                                 </td>
-                                <td className="px-4 py-3 text-center text-gray-600">
+                                <td className="px-4 py-3 text-center text-slate-400">
                                   {attempt.correct_count} / {attempt.total_questions}
                                 </td>
-                                <td className="px-4 py-3 text-center text-gray-500 text-sm">
+                                <td className="px-4 py-3 text-center text-slate-500 text-sm">
                                   {new Date(attempt.submitted_at).toLocaleDateString()}
                                 </td>
                               </tr>
@@ -533,7 +533,7 @@ export default function SkillQuizManager({ user }) {
                         </table>
                       </div>
                     ) : (
-                      <div className="text-center py-8 text-gray-500">
+                      <div className="text-center py-8 text-slate-500">
                         No quiz attempts for this skill yet.
                       </div>
                     )}

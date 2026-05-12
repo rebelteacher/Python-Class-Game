@@ -1065,7 +1065,7 @@ export default function TurtleBlocks({ user }) {
             
             <div className="flex items-center gap-4">
               {/* Show Code Toggle */}
-              <div className="flex items-center gap-2 bg-white rounded-lg px-3 py-2 shadow-sm border">
+              <div className="flex items-center gap-2 bg-cyber-navy/60 rounded-lg px-3 py-2 shadow-sm border">
                 <Blocks className="w-4 h-4 text-purple-600" />
                 <Switch
                   id="show-code"
@@ -1084,7 +1084,7 @@ export default function TurtleBlocks({ user }) {
                   variant="outline"
                   size="sm"
                   onClick={handleClearBlocks}
-                  className="bg-white"
+                  className="bg-cyber-navy/60"
                 >
                   <RotateCcw className="w-4 h-4 mr-1" />
                   Clear
@@ -1093,7 +1093,7 @@ export default function TurtleBlocks({ user }) {
                   variant="outline"
                   size="sm"
                   onClick={handleReset}
-                  className="bg-white"
+                  className="bg-cyber-navy/60"
                 >
                   <RotateCcw className="w-4 h-4" />
                 </Button>
@@ -1122,7 +1122,7 @@ export default function TurtleBlocks({ user }) {
                   <div 
                     className={`h-full bg-gray-900 text-green-400 font-mono p-4 overflow-auto absolute inset-0 ${showCode ? 'block' : 'hidden'}`}
                   >
-                    <div className="flex items-center gap-2 mb-4 text-gray-400">
+                    <div className="flex items-center gap-2 mb-4 text-slate-500">
                       <Code className="w-4 h-4" />
                       <span className="text-sm">Generated Python Code</span>
                     </div>
@@ -1149,7 +1149,7 @@ export default function TurtleBlocks({ user }) {
                   <div className="flex items-center justify-between mb-3">
                     <div className="flex items-center gap-2">
                       <span className="text-xl">🐢</span>
-                      <span className="font-semibold text-gray-700">Turtle Canvas</span>
+                      <span className="font-semibold text-slate-300">Turtle Canvas</span>
                     </div>
                     <Button
                       variant="ghost"
@@ -1161,7 +1161,7 @@ export default function TurtleBlocks({ user }) {
                     </Button>
                   </div>
                   
-                  <div className="flex-1 flex items-center justify-center bg-white rounded-lg border-2 border-gray-200">
+                  <div className="flex-1 flex items-center justify-center bg-cyber-navy/60 rounded-lg border-2 border-cyber-cyan/10">
                     <AnimatedTurtle
                       ref={turtleRef}
                       code={generatedCode}

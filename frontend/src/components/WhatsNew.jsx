@@ -120,13 +120,13 @@ export default function WhatsNew() {
 
           {loading ? (
             <div className="py-20 text-center">
-              <p className="text-gray-600">Loading announcements...</p>
+              <p className="text-slate-400">Loading announcements...</p>
             </div>
           ) : announcements.length === 0 ? (
             <div className="py-20 text-center">
               <Sparkles className="w-16 h-16 text-gray-300 mx-auto mb-4" />
-              <h3 className="text-lg font-semibold text-gray-700 mb-2">No Announcements</h3>
-              <p className="text-gray-500">Check back later for updates!</p>
+              <h3 className="text-lg font-semibold text-slate-300 mb-2">No Announcements</h3>
+              <p className="text-slate-500">Check back later for updates!</p>
             </div>
           ) : (
             <div className="space-y-6 mt-4">
@@ -136,7 +136,7 @@ export default function WhatsNew() {
                   className="border-l-4 border-purple-500 bg-gradient-to-r from-purple-50 to-pink-50 p-5 rounded-r-lg"
                 >
                   <div className="flex items-start justify-between mb-2">
-                    <h3 className="text-xl font-bold text-gray-900">{announcement.title}</h3>
+                    <h3 className="text-xl font-bold text-white">{announcement.title}</h3>
                     {index === 0 && (
                       <span className="px-2 py-1 bg-purple-600 text-white text-xs font-semibold rounded-full">
                         NEW
@@ -144,12 +144,12 @@ export default function WhatsNew() {
                     )}
                   </div>
                   
-                  <div className="flex items-center gap-2 text-sm text-gray-600 mb-3">
+                  <div className="flex items-center gap-2 text-sm text-slate-400 mb-3">
                     <Calendar className="w-4 h-4" />
                     <span>{formatDate(announcement.created_at)}</span>
                   </div>
                   
-                  <div className="text-gray-700 whitespace-pre-wrap leading-relaxed">
+                  <div className="text-slate-300 whitespace-pre-wrap leading-relaxed">
                     {announcement.content}
                   </div>
                 </div>

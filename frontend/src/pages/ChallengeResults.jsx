@@ -52,7 +52,7 @@ function ChallengeResults() {
   if (loading || !challenge || !user) {
     return (
       <div className="min-h-screen bg-cyber-black cyber-grid-bg flex items-center justify-center">
-        <p className="text-gray-600">Loading results...</p>
+        <p className="text-slate-400">Loading results...</p>
       </div>
     );
   }
@@ -71,7 +71,7 @@ function ChallengeResults() {
       <div className="max-w-4xl mx-auto">
         {/* Winner Banner */}
         {bothCompleted && (
-          <Card className={`mb-8 ${isWinner ? 'bg-gradient-to-r from-yellow-50 to-yellow-100 border-yellow-300 border-2' : 'bg-gray-50 border-gray-300 border-2'}`}>
+          <Card className={`mb-8 ${isWinner ? 'bg-gradient-to-r from-yellow-50 to-yellow-100 border-yellow-300 border-2' : 'bg-cyber-navy/40 border-cyber-cyan/15 border-2'}`}>
             <CardContent className="py-8">
               <div className="text-center">
                 {isWinner ? (
@@ -82,9 +82,9 @@ function ChallengeResults() {
                   </>
                 ) : (
                   <>
-                    <Medal className="w-20 h-20 text-gray-400 mx-auto mb-4" />
-                    <h1 className="text-4xl font-bold text-gray-700 mb-2">Defeated</h1>
-                    <p className="text-xl text-gray-600">{opponentName} won this time!</p>
+                    <Medal className="w-20 h-20 text-slate-500 mx-auto mb-4" />
+                    <h1 className="text-4xl font-bold text-slate-300 mb-2">Defeated</h1>
+                    <p className="text-xl text-slate-400">{opponentName} won this time!</p>
                   </>
                 )}
               </div>
@@ -104,12 +104,12 @@ function ChallengeResults() {
             <CardContent>
               <div className="space-y-4">
                 <div className="flex items-center justify-between">
-                  <span className="text-gray-600">Score:</span>
+                  <span className="text-slate-400">Score:</span>
                   <span className="text-3xl font-bold text-green-600">{userScore}%</span>
                 </div>
                 {userTime && (
                   <div className="flex items-center justify-between">
-                    <span className="text-gray-600 flex items-center gap-2">
+                    <span className="text-slate-400 flex items-center gap-2">
                       <Clock className="w-4 h-4" />
                       Time:
                     </span>
@@ -130,16 +130,16 @@ function ChallengeResults() {
             <CardContent>
               <div className="space-y-4">
                 <div className="flex items-center justify-between">
-                  <span className="text-gray-600">Score:</span>
+                  <span className="text-slate-400">Score:</span>
                   {opponentScore !== null ? (
                     <span className="text-3xl font-bold text-blue-600">{opponentScore}%</span>
                   ) : (
-                    <span className="text-lg text-gray-400">Pending...</span>
+                    <span className="text-lg text-slate-500">Pending...</span>
                   )}
                 </div>
                 {opponentTime && (
                   <div className="flex items-center justify-between">
-                    <span className="text-gray-600 flex items-center gap-2">
+                    <span className="text-slate-400 flex items-center gap-2">
                       <Clock className="w-4 h-4" />
                       Time:
                     </span>

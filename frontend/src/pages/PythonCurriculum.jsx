@@ -668,14 +668,14 @@ export default function PythonCurriculum({ user }) {
               variant="ghost"
               size="sm"
               onClick={() => navigate("/teacher/dashboard")}
-              className="text-white hover:bg-white/20"
+              className="text-white hover:bg-cyber-navy/60/20"
             >
               <ArrowLeft className="w-4 h-4 mr-1" />
               Back
             </Button>
           </div>
           <div className="flex items-center gap-4">
-            <div className="w-16 h-16 bg-white/20 rounded-xl flex items-center justify-center">
+            <div className="w-16 h-16 bg-cyber-navy/60/20 rounded-xl flex items-center justify-center">
               <Terminal className="w-8 h-8" />
             </div>
             <div>
@@ -689,50 +689,50 @@ export default function PythonCurriculum({ user }) {
       {/* Quick Actions */}
       <div className="max-w-6xl mx-auto px-6 -mt-6">
         <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-          <Card className="bg-white shadow-lg hover:shadow-xl transition-shadow cursor-pointer" onClick={() => navigate("/library?type=code")}>
+          <Card className="bg-cyber-navy/60 backdrop-blur-sm shadow-lg hover:shadow-xl transition-shadow cursor-pointer" onClick={() => navigate("/library?type=code")}>
             <CardContent className="p-4 flex items-center gap-3">
               <div className="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center">
                 <Library className="w-5 h-5 text-blue-600" />
               </div>
               <div>
                 <p className="font-medium text-sm">Problem Library</p>
-                <p className="text-xs text-gray-500">Browse & add problems</p>
+                <p className="text-xs text-slate-500">Browse & add problems</p>
               </div>
             </CardContent>
           </Card>
           
-          <Card className="bg-white shadow-lg hover:shadow-xl transition-shadow cursor-pointer border-2 border-blue-200" onClick={() => navigate("/python/teach")}>
+          <Card className="bg-cyber-navy/60 backdrop-blur-sm shadow-lg hover:shadow-xl transition-shadow cursor-pointer border-2 border-blue-200" onClick={() => navigate("/python/teach")}>
             <CardContent className="p-4 flex items-center gap-3">
               <div className="w-10 h-10 bg-blue-500 rounded-lg flex items-center justify-center">
                 <Play className="w-5 h-5 text-white" />
               </div>
               <div>
                 <p className="font-medium text-sm text-blue-700">Teaching Mode</p>
-                <p className="text-xs text-gray-500">Live demo environment</p>
+                <p className="text-xs text-slate-500">Live demo environment</p>
               </div>
             </CardContent>
           </Card>
 
-          <Card className="bg-white shadow-lg hover:shadow-xl transition-shadow cursor-pointer" onClick={() => navigate("/skill-quiz-manager")}>
+          <Card className="bg-cyber-navy/60 backdrop-blur-sm shadow-lg hover:shadow-xl transition-shadow cursor-pointer" onClick={() => navigate("/skill-quiz-manager")}>
             <CardContent className="p-4 flex items-center gap-3">
               <div className="w-10 h-10 bg-purple-100 rounded-lg flex items-center justify-center">
                 <GraduationCap className="w-5 h-5 text-purple-600" />
               </div>
               <div>
                 <p className="font-medium text-sm">Skill Quizzes</p>
-                <p className="text-xs text-gray-500">Manage quiz questions</p>
+                <p className="text-xs text-slate-500">Manage quiz questions</p>
               </div>
             </CardContent>
           </Card>
 
-          <Card className="bg-white shadow-lg hover:shadow-xl transition-shadow cursor-pointer" onClick={() => navigate("/teacher-reports")}>
+          <Card className="bg-cyber-navy/60 backdrop-blur-sm shadow-lg hover:shadow-xl transition-shadow cursor-pointer" onClick={() => navigate("/teacher-reports")}>
             <CardContent className="p-4 flex items-center gap-3">
               <div className="w-10 h-10 bg-green-100 rounded-lg flex items-center justify-center">
                 <Users className="w-5 h-5 text-green-600" />
               </div>
               <div>
                 <p className="font-medium text-sm">Student Progress</p>
-                <p className="text-xs text-gray-500">Track performance</p>
+                <p className="text-xs text-slate-500">Track performance</p>
               </div>
             </CardContent>
           </Card>
@@ -742,7 +742,7 @@ export default function PythonCurriculum({ user }) {
       {/* Curriculum Units */}
       <div className="max-w-6xl mx-auto px-6 py-8">
         <div className="flex items-center justify-between mb-6">
-          <h2 className="text-xl font-bold text-gray-800">Curriculum Overview</h2>
+          <h2 className="text-xl font-bold text-slate-200">Curriculum Overview</h2>
           <Button 
             onClick={() => setShowAddChapter(true)}
             variant="outline"
@@ -788,7 +788,7 @@ export default function PythonCurriculum({ user }) {
                     {unit.lessons.map((lesson, lessonIndex) => (
                       <div 
                         key={lesson.id} 
-                        className="p-4 hover:bg-gray-50 transition-colors"
+                        className="p-4 hover:bg-cyber-navy/40 transition-colors"
                       >
                         <div className="flex items-center justify-between">
                           <div className="flex items-center gap-4">
@@ -796,8 +796,8 @@ export default function PythonCurriculum({ user }) {
                               {lessonIndex + 1}
                             </div>
                             <div>
-                              <h4 className="font-medium text-gray-800">{lesson.title}</h4>
-                              <div className="flex items-center gap-3 mt-1 text-sm text-gray-500">
+                              <h4 className="font-medium text-slate-200">{lesson.title}</h4>
+                              <div className="flex items-center gap-3 mt-1 text-sm text-slate-500">
                                 <span className="flex items-center gap-1">
                                   {getIconForType(lesson.type)}
                                   {lesson.type}
@@ -806,7 +806,7 @@ export default function PythonCurriculum({ user }) {
                                   <Clock className="w-3 h-3" />
                                   {lesson.duration}
                                 </span>
-                                <span className="text-xs px-2 py-0.5 bg-gray-100 rounded">
+                                <span className="text-xs px-2 py-0.5 bg-cyber-navy/30 rounded">
                                   DOK {lesson.dokLevel}
                                 </span>
                               </div>
@@ -829,10 +829,10 @@ export default function PythonCurriculum({ user }) {
                         
                         {/* Learning Objectives */}
                         <div className="mt-3 pl-12">
-                          <p className="text-xs text-gray-500 mb-1">Learning Objectives:</p>
+                          <p className="text-xs text-slate-500 mb-1">Learning Objectives:</p>
                           <ul className="grid grid-cols-1 md:grid-cols-3 gap-1">
                             {lesson.objectives.map((obj, i) => (
-                              <li key={i} className="text-xs text-gray-600 flex items-center gap-1">
+                              <li key={i} className="text-xs text-slate-400 flex items-center gap-1">
                                 <CheckCircle className="w-3 h-3 text-green-500" />
                                 {obj}
                               </li>
@@ -843,7 +843,7 @@ export default function PythonCurriculum({ user }) {
                     ))}
                     
                     {unit.lessons.length === 0 && (
-                      <div className="p-8 text-center text-gray-500">
+                      <div className="p-8 text-center text-slate-500">
                         <BookOpen className="w-8 h-8 mx-auto mb-2 opacity-50" />
                         <p>No lessons added yet</p>
                         <p className="text-sm">Add lessons to this chapter</p>

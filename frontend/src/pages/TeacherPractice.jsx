@@ -109,24 +109,24 @@ export default function TeacherPractice({ user }) {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <div className="text-gray-500">Loading practice environment...</div>
+      <div className="min-h-screen bg-cyber-navy/40 flex items-center justify-center">
+        <div className="text-slate-500">Loading practice environment...</div>
       </div>
     );
   }
 
   if (!problem) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <div className="text-gray-500">Problem not found</div>
+      <div className="min-h-screen bg-cyber-navy/40 flex items-center justify-center">
+        <div className="text-slate-500">Problem not found</div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-cyber-navy/40">
       {/* Header */}
-      <nav className="bg-white border-b sticky top-0 z-10">
+      <nav className="bg-cyber-navy/60 border-b sticky top-0 z-10">
         <div className="container mx-auto px-6 py-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center space-x-4">
@@ -140,11 +140,11 @@ export default function TeacherPractice({ user }) {
               </Button>
               <div className="flex items-center space-x-2">
                 <Code2 className="w-7 h-7 text-green-600" />
-                <span className="text-xl font-bold text-gray-900">Practice: {problem.title}</span>
+                <span className="text-xl font-bold text-white">Practice: {problem.title}</span>
               </div>
             </div>
             <div className="flex items-center gap-2">
-              <span className="text-sm text-gray-600 bg-green-100 px-3 py-1 rounded-full">Teacher Practice Mode</span>
+              <span className="text-sm text-slate-400 bg-green-100 px-3 py-1 rounded-full">Teacher Practice Mode</span>
             </div>
           </div>
         </div>
@@ -163,7 +163,7 @@ export default function TeacherPractice({ user }) {
                   </CardDescription>
                 </CardHeader>
                 <CardContent>
-                  <p className="text-gray-700 whitespace-pre-wrap">{problem.description}</p>
+                  <p className="text-slate-300 whitespace-pre-wrap">{problem.description}</p>
                 </CardContent>
               </Card>
 
@@ -173,7 +173,7 @@ export default function TeacherPractice({ user }) {
                     <CardTitle className="text-lg">Expected Output</CardTitle>
                   </CardHeader>
                   <CardContent>
-                    <pre className="p-3 bg-white rounded border border-green-300 text-gray-800 text-sm font-mono whitespace-pre-wrap">
+                    <pre className="p-3 bg-cyber-navy/60 rounded border border-green-300 text-slate-200 text-sm font-mono whitespace-pre-wrap">
                       {problem.expected_output}
                     </pre>
                   </CardContent>
@@ -212,7 +212,7 @@ export default function TeacherPractice({ user }) {
             </div>
           </Panel>
 
-          <PanelResizeHandle className="w-2 bg-gray-200 hover:bg-indigo-400 transition-colors" />
+          <PanelResizeHandle className="w-2 bg-slate-800 hover:bg-indigo-400 transition-colors" />
 
           {/* Right Side: Code Editor & Output */}
           <Panel defaultSize={70} minSize={50}>
@@ -265,7 +265,7 @@ export default function TeacherPractice({ user }) {
                 </Card>
               </Panel>
 
-              <PanelResizeHandle className="h-2 bg-gray-200 hover:bg-indigo-400 transition-colors" />
+              <PanelResizeHandle className="h-2 bg-slate-800 hover:bg-indigo-400 transition-colors" />
 
               {/* Output Section - Full Space */}
               <Panel defaultSize={40} minSize={20}>

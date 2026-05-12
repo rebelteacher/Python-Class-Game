@@ -97,7 +97,7 @@ function PlatformAdminDashboard({ user }) {
   if (loading) {
     return (
       <div className="min-h-screen bg-cyber-black cyber-grid-bg flex items-center justify-center">
-        <p className="text-gray-600">Loading pending requests...</p>
+        <p className="text-slate-400">Loading pending requests...</p>
       </div>
     );
   }
@@ -111,18 +111,18 @@ function PlatformAdminDashboard({ user }) {
             <div className="flex items-center space-x-2">
               <Shield className="w-7 h-7 text-white" />
               <span className="text-xl font-bold text-white">ByteBattles Arena</span>
-              <span className="ml-4 px-3 py-1 bg-white/20 text-white text-sm font-medium rounded-full border border-white/30">
+              <span className="ml-4 px-3 py-1 bg-cyber-navy/60/20 text-white text-sm font-medium rounded-full border border-white/30">
                 Platform Admin
               </span>
             </div>
             <span className="text-lg font-medium text-white">{user?.name}</span>
           </div>
           <div className="flex items-center justify-between">
-            <Button onClick={handleBackToAdmin} variant="outline" size="sm" className="gap-2 border-white/30 text-white hover:bg-white/20 bg-white/10">
+            <Button onClick={handleBackToAdmin} variant="outline" size="sm" className="gap-2 border-white/30 text-white hover:bg-cyber-navy/60/20 bg-cyber-navy/60/10">
               <ArrowLeft className="w-4 h-4" />
               Back to Admin Dashboard
             </Button>
-            <Button onClick={handleLogout} variant="outline" size="sm" className="gap-2 border-white/30 text-white hover:bg-white/20 bg-white/10">
+            <Button onClick={handleLogout} variant="outline" size="sm" className="gap-2 border-white/30 text-white hover:bg-cyber-navy/60/20 bg-cyber-navy/60/10">
               <LogOut className="w-4 h-4" />
               Logout
             </Button>
@@ -136,7 +136,7 @@ function PlatformAdminDashboard({ user }) {
           <h1 className="text-4xl font-bold bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent mb-2">
             Admin Approval Center
           </h1>
-          <p className="text-gray-600">Review and approve pending school and district administrator requests</p>
+          <p className="text-slate-400">Review and approve pending school and district administrator requests</p>
         </div>
 
         {/* Summary Stats */}
@@ -145,7 +145,7 @@ function PlatformAdminDashboard({ user }) {
             <CardContent className="pt-6">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm text-gray-600">Pending School Admins</p>
+                  <p className="text-sm text-slate-400">Pending School Admins</p>
                   <p className="text-3xl font-bold text-purple-600">{pendingSchoolAdmins.length}</p>
                 </div>
                 <Building className="w-12 h-12 text-purple-400" />
@@ -157,7 +157,7 @@ function PlatformAdminDashboard({ user }) {
             <CardContent className="pt-6">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm text-gray-600">Pending District Admins</p>
+                  <p className="text-sm text-slate-400">Pending District Admins</p>
                   <p className="text-3xl font-bold text-pink-600">{pendingDistrictAdmins.length}</p>
                 </div>
                 <Users className="w-12 h-12 text-pink-400" />
@@ -178,7 +178,7 @@ function PlatformAdminDashboard({ user }) {
             <CardContent>
               {pendingSchoolAdmins.length === 0 ? (
                 <div className="text-center py-8">
-                  <p className="text-gray-500">No pending school admin requests</p>
+                  <p className="text-slate-500">No pending school admin requests</p>
                 </div>
               ) : (
                 <div className="space-y-4">
@@ -186,8 +186,8 @@ function PlatformAdminDashboard({ user }) {
                     <div key={admin.id} className="border rounded-lg p-5 hover:bg-purple-50 transition-colors">
                       <div className="flex items-start justify-between mb-3">
                         <div className="flex-1">
-                          <h3 className="font-semibold text-lg text-gray-900">{admin.name}</h3>
-                          <p className="text-sm text-gray-600 mb-1">{admin.email}</p>
+                          <h3 className="font-semibold text-lg text-white">{admin.name}</h3>
+                          <p className="text-sm text-slate-400 mb-1">{admin.email}</p>
                           <div className="flex flex-wrap gap-2 mt-2">
                             <Badge variant="outline" className="bg-blue-50">
                               {admin.job_title}
@@ -241,7 +241,7 @@ function PlatformAdminDashboard({ user }) {
             <CardContent>
               {pendingDistrictAdmins.length === 0 ? (
                 <div className="text-center py-8">
-                  <p className="text-gray-500">No pending district admin requests</p>
+                  <p className="text-slate-500">No pending district admin requests</p>
                 </div>
               ) : (
                 <div className="space-y-4">
@@ -249,8 +249,8 @@ function PlatformAdminDashboard({ user }) {
                     <div key={admin.id} className="border rounded-lg p-5 hover:bg-pink-50 transition-colors">
                       <div className="flex items-start justify-between mb-3">
                         <div className="flex-1">
-                          <h3 className="font-semibold text-lg text-gray-900">{admin.name}</h3>
-                          <p className="text-sm text-gray-600 mb-1">{admin.email}</p>
+                          <h3 className="font-semibold text-lg text-white">{admin.name}</h3>
+                          <p className="text-sm text-slate-400 mb-1">{admin.email}</p>
                           <div className="flex flex-wrap gap-2 mt-2">
                             <Badge variant="outline" className="bg-blue-50">
                               {admin.job_title}

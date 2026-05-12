@@ -126,7 +126,7 @@ export default function AdminAnnouncements({ user }) {
             </Button>
             <div className="flex items-center space-x-2">
               <Sparkles className="w-7 h-7 text-purple-600" />
-              <span className="text-xl font-bold text-gray-900">Manage Announcements</span>
+              <span className="text-xl font-bold text-white">Manage Announcements</span>
             </div>
           </div>
 
@@ -149,14 +149,14 @@ export default function AdminAnnouncements({ user }) {
 
         {loading ? (
           <div className="text-center py-20">
-            <p className="text-gray-600">Loading announcements...</p>
+            <p className="text-slate-400">Loading announcements...</p>
           </div>
         ) : announcements.length === 0 ? (
           <Card>
             <CardContent className="py-20 text-center">
-              <Sparkles className="w-16 h-16 text-gray-400 mx-auto mb-4" />
-              <h3 className="text-xl font-semibold text-gray-700 mb-2">No Announcements Yet</h3>
-              <p className="text-gray-500 mb-4">Create your first announcement to notify teachers!</p>
+              <Sparkles className="w-16 h-16 text-slate-500 mx-auto mb-4" />
+              <h3 className="text-xl font-semibold text-slate-300 mb-2">No Announcements Yet</h3>
+              <p className="text-slate-500 mb-4">Create your first announcement to notify teachers!</p>
               <Button
                 onClick={() => setCreateDialogOpen(true)}
                 className="bg-purple-600 hover:bg-purple-700 gap-2"
@@ -175,11 +175,11 @@ export default function AdminAnnouncements({ user }) {
                     <div className="flex-1">
                       <div className="flex items-center gap-3 mb-2">
                         <CardTitle className="text-xl">{announcement.title}</CardTitle>
-                        <span className={`px-2 py-1 rounded text-xs font-semibold ${announcement.is_active ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800'}`}>
+                        <span className={`px-2 py-1 rounded text-xs font-semibold ${announcement.is_active ? 'bg-green-100 text-green-800' : 'bg-cyber-navy/30 text-slate-200'}`}>
                           {announcement.is_active ? "Active" : "Hidden"}
                         </span>
                       </div>
-                      <div className="flex items-center gap-2 text-sm text-gray-600">
+                      <div className="flex items-center gap-2 text-sm text-slate-400">
                         <Calendar className="w-4 h-4" />
                         <span>{formatDate(announcement.created_at)}</span>
                       </div>
@@ -188,8 +188,8 @@ export default function AdminAnnouncements({ user }) {
                 </CardHeader>
                 <CardContent>
                   <div className="space-y-4">
-                    <div className="bg-gray-50 p-4 rounded-lg">
-                      <p className="text-gray-800 whitespace-pre-wrap">{announcement.content}</p>
+                    <div className="bg-cyber-navy/40 p-4 rounded-lg">
+                      <p className="text-slate-200 whitespace-pre-wrap">{announcement.content}</p>
                     </div>
 
                     <div className="flex gap-2">

@@ -28,7 +28,7 @@ export default function Leaderboard({ classroomId, currentUserId }) {
   };
 
   if (loading) {
-    return <div className="text-center py-10 text-gray-600">Loading leaderboard...</div>;
+    return <div className="text-center py-10 text-slate-400">Loading leaderboard...</div>;
   }
 
   return (
@@ -48,7 +48,7 @@ export default function Leaderboard({ classroomId, currentUserId }) {
               className={`flex items-center gap-4 p-4 rounded-lg ${
                 student.id === currentUserId
                   ? "bg-indigo-100 border-2 border-indigo-400"
-                  : "bg-white"
+                  : "bg-cyber-navy/80"
               } shadow-sm hover:shadow-md transition-shadow`}
             >
               <div className="flex items-center justify-center w-12 h-12 rounded-full font-bold text-lg"
@@ -66,7 +66,7 @@ export default function Leaderboard({ classroomId, currentUserId }) {
                   </span>
                   <span className="text-xl">{student.rank_icon}</span>
                 </div>
-                <div className="flex items-center gap-4 text-sm text-gray-600">
+                <div className="flex items-center gap-4 text-sm text-slate-400">
                   <span className="font-medium" style={{ color: student.rank_color }}>
                     {student.rank}
                   </span>
@@ -85,7 +85,7 @@ export default function Leaderboard({ classroomId, currentUserId }) {
                 <div className="font-bold text-xl" style={{ color: student.rank_color }}>
                   {student.xp || 0} XP
                 </div>
-                <div className="text-sm text-gray-600">{student.coins || 0} 🪙</div>
+                <div className="text-sm text-slate-400">{student.coins || 0} 🪙</div>
               </div>
             </div>
           ))}

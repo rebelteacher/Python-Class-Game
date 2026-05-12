@@ -253,14 +253,14 @@ export default function NotesLibrary({ user }) {
               Back to Dashboard
             </Button>
             <div className="flex items-center space-x-2">
-              <FileText className="w-7 h-7 text-indigo-600" />
-              <span className="text-xl font-bold text-gray-900">Notes Library</span>
+              <FileText className="w-7 h-7 text-cyber-cyan" />
+              <span className="text-xl font-bold text-white">Notes Library</span>
             </div>
           </div>
           {user.role === "teacher" && (
             <Dialog open={uploadDialogOpen} onOpenChange={setUploadDialogOpen}>
               <DialogTrigger asChild>
-                <Button className="bg-indigo-600 hover:bg-indigo-700">
+                <Button className="bg-cyber-cyan text-cyber-black hover:shadow-[0_0_15px_rgba(0,240,255,0.5)] font-bold">
                   <Upload className="w-4 h-4 mr-2" />
                   Upload PDF
                 </Button>
@@ -331,7 +331,7 @@ export default function NotesLibrary({ user }) {
                         <SelectItem value="teacher_resource">Teacher Resource (Answer Keys, Solutions)</SelectItem>
                       </SelectContent>
                     </Select>
-                    <p className="text-xs text-gray-500 mt-1">
+                    <p className="text-xs text-slate-500 mt-1">
                       Student resources can be downloaded. Teacher resources are view-only.
                     </p>
                   </div>
@@ -346,7 +346,7 @@ export default function NotesLibrary({ user }) {
                       className="mt-1"
                     />
                     {newNote.file && (
-                      <p className="text-sm text-gray-600 mt-1">
+                      <p className="text-sm text-slate-400 mt-1">
                         Selected: {newNote.file.name} ({(newNote.file.size / 1024 / 1024).toFixed(2)} MB)
                       </p>
                     )}
@@ -363,11 +363,11 @@ export default function NotesLibrary({ user }) {
                         <Share2 className="w-4 h-4" />
                         <span className="font-medium">Share with Community</span>
                       </div>
-                      <p className="text-xs text-gray-600">Other teachers can view and use this resource</p>
+                      <p className="text-xs text-slate-400">Other teachers can view and use this resource</p>
                     </Label>
                   </div>
 
-                  <Button type="submit" className="w-full bg-indigo-600 hover:bg-indigo-700" disabled={uploading}>
+                  <Button type="submit" className="w-full bg-cyber-cyan text-cyber-black hover:shadow-[0_0_15px_rgba(0,240,255,0.5)] font-bold" disabled={uploading}>
                     {uploading ? "Uploading..." : "Upload Note"}
                   </Button>
                 </form>
@@ -392,8 +392,8 @@ export default function NotesLibrary({ user }) {
         {/* Student View Header */}
         {user.role === "student" && (
           <div className="mb-6">
-            <h2 className="text-2xl font-bold text-gray-900">Study Resources</h2>
-            <p className="text-gray-600">Access study guides and reference materials from your teachers</p>
+            <h2 className="text-2xl font-bold text-white">Study Resources</h2>
+            <p className="text-slate-400">Access study guides and reference materials from your teachers</p>
           </div>
         )}
 
@@ -402,7 +402,7 @@ export default function NotesLibrary({ user }) {
           <div className="flex gap-4">
             <div className="flex-1">
               <div className="relative">
-                <Search className="absolute left-3 top-3 w-5 h-5 text-gray-400" />
+                <Search className="absolute left-3 top-3 w-5 h-5 text-slate-500" />
                 <Input
                   placeholder="Search notes..."
                   value={searchTerm}
@@ -437,19 +437,19 @@ export default function NotesLibrary({ user }) {
             </Select>
           </div>
 
-          <div className="text-sm text-gray-600">
+          <div className="text-sm text-slate-400">
             Showing {filteredNotes.length} of {notes.length} notes
           </div>
         </div>
 
         {/* Notes Grid */}
         {loading ? (
-          <div className="text-center py-20 text-gray-600">Loading notes...</div>
+          <div className="text-center py-20 text-slate-400">Loading notes...</div>
         ) : filteredNotes.length === 0 ? (
           <div className="text-center py-20">
-            <FileText className="w-16 h-16 text-gray-400 mx-auto mb-4" />
-            <h3 className="text-xl font-semibold text-gray-700 mb-2">No notes found</h3>
-            <p className="text-gray-500">Upload your first PDF note to get started</p>
+            <FileText className="w-16 h-16 text-slate-500 mx-auto mb-4" />
+            <h3 className="text-xl font-semibold text-slate-300 mb-2">No notes found</h3>
+            <p className="text-slate-500">Upload your first PDF note to get started</p>
           </div>
         ) : (
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -470,7 +470,7 @@ export default function NotesLibrary({ user }) {
                         </span>
                       )}
                     </div>
-                    <div className="text-xs text-gray-500">
+                    <div className="text-xs text-slate-500">
                       {(note.file_size / 1024).toFixed(0)} KB
                     </div>
                   </div>
@@ -485,7 +485,7 @@ export default function NotesLibrary({ user }) {
                       </span>
                     </div>
                   )}
-                  <div className="text-xs text-gray-500 pt-2">
+                  <div className="text-xs text-slate-500 pt-2">
                     By {note.creator_name}
                   </div>
                   <div className="flex gap-2 mt-3">
@@ -522,7 +522,7 @@ export default function NotesLibrary({ user }) {
                           toast.error("Failed to open PDF. Try downloading instead.");
                         }
                       }}
-                      className="flex-1 bg-indigo-600 hover:bg-indigo-700"
+                      className="flex-1 bg-cyber-cyan text-cyber-black hover:shadow-[0_0_15px_rgba(0,240,255,0.5)] font-bold"
                       size="sm"
                     >
                       <Eye className="w-4 h-4 mr-1" />
@@ -568,7 +568,7 @@ export default function NotesLibrary({ user }) {
           }
         }}>
           <DialogContent className="max-w-[95vw] max-h-[95vh] w-full h-full p-0 gap-0">
-            <div className="flex items-center justify-between h-[40px] px-4 flex-shrink-0 bg-white border-b border-gray-200">
+            <div className="flex items-center justify-between h-[40px] px-4 flex-shrink-0 bg-cyber-navy/60 border-b border-cyber-cyan/10">
               <DialogTitle className="text-base font-semibold">{selectedNote.title}</DialogTitle>
               <div className="flex gap-2 items-center mr-20">
                 <Button
@@ -597,17 +597,17 @@ export default function NotesLibrary({ user }) {
                 <embed
                   src={selectedNote.pdfBlobUrl}
                   type="application/pdf"
-                  className="w-full h-full bg-gray-100"
+                  className="w-full h-full bg-cyber-navy/30"
                 />
               ) : selectedNote.file_data ? (
                 <object
                   data={`data:application/pdf;base64,${selectedNote.file_data}`}
                   type="application/pdf"
-                  className="w-full h-full bg-gray-100"
+                  className="w-full h-full bg-cyber-navy/30"
                 >
                     <div className="p-8 text-center space-y-4 flex flex-col items-center justify-center h-full">
-                      <FileText className="w-16 h-16 text-gray-400" />
-                      <p className="text-gray-600">
+                      <FileText className="w-16 h-16 text-slate-500" />
+                      <p className="text-slate-400">
                         Unable to display PDF in browser. Please download to view.
                       </p>
                       <Button
@@ -617,7 +617,7 @@ export default function NotesLibrary({ user }) {
                           link.download = `${selectedNote.title}.pdf`;
                           link.click();
                         }}
-                        className="bg-indigo-600 hover:bg-indigo-700"
+                        className="bg-cyber-cyan text-cyber-black hover:shadow-[0_0_15px_rgba(0,240,255,0.5)] font-bold"
                       >
                         <Download className="w-4 h-4 mr-2" />
                         Download PDF
@@ -625,7 +625,7 @@ export default function NotesLibrary({ user }) {
                     </div>
                 </object>
               ) : (
-                <div className="p-8 text-center text-gray-500 flex items-center justify-center h-full bg-gray-100">
+                <div className="p-8 text-center text-slate-500 flex items-center justify-center h-full bg-cyber-navy/30">
                   No PDF data available
                 </div>
               )}

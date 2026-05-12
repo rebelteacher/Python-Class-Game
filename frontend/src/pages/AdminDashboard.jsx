@@ -120,14 +120,14 @@ export default function AdminDashboard({ user }) {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <div className="text-gray-500">Loading...</div>
+      <div className="min-h-screen bg-cyber-navy/40 flex items-center justify-center">
+        <div className="text-slate-500">Loading...</div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-cyber-navy/40">
       {/* Header */}
       <nav className="bg-cyber-navy/80 backdrop-blur-xl border-b border-cyber-cyan/20">
         <div className="container mx-auto px-6 py-4 flex justify-between items-center">
@@ -136,9 +136,9 @@ export default function AdminDashboard({ user }) {
               <ArrowLeft className="w-4 h-4 mr-2" />
               Back to Dashboard
             </Button>
-            <h1 className="text-xl font-bold text-gray-900">Admin Dashboard</h1>
+            <h1 className="text-xl font-bold text-white">Admin Dashboard</h1>
           </div>
-          <div className="text-sm text-gray-600">
+          <div className="text-sm text-slate-400">
             {user?.name} (Admin)
           </div>
         </div>
@@ -210,7 +210,7 @@ export default function AdminDashboard({ user }) {
 
         {/* Teacher Analytics & Announcements */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
-          <Card className="border-2 border-purple-200 bg-gradient-to-br from-purple-50 to-pink-50">
+          <Card className="border-2 border-purple-200 bg-cyber-navy/50">
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <Activity className="w-5 h-5 text-purple-600" />
@@ -222,7 +222,7 @@ export default function AdminDashboard({ user }) {
             </CardHeader>
             <CardContent>
               <div className="space-y-3">
-                <p className="text-sm text-gray-700">
+                <p className="text-sm text-slate-300">
                   Track teacher engagement, login frequency, and get email lists for communication.
                 </p>
                 <Button
@@ -239,7 +239,7 @@ export default function AdminDashboard({ user }) {
           <Card className="border-2 border-indigo-200 bg-gradient-to-br from-indigo-50 to-purple-50">
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
-                <MessageCircle className="w-5 h-5 text-indigo-600" />
+                <MessageCircle className="w-5 h-5 text-cyber-cyan" />
                 Announcements
               </CardTitle>
               <CardDescription>
@@ -248,12 +248,12 @@ export default function AdminDashboard({ user }) {
             </CardHeader>
             <CardContent>
               <div className="space-y-3">
-                <p className="text-sm text-gray-700">
+                <p className="text-sm text-slate-300">
                   Create announcements that appear in the "What's New" button on teacher dashboards.
                 </p>
                 <Button
                   onClick={() => navigate("/admin/announcements")}
-                  className="bg-indigo-600 hover:bg-indigo-700 gap-2 w-full"
+                  className="bg-cyber-cyan text-cyber-black hover:shadow-[0_0_15px_rgba(0,240,255,0.5)] font-bold gap-2 w-full"
                 >
                   <MessageCircle className="w-4 h-4" />
                   Manage Announcements
@@ -298,7 +298,7 @@ export default function AdminDashboard({ user }) {
         <Card className="mb-8 border-2 border-indigo-200 bg-gradient-to-br from-indigo-50 to-blue-50">
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
-              <MessageCircle className="w-5 h-5 text-indigo-600" />
+              <MessageCircle className="w-5 h-5 text-cyber-cyan" />
               Teacher Support & Feedback
             </CardTitle>
             <CardDescription>
@@ -307,14 +307,14 @@ export default function AdminDashboard({ user }) {
           </CardHeader>
           <CardContent>
             <div className="space-y-4">
-              <div className="p-4 bg-white border border-indigo-200 rounded-lg">
-                <p className="text-sm text-gray-700 mb-3">
+              <div className="p-4 bg-cyber-navy/60 border border-indigo-200 rounded-lg">
+                <p className="text-sm text-slate-300 mb-3">
                   ✅ <strong>Feedback System Active!</strong> Teachers and users can now contact you through the built-in messaging system.
                 </p>
                 <div className="flex gap-3">
                   <Button
                     onClick={() => navigate("/admin/messages")}
-                    className="bg-indigo-600 hover:bg-indigo-700 gap-2"
+                    className="bg-cyber-cyan text-cyber-black hover:shadow-[0_0_15px_rgba(0,240,255,0.5)] font-bold gap-2"
                   >
                     <MessageCircle className="w-4 h-4" />
                     View All Messages
@@ -353,7 +353,7 @@ export default function AdminDashboard({ user }) {
               <Button
                 onClick={generateInviteCode}
                 disabled={generatingCode}
-                className="bg-indigo-600 hover:bg-indigo-700"
+                className="bg-cyber-cyan text-cyber-black hover:shadow-[0_0_15px_rgba(0,240,255,0.5)] font-bold"
               >
                 {generatingCode ? "Generating..." : "Generate Code"}
               </Button>
@@ -362,13 +362,13 @@ export default function AdminDashboard({ user }) {
           <CardContent>
             <div className="space-y-2">
               {inviteCodes.length === 0 ? (
-                <p className="text-gray-500 text-center py-8">
+                <p className="text-slate-500 text-center py-8">
                   No invite codes generated yet
                 </p>
               ) : (
                 <div className="max-h-96 overflow-y-auto">
                   <table className="w-full">
-                    <thead className="bg-gray-50">
+                    <thead className="bg-cyber-navy/40">
                       <tr>
                         <th className="text-left p-3 text-sm font-semibold">Code</th>
                         <th className="text-left p-3 text-sm font-semibold">Signup Link</th>
@@ -382,7 +382,7 @@ export default function AdminDashboard({ user }) {
                       {inviteCodes.map((code) => {
                         const signupLink = `${window.location.origin}/teacher-signup?code=${code.code}`;
                         return (
-                          <tr key={code.id} className="border-t hover:bg-gray-50">
+                          <tr key={code.id} className="border-t hover:bg-cyber-navy/40">
                             <td className="p-3">
                               <span className="font-mono font-semibold">{code.code}</span>
                             </td>
@@ -413,7 +413,7 @@ export default function AdminDashboard({ user }) {
                                   Available
                                 </span>
                               ) : (
-                                <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-800">
+                                <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-cyber-navy/30 text-slate-200">
                                   Used
                                 </span>
                               )}
@@ -422,13 +422,13 @@ export default function AdminDashboard({ user }) {
                               {code.used_by_name ? (
                                 <div>
                                   <div className="font-medium">{code.used_by_name}</div>
-                                  <div className="text-xs text-gray-500">{code.used_by_email}</div>
+                                  <div className="text-xs text-slate-500">{code.used_by_email}</div>
                                 </div>
                               ) : (
-                                <span className="text-gray-400">-</span>
+                                <span className="text-slate-500">-</span>
                               )}
                             </td>
-                            <td className="p-3 text-sm text-gray-600">
+                            <td className="p-3 text-sm text-slate-400">
                               {new Date(code.created_at).toLocaleDateString()}
                             </td>
                             <td className="p-3">
@@ -466,13 +466,13 @@ export default function AdminDashboard({ user }) {
           <CardContent>
             <div className="space-y-2">
               {teachers.length === 0 ? (
-                <p className="text-gray-500 text-center py-8">
+                <p className="text-slate-500 text-center py-8">
                   No teachers registered yet
                 </p>
               ) : (
                 <div className="max-h-96 overflow-y-auto">
                   <table className="w-full">
-                    <thead className="bg-gray-50">
+                    <thead className="bg-cyber-navy/40">
                       <tr>
                         <th className="text-left p-3 text-sm font-semibold">Name</th>
                         <th className="text-left p-3 text-sm font-semibold">Email</th>
@@ -485,17 +485,17 @@ export default function AdminDashboard({ user }) {
                     </thead>
                     <tbody>
                       {teachers.map((teacher) => (
-                        <tr key={teacher.id} className="border-t hover:bg-gray-50">
+                        <tr key={teacher.id} className="border-t hover:bg-cyber-navy/40">
                           <td className="p-3">
                             <div className="font-medium">{teacher.name}</div>
                             {teacher.is_admin && (
-                              <span className="text-xs text-indigo-600 font-semibold">Admin</span>
+                              <span className="text-xs text-cyber-cyan font-semibold">Admin</span>
                             )}
                           </td>
-                          <td className="p-3 text-sm text-gray-600">{teacher.email}</td>
+                          <td className="p-3 text-sm text-slate-400">{teacher.email}</td>
                           <td className="p-3 text-sm">{teacher.classroom_count}</td>
                           <td className="p-3 text-sm">{teacher.assignment_count}</td>
-                          <td className="p-3 text-sm text-gray-600">
+                          <td className="p-3 text-sm text-slate-400">
                             {new Date(teacher.created_at).toLocaleDateString()}
                           </td>
                           <td className="p-3">

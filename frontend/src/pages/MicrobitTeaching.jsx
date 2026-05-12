@@ -515,7 +515,7 @@ export default function MicrobitTeaching({ user }) {
               variant="ghost"
               size="sm"
               onClick={() => navigate("/microbit")}
-              className="text-white hover:bg-white/20"
+              className="text-white hover:bg-cyber-navy/60/20"
             >
               <ArrowLeft className="w-4 h-4 mr-1" />
               Back
@@ -534,7 +534,7 @@ export default function MicrobitTeaching({ user }) {
               const firstLesson = Object.keys(CURRICULUM[v].lessons)[0];
               setSelectedLesson(firstLesson);
             }}>
-              <SelectTrigger className="w-48 bg-white/10 border-white/30 text-white">
+              <SelectTrigger className="w-48 bg-cyber-navy/60/10 border-white/30 text-white">
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
@@ -546,7 +546,7 @@ export default function MicrobitTeaching({ user }) {
 
             {/* Lesson Selector */}
             <Select value={selectedLesson} onValueChange={setSelectedLesson}>
-              <SelectTrigger className="w-52 bg-white/10 border-white/30 text-white">
+              <SelectTrigger className="w-52 bg-cyber-navy/60/10 border-white/30 text-white">
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
@@ -559,7 +559,7 @@ export default function MicrobitTeaching({ user }) {
             <Button
               onClick={openMicrobitEditor}
               size="sm"
-              className="bg-white/20 hover:bg-white/30"
+              className="bg-cyber-navy/60/20 hover:bg-cyber-navy/60/30"
             >
               <ExternalLink className="w-4 h-4 mr-1" />
               Open Editor
@@ -568,7 +568,7 @@ export default function MicrobitTeaching({ user }) {
             <Button
               onClick={() => navigate("/library?type=microbit")}
               size="sm"
-              className="bg-white/20 hover:bg-white/30"
+              className="bg-cyber-navy/60/20 hover:bg-cyber-navy/60/30"
             >
               <FileText className="w-4 h-4 mr-1" />
               View Problems
@@ -613,7 +613,7 @@ export default function MicrobitTeaching({ user }) {
                   <h4 className="font-semibold text-white mb-3 flex items-center gap-2">
                     <Lightbulb className="w-4 h-4 text-yellow-400" />
                     Teaching Steps
-                    <span className="text-xs text-gray-400 font-normal">(click for tips)</span>
+                    <span className="text-xs text-slate-500 font-normal">(click for tips)</span>
                   </h4>
                   <div className="space-y-1">
                     {currentLesson?.teachingGuide?.map((item, i) => (
@@ -753,7 +753,7 @@ export default function MicrobitTeaching({ user }) {
                   <HelpCircle className="w-5 h-5" />
                   {currentLesson?.title} - Quiz
                 </CardTitle>
-                <CardDescription className="text-gray-400">
+                <CardDescription className="text-slate-500">
                   Use these questions to check student understanding. {currentLesson?.quiz?.length || 0} questions.
                 </CardDescription>
               </CardHeader>
@@ -802,7 +802,7 @@ export default function MicrobitTeaching({ user }) {
                     <>
                       <div className="text-lg">
                         Score: <span className="text-cyan-400 font-bold">{getQuizScore()}/{currentLesson?.quiz?.length || 0}</span>
-                        <span className="text-gray-400 ml-2">
+                        <span className="text-slate-500 ml-2">
                           ({Math.round((getQuizScore() / (currentLesson?.quiz?.length || 1)) * 100)}%)
                         </span>
                       </div>
@@ -813,7 +813,7 @@ export default function MicrobitTeaching({ user }) {
                     </>
                   ) : (
                     <>
-                      <p className="text-gray-400">
+                      <p className="text-slate-500">
                         Answered: {Object.keys(quizAnswers).length}/{currentLesson?.quiz?.length || 0}
                       </p>
                       <Button 

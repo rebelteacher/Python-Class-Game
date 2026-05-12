@@ -42,7 +42,7 @@ function DistrictAdminDashboard({ user }) {
   if (loading) {
     return (
       <div className="min-h-screen bg-cyber-black cyber-grid-bg flex items-center justify-center">
-        <p className="text-gray-600">Loading dashboard...</p>
+        <p className="text-slate-400">Loading dashboard...</p>
       </div>
     );
   }
@@ -81,7 +81,7 @@ function DistrictAdminDashboard({ user }) {
           <h1 className="text-4xl font-bold bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent mb-2">
             {dashboardData?.district} District
           </h1>
-          <p className="text-gray-600">District-wide overview and teacher management</p>
+          <p className="text-slate-400">District-wide overview and teacher management</p>
         </div>
 
         {/* Stats Cards */}
@@ -90,7 +90,7 @@ function DistrictAdminDashboard({ user }) {
             <CardContent className="pt-6">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm text-gray-600">Schools</p>
+                  <p className="text-sm text-slate-400">Schools</p>
                   <p className="text-3xl font-bold text-blue-600">{stats.total_schools || 0}</p>
                 </div>
                 <Building className="w-12 h-12 text-blue-400" />
@@ -102,8 +102,8 @@ function DistrictAdminDashboard({ user }) {
             <CardContent className="pt-6">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm text-gray-600">Teachers</p>
-                  <p className="text-3xl font-bold text-indigo-600">{stats.total_teachers || 0}</p>
+                  <p className="text-sm text-slate-400">Teachers</p>
+                  <p className="text-3xl font-bold text-cyber-cyan">{stats.total_teachers || 0}</p>
                 </div>
                 <Users className="w-12 h-12 text-indigo-400" />
               </div>
@@ -114,7 +114,7 @@ function DistrictAdminDashboard({ user }) {
             <CardContent className="pt-6">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm text-gray-600">Students</p>
+                  <p className="text-sm text-slate-400">Students</p>
                   <p className="text-3xl font-bold text-purple-600">{stats.total_students || 0}</p>
                 </div>
                 <GraduationCap className="w-12 h-12 text-purple-400" />
@@ -126,7 +126,7 @@ function DistrictAdminDashboard({ user }) {
             <CardContent className="pt-6">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm text-gray-600">Classrooms</p>
+                  <p className="text-sm text-slate-400">Classrooms</p>
                   <p className="text-3xl font-bold text-pink-600">{stats.total_classrooms || 0}</p>
                 </div>
                 <BookOpen className="w-12 h-12 text-pink-400" />
@@ -143,15 +143,15 @@ function DistrictAdminDashboard({ user }) {
             </CardHeader>
             <CardContent>
               {schools.length === 0 ? (
-                <p className="text-gray-500 text-center py-8">No schools registered yet</p>
+                <p className="text-slate-500 text-center py-8">No schools registered yet</p>
               ) : (
                 <div className="grid gap-4">
                   {schools.map((school) => (
-                    <div key={school.id} className="border rounded-lg p-4 hover:bg-gray-50">
+                    <div key={school.id} className="border rounded-lg p-4 hover:bg-cyber-navy/40">
                       <div className="flex items-center justify-between">
                         <div>
                           <h3 className="font-semibold text-lg">{school.name}</h3>
-                          <p className="text-sm text-gray-600">
+                          <p className="text-sm text-slate-400">
                             {school.teacher_count || 0} teachers • {school.student_count || 0} students
                           </p>
                         </div>
@@ -173,12 +173,12 @@ function DistrictAdminDashboard({ user }) {
             </CardHeader>
             <CardContent>
               {teachers.length === 0 ? (
-                <p className="text-gray-500 text-center py-8">No teachers registered yet</p>
+                <p className="text-slate-500 text-center py-8">No teachers registered yet</p>
               ) : (
                 <div className="overflow-x-auto">
                   <table className="w-full">
                     <thead>
-                      <tr className="border-b bg-gray-50">
+                      <tr className="border-b bg-cyber-navy/40">
                         <th className="text-left p-3 font-semibold">Name</th>
                         <th className="text-left p-3 font-semibold">Email</th>
                         <th className="text-left p-3 font-semibold">School</th>
@@ -187,9 +187,9 @@ function DistrictAdminDashboard({ user }) {
                     </thead>
                     <tbody>
                       {teachers.map((teacher) => (
-                        <tr key={teacher.id} className="border-b hover:bg-gray-50">
+                        <tr key={teacher.id} className="border-b hover:bg-cyber-navy/40">
                           <td className="p-3">{teacher.name}</td>
-                          <td className="p-3 text-gray-600">{teacher.email}</td>
+                          <td className="p-3 text-slate-400">{teacher.email}</td>
                           <td className="p-3">{teacher.school || 'Not specified'}</td>
                           <td className="p-3">
                             <span className="px-2 py-1 bg-green-100 text-green-700 text-xs rounded-full">

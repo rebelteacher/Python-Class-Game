@@ -172,15 +172,15 @@ export default function VideoLibrary({ user }) {
               Back to Dashboard
             </Button>
             <div className="flex items-center space-x-2">
-              <Video className="w-7 h-7 text-indigo-600" />
-              <span className="text-xl font-bold text-gray-900">Video Library</span>
+              <Video className="w-7 h-7 text-cyber-cyan" />
+              <span className="text-xl font-bold text-white">Video Library</span>
             </div>
           </div>
           
           {user.is_admin && (
             <Button
               onClick={() => setUploadDialogOpen(true)}
-              className="bg-indigo-600 hover:bg-indigo-700 gap-2"
+              className="bg-cyber-cyan text-cyber-black hover:shadow-[0_0_15px_rgba(0,240,255,0.5)] font-bold gap-2"
             >
               <Plus className="w-4 h-4" />
               Upload Video
@@ -192,14 +192,14 @@ export default function VideoLibrary({ user }) {
       <main className="container mx-auto px-6 py-10">
         {loading ? (
           <div className="text-center py-20">
-            <p className="text-gray-600">Loading videos...</p>
+            <p className="text-slate-400">Loading videos...</p>
           </div>
         ) : sortedChapterNames.length === 0 ? (
           <Card>
             <CardContent className="py-20 text-center">
-              <Video className="w-16 h-16 text-gray-400 mx-auto mb-4" />
-              <h3 className="text-xl font-semibold text-gray-700 mb-2">No Videos Yet</h3>
-              <p className="text-gray-500">
+              <Video className="w-16 h-16 text-slate-500 mx-auto mb-4" />
+              <h3 className="text-xl font-semibold text-slate-300 mb-2">No Videos Yet</h3>
+              <p className="text-slate-500">
                 {user.is_admin ? "Upload your first video to get started!" : "Videos will appear here once uploaded by admins."}
               </p>
             </CardContent>
@@ -215,7 +215,7 @@ export default function VideoLibrary({ user }) {
                   {/* Folder Header - Clickable */}
                   <div
                     onClick={() => toggleFolder(chapterName)}
-                    className="flex items-center justify-between p-4 cursor-pointer hover:bg-gray-50 transition-colors"
+                    className="flex items-center justify-between p-4 cursor-pointer hover:bg-cyber-navy/40 transition-colors"
                   >
                     <div className="flex items-center gap-3">
                       {isExpanded ? (
@@ -224,14 +224,14 @@ export default function VideoLibrary({ user }) {
                         <Folder className="w-6 h-6 text-purple-600" />
                       )}
                       <div>
-                        <h3 className="text-lg font-semibold text-gray-900">{chapterName}</h3>
-                        <p className="text-sm text-gray-600">{videoCount} video{videoCount !== 1 ? 's' : ''}</p>
+                        <h3 className="text-lg font-semibold text-white">{chapterName}</h3>
+                        <p className="text-sm text-slate-400">{videoCount} video{videoCount !== 1 ? 's' : ''}</p>
                       </div>
                     </div>
                     {isExpanded ? (
-                      <ChevronDown className="w-5 h-5 text-gray-500" />
+                      <ChevronDown className="w-5 h-5 text-slate-500" />
                     ) : (
-                      <ChevronRight className="w-5 h-5 text-gray-500" />
+                      <ChevronRight className="w-5 h-5 text-slate-500" />
                     )}
                   </div>
 
@@ -242,14 +242,14 @@ export default function VideoLibrary({ user }) {
                         {chapters[chapterName].map((video) => (
                           <div
                             key={video.id}
-                            className="flex items-center justify-between p-4 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors"
+                            className="flex items-center justify-between p-4 bg-cyber-navy/40 rounded-lg hover:bg-cyber-navy/30 transition-colors"
                           >
                             <div className="flex items-center gap-3 flex-1">
                               <Video className="w-5 h-5 text-purple-600" />
                               <div className="flex-1">
-                                <h4 className="font-semibold text-gray-900">{video.title}</h4>
+                                <h4 className="font-semibold text-white">{video.title}</h4>
                                 {video.description && (
-                                  <p className="text-sm text-gray-600 line-clamp-1">{video.description}</p>
+                                  <p className="text-sm text-slate-400 line-clamp-1">{video.description}</p>
                                 )}
                               </div>
                             </div>
@@ -340,7 +340,7 @@ export default function VideoLibrary({ user }) {
                 type="file"
                 accept="video/mp4,video/webm,video/quicktime"
                 onChange={(e) => setNewVideo({ ...newVideo, file: e.target.files?.[0] || null })}
-                className="block w-full text-sm text-gray-700 file:mr-4 file:py-2 file:px-4 file:rounded file:border-0 file:text-sm file:font-semibold file:bg-indigo-600 file:text-white hover:file:bg-indigo-700 mt-1"
+                className="block w-full text-sm text-slate-300 file:mr-4 file:py-2 file:px-4 file:rounded file:border-0 file:text-sm file:font-semibold file:bg-cyber-cyan text-cyber-black file:text-white hover:file:bg-indigo-700 mt-1"
               />
             </div>
             
@@ -355,7 +355,7 @@ export default function VideoLibrary({ user }) {
               <Button
                 onClick={handleUpload}
                 disabled={uploading}
-                className="flex-1 bg-indigo-600 hover:bg-indigo-700"
+                className="flex-1 bg-cyber-cyan text-cyber-black hover:shadow-[0_0_15px_rgba(0,240,255,0.5)] font-bold"
               >
                 {uploading ? "Uploading..." : "Upload"}
               </Button>
@@ -409,7 +409,7 @@ export default function VideoLibrary({ user }) {
               </Button>
               <Button
                 onClick={handleEdit}
-                className="flex-1 bg-indigo-600 hover:bg-indigo-700"
+                className="flex-1 bg-cyber-cyan text-cyber-black hover:shadow-[0_0_15px_rgba(0,240,255,0.5)] font-bold"
               >
                 Save Changes
               </Button>

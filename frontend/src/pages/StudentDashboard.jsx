@@ -501,7 +501,7 @@ export default function StudentDashboard({ user, setUser, refreshUser }) {
     return (
       <div data-testid="student-dashboard-loading" className="min-h-screen flex items-center justify-center bg-cyber-black cyber-grid-bg">
         <div className="text-center">
-          <div className="text-xl text-gray-600 mb-2">Loading your dashboard...</div>
+          <div className="text-xl text-slate-400 mb-2">Loading your dashboard...</div>
           <div className="animate-spin w-8 h-8 border-4 border-teal-600 border-t-transparent rounded-full mx-auto"></div>
         </div>
       </div>
@@ -520,36 +520,36 @@ export default function StudentDashboard({ user, setUser, refreshUser }) {
       )}
       
       <nav 
-        className="shadow-sm border-b"
+        className="border-b backdrop-blur-xl"
         style={{ 
-          backgroundColor: getThemeNavColor() || 'white',
-          borderColor: getThemeNavColor() ? 'rgba(255,255,255,0.2)' : '#e5e7eb'
+          backgroundColor: getThemeNavColor() || '#0F172A',
+          borderColor: getThemeNavColor() ? 'rgba(255,255,255,0.2)' : 'rgba(0,240,255,0.2)'
         }}
       >
         <div className="px-6 py-3">
           {/* Row 1: Branding and User Info */}
           <div className="flex justify-between items-center mb-3">
             <div className="flex items-center space-x-2">
-              <Code2 className={`w-7 h-7 ${getThemeNavColor() ? 'text-white' : 'text-teal-600'}`} />
-              <span className={`text-xl font-bold ${getThemeNavColor() ? 'text-white' : 'text-gray-900'}`}>ByteBattles Arena</span>
-              <span className={`ml-4 px-3 py-1 text-sm font-medium rounded-full ${getThemeNavColor() ? 'bg-white/20 text-white border border-white/30' : 'bg-teal-100 text-teal-700'}`}>
+              <Code2 className={`w-7 h-7 ${getThemeNavColor() ? 'text-white' : 'text-cyber-cyan drop-shadow-[0_0_6px_rgba(0,240,255,0.8)]'}`} />
+              <span className="text-xl font-orbitron font-bold text-white tracking-wider">BYTE<span className="text-cyber-cyan">BATTLES</span></span>
+              <span className={`ml-4 px-3 py-1 text-xs font-orbitron uppercase tracking-widest ${getThemeNavColor() ? 'bg-cyber-navy/60/20 text-white border border-white/30' : 'bg-cyber-cyan/10 text-cyber-cyan border border-cyber-cyan/30'}`}>
                 Student
               </span>
             </div>
-            <span className={`text-lg font-medium ${getThemeNavColor() ? 'text-white' : 'text-gray-700'}`}>{user.name}</span>
+            <span className="text-sm font-chakra text-white">{user.name}</span>
           </div>
           
           {/* Row 2: Action Buttons */}
           <div className="flex items-center justify-end space-x-2 flex-wrap">
-            <Button onClick={() => navigate("/my-tests")} variant="outline" size="sm" className={`gap-2 ${getThemeNavColor() ? 'border-white/30 text-white hover:bg-white/20 bg-white/5' : ''}`}>
+            <Button onClick={() => navigate("/my-tests")} variant="outline" size="sm" className={`gap-2 ${getThemeNavColor() ? 'border-white/30 text-white hover:bg-cyber-navy/60/20 bg-cyber-navy/60/5' : ''}`}>
               <FileQuestion className="w-4 h-4" />
               My Tests
             </Button>
-            <Button onClick={() => navigate("/notes")} variant="outline" size="sm" className={`gap-2 ${getThemeNavColor() ? 'border-white/30 text-white hover:bg-white/20 bg-white/5' : ''}`}>
+            <Button onClick={() => navigate("/notes")} variant="outline" size="sm" className={`gap-2 ${getThemeNavColor() ? 'border-white/30 text-white hover:bg-cyber-navy/60/20 bg-cyber-navy/60/5' : ''}`}>
               <FileText className="w-4 h-4" />
               Notes
             </Button>
-            <Button data-testid="logout-btn" onClick={handleLogout} variant="outline" size="sm" className={`gap-2 ${getThemeNavColor() ? 'border-white/30 text-white hover:bg-white/20 bg-white/5' : ''}`}>
+            <Button data-testid="logout-btn" onClick={handleLogout} variant="outline" size="sm" className={`gap-2 ${getThemeNavColor() ? 'border-white/30 text-white hover:bg-cyber-navy/60/20 bg-cyber-navy/60/5' : ''}`}>
               <LogOut className="w-4 h-4" />
               Logout
             </Button>
@@ -601,19 +601,19 @@ export default function StudentDashboard({ user, setUser, refreshUser }) {
             </CardHeader>
             <CardContent className="space-y-2 text-sm">
               <div className="flex justify-between">
-                <span className="text-gray-600">Problems Solved:</span>
+                <span className="text-slate-400">Problems Solved:</span>
                 <span className="font-semibold">{userProfile.problems_solved || 0}</span>
               </div>
               <div className="flex justify-between">
-                <span className="text-gray-600">Perfect Scores:</span>
+                <span className="text-slate-400">Perfect Scores:</span>
                 <span className="font-semibold text-yellow-600">⭐ {userProfile.perfect_scores || 0}</span>
               </div>
               <div className="flex justify-between">
-                <span className="text-gray-600">Current Streak:</span>
+                <span className="text-slate-400">Current Streak:</span>
                 <span className="font-semibold text-orange-600">🔥 {userProfile.current_streak || 0}</span>
               </div>
               <div className="flex justify-between">
-                <span className="text-gray-600">Best Streak:</span>
+                <span className="text-slate-400">Best Streak:</span>
                 <span className="font-semibold">{userProfile.best_streak || 0}</span>
               </div>
             </CardContent>
@@ -750,7 +750,7 @@ export default function StudentDashboard({ user, setUser, refreshUser }) {
                         </option>
                       ))}
                     </select>
-                    <p className="text-xs text-gray-500 mt-1">Select where the challenge takes place</p>
+                    <p className="text-xs text-slate-500 mt-1">Select where the challenge takes place</p>
                   </div>
                   
                   <Button
@@ -840,13 +840,13 @@ export default function StudentDashboard({ user, setUser, refreshUser }) {
 
         <div className="flex justify-between items-center mb-8">
           <div>
-            <h1 className="text-4xl font-bold text-gray-900 mb-2">My Classes</h1>
-            <p className="text-gray-600">View your classrooms and assignments</p>
+            <h1 className="text-4xl font-bold text-white mb-2">My Classes</h1>
+            <p className="text-slate-400">View your classrooms and assignments</p>
           </div>
           <div className="flex gap-3">
             <Dialog open={joinDialogOpen} onOpenChange={setJoinDialogOpen}>
               <DialogTrigger asChild>
-                <Button data-testid="join-classroom-btn" className="bg-teal-600 hover:bg-teal-700 gap-2">
+                <Button data-testid="join-classroom-btn" className="bg-cyber-cyan hover:shadow-[0_0_15px_rgba(0,240,255,0.5)] gap-2">
                   <Plus className="w-5 h-5" />
                   Join Classroom
                 </Button>
@@ -871,7 +871,7 @@ export default function StudentDashboard({ user, setUser, refreshUser }) {
                     maxLength={6}
                   />
                 </div>
-                <Button data-testid="join-classroom-submit-btn" type="submit" className="w-full bg-teal-600 hover:bg-teal-700">
+                <Button data-testid="join-classroom-submit-btn" type="submit" className="w-full bg-cyber-cyan hover:shadow-[0_0_15px_rgba(0,240,255,0.5)]">
                   Join Classroom
                 </Button>
               </form>
@@ -896,7 +896,7 @@ export default function StudentDashboard({ user, setUser, refreshUser }) {
               <div className="flex items-start justify-between">
                 <div className="flex items-start gap-4">
                   <div className="p-3 bg-indigo-100 rounded-lg">
-                    <Video className="w-8 h-8 text-indigo-600" />
+                    <Video className="w-8 h-8 text-cyber-cyan" />
                   </div>
                   <div>
                     <h3 className="text-lg font-semibold text-indigo-900">Video Library</h3>
@@ -975,7 +975,7 @@ export default function StudentDashboard({ user, setUser, refreshUser }) {
         {/* Active Competitions Section */}
         {competitions.length > 0 && (
           <div className="mb-8">
-            <h2 className="text-2xl font-bold text-gray-900 mb-4 flex items-center gap-2">
+            <h2 className="text-2xl font-bold text-white mb-4 flex items-center gap-2">
               <Trophy className="w-6 h-6 text-yellow-600" />
               Active Competitions
             </h2>
@@ -1006,7 +1006,7 @@ export default function StudentDashboard({ user, setUser, refreshUser }) {
                       <CardDescription>{comp.description}</CardDescription>
                     </CardHeader>
                     <CardContent>
-                      <div className="space-y-2 text-sm text-gray-700 mb-4">
+                      <div className="space-y-2 text-sm text-slate-300 mb-4">
                         <div className="flex items-center gap-2">
                           <Users className="w-4 h-4" />
                           <span>{comp.classrooms?.length || 0} classes competing</span>
@@ -1043,7 +1043,7 @@ export default function StudentDashboard({ user, setUser, refreshUser }) {
         {/* Available Tests Section */}
         {availableTests.length > 0 && (
           <div className="mb-8">
-            <h2 className="text-2xl font-bold text-gray-900 mb-4">Available Tests</h2>
+            <h2 className="text-2xl font-bold text-white mb-4">Available Tests</h2>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
               {availableTests.map((test) => {
                 const now = new Date();
@@ -1068,7 +1068,7 @@ export default function StudentDashboard({ user, setUser, refreshUser }) {
                       <CardDescription>{test.classroom_name}</CardDescription>
                     </CardHeader>
                     <CardContent>
-                      <div className="space-y-2 text-sm text-gray-600 mb-4">
+                      <div className="space-y-2 text-sm text-slate-400 mb-4">
                         <div className="flex items-center gap-2">
                           <FileQuestion className="w-4 h-4" />
                           <span>{test.num_questions} questions</span>
@@ -1090,7 +1090,7 @@ export default function StudentDashboard({ user, setUser, refreshUser }) {
                       </div>
                       <Button 
                         onClick={() => navigate(`/test/${test.id}`)}
-                        className="w-full bg-indigo-600 hover:bg-indigo-700"
+                        className="w-full bg-cyber-cyan text-cyber-black hover:shadow-[0_0_15px_rgba(0,240,255,0.5)] font-bold"
                         disabled={isOverdue}
                       >
                         {isOverdue ? "Test Closed" : "Start Test"}
@@ -1105,13 +1105,13 @@ export default function StudentDashboard({ user, setUser, refreshUser }) {
 
         {/* Assignments - Folder View with Tabs */}
         {loading ? (
-          <div className="text-center py-20 text-gray-600">Loading assignments...</div>
+          <div className="text-center py-20 text-slate-400">Loading assignments...</div>
         ) : classrooms.length === 0 ? (
           <div className="text-center py-20">
-            <BookOpen className="w-16 h-16 text-gray-400 mx-auto mb-4" />
-            <h3 className="text-xl font-semibold text-gray-700 mb-2">No classrooms yet</h3>
-            <p className="text-gray-500 mb-6">Join a class to start coding!</p>
-            <Button onClick={() => setJoinDialogOpen(true)} className="bg-teal-600 hover:bg-teal-700">
+            <BookOpen className="w-16 h-16 text-slate-500 mx-auto mb-4" />
+            <h3 className="text-xl font-semibold text-slate-300 mb-2">No classrooms yet</h3>
+            <p className="text-slate-500 mb-6">Join a class to start coding!</p>
+            <Button onClick={() => setJoinDialogOpen(true)} className="bg-cyber-cyan hover:shadow-[0_0_15px_rgba(0,240,255,0.5)]">
               <Plus className="w-4 h-4 mr-2" />
               Join Class
             </Button>
@@ -1120,7 +1120,7 @@ export default function StudentDashboard({ user, setUser, refreshUser }) {
           <Card className="mb-8">
             <CardHeader>
               <CardTitle className="text-2xl flex items-center gap-2">
-                <BookOpen className="w-6 h-6 text-teal-600" />
+                <BookOpen className="w-6 h-6 text-cyber-cyan" />
                 My Assignments
               </CardTitle>
               <CardDescription>
@@ -1147,8 +1147,8 @@ export default function StudentDashboard({ user, setUser, refreshUser }) {
                   {Object.keys(toDoAssignments).length === 0 ? (
                     <div className="text-center py-12">
                       <CheckCircle className="w-16 h-16 text-green-400 mx-auto mb-4" />
-                      <h3 className="text-xl font-semibold text-gray-700 mb-2">All caught up! 🎉</h3>
-                      <p className="text-gray-500">You've completed all your assignments</p>
+                      <h3 className="text-xl font-semibold text-slate-300 mb-2">All caught up! 🎉</h3>
+                      <p className="text-slate-500">You've completed all your assignments</p>
                     </div>
                   ) : (
                     <div className="space-y-4">
@@ -1157,24 +1157,24 @@ export default function StudentDashboard({ user, setUser, refreshUser }) {
                         const lessons = toDoAssignments[chapter];
               
               return (
-                <div key={chapter} className="border rounded-lg bg-white shadow-sm">
+                <div key={chapter} className="border rounded-lg bg-cyber-navy/60 backdrop-blur-sm">
                   {/* Chapter Folder */}
                   <div
-                    className="flex items-center gap-3 p-4 cursor-pointer hover:bg-gray-50 transition-colors"
+                    className="flex items-center gap-3 p-4 cursor-pointer hover:bg-cyber-navy/40 transition-colors"
                     onClick={() => toggleChapter(chapter)}
                   >
                     {isChapterExpanded ? (
-                      <ChevronDown className="w-5 h-5 text-gray-600" />
+                      <ChevronDown className="w-5 h-5 text-slate-400" />
                     ) : (
-                      <ChevronRight className="w-5 h-5 text-gray-600" />
+                      <ChevronRight className="w-5 h-5 text-slate-400" />
                     )}
                     {isChapterExpanded ? (
                       <FolderOpen className="w-6 h-6 text-blue-500" />
                     ) : (
                       <Folder className="w-6 h-6 text-blue-500" />
                     )}
-                    <h3 className="text-lg font-semibold text-gray-900">{chapter}</h3>
-                    <span className="ml-auto text-sm text-gray-500 bg-gray-100 px-3 py-1 rounded-full">
+                    <h3 className="text-lg font-semibold text-white">{chapter}</h3>
+                    <span className="ml-auto text-sm text-slate-500 bg-cyber-navy/30 px-3 py-1 rounded-full">
                       {Object.keys(lessons).length} lesson{Object.keys(lessons).length !== 1 ? 's' : ''}
                     </span>
                   </div>
@@ -1188,24 +1188,24 @@ export default function StudentDashboard({ user, setUser, refreshUser }) {
                         const assignments = lessons[lesson];
                         
                         return (
-                          <div key={lessonKey} className="border rounded-lg bg-gray-50">
+                          <div key={lessonKey} className="border rounded-lg bg-cyber-navy/40">
                             {/* Lesson Folder */}
                             <div
-                              className="flex items-center gap-3 p-3 cursor-pointer hover:bg-gray-100 transition-colors rounded-lg"
+                              className="flex items-center gap-3 p-3 cursor-pointer hover:bg-cyber-navy/30 transition-colors rounded-lg"
                               onClick={() => toggleLesson(lessonKey)}
                             >
                               {isLessonExpanded ? (
-                                <ChevronDown className="w-4 h-4 text-gray-600" />
+                                <ChevronDown className="w-4 h-4 text-slate-400" />
                               ) : (
-                                <ChevronRight className="w-4 h-4 text-gray-600" />
+                                <ChevronRight className="w-4 h-4 text-slate-400" />
                               )}
                               {isLessonExpanded ? (
                                 <FolderOpen className="w-5 h-5 text-teal-500" />
                               ) : (
                                 <Folder className="w-5 h-5 text-teal-500" />
                               )}
-                              <h4 className="text-md font-medium text-gray-800">{lesson}</h4>
-                              <span className="ml-auto text-xs text-gray-500 bg-white px-2 py-1 rounded-full">
+                              <h4 className="text-md font-medium text-slate-200">{lesson}</h4>
+                              <span className="ml-auto text-xs text-slate-500 bg-cyber-navy/60 px-2 py-1 rounded-full">
                                 {assignments.length} assignment{assignments.length !== 1 ? 's' : ''}
                               </span>
                             </div>
@@ -1217,13 +1217,13 @@ export default function StudentDashboard({ user, setUser, refreshUser }) {
                                   <Card
                                     key={assignment.id}
                                     data-testid={`assignment-card-${assignment.id}`}
-                                    className="hover:shadow-md transition-shadow cursor-pointer border-2 border-gray-200 hover:border-teal-300"
+                                    className="hover:shadow-md transition-shadow cursor-pointer border-2 border-cyber-cyan/10 hover:border-teal-300"
                                     onClick={() => navigate(`/assignment/${assignment.id}`)}
                                   >
                                     <CardHeader className="pb-3">
                                       <div className="flex justify-between items-start">
                                         <CardTitle className="text-base">{assignment.title}</CardTitle>
-                                        <span className="text-xs text-gray-500 bg-white px-2 py-1 rounded border">
+                                        <span className="text-xs text-slate-500 bg-cyber-navy/60 px-2 py-1 rounded border">
                                           {assignment.classroom_name}
                                         </span>
                                       </div>
@@ -1231,7 +1231,7 @@ export default function StudentDashboard({ user, setUser, refreshUser }) {
                                     </CardHeader>
                                     <CardContent className="pt-0">
                                       <div className="flex items-center justify-between text-sm">
-                                        <span className="text-gray-600">
+                                        <span className="text-slate-400">
                                           {assignment.problem_ids?.length || 0} problems
                                         </span>
                                         {assignment.due_date && (
@@ -1261,9 +1261,9 @@ export default function StudentDashboard({ user, setUser, refreshUser }) {
                 <TabsContent value="completed">
                   {Object.keys(completedAssignments).length === 0 ? (
                     <div className="text-center py-12">
-                      <FileText className="w-16 h-16 text-gray-400 mx-auto mb-4" />
-                      <h3 className="text-xl font-semibold text-gray-700 mb-2">No completed assignments yet</h3>
-                      <p className="text-gray-500">Complete assignments to see them here</p>
+                      <FileText className="w-16 h-16 text-slate-500 mx-auto mb-4" />
+                      <h3 className="text-xl font-semibold text-slate-300 mb-2">No completed assignments yet</h3>
+                      <p className="text-slate-500">Complete assignments to see them here</p>
                     </div>
                   ) : (
                     <div className="space-y-4">
@@ -1272,24 +1272,24 @@ export default function StudentDashboard({ user, setUser, refreshUser }) {
                         const lessons = completedAssignments[chapter];
                         
                         return (
-                          <div key={chapter} className="border rounded-lg bg-white shadow-sm">
+                          <div key={chapter} className="border rounded-lg bg-cyber-navy/60 backdrop-blur-sm">
                             {/* Chapter Folder */}
                             <div
-                              className="flex items-center gap-3 p-4 cursor-pointer hover:bg-gray-50 transition-colors"
+                              className="flex items-center gap-3 p-4 cursor-pointer hover:bg-cyber-navy/40 transition-colors"
                               onClick={() => toggleChapter(chapter)}
                             >
                               {isChapterExpanded ? (
-                                <ChevronDown className="w-5 h-5 text-gray-600" />
+                                <ChevronDown className="w-5 h-5 text-slate-400" />
                               ) : (
-                                <ChevronRight className="w-5 h-5 text-gray-600" />
+                                <ChevronRight className="w-5 h-5 text-slate-400" />
                               )}
                               {isChapterExpanded ? (
                                 <FolderOpen className="w-6 h-6 text-green-500" />
                               ) : (
                                 <Folder className="w-6 h-6 text-green-500" />
                               )}
-                              <h3 className="text-lg font-semibold text-gray-900">{chapter}</h3>
-                              <span className="ml-auto text-sm text-gray-500 bg-green-50 px-3 py-1 rounded-full">
+                              <h3 className="text-lg font-semibold text-white">{chapter}</h3>
+                              <span className="ml-auto text-sm text-slate-500 bg-green-50 px-3 py-1 rounded-full">
                                 {Object.keys(lessons).length} lesson{Object.keys(lessons).length !== 1 ? 's' : ''}
                               </span>
                             </div>
@@ -1310,17 +1310,17 @@ export default function StudentDashboard({ user, setUser, refreshUser }) {
                                         onClick={() => toggleLesson(lessonKey)}
                                       >
                                         {isLessonExpanded ? (
-                                          <ChevronDown className="w-4 h-4 text-gray-600" />
+                                          <ChevronDown className="w-4 h-4 text-slate-400" />
                                         ) : (
-                                          <ChevronRight className="w-4 h-4 text-gray-600" />
+                                          <ChevronRight className="w-4 h-4 text-slate-400" />
                                         )}
                                         {isLessonExpanded ? (
                                           <FolderOpen className="w-5 h-5 text-green-600" />
                                         ) : (
                                           <Folder className="w-5 h-5 text-green-600" />
                                         )}
-                                        <h4 className="text-md font-medium text-gray-800">{lesson}</h4>
-                                        <span className="ml-auto text-xs text-gray-500 bg-white px-2 py-1 rounded-full">
+                                        <h4 className="text-md font-medium text-slate-200">{lesson}</h4>
+                                        <span className="ml-auto text-xs text-slate-500 bg-cyber-navy/60 px-2 py-1 rounded-full">
                                           {assignments.length} assignment{assignments.length !== 1 ? 's' : ''}
                                         </span>
                                       </div>
@@ -1332,7 +1332,7 @@ export default function StudentDashboard({ user, setUser, refreshUser }) {
                                             <Card
                                               key={assignment.id}
                                               data-testid={`assignment-card-${assignment.id}`}
-                                              className="hover:shadow-md transition-shadow cursor-pointer border-2 border-green-300 hover:border-green-400 bg-white"
+                                              className="hover:shadow-md transition-shadow cursor-pointer border-2 border-green-300 hover:border-green-400 bg-cyber-navy/60"
                                               onClick={() => navigate(`/assignment/${assignment.id}`)}
                                             >
                                               <CardHeader className="pb-3">
@@ -1341,7 +1341,7 @@ export default function StudentDashboard({ user, setUser, refreshUser }) {
                                                     <CheckCircle className="w-4 h-4 text-green-600" />
                                                     {assignment.title}
                                                   </CardTitle>
-                                                  <span className="text-xs text-gray-500 bg-white px-2 py-1 rounded border">
+                                                  <span className="text-xs text-slate-500 bg-cyber-navy/60 px-2 py-1 rounded border">
                                                     {assignment.classroom_name}
                                                   </span>
                                                 </div>
@@ -1354,7 +1354,7 @@ export default function StudentDashboard({ user, setUser, refreshUser }) {
                                                     Completed
                                                   </span>
                                                   {assignment.due_date && (
-                                                    <span className="text-gray-500">
+                                                    <span className="text-slate-500">
                                                       Due: {new Date(assignment.due_date).toLocaleDateString()}
                                                     </span>
                                                   )}
@@ -1510,7 +1510,7 @@ export default function StudentDashboard({ user, setUser, refreshUser }) {
                             style={{ background: item.preview }}
                           />
                           <div className="flex items-center justify-between">
-                            <span className="text-2xl font-bold text-indigo-600">{item.price} 🪙</span>
+                            <span className="text-2xl font-bold text-cyber-cyan">{item.price} 🪙</span>
                             <div className="flex gap-2">
                               {isOwned ? (
                                 <Button
@@ -1566,7 +1566,7 @@ export default function StudentDashboard({ user, setUser, refreshUser }) {
                             {item.icon}
                           </div>
                           <div className="flex items-center justify-between">
-                            <span className="text-2xl font-bold text-indigo-600">{item.price} 🪙</span>
+                            <span className="text-2xl font-bold text-cyber-cyan">{item.price} 🪙</span>
                             <div className="flex gap-2">
                               {isOwned ? (
                                 <Button
@@ -1620,14 +1620,14 @@ export default function StudentDashboard({ user, setUser, refreshUser }) {
                         <CardContent>
                           <div className="flex justify-center mb-3">
                             <div 
-                              className="w-24 h-24 rounded-full bg-gray-200 flex items-center justify-center text-3xl"
+                              className="w-24 h-24 rounded-full bg-slate-800 flex items-center justify-center text-3xl"
                               style={{ border: item.style, backgroundImage: item.gradient ? item.gradient : undefined }}
                             >
                               👤
                             </div>
                           </div>
                           <div className="flex items-center justify-between">
-                            <span className="text-2xl font-bold text-indigo-600">{item.price} 🪙</span>
+                            <span className="text-2xl font-bold text-cyber-cyan">{item.price} 🪙</span>
                             <div className="flex gap-2">
                               {isOwned ? (
                                 <Button

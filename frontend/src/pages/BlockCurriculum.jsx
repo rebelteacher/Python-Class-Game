@@ -91,7 +91,7 @@ const getProblemTypeBadge = (type) => {
     "Project": "bg-pink-100 text-pink-700",
     "Assessment": "bg-yellow-100 text-yellow-700"
   };
-  return styles[type] || "bg-gray-100 text-gray-700";
+  return styles[type] || "bg-cyber-navy/30 text-slate-300";
 };
 
 export default function BlockCurriculum({ user }) {
@@ -380,7 +380,7 @@ export default function BlockCurriculum({ user }) {
       <div className="min-h-screen bg-cyber-black cyber-grid-bg">
         <div className="text-center">
           <Loader2 className="w-12 h-12 animate-spin text-purple-600 mx-auto mb-4" />
-          <p className="text-gray-600">Loading curriculum...</p>
+          <p className="text-slate-400">Loading curriculum...</p>
         </div>
       </div>
     );
@@ -396,7 +396,7 @@ export default function BlockCurriculum({ user }) {
               variant="ghost"
               size="sm"
               onClick={() => navigate("/teacher/dashboard")}
-              className="text-white hover:bg-white/20"
+              className="text-white hover:bg-cyber-navy/60/20"
             >
               <ArrowLeft className="w-4 h-4 mr-1" />
               Back to Dashboard
@@ -404,7 +404,7 @@ export default function BlockCurriculum({ user }) {
           </div>
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-4">
-              <div className="p-4 bg-white/20 rounded-xl">
+              <div className="p-4 bg-cyber-navy/60/20 rounded-xl">
                 <Boxes className="w-10 h-10" />
               </div>
               <div>
@@ -417,14 +417,14 @@ export default function BlockCurriculum({ user }) {
             <div className="flex gap-2">
               <Button
                 onClick={() => setShowAddChapterDialog(true)}
-                className="bg-white/20 hover:bg-white/30"
+                className="bg-cyber-navy/60/20 hover:bg-cyber-navy/60/30"
               >
                 <Plus className="w-4 h-4 mr-1" />
                 Add Chapter
               </Button>
               <Button
                 onClick={() => setShowAddLessonDialog(true)}
-                className="bg-white/20 hover:bg-white/30"
+                className="bg-cyber-navy/60/20 hover:bg-cyber-navy/60/30"
               >
                 <Plus className="w-4 h-4 mr-1" />
                 Add Lesson
@@ -444,7 +444,7 @@ export default function BlockCurriculum({ user }) {
               </div>
               <div>
                 <h3 className="font-semibold">Problem Library</h3>
-                <p className="text-sm text-gray-600">View & create Block problems</p>
+                <p className="text-sm text-slate-400">View & create Block problems</p>
               </div>
             </CardContent>
           </Card>
@@ -456,7 +456,7 @@ export default function BlockCurriculum({ user }) {
               </div>
               <div>
                 <h3 className="font-semibold">Teaching Guide</h3>
-                <p className="text-sm text-gray-600">Interactive lesson guides</p>
+                <p className="text-sm text-slate-400">Interactive lesson guides</p>
               </div>
             </CardContent>
           </Card>
@@ -468,7 +468,7 @@ export default function BlockCurriculum({ user }) {
               </div>
               <div>
                 <h3 className="font-semibold">Turtle Blocks Editor</h3>
-                <p className="text-sm text-gray-600">Visual block coding workspace</p>
+                <p className="text-sm text-slate-400">Visual block coding workspace</p>
               </div>
             </CardContent>
           </Card>
@@ -479,7 +479,7 @@ export default function BlockCurriculum({ user }) {
               </div>
               <div>
                 <h3 className="font-semibold">Student Progress</h3>
-                <p className="text-sm text-gray-600">View in classroom page</p>
+                <p className="text-sm text-slate-400">View in classroom page</p>
               </div>
             </CardContent>
           </Card>
@@ -506,8 +506,8 @@ export default function BlockCurriculum({ user }) {
         {sortedChapters.length === 0 && (
           <Card className="p-8 text-center">
             <Boxes className="w-16 h-16 text-gray-300 mx-auto mb-4" />
-            <h3 className="text-xl font-semibold text-gray-700 mb-2">No Block Problems Yet</h3>
-            <p className="text-gray-500 mb-4">
+            <h3 className="text-xl font-semibold text-slate-300 mb-2">No Block Problems Yet</h3>
+            <p className="text-slate-500 mb-4">
               Create block-based problems in the library to populate this curriculum.
             </p>
             <Button onClick={() => navigate("/library?type=block")}>
@@ -554,7 +554,7 @@ export default function BlockCurriculum({ user }) {
                         <Button
                           size="sm"
                           variant="ghost"
-                          className="text-white hover:bg-white/20"
+                          className="text-white hover:bg-cyber-navy/60/20"
                           onClick={(e) => {
                             e.stopPropagation();
                             handleDeleteChapter(customChapterObj);
@@ -563,11 +563,11 @@ export default function BlockCurriculum({ user }) {
                           <Trash2 className="w-4 h-4" />
                         </Button>
                       )}
-                      <span className="text-sm bg-white/20 px-3 py-1 rounded-full">
+                      <span className="text-sm bg-cyber-navy/60/20 px-3 py-1 rounded-full">
                         {totalInChapter} problems
                       </span>
                       {meta.weeks && (
-                        <span className="text-sm bg-white/20 px-3 py-1 rounded-full">
+                        <span className="text-sm bg-cyber-navy/60/20 px-3 py-1 rounded-full">
                           {meta.weeks}
                         </span>
                       )}
@@ -584,7 +584,7 @@ export default function BlockCurriculum({ user }) {
                   <CardContent className="p-4">
                     <div className="space-y-3">
                       {lessonKeys.length === 0 ? (
-                        <div className="text-center py-8 text-gray-500">
+                        <div className="text-center py-8 text-slate-500">
                           <p>No lessons yet. Add lessons or create problems in the library.</p>
                           <Button
                             variant="outline"
@@ -609,7 +609,7 @@ export default function BlockCurriculum({ user }) {
                             <div key={lesson} className="border rounded-lg overflow-hidden">
                               {/* Lesson Header */}
                               <div
-                                className="flex items-center justify-between p-4 bg-gray-50 cursor-pointer hover:bg-gray-100"
+                                className="flex items-center justify-between p-4 bg-cyber-navy/40 cursor-pointer hover:bg-cyber-navy/30"
                                 onClick={() => toggleLesson(lessonKey)}
                               >
                                 <div className="flex items-center gap-3">
@@ -617,8 +617,8 @@ export default function BlockCurriculum({ user }) {
                                     {lessonIndex + 1}
                                   </div>
                                   <div>
-                                    <h3 className="font-semibold text-gray-900">{lesson}</h3>
-                                    <p className="text-xs text-gray-500">{problems.length} problems</p>
+                                    <h3 className="font-semibold text-white">{lesson}</h3>
+                                    <p className="text-xs text-slate-500">{problems.length} problems</p>
                                   </div>
                                 </div>
                                 <div className="flex items-center gap-2">
@@ -647,9 +647,9 @@ export default function BlockCurriculum({ user }) {
                                     View in Library
                                   </Button>
                                   {isLessonExpanded ? (
-                                    <ChevronDown className="w-5 h-5 text-gray-400" />
+                                    <ChevronDown className="w-5 h-5 text-slate-500" />
                                   ) : (
-                                    <ChevronRight className="w-5 h-5 text-gray-400" />
+                                    <ChevronRight className="w-5 h-5 text-slate-500" />
                                   )}
                                 </div>
                               </div>
@@ -658,7 +658,7 @@ export default function BlockCurriculum({ user }) {
                               {isLessonExpanded && (
                                 <div className="divide-y">
                                   {problems.length === 0 ? (
-                                    <div className="p-4 text-center text-gray-500">
+                                    <div className="p-4 text-center text-slate-500">
                                       <p className="text-sm">No problems in this lesson yet.</p>
                                       <Button
                                         size="sm"
@@ -672,12 +672,12 @@ export default function BlockCurriculum({ user }) {
                                     problems.map((problem, problemIndex) => (
                                       <div
                                         key={problem.id}
-                                        className="flex items-center justify-between p-3 pl-14 hover:bg-gray-50"
+                                        className="flex items-center justify-between p-3 pl-14 hover:bg-cyber-navy/40"
                                       >
                                         <div className="flex items-center gap-3">
-                                          <span className="text-sm text-gray-400 w-6">{problemIndex + 1}.</span>
+                                          <span className="text-sm text-slate-500 w-6">{problemIndex + 1}.</span>
                                           <div>
-                                            <h4 className="font-medium text-gray-800">{problem.title}</h4>
+                                            <h4 className="font-medium text-slate-200">{problem.title}</h4>
                                             <div className="flex items-center gap-2 mt-1">
                                               <span className={`px-2 py-0.5 rounded text-xs font-medium ${getProblemTypeBadge(problem.problem_type)}`}>
                                                 {problem.problem_type}
@@ -725,7 +725,7 @@ export default function BlockCurriculum({ user }) {
                       {/* Add Lesson Button within chapter */}
                       <Button
                         variant="ghost"
-                        className="w-full border-2 border-dashed border-gray-200 hover:border-purple-300 hover:bg-purple-50"
+                        className="w-full border-2 border-dashed border-cyber-cyan/10 hover:border-purple-300 hover:bg-purple-50"
                         onClick={() => {
                           setSelectedChapterForLesson(chapter);
                           setShowAddLessonDialog(true);
@@ -746,8 +746,8 @@ export default function BlockCurriculum({ user }) {
         <Card className="mt-8 border-2 border-dashed border-purple-300">
           <CardContent className="p-6 text-center">
             <ArrowRightLeft className="w-12 h-12 text-purple-400 mx-auto mb-4" />
-            <h3 className="text-xl font-bold text-gray-900 mb-2">Ready for Unit 2?</h3>
-            <p className="text-gray-600 mb-4">
+            <h3 className="text-xl font-bold text-white mb-2">Ready for Unit 2?</h3>
+            <p className="text-slate-400 mb-4">
               After completing Unit 1, students will be prepared to transition to Turtle Graphics - learning Python syntax through visual programming!
             </p>
             <div className="flex justify-center gap-4 flex-wrap">
@@ -791,9 +791,9 @@ export default function BlockCurriculum({ user }) {
               </Select>
             </div>
             {selectedProblem && (
-              <div className="bg-gray-50 p-4 rounded-lg">
+              <div className="bg-cyber-navy/40 p-4 rounded-lg">
                 <h4 className="font-medium mb-2">Problem Details:</h4>
-                <p className="text-sm text-gray-600 mb-2">{selectedProblem.description}</p>
+                <p className="text-sm text-slate-400 mb-2">{selectedProblem.description}</p>
                 <div className="flex items-center gap-2">
                   <span className={`px-2 py-0.5 rounded text-xs font-medium ${getProblemTypeBadge(selectedProblem.problem_type)}`}>
                     {selectedProblem.problem_type}

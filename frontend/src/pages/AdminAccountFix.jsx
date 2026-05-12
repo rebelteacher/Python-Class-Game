@@ -94,7 +94,7 @@ export default function AdminAccountFix() {
             <div className="space-y-2">
               <Label htmlFor="email">Your Email</Label>
               <div className="relative">
-                <Mail className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
+                <Mail className="absolute left-3 top-3 h-4 w-4 text-slate-500" />
                 <Input
                   id="email"
                   type="email"
@@ -126,7 +126,7 @@ export default function AdminAccountFix() {
                 type="button"
                 variant="link"
                 onClick={() => navigate("/")}
-                className="text-indigo-600"
+                className="text-cyber-cyan"
               >
                 Back to Home
               </Button>
@@ -151,7 +151,7 @@ export default function AdminAccountFix() {
             <div className="space-y-2">
               <Label htmlFor="studentEmail">Student Email</Label>
               <div className="relative">
-                <Mail className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
+                <Mail className="absolute left-3 top-3 h-4 w-4 text-slate-500" />
                 <Input
                   id="studentEmail"
                   type="email"

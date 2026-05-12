@@ -84,8 +84,8 @@ export default function LessonPopup({ open, onClose, lessonTitle, materials = []
 
       case 'text':
         return (
-          <div className="prose prose-sm max-w-none p-4 bg-gray-50 rounded-lg">
-            <div className="whitespace-pre-wrap text-gray-700">
+          <div className="prose prose-sm max-w-none p-4 bg-cyber-navy/40 rounded-lg">
+            <div className="whitespace-pre-wrap text-slate-300">
               {material.content}
             </div>
           </div>
@@ -173,7 +173,7 @@ export default function LessonPopup({ open, onClose, lessonTitle, materials = []
           <div className="space-y-4 py-4">
             {/* Material title if exists */}
             {currentMaterial?.title && (
-              <div className="flex items-center gap-2 text-lg font-semibold text-gray-800">
+              <div className="flex items-center gap-2 text-lg font-semibold text-slate-200">
                 {getTypeIcon(currentMaterial.type)}
                 <span>{currentMaterial.title}</span>
               </div>
@@ -198,7 +198,7 @@ export default function LessonPopup({ open, onClose, lessonTitle, materials = []
                   <ChevronLeft className="w-4 h-4" />
                   Previous
                 </Button>
-                <span className="text-sm text-gray-500 px-2">
+                <span className="text-sm text-slate-500 px-2">
                   {currentSlide + 1} of {materials.length}
                 </span>
                 {!isLastSlide && (

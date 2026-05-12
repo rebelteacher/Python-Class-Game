@@ -274,7 +274,7 @@ export default function BlockTeaching({ user }) {
               variant="ghost"
               size="sm"
               onClick={() => navigate("/blocks-curriculum")}
-              className="text-white hover:bg-white/20"
+              className="text-white hover:bg-cyber-navy/60/20"
             >
               <ArrowLeft className="w-4 h-4 mr-1" />
               Back to Curriculum
@@ -287,7 +287,7 @@ export default function BlockTeaching({ user }) {
           
           <Button
             onClick={openTurtleBlocks}
-            className="bg-white text-orange-600 hover:bg-orange-50"
+            className="bg-cyber-navy/60 text-orange-600 hover:bg-orange-50"
           >
             <Play className="w-4 h-4 mr-2" />
             Open Turtle Blocks
@@ -330,7 +330,7 @@ export default function BlockTeaching({ user }) {
                         <button
                           key={lesson.id}
                           onClick={() => setSelectedLesson(lesson)}
-                          className={`w-full text-left px-4 py-3 border-b hover:bg-gray-50 transition-colors ${
+                          className={`w-full text-left px-4 py-3 border-b hover:bg-cyber-navy/40 transition-colors ${
                             selectedLesson.id === lesson.id ? 'bg-orange-50 border-l-4 border-l-orange-500' : ''
                           }`}
                         >

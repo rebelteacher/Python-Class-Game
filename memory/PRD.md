@@ -117,11 +117,16 @@ A coding education platform for K-12 students featuring multiple programming env
   - Custom fonts: Chakra Petch (headings/body), Orbitron (buttons/badges/nav), Fira Code (code)
   - Tailwind config extended with cyber-* color tokens and font families
   - Landing page fully redesigned: dark background, neon glow effects, sharp edges, grid background
-  - Teacher login page: glassmorphism card with neon accents
-  - Teacher Dashboard: dark sidebar, neon unit cards, glowing classroom cards
+  - Teacher Login: glassmorphism card with neon accents
+  - Teacher Dashboard: dark sidebar, neon unit cards, glowing classroom cards with rotating neon accents
+  - Student Dashboard: dark nav with neon branding
   - Assignment Library: dark nav, neon buttons
-  - All 50+ page backgrounds converted from light gradients to dark theme
+  - ClassroomPage: dark cards, neon accents
+  - All 50+ page backgrounds converted from light gradients to dark cyber-black
   - All nav bars updated to dark glassmorphism style
+  - All bg-white cards → bg-cyber-navy/60, all gray text → slate equivalents
+  - All indigo/teal buttons → cyber-cyan neon buttons
+  - All gray borders → subtle cyber-cyan borders
   - Custom scrollbar styling, neon text glow utilities, cyber grid background
 
 ### Completed (April 17, 2025)

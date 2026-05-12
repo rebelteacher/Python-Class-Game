@@ -126,7 +126,7 @@ export default function ImportAssignment({ user }) {
   if (loading || !assignment) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-cyber-black cyber-grid-bg">
-        <div className="text-xl text-gray-600">Loading...</div>
+        <div className="text-xl text-slate-400">Loading...</div>
       </div>
     );
   }
@@ -140,8 +140,8 @@ export default function ImportAssignment({ user }) {
             Back
           </Button>
           <div className="flex items-center space-x-2">
-            <Download className="w-7 h-7 text-indigo-600" />
-            <span className="text-xl font-bold text-gray-900">Import Assignment</span>
+            <Download className="w-7 h-7 text-cyber-cyan" />
+            <span className="text-xl font-bold text-white">Import Assignment</span>
           </div>
         </div>
       </nav>
@@ -155,11 +155,11 @@ export default function ImportAssignment({ user }) {
             </CardHeader>
             <CardContent className="space-y-3">
               <div>
-                <div className="text-sm text-gray-600">Title</div>
+                <div className="text-sm text-slate-400">Title</div>
                 <div className="font-semibold">{assignment.title}</div>
               </div>
               <div>
-                <div className="text-sm text-gray-600">Description</div>
+                <div className="text-sm text-slate-400">Description</div>
                 <div className="text-sm">{assignment.description}</div>
               </div>
               <div className="flex gap-2">
@@ -195,7 +195,7 @@ export default function ImportAssignment({ user }) {
                   <Calendar className="w-4 h-4" />
                   Available Date (Optional)
                 </Label>
-                <div className="text-xs text-gray-500 mb-2">Students can't access before this date/time</div>
+                <div className="text-xs text-slate-500 mb-2">Students can't access before this date/time</div>
                 <div className="grid grid-cols-2 gap-2">
                   <Input
                     data-testid="available-date"
@@ -218,7 +218,7 @@ export default function ImportAssignment({ user }) {
                   <Clock className="w-4 h-4" />
                   Due Date (Optional)
                 </Label>
-                <div className="text-xs text-gray-500 mb-2">Submission deadline</div>
+                <div className="text-xs text-slate-500 mb-2">Submission deadline</div>
                 <div className="grid grid-cols-2 gap-2">
                   <Input
                     data-testid="due-date"
@@ -257,7 +257,7 @@ export default function ImportAssignment({ user }) {
                       onChange={(e) => setLatePenalty(Number(e.target.value))}
                       className="mt-1"
                     />
-                    <div className="text-xs text-gray-500 mt-1">
+                    <div className="text-xs text-slate-500 mt-1">
                       Deduct {latePenalty}% from score for late submissions
                     </div>
                   </div>
@@ -275,7 +275,7 @@ export default function ImportAssignment({ user }) {
           </CardHeader>
           <CardContent>
             {classrooms.length === 0 ? (
-              <div className="text-center py-10 text-gray-500">
+              <div className="text-center py-10 text-slate-500">
                 No classrooms found. Create a classroom first.
               </div>
             ) : (
@@ -284,7 +284,7 @@ export default function ImportAssignment({ user }) {
                   <label
                     key={classroom.id}
                     data-testid={`classroom-checkbox-${classroom.id}`}
-                    className="flex items-center space-x-3 p-3 rounded-lg border hover:bg-gray-50 cursor-pointer"
+                    className="flex items-center space-x-3 p-3 rounded-lg border hover:bg-cyber-navy/40 cursor-pointer"
                   >
                     <Checkbox
                       checked={selectedClassrooms.includes(classroom.id)}
@@ -292,7 +292,7 @@ export default function ImportAssignment({ user }) {
                     />
                     <div className="flex-1">
                       <div className="font-semibold">{classroom.name}</div>
-                      <div className="text-sm text-gray-600">
+                      <div className="text-sm text-slate-400">
                         Code: {classroom.class_code} • {classroom.students?.length || 0} students
                       </div>
                     </div>
@@ -309,7 +309,7 @@ export default function ImportAssignment({ user }) {
             data-testid="import-submit-btn"
             onClick={handleImport}
             disabled={importing || selectedClassrooms.length === 0}
-            className="w-full bg-indigo-600 hover:bg-indigo-700 py-6 text-lg"
+            className="w-full bg-cyber-cyan text-cyber-black hover:shadow-[0_0_15px_rgba(0,240,255,0.5)] font-bold py-6 text-lg"
           >
             {importing
               ? "Importing..."

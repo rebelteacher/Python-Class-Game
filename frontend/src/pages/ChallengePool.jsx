@@ -192,10 +192,10 @@ function ChallengePool() {
               <h1 className="text-4xl font-bold bg-gradient-to-r from-orange-600 to-red-600 bg-clip-text text-transparent mb-2">
                 Challenge Problem Pool
               </h1>
-              <p className="text-gray-600">Problems for student-to-student challenges</p>
+              <p className="text-slate-400">Problems for student-to-student challenges</p>
             </div>
             <div className="flex items-center gap-3">
-              {user && <span className="text-gray-700 font-medium">{user.name}</span>}
+              {user && <span className="text-slate-300 font-medium">{user.name}</span>}
               <Button onClick={() => navigate('/teacher/dashboard')} variant="outline">
                 <ArrowLeft className="w-4 h-4 mr-2" />
                 Back
@@ -313,8 +313,8 @@ function ChallengePool() {
           <Card className="border-2 border-dashed">
             <CardContent className="flex flex-col items-center justify-center py-12">
               <Trophy className="w-16 h-16 text-gray-300 mb-4" />
-              <h3 className="text-xl font-semibold text-gray-600 mb-2">No challenge problems yet</h3>
-              <p className="text-gray-500 mb-4">Add problems for students to battle with!</p>
+              <h3 className="text-xl font-semibold text-slate-400 mb-2">No challenge problems yet</h3>
+              <p className="text-slate-500 mb-4">Add problems for students to battle with!</p>
             </CardContent>
           </Card>
         ) : (
@@ -325,7 +325,7 @@ function ChallengePool() {
                   <div className="flex justify-between items-start">
                     <div>
                       <CardTitle className="text-xl">{problem.title}</CardTitle>
-                      <p className="text-sm text-gray-600 mt-2">{problem.description}</p>
+                      <p className="text-sm text-slate-400 mt-2">{problem.description}</p>
                     </div>
                     <Button
                       onClick={() => handleDelete(problem.id)}
@@ -337,9 +337,9 @@ function ChallengePool() {
                   </div>
                 </CardHeader>
                 <CardContent>
-                  <div className="text-sm text-gray-600">
+                  <div className="text-sm text-slate-400">
                     <p><strong>{problem.test_cases?.length || 0}</strong> test cases</p>
-                    <p className="text-xs text-gray-500 mt-1">
+                    <p className="text-xs text-slate-500 mt-1">
                       Added {new Date(problem.created_at).toLocaleDateString()}
                     </p>
                   </div>

@@ -100,13 +100,13 @@ export default function LessonModal({ isOpen, onClose, lesson }) {
                 },
                 // Headings
                 h1({node, ...props}) {
-                  return <h1 className="text-3xl font-bold text-gray-900 mt-6 mb-4" {...props} />;
+                  return <h1 className="text-3xl font-bold text-white mt-6 mb-4" {...props} />;
                 },
                 h2({node, ...props}) {
-                  return <h2 className="text-2xl font-bold text-gray-800 mt-5 mb-3" {...props} />;
+                  return <h2 className="text-2xl font-bold text-slate-200 mt-5 mb-3" {...props} />;
                 },
                 h3({node, ...props}) {
-                  return <h3 className="text-xl font-semibold text-gray-800 mt-4 mb-2" {...props} />;
+                  return <h3 className="text-xl font-semibold text-slate-200 mt-4 mb-2" {...props} />;
                 },
                 // Links
                 a({node, ...props}) {
@@ -128,12 +128,12 @@ export default function LessonModal({ isOpen, onClose, lesson }) {
                 },
                 // Paragraphs
                 p({node, ...props}) {
-                  return <p className="text-gray-700 leading-relaxed my-3" {...props} />;
+                  return <p className="text-slate-300 leading-relaxed my-3" {...props} />;
                 },
                 // Blockquotes
                 blockquote({node, ...props}) {
                   return (
-                    <blockquote className="border-l-4 border-blue-500 pl-4 py-2 my-4 bg-blue-50 italic text-gray-700" {...props} />
+                    <blockquote className="border-l-4 border-blue-500 pl-4 py-2 my-4 bg-blue-50 italic text-slate-300" {...props} />
                   );
                 },
               }}
@@ -144,7 +144,7 @@ export default function LessonModal({ isOpen, onClose, lesson }) {
         </div>
 
         <div className="mt-6 pt-4 border-t flex justify-between items-center">
-          <p className="text-sm text-gray-500">
+          <p className="text-sm text-slate-500">
             💡 Tip: You can come back and review this anytime!
           </p>
           <Button onClick={onClose} className="bg-blue-600 hover:bg-blue-700">

@@ -71,7 +71,7 @@ export default function CodingTestList({ user }) {
     const dueDate = test.due_date ? new Date(test.due_date) : null;
     
     if (dueDate && now > dueDate) {
-      return "bg-gray-100 text-gray-700";
+      return "bg-cyber-navy/30 text-slate-300";
     }
     return "bg-green-100 text-green-700";
   };
@@ -90,7 +90,7 @@ export default function CodingTestList({ user }) {
     return (
       <div className="min-h-screen bg-cyber-black cyber-grid-bg">
         <div className="max-w-6xl mx-auto">
-          <p className="text-center text-gray-600">Loading coding tests...</p>
+          <p className="text-center text-slate-400">Loading coding tests...</p>
         </div>
       </div>
     );
@@ -109,26 +109,26 @@ export default function CodingTestList({ user }) {
           </Button>
           <Button
             onClick={() => navigate("/coding-tests/create")}
-            className="bg-indigo-600 hover:bg-indigo-700"
+            className="bg-cyber-cyan text-cyber-black hover:shadow-[0_0_15px_rgba(0,240,255,0.5)] font-bold"
           >
             <Code2 className="w-4 h-4 mr-2" />
             Create New Test
           </Button>
         </div>
 
-        <h1 className="text-3xl font-bold text-gray-900 mb-6">Coding Tests</h1>
+        <h1 className="text-3xl font-bold text-white mb-6">Coding Tests</h1>
 
         {tests.length === 0 ? (
           <Card>
             <CardContent className="py-12 text-center">
-              <Code2 className="w-16 h-16 text-gray-400 mx-auto mb-4" />
-              <h3 className="text-lg font-semibold text-gray-900 mb-2">No coding tests yet</h3>
-              <p className="text-gray-600 mb-4">
+              <Code2 className="w-16 h-16 text-slate-500 mx-auto mb-4" />
+              <h3 className="text-lg font-semibold text-white mb-2">No coding tests yet</h3>
+              <p className="text-slate-400 mb-4">
                 Create your first coding test to assess student skills
               </p>
               <Button
                 onClick={() => navigate("/coding-tests/create")}
-                className="bg-indigo-600 hover:bg-indigo-700"
+                className="bg-cyber-cyan text-cyber-black hover:shadow-[0_0_15px_rgba(0,240,255,0.5)] font-bold"
               >
                 <Code2 className="w-4 h-4 mr-2" />
                 Create Test
@@ -145,7 +145,7 @@ export default function CodingTestList({ user }) {
                       <CardTitle className="text-xl mb-2">{test.title}</CardTitle>
                       <CardDescription>{test.description}</CardDescription>
                       
-                      <div className="mt-3 flex flex-wrap gap-2 text-sm text-gray-600">
+                      <div className="mt-3 flex flex-wrap gap-2 text-sm text-slate-400">
                         {test.chapter && (
                           <span className="px-2 py-1 bg-blue-50 rounded">
                             {test.chapter}
@@ -171,7 +171,7 @@ export default function CodingTestList({ user }) {
                 </CardHeader>
                 <CardContent>
                   <div className="space-y-3">
-                    <div className="flex items-center gap-4 text-sm text-gray-600 flex-wrap">
+                    <div className="flex items-center gap-4 text-sm text-slate-400 flex-wrap">
                       <div className="flex items-center gap-1">
                         <Calendar className="w-4 h-4" />
                         <span>Available: {formatDate(test.available_date)}</span>
@@ -212,29 +212,29 @@ export default function CodingTestList({ user }) {
                       <div className="mt-4 border-t pt-4">
                         <h4 className="font-semibold mb-3">Student Submissions</h4>
                         {!submissions[test.id] ? (
-                          <p className="text-sm text-gray-600">Loading...</p>
+                          <p className="text-sm text-slate-400">Loading...</p>
                         ) : submissions[test.id].length === 0 ? (
-                          <p className="text-sm text-gray-600">No submissions yet</p>
+                          <p className="text-sm text-slate-400">No submissions yet</p>
                         ) : (
                           <div className="space-y-2">
                             {submissions[test.id].map((submission) => (
                               <div
                                 key={submission.id}
-                                className="flex items-center justify-between p-3 bg-gray-50 rounded"
+                                className="flex items-center justify-between p-3 bg-cyber-navy/40 rounded"
                               >
                                 <div>
                                   <p className="font-medium">{submission.student_name}</p>
-                                  <p className="text-xs text-gray-600">
+                                  <p className="text-xs text-slate-400">
                                     Submitted: {formatDate(submission.submitted_at)}
                                   </p>
                                   {submission.time_taken_seconds > 0 && (
-                                    <p className="text-xs text-gray-600">
+                                    <p className="text-xs text-slate-400">
                                       Time: {Math.floor(submission.time_taken_seconds / 60)}m {submission.time_taken_seconds % 60}s
                                     </p>
                                   )}
                                 </div>
                                 <div className="text-right">
-                                  <p className="text-2xl font-bold text-indigo-600">
+                                  <p className="text-2xl font-bold text-cyber-cyan">
                                     {Math.round(submission.score)}%
                                   </p>
                                 </div>

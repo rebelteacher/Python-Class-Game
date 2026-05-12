@@ -85,7 +85,7 @@ export default function BattleZone({ classroomId, isTeacher }) {
   };
 
   if (loading) {
-    return <div className="text-center py-10 text-gray-600">Loading battles...</div>;
+    return <div className="text-center py-10 text-slate-400">Loading battles...</div>;
   }
 
   return (
@@ -143,8 +143,8 @@ export default function BattleZone({ classroomId, isTeacher }) {
         <Card>
           <CardContent className="py-20 text-center">
             <Swords className="w-16 h-16 text-gray-400 mx-auto mb-4" />
-            <h3 className="text-xl font-semibold text-gray-700 mb-2">No battles yet</h3>
-            <p className="text-gray-500">
+            <h3 className="text-xl font-semibold text-slate-300 mb-2">No battles yet</h3>
+            <p className="text-slate-500">
               {isTeacher ? "Challenge another classroom to start a battle!" : "Your teacher will start battles soon!"}
             </p>
           </CardContent>
@@ -183,7 +183,7 @@ export default function BattleZone({ classroomId, isTeacher }) {
                           </span>
                         </>
                       ) : (
-                        <span className="font-semibold text-gray-600">
+                        <span className="font-semibold text-slate-400">
                           Battle Ended
                         </span>
                       )}
@@ -194,9 +194,9 @@ export default function BattleZone({ classroomId, isTeacher }) {
                   <div className="space-y-4">
                     <div className="flex justify-between items-center">
                       <div className="text-center flex-1">
-                        <div className="text-sm text-gray-600 mb-1">{ourTeam}</div>
+                        <div className="text-sm text-slate-400 mb-1">{ourTeam}</div>
                         <div className="text-3xl font-bold text-indigo-600">{ourScore}</div>
-                        <div className="text-xs text-gray-500">Avg XP/student</div>
+                        <div className="text-xs text-slate-500">Avg XP/student</div>
                         <div className="text-xs text-gray-400 mt-1">
                           ({isChallenger ? battle.challenger_student_count : battle.opponent_student_count} students)
                         </div>
@@ -207,9 +207,9 @@ export default function BattleZone({ classroomId, isTeacher }) {
                       </div>
                       
                       <div className="text-center flex-1">
-                        <div className="text-sm text-gray-600 mb-1">{theirTeam}</div>
+                        <div className="text-sm text-slate-400 mb-1">{theirTeam}</div>
                         <div className="text-3xl font-bold text-red-600">{theirScore}</div>
-                        <div className="text-xs text-gray-500">Avg XP/student</div>
+                        <div className="text-xs text-slate-500">Avg XP/student</div>
                         <div className="text-xs text-gray-400 mt-1">
                           ({isChallenger ? battle.opponent_student_count : battle.challenger_student_count} students)
                         </div>
@@ -229,7 +229,7 @@ export default function BattleZone({ classroomId, isTeacher }) {
                     </div>
 
                     {battle.status === "completed" && (
-                      <div className={`text-center py-3 rounded-lg ${isWinner ? "bg-yellow-100 text-yellow-800" : "bg-gray-100 text-gray-700"}`}>
+                      <div className={`text-center py-3 rounded-lg ${isWinner ? "bg-yellow-100 text-yellow-800" : "bg-cyber-navy/30 text-slate-300"}`}>
                         <div className="font-bold text-lg">
                           {isWinner ? "🎉 VICTORY! You won +200 coins + Champion Team badge!" : "Keep training for the next battle!"}
                         </div>

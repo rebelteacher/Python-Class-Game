@@ -26,7 +26,7 @@ export default function RankBadge({ rank, xp, size = "normal" }) {
   }
 
   return (
-    <div className="bg-white rounded-xl p-6 shadow-lg border-2" style={{ borderColor: data.color }}>
+    <div className="bg-cyber-navy/80 rounded-xl p-6 shadow-lg border-2" style={{ borderColor: data.color }}>
       <div className="flex items-center justify-between mb-4">
         <div className="flex items-center gap-3">
           <span className="text-5xl">{data.icon}</span>
@@ -34,13 +34,13 @@ export default function RankBadge({ rank, xp, size = "normal" }) {
             <h3 className="text-2xl font-bold" style={{ color: data.color }}>
               {rank}
             </h3>
-            <p className="text-sm text-gray-600">{xp} XP</p>
+            <p className="text-sm text-slate-400">{xp} XP</p>
           </div>
         </div>
       </div>
       {rank !== "Legend" && (
         <div>
-          <div className="flex justify-between text-xs text-gray-600 mb-1">
+          <div className="flex justify-between text-xs text-slate-400 mb-1">
             <span>Progress to next rank</span>
             <span>{data.nextXp - xp} XP needed</span>
           </div>

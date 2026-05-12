@@ -123,7 +123,7 @@ export default function AdminMessages({ user }) {
       case "unread": return "bg-red-100 text-red-800";
       case "read": return "bg-blue-100 text-blue-800";
       case "resolved": return "bg-green-100 text-green-800";
-      default: return "bg-gray-100 text-gray-800";
+      default: return "bg-cyber-navy/30 text-slate-200";
     }
   };
 
@@ -150,8 +150,8 @@ export default function AdminMessages({ user }) {
               Back to Admin
             </Button>
             <div className="flex items-center space-x-2">
-              <MessageCircle className="w-7 h-7 text-indigo-600" />
-              <span className="text-xl font-bold text-gray-900">User Messages</span>
+              <MessageCircle className="w-7 h-7 text-cyber-cyan" />
+              <span className="text-xl font-bold text-white">User Messages</span>
             </div>
           </div>
         </div>
@@ -166,7 +166,7 @@ export default function AdminMessages({ user }) {
               onClick={() => setFilter(f)}
               variant={filter === f ? "default" : "outline"}
               size="sm"
-              className={filter === f ? "bg-indigo-600" : ""}
+              className={filter === f ? "bg-cyber-cyan text-cyber-black" : ""}
             >
               {f.charAt(0).toUpperCase() + f.slice(1)}
               {f === "unread" && (
@@ -180,14 +180,14 @@ export default function AdminMessages({ user }) {
 
         {loading ? (
           <div className="text-center py-20">
-            <p className="text-gray-600">Loading messages...</p>
+            <p className="text-slate-400">Loading messages...</p>
           </div>
         ) : filteredMessages.length === 0 ? (
           <Card>
             <CardContent className="py-20 text-center">
-              <MessageCircle className="w-16 h-16 text-gray-400 mx-auto mb-4" />
-              <h3 className="text-xl font-semibold text-gray-700 mb-2">No Messages</h3>
-              <p className="text-gray-500">
+              <MessageCircle className="w-16 h-16 text-slate-500 mx-auto mb-4" />
+              <h3 className="text-xl font-semibold text-slate-300 mb-2">No Messages</h3>
+              <p className="text-slate-500">
                 {filter === "all" ? "No messages yet" : `No ${filter} messages`}
               </p>
             </CardContent>
@@ -203,7 +203,7 @@ export default function AdminMessages({ user }) {
                         <span className="text-2xl">{getCategoryIcon(message.category)}</span>
                         <div>
                           <CardTitle className="text-lg">{message.name}</CardTitle>
-                          <div className="flex items-center gap-3 text-sm text-gray-600 mt-1">
+                          <div className="flex items-center gap-3 text-sm text-slate-400 mt-1">
                             <span className="flex items-center gap-1">
                               <Mail className="w-3 h-3" />
                               {message.email}
@@ -224,7 +224,7 @@ export default function AdminMessages({ user }) {
                       <span className={`inline-block px-2 py-1 rounded text-xs font-semibold ${getStatusColor(message.status)}`}>
                         {message.status}
                       </span>
-                      <span className="ml-2 inline-block px-2 py-1 rounded text-xs font-semibold bg-gray-100 text-gray-800">
+                      <span className="ml-2 inline-block px-2 py-1 rounded text-xs font-semibold bg-cyber-navy/30 text-slate-200">
                         {message.category}
                       </span>
                     </div>
@@ -232,16 +232,16 @@ export default function AdminMessages({ user }) {
                 </CardHeader>
                 <CardContent>
                   <div className="space-y-4">
-                    <div className="bg-gray-50 p-4 rounded-lg">
-                      <p className="text-gray-800 whitespace-pre-wrap">{message.message}</p>
+                    <div className="bg-cyber-navy/40 p-4 rounded-lg">
+                      <p className="text-slate-200 whitespace-pre-wrap">{message.message}</p>
                     </div>
 
                     {message.admin_reply && (
                       <div className="bg-blue-50 p-4 rounded-lg border-l-4 border-blue-500">
                         <p className="text-sm font-semibold text-blue-900 mb-2">Your Reply:</p>
-                        <p className="text-gray-800 whitespace-pre-wrap">{message.admin_reply}</p>
+                        <p className="text-slate-200 whitespace-pre-wrap">{message.admin_reply}</p>
                         {message.replied_at && (
-                          <p className="text-xs text-gray-500 mt-2">
+                          <p className="text-xs text-slate-500 mt-2">
                             Replied on {new Date(message.replied_at).toLocaleString()}
                           </p>
                         )}
@@ -320,9 +320,9 @@ export default function AdminMessages({ user }) {
             <DialogTitle>Reply to {selectedMessage?.name}</DialogTitle>
           </DialogHeader>
           <div className="space-y-4">
-            <div className="bg-gray-50 p-4 rounded-lg">
-              <p className="text-sm font-semibold text-gray-700 mb-2">Original Message:</p>
-              <p className="text-gray-800 whitespace-pre-wrap">{selectedMessage?.message}</p>
+            <div className="bg-cyber-navy/40 p-4 rounded-lg">
+              <p className="text-sm font-semibold text-slate-300 mb-2">Original Message:</p>
+              <p className="text-slate-200 whitespace-pre-wrap">{selectedMessage?.message}</p>
             </div>
 
             <div>

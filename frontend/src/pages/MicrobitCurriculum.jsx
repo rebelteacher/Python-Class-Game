@@ -115,7 +115,7 @@ export default function MicrobitCurriculum({ user }) {
       case "code":
         return "bg-blue-100 text-blue-700";
       default:
-        return "bg-gray-100 text-gray-700";
+        return "bg-cyber-navy/30 text-slate-300";
     }
   };
 
@@ -124,7 +124,7 @@ export default function MicrobitCurriculum({ user }) {
       <div className="min-h-screen bg-cyber-black cyber-grid-bg flex items-center justify-center">
         <div className="text-center">
           <Cpu className="w-12 h-12 text-cyan-600 animate-pulse mx-auto mb-4" />
-          <p className="text-lg text-gray-600">Loading Micro:bit Curriculum...</p>
+          <p className="text-lg text-slate-400">Loading Micro:bit Curriculum...</p>
         </div>
       </div>
     );
@@ -140,7 +140,7 @@ export default function MicrobitCurriculum({ user }) {
               <Button
                 variant="ghost"
                 onClick={() => navigate(-1)}
-                className="text-white hover:bg-white/20"
+                className="text-white hover:bg-cyber-navy/60/20"
               >
                 <ArrowLeft className="w-5 h-5 mr-2" />
                 Back
@@ -155,7 +155,7 @@ export default function MicrobitCurriculum({ user }) {
             </div>
             <Button
               onClick={() => navigate("/library?type=microbit")}
-              className="bg-white text-cyan-600 hover:bg-cyan-50"
+              className="bg-cyber-navy/60 text-cyan-600 hover:bg-cyan-50"
             >
               <BookOpen className="w-4 h-4 mr-2" />
               Go to Micro:bit Library
@@ -174,7 +174,7 @@ export default function MicrobitCurriculum({ user }) {
               </div>
               <div>
                 <h3 className="font-semibold">Problem Library</h3>
-                <p className="text-sm text-gray-600">View & create Micro:bit problems</p>
+                <p className="text-sm text-slate-400">View & create Micro:bit problems</p>
               </div>
             </CardContent>
           </Card>
@@ -198,7 +198,7 @@ export default function MicrobitCurriculum({ user }) {
               </div>
               <div>
                 <h3 className="font-semibold">Quick Assign</h3>
-                <p className="text-sm text-gray-600">Assign a lesson to your class</p>
+                <p className="text-sm text-slate-400">Assign a lesson to your class</p>
               </div>
             </CardContent>
           </Card>
@@ -210,7 +210,7 @@ export default function MicrobitCurriculum({ user }) {
               </div>
               <div>
                 <h3 className="font-semibold">Student Progress</h3>
-                <p className="text-sm text-gray-600">View in classroom page</p>
+                <p className="text-sm text-slate-400">View in classroom page</p>
               </div>
             </CardContent>
           </Card>
@@ -220,7 +220,7 @@ export default function MicrobitCurriculum({ user }) {
         <Card className="mb-8 bg-gradient-to-r from-cyan-500 to-blue-500 text-white border-0">
           <CardContent className="p-6">
             <div className="flex items-start gap-4">
-              <div className="p-3 bg-white/20 rounded-lg">
+              <div className="p-3 bg-cyber-navy/60/20 rounded-lg">
                 <Zap className="w-8 h-8" />
               </div>
               <div>
@@ -260,10 +260,10 @@ export default function MicrobitCurriculum({ user }) {
                   onError={(e) => { e.target.style.display = 'none'; }}
                 />
                 <div className="text-sm">
-                  <p className="text-gray-700">
+                  <p className="text-slate-300">
                     Curriculum based on <a href="https://microbit.org" target="_blank" rel="noopener noreferrer" className="text-cyan-600 hover:underline font-medium">BBC micro:bit</a> resources.
                   </p>
-                  <p className="text-gray-500 text-xs">
+                  <p className="text-slate-500 text-xs">
                     micro:bit is a trademark of the Micro:bit Educational Foundation.
                   </p>
                 </div>
@@ -300,7 +300,7 @@ export default function MicrobitCurriculum({ user }) {
                 className={`cursor-pointer transition-colors ${
                   selectedUnit?.id === unit.id 
                     ? 'bg-cyan-50 border-b-2 border-cyan-500' 
-                    : 'hover:bg-gray-50'
+                    : 'hover:bg-cyber-navy/40'
                 }`}
                 onClick={() => setSelectedUnit(selectedUnit?.id === unit.id ? null : unit)}
               >
@@ -335,11 +335,11 @@ export default function MicrobitCurriculum({ user }) {
                     {unit.lessons.map((lesson, lessonIndex) => (
                       <div 
                         key={lesson.id}
-                        className="p-4 hover:bg-gray-50 transition-colors"
+                        className="p-4 hover:bg-cyber-navy/40 transition-colors"
                       >
                         <div className="flex items-start justify-between">
                           <div className="flex items-start gap-4">
-                            <div className="w-8 h-8 rounded-full bg-gray-100 flex items-center justify-center text-sm font-medium">
+                            <div className="w-8 h-8 rounded-full bg-cyber-navy/30 flex items-center justify-center text-sm font-medium">
                               {lessonIndex + 1}
                             </div>
                             <div className="flex-1">
@@ -354,14 +354,14 @@ export default function MicrobitCurriculum({ user }) {
                                   {lesson.duration}
                                 </Badge>
                               </div>
-                              <p className="text-sm text-gray-600 mb-2">{lesson.description}</p>
+                              <p className="text-sm text-slate-400 mb-2">{lesson.description}</p>
                               
                               {/* Learning Objectives */}
                               <div className="mb-2">
-                                <p className="text-xs font-semibold text-gray-500 mb-1 flex items-center gap-1">
+                                <p className="text-xs font-semibold text-slate-500 mb-1 flex items-center gap-1">
                                   <Target className="w-3 h-3" /> Learning Objectives:
                                 </p>
-                                <ul className="text-xs text-gray-600 space-y-1">
+                                <ul className="text-xs text-slate-400 space-y-1">
                                   {lesson.objectives.map((obj, i) => (
                                     <li key={i} className="flex items-center gap-1">
                                       <CheckCircle className="w-3 h-3 text-green-500" />
@@ -373,7 +373,7 @@ export default function MicrobitCurriculum({ user }) {
 
                               {/* Materials */}
                               <div>
-                                <p className="text-xs font-semibold text-gray-500 mb-1 flex items-center gap-1">
+                                <p className="text-xs font-semibold text-slate-500 mb-1 flex items-center gap-1">
                                   <Wrench className="w-3 h-3" /> Materials Needed:
                                 </p>
                                 <div className="flex flex-wrap gap-1">
@@ -421,7 +421,7 @@ export default function MicrobitCurriculum({ user }) {
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <ul className="space-y-2 text-sm text-gray-700">
+            <ul className="space-y-2 text-sm text-slate-300">
               <li className="flex items-start gap-2">
                 <CheckCircle className="w-4 h-4 text-green-500 mt-0.5" />
                 <span><strong>Hardware First:</strong> Let students explore the physical Micro:bit before coding</span>
@@ -457,13 +457,13 @@ export default function MicrobitCurriculum({ user }) {
             <div>
               <label className="text-sm font-medium mb-2 block">Select Classrooms:</label>
               {classrooms.length === 0 ? (
-                <p className="text-sm text-gray-500">No classrooms found. Create a classroom first.</p>
+                <p className="text-sm text-slate-500">No classrooms found. Create a classroom first.</p>
               ) : (
                 <div className="space-y-2 max-h-48 overflow-y-auto border rounded-lg p-2">
                   {classrooms.map((classroom) => (
                     <div 
                       key={classroom.id}
-                      className="flex items-center gap-2 p-2 hover:bg-gray-50 rounded"
+                      className="flex items-center gap-2 p-2 hover:bg-cyber-navy/40 rounded"
                     >
                       <Checkbox
                         id={classroom.id}
@@ -486,9 +486,9 @@ export default function MicrobitCurriculum({ user }) {
             </div>
 
             {selectedLesson && (
-              <div className="bg-gray-50 rounded-lg p-3 text-sm">
+              <div className="bg-cyber-navy/40 rounded-lg p-3 text-sm">
                 <p className="font-medium mb-1">This will create:</p>
-                <ul className="text-gray-600 space-y-1">
+                <ul className="text-slate-400 space-y-1">
                   <li>• A problem in your Assignment Library</li>
                   <li>• An assignment for selected classrooms</li>
                   <li>• Pre-filled with starter code & test cases</li>

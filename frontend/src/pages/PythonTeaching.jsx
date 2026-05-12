@@ -1969,7 +1969,7 @@ export default function PythonTeaching({ user }) {
               variant="ghost"
               size="sm"
               onClick={() => navigate("/python-curriculum")}
-              className="text-white hover:bg-white/20"
+              className="text-white hover:bg-cyber-navy/60/20"
             >
               <ArrowLeft className="w-4 h-4 mr-1" />
               Back to Curriculum
@@ -1982,7 +1982,7 @@ export default function PythonTeaching({ user }) {
           
           <Button
             onClick={() => navigate("/library?type=text")}
-            className="bg-white text-blue-600 hover:bg-blue-50"
+            className="bg-cyber-navy/60 text-blue-600 hover:bg-blue-50"
           >
             <BookOpen className="w-4 h-4 mr-2" />
             View Problems
@@ -2007,7 +2007,7 @@ export default function PythonTeaching({ user }) {
                     {/* Chapter Header */}
                     <button
                       onClick={() => setExpandedChapter(expandedChapter === chapterKey ? null : chapterKey)}
-                      className={`w-full text-left px-4 py-3 flex items-center justify-between hover:bg-gray-50 transition-colors border-b ${
+                      className={`w-full text-left px-4 py-3 flex items-center justify-between hover:bg-cyber-navy/40 transition-colors border-b ${
                         selectedChapter === chapterKey ? 'bg-blue-50' : ''
                       }`}
                     >
@@ -2016,15 +2016,15 @@ export default function PythonTeaching({ user }) {
                         <span className="font-medium text-sm">{chapter.title}</span>
                       </div>
                       {expandedChapter === chapterKey ? (
-                        <ChevronDown className="w-4 h-4 text-gray-400" />
+                        <ChevronDown className="w-4 h-4 text-slate-500" />
                       ) : (
-                        <ChevronRight className="w-4 h-4 text-gray-400" />
+                        <ChevronRight className="w-4 h-4 text-slate-500" />
                       )}
                     </button>
                     
                     {/* Lessons List */}
                     {expandedChapter === chapterKey && (
-                      <div className="bg-gray-50">
+                      <div className="bg-cyber-navy/40">
                         {chapter.lessons.map((lesson) => (
                           <button
                             key={lesson.id}
@@ -2032,7 +2032,7 @@ export default function PythonTeaching({ user }) {
                               setSelectedChapter(chapterKey);
                               setSelectedLesson(lesson);
                             }}
-                            className={`w-full text-left px-6 py-2 text-sm border-b border-gray-100 hover:bg-blue-50 transition-colors ${
+                            className={`w-full text-left px-6 py-2 text-sm border-b border-cyber-cyan/10 hover:bg-blue-50 transition-colors ${
                               selectedLesson?.id === lesson.id ? 'bg-blue-100 border-l-4 border-l-blue-500' : ''
                             }`}
                           >

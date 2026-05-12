@@ -96,7 +96,7 @@ export default function StudentSandbox({ user }) {
               onClick={() => navigate("/student/dashboard")}
               variant="outline"
               size="sm"
-              className="gap-2 border-white/30 text-white hover:bg-white/20 bg-white/10"
+              className="gap-2 border-white/30 text-white hover:bg-cyber-navy/60/20 bg-cyber-navy/60/10"
             >
               <ArrowLeft className="w-4 h-4" />
               Back to Dashboard
@@ -111,7 +111,7 @@ export default function StudentSandbox({ user }) {
               onClick={toggleDarkMode}
               variant="outline"
               size="sm"
-              className="gap-2 border-white/30 text-white hover:bg-white/20 bg-white/10"
+              className="gap-2 border-white/30 text-white hover:bg-cyber-navy/60/20 bg-cyber-navy/60/10"
             >
               {darkMode ? <Sun className="w-4 h-4" /> : <Moon className="w-4 h-4" />}
               {darkMode ? "Light" : "Dark"}
@@ -120,7 +120,7 @@ export default function StudentSandbox({ user }) {
               onClick={handleClearCode}
               variant="outline"
               size="sm"
-              className="gap-2 border-white/30 text-white hover:bg-white/20 bg-white/10"
+              className="gap-2 border-white/30 text-white hover:bg-cyber-navy/60/20 bg-cyber-navy/60/10"
             >
               <Trash2 className="w-4 h-4" />
               Clear
@@ -129,7 +129,7 @@ export default function StudentSandbox({ user }) {
               onClick={() => handleRunCode()}
               disabled={running}
               size="sm"
-              className="gap-2 bg-white text-purple-600 hover:bg-gray-100"
+              className="gap-2 bg-cyber-navy/60 text-purple-600 hover:bg-cyber-navy/30"
             >
               <Play className="w-4 h-4" />
               {running ? "Running..." : "Run Code"}
@@ -168,7 +168,7 @@ export default function StudentSandbox({ user }) {
                   <CardHeader className="pb-3">
                     <CardTitle className="text-lg flex items-center justify-between">
                       <span>Python Code Editor</span>
-                      <span className="text-sm font-normal text-gray-500">
+                      <span className="text-sm font-normal text-slate-500">
                         {darkMode ? "🌙 Dark Mode" : "☀️ Light Mode"}
                       </span>
                     </CardTitle>

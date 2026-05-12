@@ -314,7 +314,7 @@ export default function TestTaking({ user }) {
   };
 
   const getTimeColor = () => {
-    if (!timeRemaining || timeRemaining > 300) return "text-gray-700";
+    if (!timeRemaining || timeRemaining > 300) return "text-slate-300";
     if (timeRemaining > 60) return "text-yellow-600";
     return "text-red-600 font-bold";
   };
@@ -334,11 +334,11 @@ export default function TestTaking({ user }) {
         <Card className="max-w-md">
           <CardContent className="p-6 text-center">
             <AlertCircle className="w-12 h-12 text-red-500 mx-auto mb-4" />
-            <p className="text-lg font-medium text-gray-900 mb-2">Unable to load test</p>
-            <p className="text-gray-600 mb-4">The test may have been deleted or there was an error loading it.</p>
+            <p className="text-lg font-medium text-white mb-2">Unable to load test</p>
+            <p className="text-slate-400 mb-4">The test may have been deleted or there was an error loading it.</p>
             <Button 
               onClick={() => navigate("/student/dashboard")}
-              className="bg-indigo-600 hover:bg-indigo-700"
+              className="bg-cyber-cyan text-cyber-black hover:shadow-[0_0_15px_rgba(0,240,255,0.5)] font-bold"
             >
               <ArrowLeft className="w-4 h-4 mr-2" />
               Back to Dashboard
@@ -358,7 +358,7 @@ export default function TestTaking({ user }) {
       <div className="min-h-screen bg-cyber-black cyber-grid-bg">
         <nav className="bg-cyber-navy/80 backdrop-blur-xl border-b border-cyber-cyan/20">
           <div className="container mx-auto px-6 py-4">
-            <h1 className="text-2xl font-bold text-gray-900">{testData?.title || "Test"}</h1>
+            <h1 className="text-2xl font-bold text-white">{testData?.title || "Test"}</h1>
           </div>
         </nav>
 
@@ -376,17 +376,17 @@ export default function TestTaking({ user }) {
             </CardHeader>
             <CardContent className="text-center space-y-6">
               <div>
-                <p className="text-gray-600 mb-2">Your Score</p>
+                <p className="text-slate-400 mb-2">Your Score</p>
                 <p className={`text-6xl font-bold ${score >= 70 ? 'text-green-600' : 'text-yellow-600'}`}>
                   {typeof score === 'number' ? score.toFixed(1) : score}%
                 </p>
-                <p className="text-gray-500 mt-2">
+                <p className="text-slate-500 mt-2">
                   {correctCount} correct out of {totalQuestions || questions.length} questions
                 </p>
               </div>
               
               <div className="pt-6 border-t">
-                <p className="text-gray-600 mb-4">
+                <p className="text-slate-400 mb-4">
                   {score >= 90 ? "Excellent work! 🎉" :
                    score >= 80 ? "Great job! 👏" :
                    score >= 70 ? "Good effort! 👍" :
@@ -395,7 +395,7 @@ export default function TestTaking({ user }) {
                 </p>
                 <Button 
                   onClick={() => navigate("/student/dashboard")}
-                  className="bg-indigo-600 hover:bg-indigo-700"
+                  className="bg-cyber-cyan text-cyber-black hover:shadow-[0_0_15px_rgba(0,240,255,0.5)] font-bold"
                 >
                   <ArrowLeft className="w-4 h-4 mr-2" />
                   Back to Dashboard
@@ -423,7 +423,7 @@ export default function TestTaking({ user }) {
             <Card className="max-w-4xl mx-auto">
               <CardHeader>
                 <CardTitle className="text-xl">Question Review</CardTitle>
-                <p className="text-gray-600">
+                <p className="text-slate-400">
                   {missedQuestions.length > 0 
                     ? `You missed ${missedQuestions.length} question${missedQuestions.length > 1 ? 's' : ''}. Review below:`
                     : "Perfect score! All questions answered correctly."}
@@ -448,7 +448,7 @@ export default function TestTaking({ user }) {
                           {result.is_correct ? '✓' : '✗'}
                         </span>
                         <div className="flex-1">
-                          <p className="font-medium text-gray-900 mb-2">
+                          <p className="font-medium text-white mb-2">
                             Q{idx + 1}: {renderTextWithLineBreaks(result.question_text || '')}
                           </p>
                           
@@ -513,9 +513,9 @@ export default function TestTaking({ user }) {
         <div className="container mx-auto px-6 py-4">
           <div className="flex justify-between items-center mb-3">
             <div>
-              <h1 className="text-2xl font-bold text-gray-900">{testData.title}</h1>
+              <h1 className="text-2xl font-bold text-white">{testData.title}</h1>
               {testData.description && (
-                <p className="text-sm text-gray-600">{testData.description}</p>
+                <p className="text-sm text-slate-400">{testData.description}</p>
               )}
             </div>
             
@@ -531,7 +531,7 @@ export default function TestTaking({ user }) {
           
           {/* Progress bar */}
           <div className="space-y-2">
-            <div className="flex justify-between text-sm text-gray-600">
+            <div className="flex justify-between text-sm text-slate-400">
               <span>Question {currentQuestionIndex + 1} of {questions.length}</span>
               <span>{answeredCount} of {questions.length} answered</span>
             </div>
@@ -558,7 +558,7 @@ export default function TestTaking({ user }) {
               </CardHeader>
               <CardContent>
                 {/* Question text with line break support */}
-                <div className="text-gray-900 mb-6 text-base font-medium whitespace-pre-line">
+                <div className="text-white mb-6 text-base font-medium whitespace-pre-line">
                   {renderTextWithLineBreaks(currentQuestion.question_text)}
                 </div>
                 
@@ -572,7 +572,7 @@ export default function TestTaking({ user }) {
                       className={`flex items-center space-x-3 p-4 rounded-lg transition-colors border-2 cursor-pointer
                         ${answers[currentQuestion.id] === idx.toString() 
                           ? 'border-indigo-500 bg-indigo-50' 
-                          : 'border-gray-200 hover:bg-gray-50 hover:border-gray-300'}`}
+                          : 'border-cyber-cyan/10 hover:bg-cyber-navy/40 hover:border-cyber-cyan/15'}`}
                     >
                       <RadioGroupItem 
                         value={idx.toString()} 
@@ -611,7 +611,7 @@ export default function TestTaking({ user }) {
                   onClick={() => setCurrentQuestionIndex(idx)}
                   className={`w-3 h-3 rounded-full transition-colors ${
                     idx === currentQuestionIndex 
-                      ? 'bg-indigo-600' 
+                      ? 'bg-cyber-cyan text-cyber-black' 
                       : answers[q.id] 
                         ? 'bg-green-500' 
                         : 'bg-gray-300 hover:bg-gray-400'
@@ -625,7 +625,7 @@ export default function TestTaking({ user }) {
               <Button
                 onClick={() => handleSubmit(false)}
                 disabled={submitting}
-                className="bg-indigo-600 hover:bg-indigo-700 gap-2"
+                className="bg-cyber-cyan text-cyber-black hover:shadow-[0_0_15px_rgba(0,240,255,0.5)] font-bold gap-2"
               >
                 {submitting ? "Submitting..." : "Submit Test"}
                 <CheckCircle className="w-4 h-4" />
@@ -633,7 +633,7 @@ export default function TestTaking({ user }) {
             ) : (
               <Button
                 onClick={handleNext}
-                className="bg-indigo-600 hover:bg-indigo-700 gap-2"
+                className="bg-cyber-cyan text-cyber-black hover:shadow-[0_0_15px_rgba(0,240,255,0.5)] font-bold gap-2"
               >
                 Next
                 <ArrowRight className="w-4 h-4" />
@@ -642,10 +642,10 @@ export default function TestTaking({ user }) {
           </div>
 
           {/* Summary card at bottom */}
-          <Card className="mt-6 bg-gray-50 border-gray-200">
+          <Card className="mt-6 bg-cyber-navy/40 border-cyber-cyan/10">
             <CardContent className="p-4">
               <div className="flex justify-between items-center text-sm">
-                <span className="text-gray-600">
+                <span className="text-slate-400">
                   {answeredCount === questions.length 
                     ? "✓ All questions answered!" 
                     : `${questions.length - answeredCount} question${questions.length - answeredCount !== 1 ? 's' : ''} remaining`}
@@ -654,7 +654,7 @@ export default function TestTaking({ user }) {
                   <Button
                     onClick={() => setCurrentQuestionIndex(questions.length - 1)}
                     variant="link"
-                    className="text-indigo-600 p-0"
+                    className="text-cyber-cyan p-0"
                   >
                     Go to Submit →
                   </Button>

@@ -146,7 +146,7 @@ function CompetitionManagement() {
     const styles = {
       upcoming: 'bg-yellow-100 text-yellow-800 border-yellow-200',
       active: 'bg-green-100 text-green-800 border-green-200',
-      completed: 'bg-gray-100 text-gray-800 border-gray-200'
+      completed: 'bg-cyber-navy/30 text-slate-200 border-cyber-cyan/10'
     };
     return (
       <span className={`px-3 py-1 rounded-full text-xs font-semibold border ${styles[status] || styles.upcoming}`}>
@@ -164,10 +164,10 @@ function CompetitionManagement() {
             <h1 className="text-4xl font-bold bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent mb-2">
               Competition Management
             </h1>
-            <p className="text-gray-600">Create and manage class vs class competitions</p>
+            <p className="text-slate-400">Create and manage class vs class competitions</p>
           </div>
           <div className="flex items-center gap-3">
-            {user && <span className="text-gray-700 font-medium">{user.name}</span>}
+            {user && <span className="text-slate-300 font-medium">{user.name}</span>}
             <Button onClick={() => navigate('/teacher/dashboard')} variant="outline">
               Back to Dashboard
             </Button>
@@ -215,10 +215,10 @@ function CompetitionManagement() {
                     </label>
                     <div className="border rounded-lg p-4 space-y-2 max-h-48 overflow-y-auto">
                       {classrooms.length === 0 ? (
-                        <p className="text-sm text-gray-500">No classrooms available</p>
+                        <p className="text-sm text-slate-500">No classrooms available</p>
                       ) : (
                         classrooms.map(classroom => (
-                          <label key={classroom.id} className="flex items-center gap-2 cursor-pointer hover:bg-gray-50 p-2 rounded">
+                          <label key={classroom.id} className="flex items-center gap-2 cursor-pointer hover:bg-cyber-navy/40 p-2 rounded">
                             <input
                               type="checkbox"
                               checked={selectedClassrooms.includes(classroom.id)}
@@ -226,7 +226,7 @@ function CompetitionManagement() {
                               className="w-4 h-4"
                             />
                             <span className="text-sm">{classroom.name}</span>
-                            <span className="text-xs text-gray-500">({classroom.students?.length || 0} students)</span>
+                            <span className="text-xs text-slate-500">({classroom.students?.length || 0} students)</span>
                           </label>
                         ))
                       )}
@@ -264,7 +264,7 @@ function CompetitionManagement() {
                       value={minProblems}
                       onChange={(e) => setMinProblems(parseInt(e.target.value) || 10)}
                     />
-                    <p className="text-xs text-gray-500 mt-1">
+                    <p className="text-xs text-slate-500 mt-1">
                       Students must solve at least this many problems to be eligible
                     </p>
                   </div>
@@ -290,8 +290,8 @@ function CompetitionManagement() {
           <Card className="border-2 border-dashed">
             <CardContent className="flex flex-col items-center justify-center py-12">
               <Trophy className="w-16 h-16 text-gray-300 mb-4" />
-              <h3 className="text-xl font-semibold text-gray-600 mb-2">No competitions yet</h3>
-              <p className="text-gray-500 mb-4">Create your first class vs class competition!</p>
+              <h3 className="text-xl font-semibold text-slate-400 mb-2">No competitions yet</h3>
+              <p className="text-slate-500 mb-4">Create your first class vs class competition!</p>
             </CardContent>
           </Card>
         ) : (
@@ -317,8 +317,8 @@ function CompetitionManagement() {
                     <div className="flex items-start gap-2">
                       <Users className="w-5 h-5 text-purple-600 mt-0.5" />
                       <div>
-                        <p className="text-sm font-medium text-gray-700">Participating Classes</p>
-                        <p className="text-sm text-gray-600">
+                        <p className="text-sm font-medium text-slate-300">Participating Classes</p>
+                        <p className="text-sm text-slate-400">
                           {comp.classrooms?.map(c => c.name).join(', ') || 'N/A'}
                         </p>
                       </div>
@@ -328,8 +328,8 @@ function CompetitionManagement() {
                     <div className="flex items-start gap-2">
                       <Calendar className="w-5 h-5 text-pink-600 mt-0.5" />
                       <div>
-                        <p className="text-sm font-medium text-gray-700">Competition Period</p>
-                        <p className="text-xs text-gray-600">
+                        <p className="text-sm font-medium text-slate-300">Competition Period</p>
+                        <p className="text-xs text-slate-400">
                           {new Date(comp.start_date).toLocaleDateString()} - {new Date(comp.end_date).toLocaleDateString()}
                         </p>
                       </div>
@@ -339,8 +339,8 @@ function CompetitionManagement() {
                     <div className="flex items-start gap-2">
                       <TrendingUp className="w-5 h-5 text-blue-600 mt-0.5" />
                       <div>
-                        <p className="text-sm font-medium text-gray-700">Min Problems</p>
-                        <p className="text-sm text-gray-600">{comp.min_problems_required}</p>
+                        <p className="text-sm font-medium text-slate-300">Min Problems</p>
+                        <p className="text-sm text-slate-400">{comp.min_problems_required}</p>
                       </div>
                     </div>
                   </div>

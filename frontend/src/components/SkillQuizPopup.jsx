@@ -144,7 +144,7 @@ export default function SkillQuizPopup({
               }`}>
                 {results?.score?.toFixed(0)}%
               </div>
-              <p className="text-gray-600">
+              <p className="text-slate-400">
                 {results?.correct_count} out of {results?.total_questions} correct
               </p>
               
@@ -160,7 +160,7 @@ export default function SkillQuizPopup({
                 </div>
               )}
               {results?.score < 60 && (
-                <div className="mt-4 text-gray-600">
+                <div className="mt-4 text-slate-400">
                   Review the concepts and try again next time!
                 </div>
               )}
@@ -183,19 +183,19 @@ export default function SkillQuizPopup({
                         <div className="flex-1">
                           <p className="font-medium text-sm mb-1">Q{idx + 1}: {r.question_text}</p>
                           <p className="text-sm">
-                            <span className="text-gray-500">Your answer:</span>{" "}
+                            <span className="text-slate-500">Your answer:</span>{" "}
                             <span className={r.is_correct ? "text-green-600" : "text-red-600"}>
                               {r.student_answer || "Not answered"}
                             </span>
                           </p>
                           {!r.is_correct && (
                             <p className="text-sm">
-                              <span className="text-gray-500">Correct answer:</span>{" "}
+                              <span className="text-slate-500">Correct answer:</span>{" "}
                               <span className="text-green-600 font-medium">{r.correct_answer}</span>
                             </p>
                           )}
                           {r.explanation && (
-                            <p className="text-xs text-gray-500 mt-1 italic">{r.explanation}</p>
+                            <p className="text-xs text-slate-500 mt-1 italic">{r.explanation}</p>
                           )}
                         </div>
                       </div>
@@ -223,7 +223,7 @@ export default function SkillQuizPopup({
         <DialogContent className="max-w-lg">
           <div className="flex items-center justify-center py-8">
             <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-purple-500"></div>
-            <span className="ml-3 text-gray-600">Loading quiz...</span>
+            <span className="ml-3 text-slate-400">Loading quiz...</span>
           </div>
         </DialogContent>
       </Dialog>
@@ -248,10 +248,10 @@ export default function SkillQuizPopup({
           <div className="py-4">
             {/* Progress */}
             <div className="flex items-center justify-between mb-4">
-              <span className="text-sm text-gray-500">
+              <span className="text-sm text-slate-500">
                 Question {currentIndex + 1} of {questions.length}
               </span>
-              <span className="text-sm text-gray-500">
+              <span className="text-sm text-slate-500">
                 {answeredCount} / {questions.length} answered
               </span>
             </div>
@@ -295,7 +295,7 @@ export default function SkillQuizPopup({
                   className={`flex items-center space-x-3 p-3 rounded-lg border-2 transition-all cursor-pointer hover:bg-purple-50 ${
                     answers[currentQuestion.id] === choice.value 
                       ? 'border-purple-500 bg-purple-50' 
-                      : 'border-gray-200'
+                      : 'border-cyber-cyan/10'
                   }`}
                   onClick={() => handleAnswerSelect(currentQuestion.id, choice.value)}
                 >
@@ -332,7 +332,7 @@ export default function SkillQuizPopup({
                     ? 'bg-purple-500 text-white' 
                     : answers[questions[idx]?.id]
                       ? 'bg-green-100 text-green-700'
-                      : 'bg-gray-100 text-gray-500'
+                      : 'bg-cyber-navy/30 text-slate-500'
                 }`}
                 onClick={() => setCurrentIndex(idx)}
               >

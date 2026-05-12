@@ -662,7 +662,7 @@ export default function AssignmentLibrary({ user }) {
               Back to Dashboard
             </Button>
             <div className="flex items-center space-x-2">
-              <BookOpen className="w-7 h-7 text-indigo-600" />
+              <BookOpen className="w-7 h-7 text-cyber-cyan" />
               <span className="text-xl font-orbitron text-white uppercase tracking-wider">Assignment Library</span>
             </div>
           </div>
@@ -708,10 +708,10 @@ export default function AssignmentLibrary({ user }) {
                   <form onSubmit={handleBulkUpload} className="space-y-4">
                     <div>
                       <Label>CSV Format Required:</Label>
-                      <div className="text-xs text-gray-600 mt-2 p-3 bg-gray-50 rounded font-mono overflow-x-auto">
+                      <div className="text-xs text-slate-400 mt-2 p-3 bg-cyber-navy/40 rounded font-mono overflow-x-auto">
                         title,description,starter_code,solution_code,expected_output,category,difficulty,csta_standard
                       </div>
-                      <p className="text-xs text-gray-500 mt-2">
+                      <p className="text-xs text-slate-500 mt-2">
                         • Title and solution_code are required<br/>
                         • Multi-line code: Use \n or wrap in quotes with actual line breaks<br/>
                         • Difficulty: Easy, Medium, or Hard<br/>
@@ -735,7 +735,7 @@ export default function AssignmentLibrary({ user }) {
                       data-testid="upload-csv-btn" 
                       type="submit" 
                       disabled={uploading || !csvFile}
-                      className="w-full bg-indigo-600 hover:bg-indigo-700"
+                      className="w-full bg-cyber-cyan text-cyber-black hover:shadow-[0_0_15px_rgba(0,240,255,0.5)] font-bold"
                     >
                       {uploading ? "Uploading..." : "Upload CSV"}
                     </Button>
@@ -816,7 +816,7 @@ export default function AssignmentLibrary({ user }) {
                         onChange={(e) => setNewProblem({ ...newProblem, unit: e.target.value })}
                         className="mt-1"
                       />
-                      <p className="text-xs text-gray-500 mt-1">High-level curriculum unit</p>
+                      <p className="text-xs text-slate-500 mt-1">High-level curriculum unit</p>
                     </div>
 
                     <div>
@@ -842,7 +842,7 @@ export default function AssignmentLibrary({ user }) {
                         }}
                         className="mt-1"
                       />
-                      <p className="text-xs text-gray-500 mt-1">Organize problems by chapter (auto-detects type)</p>
+                      <p className="text-xs text-slate-500 mt-1">Organize problems by chapter (auto-detects type)</p>
                     </div>
 
                     <div>
@@ -855,7 +855,7 @@ export default function AssignmentLibrary({ user }) {
                         onChange={(e) => setNewProblem({ ...newProblem, lesson: e.target.value })}
                         className="mt-1"
                       />
-                      <p className="text-xs text-gray-500 mt-1">Sub-folder under chapter</p>
+                      <p className="text-xs text-slate-500 mt-1">Sub-folder under chapter</p>
                     </div>
                   </div>
 
@@ -887,7 +887,7 @@ export default function AssignmentLibrary({ user }) {
                           <SelectItem value="microbit">⚡ Micro:bit (Unit 4)</SelectItem>
                         </SelectContent>
                       </Select>
-                      <p className="text-xs text-gray-500 mt-1">Which curriculum this problem belongs to</p>
+                      <p className="text-xs text-slate-500 mt-1">Which curriculum this problem belongs to</p>
                     </div>
                   </div>
 
@@ -941,7 +941,7 @@ export default function AssignmentLibrary({ user }) {
                         }}
                         className="mt-1"
                       />
-                      <p className="text-xs text-gray-500 mt-1">
+                      <p className="text-xs text-slate-500 mt-1">
                         Paste a direct URL or embed code - we'll extract the link automatically
                       </p>
                     </div>
@@ -953,7 +953,7 @@ export default function AssignmentLibrary({ user }) {
                           <Label className="text-lg font-semibold flex items-center gap-2">
                             📚 Lesson Materials (Optional)
                           </Label>
-                          <p className="text-sm text-gray-600 mt-1">
+                          <p className="text-sm text-slate-400 mt-1">
                             Add videos, images, text, or links that students must review before starting
                           </p>
                         </div>
@@ -974,7 +974,7 @@ export default function AssignmentLibrary({ user }) {
                       {newProblem.lesson_materials?.length > 0 && (
                         <div className="space-y-3">
                           {newProblem.lesson_materials.map((material, index) => (
-                            <div key={index} className="bg-white p-3 rounded-lg border border-purple-200">
+                            <div key={index} className="bg-cyber-navy/60 p-3 rounded-lg border border-purple-200">
                               <div className="flex items-center gap-2 mb-2">
                                 <select
                                   value={material.type}
@@ -1045,7 +1045,7 @@ export default function AssignmentLibrary({ user }) {
                       )}
                       
                       {(!newProblem.lesson_materials || newProblem.lesson_materials.length === 0) && (
-                        <div className="text-center py-4 text-gray-500 text-sm">
+                        <div className="text-center py-4 text-slate-500 text-sm">
                           No lesson materials added. Click "Add Material" to create a pre-assignment lesson.
                         </div>
                       )}
@@ -1057,9 +1057,9 @@ export default function AssignmentLibrary({ user }) {
                     <div className="flex items-center justify-between mb-3">
                       <div>
                         <Label className="text-lg font-semibold">Assignment Type</Label>
-                        <p className="text-sm text-gray-600 mt-1">Choose the type of problem</p>
+                        <p className="text-sm text-slate-400 mt-1">Choose the type of problem</p>
                       </div>
-                      <div className="flex items-center gap-2 bg-white px-3 py-2 rounded-lg border">
+                      <div className="flex items-center gap-2 bg-cyber-navy/60 px-3 py-2 rounded-lg border">
                         <Button
                           type="button"
                           variant="outline"
@@ -1111,7 +1111,7 @@ export default function AssignmentLibrary({ user }) {
                         
                         <div>
                           <Label className="font-semibold">Learning Objectives</Label>
-                          <p className="text-xs text-gray-500 mb-2">What students will learn (one per line)</p>
+                          <p className="text-xs text-slate-500 mb-2">What students will learn (one per line)</p>
                           <Textarea
                             placeholder="Understand digital output&#10;Control LEDs with code&#10;Use loops for animation"
                             value={newProblem.learning_objectives?.join('\n') || ""}
@@ -1126,7 +1126,7 @@ export default function AssignmentLibrary({ user }) {
                         
                         <div>
                           <Label className="font-semibold">Materials Needed</Label>
-                          <p className="text-xs text-gray-500 mb-2">Hardware required (one per line)</p>
+                          <p className="text-xs text-slate-500 mb-2">Hardware required (one per line)</p>
                           <Textarea
                             placeholder="Micro:bit&#10;USB cable&#10;Breadboard&#10;LED&#10;220Ω resistor"
                             value={newProblem.materials_needed?.join('\n') || ""}
@@ -1141,7 +1141,7 @@ export default function AssignmentLibrary({ user }) {
                         
                         <div>
                           <Label className="font-semibold">Wiring Instructions</Label>
-                          <p className="text-xs text-gray-500 mb-2">Step-by-step circuit setup</p>
+                          <p className="text-xs text-slate-500 mb-2">Step-by-step circuit setup</p>
                           <Textarea
                             placeholder="1. Connect Micro:bit to computer via USB&#10;2. Place LED on breadboard&#10;3. Connect resistor..."
                             value={newProblem.wiring_instructions || ""}
@@ -1177,7 +1177,7 @@ export default function AssignmentLibrary({ user }) {
                             <Map className="w-4 h-4" />
                             Maze & Background Options
                           </Label>
-                          <p className="text-sm text-gray-600 mb-3">Add interactive backgrounds to turtle challenges</p>
+                          <p className="text-sm text-slate-400 mb-3">Add interactive backgrounds to turtle challenges</p>
                           
                           <div className="space-y-4">
                             <div>
@@ -1303,7 +1303,7 @@ export default function AssignmentLibrary({ user }) {
                   {newProblem.assignment_type === "code" && (
                     <div className="border-2 border-blue-200 bg-blue-50 rounded-lg p-4">
                       <Label className="text-lg font-semibold">Partial Credit Rules</Label>
-                      <p className="text-sm text-gray-600 mt-1 mb-3">Customize penalties/bonuses for consistent grading</p>
+                      <p className="text-sm text-slate-400 mt-1 mb-3">Customize penalties/bonuses for consistent grading</p>
                       
                       <div className="grid grid-cols-2 gap-3">
                         <div>
@@ -1388,7 +1388,7 @@ export default function AssignmentLibrary({ user }) {
                       <Label className="text-lg font-semibold flex items-center gap-2 mb-3">
                         🧩 Starter Blocks (Optional)
                       </Label>
-                      <p className="text-sm text-gray-600 mb-3">
+                      <p className="text-sm text-slate-400 mb-3">
                         Drag blocks here to create what students will start with. Leave empty for a blank canvas.
                       </p>
                       <div className="h-[600px] border rounded-lg overflow-hidden">
@@ -1429,7 +1429,7 @@ export default function AssignmentLibrary({ user }) {
                           <Label className="text-lg font-semibold flex items-center gap-2">
                             ✅ Solution Blocks *
                           </Label>
-                          <p className="text-sm text-gray-600 mt-1">
+                          <p className="text-sm text-slate-400 mt-1">
                             Create the correct solution using blocks. This will be used for grading.
                           </p>
                         </div>
@@ -1487,7 +1487,7 @@ export default function AssignmentLibrary({ user }) {
                       <Label className="text-lg font-semibold flex items-center gap-2">
                         ⚡ Solution Code & Simulator Test *
                       </Label>
-                      <p className="text-sm text-gray-600 mt-1 mb-3">
+                      <p className="text-sm text-slate-400 mt-1 mb-3">
                         Write your MicroPython solution and test it in the simulator.
                       </p>
                       <div className="flex gap-4" style={{ height: '420px' }}>
@@ -1504,7 +1504,7 @@ export default function AssignmentLibrary({ user }) {
                         </div>
                         <div className="flex flex-col" style={{ width: '320px' }}>
                           <Label className="text-sm font-medium mb-1">Simulator Preview</Label>
-                          <div className="flex-1 border rounded-lg bg-white overflow-hidden">
+                          <div className="flex-1 border rounded-lg bg-cyber-navy/60 overflow-hidden">
                             <MicrobitSimulator code={newProblem.solution_code} />
                           </div>
                         </div>
@@ -1591,7 +1591,7 @@ export default function AssignmentLibrary({ user }) {
                         className="mt-1 font-mono text-sm"
                         rows={3}
                       />
-                      <p className="text-xs text-gray-500 mt-1">What the program should output when run</p>
+                      <p className="text-xs text-slate-500 mt-1">What the program should output when run</p>
                     </div>
                   )}
                   
@@ -1601,10 +1601,10 @@ export default function AssignmentLibrary({ user }) {
                       <img 
                         src={`data:image/png;base64,${newProblem.expected_turtle_image}`}
                         alt="Expected turtle output"
-                        className="mt-2 border-2 border-gray-300 rounded"
+                        className="mt-2 border-2 border-cyber-cyan/15 rounded"
                         style={{ maxWidth: "100%", height: "auto" }}
                       />
-                      <p className="text-sm text-gray-600 mt-2">✓ This will be shown to students as the expected output</p>
+                      <p className="text-sm text-slate-400 mt-2">✓ This will be shown to students as the expected output</p>
                     </div>
                   )}
 
@@ -1614,7 +1614,7 @@ export default function AssignmentLibrary({ user }) {
                       <div className="flex items-center justify-between mb-3">
                         <div>
                           <Label className="text-lg font-semibold">Test Cases (Optional but Recommended)</Label>
-                          <p className="text-sm text-gray-600 mt-1">For problems with input(), add test cases for auto-grading</p>
+                          <p className="text-sm text-slate-400 mt-1">For problems with input(), add test cases for auto-grading</p>
                         </div>
                         <Button
                           type="button"
@@ -1632,11 +1632,11 @@ export default function AssignmentLibrary({ user }) {
                       </div>
 
                       {newProblem.test_cases.length === 0 ? (
-                        <p className="text-sm text-gray-500 text-center py-4">No test cases added yet. Click "Add Test Case" to create one.</p>
+                        <p className="text-sm text-slate-500 text-center py-4">No test cases added yet. Click "Add Test Case" to create one.</p>
                       ) : (
                         <div className="space-y-3">
                           {newProblem.test_cases.map((testCase, index) => (
-                            <div key={index} className="bg-white p-3 rounded border border-yellow-300">
+                            <div key={index} className="bg-cyber-navy/60 p-3 rounded border border-yellow-300">
                               <div className="flex items-center justify-between mb-2">
                                 <Label className="font-semibold">Test Case {index + 1}</Label>
                                 <Button
@@ -1707,7 +1707,7 @@ export default function AssignmentLibrary({ user }) {
                       <div className="flex items-center justify-between mb-3">
                         <div>
                           <Label className="text-lg font-semibold">🐢 Turtle Test Cases</Label>
-                          <p className="text-sm text-gray-600 mt-1">Check if student code uses required turtle commands</p>
+                          <p className="text-sm text-slate-400 mt-1">Check if student code uses required turtle commands</p>
                         </div>
                         <Button
                           type="button"
@@ -1725,7 +1725,7 @@ export default function AssignmentLibrary({ user }) {
                       </div>
 
                       {newProblem.test_cases.length === 0 ? (
-                        <p className="text-sm text-gray-500 text-center py-4">No tests added yet. Click "Add Test" to create one.</p>
+                        <p className="text-sm text-slate-500 text-center py-4">No tests added yet. Click "Add Test" to create one.</p>
                       ) : (
                         <div className="overflow-x-auto">
                           <table className="w-full text-sm">
@@ -1811,7 +1811,7 @@ export default function AssignmentLibrary({ user }) {
                               ))}
                             </tbody>
                           </table>
-                          <p className="text-xs text-gray-500 mt-2">
+                          <p className="text-xs text-slate-500 mt-2">
                             💡 <strong>Pattern examples:</strong> <code>forward(</code>, <code>circle(25)</code>, <code>penup()</code>, <code>= turtle.Turtle()</code>
                           </p>
                         </div>
@@ -1825,7 +1825,7 @@ export default function AssignmentLibrary({ user }) {
                       <div className="flex items-center justify-between mb-3">
                         <div>
                           <Label className="text-lg font-semibold">Pattern Test Cases</Label>
-                          <p className="text-sm text-gray-600 mt-1">Check if student code contains required patterns</p>
+                          <p className="text-sm text-slate-400 mt-1">Check if student code contains required patterns</p>
                         </div>
                         <Button
                           type="button"
@@ -1843,11 +1843,11 @@ export default function AssignmentLibrary({ user }) {
                       </div>
 
                       {newProblem.test_cases.length === 0 ? (
-                        <p className="text-sm text-gray-500 text-center py-4">No pattern checks added yet. Click "Add Pattern Check" to create one.</p>
+                        <p className="text-sm text-slate-500 text-center py-4">No pattern checks added yet. Click "Add Pattern Check" to create one.</p>
                       ) : (
                         <div className="space-y-3">
                           {newProblem.test_cases.map((testCase, index) => (
-                            <div key={index} className="bg-white p-3 rounded border border-cyan-300">
+                            <div key={index} className="bg-cyber-navy/60 p-3 rounded border border-cyan-300">
                               <div className="flex items-center justify-between mb-2">
                                 <Label className="font-semibold">Pattern Check {index + 1}</Label>
                                 <Button
@@ -1905,7 +1905,7 @@ export default function AssignmentLibrary({ user }) {
                                   />
                                 </div>
                                 <div className="col-span-3">
-                                  <Label className="text-sm text-gray-600">Alternate accepted patterns <span className="text-xs font-normal">(optional)</span></Label>
+                                  <Label className="text-sm text-slate-400">Alternate accepted patterns <span className="text-xs font-normal">(optional)</span></Label>
                                   <Input
                                     placeholder="e.g., display.set_pixel(0,0,9) if main pattern has spaces"
                                     value={testCase.alternate_patterns || ""}
@@ -1916,7 +1916,7 @@ export default function AssignmentLibrary({ user }) {
                                     }}
                                     className="mt-1 font-mono text-sm border-dashed"
                                   />
-                                  <p className="text-xs text-gray-500 mt-1">
+                                  <p className="text-xs text-slate-500 mt-1">
                                     Whitespace differences (spaces around commas/parens) are auto-matched. Use this for genuinely different code, separated by <code>|</code>
                                   </p>
                                 </div>
@@ -1934,7 +1934,7 @@ export default function AssignmentLibrary({ user }) {
                       <div className="flex items-center justify-between mb-3">
                         <div>
                           <Label className="text-lg font-semibold">🧱 Block Test Cases</Label>
-                          <p className="text-sm text-gray-600 mt-1">Check if student uses required blocks</p>
+                          <p className="text-sm text-slate-400 mt-1">Check if student uses required blocks</p>
                         </div>
                         <Button
                           type="button"
@@ -1952,7 +1952,7 @@ export default function AssignmentLibrary({ user }) {
                       </div>
 
                       {newProblem.test_cases.length === 0 ? (
-                        <p className="text-sm text-gray-500 text-center py-4">No tests added yet. Click "Add Test" to create one.</p>
+                        <p className="text-sm text-slate-500 text-center py-4">No tests added yet. Click "Add Test" to create one.</p>
                       ) : (
                         <div className="overflow-x-auto">
                           <table className="w-full text-sm">
@@ -2123,7 +2123,7 @@ export default function AssignmentLibrary({ user }) {
                         mazeData={newProblem.maze_data}
                         goals={newProblem.goals || []}
                       />
-                      <p className="text-xs text-gray-500 mt-2">
+                      <p className="text-xs text-slate-500 mt-2">
                         Hover over canvas to see coordinates. Use play controls to test your code.
                       </p>
                     </div>
@@ -2164,7 +2164,7 @@ export default function AssignmentLibrary({ user }) {
                   <Button 
                     onClick={() => setTestBuilderOpen(true)}
                     disabled={selectedProblems.length === 0}
-                    className="bg-indigo-600 hover:bg-indigo-700"
+                    className="bg-cyber-cyan text-cyber-black hover:shadow-[0_0_15px_rgba(0,240,255,0.5)] font-bold"
                   >
                     Create Test ({selectedProblems.length} selected)
                   </Button>
@@ -2181,7 +2181,7 @@ export default function AssignmentLibrary({ user }) {
           <div className="flex gap-4">
             <div className="flex-1">
               <div className="relative">
-                <Search className="absolute left-3 top-3 w-5 h-5 text-gray-400" />
+                <Search className="absolute left-3 top-3 w-5 h-5 text-slate-500" />
                 <Input
                   data-testid="search-library"
                   placeholder="Search problems..."
@@ -2322,19 +2322,19 @@ export default function AssignmentLibrary({ user }) {
             </div>
           )}
 
-          <div className="text-sm text-gray-600">
+          <div className="text-sm text-slate-400">
             Showing {filteredProblems.length} of {problems.length} problems
           </div>
         </div>
 
         {/* Problem Display - 3-Level Folder View: Chapter > Lesson > Problem Type */}
         {loading ? (
-          <div className="text-center py-20 text-gray-600">Loading library...</div>
+          <div className="text-center py-20 text-slate-400">Loading library...</div>
         ) : filteredProblems.length === 0 ? (
           <div className="text-center py-20">
-            <BookOpen className="w-16 h-16 text-gray-400 mx-auto mb-4" />
-            <h3 className="text-xl font-semibold text-gray-700 mb-2">No problems found</h3>
-            <p className="text-gray-500">Try adjusting your filters or add a new problem</p>
+            <BookOpen className="w-16 h-16 text-slate-500 mx-auto mb-4" />
+            <h3 className="text-xl font-semibold text-slate-300 mb-2">No problems found</h3>
+            <p className="text-slate-500">Try adjusting your filters or add a new problem</p>
           </div>
         ) : (
           <div className="space-y-4">
@@ -2343,24 +2343,24 @@ export default function AssignmentLibrary({ user }) {
               const lessons = groupedProblems[chapter];
               
               return (
-                <div key={chapter} className="border rounded-lg bg-white shadow-sm">
+                <div key={chapter} className="border rounded-lg bg-cyber-navy/60 backdrop-blur-sm">
                   {/* Chapter Folder */}
                   <div
-                    className="flex items-center gap-3 p-4 cursor-pointer hover:bg-gray-50 transition-colors"
+                    className="flex items-center gap-3 p-4 cursor-pointer hover:bg-cyber-navy/40 transition-colors"
                     onClick={() => toggleChapter(chapter)}
                   >
                     {isChapterExpanded ? (
-                      <ChevronDown className="w-5 h-5 text-gray-600" />
+                      <ChevronDown className="w-5 h-5 text-slate-400" />
                     ) : (
-                      <ChevronRight className="w-5 h-5 text-gray-600" />
+                      <ChevronRight className="w-5 h-5 text-slate-400" />
                     )}
                     {isChapterExpanded ? (
                       <FolderOpen className="w-6 h-6 text-blue-500" />
                     ) : (
                       <Folder className="w-6 h-6 text-blue-500" />
                     )}
-                    <h3 className="text-lg font-semibold text-gray-900">{chapter}</h3>
-                    <span className="ml-auto text-sm text-gray-500 bg-gray-100 px-3 py-1 rounded-full">
+                    <h3 className="text-lg font-semibold text-white">{chapter}</h3>
+                    <span className="ml-auto text-sm text-slate-500 bg-cyber-navy/30 px-3 py-1 rounded-full">
                       {Object.keys(lessons).length} lesson{Object.keys(lessons).length !== 1 ? 's' : ''}
                     </span>
                   </div>
@@ -2374,24 +2374,24 @@ export default function AssignmentLibrary({ user }) {
                         const problemTypes = lessons[lesson];
                         
                         return (
-                          <div key={lessonKey} className="border rounded-lg bg-gray-50">
+                          <div key={lessonKey} className="border rounded-lg bg-cyber-navy/40">
                             {/* Lesson Folder */}
                             <div
-                              className="flex items-center gap-3 p-3 cursor-pointer hover:bg-gray-100 transition-colors rounded-lg"
+                              className="flex items-center gap-3 p-3 cursor-pointer hover:bg-cyber-navy/30 transition-colors rounded-lg"
                               onClick={() => toggleLesson(lessonKey)}
                             >
                               {isLessonExpanded ? (
-                                <ChevronDown className="w-4 h-4 text-gray-600" />
+                                <ChevronDown className="w-4 h-4 text-slate-400" />
                               ) : (
-                                <ChevronRight className="w-4 h-4 text-gray-600" />
+                                <ChevronRight className="w-4 h-4 text-slate-400" />
                               )}
                               {isLessonExpanded ? (
                                 <FolderOpen className="w-5 h-5 text-teal-500" />
                               ) : (
                                 <Folder className="w-5 h-5 text-teal-500" />
                               )}
-                              <h4 className="text-md font-medium text-gray-800">{lesson}</h4>
-                              <span className="ml-auto text-xs text-gray-500 bg-white px-2 py-1 rounded-full">
+                              <h4 className="text-md font-medium text-slate-200">{lesson}</h4>
+                              <span className="ml-auto text-xs text-slate-500 bg-cyber-navy/60 px-2 py-1 rounded-full">
                                 {Object.keys(problemTypes).length} type{Object.keys(problemTypes).length !== 1 ? 's' : ''}
                               </span>
                             </div>
@@ -2405,24 +2405,24 @@ export default function AssignmentLibrary({ user }) {
                                   const problems = problemTypes[problemType];
                                   
                                   return (
-                                    <div key={typeKey} className="border rounded-lg bg-white">
+                                    <div key={typeKey} className="border rounded-lg bg-cyber-navy/60">
                                       {/* Problem Type Folder */}
                                       <div
-                                        className="flex items-center gap-3 p-3 cursor-pointer hover:bg-gray-50 transition-colors rounded-lg"
+                                        className="flex items-center gap-3 p-3 cursor-pointer hover:bg-cyber-navy/40 transition-colors rounded-lg"
                                         onClick={() => toggleProblemType(typeKey)}
                                       >
                                         {isTypeExpanded ? (
-                                          <ChevronDown className="w-4 h-4 text-gray-600" />
+                                          <ChevronDown className="w-4 h-4 text-slate-400" />
                                         ) : (
-                                          <ChevronRight className="w-4 h-4 text-gray-600" />
+                                          <ChevronRight className="w-4 h-4 text-slate-400" />
                                         )}
                                         {isTypeExpanded ? (
                                           <FolderOpen className="w-5 h-5 text-purple-500" />
                                         ) : (
                                           <Folder className="w-5 h-5 text-purple-500" />
                                         )}
-                                        <h5 className="text-sm font-medium text-gray-700">{problemType}</h5>
-                                        <span className="ml-auto text-xs text-gray-500 bg-gray-100 px-2 py-1 rounded-full">
+                                        <h5 className="text-sm font-medium text-slate-300">{problemType}</h5>
+                                        <span className="ml-auto text-xs text-slate-500 bg-cyber-navy/30 px-2 py-1 rounded-full">
                                           {problems.length} problem{problems.length !== 1 ? 's' : ''}
                                         </span>
                                       </div>
@@ -2437,7 +2437,7 @@ export default function AssignmentLibrary({ user }) {
                                               className={`hover:shadow-lg transition-all border-2 ${
                                                 selectionMode && selectedProblems.includes(problem.id)
                                                   ? 'border-purple-500 bg-purple-50'
-                                                  : 'border-gray-100'
+                                                  : 'border-cyber-cyan/10'
                                               } ${selectionMode ? 'cursor-pointer' : ''}`}
                                               onClick={() => selectionMode && toggleProblemSelection(problem.id)}
                                             >
@@ -2452,7 +2452,7 @@ export default function AssignmentLibrary({ user }) {
                                                       />
                                                     )}
                                                   </div>
-                                                  <div className="text-xs text-gray-500">
+                                                  <div className="text-xs text-slate-500">
                                                     <Download className="w-3 h-3 inline mr-1" />
                                                     {problem.times_imported || 0}
                                                   </div>
@@ -2481,7 +2481,7 @@ export default function AssignmentLibrary({ user }) {
                                                     </span>
                                                   )}
                                                   {problem.lesson && (
-                                                    <span className="px-2 py-1 bg-teal-100 text-teal-700 rounded text-xs font-medium">
+                                                    <span className="px-2 py-1 bg-teal-100 text-cyber-cyan rounded text-xs font-medium">
                                                       📖 {problem.lesson}
                                                     </span>
                                                   )}
@@ -2494,7 +2494,7 @@ export default function AssignmentLibrary({ user }) {
                                                     </span>
                                                   )}
                                                 </div>
-                                                <div className="text-xs text-gray-500 pt-2">
+                                                <div className="text-xs text-slate-500 pt-2">
                                                   By {problem.creator_name}
                                                 </div>
                                                 {!selectionMode && (
@@ -2560,7 +2560,7 @@ export default function AssignmentLibrary({ user }) {
                                                     <Button
                                                       data-testid={`import-${problem.id}`}
                                                       onClick={() => navigate(`/library/import/${problem.id}`)}
-                                                      className="w-full bg-indigo-600 hover:bg-indigo-700"
+                                                      className="w-full bg-cyber-cyan text-cyber-black hover:shadow-[0_0_15px_rgba(0,240,255,0.5)] font-bold"
                                                       size="sm"
                                                     >
                                                       Import to Classroom
@@ -2738,7 +2738,7 @@ export default function AssignmentLibrary({ user }) {
                     }}
                     className="mt-1"
                   />
-                  <p className="text-xs text-gray-500 mt-1">
+                  <p className="text-xs text-slate-500 mt-1">
                     Paste a direct URL or embed code - we'll extract the link automatically
                   </p>
                 </div>
@@ -2749,7 +2749,7 @@ export default function AssignmentLibrary({ user }) {
                     <Label className="text-lg font-semibold flex items-center gap-2 mb-3">
                       🧩 Starter Blocks (Optional)
                     </Label>
-                    <p className="text-sm text-gray-600 mb-3">
+                    <p className="text-sm text-slate-400 mb-3">
                       Drag blocks here to create what students will start with. Leave empty for a blank canvas.
                     </p>
                     <div className="h-[600px] border rounded-lg overflow-hidden">
@@ -2785,7 +2785,7 @@ export default function AssignmentLibrary({ user }) {
                       <Label className="text-lg font-semibold flex items-center gap-2">
                         ✅ Solution Blocks *
                       </Label>
-                      <p className="text-sm text-gray-600 mt-1">
+                      <p className="text-sm text-slate-400 mt-1">
                         Create the correct solution using blocks. This will be used for grading.
                       </p>
                     </div>
@@ -2807,7 +2807,7 @@ export default function AssignmentLibrary({ user }) {
                     <Label className="text-lg font-semibold flex items-center gap-2">
                       ⚡ Solution Code & Simulator Test *
                     </Label>
-                    <p className="text-sm text-gray-600 mt-1 mb-3">
+                    <p className="text-sm text-slate-400 mt-1 mb-3">
                       Write your MicroPython solution and test it in the simulator.
                     </p>
                     <div className="flex gap-4" style={{ height: '420px' }}>
@@ -2824,7 +2824,7 @@ export default function AssignmentLibrary({ user }) {
                       </div>
                       <div className="flex flex-col" style={{ width: '320px' }}>
                         <Label className="text-sm font-medium mb-1">Simulator Preview</Label>
-                        <div className="flex-1 border rounded-lg bg-white overflow-hidden">
+                        <div className="flex-1 border rounded-lg bg-cyber-navy/60 overflow-hidden">
                           <MicrobitSimulator code={editingProblem.solution_code} />
                         </div>
                       </div>
@@ -2856,7 +2856,7 @@ export default function AssignmentLibrary({ user }) {
                       className="mt-1 font-mono text-sm"
                       rows={3}
                     />
-                    <p className="text-xs text-gray-500 mt-1">What the program should output when run</p>
+                    <p className="text-xs text-slate-500 mt-1">What the program should output when run</p>
                   </div>
                 )}
 
@@ -2866,7 +2866,7 @@ export default function AssignmentLibrary({ user }) {
                     <div className="flex items-center justify-between mb-3">
                       <div>
                         <Label className="text-lg font-semibold">Test Cases (Optional but Recommended)</Label>
-                        <p className="text-sm text-gray-600 mt-1">For problems with input(), add test cases for auto-grading</p>
+                        <p className="text-sm text-slate-400 mt-1">For problems with input(), add test cases for auto-grading</p>
                       </div>
                       <Button
                         type="button"
@@ -2884,11 +2884,11 @@ export default function AssignmentLibrary({ user }) {
                     </div>
 
                     {(!editingProblem.test_cases || editingProblem.test_cases.length === 0) ? (
-                      <p className="text-sm text-gray-500 text-center py-4">No test cases added yet. Click "Add Test Case" to create one.</p>
+                      <p className="text-sm text-slate-500 text-center py-4">No test cases added yet. Click "Add Test Case" to create one.</p>
                     ) : (
                       <div className="space-y-3">
                         {editingProblem.test_cases.map((testCase, index) => (
-                          <div key={index} className="bg-white p-3 rounded border border-yellow-300">
+                          <div key={index} className="bg-cyber-navy/60 p-3 rounded border border-yellow-300">
                             <div className="flex items-center justify-between mb-2">
                               <Label className="font-semibold">Test Case {index + 1}</Label>
                               <Button
@@ -2959,7 +2959,7 @@ export default function AssignmentLibrary({ user }) {
                     <div className="flex items-center justify-between mb-3">
                       <div>
                         <Label className="text-lg font-semibold">🐢 Turtle Test Cases</Label>
-                        <p className="text-sm text-gray-600 mt-1">Check if student code uses required turtle commands</p>
+                        <p className="text-sm text-slate-400 mt-1">Check if student code uses required turtle commands</p>
                       </div>
                       <Button
                         type="button"
@@ -2977,7 +2977,7 @@ export default function AssignmentLibrary({ user }) {
                     </div>
 
                     {(!editingProblem.test_cases || editingProblem.test_cases.length === 0) ? (
-                      <p className="text-sm text-gray-500 text-center py-4">No tests added yet. Click "Add Test" to create one.</p>
+                      <p className="text-sm text-slate-500 text-center py-4">No tests added yet. Click "Add Test" to create one.</p>
                     ) : (
                       <div className="overflow-x-auto">
                         <table className="w-full text-sm">
@@ -3063,7 +3063,7 @@ export default function AssignmentLibrary({ user }) {
                             ))}
                           </tbody>
                         </table>
-                        <p className="text-xs text-gray-500 mt-2">
+                        <p className="text-xs text-slate-500 mt-2">
                           💡 <strong>Pattern examples:</strong> <code>forward(</code>, <code>circle(25)</code>, <code>penup()</code>, <code>= turtle.Turtle()</code>
                         </p>
                       </div>
@@ -3077,7 +3077,7 @@ export default function AssignmentLibrary({ user }) {
                     <div className="flex items-center justify-between mb-3">
                       <div>
                         <Label className="text-lg font-semibold">Pattern Test Cases</Label>
-                        <p className="text-sm text-gray-600 mt-1">Check if student code contains required patterns</p>
+                        <p className="text-sm text-slate-400 mt-1">Check if student code contains required patterns</p>
                       </div>
                       <Button
                         type="button"
@@ -3095,11 +3095,11 @@ export default function AssignmentLibrary({ user }) {
                     </div>
 
                     {(!editingProblem.test_cases || editingProblem.test_cases.length === 0) ? (
-                      <p className="text-sm text-gray-500 text-center py-4">No pattern checks added yet.</p>
+                      <p className="text-sm text-slate-500 text-center py-4">No pattern checks added yet.</p>
                     ) : (
                       <div className="space-y-3">
                         {editingProblem.test_cases.map((testCase, index) => (
-                          <div key={index} className="bg-white p-3 rounded border border-cyan-300">
+                          <div key={index} className="bg-cyber-navy/60 p-3 rounded border border-cyan-300">
                             <div className="flex items-center justify-between mb-2">
                               <Label className="font-semibold">Pattern Check {index + 1}</Label>
                               <Button
@@ -3157,7 +3157,7 @@ export default function AssignmentLibrary({ user }) {
                                 />
                               </div>
                               <div className="col-span-3">
-                                <Label className="text-sm text-gray-600">Alternate accepted patterns <span className="text-xs font-normal">(optional)</span></Label>
+                                <Label className="text-sm text-slate-400">Alternate accepted patterns <span className="text-xs font-normal">(optional)</span></Label>
                                 <Input
                                   placeholder="e.g., display.set_pixel(0,0,9) if main pattern has spaces"
                                   value={testCase.alternate_patterns || ""}
@@ -3168,7 +3168,7 @@ export default function AssignmentLibrary({ user }) {
                                   }}
                                   className="mt-1 font-mono text-sm border-dashed"
                                 />
-                                <p className="text-xs text-gray-500 mt-1">
+                                <p className="text-xs text-slate-500 mt-1">
                                   Whitespace differences are auto-matched. Use this for genuinely different code, separated by <code>|</code>
                                 </p>
                               </div>
@@ -3186,7 +3186,7 @@ export default function AssignmentLibrary({ user }) {
                     <div className="flex items-center justify-between mb-3">
                       <div>
                         <Label className="text-lg font-semibold">🧱 Block Test Cases</Label>
-                        <p className="text-sm text-gray-600 mt-1">Check if student uses required blocks</p>
+                        <p className="text-sm text-slate-400 mt-1">Check if student uses required blocks</p>
                       </div>
                       <Button
                         type="button"
@@ -3204,7 +3204,7 @@ export default function AssignmentLibrary({ user }) {
                     </div>
 
                     {(!editingProblem.test_cases || editingProblem.test_cases.length === 0) ? (
-                      <p className="text-sm text-gray-500 text-center py-4">No tests added yet. Click "Add Test" to create one.</p>
+                      <p className="text-sm text-slate-500 text-center py-4">No tests added yet. Click "Add Test" to create one.</p>
                     ) : (
                       <div className="overflow-x-auto">
                         <table className="w-full text-sm">
@@ -3373,13 +3373,13 @@ export default function AssignmentLibrary({ user }) {
                       backgroundType="none"
                       backgroundColor="#ffffff"
                     />
-                    <p className="text-xs text-gray-500 mt-2">
+                    <p className="text-xs text-slate-500 mt-2">
                       Hover over canvas to see coordinates. Use play controls to test your code.
                     </p>
                   </div>
                 )}
 
-                <Button type="submit" className="w-full bg-indigo-600 hover:bg-indigo-700">
+                <Button type="submit" className="w-full bg-cyber-cyan text-cyber-black hover:shadow-[0_0_15px_rgba(0,240,255,0.5)] font-bold">
                   Update Problem
                 </Button>
               </form>
@@ -3448,7 +3448,7 @@ export default function AssignmentLibrary({ user }) {
                   <Button onClick={() => setMoveDialogOpen(false)} variant="outline" className="flex-1">
                     Cancel
                   </Button>
-                  <Button onClick={handleMoveProblem} className="flex-1 bg-indigo-600 hover:bg-indigo-700">
+                  <Button onClick={handleMoveProblem} className="flex-1 bg-cyber-cyan text-cyber-black hover:shadow-[0_0_15px_rgba(0,240,255,0.5)] font-bold">
                     <FolderInput className="w-4 h-4 mr-2" />
                     Move Here
                   </Button>
@@ -3495,7 +3495,7 @@ export default function AssignmentLibrary({ user }) {
                 onChange={(e) => setBulkUpdateUnit(e.target.value)}
                 className="mt-1"
               />
-              <p className="text-xs text-gray-500 mt-1">
+              <p className="text-xs text-slate-500 mt-1">
                 Examples: "Unit 1: Block-Based", "Unit 2: Turtle Graphics", "Unit 3: Python Text"
               </p>
             </div>
@@ -3507,7 +3507,7 @@ export default function AssignmentLibrary({ user }) {
                 onChange={(e) => setBulkUpdateChapter(e.target.value)}
                 className="mt-1"
               />
-              <p className="text-xs text-gray-500 mt-1">
+              <p className="text-xs text-slate-500 mt-1">
                 Examples: "Chapter 1: Printing", "Chapter 2: Variables and Input"
               </p>
             </div>
@@ -3519,22 +3519,22 @@ export default function AssignmentLibrary({ user }) {
                 onChange={(e) => setBulkUpdateLesson(e.target.value)}
                 className="mt-1"
               />
-              <p className="text-xs text-gray-500 mt-1">
+              <p className="text-xs text-slate-500 mt-1">
                 Examples: "Lesson 1 Intro to Print", "Lesson 2 Numbers"
               </p>
             </div>
             
             {/* Preview of selected problems */}
-            <div className="border rounded-lg p-3 bg-gray-50 max-h-40 overflow-y-auto">
-              <Label className="text-sm text-gray-600">Selected Problems Preview:</Label>
+            <div className="border rounded-lg p-3 bg-cyber-navy/40 max-h-40 overflow-y-auto">
+              <Label className="text-sm text-slate-400">Selected Problems Preview:</Label>
               <ul className="mt-2 space-y-1">
                 {problems.filter(p => selectedProblems.includes(p.id)).slice(0, 10).map(p => (
-                  <li key={p.id} className="text-xs text-gray-700 truncate">
+                  <li key={p.id} className="text-xs text-slate-300 truncate">
                     • {p.title}
                   </li>
                 ))}
                 {selectedProblems.length > 10 && (
-                  <li className="text-xs text-gray-500">... and {selectedProblems.length - 10} more</li>
+                  <li className="text-xs text-slate-500">... and {selectedProblems.length - 10} more</li>
                 )}
               </ul>
             </div>
@@ -3589,7 +3589,7 @@ export default function AssignmentLibrary({ user }) {
                   toast.success(`Completed! Distance: ${stats.pathLength.toFixed(0)}px`);
                 }}
               />
-              <div className="text-sm text-gray-600 bg-gray-100 rounded-lg p-3 w-full">
+              <div className="text-sm text-slate-400 bg-cyber-navy/30 rounded-lg p-3 w-full">
                 <p><strong>Maze Settings:</strong></p>
                 <ul className="list-disc list-inside text-xs mt-1">
                   <li>Background: {newProblem.background_type}</li>
@@ -3610,7 +3610,7 @@ export default function AssignmentLibrary({ user }) {
                 backgroundType="none"
                 backgroundColor={newProblem.background_color || "#ffffff"}
               />
-              <p className="text-sm text-gray-500">
+              <p className="text-sm text-slate-500">
                 Use the controls above to run your code. Hover over the canvas to see coordinates.
               </p>
             </div>
@@ -3780,7 +3780,7 @@ function AssignmentBuilder({ open, onOpenChange, selectedProblems, problems, onS
           <div>
             <p className="font-bold mb-2">Assignment Created!</p>
             <p className="text-sm mb-1">Proctor Code: <span className="font-mono font-bold text-lg">{response.data.proctor_code}</span></p>
-            <p className="text-xs text-gray-600">Students can use this code to unlock if they accidentally mark as Done.</p>
+            <p className="text-xs text-slate-400">Students can use this code to unlock if they accidentally mark as Done.</p>
           </div>,
           { duration: 10000 }
         );
@@ -3811,10 +3811,10 @@ function AssignmentBuilder({ open, onOpenChange, selectedProblems, problems, onS
           {/* Selected Problems Preview */}
           <div>
             <Label>Selected Problems ({selectedProblems.length})</Label>
-            <div className="mt-2 space-y-2 max-h-40 overflow-y-auto p-3 bg-gray-50 rounded-lg border">
+            <div className="mt-2 space-y-2 max-h-40 overflow-y-auto p-3 bg-cyber-navy/40 rounded-lg border">
               {selectedProblemsList.map((problem, index) => (
                 <div key={problem.id} className="text-sm flex items-center gap-2">
-                  <span className="font-semibold text-gray-600">{index + 1}.</span>
+                  <span className="font-semibold text-slate-400">{index + 1}.</span>
                   <span>{problem.title}</span>
                 </div>
               ))}
@@ -3855,7 +3855,7 @@ function AssignmentBuilder({ open, onOpenChange, selectedProblems, problems, onS
                 onChange={(e) => setChapter(e.target.value)}
                 className="mt-1"
               />
-              <p className="text-xs text-gray-500 mt-1">For organizing student assignments</p>
+              <p className="text-xs text-slate-500 mt-1">For organizing student assignments</p>
             </div>
             <div>
               <Label htmlFor="lesson">Lesson</Label>
@@ -3866,14 +3866,14 @@ function AssignmentBuilder({ open, onOpenChange, selectedProblems, problems, onS
                 onChange={(e) => setLesson(e.target.value)}
                 className="mt-1"
               />
-              <p className="text-xs text-gray-500 mt-1">Sub-folder under chapter</p>
+              <p className="text-xs text-slate-500 mt-1">Sub-folder under chapter</p>
             </div>
           </div>
 
           {/* Classroom Selection */}
           <div>
             <Label>Assign to Classrooms *</Label>
-            <div className="mt-2 space-y-2 max-h-40 overflow-y-auto p-3 bg-gray-50 rounded-lg border">
+            <div className="mt-2 space-y-2 max-h-40 overflow-y-auto p-3 bg-cyber-navy/40 rounded-lg border">
               {classrooms.map((classroom) => (
                 <div key={classroom.id} className="flex items-center space-x-2">
                   <Checkbox
@@ -3976,7 +3976,7 @@ function AssignmentBuilder({ open, onOpenChange, selectedProblems, problems, onS
                 onChange={(e) => setCompletionBonusXp(e.target.value)}
                 className="mt-1"
               />
-              <p className="text-xs text-gray-500 mt-1">Bonus for completing all problems</p>
+              <p className="text-xs text-slate-500 mt-1">Bonus for completing all problems</p>
             </div>
             <div>
               <Label htmlFor="bonusCoins">Completion Bonus Coins</Label>
@@ -3988,7 +3988,7 @@ function AssignmentBuilder({ open, onOpenChange, selectedProblems, problems, onS
                 onChange={(e) => setCompletionBonusCoins(e.target.value)}
                 className="mt-1"
               />
-              <p className="text-xs text-gray-500 mt-1">Bonus coins for completing all</p>
+              <p className="text-xs text-slate-500 mt-1">Bonus coins for completing all</p>
             </div>
           </div>
 
@@ -4184,7 +4184,7 @@ function CodingTestBuilder({ open, onOpenChange, selectedProblems, problems, onS
               required
               className="mt-1"
             />
-            <p className="text-xs text-gray-500 mt-1">Set to 0 for unlimited time</p>
+            <p className="text-xs text-slate-500 mt-1">Set to 0 for unlimited time</p>
           </div>
 
           {/* Classroom Selection */}
@@ -4194,7 +4194,7 @@ function CodingTestBuilder({ open, onOpenChange, selectedProblems, problems, onS
               {classrooms.map((classroom) => (
                 <label
                   key={classroom.id}
-                  className="flex items-center gap-2 p-2 hover:bg-gray-50 rounded cursor-pointer"
+                  className="flex items-center gap-2 p-2 hover:bg-cyber-navy/40 rounded cursor-pointer"
                 >
                   <Checkbox
                     checked={selectedClassrooms.includes(classroom.id)}
@@ -4233,7 +4233,7 @@ function CodingTestBuilder({ open, onOpenChange, selectedProblems, problems, onS
           <Button
             type="submit"
             disabled={creating}
-            className="w-full bg-indigo-600 hover:bg-indigo-700"
+            className="w-full bg-cyber-cyan text-cyber-black hover:shadow-[0_0_15px_rgba(0,240,255,0.5)] font-bold"
           >
             {creating ? "Creating..." : "Create Coding Test"}
           </Button>

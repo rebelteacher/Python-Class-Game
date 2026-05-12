@@ -205,8 +205,8 @@ export default function TestBuilder({ user }) {
               Back to Dashboard
             </Button>
             <div className="flex items-center space-x-2">
-              <FileQuestion className="w-7 h-7 text-indigo-600" />
-              <span className="text-xl font-bold text-gray-900">Test Builder</span>
+              <FileQuestion className="w-7 h-7 text-cyber-cyan" />
+              <span className="text-xl font-bold text-white">Test Builder</span>
             </div>
           </div>
         </div>
@@ -282,7 +282,7 @@ export default function TestBuilder({ user }) {
                         onChange={(e) => setTestData({ ...testData, num_questions: e.target.value })}
                         className="mt-1"
                       />
-                      <p className="text-xs text-gray-500 mt-1">
+                      <p className="text-xs text-slate-500 mt-1">
                         Each student will get this many random questions from your selected pool
                       </p>
                     </div>
@@ -309,7 +309,7 @@ export default function TestBuilder({ user }) {
                         onChange={(e) => setTestData({ ...testData, available_date: e.target.value })}
                         className="mt-1"
                       />
-                      <p className="text-xs text-gray-500 mt-1">
+                      <p className="text-xs text-slate-500 mt-1">
                         Test will appear to students on this date/time
                       </p>
                     </div>
@@ -329,7 +329,7 @@ export default function TestBuilder({ user }) {
                       <Label>Assign to Classrooms *</Label>
                       <div className="space-y-2 mt-2 max-h-40 overflow-y-auto border rounded p-3">
                         {classrooms.length === 0 ? (
-                          <p className="text-sm text-gray-500">No classrooms available</p>
+                          <p className="text-sm text-slate-500">No classrooms available</p>
                         ) : (
                           classrooms.map((classroom) => (
                             <div key={classroom.id} className="flex items-center space-x-2">
@@ -380,7 +380,7 @@ export default function TestBuilder({ user }) {
                     <Button
                       type="submit"
                       disabled={creating}
-                      className="w-full bg-indigo-600 hover:bg-indigo-700"
+                      className="w-full bg-cyber-cyan text-cyber-black hover:shadow-[0_0_15px_rgba(0,240,255,0.5)] font-bold"
                     >
                       {creating ? "Creating..." : "Create Test"}
                     </Button>
@@ -397,7 +397,7 @@ export default function TestBuilder({ user }) {
                 </CardHeader>
                 <CardContent className="max-h-[600px] overflow-y-auto">
                   {questions.length === 0 ? (
-                    <p className="text-center text-gray-500 py-10">
+                    <p className="text-center text-slate-500 py-10">
                       No questions available. Create questions first.
                     </p>
                   ) : (
@@ -409,7 +409,7 @@ export default function TestBuilder({ user }) {
                         return (
                           <div key={chapter} className="border rounded-lg">
                             <div
-                              className="flex items-center gap-2 p-3 cursor-pointer hover:bg-gray-50"
+                              className="flex items-center gap-2 p-3 cursor-pointer hover:bg-cyber-navy/40"
                               onClick={() => toggleChapter(chapter)}
                             >
                               {isChapterExpanded ? (
@@ -431,7 +431,7 @@ export default function TestBuilder({ user }) {
                                   return (
                                     <div key={lessonKey} className="border rounded">
                                       <div
-                                        className="flex items-center gap-2 p-2 cursor-pointer hover:bg-gray-50"
+                                        className="flex items-center gap-2 p-2 cursor-pointer hover:bg-cyber-navy/40"
                                         onClick={() => toggleLesson(lessonKey)}
                                       >
                                         {isLessonExpanded ? (
@@ -448,7 +448,7 @@ export default function TestBuilder({ user }) {
                                           {lessonQuestions.map((question) => (
                                             <div
                                               key={question.id}
-                                              className="flex items-start space-x-2 p-2 border rounded hover:bg-gray-50"
+                                              className="flex items-start space-x-2 p-2 border rounded hover:bg-cyber-navy/40"
                                             >
                                               <Checkbox
                                                 id={`q-${question.id}`}
@@ -487,7 +487,7 @@ export default function TestBuilder({ user }) {
                 </CardHeader>
                 <CardContent className="max-h-[600px] overflow-y-auto">
                   {selectedQuestions.size === 0 ? (
-                    <p className="text-center text-gray-500 py-10">
+                    <p className="text-center text-slate-500 py-10">
                       No questions selected yet
                     </p>
                   ) : (

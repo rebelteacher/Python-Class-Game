@@ -1135,15 +1135,15 @@ export default function BlockSpriteEditor() {
   };
 
   return (
-    <div className="h-screen flex flex-col bg-gray-50">
+    <div className="h-screen flex flex-col bg-cyber-navy/40">
       {/* Header */}
-      <div className="bg-white border-b px-4 py-2 flex items-center justify-between">
+      <div className="bg-cyber-navy/60 border-b px-4 py-2 flex items-center justify-between">
         <div className="flex items-center gap-4">
           <Button variant="ghost" size="sm" onClick={() => navigate(-1)}>
             <ArrowLeft className="w-4 h-4 mr-2" />
             Back
           </Button>
-          <h1 className="text-lg font-bold text-indigo-600">
+          <h1 className="text-lg font-bold text-cyber-cyan">
             🧩 Block-Based Sprite Editor
           </h1>
         </div>
@@ -1176,7 +1176,7 @@ export default function BlockSpriteEditor() {
           
           {/* Sprite Stage */}
           <ResizablePanel defaultSize={45} minSize={30}>
-            <div className="h-full flex flex-col p-4 bg-gray-100">
+            <div className="h-full flex flex-col p-4 bg-cyber-navy/30">
               {/* Canvas */}
               <div className="flex-shrink-0 mb-4">
                 <SpriteCanvas
@@ -1212,7 +1212,7 @@ export default function BlockSpriteEditor() {
                         key={sprite.id}
                         onClick={() => setSelectedSpriteId(sprite.id)}
                         className={`p-2 border rounded-lg cursor-pointer text-center ${
-                          selectedSpriteId === sprite.id ? 'border-indigo-500 bg-indigo-50' : 'border-gray-200'
+                          selectedSpriteId === sprite.id ? 'border-indigo-500 bg-indigo-50' : 'border-cyber-cyan/10'
                         }`}
                       >
                         <div className="text-2xl mb-1">
@@ -1274,7 +1274,7 @@ export default function BlockSpriteEditor() {
             <TabsContent value="custom">
               <div className="p-4">
                 {customSprites.length === 0 ? (
-                  <div className="text-center text-gray-500 py-8">
+                  <div className="text-center text-slate-500 py-8">
                     <Sparkles className="w-12 h-12 mx-auto mb-2 opacity-50" />
                     <p>No custom sprites yet</p>
                     <Button 
@@ -1334,13 +1334,13 @@ export default function BlockSpriteEditor() {
                 value={generatePrompt}
                 onChange={(e) => setGeneratePrompt(e.target.value)}
               />
-              <p className="text-xs text-gray-500 mt-1">
+              <p className="text-xs text-slate-500 mt-1">
                 Tip: Be specific! Include colors, style, and character traits.
               </p>
             </div>
             
             <div className="flex gap-2 flex-wrap">
-              <span className="text-xs text-gray-500">Quick ideas:</span>
+              <span className="text-xs text-slate-500">Quick ideas:</span>
               {["space warrior", "cute dragon", "fast spaceship", "treasure chest", "magic crystal"].map(idea => (
                 <Button
                   key={idea}

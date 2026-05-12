@@ -72,7 +72,7 @@ function SchoolAdminDashboard({ user }) {
   if (loading) {
     return (
       <div className="min-h-screen bg-cyber-black cyber-grid-bg flex items-center justify-center">
-        <p className="text-gray-600">Loading dashboard...</p>
+        <p className="text-slate-400">Loading dashboard...</p>
       </div>
     );
   }
@@ -91,17 +91,17 @@ function SchoolAdminDashboard({ user }) {
               <div className="flex items-center space-x-2">
                 <School className="w-7 h-7 text-white" />
                 <span className="text-xl font-bold text-white">ByteBattles Arena</span>
-                <span className="ml-4 px-3 py-1 bg-white/20 text-white text-sm font-medium rounded-full border border-white/30">
+                <span className="ml-4 px-3 py-1 bg-cyber-navy/60/20 text-white text-sm font-medium rounded-full border border-white/30">
                   School Admin
                 </span>
               </div>
               <span className="text-lg font-medium text-white">{user?.name}</span>
             </div>
             <div className="flex items-center justify-between">
-              <Button onClick={handleBackToTeachers} variant="outline" size="sm" className="gap-2 border-white/30 text-white hover:bg-white/20 bg-white/10">
+              <Button onClick={handleBackToTeachers} variant="outline" size="sm" className="gap-2 border-white/30 text-white hover:bg-cyber-navy/60/20 bg-cyber-navy/60/10">
                 ← Back to Teachers
               </Button>
-              <Button onClick={handleLogout} variant="outline" size="sm" className="gap-2 border-white/30 text-white hover:bg-white/20 bg-white/10">
+              <Button onClick={handleLogout} variant="outline" size="sm" className="gap-2 border-white/30 text-white hover:bg-cyber-navy/60/20 bg-cyber-navy/60/10">
                 <LogOut className="w-4 h-4" />
                 Logout
               </Button>
@@ -115,19 +115,19 @@ function SchoolAdminDashboard({ user }) {
             <h1 className="text-4xl font-bold bg-gradient-to-r from-green-600 to-teal-600 bg-clip-text text-transparent mb-2">
               {selectedTeacher.name}'s Classrooms
             </h1>
-            <p className="text-gray-600">View-only access to teacher's classrooms and assignments</p>
+            <p className="text-slate-400">View-only access to teacher's classrooms and assignments</p>
           </div>
 
           {/* Classrooms */}
           <div className="max-w-7xl mx-auto">
             {loadingClassrooms ? (
               <div className="text-center py-12">
-                <p className="text-gray-600">Loading classrooms...</p>
+                <p className="text-slate-400">Loading classrooms...</p>
               </div>
             ) : teacherClassrooms.length === 0 ? (
               <Card>
                 <CardContent className="py-12">
-                  <p className="text-gray-500 text-center">No classrooms found for this teacher</p>
+                  <p className="text-slate-500 text-center">No classrooms found for this teacher</p>
                 </CardContent>
               </Card>
             ) : (
@@ -140,25 +140,25 @@ function SchoolAdminDashboard({ user }) {
                     <CardContent className="pt-4">
                       <div className="space-y-3">
                         <div className="flex items-center justify-between">
-                          <span className="text-sm text-gray-600">Students:</span>
-                          <span className="font-semibold text-teal-600">{classroom.students?.length || 0}</span>
+                          <span className="text-sm text-slate-400">Students:</span>
+                          <span className="font-semibold text-cyber-cyan">{classroom.students?.length || 0}</span>
                         </div>
                         <div className="flex items-center justify-between">
-                          <span className="text-sm text-gray-600">Join Code:</span>
-                          <code className="px-2 py-1 bg-gray-100 rounded text-xs font-mono">{classroom.join_code}</code>
+                          <span className="text-sm text-slate-400">Join Code:</span>
+                          <code className="px-2 py-1 bg-cyber-navy/30 rounded text-xs font-mono">{classroom.join_code}</code>
                         </div>
                         {classroom.students && classroom.students.length > 0 && (
                           <div className="mt-4 pt-4 border-t">
-                            <p className="text-xs text-gray-500 mb-2">Students:</p>
+                            <p className="text-xs text-slate-500 mb-2">Students:</p>
                             <div className="space-y-1">
                               {classroom.students.slice(0, 5).map((student) => (
-                                <div key={student.id} className="text-xs text-gray-700 flex items-center gap-2">
+                                <div key={student.id} className="text-xs text-slate-300 flex items-center gap-2">
                                   <GraduationCap className="w-3 h-3" />
                                   {student.name}
                                 </div>
                               ))}
                               {classroom.students.length > 5 && (
-                                <p className="text-xs text-gray-500">+{classroom.students.length - 5} more</p>
+                                <p className="text-xs text-slate-500">+{classroom.students.length - 5} more</p>
                               )}
                             </div>
                           </div>
@@ -191,14 +191,14 @@ function SchoolAdminDashboard({ user }) {
             <div className="flex items-center space-x-2">
               <School className="w-7 h-7 text-white" />
               <span className="text-xl font-bold text-white">ByteBattles Arena</span>
-              <span className="ml-4 px-3 py-1 bg-white/20 text-white text-sm font-medium rounded-full border border-white/30">
+              <span className="ml-4 px-3 py-1 bg-cyber-navy/60/20 text-white text-sm font-medium rounded-full border border-white/30">
                 School Admin
               </span>
             </div>
             <span className="text-lg font-medium text-white">{user?.name}</span>
           </div>
           <div className="flex items-center justify-end">
-            <Button onClick={handleLogout} variant="outline" size="sm" className="gap-2 border-white/30 text-white hover:bg-white/20 bg-white/10">
+            <Button onClick={handleLogout} variant="outline" size="sm" className="gap-2 border-white/30 text-white hover:bg-cyber-navy/60/20 bg-cyber-navy/60/10">
               <LogOut className="w-4 h-4" />
               Logout
             </Button>
@@ -212,7 +212,7 @@ function SchoolAdminDashboard({ user }) {
           <h1 className="text-4xl font-bold bg-gradient-to-r from-green-600 to-teal-600 bg-clip-text text-transparent mb-2">
             {stats.school_name}
           </h1>
-          <p className="text-gray-600">School-wide overview and teacher management</p>
+          <p className="text-slate-400">School-wide overview and teacher management</p>
         </div>
 
         {/* Stats Cards */}
@@ -221,7 +221,7 @@ function SchoolAdminDashboard({ user }) {
             <CardContent className="pt-6">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm text-gray-600">Teachers</p>
+                  <p className="text-sm text-slate-400">Teachers</p>
                   <p className="text-3xl font-bold text-green-600">{stats.total_teachers || 0}</p>
                 </div>
                 <Users className="w-12 h-12 text-green-400" />
@@ -233,8 +233,8 @@ function SchoolAdminDashboard({ user }) {
             <CardContent className="pt-6">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm text-gray-600">Classrooms</p>
-                  <p className="text-3xl font-bold text-teal-600">{stats.total_classrooms || 0}</p>
+                  <p className="text-sm text-slate-400">Classrooms</p>
+                  <p className="text-3xl font-bold text-cyber-cyan">{stats.total_classrooms || 0}</p>
                 </div>
                 <BookOpen className="w-12 h-12 text-teal-400" />
               </div>
@@ -245,7 +245,7 @@ function SchoolAdminDashboard({ user }) {
             <CardContent className="pt-6">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm text-gray-600">Students</p>
+                  <p className="text-sm text-slate-400">Students</p>
                   <p className="text-3xl font-bold text-blue-600">{stats.total_students || 0}</p>
                 </div>
                 <GraduationCap className="w-12 h-12 text-blue-400" />
@@ -262,7 +262,7 @@ function SchoolAdminDashboard({ user }) {
             </CardHeader>
             <CardContent>
               {teachers.length === 0 ? (
-                <p className="text-gray-500 text-center py-8">No teachers registered yet</p>
+                <p className="text-slate-500 text-center py-8">No teachers registered yet</p>
               ) : (
                 <div className="grid gap-4">
                   {teachers.map((teacher) => (
@@ -270,7 +270,7 @@ function SchoolAdminDashboard({ user }) {
                       <div className="flex items-center justify-between">
                         <div>
                           <h3 className="font-semibold text-lg">{teacher.name}</h3>
-                          <p className="text-sm text-gray-600">{teacher.email}</p>
+                          <p className="text-sm text-slate-400">{teacher.email}</p>
                         </div>
                         <Button 
                           onClick={() => handleViewTeacher(teacher)} 

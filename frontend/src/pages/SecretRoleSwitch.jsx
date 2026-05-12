@@ -25,10 +25,10 @@ export default function SecretRoleSwitch() {
   }, [navigate]);
 
   return (
-    <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+    <div className="min-h-screen bg-cyber-navy/40 flex items-center justify-center">
       <div className="text-center">
         <h1 className="text-2xl font-bold mb-4">Switching Role...</h1>
-        <p className="text-gray-600">Please wait...</p>
+        <p className="text-slate-400">Please wait...</p>
       </div>
     </div>
   );

@@ -732,7 +732,7 @@ export default function AssignmentPage({ user }) {
   if (loading) {
     return (
       <div data-testid="assignment-loading" className="min-h-screen flex items-center justify-center bg-cyber-black cyber-grid-bg">
-        <div className="text-xl text-gray-600">Loading...</div>
+        <div className="text-xl text-slate-400">Loading...</div>
       </div>
     );
   }
@@ -740,7 +740,7 @@ export default function AssignmentPage({ user }) {
   if (!assignment) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-cyber-black cyber-grid-bg">
-        <div className="text-xl text-gray-600">Assignment not found</div>
+        <div className="text-xl text-slate-400">Assignment not found</div>
       </div>
     );
   }
@@ -767,8 +767,8 @@ export default function AssignmentPage({ user }) {
               Back to Dashboard
             </Button>
             <div className="flex items-center space-x-2">
-              <Code2 className="w-7 h-7 text-indigo-600" />
-              <span className="text-xl font-bold text-gray-900">{assignment.title}</span>
+              <Code2 className="w-7 h-7 text-cyber-cyan" />
+              <span className="text-xl font-bold text-white">{assignment.title}</span>
             </div>
           </div>
         </div>
@@ -776,14 +776,14 @@ export default function AssignmentPage({ user }) {
 
       {/* Multi-Problem Navigation */}
       {assignment.problems && assignment.problems.length > 1 && (
-        <div className="bg-white border-b">
+        <div className="bg-cyber-navy/60 border-b">
           <div className="container mx-auto px-6 py-4">
             <div className="flex items-center justify-between mb-3">
-              <h3 className="text-sm font-semibold text-gray-700">
+              <h3 className="text-sm font-semibold text-slate-300">
                 Problem {currentProblemIndex + 1} of {assignment.problems.length}
               </h3>
               <div className="flex items-center gap-4">
-                <div className="text-sm text-gray-600">
+                <div className="text-sm text-slate-400">
                   Progress: {Object.values(problemsFinal).filter(isDone => isDone).length}/{assignment.problems.length} done
                 </div>
                 {user.role === "student" && (
@@ -796,7 +796,7 @@ export default function AssignmentPage({ user }) {
                         : 0;
                       const gradeColor = averageScore >= 90 ? "text-green-600" :
                                         averageScore >= 70 ? "text-yellow-600" :
-                                        averageScore > 0 ? "text-orange-600" : "text-gray-500";
+                                        averageScore > 0 ? "text-orange-600" : "text-slate-500";
                       return <span className={gradeColor}>{averageScore.toFixed(1)}%</span>;
                     })()}
                   </div>
@@ -809,12 +809,12 @@ export default function AssignmentPage({ user }) {
                 const isFinal = problemsFinal[problem.id];
                 
                 // Determine color based on score
-                let colorClass = 'bg-gray-100 text-gray-700 hover:bg-gray-200'; // Not attempted
+                let colorClass = 'bg-cyber-navy/30 text-slate-300 hover:bg-slate-800'; // Not attempted
                 if (problemScore !== null && problemScore !== undefined) {
                   if (problemScore === 100) {
                     colorClass = 'bg-green-500 text-white hover:bg-green-600'; // Perfect
                   } else if (problemScore >= 70) {
-                    colorClass = 'bg-yellow-400 text-gray-900 hover:bg-yellow-500'; // Passing
+                    colorClass = 'bg-yellow-400 text-white hover:bg-yellow-500'; // Passing
                   } else {
                     colorClass = 'bg-red-400 text-white hover:bg-red-500'; // Failed
                   }
@@ -827,7 +827,7 @@ export default function AssignmentPage({ user }) {
                 
                 // Current problem highlight
                 if (currentProblemIndex === index) {
-                  colorClass = 'bg-indigo-600 text-white border-2 border-indigo-800';
+                  colorClass = 'bg-cyber-cyan text-cyber-black text-white border-2 border-indigo-800';
                 }
                 
                 return (
@@ -861,7 +861,7 @@ export default function AssignmentPage({ user }) {
                   <CardTitle className="text-base">Instructions</CardTitle>
                 </CardHeader>
                 <CardContent className="pt-0 px-3">
-                  <p className="text-gray-700 whitespace-pre-wrap text-sm">
+                  <p className="text-slate-300 whitespace-pre-wrap text-sm">
                     {(assignment.problems && assignment.problems[currentProblemIndex]?.description) || assignment.description || "No description provided."}
                   </p>
                   
@@ -995,7 +995,7 @@ export default function AssignmentPage({ user }) {
                             {currentProblem.materials_needed.map((mat, i) => (
                               <span 
                                 key={i} 
-                                className="px-2 py-1 bg-white border border-yellow-300 rounded-full text-xs font-medium"
+                                className="px-2 py-1 bg-cyber-navy/60 border border-yellow-300 rounded-full text-xs font-medium"
                               >
                                 {mat}
                               </span>
@@ -1014,7 +1014,7 @@ export default function AssignmentPage({ user }) {
                           </CardTitle>
                         </CardHeader>
                         <CardContent>
-                          <pre className="text-sm whitespace-pre-wrap font-sans text-gray-700">
+                          <pre className="text-sm whitespace-pre-wrap font-sans text-slate-300">
                             {currentProblem.wiring_instructions}
                           </pre>
                         </CardContent>
@@ -1076,7 +1076,7 @@ export default function AssignmentPage({ user }) {
                         <CardTitle className="text-lg">Expected Output</CardTitle>
                       </CardHeader>
                       <CardContent>
-                        <pre className="p-3 bg-white rounded border border-green-300 text-gray-800 text-sm font-mono whitespace-pre-wrap">
+                        <pre className="p-3 bg-cyber-navy/60 rounded border border-green-300 text-slate-200 text-sm font-mono whitespace-pre-wrap">
                           {assignment.expected_output || currentProblem.expected_output}
                         </pre>
                       </CardContent>
@@ -1090,7 +1090,7 @@ export default function AssignmentPage({ user }) {
                 <CardHeader className="pb-2">
                   <CardTitle className="flex items-center gap-2">
                     📋 Test Cases
-                    <span className="text-sm font-normal text-gray-500">
+                    <span className="text-sm font-normal text-slate-500">
                       ({(() => {
                         const problem = assignment.problems ? assignment.problems[currentProblemIndex] : assignment;
                         const testCases = problem?.test_cases || [];
@@ -1106,12 +1106,12 @@ export default function AssignmentPage({ user }) {
                     <table className="w-full text-sm border-collapse">
                       <thead>
                         <tr className="bg-indigo-50">
-                          <th className="border border-gray-200 px-3 py-2 text-left font-semibold text-indigo-700">#</th>
-                          <th className="border border-gray-200 px-3 py-2 text-left font-semibold text-indigo-700">Test Name</th>
-                          <th className="border border-gray-200 px-3 py-2 text-left font-semibold text-indigo-700">Input</th>
-                          <th className="border border-gray-200 px-3 py-2 text-left font-semibold text-indigo-700">Expected Output</th>
-                          <th className="border border-gray-200 px-3 py-2 text-center font-semibold text-indigo-700">Points</th>
-                          {latestSubmission && <th className="border border-gray-200 px-3 py-2 text-center font-semibold text-indigo-700">Status</th>}
+                          <th className="border border-cyber-cyan/10 px-3 py-2 text-left font-semibold text-indigo-700">#</th>
+                          <th className="border border-cyber-cyan/10 px-3 py-2 text-left font-semibold text-indigo-700">Test Name</th>
+                          <th className="border border-cyber-cyan/10 px-3 py-2 text-left font-semibold text-indigo-700">Input</th>
+                          <th className="border border-cyber-cyan/10 px-3 py-2 text-left font-semibold text-indigo-700">Expected Output</th>
+                          <th className="border border-cyber-cyan/10 px-3 py-2 text-center font-semibold text-indigo-700">Points</th>
+                          {latestSubmission && <th className="border border-cyber-cyan/10 px-3 py-2 text-center font-semibold text-indigo-700">Status</th>}
                         </tr>
                       </thead>
                       <tbody>
@@ -1132,30 +1132,30 @@ export default function AssignmentPage({ user }) {
                             );
                             
                             return (
-                            <tr key={testCase.id || index} className={index % 2 === 0 ? 'bg-white' : 'bg-gray-50'}>
-                              <td className="border border-gray-200 px-3 py-2 text-center font-medium text-gray-600">
+                            <tr key={testCase.id || index} className={index % 2 === 0 ? 'bg-cyber-navy/60' : 'bg-cyber-navy/40'}>
+                              <td className="border border-cyber-cyan/10 px-3 py-2 text-center font-medium text-slate-400">
                                 {index + 1}
                               </td>
-                              <td className="border border-gray-200 px-3 py-2 font-medium text-gray-900">
+                              <td className="border border-cyber-cyan/10 px-3 py-2 font-medium text-white">
                                 {testCase.description || `Test ${index + 1}`}
                               </td>
-                              <td className="border border-gray-200 px-3 py-2">
+                              <td className="border border-cyber-cyan/10 px-3 py-2">
                                 <pre className="whitespace-pre-wrap font-mono text-xs bg-blue-50 p-2 rounded text-blue-800 max-w-xs overflow-x-auto">
                                   {(testCase.input_data || testCase.input || "(no input)").split('\\n').join('\n')}
                                 </pre>
                               </td>
-                              <td className="border border-gray-200 px-3 py-2">
+                              <td className="border border-cyber-cyan/10 px-3 py-2">
                                 <pre className="whitespace-pre-wrap font-mono text-xs bg-green-50 p-2 rounded text-green-800 max-w-xs overflow-x-auto">
                                   {(testCase.expected_output || "").split('\\n').join('\n')}
                                 </pre>
                               </td>
-                              <td className="border border-gray-200 px-3 py-2 text-center">
+                              <td className="border border-cyber-cyan/10 px-3 py-2 text-center">
                                 <span className="inline-flex items-center justify-center px-2 py-1 bg-amber-100 text-amber-800 rounded-full font-semibold text-xs">
                                   {testCase.points || pointsPerTest} pts
                                 </span>
                               </td>
                               {latestSubmission && (
-                                <td className="border border-gray-200 px-3 py-2 text-center">
+                                <td className="border border-cyber-cyan/10 px-3 py-2 text-center">
                                   {result ? (
                                     result.passed ? (
                                       <span className="inline-flex items-center justify-center px-2 py-1 bg-green-100 text-green-700 rounded-full font-semibold text-xs">
@@ -1167,7 +1167,7 @@ export default function AssignmentPage({ user }) {
                                       </span>
                                     )
                                   ) : (
-                                    <span className="inline-flex items-center justify-center px-2 py-1 bg-gray-100 text-gray-500 rounded-full font-semibold text-xs">
+                                    <span className="inline-flex items-center justify-center px-2 py-1 bg-cyber-navy/30 text-slate-500 rounded-full font-semibold text-xs">
                                       —
                                     </span>
                                   )}
@@ -1195,16 +1195,16 @@ export default function AssignmentPage({ user }) {
                   <CardHeader>
                     <CardTitle className="text-lg">Latest Submission</CardTitle>
                     <CardDescription>
-                      Score: <span className="font-bold text-indigo-600">{latestSubmission.score.toFixed(1)}%</span>
+                      Score: <span className="font-bold text-cyber-cyan">{latestSubmission.score.toFixed(1)}%</span>
                     </CardDescription>
                   </CardHeader>
                   <CardContent>
                     <div className="mb-3">
-                      <div className="font-semibold text-sm text-gray-900 mb-2">Feedback:</div>
-                      <p className="text-sm text-gray-700">{latestSubmission.feedback}</p>
+                      <div className="font-semibold text-sm text-white mb-2">Feedback:</div>
+                      <p className="text-sm text-slate-300">{latestSubmission.feedback}</p>
                     </div>
                     <div>
-                      <div className="font-semibold text-sm text-gray-900 mb-2">Test Results:</div>
+                      <div className="font-semibold text-sm text-white mb-2">Test Results:</div>
                       <div className="space-y-2">
                         {latestSubmission.test_results?.map((result, index) => (
                           <div key={index} className="flex items-center gap-2 text-sm">
@@ -1227,7 +1227,7 @@ export default function AssignmentPage({ user }) {
           </Panel>
 
           {/* Resize Handle */}
-          <PanelResizeHandle className="w-2 bg-gray-300 hover:bg-indigo-500 transition-colors cursor-col-resize mx-2" />
+          <PanelResizeHandle className="w-2 bg-gray-300 hover:bg-cyber-cyan/100 transition-colors cursor-col-resize mx-2" />
 
           {/* Right Side: Code Editor & Output */}
           <Panel defaultSize={80} minSize={60}>
@@ -1238,9 +1238,9 @@ export default function AssignmentPage({ user }) {
                 /* Block-Based Layout - TurtleBlocklyEditor takes full space with inline preview */
                 <div className="h-full flex flex-col pr-0">
                   {/* Compact header with score and submit */}
-                  <div className="flex items-center justify-between bg-white border-b px-3 py-2 flex-shrink-0 rounded-tr-none">
+                  <div className="flex items-center justify-between bg-cyber-navy/60 border-b px-3 py-2 flex-shrink-0 rounded-tr-none">
                     <div className="flex items-center gap-3">
-                      <span className="font-semibold text-gray-700">🧩 Block Coding</span>
+                      <span className="font-semibold text-slate-300">🧩 Block Coding</span>
                       {(() => {
                         const currentProblemId = getCurrentProblemId();
                         const bestScore = problemStatuses[currentProblemId];
@@ -1261,7 +1261,7 @@ export default function AssignmentPage({ user }) {
                         onClick={() => handleSubmit()}
                         disabled={submitting || problemsFinal[getCurrentProblemId()]}
                         size="sm"
-                        className="bg-indigo-600 hover:bg-indigo-700"
+                        className="bg-cyber-cyan text-cyber-black hover:shadow-[0_0_15px_rgba(0,240,255,0.5)] font-bold"
                       >
                         {submitting ? "Submitting..." : problemsFinal[getCurrentProblemId()] ? "✓ Submitted" : "Submit"}
                       </Button>
@@ -1374,7 +1374,7 @@ export default function AssignmentPage({ user }) {
                             if (bestScore !== null && bestScore !== undefined) {
                               return (
                                 <div className="flex items-center gap-2 text-sm">
-                                  <span className="text-gray-600">Best Score:</span>
+                                  <span className="text-slate-400">Best Score:</span>
                                   <span className={`font-semibold ${bestScore >= 70 ? 'text-green-600' : 'text-orange-600'}`}>
                                     {bestScore.toFixed(0)}%
                                   </span>
@@ -1383,7 +1383,7 @@ export default function AssignmentPage({ user }) {
                             }
                             
                             return (
-                              <div className="text-sm text-gray-500">
+                              <div className="text-sm text-slate-500">
                                 <span>Unlimited attempts</span>
                               </div>
                             );
@@ -1406,7 +1406,7 @@ export default function AssignmentPage({ user }) {
                           data-testid="submit-code-btn" 
                           onClick={handleSubmit} 
                           disabled={submitting || !hasRun || problemsFinal[getCurrentProblemId()]}
-                          className="bg-indigo-600 hover:bg-indigo-700 gap-2 flex-1"
+                          className="bg-cyber-cyan text-cyber-black hover:shadow-[0_0_15px_rgba(0,240,255,0.5)] font-bold gap-2 flex-1"
                           size="sm"
                         >
                           <Send className="w-4 h-4" />
@@ -1428,7 +1428,7 @@ export default function AssignmentPage({ user }) {
                           <BookOpen className="w-4 h-4 mr-2" />
                           {loadingLesson ? "Loading..." : "📚 Learn This Concept (FREE)"}
                         </Button>
-                        <p className="text-xs text-center text-gray-500 mt-2">
+                        <p className="text-xs text-center text-slate-500 mt-2">
                           💡 Review the lesson anytime - no coins needed!
                         </p>
                       </div>
@@ -1473,10 +1473,10 @@ export default function AssignmentPage({ user }) {
                             <p className="text-orange-600 font-medium">
                               ⚠️ Click &quot;Submit as Done&quot; only when you&apos;re finished!
                             </p>
-                            <p className="text-gray-600">
+                            <p className="text-slate-400">
                               💡 {hintStatus.hints_remaining}/2 hints remaining for this assignment
                             </p>
-                            <p className="text-gray-500">
+                            <p className="text-slate-500">
                               💰 Try reading the feedback first to save coins!
                             </p>
                           </div>
@@ -1560,7 +1560,7 @@ export default function AssignmentPage({ user }) {
               </Panel>
 
               {/* Resize Handle */}
-              <PanelResizeHandle className="w-1.5 bg-gray-200 hover:bg-indigo-500 transition-colors cursor-col-resize mx-1" />
+              <PanelResizeHandle className="w-1.5 bg-slate-800 hover:bg-cyber-cyan/100 transition-colors cursor-col-resize mx-1" />
 
               {/* Output - Right - Compact for more coding space */}
               <Panel defaultSize={45} minSize={25}>
@@ -1589,7 +1589,7 @@ export default function AssignmentPage({ user }) {
                         {/* Console output below simulator */}
                         {output && (
                           <div className="mt-2">
-                            <div className="text-sm font-semibold text-gray-700 mb-1">Console Output:</div>
+                            <div className="text-sm font-semibold text-slate-300 mb-1">Console Output:</div>
                             <pre className="p-3 bg-gray-900 text-green-400 rounded-lg font-mono text-xs whitespace-pre-wrap max-h-32 overflow-y-auto">
                               {output}
                             </pre>
@@ -1613,7 +1613,7 @@ export default function AssignmentPage({ user }) {
                             return (
                               <div className="flex flex-col gap-3">
                                 {/* Live Turtle Canvas with Maze */}
-                                <div className="bg-white rounded-lg shadow p-2">
+                                <div className="bg-cyber-navy/60 rounded-lg shadow p-2">
                                   <AnimatedTurtle
                                     code={code}
                                     width={600}
@@ -1689,7 +1689,7 @@ export default function AssignmentPage({ user }) {
                                 
                                 {/* Toggle for static vs live preview */}
                                 {!hasMaze && (
-                                  <div className="flex items-center gap-2 text-xs text-gray-500">
+                                  <div className="flex items-center gap-2 text-xs text-slate-500">
                                     <input
                                       type="checkbox"
                                       id="useLiveTurtle"
@@ -1705,7 +1705,7 @@ export default function AssignmentPage({ user }) {
                           } else {
                             // Fallback to static image for non-maze problems
                             return turtleImage ? (
-                              <div className="flex justify-center items-center bg-white p-4 rounded border-2 border-gray-200">
+                              <div className="flex justify-center items-center bg-cyber-navy/60 p-4 rounded border-2 border-cyber-cyan/10">
                                 <img 
                                   src={`data:image/png;base64,${turtleImage}`}
                                   alt="Turtle output"
@@ -1714,7 +1714,7 @@ export default function AssignmentPage({ user }) {
                                 />
                               </div>
                             ) : (
-                              <div className="flex items-center justify-center h-64 bg-gray-50 rounded border-2 border-dashed border-gray-300 text-gray-500">
+                              <div className="flex items-center justify-center h-64 bg-cyber-navy/40 rounded border-2 border-dashed border-cyber-cyan/15 text-slate-500">
                                 <div className="text-center">
                                   <div className="text-4xl mb-2">🐢</div>
                                   <div>Run your turtle code to see the output here...</div>
@@ -1725,7 +1725,7 @@ export default function AssignmentPage({ user }) {
                         })()}
                         {output && (
                           <div className="mt-2">
-                            <div className="text-sm font-semibold text-gray-700 mb-1">Console Output:</div>
+                            <div className="text-sm font-semibold text-slate-300 mb-1">Console Output:</div>
                             <pre className="p-3 bg-gray-900 text-green-400 rounded-lg font-mono text-xs whitespace-pre-wrap">
                               {output}
                             </pre>
@@ -1753,7 +1753,7 @@ export default function AssignmentPage({ user }) {
                       <img 
                         src="https://scratch.mit.edu/images/logo_sm.png" 
                         alt="Scratch" 
-                        className="h-10 bg-white rounded p-1"
+                        className="h-10 bg-cyber-navy/60 rounded p-1"
                       />
                       <div>
                         <span className="font-bold text-xl">Scratch Teaching Mode</span>
@@ -1765,7 +1765,7 @@ export default function AssignmentPage({ user }) {
                   {/* Problem info */}
                   <div className="bg-orange-50 border-b border-orange-200 p-4">
                     <h3 className="font-bold text-orange-800 mb-1">📋 Challenge:</h3>
-                    <p className="text-gray-700">
+                    <p className="text-slate-300">
                       {assignment.problems?.[currentProblemIndex]?.description || "Complete the Scratch challenge"}
                     </p>
                   </div>
@@ -1775,7 +1775,7 @@ export default function AssignmentPage({ user }) {
                     <div className="text-center max-w-lg">
                       <div className="text-8xl mb-6">🐱</div>
                       <h2 className="text-2xl font-bold text-orange-800 mb-4">Ready to Teach with Scratch!</h2>
-                      <p className="text-gray-600 mb-6">
+                      <p className="text-slate-400 mb-6">
                         Click the button below to open the Scratch editor. Share your screen with students while you demonstrate the solution.
                       </p>
                       
@@ -1886,7 +1886,7 @@ export default function AssignmentPage({ user }) {
                 </div>
                 </Panel>
 
-                <PanelResizeHandle className="w-2 bg-gray-300 hover:bg-indigo-500 transition-colors cursor-col-resize mx-2" />
+                <PanelResizeHandle className="w-2 bg-gray-300 hover:bg-cyber-cyan/100 transition-colors cursor-col-resize mx-2" />
 
                 {/* Output - Right - Full Space */}
                 <Panel defaultSize={50} minSize={30}>
@@ -1900,7 +1900,7 @@ export default function AssignmentPage({ user }) {
                               ? "⚡ Virtual Micro:bit"
                               : "Output"}
                         </span>
-                        <span className="text-xs text-gray-500 font-normal">Demo mode - not graded</span>
+                        <span className="text-xs text-slate-500 font-normal">Demo mode - not graded</span>
                       </CardTitle>
                       <CardDescription className="text-xs">
                         {assignment.problems?.[currentProblemIndex]?.assignment_type === "turtle" 
@@ -1924,8 +1924,8 @@ export default function AssignmentPage({ user }) {
                           {/* Console output below simulator */}
                           {output && (
                             <div className="mt-2">
-                              <div className="text-sm font-semibold text-gray-700 mb-1">Console Output:</div>
-                              <pre className={`p-3 ${darkMode ? 'bg-gray-900 text-green-400' : 'bg-gray-100 text-gray-900'} rounded-lg font-mono text-xs whitespace-pre-wrap max-h-32 overflow-y-auto`}>
+                              <div className="text-sm font-semibold text-slate-300 mb-1">Console Output:</div>
+                              <pre className={`p-3 ${darkMode ? 'bg-gray-900 text-green-400' : 'bg-cyber-navy/30 text-white'} rounded-lg font-mono text-xs whitespace-pre-wrap max-h-32 overflow-y-auto`}>
                                 {output}
                               </pre>
                             </div>
@@ -1940,7 +1940,7 @@ export default function AssignmentPage({ user }) {
                       ) : assignment.problems?.[currentProblemIndex]?.assignment_type === "turtle" ? (
                         <div className="h-full flex flex-col gap-3">
                           {turtleImage ? (
-                            <div className="flex justify-center items-center bg-white p-4 rounded border-2 border-gray-200">
+                            <div className="flex justify-center items-center bg-cyber-navy/60 p-4 rounded border-2 border-cyber-cyan/10">
                               <img 
                                 src={`data:image/png;base64,${turtleImage}`}
                                 alt="Turtle output"
@@ -1949,7 +1949,7 @@ export default function AssignmentPage({ user }) {
                               />
                             </div>
                           ) : (
-                            <div className="flex items-center justify-center h-64 bg-gray-50 rounded border-2 border-dashed border-gray-300 text-gray-500">
+                            <div className="flex items-center justify-center h-64 bg-cyber-navy/40 rounded border-2 border-dashed border-cyber-cyan/15 text-slate-500">
                               <div className="text-center">
                                 <div className="text-4xl mb-2">🐢</div>
                                 <div>Run your turtle code to see the output here...</div>
@@ -1958,15 +1958,15 @@ export default function AssignmentPage({ user }) {
                           )}
                           {output && (
                             <div className="mt-2">
-                              <div className="text-sm font-semibold text-gray-700 mb-1">Console Output:</div>
-                              <pre className={`p-3 ${darkMode ? 'bg-gray-900 text-green-400' : 'bg-gray-100 text-gray-900'} rounded-lg font-mono text-xs whitespace-pre-wrap`}>
+                              <div className="text-sm font-semibold text-slate-300 mb-1">Console Output:</div>
+                              <pre className={`p-3 ${darkMode ? 'bg-gray-900 text-green-400' : 'bg-cyber-navy/30 text-white'} rounded-lg font-mono text-xs whitespace-pre-wrap`}>
                                 {output}
                               </pre>
                             </div>
                           )}
                         </div>
                       ) : (
-                        <pre className={`p-4 ${darkMode ? 'bg-gray-900 text-green-400' : 'bg-gray-100 text-gray-900'} rounded-lg font-mono text-sm whitespace-pre-wrap h-full`}>
+                        <pre className={`p-4 ${darkMode ? 'bg-gray-900 text-green-400' : 'bg-cyber-navy/30 text-white'} rounded-lg font-mono text-sm whitespace-pre-wrap h-full`}>
                           {output || "Run your code to see output here..."}
                         </pre>
                       )}
@@ -1988,18 +1988,18 @@ export default function AssignmentPage({ user }) {
                   {submissions.map((sub, index) => {
                     const isTurtleSubmission = sub.turtle_image && sub.turtle_image.length > 0;
                     return (
-                      <div key={sub.id} data-testid={`submission-${index}`} className="p-3 bg-gray-50 rounded-lg border border-gray-200">
+                      <div key={sub.id} data-testid={`submission-${index}`} className="p-3 bg-cyber-navy/40 rounded-lg border border-cyber-cyan/10">
                         <div className="flex justify-between items-start mb-2">
                           <div className="font-semibold text-sm">{sub.student_name}</div>
-                          <div className="text-sm font-bold text-indigo-600">{sub.score.toFixed(1)}%</div>
+                          <div className="text-sm font-bold text-cyber-cyan">{sub.score.toFixed(1)}%</div>
                         </div>
-                        <div className="text-xs text-gray-600 mb-2">{sub.feedback}</div>
+                        <div className="text-xs text-slate-400 mb-2">{sub.feedback}</div>
                         
                         {/* Show turtle image if this is a turtle submission */}
                         {isTurtleSubmission && (
                           <div className="mt-3">
-                            <div className="text-xs font-semibold text-gray-700 mb-1">Student&apos;s Turtle Graphics:</div>
-                            <div className="flex justify-center bg-white p-2 rounded border">
+                            <div className="text-xs font-semibold text-slate-300 mb-1">Student&apos;s Turtle Graphics:</div>
+                            <div className="flex justify-center bg-cyber-navy/60 p-2 rounded border">
                               <img 
                                 src={`data:image/png;base64,${sub.turtle_image}`}
                                 alt="Student turtle output"
@@ -2008,7 +2008,7 @@ export default function AssignmentPage({ user }) {
                               />
                             </div>
                             {sub.turtle_tracking_data && (
-                              <div className="mt-2 text-xs text-gray-600 bg-white p-2 rounded">
+                              <div className="mt-2 text-xs text-slate-400 bg-cyber-navy/60 p-2 rounded">
                                 <div className="font-semibold mb-1">📊 Tracking Data:</div>
                                 <div className="grid grid-cols-2 gap-1">
                                   <span>Lines: {sub.turtle_tracking_data.lines_drawn}</span>
@@ -2056,9 +2056,9 @@ export default function AssignmentPage({ user }) {
             </DialogDescription>
           </DialogHeader>
           <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4 my-4">
-            <p className="text-gray-800 whitespace-pre-wrap">{currentHint?.text}</p>
+            <p className="text-slate-200 whitespace-pre-wrap">{currentHint?.text}</p>
           </div>
-          <div className="flex justify-between items-center text-sm text-gray-600">
+          <div className="flex justify-between items-center text-sm text-slate-400">
             <span>💡 {hintStatus.hints_remaining} hints remaining for this assignment</span>
             <Button onClick={() => setShowHintDialog(false)} size="sm">
               Got it!

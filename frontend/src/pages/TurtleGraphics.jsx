@@ -140,8 +140,8 @@ export default function TurtleGraphics({ user }) {
               Back
             </Button>
             <div>
-              <h1 className="text-3xl font-bold text-gray-900">🐢 Turtle Graphics</h1>
-              <p className="text-gray-600">Learn Python with visual programming</p>
+              <h1 className="text-3xl font-bold text-white">🐢 Turtle Graphics</h1>
+              <p className="text-slate-400">Learn Python with visual programming</p>
             </div>
           </div>
 

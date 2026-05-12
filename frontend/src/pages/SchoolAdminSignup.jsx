@@ -84,7 +84,7 @@ export default function SchoolAdminSignup() {
             <div className="space-y-2">
               <Label htmlFor="name">Full Name</Label>
               <div className="relative">
-                <User className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
+                <User className="absolute left-3 top-3 h-4 w-4 text-slate-500" />
                 <Input
                   id="name"
                   type="text"
@@ -100,7 +100,7 @@ export default function SchoolAdminSignup() {
             <div className="space-y-2">
               <Label htmlFor="email">School Email</Label>
               <div className="relative">
-                <Mail className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
+                <Mail className="absolute left-3 top-3 h-4 w-4 text-slate-500" />
                 <Input
                   id="email"
                   type="email"
@@ -111,13 +111,13 @@ export default function SchoolAdminSignup() {
                   required
                 />
               </div>
-              <p className="text-xs text-gray-500">Use your official school email address</p>
+              <p className="text-xs text-slate-500">Use your official school email address</p>
             </div>
 
             <div className="space-y-2">
               <Label htmlFor="jobTitle">Job Title</Label>
               <div className="relative">
-                <Briefcase className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
+                <Briefcase className="absolute left-3 top-3 h-4 w-4 text-slate-500" />
                 <select
                   id="jobTitle"
                   value={jobTitle}
@@ -138,7 +138,7 @@ export default function SchoolAdminSignup() {
             <div className="space-y-2">
               <Label htmlFor="school">School Name</Label>
               <div className="relative">
-                <Building className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
+                <Building className="absolute left-3 top-3 h-4 w-4 text-slate-500" />
                 <Input
                   id="school"
                   type="text"
@@ -154,7 +154,7 @@ export default function SchoolAdminSignup() {
             <div className="space-y-2">
               <Label htmlFor="district">District Name</Label>
               <div className="relative">
-                <Building2 className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
+                <Building2 className="absolute left-3 top-3 h-4 w-4 text-slate-500" />
                 <Input
                   id="district"
                   type="text"
@@ -170,7 +170,7 @@ export default function SchoolAdminSignup() {
             <div className="space-y-2">
               <Label htmlFor="password">Password</Label>
               <div className="relative">
-                <Lock className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
+                <Lock className="absolute left-3 top-3 h-4 w-4 text-slate-500" />
                 <Input
                   id="password"
                   type="password"
@@ -187,7 +187,7 @@ export default function SchoolAdminSignup() {
             <div className="space-y-2">
               <Label htmlFor="confirmPassword">Confirm Password</Label>
               <div className="relative">
-                <Lock className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
+                <Lock className="absolute left-3 top-3 h-4 w-4 text-slate-500" />
                 <Input
                   id="confirmPassword"
                   type="password"
@@ -214,7 +214,7 @@ export default function SchoolAdminSignup() {
               {loading ? "Submitting..." : "Submit Request"}
             </Button>
 
-            <p className="text-center text-sm text-gray-600">
+            <p className="text-center text-sm text-slate-400">
               Already have an account?{" "}
               <button
                 type="button"

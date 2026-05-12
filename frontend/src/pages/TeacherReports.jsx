@@ -252,14 +252,14 @@ export default function TeacherReports({ user }) {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <div className="text-gray-500">Loading...</div>
+      <div className="min-h-screen bg-cyber-navy/40 flex items-center justify-center">
+        <div className="text-slate-500">Loading...</div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-cyber-navy/40">
       {/* Header */}
       <nav className="bg-cyber-navy/80 backdrop-blur-xl border-b border-cyber-cyan/20">
         <div className="container mx-auto px-6 py-4 flex justify-between items-center">
@@ -269,8 +269,8 @@ export default function TeacherReports({ user }) {
               Back to Dashboard
             </Button>
             <div className="flex items-center space-x-2">
-              <FileSpreadsheet className="w-7 h-7 text-indigo-600" />
-              <span className="text-xl font-bold text-gray-900">Student Reports</span>
+              <FileSpreadsheet className="w-7 h-7 text-cyber-cyan" />
+              <span className="text-xl font-bold text-white">Student Reports</span>
             </div>
           </div>
         </div>
@@ -314,7 +314,7 @@ export default function TeacherReports({ user }) {
               </div>
               <div className="border rounded-lg p-4 max-h-60 overflow-y-auto space-y-2">
                 {classrooms.length === 0 ? (
-                  <p className="text-sm text-gray-500 text-center py-4">
+                  <p className="text-sm text-slate-500 text-center py-4">
                     No classrooms found
                   </p>
                 ) : (
@@ -335,7 +335,7 @@ export default function TeacherReports({ user }) {
                   ))
                 )}
               </div>
-              <p className="text-xs text-gray-500 mt-2">
+              <p className="text-xs text-slate-500 mt-2">
                 {selectedClassrooms.length} classroom(s) selected
               </p>
             </div>
@@ -356,7 +356,7 @@ export default function TeacherReports({ user }) {
                 </div>
                 <div className="border rounded-lg p-4 max-h-60 overflow-y-auto space-y-2">
                   {assignments.length === 0 ? (
-                    <p className="text-sm text-gray-500 text-center py-4">
+                    <p className="text-sm text-slate-500 text-center py-4">
                       No assignments found in selected classrooms
                     </p>
                   ) : (
@@ -377,7 +377,7 @@ export default function TeacherReports({ user }) {
                     ))
                   )}
                 </div>
-                <p className="text-xs text-gray-500 mt-2">
+                <p className="text-xs text-slate-500 mt-2">
                   {selectedAssignments.length} assignment(s) selected
                 </p>
               </div>
@@ -420,7 +420,7 @@ export default function TeacherReports({ user }) {
               <Button
                 onClick={generateReport}
                 disabled={generating || selectedClassrooms.length === 0 || (reportType === "grades" && selectedAssignments.length === 0)}
-                className="w-full bg-indigo-600 hover:bg-indigo-700"
+                className="w-full bg-cyber-cyan text-cyber-black hover:shadow-[0_0_15px_rgba(0,240,255,0.5)] font-bold"
                 size="lg"
               >
                 <FileSpreadsheet className="w-5 h-5 mr-2" />
@@ -452,14 +452,14 @@ export default function TeacherReports({ user }) {
             </CardHeader>
             <CardContent>
               <div className="overflow-x-auto">
-                <table className="w-full border-collapse border border-gray-300 text-sm">
+                <table className="w-full border-collapse border border-cyber-cyan/15 text-sm">
                   <thead>
-                    <tr className="bg-gray-100">
-                      <th className="border border-gray-300 px-4 py-2 text-left font-semibold">
+                    <tr className="bg-cyber-navy/30">
+                      <th className="border border-cyber-cyan/15 px-4 py-2 text-left font-semibold">
                         Student Name
                       </th>
                       {reportData.assignments.map(assignment => (
-                        <th key={assignment.id} className="border border-gray-300 px-4 py-2 text-center font-semibold">
+                        <th key={assignment.id} className="border border-cyber-cyan/15 px-4 py-2 text-center font-semibold">
                           {assignment.title}
                         </th>
                       ))}
@@ -467,8 +467,8 @@ export default function TeacherReports({ user }) {
                   </thead>
                   <tbody>
                     {reportData.students.map(student => (
-                      <tr key={student.student_id} className="hover:bg-gray-50">
-                        <td className="border border-gray-300 px-4 py-2 font-medium">
+                      <tr key={student.student_id} className="hover:bg-cyber-navy/40">
+                        <td className="border border-cyber-cyan/15 px-4 py-2 font-medium">
                           {student.student_name}
                         </td>
                         {reportData.assignments.map(assignment => {
@@ -479,7 +479,7 @@ export default function TeacherReports({ user }) {
                                         score > 0 ? "bg-orange-100" : "bg-red-100";
                           
                           return (
-                            <td key={assignment.id} className={`border border-gray-300 px-4 py-2 text-center ${bgColor}`}>
+                            <td key={assignment.id} className={`border border-cyber-cyan/15 px-4 py-2 text-center ${bgColor}`}>
                               {score}
                             </td>
                           );
@@ -503,16 +503,16 @@ export default function TeacherReports({ user }) {
             </CardHeader>
             <CardContent className="space-y-6">
               {reportData.students.length === 0 ? (
-                <div className="text-center py-8 text-gray-500">
+                <div className="text-center py-8 text-slate-500">
                   <User className="w-12 h-12 mx-auto mb-3 opacity-50" />
                   <p>All students are up to date!</p>
                   <p className="text-sm">No missing or incomplete assignments found.</p>
                 </div>
               ) : (
                 reportData.students.map(student => (
-                  <div key={student.student_id} className="border rounded-lg p-4 bg-gray-50">
+                  <div key={student.student_id} className="border rounded-lg p-4 bg-cyber-navy/40">
                     <h3 className="font-semibold text-lg mb-1">{student.student_name}</h3>
-                    <p className="text-sm text-gray-600 mb-3">{student.student_email}</p>
+                    <p className="text-sm text-slate-400 mb-3">{student.student_email}</p>
                     
                     {student.missing_assignments.length > 0 && (
                       <div className="mb-3">

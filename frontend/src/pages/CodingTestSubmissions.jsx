@@ -149,7 +149,7 @@ export default function CodingTestSubmissions({ user }) {
     return (
       <div className="min-h-screen bg-cyber-black cyber-grid-bg">
         <div className="max-w-6xl mx-auto">
-          <p className="text-center text-gray-600">Loading submissions...</p>
+          <p className="text-center text-slate-400">Loading submissions...</p>
         </div>
       </div>
     );
@@ -169,9 +169,9 @@ export default function CodingTestSubmissions({ user }) {
 
         {test && (
           <div className="mb-6">
-            <h1 className="text-3xl font-bold text-gray-900 mb-2">{test.title}</h1>
-            <p className="text-gray-600">{test.description}</p>
-            <div className="mt-2 flex gap-4 text-sm text-gray-600">
+            <h1 className="text-3xl font-bold text-white mb-2">{test.title}</h1>
+            <p className="text-slate-400">{test.description}</p>
+            <div className="mt-2 flex gap-4 text-sm text-slate-400">
               <span>Problems: {test.problem_ids?.length || 0}</span>
               {test.time_limit_minutes > 0 && <span>Time Limit: {test.time_limit_minutes} min</span>}
             </div>
@@ -200,7 +200,7 @@ export default function CodingTestSubmissions({ user }) {
           </CardHeader>
           <CardContent>
             {submissions.length === 0 ? (
-              <div className="text-center py-12 text-gray-500">
+              <div className="text-center py-12 text-slate-500">
                 No submissions yet
               </div>
             ) : (
@@ -210,7 +210,7 @@ export default function CodingTestSubmissions({ user }) {
                     <CardHeader>
                       <div className="flex items-center justify-between">
                         <div className="flex items-center gap-3">
-                          <User className="w-5 h-5 text-gray-400" />
+                          <User className="w-5 h-5 text-slate-500" />
                           <div>
                             <CardTitle className="text-lg">{student.student_name}</CardTitle>
                             <CardDescription>
@@ -219,7 +219,7 @@ export default function CodingTestSubmissions({ user }) {
                           </div>
                         </div>
                         <div className="text-right">
-                          <p className="text-xs text-gray-500 mb-1">Overall Score</p>
+                          <p className="text-xs text-slate-500 mb-1">Overall Score</p>
                           <p className={`text-3xl font-bold ${getScoreColor(student.overall_score)}`}>
                             {Math.round(student.overall_score)}%
                           </p>
@@ -241,12 +241,12 @@ export default function CodingTestSubmissions({ user }) {
                             new Date(a.submitted_at) - new Date(b.submitted_at)
                           );
                           return (
-                            <div key={problemId} className="p-3 bg-gray-50 rounded-lg border">
+                            <div key={problemId} className="p-3 bg-cyber-navy/40 rounded-lg border">
                               <div className="flex items-center justify-between mb-2">
                                 <span className="font-medium">
                                   Problem {problemIndex + 1}
                                   {problemSubs.length > 1 && (
-                                    <span className="ml-2 text-xs text-gray-500">
+                                    <span className="ml-2 text-xs text-slate-500">
                                       ({problemSubs.length} attempts)
                                     </span>
                                   )}
@@ -265,11 +265,11 @@ export default function CodingTestSubmissions({ user }) {
                                 <div 
                                   key={sub.id} 
                                   className={`p-2 rounded text-xs mb-2 ${
-                                    sub.score === bestScore ? 'bg-green-50 border border-green-200' : 'bg-white border'
+                                    sub.score === bestScore ? 'bg-green-50 border border-green-200' : 'bg-cyber-navy/60 border'
                                   }`}
                                 >
                                   <div className="flex justify-between items-center mb-1">
-                                    <span className="font-medium text-gray-700">
+                                    <span className="font-medium text-slate-300">
                                       Attempt {attemptIndex + 1}
                                       {sub.score === bestScore && problemSubs.length > 1 && (
                                         <Trophy className="inline w-3 h-3 ml-1 text-yellow-500" />
@@ -279,7 +279,7 @@ export default function CodingTestSubmissions({ user }) {
                                       {Math.round(sub.score)}%
                                     </span>
                                   </div>
-                                  <div className="grid grid-cols-2 gap-2 text-gray-600">
+                                  <div className="grid grid-cols-2 gap-2 text-slate-400">
                                     <div className="flex items-center gap-1">
                                       <Clock className="w-3 h-3" />
                                       <span>{formatTime(sub.time_taken_seconds)}</span>
@@ -290,7 +290,7 @@ export default function CodingTestSubmissions({ user }) {
                                     </div>
                                   </div>
                                   {sub.feedback && (
-                                    <div className="mt-1 text-gray-600">
+                                    <div className="mt-1 text-slate-400">
                                       <span className="font-semibold">Feedback: </span>
                                       {sub.feedback}
                                     </div>

@@ -48,8 +48,8 @@ export default function AdminAnalytics({ user }) {
       case "Very Active": return "bg-green-100 text-green-800 border-green-300";
       case "Active": return "bg-blue-100 text-blue-800 border-blue-300";
       case "Low Activity": return "bg-yellow-100 text-yellow-800 border-yellow-300";
-      case "Inactive": return "bg-gray-100 text-gray-800 border-gray-300";
-      default: return "bg-gray-100 text-gray-800 border-gray-300";
+      case "Inactive": return "bg-cyber-navy/30 text-slate-200 border-cyber-cyan/15";
+      default: return "bg-cyber-navy/30 text-slate-200 border-cyber-cyan/15";
     }
   };
 
@@ -76,8 +76,8 @@ export default function AdminAnalytics({ user }) {
               Back to Admin
             </Button>
             <div className="flex items-center space-x-2">
-              <TrendingUp className="w-7 h-7 text-indigo-600" />
-              <span className="text-xl font-bold text-gray-900">Teacher Analytics</span>
+              <TrendingUp className="w-7 h-7 text-cyber-cyan" />
+              <span className="text-xl font-bold text-white">Teacher Analytics</span>
             </div>
           </div>
         </div>
@@ -88,16 +88,16 @@ export default function AdminAnalytics({ user }) {
         <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
           <Card>
             <CardHeader className="pb-2">
-              <CardTitle className="text-sm font-medium text-gray-600">Total Teachers</CardTitle>
+              <CardTitle className="text-sm font-medium text-slate-400">Total Teachers</CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="text-3xl font-bold text-indigo-600">{teachers.length}</div>
+              <div className="text-3xl font-bold text-cyber-cyan">{teachers.length}</div>
             </CardContent>
           </Card>
 
           <Card>
             <CardHeader className="pb-2">
-              <CardTitle className="text-sm font-medium text-gray-600">Very Active</CardTitle>
+              <CardTitle className="text-sm font-medium text-slate-400">Very Active</CardTitle>
             </CardHeader>
             <CardContent>
               <div className="text-3xl font-bold text-green-600">
@@ -108,7 +108,7 @@ export default function AdminAnalytics({ user }) {
 
           <Card>
             <CardHeader className="pb-2">
-              <CardTitle className="text-sm font-medium text-gray-600">Active</CardTitle>
+              <CardTitle className="text-sm font-medium text-slate-400">Active</CardTitle>
             </CardHeader>
             <CardContent>
               <div className="text-3xl font-bold text-blue-600">
@@ -119,10 +119,10 @@ export default function AdminAnalytics({ user }) {
 
           <Card>
             <CardHeader className="pb-2">
-              <CardTitle className="text-sm font-medium text-gray-600">Inactive</CardTitle>
+              <CardTitle className="text-sm font-medium text-slate-400">Inactive</CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="text-3xl font-bold text-gray-600">
+              <div className="text-3xl font-bold text-slate-400">
                 {teachers.filter(t => t.frequency === "Inactive").length}
               </div>
             </CardContent>
@@ -135,7 +135,7 @@ export default function AdminAnalytics({ user }) {
             <Button
               onClick={() => setView("all")}
               variant={view === "all" ? "default" : "outline"}
-              className={view === "all" ? "bg-indigo-600" : ""}
+              className={view === "all" ? "bg-cyber-cyan text-cyber-black" : ""}
             >
               All Teachers ({teachers.length})
             </Button>
@@ -150,7 +150,7 @@ export default function AdminAnalytics({ user }) {
 
           <Button
             onClick={copyEmailList}
-            className="bg-indigo-600 hover:bg-indigo-700 gap-2"
+            className="bg-cyber-cyan text-cyber-black hover:shadow-[0_0_15px_rgba(0,240,255,0.5)] font-bold gap-2"
           >
             <Copy className="w-4 h-4" />
             Copy {filteredTeachers.length} Email{filteredTeachers.length !== 1 ? "s" : ""}
@@ -160,14 +160,14 @@ export default function AdminAnalytics({ user }) {
         {/* Teachers Table */}
         {loading ? (
           <div className="text-center py-20">
-            <p className="text-gray-600">Loading teacher data...</p>
+            <p className="text-slate-400">Loading teacher data...</p>
           </div>
         ) : filteredTeachers.length === 0 ? (
           <Card>
             <CardContent className="py-20 text-center">
-              <Users className="w-16 h-16 text-gray-400 mx-auto mb-4" />
-              <h3 className="text-xl font-semibold text-gray-700 mb-2">No Teachers Found</h3>
-              <p className="text-gray-500">
+              <Users className="w-16 h-16 text-slate-500 mx-auto mb-4" />
+              <h3 className="text-xl font-semibold text-slate-300 mb-2">No Teachers Found</h3>
+              <p className="text-slate-500">
                 {view === "active" ? "No active teachers yet" : "No teachers registered yet"}
               </p>
             </CardContent>
@@ -177,55 +177,55 @@ export default function AdminAnalytics({ user }) {
             <CardContent className="p-0">
               <div className="overflow-x-auto">
                 <table className="w-full">
-                  <thead className="bg-gray-50 border-b border-gray-200">
+                  <thead className="bg-cyber-navy/40 border-b border-cyber-cyan/10">
                     <tr>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      <th className="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">
                         Teacher
                       </th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      <th className="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">
                         Total Logins
                       </th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      <th className="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">
                         Last Login
                       </th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      <th className="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">
                         30-Day Logins
                       </th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      <th className="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">
                         Frequency
                       </th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      <th className="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">
                         Classrooms
                       </th>
                     </tr>
                   </thead>
                   <tbody className="bg-white divide-y divide-gray-200">
                     {filteredTeachers.map((teacher, index) => (
-                      <tr key={teacher.id} className={index % 2 === 0 ? "bg-white" : "bg-gray-50"}>
+                      <tr key={teacher.id} className={index % 2 === 0 ? "bg-cyber-navy/60" : "bg-cyber-navy/40"}>
                         <td className="px-6 py-4 whitespace-nowrap">
                           <div className="flex items-center">
-                            <Mail className="w-4 h-4 text-gray-400 mr-2" />
+                            <Mail className="w-4 h-4 text-slate-500 mr-2" />
                             <div>
-                              <div className="text-sm font-medium text-gray-900">
+                              <div className="text-sm font-medium text-white">
                                 {teacher.name || "Unnamed"}
                               </div>
-                              <div className="text-sm text-gray-500">{teacher.email}</div>
+                              <div className="text-sm text-slate-500">{teacher.email}</div>
                             </div>
                           </div>
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap">
-                          <div className="text-sm font-semibold text-gray-900">
+                          <div className="text-sm font-semibold text-white">
                             {teacher.total_logins || 0}
                           </div>
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap">
-                          <div className="text-sm text-gray-900 flex items-center gap-2">
-                            <Calendar className="w-4 h-4 text-gray-400" />
+                          <div className="text-sm text-white flex items-center gap-2">
+                            <Calendar className="w-4 h-4 text-slate-500" />
                             {formatDate(teacher.last_login)}
                           </div>
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap">
-                          <div className="text-sm font-semibold text-indigo-600">
+                          <div className="text-sm font-semibold text-cyber-cyan">
                             {teacher.recent_login_count || 0}
                           </div>
                         </td>
@@ -235,8 +235,8 @@ export default function AdminAnalytics({ user }) {
                           </span>
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap">
-                          <div className="text-sm text-gray-900 flex items-center gap-2">
-                            <Users className="w-4 h-4 text-gray-400" />
+                          <div className="text-sm text-white flex items-center gap-2">
+                            <Users className="w-4 h-4 text-slate-500" />
                             {teacher.classroom_count || 0}
                           </div>
                         </td>

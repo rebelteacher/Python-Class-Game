@@ -436,7 +436,7 @@ export default function ClassroomPage({ user }) {
   if (loading) {
     return (
       <div data-testid="classroom-loading" className="min-h-screen flex items-center justify-center bg-cyber-black cyber-grid-bg">
-        <div className="text-xl text-gray-600">Loading...</div>
+        <div className="text-xl text-slate-400">Loading...</div>
       </div>
     );
   }
@@ -444,7 +444,7 @@ export default function ClassroomPage({ user }) {
   if (!classroom) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-cyber-black cyber-grid-bg">
-        <div className="text-xl text-gray-600">Classroom not found</div>
+        <div className="text-xl text-slate-400">Classroom not found</div>
       </div>
     );
   }
@@ -461,8 +461,8 @@ export default function ClassroomPage({ user }) {
               Back
             </Button>
             <div className="flex items-center space-x-2">
-              <Code2 className="w-7 h-7 text-indigo-600" />
-              <span className="text-xl font-bold text-gray-900">{classroom.name}</span>
+              <Code2 className="w-7 h-7 text-cyber-cyan" />
+              <span className="text-xl font-bold text-white">{classroom.name}</span>
             </div>
           </div>
           <div className="flex items-center space-x-3">
@@ -502,21 +502,21 @@ export default function ClassroomPage({ user }) {
 
           <TabsContent value="tests">
             <div className="flex justify-between items-center mb-6">
-              <h2 className="text-2xl font-bold text-gray-900">Tests</h2>
+              <h2 className="text-2xl font-bold text-white">Tests</h2>
             </div>
 
             {tests.length === 0 && codingTests.length === 0 ? (
               <div className="text-center py-20">
-                <FileQuestion className="w-16 h-16 text-gray-400 mx-auto mb-4" />
-                <h3 className="text-xl font-semibold text-gray-700 mb-2">No tests assigned yet</h3>
-                <p className="text-gray-500 mb-6">
+                <FileQuestion className="w-16 h-16 text-slate-500 mx-auto mb-4" />
+                <h3 className="text-xl font-semibold text-slate-300 mb-2">No tests assigned yet</h3>
+                <p className="text-slate-500 mb-6">
                   {isTeacher 
                     ? "Create MC tests or Coding tests to assess your students"
                     : "Tests will appear here when your teacher assigns them"}
                 </p>
                 {isTeacher && (
                   <div className="flex gap-3 justify-center">
-                    <Button onClick={() => navigate("/test-builder")} className="bg-indigo-600 hover:bg-indigo-700">
+                    <Button onClick={() => navigate("/test-builder")} className="bg-cyber-cyan text-cyber-black hover:shadow-[0_0_15px_rgba(0,240,255,0.5)] font-bold">
                       <Plus className="w-4 h-4 mr-2" />
                       MC Test
                     </Button>
@@ -532,7 +532,7 @@ export default function ClassroomPage({ user }) {
                 {/* Coding Tests Section */}
                 {codingTests.length > 0 && (
                   <div>
-                    <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center gap-2">
+                    <h3 className="text-lg font-semibold text-white mb-4 flex items-center gap-2">
                       <Code2 className="w-5 h-5 text-purple-600" />
                       Coding Tests
                     </h3>
@@ -557,7 +557,7 @@ export default function ClassroomPage({ user }) {
                                   <span className="px-2 py-1 bg-yellow-100 text-yellow-800 text-xs rounded">Scheduled</span>
                                 )}
                                 {isClosed && (
-                                  <span className="px-2 py-1 bg-gray-100 text-gray-800 text-xs rounded">Closed</span>
+                                  <span className="px-2 py-1 bg-cyber-navy/30 text-slate-200 text-xs rounded">Closed</span>
                                 )}
                                 {isAvailable && (
                                   <span className="px-2 py-1 bg-green-100 text-green-800 text-xs rounded">Available</span>
@@ -566,7 +566,7 @@ export default function ClassroomPage({ user }) {
                               <CardDescription>{test.description}</CardDescription>
                             </CardHeader>
                             <CardContent>
-                              <div className="space-y-2 text-sm text-gray-600">
+                              <div className="space-y-2 text-sm text-slate-400">
                                 <div className="flex items-center gap-2">
                                   <Code2 className="w-4 h-4" />
                                   <span>{test.problem_ids?.length || 0} problems</span>
@@ -656,8 +656,8 @@ export default function ClassroomPage({ user }) {
                 {/* MC Tests Section */}
                 {tests.length > 0 && (
                   <div>
-                    <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center gap-2">
-                      <FileQuestion className="w-5 h-5 text-indigo-600" />
+                    <h3 className="text-lg font-semibold text-white mb-4 flex items-center gap-2">
+                      <FileQuestion className="w-5 h-5 text-cyber-cyan" />
                       Multiple Choice Tests
                     </h3>
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -689,7 +689,7 @@ export default function ClassroomPage({ user }) {
                             </span>
                           )}
                           {isClosed && (
-                            <span className="px-2 py-1 bg-gray-100 text-gray-700 text-xs rounded">
+                            <span className="px-2 py-1 bg-cyber-navy/30 text-slate-300 text-xs rounded">
                               Closed
                             </span>
                           )}
@@ -697,7 +697,7 @@ export default function ClassroomPage({ user }) {
                         <CardDescription>{test.description || "No description"}</CardDescription>
                       </CardHeader>
                       <CardContent>
-                        <div className="space-y-2 text-sm text-gray-600">
+                        <div className="space-y-2 text-sm text-slate-400">
                           <div className="flex items-center gap-2">
                             <FileQuestion className="w-4 h-4" />
                             <span>{test.num_questions} questions (from pool of {test.question_pool_ids?.length || 0})</span>
@@ -725,7 +725,7 @@ export default function ClassroomPage({ user }) {
                           {!isTeacher && isAvailable && (
                             <Button 
                               onClick={() => navigate(`/test/${test.id}`)}
-                              className="w-full bg-indigo-600 hover:bg-indigo-700"
+                              className="w-full bg-cyber-cyan text-cyber-black hover:shadow-[0_0_15px_rgba(0,240,255,0.5)] font-bold"
                             >
                               Start Test
                             </Button>
@@ -809,11 +809,11 @@ export default function ClassroomPage({ user }) {
 
           <TabsContent value="assignments">
             <div className="flex justify-between items-center mb-6">
-              <h2 className="text-2xl font-bold text-gray-900">Assignments</h2>
+              <h2 className="text-2xl font-bold text-white">Assignments</h2>
               {isTeacher && (
                 <Dialog open={createDialogOpen} onOpenChange={setCreateDialogOpen}>
                   <DialogTrigger asChild>
-                    <Button data-testid="create-assignment-btn" className="bg-indigo-600 hover:bg-indigo-700 gap-2">
+                    <Button data-testid="create-assignment-btn" className="bg-cyber-cyan text-cyber-black hover:shadow-[0_0_15px_rgba(0,240,255,0.5)] font-bold gap-2">
                       <Plus className="w-5 h-5" />
                       Create Assignment
                     </Button>
@@ -885,7 +885,7 @@ export default function ClassroomPage({ user }) {
                             Add Test Case
                           </Button>
                         </div>
-                        <p className="text-xs text-gray-500 mb-3">
+                        <p className="text-xs text-slate-500 mb-3">
                           Leave empty to grade based on output comparison only. Add test cases for specific input/output validation.
                         </p>
                         {newAssignment.test_cases.map((testCase, index) => (
@@ -945,7 +945,7 @@ export default function ClassroomPage({ user }) {
                         ))}
                       </div>
 
-                      <Button data-testid="create-assignment-submit-btn" type="submit" className="w-full bg-indigo-600 hover:bg-indigo-700">
+                      <Button data-testid="create-assignment-submit-btn" type="submit" className="w-full bg-cyber-cyan text-cyber-black hover:shadow-[0_0_15px_rgba(0,240,255,0.5)] font-bold">
                         Create Assignment
                       </Button>
                     </form>
@@ -956,12 +956,12 @@ export default function ClassroomPage({ user }) {
 
             {assignments.length === 0 && tests.length === 0 ? (
               <div data-testid="no-assignments" className="text-center py-20">
-                <BookOpen className="w-16 h-16 text-gray-400 mx-auto mb-4" />
-                <h3 className="text-xl font-semibold text-gray-700 mb-2">No assignments or tests yet</h3>
+                <BookOpen className="w-16 h-16 text-slate-500 mx-auto mb-4" />
+                <h3 className="text-xl font-semibold text-slate-300 mb-2">No assignments or tests yet</h3>
                 {isTeacher && (
                   <>
-                    <p className="text-gray-500 mb-6">Create your first assignment</p>
-                    <Button data-testid="create-first-assignment-btn" onClick={() => setCreateDialogOpen(true)} className="bg-indigo-600 hover:bg-indigo-700">
+                    <p className="text-slate-500 mb-6">Create your first assignment</p>
+                    <Button data-testid="create-first-assignment-btn" onClick={() => setCreateDialogOpen(true)} className="bg-cyber-cyan text-cyber-black hover:shadow-[0_0_15px_rgba(0,240,255,0.5)] font-bold">
                       <Plus className="w-4 h-4 mr-2" />
                       Create Assignment
                     </Button>
@@ -979,24 +979,24 @@ export default function ClassroomPage({ user }) {
                   if (!hasContent) return null;
                   
                   return (
-                    <div key={folderType} className="border-2 rounded-lg bg-gradient-to-r from-purple-50 to-blue-50 shadow-md">
+                    <div key={folderType} className="border-2 rounded-lg bg-cyber-navy/50 shadow-md">
                       {/* Main Folder Header */}
                       <div
-                        className="flex items-center gap-3 p-5 cursor-pointer hover:bg-white/50 transition-colors"
+                        className="flex items-center gap-3 p-5 cursor-pointer hover:bg-cyber-navy/60/50 transition-colors"
                         onClick={() => toggleFolder(folderType)}
                       >
                         {isFolderExpanded ? (
-                          <ChevronDown className="w-6 h-6 text-gray-700" />
+                          <ChevronDown className="w-6 h-6 text-slate-300" />
                         ) : (
-                          <ChevronRight className="w-6 h-6 text-gray-700" />
+                          <ChevronRight className="w-6 h-6 text-slate-300" />
                         )}
                         {isFolderExpanded ? (
                           <FolderOpen className="w-7 h-7 text-purple-600" />
                         ) : (
                           <Folder className="w-7 h-7 text-purple-600" />
                         )}
-                        <h2 className="text-2xl font-bold text-gray-900 capitalize">{folderType}</h2>
-                        <span className="ml-auto text-sm text-gray-600 bg-white px-3 py-1 rounded-full font-medium">
+                        <h2 className="text-2xl font-bold text-white capitalize">{folderType}</h2>
+                        <span className="ml-auto text-sm text-slate-400 bg-cyber-navy/60 px-3 py-1 rounded-full font-medium">
                           {Object.keys(folderData).length} chapter{Object.keys(folderData).length !== 1 ? 's' : ''}
                         </span>
                       </div>
@@ -1010,24 +1010,24 @@ export default function ClassroomPage({ user }) {
                             const lessons = folderData[chapter];
                   
                             return (
-                              <div key={chapterKey} className="border rounded-lg bg-white shadow-sm">
+                              <div key={chapterKey} className="border rounded-lg bg-cyber-navy/60 backdrop-blur-sm">
                                 {/* Chapter Folder */}
                                 <div
-                                  className="flex items-center gap-3 p-4 cursor-pointer hover:bg-gray-50 transition-colors"
+                                  className="flex items-center gap-3 p-4 cursor-pointer hover:bg-cyber-navy/40 transition-colors"
                                   onClick={() => toggleChapter(chapterKey)}
                                 >
                                   {isChapterExpanded ? (
-                                    <ChevronDown className="w-5 h-5 text-gray-600" />
+                                    <ChevronDown className="w-5 h-5 text-slate-400" />
                                   ) : (
-                                    <ChevronRight className="w-5 h-5 text-gray-600" />
+                                    <ChevronRight className="w-5 h-5 text-slate-400" />
                                   )}
                                   {isChapterExpanded ? (
                                     <FolderOpen className="w-6 h-6 text-blue-500" />
                                   ) : (
                                     <Folder className="w-6 h-6 text-blue-500" />
                                   )}
-                                  <h3 className="text-lg font-semibold text-gray-900">{chapter}</h3>
-                                  <span className="ml-auto text-sm text-gray-500 bg-gray-100 px-3 py-1 rounded-full">
+                                  <h3 className="text-lg font-semibold text-white">{chapter}</h3>
+                                  <span className="ml-auto text-sm text-slate-500 bg-cyber-navy/30 px-3 py-1 rounded-full">
                                     {Object.keys(lessons).length} lesson{Object.keys(lessons).length !== 1 ? 's' : ''}
                                   </span>
                                 </div>
@@ -1041,24 +1041,24 @@ export default function ClassroomPage({ user }) {
                                       const lessonAssignments = lessons[lesson];
                             
                                       return (
-                                        <div key={lessonKey} className="border rounded-lg bg-gray-50">
+                                        <div key={lessonKey} className="border rounded-lg bg-cyber-navy/40">
                                 {/* Lesson Folder */}
                                 <div
-                                  className="flex items-center gap-3 p-3 cursor-pointer hover:bg-gray-100 transition-colors rounded-lg"
+                                  className="flex items-center gap-3 p-3 cursor-pointer hover:bg-cyber-navy/30 transition-colors rounded-lg"
                                   onClick={() => toggleLesson(lessonKey)}
                                 >
                                   {isLessonExpanded ? (
-                                    <ChevronDown className="w-4 h-4 text-gray-600" />
+                                    <ChevronDown className="w-4 h-4 text-slate-400" />
                                   ) : (
-                                    <ChevronRight className="w-4 h-4 text-gray-600" />
+                                    <ChevronRight className="w-4 h-4 text-slate-400" />
                                   )}
                                   {isLessonExpanded ? (
                                     <FolderOpen className="w-5 h-5 text-teal-500" />
                                   ) : (
                                     <Folder className="w-5 h-5 text-teal-500" />
                                   )}
-                                  <h4 className="text-md font-medium text-gray-800">{lesson}</h4>
-                                  <span className="ml-auto text-xs text-gray-500 bg-white px-2 py-1 rounded-full">
+                                  <h4 className="text-md font-medium text-slate-200">{lesson}</h4>
+                                  <span className="ml-auto text-xs text-slate-500 bg-cyber-navy/60 px-2 py-1 rounded-full">
                                     {lessonAssignments.length} assignment{lessonAssignments.length !== 1 ? 's' : ''}
                                   </span>
                                 </div>
@@ -1070,14 +1070,14 @@ export default function ClassroomPage({ user }) {
                                       <Card
                                         data-testid={`assignment-card-${assignment.id}`}
                                         key={assignment.id}
-                                        className="hover:shadow-lg transition-shadow border-2 border-gray-100"
+                                        className="hover:shadow-lg transition-shadow border-2 border-cyber-cyan/10"
                                       >
                                         <CardHeader>
                                           <CardTitle className="text-lg">{assignment.title}</CardTitle>
                                           <CardDescription className="line-clamp-2">{assignment.description}</CardDescription>
                                         </CardHeader>
                                         <CardContent>
-                                          <div className="text-sm text-gray-600 mb-3">
+                                          <div className="text-sm text-slate-400 mb-3">
                                             {assignment.problem_count ? `${assignment.problem_count} problems` : `${assignment.test_cases?.length || 0} test cases`}
                                           </div>
                                           {isTeacher && assignment.proctor_code && (
@@ -1188,12 +1188,12 @@ export default function ClassroomPage({ user }) {
 
           {isTeacher && (
             <TabsContent value="students">
-              <h2 className="text-2xl font-bold text-gray-900 mb-6">Students</h2>
+              <h2 className="text-2xl font-bold text-white mb-6">Students</h2>
               {classroom.student_details?.length === 0 ? (
                 <div data-testid="no-students" className="text-center py-20">
-                  <Users className="w-16 h-16 text-gray-400 mx-auto mb-4" />
-                  <h3 className="text-xl font-semibold text-gray-700 mb-2">No students yet</h3>
-                  <p className="text-gray-500">Share the class code with students to join</p>
+                  <Users className="w-16 h-16 text-slate-500 mx-auto mb-4" />
+                  <h3 className="text-xl font-semibold text-slate-300 mb-2">No students yet</h3>
+                  <p className="text-slate-500">Share the class code with students to join</p>
                 </div>
               ) : (
                 <div data-testid="students-list" className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
@@ -1264,7 +1264,7 @@ export default function ClassroomPage({ user }) {
 
                 {/* Schedule Section */}
                 <div className="pt-4 border-t">
-                  <h3 className="text-sm font-semibold mb-3 text-gray-700">Schedule</h3>
+                  <h3 className="text-sm font-semibold mb-3 text-slate-300">Schedule</h3>
                   <div className="grid grid-cols-2 gap-4">
                     <div>
                       <Label htmlFor="edit-available-date">Available Date</Label>
@@ -1337,7 +1337,7 @@ export default function ClassroomPage({ user }) {
                   )}
                 </div>
 
-                <Button type="submit" className="w-full bg-indigo-600 hover:bg-indigo-700">
+                <Button type="submit" className="w-full bg-cyber-cyan text-cyber-black hover:shadow-[0_0_15px_rgba(0,240,255,0.5)] font-bold">
                   Update Assignment
                 </Button>
               </form>
@@ -1397,7 +1397,7 @@ export default function ClassroomPage({ user }) {
                     
                     {editingLesson.video_filename ? (
                       <div className="flex items-center gap-3">
-                        <div className="flex-1 bg-white border border-purple-300 rounded px-3 py-2 text-sm">
+                        <div className="flex-1 bg-cyber-navy/60 border border-purple-300 rounded px-3 py-2 text-sm">
                           ✅ Video uploaded: {editingLesson.video_filename}
                         </div>
                         <Button 
@@ -1445,10 +1445,10 @@ export default function ClassroomPage({ user }) {
                       <ol className="text-sm text-blue-800 space-y-2">
                         <li className="font-medium">1. Find your meme/image online (Google, Imgflip, etc.)</li>
                         <li className="font-medium">2. Right-click the image → "Copy image address" or "Copy image link"</li>
-                        <li className="font-medium">3. Paste in this format: <code className="bg-white px-1">![Description](paste-url-here)</code></li>
+                        <li className="font-medium">3. Paste in this format: <code className="bg-cyber-navy/60 px-1">![Description](paste-url-here)</code></li>
                         <li className="pl-4">
                           <strong>Example:</strong><br/>
-                          <code className="bg-white px-2 py-1 block mt-1">![Funny loop meme](https://i.imgflip.com/7k3jqx.jpg)</code>
+                          <code className="bg-cyber-navy/60 px-2 py-1 block mt-1">![Funny loop meme](https://i.imgflip.com/7k3jqx.jpg)</code>
                         </li>
                         <li className="text-blue-600 font-medium">💡 Popular meme sites: imgflip.com, imgur.com, quickmeme.com</li>
                       </ol>
@@ -1456,11 +1456,11 @@ export default function ClassroomPage({ user }) {
                   </div>
                 </TabsContent>
 
-                <TabsContent value="preview" className="border rounded-lg p-6 bg-white min-h-[400px]">
+                <TabsContent value="preview" className="border rounded-lg p-6 bg-cyber-navy/60 min-h-[400px]">
                   <div className="prose prose-sm max-w-none">
                     <h2 className="text-2xl font-bold mb-4">{editingLesson.title}</h2>
                     <div className="whitespace-pre-wrap">{editingLesson.content}</div>
-                    <p className="text-sm text-gray-500 mt-4 italic">
+                    <p className="text-sm text-slate-500 mt-4 italic">
                       Note: Full preview with markdown rendering will show to students
                     </p>
                   </div>

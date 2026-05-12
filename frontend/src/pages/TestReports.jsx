@@ -270,8 +270,8 @@ export default function TestReports({ user }) {
               Back to Dashboard
             </Button>
             <div className="flex items-center space-x-2">
-              <FileSpreadsheet className="w-7 h-7 text-indigo-600" />
-              <span className="text-xl font-bold text-gray-900">Test Reports</span>
+              <FileSpreadsheet className="w-7 h-7 text-cyber-cyan" />
+              <span className="text-xl font-bold text-white">Test Reports</span>
             </div>
           </div>
         </div>
@@ -281,14 +281,14 @@ export default function TestReports({ user }) {
         {/* Print Header */}
         <div className="print-only mb-6">
           <h1 className="text-2xl font-bold">Test Score Report</h1>
-          <p className="text-gray-600">Generated on {new Date().toLocaleDateString()}</p>
+          <p className="text-slate-400">Generated on {new Date().toLocaleDateString()}</p>
         </div>
 
         {/* Filters */}
         <Card className="mb-6 no-print">
           <CardHeader>
             <CardTitle>Select Tests to Report On</CardTitle>
-            <p className="text-sm text-gray-500 mt-1">Select multiple classrooms and tests to combine results</p>
+            <p className="text-sm text-slate-500 mt-1">Select multiple classrooms and tests to combine results</p>
           </CardHeader>
           <CardContent>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -344,11 +344,11 @@ export default function TestReports({ user }) {
               <div>
                 <Label className="mb-2 block font-semibold">Tests ({selectedTests.length} selected)</Label>
                 {selectedClassrooms.length === 0 ? (
-                  <div className="border rounded-lg p-4 text-center text-gray-500">
+                  <div className="border rounded-lg p-4 text-center text-slate-500">
                     Select classrooms first
                   </div>
                 ) : allTests.length === 0 ? (
-                  <div className="border rounded-lg p-4 text-center text-gray-500">
+                  <div className="border rounded-lg p-4 text-center text-slate-500">
                     No tests available in selected classrooms
                   </div>
                 ) : (
@@ -434,7 +434,7 @@ export default function TestReports({ user }) {
         {/* Loading State */}
         {loadingResults && (
           <div className="text-center py-20">
-            <p className="text-gray-600">Loading results...</p>
+            <p className="text-slate-400">Loading results...</p>
           </div>
         )}
 
@@ -442,9 +442,9 @@ export default function TestReports({ user }) {
         {!loadingResults && selectedTests.length > 0 && results.length === 0 && (
           <Card>
             <CardContent className="py-20 text-center">
-              <Users className="w-16 h-16 text-gray-400 mx-auto mb-4" />
-              <h3 className="text-xl font-semibold text-gray-700 mb-2">No Results Yet</h3>
-              <p className="text-gray-500">No students have completed this test yet.</p>
+              <Users className="w-16 h-16 text-slate-500 mx-auto mb-4" />
+              <h3 className="text-xl font-semibold text-slate-300 mb-2">No Results Yet</h3>
+              <p className="text-slate-500">No students have completed this test yet.</p>
             </CardContent>
           </Card>
         )}
@@ -469,10 +469,10 @@ export default function TestReports({ user }) {
                 <CardContent className="pt-6">
                   <div className="flex items-center justify-between">
                     <div>
-                      <p className="text-sm text-gray-600">Average Score</p>
-                      <p className="text-3xl font-bold text-indigo-600">{stats.average}%</p>
+                      <p className="text-sm text-slate-400">Average Score</p>
+                      <p className="text-3xl font-bold text-cyber-cyan">{stats.average}%</p>
                     </div>
-                    <TrendingUp className="w-8 h-8 text-indigo-600" />
+                    <TrendingUp className="w-8 h-8 text-cyber-cyan" />
                   </div>
                 </CardContent>
               </Card>
@@ -481,7 +481,7 @@ export default function TestReports({ user }) {
                 <CardContent className="pt-6">
                   <div className="flex items-center justify-between">
                     <div>
-                      <p className="text-sm text-gray-600">Highest Score</p>
+                      <p className="text-sm text-slate-400">Highest Score</p>
                       <p className="text-3xl font-bold text-green-600">{stats.highest}%</p>
                     </div>
                     <Award className="w-8 h-8 text-green-600" />
@@ -493,7 +493,7 @@ export default function TestReports({ user }) {
                 <CardContent className="pt-6">
                   <div className="flex items-center justify-between">
                     <div>
-                      <p className="text-sm text-gray-600">Lowest Score</p>
+                      <p className="text-sm text-slate-400">Lowest Score</p>
                       <p className="text-3xl font-bold text-yellow-600">{stats.lowest}%</p>
                     </div>
                     <TrendingDown className="w-8 h-8 text-yellow-600" />
@@ -505,9 +505,9 @@ export default function TestReports({ user }) {
                 <CardContent className="pt-6">
                   <div className="flex items-center justify-between">
                     <div>
-                      <p className="text-sm text-gray-600">Completion</p>
+                      <p className="text-sm text-slate-400">Completion</p>
                       <p className="text-3xl font-bold text-blue-600">{stats.completionRate}%</p>
-                      <p className="text-xs text-gray-500">{stats.completed} of {stats.totalStudents}</p>
+                      <p className="text-xs text-slate-500">{stats.completed} of {stats.totalStudents}</p>
                     </div>
                     <Users className="w-8 h-8 text-blue-600" />
                   </div>
@@ -519,7 +519,7 @@ export default function TestReports({ user }) {
             <Card className="mb-6">
               <CardHeader>
                 <CardTitle>{testInfo?.title || "Test Results"}</CardTitle>
-                <div className="text-sm text-gray-600 space-y-1">
+                <div className="text-sm text-slate-400 space-y-1">
                   <p><strong>Classrooms:</strong> {selectedClassrooms.length} selected ({classrooms.filter(c => selectedClassrooms.includes(c.id)).map(c => c.name).join(", ")})</p>
                   <p><strong>Tests:</strong> {selectedTests.length} selected</p>
                   {selectedTests.length === 1 && testInfo?.num_questions && (
@@ -542,24 +542,24 @@ export default function TestReports({ user }) {
                   <table className="w-full">
                     <thead>
                       <tr className="border-b">
-                        <th className="text-left py-3 px-4 font-semibold text-gray-700">#</th>
-                        <th className="text-left py-3 px-4 font-semibold text-gray-700">Student Name</th>
+                        <th className="text-left py-3 px-4 font-semibold text-slate-300">#</th>
+                        <th className="text-left py-3 px-4 font-semibold text-slate-300">Student Name</th>
                         {selectedTests.length > 1 && (
-                          <th className="text-left py-3 px-4 font-semibold text-gray-700">Test</th>
+                          <th className="text-left py-3 px-4 font-semibold text-slate-300">Test</th>
                         )}
-                        <th className="text-left py-3 px-4 font-semibold text-gray-700">Score</th>
-                        <th className="text-left py-3 px-4 font-semibold text-gray-700">Date Taken</th>
+                        <th className="text-left py-3 px-4 font-semibold text-slate-300">Score</th>
+                        <th className="text-left py-3 px-4 font-semibold text-slate-300">Date Taken</th>
                       </tr>
                     </thead>
                     <tbody>
                       {results
                         .sort((a, b) => b.score - a.score) // Sort by score descending
                         .map((result, index) => (
-                          <tr key={result.id || index} className="border-b hover:bg-gray-50">
-                            <td className="py-3 px-4 text-gray-600">{index + 1}</td>
+                          <tr key={result.id || index} className="border-b hover:bg-cyber-navy/40">
+                            <td className="py-3 px-4 text-slate-400">{index + 1}</td>
                             <td className="py-3 px-4 font-medium">{result.student_name}</td>
                             {selectedTests.length > 1 && (
-                              <td className="py-3 px-4 text-gray-600 text-sm">{result.test_title}</td>
+                              <td className="py-3 px-4 text-slate-400 text-sm">{result.test_title}</td>
                             )}
                             <td className="py-3 px-4">
                               <span className={`font-bold ${
@@ -571,7 +571,7 @@ export default function TestReports({ user }) {
                                 {result.score.toFixed(1)}%
                               </span>
                             </td>
-                            <td className="py-3 px-4 text-gray-600">
+                            <td className="py-3 px-4 text-slate-400">
                               {new Date(result.submitted_at).toLocaleString()}
                             </td>
                           </tr>

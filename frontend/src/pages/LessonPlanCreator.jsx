@@ -339,10 +339,10 @@ export default function LessonPlanCreator({ user }) {
               Back to Dashboard
             </Button>
             <div className="flex items-center space-x-2">
-              <GraduationCap className="w-7 h-7 text-indigo-600" />
+              <GraduationCap className="w-7 h-7 text-cyber-cyan" />
               <div>
-                <span className="text-xl font-bold text-gray-900">Lesson Plan Generator</span>
-                <p className="text-xs text-gray-500">{headerFields.schoolName}</p>
+                <span className="text-xl font-bold text-white">Lesson Plan Generator</span>
+                <p className="text-xs text-slate-500">{headerFields.schoolName}</p>
               </div>
             </div>
           </div>
@@ -385,7 +385,7 @@ export default function LessonPlanCreator({ user }) {
             <Card>
               <CardHeader className="pb-3">
                 <CardTitle className="text-lg flex items-center gap-2">
-                  <FileText className="w-5 h-5 text-indigo-600" />
+                  <FileText className="w-5 h-5 text-cyber-cyan" />
                   Plan Information
                 </CardTitle>
               </CardHeader>
@@ -446,7 +446,7 @@ export default function LessonPlanCreator({ user }) {
             <Card>
               <CardHeader className="pb-3">
                 <CardTitle className="text-lg flex items-center gap-2">
-                  <Clock className="w-5 h-5 text-indigo-600" />
+                  <Clock className="w-5 h-5 text-cyber-cyan" />
                   Pacing (minutes)
                 </CardTitle>
               </CardHeader>
@@ -533,7 +533,7 @@ ISTE 1.1.c - Students use technology to seek feedback..."
                     className="mt-1 text-sm"
                     rows={4}
                   />
-                  <p className="text-xs text-gray-500 mt-1">
+                  <p className="text-xs text-slate-500 mt-1">
                     These standards will be incorporated into generated lessons
                   </p>
                 </div>
@@ -550,7 +550,7 @@ ISTE 1.1.c - Students use technology to seek feedback..."
                     className="mt-1 text-sm"
                     rows={4}
                   />
-                  <p className="text-xs text-gray-500 mt-1">
+                  <p className="text-xs text-slate-500 mt-1">
                     These objectives will guide the AI's lesson content
                   </p>
                 </div>
@@ -561,7 +561,7 @@ ISTE 1.1.c - Students use technology to seek feedback..."
             <Card className="border-indigo-200 bg-indigo-50">
               <CardHeader className="pb-3">
                 <CardTitle className="text-lg flex items-center gap-2">
-                  <Sparkles className="w-5 h-5 text-indigo-600" />
+                  <Sparkles className="w-5 h-5 text-cyber-cyan" />
                   Generate Lesson Plan
                 </CardTitle>
               </CardHeader>
@@ -573,7 +573,7 @@ ISTE 1.1.c - Students use technology to seek feedback..."
                     value={lessonInput.subject}
                     onChange={(e) => setLessonInput({ ...lessonInput, subject: e.target.value })}
                     placeholder="e.g., Mathematics, English, Science"
-                    className="mt-1 bg-white"
+                    className="mt-1 bg-cyber-navy/60"
                   />
                 </div>
                 <div>
@@ -583,7 +583,7 @@ ISTE 1.1.c - Students use technology to seek feedback..."
                     value={lessonInput.topic}
                     onChange={(e) => setLessonInput({ ...lessonInput, topic: e.target.value })}
                     placeholder="e.g., Fractions and Decimals"
-                    className="mt-1 bg-white"
+                    className="mt-1 bg-cyber-navy/60"
                   />
                 </div>
                 <div>
@@ -593,7 +593,7 @@ ISTE 1.1.c - Students use technology to seek feedback..."
                     value={lessonInput.gradeLevel}
                     onChange={(e) => setLessonInput({ ...lessonInput, gradeLevel: e.target.value })}
                     placeholder="e.g., 7th Grade"
-                    className="mt-1 bg-white"
+                    className="mt-1 bg-cyber-navy/60"
                   />
                 </div>
                 <div className="grid grid-cols-2 gap-3">
@@ -604,7 +604,7 @@ ISTE 1.1.c - Students use technology to seek feedback..."
                       type="date"
                       value={lessonInput.startDate}
                       onChange={(e) => setLessonInput({ ...lessonInput, startDate: e.target.value })}
-                      className="mt-1 bg-white"
+                      className="mt-1 bg-cyber-navy/60"
                     />
                   </div>
                   <div>
@@ -616,7 +616,7 @@ ISTE 1.1.c - Students use technology to seek feedback..."
                       max="10"
                       value={lessonInput.numberOfDays}
                       onChange={(e) => setLessonInput({ ...lessonInput, numberOfDays: parseInt(e.target.value) || 1 })}
-                      className="mt-1 bg-white"
+                      className="mt-1 bg-cyber-navy/60"
                     />
                   </div>
                 </div>
@@ -640,7 +640,7 @@ ISTE 1.1.c - Students use technology to seek feedback..."
                             problemChapter: value === "none" ? "" : value 
                           })}
                         >
-                          <SelectTrigger className="mt-1 bg-white">
+                          <SelectTrigger className="mt-1 bg-cyber-navy/60">
                             <SelectValue placeholder="Select a unit/chapter..." />
                           </SelectTrigger>
                           <SelectContent>
@@ -665,7 +665,7 @@ ISTE 1.1.c - Students use technology to seek feedback..."
                               problemUnit: value === "none" ? "" : value 
                             })}
                           >
-                            <SelectTrigger className="mt-1 bg-white">
+                            <SelectTrigger className="mt-1 bg-cyber-navy/60">
                               <SelectValue placeholder="Select a lesson..." />
                             </SelectTrigger>
                             <SelectContent>
@@ -691,7 +691,7 @@ ISTE 1.1.c - Students use technology to seek feedback..."
                           value={lessonInput.problemUnit}
                           onChange={(e) => setLessonInput({ ...lessonInput, problemUnit: e.target.value })}
                           placeholder="e.g., Unit 2: Turtle Graphics"
-                          className="mt-1 bg-white text-sm"
+                          className="mt-1 bg-cyber-navy/60 text-sm"
                         />
                       </div>
                       <div>
@@ -701,7 +701,7 @@ ISTE 1.1.c - Students use technology to seek feedback..."
                           value={lessonInput.problemChapter}
                           onChange={(e) => setLessonInput({ ...lessonInput, problemChapter: e.target.value })}
                           placeholder="e.g., Chapter 3: Colors"
-                          className="mt-1 bg-white text-sm"
+                          className="mt-1 bg-cyber-navy/60 text-sm"
                         />
                       </div>
                     </div>
@@ -715,7 +715,7 @@ ISTE 1.1.c - Students use technology to seek feedback..."
                 <Button 
                   onClick={generateLessonPlan} 
                   disabled={isGenerating}
-                  className="w-full bg-indigo-600 hover:bg-indigo-700 gap-2"
+                  className="w-full bg-cyber-cyan text-cyber-black hover:shadow-[0_0_15px_rgba(0,240,255,0.5)] font-bold gap-2"
                   data-testid="generate-plan-btn"
                 >
                   {isGenerating ? (
@@ -748,14 +748,14 @@ ISTE 1.1.c - Students use technology to seek feedback..."
                       {savedPlans.map((plan) => (
                         <div 
                           key={plan.id} 
-                          className="p-3 bg-gray-50 rounded-lg flex items-center justify-between"
+                          className="p-3 bg-cyber-navy/40 rounded-lg flex items-center justify-between"
                         >
                           <div 
                             className="flex-1 cursor-pointer"
                             onClick={() => loadSavedPlan(plan)}
                           >
                             <p className="font-medium text-sm">{plan.lessonInput?.topic || "Untitled"}</p>
-                            <p className="text-xs text-gray-500">
+                            <p className="text-xs text-slate-500">
                               {plan.lessonInput?.subject} • {plan.dailyPlans?.length || 0} days
                             </p>
                           </div>
@@ -788,15 +788,15 @@ ISTE 1.1.c - Students use technology to seek feedback..."
                       App Problems ({availableProblems.length})
                     </span>
                     {showProblemsPanel ? (
-                      <ChevronUp className="w-4 h-4 text-gray-400" />
+                      <ChevronUp className="w-4 h-4 text-slate-500" />
                     ) : (
-                      <ChevronDown className="w-4 h-4 text-gray-400" />
+                      <ChevronDown className="w-4 h-4 text-slate-500" />
                     )}
                   </CardTitle>
                 </CardHeader>
                 {showProblemsPanel && (
                   <CardContent>
-                    <p className="text-xs text-gray-500 mb-3">
+                    <p className="text-xs text-slate-500 mb-3">
                       These problems from your library match the lesson topic. Use them for class practice!
                     </p>
                     <ScrollArea className="h-48">
@@ -807,7 +807,7 @@ ISTE 1.1.c - Students use technology to seek feedback..."
                             className="p-2 bg-green-50 rounded-lg text-sm"
                           >
                             <div className="flex items-center justify-between">
-                              <span className="font-medium text-gray-800">{problem.title}</span>
+                              <span className="font-medium text-slate-200">{problem.title}</span>
                               <div className="flex items-center gap-1">
                                 <Button
                                   variant="ghost"
@@ -830,7 +830,7 @@ ISTE 1.1.c - Students use technology to seek feedback..."
                               </div>
                             </div>
                             {problem.chapter && (
-                              <p className="text-xs text-gray-500 mt-1">{problem.chapter}</p>
+                              <p className="text-xs text-slate-500 mt-1">{problem.chapter}</p>
                             )}
                           </div>
                         ))}
@@ -848,8 +848,8 @@ ISTE 1.1.c - Students use technology to seek feedback..."
               <Card className="h-full flex items-center justify-center min-h-[500px]">
                 <CardContent className="text-center py-12">
                   <GraduationCap className="w-16 h-16 mx-auto text-gray-300 mb-4" />
-                  <h3 className="text-xl font-semibold text-gray-600 mb-2">No Lesson Plan Generated</h3>
-                  <p className="text-gray-500 max-w-md">
+                  <h3 className="text-xl font-semibold text-slate-400 mb-2">No Lesson Plan Generated</h3>
+                  <p className="text-slate-500 max-w-md">
                     Fill in the subject and topic on the left, then click "Generate Plan" to create a comprehensive multi-day lesson plan with AI.
                   </p>
                 </CardContent>
@@ -857,7 +857,7 @@ ISTE 1.1.c - Students use technology to seek feedback..."
             ) : (
               <div className="space-y-4">
                 {/* Plan Header - Print Version */}
-                <div className="print-only bg-white p-6 rounded-lg">
+                <div className="print-only bg-cyber-navy/60 p-6 rounded-lg">
                   <div className="text-center mb-4">
                     <h1 className="text-2xl font-bold">{headerFields.schoolName}</h1>
                     <h2 className="text-lg">{lessonInput.subject} - {lessonInput.topic}</h2>
@@ -879,7 +879,7 @@ ISTE 1.1.c - Students use technology to seek feedback..."
                 {generatedPlans.map((day, dayIndex) => (
                   <Card key={dayIndex} className="lesson-day">
                     <CardHeader 
-                      className="cursor-pointer hover:bg-gray-50 no-print"
+                      className="cursor-pointer hover:bg-cyber-navy/40 no-print"
                       onClick={() => toggleDay(dayIndex)}
                     >
                       <CardTitle className="flex items-center justify-between">
@@ -889,15 +889,15 @@ ISTE 1.1.c - Students use technology to seek feedback..."
                           </div>
                           <div>
                             <h3 className="text-lg font-semibold">Day {dayIndex + 1}</h3>
-                            <p className="text-sm text-gray-500 font-normal">
+                            <p className="text-sm text-slate-500 font-normal">
                               {formatDate(lessonInput.startDate, dayIndex)}
                             </p>
                           </div>
                         </div>
                         {expandedDays[dayIndex] ? (
-                          <ChevronUp className="w-5 h-5 text-gray-400" />
+                          <ChevronUp className="w-5 h-5 text-slate-500" />
                         ) : (
-                          <ChevronDown className="w-5 h-5 text-gray-400" />
+                          <ChevronDown className="w-5 h-5 text-slate-500" />
                         )}
                       </CardTitle>
                     </CardHeader>
@@ -914,15 +914,15 @@ ISTE 1.1.c - Students use technology to seek feedback..."
                           const isEditing = editingSection === `${dayIndex}-${section.key}`;
                           
                           return (
-                            <div key={section.key} className="border-b border-gray-100 pb-4 last:border-0">
+                            <div key={section.key} className="border-b border-cyber-cyan/10 pb-4 last:border-0">
                               <div className="flex items-start gap-2 mb-2">
-                                <Icon className="w-4 h-4 text-indigo-600 mt-1 flex-shrink-0" />
+                                <Icon className="w-4 h-4 text-cyber-cyan mt-1 flex-shrink-0" />
                                 <div className="flex-1">
                                   <div className="flex items-center justify-between">
-                                    <h4 className="font-semibold text-gray-800">
+                                    <h4 className="font-semibold text-slate-200">
                                       {section.label}
                                       {section.description && (
-                                        <span className="font-normal text-gray-500 text-sm ml-2">
+                                        <span className="font-normal text-slate-500 text-sm ml-2">
                                           ({section.description})
                                         </span>
                                       )}
@@ -947,11 +947,11 @@ ISTE 1.1.c - Students use technology to seek feedback..."
                                     />
                                   ) : (
                                     <div 
-                                      className="text-gray-600 mt-1 whitespace-pre-wrap"
+                                      className="text-slate-400 mt-1 whitespace-pre-wrap"
                                       dangerouslySetInnerHTML={{ 
                                         __html: toDisplayString(day[section.key]).replace(
                                           /\*\*(.*?)\*\*/g, 
-                                          '<strong class="text-gray-900">$1</strong>'
+                                          '<strong class="text-white">$1</strong>'
                                         )
                                       }}
                                     />
@@ -969,8 +969,8 @@ ISTE 1.1.c - Students use technology to seek feedback..."
                                           const problem = getProblemById(problemId);
                                           if (!problem) return null;
                                           return (
-                                            <div key={idx} className="flex items-center justify-between text-sm bg-white p-2 rounded border border-green-100">
-                                              <span className="text-gray-700">{problem.title}</span>
+                                            <div key={idx} className="flex items-center justify-between text-sm bg-cyber-navy/60 p-2 rounded border border-green-100">
+                                              <span className="text-slate-300">{problem.title}</span>
                                               <div className="flex items-center gap-1">
                                                 <Button
                                                   variant="ghost"

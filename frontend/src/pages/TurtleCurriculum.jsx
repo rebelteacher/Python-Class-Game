@@ -478,7 +478,7 @@ export default function TurtleCurriculum({ user }) {
       case "Practice": return "bg-purple-100 text-purple-700";
       case "Project": return "bg-orange-100 text-orange-700";
       case "Challenge": return "bg-red-100 text-red-700";
-      default: return "bg-gray-100 text-gray-700";
+      default: return "bg-cyber-navy/30 text-slate-300";
     }
   };
 
@@ -506,7 +506,7 @@ export default function TurtleCurriculum({ user }) {
               <Button
                 variant="ghost"
                 onClick={() => navigate("/teacher/dashboard")}
-                className="text-white hover:bg-white/20"
+                className="text-white hover:bg-cyber-navy/60/20"
               >
                 <ArrowLeft className="w-4 h-4 mr-2" />
                 Back
@@ -520,7 +520,7 @@ export default function TurtleCurriculum({ user }) {
             </div>
             <Button
               onClick={() => navigate("/library?type=turtle")}
-              className="bg-white text-green-600 hover:bg-green-50"
+              className="bg-cyber-navy/60 text-green-600 hover:bg-green-50"
             >
               <BookOpen className="w-4 h-4 mr-2" />
               Go to Turtle Library
@@ -539,7 +539,7 @@ export default function TurtleCurriculum({ user }) {
               </div>
               <div>
                 <h3 className="font-semibold">Problem Library</h3>
-                <p className="text-sm text-gray-600">View & create Turtle problems</p>
+                <p className="text-sm text-slate-400">View & create Turtle problems</p>
               </div>
             </CardContent>
           </Card>
@@ -563,7 +563,7 @@ export default function TurtleCurriculum({ user }) {
               </div>
               <div>
                 <h3 className="font-semibold">Turtle Sandbox</h3>
-                <p className="text-sm text-gray-600">Try turtle code interactively</p>
+                <p className="text-sm text-slate-400">Try turtle code interactively</p>
               </div>
             </CardContent>
           </Card>
@@ -575,7 +575,7 @@ export default function TurtleCurriculum({ user }) {
               </div>
               <div>
                 <h3 className="font-semibold">Student Progress</h3>
-                <p className="text-sm text-gray-600">View in classroom page</p>
+                <p className="text-sm text-slate-400">View in classroom page</p>
               </div>
             </CardContent>
           </Card>
@@ -585,7 +585,7 @@ export default function TurtleCurriculum({ user }) {
         <Card className="mb-8 bg-gradient-to-r from-green-500 to-emerald-500 text-white border-0">
           <CardContent className="p-6">
             <div className="flex items-start gap-4">
-              <div className="p-3 bg-white/20 rounded-lg">
+              <div className="p-3 bg-cyber-navy/60/20 rounded-lg">
                 <Zap className="w-8 h-8" />
               </div>
               <div>
@@ -619,10 +619,10 @@ export default function TurtleCurriculum({ user }) {
             <div className="flex items-center justify-between flex-wrap gap-4">
               <div className="flex items-center gap-3">
                 <div className="text-sm">
-                  <p className="text-gray-700 font-medium">
+                  <p className="text-slate-300 font-medium">
                     📚 Part of <span className="text-green-600">Unit 2: Turtle Graphics</span> curriculum
                   </p>
-                  <p className="text-gray-500 text-xs">
+                  <p className="text-slate-500 text-xs">
                     Covers: Variables, Loops, Conditionals, Functions, Debugging
                   </p>
                 </div>
@@ -667,32 +667,32 @@ export default function TurtleCurriculum({ user }) {
               </div>
 
               {expandedUnits.has(unit.id) && (
-                <CardContent className="p-4 bg-gray-50">
+                <CardContent className="p-4 bg-cyber-navy/40">
                   <div className="space-y-3">
                     {unit.lessons.map((lesson, index) => (
                       <div
                         key={lesson.id}
-                        className="bg-white p-4 rounded-lg border border-gray-200 hover:shadow-md transition-shadow"
+                        className="bg-cyber-navy/60 p-4 rounded-lg border border-cyber-cyan/10 hover:shadow-md transition-shadow"
                       >
                         <div className="flex items-start justify-between">
                           <div className="flex items-start gap-3">
-                            <div className="flex items-center justify-center w-8 h-8 rounded-full bg-gray-100 text-gray-600 font-semibold text-sm">
+                            <div className="flex items-center justify-center w-8 h-8 rounded-full bg-cyber-navy/30 text-slate-400 font-semibold text-sm">
                               {index + 1}
                             </div>
                             <div>
                               <div className="flex items-center gap-2 mb-1">
-                                <h4 className="font-semibold text-gray-900">{lesson.title}</h4>
+                                <h4 className="font-semibold text-white">{lesson.title}</h4>
                                 <span className={`px-2 py-0.5 rounded text-xs font-medium flex items-center gap-1 ${getTypeColor(lesson.type)}`}>
                                   {getTypeIcon(lesson.type)}
                                   {lesson.type}
                                 </span>
                                 {getDOKBadge(lesson.dokLevel)}
                               </div>
-                              <div className="flex items-center gap-2 text-sm text-gray-500 mb-2">
+                              <div className="flex items-center gap-2 text-sm text-slate-500 mb-2">
                                 <Clock className="w-3 h-3" />
                                 <span>{lesson.duration}</span>
                               </div>
-                              <ul className="text-sm text-gray-600 space-y-1">
+                              <ul className="text-sm text-slate-400 space-y-1">
                                 {lesson.objectives.map((obj, i) => (
                                   <li key={i} className="flex items-start gap-2">
                                     <CheckCircle className="w-3 h-3 text-green-500 mt-1 flex-shrink-0" />
@@ -747,30 +747,30 @@ export default function TurtleCurriculum({ user }) {
               <div className="text-center p-4 bg-green-50 rounded-lg">
                 <div className="text-2xl mb-2">1️⃣</div>
                 <div className="font-semibold text-green-700">Basics</div>
-                <div className="text-xs text-gray-600 mt-1">Commands, sequences</div>
+                <div className="text-xs text-slate-400 mt-1">Commands, sequences</div>
               </div>
               <div className="text-center p-4 bg-blue-50 rounded-lg">
                 <div className="text-2xl mb-2">2️⃣</div>
                 <div className="font-semibold text-blue-700">Loops</div>
-                <div className="text-xs text-gray-600 mt-1">for, while, nested</div>
+                <div className="text-xs text-slate-400 mt-1">for, while, nested</div>
               </div>
               <div className="text-center p-4 bg-pink-50 rounded-lg">
                 <div className="text-2xl mb-2">3️⃣</div>
                 <div className="font-semibold text-pink-700">Style</div>
-                <div className="text-xs text-gray-600 mt-1">Colors, pen control</div>
+                <div className="text-xs text-slate-400 mt-1">Colors, pen control</div>
               </div>
               <div className="text-center p-4 bg-purple-50 rounded-lg">
                 <div className="text-2xl mb-2">4️⃣</div>
                 <div className="font-semibold text-purple-700">Logic</div>
-                <div className="text-xs text-gray-600 mt-1">if, elif, else</div>
+                <div className="text-xs text-slate-400 mt-1">if, elif, else</div>
               </div>
               <div className="text-center p-4 bg-orange-50 rounded-lg">
                 <div className="text-2xl mb-2">5️⃣</div>
                 <div className="font-semibold text-orange-700">Functions</div>
-                <div className="text-xs text-gray-600 mt-1">def, parameters</div>
+                <div className="text-xs text-slate-400 mt-1">def, parameters</div>
               </div>
             </div>
-            <div className="mt-4 p-4 bg-gray-50 rounded-lg text-sm text-gray-600">
+            <div className="mt-4 p-4 bg-cyber-navy/40 rounded-lg text-sm text-slate-400">
               <strong>After Turtle:</strong> Students will take these same Python skills to 
               <span className="text-blue-600 font-medium"> Unit 3: Python Text</span> for advanced text-based programming, 
               then move to <span className="text-cyan-600 font-medium">Micro:bit physical computing</span>, 

@@ -458,7 +458,7 @@ export default function CodingTestTaking({ user }) {
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-6">
-            <div className="bg-blue-50 p-6 rounded-lg text-gray-900">
+            <div className="bg-blue-50 p-6 rounded-lg text-white">
               <h3 className="font-semibold mb-3 text-lg">Test Information:</h3>
               <ul className="space-y-2 text-sm">
                 <li className="flex items-center gap-2">
@@ -541,7 +541,7 @@ export default function CodingTestTaking({ user }) {
                 {verifyingCode ? "Verifying..." : "Verify Code"}
               </Button>
               <div className="space-y-2">
-                <p className="text-xs text-center text-gray-500">
+                <p className="text-xs text-center text-slate-500">
                   Ask your teacher for the proctor code to unlock the test.
                 </p>
                 <p className="text-xs text-center text-orange-600 font-medium">
@@ -557,7 +557,7 @@ export default function CodingTestTaking({ user }) {
         <div className="flex-1">
           <h1 className="text-xl font-bold">{test?.title}</h1>
           <div className="flex items-center gap-4 mt-1">
-            <p className="text-sm text-gray-400">
+            <p className="text-sm text-slate-500">
               Problem {currentProblemIndex + 1} of {problems.length}: {currentProblem?.title}
             </p>
             {submittedProblemIds.includes(currentProblem?.id) && (
@@ -704,7 +704,7 @@ export default function CodingTestTaking({ user }) {
             
             {/* Show AnimatedTurtle for turtle code */}
             {isTurtleProblem ? (
-              <div className="bg-white rounded-lg overflow-hidden" style={{ height: '200px' }}>
+              <div className="bg-cyber-navy/60 rounded-lg overflow-hidden" style={{ height: '200px' }}>
                 <AnimatedTurtle 
                   code={code}
                   width={300}
@@ -750,7 +750,7 @@ export default function CodingTestTaking({ user }) {
                     <p className="text-xs text-gray-300">
                       {sub.feedback || 'No feedback available'}
                     </p>
-                    <p className="text-xs text-gray-500 mt-1">
+                    <p className="text-xs text-slate-500 mt-1">
                       Submitted: {new Date(sub.submitted_at).toLocaleTimeString()}
                     </p>
                   </div>
@@ -807,7 +807,7 @@ export default function CodingTestTaking({ user }) {
             <div className="space-y-6">
               {/* Overall Score */}
               <div className="text-center p-6 bg-cyber-black cyber-grid-bg">
-                <p className="text-sm text-gray-600 mb-2">Overall Score</p>
+                <p className="text-sm text-slate-400 mb-2">Overall Score</p>
                 <p className={`text-6xl font-bold ${
                   testResults.overall_score >= 90 ? 'text-green-600' :
                   testResults.overall_score >= 70 ? 'text-blue-600' :
@@ -816,7 +816,7 @@ export default function CodingTestTaking({ user }) {
                 }`}>
                   {Math.round(testResults.overall_score)}%
                 </p>
-                <p className="text-sm text-gray-600 mt-2">
+                <p className="text-sm text-slate-400 mt-2">
                   {testResults.total_problems} {testResults.total_problems === 1 ? 'Problem' : 'Problems'} Completed
                 </p>
               </div>
@@ -825,7 +825,7 @@ export default function CodingTestTaking({ user }) {
               <div className="space-y-3">
                 <h3 className="font-semibold text-lg">Problem Breakdown:</h3>
                 {testResults.submissions?.map((submission, index) => (
-                  <div key={submission.problem_id} className="p-4 bg-gray-50 rounded-lg border">
+                  <div key={submission.problem_id} className="p-4 bg-cyber-navy/40 rounded-lg border">
                     <div className="flex items-center justify-between mb-2">
                       <span className="font-medium">Problem {index + 1}</span>
                       <span className={`text-xl font-bold ${
@@ -837,7 +837,7 @@ export default function CodingTestTaking({ user }) {
                         {Math.round(submission.score)}%
                       </span>
                     </div>
-                    <p className="text-sm text-gray-700 bg-white p-3 rounded border">
+                    <p className="text-sm text-slate-300 bg-cyber-navy/60 p-3 rounded border">
                       {submission.feedback}
                     </p>
                   </div>
