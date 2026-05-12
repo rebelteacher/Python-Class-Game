@@ -1,0 +1,117 @@
+{
+  "theme": "dark",
+  "archetype": "7 (Electric & Neon)",
+  "instructions_to_main_agent": [
+    "Apply the cyberpunk design system across the app strictly using the provided colors, fonts, and effects.",
+    "Do NOT change any existing functionalities or React component behaviors. This is a visual redesign ONLY.",
+    "MUST include 'Chakra Petch', 'Orbitron', and 'Fira Code' fonts from Google Fonts in the main index.html or global css.",
+    "Add 'data-testid' to all interactive elements if not already present.",
+    "Do not use generic Shadcn default styling. Override background colors with `bg-cyber-navy` (or `#0F172A`) and borders with glowing neon borders.",
+    "Ensure all major backgrounds have either a dark gradient or a faint cyan/pink css grid.",
+    "Use glassmorphism (backdrop-blur-xl) on header navigation and dialog modals.",
+    "Implement neon glowing shadows (box-shadow or drop-shadow) on hover for buttons and cards.",
+    "For icons, use Lucide-react (already installed). Apply cyan or pink colors with drop-shadows to make them glow.",
+    "Eliminate heavy rounded corners. Use sharp corners (rounded-none or max rounded-sm) to match the futuristic/cyberpunk aesthetic.",
+    "Update Tailwind config to include the custom colors (`cyber-black`, `cyber-navy`, `cyber-cyan`, `cyber-pink`, `cyber-lime`) and custom fonts."
+  ],
+  "typography": {
+    "headings": {
+      "fontFamily": "'Chakra Petch', sans-serif",
+      "weights": ["600", "700"],
+      "styling": "uppercase tracking-widest text-white drop-shadow-[0_0_8px_rgba(0,240,255,0.5)]"
+    },
+    "body": {
+      "fontFamily": "'Chakra Petch', sans-serif",
+      "weights": ["400", "500"],
+      "styling": "text-slate-300 leading-relaxed"
+    },
+    "ui_elements": {
+      "fontFamily": "'Orbitron', sans-serif",
+      "weights": ["500", "700"],
+      "styling": "uppercase tracking-wider"
+    },
+    "code": {
+      "fontFamily": "'Fira Code', monospace",
+      "weights": ["400", "600"],
+      "styling": "text-[#39FF14] tracking-tight bg-black/50 p-1 border border-[#39FF14]/20"
+    }
+  },
+  "colors": {
+    "backgrounds": {
+      "primary": "#0A0E17",
+      "secondary": "#0F172A",
+      "glass": "rgba(15, 23, 42, 0.7)"
+    },
+    "brand": {
+      "cyan": "#00F0FF",
+      "pink": "#FF00AA",
+      "lime": "#39FF14"
+    },
+    "text": {
+      "primary": "#FFFFFF",
+      "secondary": "#94A3B8",
+      "muted": "#64748B",
+      "accent_cyan": "#00F0FF",
+      "accent_pink": "#FF00AA",
+      "accent_lime": "#39FF14"
+    },
+    "borders": {
+      "default": "rgba(0, 240, 255, 0.2)",
+      "active": "rgba(0, 240, 255, 0.8)",
+      "error": "rgba(255, 0, 170, 0.8)"
+    }
+  },
+  "visual_enhancers": {
+    "glow_effects": {
+      "cyan_glow": "shadow-[0_0_15px_rgba(0,240,255,0.5)]",
+      "pink_glow": "shadow-[0_0_15px_rgba(255,0,170,0.5)]",
+      "text_glow_cyan": "drop-shadow-[0_0_10px_rgba(0,240,255,0.8)]",
+      "text_glow_pink": "drop-shadow-[0_0_10px_rgba(255,0,170,0.8)]"
+    },
+    "glassmorphism": "backdrop-blur-xl bg-[#0F172A]/70 border border-[#00F0FF]/20",
+    "background_textures": {
+      "cyan_grid": "bg-[linear-gradient(to_right,#00F0FF12_1px,transparent_1px),linear-gradient(to_bottom,#00F0FF12_1px,transparent_1px)] bg-[size:24px_24px]",
+      "scanlines": "bg-[linear-gradient(rgba(0,0,0,0)_50%,rgba(0,0,0,0.25)_50%),linear-gradient(90deg,rgba(255,0,0,0.06),rgba(0,255,0,0.02),rgba(0,0,255,0.06))] bg-[length:100%_4px,3px_100%]"
+    }
+  },
+  "components": {
+    "buttons": {
+      "primary": "font-orbitron font-bold uppercase tracking-widest text-[#0A0E17] bg-[#00F0FF] shadow-[0_0_15px_rgba(0,240,255,0.6)] hover:shadow-[0_0_25px_rgba(0,240,255,1)] transition-all duration-300 rounded-none border border-[#00F0FF]",
+      "secondary": "font-orbitron font-bold uppercase tracking-widest text-[#00F0FF] bg-transparent border border-[#00F0FF] shadow-[0_0_10px_rgba(0,240,255,0.2)] hover:bg-[#00F0FF]/10 hover:shadow-[0_0_20px_rgba(0,240,255,0.5)] transition-all duration-300 rounded-none",
+      "danger": "font-orbitron font-bold uppercase tracking-widest text-[#0A0E17] bg-[#FF00AA] shadow-[0_0_15px_rgba(255,0,170,0.6)] hover:shadow-[0_0_25px_rgba(255,0,170,1)] transition-all duration-300 rounded-none border border-[#FF00AA]"
+    },
+    "cards": {
+      "default": "bg-[#0F172A]/80 backdrop-blur-md border border-[#00F0FF]/30 rounded-none shadow-[0_4px_20px_rgba(0,0,0,0.5)] hover:border-[#00F0FF]/80 hover:shadow-[0_0_15px_rgba(0,240,255,0.3)] transition-all duration-500",
+      "header": "border-b border-[#00F0FF]/30 pb-4 mb-4 font-orbitron text-[#00F0FF]",
+      "content": "text-slate-300 font-chakra"
+    },
+    "inputs": {
+      "default": "bg-[#0A0E17]/50 border border-[#00F0FF]/40 text-white font-chakra focus:outline-none focus:ring-1 focus:ring-[#00F0FF] focus:border-[#00F0FF] rounded-none shadow-[inset_0_0_10px_rgba(0,240,255,0.1)]"
+    },
+    "badges": {
+      "success": "bg-[#39FF14]/20 text-[#39FF14] border border-[#39FF14]/50 font-orbitron uppercase text-xs rounded-none px-2 py-1 shadow-[0_0_10px_rgba(57,255,20,0.3)]",
+      "alert": "bg-[#FF00AA]/20 text-[#FF00AA] border border-[#FF00AA]/50 font-orbitron uppercase text-xs rounded-none px-2 py-1 shadow-[0_0_10px_rgba(255,0,170,0.3)]"
+    }
+  },
+  "layouts": {
+    "dashboards": "Control Room grid. Density: tight (`gap-4` or `gap-6`). Strict grid hierarchy. Use sharp borders and 1px neon outlines to structure data.",
+    "marketing": "Heavy asymmetry, bento grids, overlapping elements. Use high contrast and massive glowing typography. Embed background grids in sections.",
+    "code_editor": "Maximize vertical space. Ensure Fira Code font is used exclusively in the code entry areas, accented by Neon Lime (#39FF14) for output success."
+  },
+  "media": {
+    "image_urls": {
+      "hero_background": {
+        "url": "https://images.unsplash.com/photo-1767481626833-dff05d7ab1bc?crop=entropy&cs=srgb&fm=jpg&ixid=M3w4NjA2MDV8MHwxfHNlYXJjaHwxfHxjeWJlcnB1bmslMjBuZW9uJTIwZ3JpZHxlbnwwfHx8fDE3Nzg1ODc1MDF8MA&ixlib=rb-4.1.0&q=85",
+        "description": "Neon green diamond grid for use as a blended background layer in hero or marketing sections"
+      },
+      "code_abstract": {
+        "url": "https://images.unsplash.com/photo-1761599821310-da0d6356b4f3?crop=entropy&cs=srgb&fm=jpg&ixid=M3w3NTY2OTV8MHwxfHNlYXJjaHwxfHxmdXR1cmlzdGljJTIwZ2xvd2luZyUyMGNvZGV8ZW58MHx8fHwxNzc4NTg3NTAxfDA&ixlib=rb-4.1.0&q=85",
+        "description": "Abstract green digital pattern with vertical lines, use as decorative image in code challenge pages or assignment lists"
+      },
+      "cyber_circuit": {
+        "url": "https://images.pexels.com/photos/8108728/pexels-photo-8108728.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=650&w=940",
+        "description": "Motherboard circuits with neon glow, use as background pattern for teacher dashboard or login page"
+      }
+    }
+  }
+}
