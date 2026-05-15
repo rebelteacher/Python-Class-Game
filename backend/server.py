@@ -2304,6 +2304,96 @@ async def get_assignment(assignment_id: str, request: Request):
     assignment["problems"] = problems
     return assignment
 
+
+# ----- Lesson (Auto-Assign) Endpoints -----
+
+@api_router.get("/curriculum/units")
+async def get_curriculum_units(request: Request):
+    """Get all units with their chapters and lesson counts"""
+    user = await get_current_user(request)  # noqa: F841
+    
+    # Define unit-to-assignment_type mapping
+    unit_map = {
+        "Unit 1: Block-Based Coding": "block",
+        "Unit 2: Turtle Graphics": "turtle",
+        "Unit 3: Python Text": "code",
+        "Unit 4: Micro:bit": "microbit",
+    }
+    
+    units = []
+    for unit_name, atype in unit_map.items():
+        chapters_raw = await db.problems.distinct("chapter", {"assignment_type": atype})
+        chapters = []
+        for ch in sorted(chapters_raw):
+            if not ch:
+                continue
+            lessons_raw = await db.problems.distinct("lesson", {"assignment_type": atype, "chapter": ch})
+            lessons = []
+            for le in sorted(lessons_raw):
+                if not le:
+                    continue
+                count = await db.problems.count_documents({"assignment_type": atype, "chapter": ch, "lesson": le})
+                lessons.append({"name": le, "problem_count": count})
+            chapters.append({"name": ch, "lessons": lessons, "problem_count": sum(le["problem_count"] for le in lessons)})
+        units.append({"name": unit_name, "assignment_type": atype, "chapters": chapters, "problem_count": sum(c["problem_count"] for c in chapters)})
+    
+    return units
+
+@api_router.get("/curriculum/lesson-problems")
+async def get_lesson_problems(request: Request, assignment_type: str, chapter: str, lesson: str):
+    """Get all problems for a specific lesson, formatted like an assignment.
+    Problems are ordered: Class Practice -> Paired Programming -> Independent Practice -> Challenge"""
+    user = await get_current_user(request)
+    
+    # Fetch problems matching this lesson
+    cursor = db.problems.find(
+        {"assignment_type": assignment_type, "chapter": chapter, "lesson": lesson},
+        {"_id": 0}
+    )
+    raw_problems = await cursor.to_list(200)
+    
+    if not raw_problems:
+        raise HTTPException(status_code=404, detail="No problems found for this lesson")
+    
+    # Sort by problem_type order, then by title (respecting numbering)
+    type_order = {"Class Practice": 0, "Paired Programming": 1, "Independent Practice": 2, "Challenge": 3, "Assessment": 4, "Quiz": 5, "Debugging": 6, "Project": 7}
+    raw_problems.sort(key=lambda p: (type_order.get(p.get("problem_type", ""), 99), p.get("title", "")))
+    
+    # For students, hide solution code
+    if user.get("role") == "student":
+        for p in raw_problems:
+            p["solution_code"] = "[Hidden]"
+    
+    # Fetch student's existing submissions for these problems (for progress tracking)
+    problem_ids = [p["id"] for p in raw_problems]
+    if user.get("role") == "student":
+        existing_subs = await db.submissions.find(
+            {"student_id": user["id"], "problem_id": {"$in": problem_ids}},
+            {"_id": 0}
+        ).to_list(1000)
+        
+        # Build completion map
+        for p in raw_problems:
+            passing = any(s for s in existing_subs if s.get("problem_id") == p["id"] and s.get("is_passing"))
+            p["is_completed"] = passing
+    
+    # Build a virtual assignment-like response
+    lesson_id = f"lesson_{assignment_type}_{chapter}_{lesson}".replace(" ", "_").replace(":", "").lower()
+    
+    return {
+        "id": lesson_id,
+        "title": f"{lesson}",
+        "description": f"{chapter} - {lesson}",
+        "chapter": chapter,
+        "lesson": lesson,
+        "assignment_type": assignment_type,
+        "is_lesson": True,
+        "is_locked": False,
+        "problems": raw_problems,
+        "problem_ids": problem_ids,
+    }
+
+
 # ----- Code Execution -----
 
 def normalize_output(output: str) -> str:
@@ -3032,34 +3122,52 @@ async def submit_assignment(submission: SubmissionCreate, request: Request):
     if user["role"] != "student":
         raise HTTPException(status_code=403, detail="Only students can submit assignments")
     
-    assignment = await db.assignments.find_one({"id": submission.assignment_id})
-    if not assignment:
-        logging.error(f"📝 SUBMISSION: Assignment not found: {submission.assignment_id}")
-        raise HTTPException(status_code=404, detail="Assignment not found")
+    # Check if this is a lesson-based submission (auto-assign, no real assignment)
+    is_lesson = submission.assignment_id.startswith("lesson_")
     
-    logging.info(f"📝 SUBMISSION: Assignment found, type={assignment.get('assignment_type')}, problem_ids={assignment.get('problem_ids', [])[:3]}")
-    
-    # Handle both old (classroom_id) and new (classroom_ids) structure
-    if "classroom_ids" in assignment:
-        # New structure: check if student is in any of the classrooms
-        has_access = False
-        for classroom_id in assignment["classroom_ids"]:
-            classroom = await db.classrooms.find_one({"id": classroom_id})
-            if classroom and user["id"] in classroom.get("students", []):
-                has_access = True
-                break
-        if not has_access:
-            raise HTTPException(status_code=403, detail="You are not enrolled in any classroom for this assignment")
+    if is_lesson:
+        # Lesson-based: no assignment document, just fetch the problem directly
+        problem = await db.problems.find_one({"id": submission.problem_id})
+        if not problem:
+            raise HTTPException(status_code=404, detail="Problem not found")
+        assignment = {
+            "id": submission.assignment_id,
+            "assignment_type": problem.get("assignment_type", "code"),
+            "is_lesson": True,
+        }
     else:
-        # Old structure: single classroom_id
-        classroom = await db.classrooms.find_one({"id": assignment.get("classroom_id")})
-        if not classroom:
-            raise HTTPException(status_code=404, detail="Classroom not found")
-        if user["id"] not in classroom.get("students", []):
-            raise HTTPException(status_code=403, detail="You are not enrolled in this classroom")
+        assignment = await db.assignments.find_one({"id": submission.assignment_id})
+        if not assignment:
+            logging.error(f"📝 SUBMISSION: Assignment not found: {submission.assignment_id}")
+            raise HTTPException(status_code=404, detail="Assignment not found")
     
-    # Get the problem (handle both old single-problem and new multi-problem structure)
-    if "problem_ids" in assignment and submission.problem_id:
+    logging.info(f"📝 SUBMISSION: Assignment found, type={assignment.get('assignment_type')}, is_lesson={is_lesson}")
+    
+    if not is_lesson:
+        # Handle both old (classroom_id) and new (classroom_ids) structure
+        if "classroom_ids" in assignment:
+            # New structure: check if student is in any of the classrooms
+            has_access = False
+            for classroom_id in assignment["classroom_ids"]:
+                classroom = await db.classrooms.find_one({"id": classroom_id})
+                if classroom and user["id"] in classroom.get("students", []):
+                    has_access = True
+                    break
+            if not has_access:
+                raise HTTPException(status_code=403, detail="You are not enrolled in any classroom for this assignment")
+        else:
+            # Old structure: single classroom_id
+            classroom = await db.classrooms.find_one({"id": assignment.get("classroom_id")})
+            if not classroom:
+                raise HTTPException(status_code=404, detail="Classroom not found")
+            if user["id"] not in classroom.get("students", []):
+                raise HTTPException(status_code=403, detail="You are not enrolled in this classroom")
+    
+    # Get the problem (handle lesson, old single-problem, and new multi-problem structure)
+    if is_lesson:
+        # Already fetched above
+        pass
+    elif "problem_ids" in assignment and submission.problem_id:
         # New structure: get specific problem
         problem = await db.problems.find_one({"id": submission.problem_id})
         if not problem:
@@ -3088,16 +3196,17 @@ async def submit_assignment(submission: SubmissionCreate, request: Request):
     is_turtle = problem.get("assignment_type") == "turtle"
     is_microbit = problem.get("assignment_type") == "microbit"
     
-    # Check if assignment is available
-    now = datetime.now(timezone.utc)
-    try:
-        available_date = datetime.fromisoformat(assignment["available_date"]) if assignment.get("available_date") else None
-    except (ValueError, TypeError) as e:
-        logging.warning(f"Invalid available_date format: {assignment.get('available_date')}")
-        available_date = None
-    
-    if available_date and now < available_date:
-        raise HTTPException(status_code=403, detail="This assignment is not yet available")
+    # Check if assignment is available (skip for lessons)
+    if not is_lesson:
+        now = datetime.now(timezone.utc)
+        try:
+            available_date = datetime.fromisoformat(assignment["available_date"]) if assignment.get("available_date") else None
+        except (ValueError, TypeError) as e:
+            logging.warning(f"Invalid available_date format: {assignment.get('available_date')}")
+            available_date = None
+        
+        if available_date and now < available_date:
+            raise HTTPException(status_code=403, detail="This assignment is not yet available")
     
     # Check previous submissions for this specific problem
     previous_submissions = await db.submissions.find(

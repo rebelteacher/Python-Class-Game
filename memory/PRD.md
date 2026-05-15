@@ -111,6 +111,14 @@ A coding education platform for K-12 students featuring multiple programming env
 - [x] Block Problem Creation Workflow
 - [x] Looks blocks, MC Test features, Grid toggle, etc.
 
+### Phase 2: Student Lesson Flow (In Progress, May 2025)
+- [x] **Backend: Curriculum Units API** (`/api/curriculum/units`) — Returns all units with chapters, lessons, and problem counts
+- [x] **Backend: Lesson Problems API** (`/api/curriculum/lesson-problems`) — Returns problems for a specific lesson sorted by type (Class Practice → Paired → Independent → Challenge), formatted like an assignment
+- [x] **Backend: Lesson Submissions** — Updated submission endpoint to accept lesson-based submissions (no real assignment document needed)
+- [x] **Frontend: LessonPage wrapper** — Fetches lesson data and passes to AssignmentPage
+- [x] **Frontend: AssignmentPage accepts lessonData prop** — Reuses the existing 3-column layout for both assigned and auto-loaded lessons
+- [x] **Route**: `/lesson/:assignmentType/:chapter/:lesson` — Directly navigable lesson URLs
+
 ### Completed (May 2025)
 - [x] **Phase 1: Cyberpunk Design Overhaul** - Applied futuristic dark theme across the entire app inspired by CyberCode Nexus:
   - CSS variables updated to dark cyberpunk palette (deep black #0A0E17, navy #0F172A, neon cyan #00F0FF, neon pink #FF00AA, neon lime #39FF14)

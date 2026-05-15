@@ -27,11 +27,12 @@ import TurtleBlocklyEditor from "@/components/TurtleBlocklyEditor";
 const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
 const API = `${BACKEND_URL}/api`;
 
-export default function AssignmentPage({ user }) {
+export default function AssignmentPage({ user, lessonData }) {
   const { assignmentId } = useParams();
   const navigate = useNavigate();
   const location = useLocation();
   const classroomIdFromNav = location.state?.classroomId; // Get classroom_id if passed from navigation
+  const effectiveAssignmentId = lessonData ? lessonData.id : assignmentId;
   const [assignment, setAssignment] = useState(null);
   const [loading, setLoading] = useState(true);
   const [code, setCode] = useState("");
@@ -111,7 +112,7 @@ export default function AssignmentPage({ user }) {
     }
     
     // Load saved code from localStorage
-    const savedCodeData = localStorage.getItem(`saved_code_${assignmentId}`);
+    const savedCodeData = localStorage.getItem(`saved_code_${effectiveAssignmentId}`);
     if (savedCodeData) {
       try {
         const parsedData = JSON.parse(savedCodeData);
@@ -122,7 +123,7 @@ export default function AssignmentPage({ user }) {
     }
     
     // Load saved block XML from localStorage (for block-type assignments)
-    const savedXmlData = localStorage.getItem(`saved_xml_${assignmentId}`);
+    const savedXmlData = localStorage.getItem(`saved_xml_${effectiveAssignmentId}`);
     if (savedXmlData) {
       try {
         const parsedXml = JSON.parse(savedXmlData);
@@ -131,7 +132,7 @@ export default function AssignmentPage({ user }) {
         console.error("Error loading saved block XML:", e);
       }
     }
-  }, [assignmentId]);
+  }, [effectiveAssignmentId]);
   
   // Fetch submissions whenever assignment or navigation changes
   useEffect(() => {
@@ -220,7 +221,7 @@ export default function AssignmentPage({ user }) {
         };
         
         // Also save to localStorage for persistence across refreshes
-        localStorage.setItem(`saved_code_${assignmentId}`, JSON.stringify(newState));
+        localStorage.setItem(`saved_code_${effectiveAssignmentId}`, JSON.stringify(newState));
         
         return newState;
       });
@@ -266,6 +267,15 @@ export default function AssignmentPage({ user }) {
 
   const fetchAssignment = async () => {
     try {
+      // If lessonData is provided (auto-assign), use it directly
+      if (lessonData) {
+        setAssignment(lessonData);
+        const starterCode = lessonData.problems?.[0]?.starter_code || "# Write your code here\n";
+        setCode(starterCode);
+        setLoading(false);
+        return;
+      }
+      
       const response = await axios.get(`${API}/assignments/${assignmentId}`, {
         withCredentials: true,
       });
@@ -1307,7 +1317,7 @@ export default function AssignmentPage({ user }) {
                             [problemId]: newXml
                           };
                           // Save to localStorage for persistence
-                          localStorage.setItem(`saved_xml_${assignmentId}`, JSON.stringify(newState));
+                          localStorage.setItem(`saved_xml_${effectiveAssignmentId}`, JSON.stringify(newState));
                           return newState;
                         });
                       }}
@@ -1834,7 +1844,7 @@ export default function AssignmentPage({ user }) {
                             onClick={() => {
                               const newMode = !darkMode;
                               setDarkMode(newMode);
-                              localStorage.setItem(`darkMode_${assignmentId}`, newMode);
+                              localStorage.setItem(`darkMode_${effectiveAssignmentId}`, newMode);
                             }}
                             variant="outline"
                             size="sm"
