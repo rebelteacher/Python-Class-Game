@@ -473,21 +473,21 @@ export default function TurtleCurriculum({ user }) {
 
   const getTypeColor = (type) => {
     switch (type) {
-      case "Introduction": return "bg-blue-100 text-blue-700";
-      case "Code": return "bg-green-100 text-green-700";
-      case "Practice": return "bg-purple-100 text-purple-700";
-      case "Project": return "bg-orange-100 text-orange-700";
-      case "Challenge": return "bg-red-100 text-red-700";
+      case "Introduction": return "bg-blue-500/20 text-blue-400";
+      case "Code": return "bg-green-500/20 text-green-400";
+      case "Practice": return "bg-purple-500/20 text-purple-400";
+      case "Project": return "bg-orange-500/20 text-orange-400";
+      case "Challenge": return "bg-red-500/20 text-red-400";
       default: return "bg-cyber-navy/30 text-slate-300";
     }
   };
 
   const getDOKBadge = (level) => {
     const colors = {
-      1: "bg-green-100 text-green-700",
-      2: "bg-blue-100 text-blue-700",
-      3: "bg-purple-100 text-purple-700",
-      4: "bg-red-100 text-red-700"
+      1: "bg-green-500/20 text-green-400",
+      2: "bg-blue-500/20 text-blue-400",
+      3: "bg-purple-500/20 text-purple-400",
+      4: "bg-red-500/20 text-red-400"
     };
     return (
       <span className={`px-1.5 py-0.5 rounded text-xs font-medium ${colors[level]}`}>
@@ -520,7 +520,7 @@ export default function TurtleCurriculum({ user }) {
             </div>
             <Button
               onClick={() => navigate("/library?type=turtle")}
-              className="bg-cyber-navy/60 text-green-600 hover:bg-green-50"
+              className="bg-cyber-navy/60 text-green-600 hover:bg-green-500/10"
             >
               <BookOpen className="w-4 h-4 mr-2" />
               Go to Turtle Library
@@ -534,7 +534,7 @@ export default function TurtleCurriculum({ user }) {
         <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
           <Card className="hover:shadow-lg transition-shadow cursor-pointer" onClick={() => navigate("/library?type=turtle")}>
             <CardContent className="p-6 flex items-center gap-4">
-              <div className="p-3 bg-green-100 rounded-lg">
+              <div className="p-3 bg-green-500/20 rounded-lg">
                 <BookOpen className="w-6 h-6 text-green-600" />
               </div>
               <div>
@@ -544,13 +544,13 @@ export default function TurtleCurriculum({ user }) {
             </CardContent>
           </Card>
           
-          <Card className="hover:shadow-lg transition-shadow cursor-pointer border-2 border-green-500 bg-green-50" onClick={() => navigate("/turtle/teach")}>
+          <Card className="hover:shadow-lg transition-shadow cursor-pointer border-2 border-green-500 bg-green-500/10" onClick={() => navigate("/turtle/teach")}>
             <CardContent className="p-6 flex items-center gap-4">
-              <div className="p-3 bg-green-500 rounded-lg">
+              <div className="p-3 bg-green-500/100 rounded-lg">
                 <Target className="w-6 h-6 text-white" />
               </div>
               <div>
-                <h3 className="font-semibold text-green-700">Teaching Mode</h3>
+                <h3 className="font-semibold text-green-400">Teaching Mode</h3>
                 <p className="text-sm text-green-600">Live demo with simulator</p>
               </div>
             </CardContent>
@@ -558,7 +558,7 @@ export default function TurtleCurriculum({ user }) {
           
           <Card className="hover:shadow-lg transition-shadow cursor-pointer" onClick={() => navigate("/turtle")}>
             <CardContent className="p-6 flex items-center gap-4">
-              <div className="p-3 bg-blue-100 rounded-lg">
+              <div className="p-3 bg-blue-500/20 rounded-lg">
                 <Play className="w-6 h-6 text-blue-600" />
               </div>
               <div>
@@ -570,7 +570,7 @@ export default function TurtleCurriculum({ user }) {
           
           <Card className="hover:shadow-lg transition-shadow cursor-pointer" onClick={() => navigate("/teacher/dashboard")}>
             <CardContent className="p-6 flex items-center gap-4">
-              <div className="p-3 bg-purple-100 rounded-lg">
+              <div className="p-3 bg-purple-500/20 rounded-lg">
                 <Clock className="w-6 h-6 text-purple-600" />
               </div>
               <div>
@@ -614,7 +614,7 @@ export default function TurtleCurriculum({ user }) {
         </Card>
 
         {/* Learning Path */}
-        <Card className="mb-6 border-green-200 bg-green-50/50">
+        <Card className="mb-6 border-green-500/30 bg-green-500/10/50">
           <CardContent className="p-4">
             <div className="flex items-center justify-between flex-wrap gap-4">
               <div className="flex items-center gap-3">
@@ -628,9 +628,9 @@ export default function TurtleCurriculum({ user }) {
                 </div>
               </div>
               <div className="flex gap-2 flex-wrap">
-                <span className="px-2 py-1 bg-green-100 text-green-700 rounded text-xs font-medium">DOK2: Understand</span>
-                <span className="px-2 py-1 bg-blue-100 text-blue-700 rounded text-xs font-medium">DOK3: Apply</span>
-                <span className="px-2 py-1 bg-purple-100 text-purple-700 rounded text-xs font-medium">DOK4: Create</span>
+                <span className="px-2 py-1 bg-green-500/20 text-green-400 rounded text-xs font-medium">DOK2: Understand</span>
+                <span className="px-2 py-1 bg-blue-500/20 text-blue-400 rounded text-xs font-medium">DOK3: Apply</span>
+                <span className="px-2 py-1 bg-purple-500/20 text-purple-400 rounded text-xs font-medium">DOK4: Create</span>
               </div>
             </div>
           </CardContent>
@@ -748,29 +748,29 @@ export default function TurtleCurriculum({ user }) {
           </CardHeader>
           <CardContent>
             <div className="grid grid-cols-1 md:grid-cols-5 gap-4">
-              <div className="text-center p-4 bg-green-50 rounded-lg">
+              <div className="text-center p-4 bg-green-500/10 rounded-lg">
                 <div className="text-2xl mb-2">1️⃣</div>
-                <div className="font-semibold text-green-700">Basics</div>
+                <div className="font-semibold text-green-400">Basics</div>
                 <div className="text-xs text-slate-400 mt-1">Commands, sequences</div>
               </div>
-              <div className="text-center p-4 bg-blue-50 rounded-lg">
+              <div className="text-center p-4 bg-blue-500/10 rounded-lg">
                 <div className="text-2xl mb-2">2️⃣</div>
-                <div className="font-semibold text-blue-700">Loops</div>
+                <div className="font-semibold text-blue-400">Loops</div>
                 <div className="text-xs text-slate-400 mt-1">for, while, nested</div>
               </div>
-              <div className="text-center p-4 bg-pink-50 rounded-lg">
+              <div className="text-center p-4 bg-pink-500/10 rounded-lg">
                 <div className="text-2xl mb-2">3️⃣</div>
                 <div className="font-semibold text-pink-700">Style</div>
                 <div className="text-xs text-slate-400 mt-1">Colors, pen control</div>
               </div>
-              <div className="text-center p-4 bg-purple-50 rounded-lg">
+              <div className="text-center p-4 bg-purple-500/10 rounded-lg">
                 <div className="text-2xl mb-2">4️⃣</div>
-                <div className="font-semibold text-purple-700">Logic</div>
+                <div className="font-semibold text-purple-400">Logic</div>
                 <div className="text-xs text-slate-400 mt-1">if, elif, else</div>
               </div>
-              <div className="text-center p-4 bg-orange-50 rounded-lg">
+              <div className="text-center p-4 bg-orange-500/10 rounded-lg">
                 <div className="text-2xl mb-2">5️⃣</div>
-                <div className="font-semibold text-orange-700">Functions</div>
+                <div className="font-semibold text-orange-400">Functions</div>
                 <div className="text-xs text-slate-400 mt-1">def, parameters</div>
               </div>
             </div>
@@ -815,9 +815,9 @@ export default function TurtleCurriculum({ user }) {
             </div>
             
             {selectedLesson && (
-              <div className="p-3 bg-green-50 rounded-lg">
-                <h4 className="font-medium text-green-800 mb-2">Learning Objectives:</h4>
-                <ul className="text-sm text-green-700 space-y-1">
+              <div className="p-3 bg-green-500/10 rounded-lg">
+                <h4 className="font-medium text-green-400 mb-2">Learning Objectives:</h4>
+                <ul className="text-sm text-green-400 space-y-1">
                   {selectedLesson.objectives.map((obj, i) => (
                     <li key={i} className="flex items-start gap-2">
                       <CheckCircle className="w-3 h-3 mt-1 flex-shrink-0" />

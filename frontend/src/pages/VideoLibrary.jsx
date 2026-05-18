@@ -277,7 +277,7 @@ export default function VideoLibrary({ user }) {
                                     onClick={() => handleDelete(video.id)}
                                     variant="outline"
                                     size="sm"
-                                    className="text-red-600 hover:text-red-700"
+                                    className="text-red-600 hover:text-red-400"
                                   >
                                     <Trash2 className="w-4 h-4" />
                                   </Button>

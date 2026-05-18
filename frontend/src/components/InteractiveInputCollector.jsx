@@ -92,7 +92,7 @@ export default function InteractiveInputCollector({
           {inputPrompts.map((prompt, index) => (
             <div key={index} className="space-y-2">
               <label className="text-sm font-medium text-slate-300 flex items-center gap-2">
-                <span className="bg-blue-100 text-blue-800 px-2 py-0.5 rounded text-xs font-bold">
+                <span className="bg-blue-500/20 text-blue-400 px-2 py-0.5 rounded text-xs font-bold">
                   #{index + 1}
                 </span>
                 {prompt || `Input ${index + 1}`}

@@ -141,8 +141,8 @@ export default function AdminAnnouncements({ user }) {
       </nav>
 
       <main className="container mx-auto px-6 py-10">
-        <div className="bg-blue-50 border border-blue-200 p-4 rounded-lg mb-6">
-          <p className="text-sm text-blue-800">
+        <div className="bg-blue-500/10 border border-blue-500/30 p-4 rounded-lg mb-6">
+          <p className="text-sm text-blue-400">
             💡 <strong>Tip:</strong> Teachers see active announcements in the "What's New" button on their dashboard. Use this to notify them about new features, content, or important updates!
           </p>
         </div>
@@ -175,7 +175,7 @@ export default function AdminAnnouncements({ user }) {
                     <div className="flex-1">
                       <div className="flex items-center gap-3 mb-2">
                         <CardTitle className="text-xl">{announcement.title}</CardTitle>
-                        <span className={`px-2 py-1 rounded text-xs font-semibold ${announcement.is_active ? 'bg-green-100 text-green-800' : 'bg-cyber-navy/30 text-slate-200'}`}>
+                        <span className={`px-2 py-1 rounded text-xs font-semibold ${announcement.is_active ? 'bg-green-500/20 text-green-400' : 'bg-cyber-navy/30 text-slate-200'}`}>
                           {announcement.is_active ? "Active" : "Hidden"}
                         </span>
                       </div>
@@ -216,7 +216,7 @@ export default function AdminAnnouncements({ user }) {
                         onClick={() => handleDelete(announcement.id)}
                         size="sm"
                         variant="outline"
-                        className="gap-2 text-red-600 hover:text-red-700"
+                        className="gap-2 text-red-600 hover:text-red-400"
                       >
                         <Trash2 className="w-4 h-4" />
                         Delete
@@ -258,8 +258,8 @@ export default function AdminAnnouncements({ user }) {
               />
             </div>
 
-            <div className="bg-yellow-50 border border-yellow-200 p-3 rounded-lg">
-              <p className="text-sm text-yellow-800">
+            <div className="bg-yellow-500/10 border border-yellow-500/30 p-3 rounded-lg">
+              <p className="text-sm text-yellow-400">
                 📢 <strong>Note:</strong> This announcement will be immediately visible to all teachers in the "What's New" button on their dashboard.
               </p>
             </div>

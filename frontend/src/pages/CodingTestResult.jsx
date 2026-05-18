@@ -38,7 +38,7 @@ export default function CodingTestResult({ user }) {
   const getScoreColor = (score) => {
     if (score >= 90) return "text-green-600";
     if (score >= 70) return "text-blue-600";
-    if (score >= 50) return "text-yellow-600";
+    if (score >= 50) return "text-yellow-400";
     return "text-red-600";
   };
 
@@ -83,7 +83,7 @@ export default function CodingTestResult({ user }) {
           <CardHeader className="text-center pb-2">
             <div className="flex justify-center mb-4">
               <div className={`w-32 h-32 rounded-full flex items-center justify-center ${
-                result.overall_score >= 70 ? 'bg-green-100' : 'bg-cyber-navy/30'
+                result.overall_score >= 70 ? 'bg-green-500/20' : 'bg-cyber-navy/30'
               }`}>
                 <Trophy className={`w-16 h-16 ${
                   result.overall_score >= 70 ? 'text-green-600' : 'text-slate-500'
@@ -121,7 +121,7 @@ export default function CodingTestResult({ user }) {
                 </CardTitle>
               </CardHeader>
               <CardContent>
-                <div className="bg-blue-50 p-4 rounded-lg mb-3">
+                <div className="bg-blue-500/10 p-4 rounded-lg mb-3">
                   <p className="text-slate-200 whitespace-pre-wrap">{submission.feedback}</p>
                 </div>
                 <div className="flex items-center gap-4 text-sm text-slate-400">
@@ -142,9 +142,9 @@ export default function CodingTestResult({ user }) {
         <Card>
           <CardContent className="pt-6">
 
-            <div className="mt-6 p-4 bg-yellow-50 border border-yellow-200 rounded-lg">
+            <div className="mt-6 p-4 bg-yellow-500/10 border border-yellow-500/30 rounded-lg">
               <h4 className="font-semibold text-yellow-900 mb-2">📝 Note</h4>
-              <p className="text-sm text-yellow-800">
+              <p className="text-sm text-yellow-400">
                 Your code has been submitted and evaluated. For security reasons, you cannot view or edit your submitted code.
                 If you have questions about the feedback, please reach out to your instructor.
               </p>

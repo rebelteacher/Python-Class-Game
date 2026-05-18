@@ -164,7 +164,7 @@ function SchoolAdminDashboard({ user }) {
                           </div>
                         )}
                         <div className="mt-4 pt-4 border-t">
-                          <span className="inline-flex items-center gap-2 text-xs bg-blue-100 text-blue-700 px-3 py-1 rounded-full">
+                          <span className="inline-flex items-center gap-2 text-xs bg-blue-500/20 text-blue-400 px-3 py-1 rounded-full">
                             <Eye className="w-3 h-3" />
                             View-Only Access
                           </span>
@@ -217,7 +217,7 @@ function SchoolAdminDashboard({ user }) {
 
         {/* Stats Cards */}
         <div className="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-          <Card className="border-2 border-green-200 bg-gradient-to-br from-green-50 to-green-100">
+          <Card className="border-2 border-green-500/30 bg-gradient-to-br from-green-50 to-green-100">
             <CardContent className="pt-6">
               <div className="flex items-center justify-between">
                 <div>
@@ -241,7 +241,7 @@ function SchoolAdminDashboard({ user }) {
             </CardContent>
           </Card>
 
-          <Card className="border-2 border-blue-200 bg-cyber-black cyber-grid-bg">
+          <Card className="border-2 border-blue-500/30 bg-cyber-black cyber-grid-bg">
             <CardContent className="pt-6">
               <div className="flex items-center justify-between">
                 <div>
@@ -266,7 +266,7 @@ function SchoolAdminDashboard({ user }) {
               ) : (
                 <div className="grid gap-4">
                   {teachers.map((teacher) => (
-                    <div key={teacher.id} className="border rounded-lg p-4 hover:bg-teal-50 transition-colors">
+                    <div key={teacher.id} className="border rounded-lg p-4 hover:bg-teal-500/10 transition-colors">
                       <div className="flex items-center justify-between">
                         <div>
                           <h3 className="font-semibold text-lg">{teacher.name}</h3>

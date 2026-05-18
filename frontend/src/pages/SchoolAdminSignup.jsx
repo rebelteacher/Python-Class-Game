@@ -200,8 +200,8 @@ export default function SchoolAdminSignup() {
               </div>
             </div>
 
-            <div className="bg-blue-50 border border-blue-200 rounded-md p-3">
-              <p className="text-sm text-blue-800">
+            <div className="bg-blue-500/10 border border-blue-500/30 rounded-md p-3">
+              <p className="text-sm text-blue-400">
                 ℹ️ Your request will be reviewed by a platform administrator. You'll receive access once approved.
               </p>
             </div>

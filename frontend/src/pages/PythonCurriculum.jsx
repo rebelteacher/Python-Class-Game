@@ -691,7 +691,7 @@ export default function PythonCurriculum({ user }) {
         <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
           <Card className="bg-cyber-navy/60 backdrop-blur-sm shadow-lg hover:shadow-xl transition-shadow cursor-pointer" onClick={() => navigate("/library?type=code")}>
             <CardContent className="p-4 flex items-center gap-3">
-              <div className="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center">
+              <div className="w-10 h-10 bg-blue-500/20 rounded-lg flex items-center justify-center">
                 <Library className="w-5 h-5 text-blue-600" />
               </div>
               <div>
@@ -701,13 +701,13 @@ export default function PythonCurriculum({ user }) {
             </CardContent>
           </Card>
           
-          <Card className="bg-cyber-navy/60 backdrop-blur-sm shadow-lg hover:shadow-xl transition-shadow cursor-pointer border-2 border-blue-200" onClick={() => navigate("/python/teach")}>
+          <Card className="bg-cyber-navy/60 backdrop-blur-sm shadow-lg hover:shadow-xl transition-shadow cursor-pointer border-2 border-blue-500/30" onClick={() => navigate("/python/teach")}>
             <CardContent className="p-4 flex items-center gap-3">
-              <div className="w-10 h-10 bg-blue-500 rounded-lg flex items-center justify-center">
+              <div className="w-10 h-10 bg-blue-500/100 rounded-lg flex items-center justify-center">
                 <Play className="w-5 h-5 text-white" />
               </div>
               <div>
-                <p className="font-medium text-sm text-blue-700">Teaching Mode</p>
+                <p className="font-medium text-sm text-blue-400">Teaching Mode</p>
                 <p className="text-xs text-slate-500">Live demo environment</p>
               </div>
             </CardContent>
@@ -715,7 +715,7 @@ export default function PythonCurriculum({ user }) {
 
           <Card className="bg-cyber-navy/60 backdrop-blur-sm shadow-lg hover:shadow-xl transition-shadow cursor-pointer" onClick={() => navigate("/skill-quiz-manager")}>
             <CardContent className="p-4 flex items-center gap-3">
-              <div className="w-10 h-10 bg-purple-100 rounded-lg flex items-center justify-center">
+              <div className="w-10 h-10 bg-purple-500/20 rounded-lg flex items-center justify-center">
                 <GraduationCap className="w-5 h-5 text-purple-600" />
               </div>
               <div>
@@ -727,7 +727,7 @@ export default function PythonCurriculum({ user }) {
 
           <Card className="bg-cyber-navy/60 backdrop-blur-sm shadow-lg hover:shadow-xl transition-shadow cursor-pointer" onClick={() => navigate("/teacher-reports")}>
             <CardContent className="p-4 flex items-center gap-3">
-              <div className="w-10 h-10 bg-green-100 rounded-lg flex items-center justify-center">
+              <div className="w-10 h-10 bg-green-500/20 rounded-lg flex items-center justify-center">
                 <Users className="w-5 h-5 text-green-600" />
               </div>
               <div>

@@ -315,7 +315,7 @@ export default function TestTaking({ user }) {
 
   const getTimeColor = () => {
     if (!timeRemaining || timeRemaining > 300) return "text-slate-300";
-    if (timeRemaining > 60) return "text-yellow-600";
+    if (timeRemaining > 60) return "text-yellow-400";
     return "text-red-600 font-bold";
   };
 
@@ -377,7 +377,7 @@ export default function TestTaking({ user }) {
             <CardContent className="text-center space-y-6">
               <div>
                 <p className="text-slate-400 mb-2">Your Score</p>
-                <p className={`text-6xl font-bold ${score >= 70 ? 'text-green-600' : 'text-yellow-600'}`}>
+                <p className={`text-6xl font-bold ${score >= 70 ? 'text-green-600' : 'text-yellow-400'}`}>
                   {typeof score === 'number' ? score.toFixed(1) : score}%
                 </p>
                 <p className="text-slate-500 mt-2">
@@ -406,11 +406,11 @@ export default function TestTaking({ user }) {
 
           {/* Show message when results are not released yet */}
           {!resultsReleased && (
-            <Card className="max-w-4xl mx-auto bg-yellow-50 border-yellow-200">
+            <Card className="max-w-4xl mx-auto bg-yellow-500/100/10 border-yellow-500/30">
               <CardContent className="py-8 text-center">
                 <Lock className="w-12 h-12 text-yellow-500 mx-auto mb-4" />
-                <h3 className="text-lg font-semibold text-yellow-800 mb-2">Results Pending Release</h3>
-                <p className="text-yellow-700">
+                <h3 className="text-lg font-semibold text-yellow-400 mb-2">Results Pending Release</h3>
+                <p className="text-yellow-400">
                   Your teacher has not released the test results yet. 
                   Check back later to see which questions you missed.
                 </p>
@@ -437,13 +437,13 @@ export default function TestTaking({ user }) {
                       key={result.question_id || idx} 
                       className={`p-4 rounded-lg border-2 ${
                         result.is_correct 
-                          ? 'bg-green-50 border-green-200' 
-                          : 'bg-red-50 border-red-200'
+                          ? 'bg-green-500/10 border-green-500/30' 
+                          : 'bg-red-500/10 border-red-500/30'
                       }`}
                     >
                       <div className="flex items-start gap-3">
                         <span className={`flex-shrink-0 w-8 h-8 rounded-full flex items-center justify-center text-white font-bold ${
-                          result.is_correct ? 'bg-green-500' : 'bg-red-500'
+                          result.is_correct ? 'bg-green-500/100' : 'bg-red-500/100'
                         }`}>
                           {result.is_correct ? '✓' : '✗'}
                         </span>
@@ -459,9 +459,9 @@ export default function TestTaking({ user }) {
                                   key={letter}
                                   className={`p-2 rounded ${
                                     letter === result.correct_answer 
-                                      ? 'bg-green-200 text-green-800 font-medium' 
+                                      ? 'bg-green-200 text-green-400 font-medium' 
                                       : letter === result.student_answer && !result.is_correct
-                                      ? 'bg-red-200 text-red-800 line-through'
+                                      ? 'bg-red-200 text-red-400 line-through'
                                       : 'bg-white'
                                   }`}
                                 >
@@ -571,7 +571,7 @@ export default function TestTaking({ user }) {
                       key={idx} 
                       className={`flex items-center space-x-3 p-4 rounded-lg transition-colors border-2 cursor-pointer
                         ${answers[currentQuestion.id] === idx.toString() 
-                          ? 'border-indigo-500 bg-indigo-50' 
+                          ? 'border-indigo-500 bg-indigo-500/10' 
                           : 'border-cyber-cyan/10 hover:bg-cyber-navy/40 hover:border-cyber-cyan/15'}`}
                     >
                       <RadioGroupItem 
@@ -613,7 +613,7 @@ export default function TestTaking({ user }) {
                     idx === currentQuestionIndex 
                       ? 'bg-cyber-cyan text-cyber-black' 
                       : answers[q.id] 
-                        ? 'bg-green-500' 
+                        ? 'bg-green-500/100' 
                         : 'bg-gray-300 hover:bg-gray-400'
                   }`}
                   title={`Question ${idx + 1}${answers[q.id] ? ' (answered)' : ''}`}

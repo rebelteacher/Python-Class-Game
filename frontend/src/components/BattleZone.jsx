@@ -165,7 +165,7 @@ export default function BattleZone({ classroomId, isTeacher }) {
               <Card 
                 key={battle.id} 
                 data-testid={`battle-${battle.id}`}
-                className={`${battle.status === "active" ? "border-2 border-red-500" : ""} ${isWinner ? "bg-yellow-50 border-2 border-yellow-400" : ""}`}
+                className={`${battle.status === "active" ? "border-2 border-red-500" : ""} ${isWinner ? "bg-yellow-500/10 border-2 border-yellow-400" : ""}`}
               >
                 <CardHeader>
                   <div className="flex justify-between items-start">
@@ -229,7 +229,7 @@ export default function BattleZone({ classroomId, isTeacher }) {
                     </div>
 
                     {battle.status === "completed" && (
-                      <div className={`text-center py-3 rounded-lg ${isWinner ? "bg-yellow-100 text-yellow-800" : "bg-cyber-navy/30 text-slate-300"}`}>
+                      <div className={`text-center py-3 rounded-lg ${isWinner ? "bg-yellow-500/20 text-yellow-400" : "bg-cyber-navy/30 text-slate-300"}`}>
                         <div className="font-bold text-lg">
                           {isWinner ? "🎉 VICTORY! You won +200 coins + Champion Team badge!" : "Keep training for the next battle!"}
                         </div>

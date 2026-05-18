@@ -49,7 +49,7 @@ export default function AdminAddCoins() {
 
   return (
     <div className="min-h-screen bg-cyber-black cyber-grid-bg flex items-center justify-center p-4">
-      <Card className="w-full max-w-md border-green-200">
+      <Card className="w-full max-w-md border-green-500/30">
         <CardHeader className="space-y-1">
           <div className="flex items-center justify-between">
             <Button onClick={() => navigate("/admin-dashboard")} variant="ghost" size="sm">
@@ -91,8 +91,8 @@ export default function AdminAddCoins() {
               />
             </div>
 
-            <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-3">
-              <p className="text-xs text-yellow-800">
+            <div className="bg-yellow-500/10 border border-yellow-500/30 rounded-lg p-3">
+              <p className="text-xs text-yellow-400">
                 <strong>Note:</strong> Student must be logged in for changes to take effect. They should refresh their page after you add coins.
               </p>
             </div>

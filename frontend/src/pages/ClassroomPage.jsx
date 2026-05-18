@@ -466,7 +466,7 @@ export default function ClassroomPage({ user }) {
             </div>
           </div>
           <div className="flex items-center space-x-3">
-            <span className="px-3 py-1 bg-indigo-100 text-indigo-700 rounded-full text-sm font-mono font-semibold">
+            <span className="px-3 py-1 bg-indigo-500/20 text-indigo-400 rounded-full text-sm font-mono font-semibold">
               {classroom.class_code}
             </span>
           </div>
@@ -554,13 +554,13 @@ export default function ClassroomPage({ user }) {
                               <CardTitle className="flex items-center justify-between">
                                 <span>{test.title}</span>
                                 {isScheduled && (
-                                  <span className="px-2 py-1 bg-yellow-100 text-yellow-800 text-xs rounded">Scheduled</span>
+                                  <span className="px-2 py-1 bg-yellow-500/20 text-yellow-400 text-xs rounded">Scheduled</span>
                                 )}
                                 {isClosed && (
                                   <span className="px-2 py-1 bg-cyber-navy/30 text-slate-200 text-xs rounded">Closed</span>
                                 )}
                                 {isAvailable && (
-                                  <span className="px-2 py-1 bg-green-100 text-green-800 text-xs rounded">Available</span>
+                                  <span className="px-2 py-1 bg-green-500/20 text-green-400 text-xs rounded">Available</span>
                                 )}
                               </CardTitle>
                               <CardDescription>{test.description}</CardDescription>
@@ -584,9 +584,9 @@ export default function ClassroomPage({ user }) {
                                   </div>
                                 )}
                                 {isTeacher && test.proctor_code && (
-                                  <div className="mt-3 p-2 bg-yellow-50 border border-yellow-200 rounded">
+                                  <div className="mt-3 p-2 bg-yellow-500/10 border border-yellow-500/30 rounded">
                                     <p className="text-xs font-semibold text-yellow-900">Proctor Code:</p>
-                                    <p className="text-lg font-mono font-bold text-yellow-800">{test.proctor_code}</p>
+                                    <p className="text-lg font-mono font-bold text-yellow-400">{test.proctor_code}</p>
                                   </div>
                                 )}
                               </div>
@@ -639,7 +639,7 @@ export default function ClassroomPage({ user }) {
                                     }}
                                     variant="outline"
                                     size="sm"
-                                    className="text-red-600 hover:bg-red-50"
+                                    className="text-red-600 hover:bg-red-500/10"
                                   >
                                     <Trash2 className="w-4 h-4" />
                                   </Button>
@@ -679,12 +679,12 @@ export default function ClassroomPage({ user }) {
                         <div className="flex justify-between items-start">
                           <CardTitle className="text-lg">{test.title}</CardTitle>
                           {isScheduled && (
-                            <span className="px-2 py-1 bg-yellow-100 text-yellow-700 text-xs rounded">
+                            <span className="px-2 py-1 bg-yellow-500/20 text-yellow-400 text-xs rounded">
                               Scheduled
                             </span>
                           )}
                           {isAvailable && (
-                            <span className="px-2 py-1 bg-green-100 text-green-700 text-xs rounded">
+                            <span className="px-2 py-1 bg-green-500/20 text-green-400 text-xs rounded">
                               Available
                             </span>
                           )}
@@ -781,7 +781,7 @@ export default function ClassroomPage({ user }) {
                                 }}
                                 variant="outline"
                                 size="sm"
-                                className="text-red-600 hover:bg-red-50"
+                                className="text-red-600 hover:bg-red-500/10"
                               >
                                 <Trash2 className="w-4 h-4" />
                               </Button>
@@ -1081,10 +1081,10 @@ export default function ClassroomPage({ user }) {
                                             {assignment.problem_count ? `${assignment.problem_count} problems` : `${assignment.test_cases?.length || 0} test cases`}
                                           </div>
                                           {isTeacher && assignment.proctor_code && (
-                                            <div className="mb-3 p-2 bg-yellow-50 border border-yellow-200 rounded">
+                                            <div className="mb-3 p-2 bg-yellow-500/10 border border-yellow-500/30 rounded">
                                               <p className="text-xs font-semibold text-yellow-900">Proctor Code:</p>
-                                              <p className="text-lg font-mono font-bold text-yellow-800">{assignment.proctor_code}</p>
-                                              <p className="text-xs text-yellow-700 mt-1">Share with students who need to unlock this assignment</p>
+                                              <p className="text-lg font-mono font-bold text-yellow-400">{assignment.proctor_code}</p>
+                                              <p className="text-xs text-yellow-400 mt-1">Share with students who need to unlock this assignment</p>
                                             </div>
                                           )}
                                           <div className="flex gap-2">
@@ -1145,7 +1145,7 @@ export default function ClassroomPage({ user }) {
                                                   }}
                                                   variant="outline"
                                                   size="sm"
-                                                  className="gap-1 bg-blue-50 text-blue-700 hover:bg-blue-100 border-blue-300"
+                                                  className="gap-1 bg-blue-500/10 text-blue-400 hover:bg-blue-500/20 border-blue-300"
                                                 >
                                                   <BookOpen className="w-4 h-4" />
                                                   Lesson
@@ -1157,7 +1157,7 @@ export default function ClassroomPage({ user }) {
                                                   }}
                                                   variant="outline"
                                                   size="sm"
-                                                  className="text-red-600 hover:text-red-700 hover:bg-red-50"
+                                                  className="text-red-600 hover:text-red-400 hover:bg-red-500/10"
                                                 >
                                                   <Trash2 className="w-4 h-4" />
                                                 </Button>
@@ -1389,11 +1389,11 @@ export default function ClassroomPage({ user }) {
                     />
                   </div>
 
-                  <div className="bg-purple-50 border border-purple-200 rounded-lg p-4">
+                  <div className="bg-purple-500/10 border border-purple-500/30 rounded-lg p-4">
                     <Label className="text-purple-900 font-semibold flex items-center gap-2">
                       🎥 Tutorial Video (Optional)
                     </Label>
-                    <p className="text-sm text-purple-700 mb-3">Upload a screen recording to help students learn (up to 10 minutes, MP4/WEBM)</p>
+                    <p className="text-sm text-purple-400 mb-3">Upload a screen recording to help students learn (up to 10 minutes, MP4/WEBM)</p>
                     
                     {editingLesson.video_filename ? (
                       <div className="flex items-center gap-3">
@@ -1424,15 +1424,15 @@ export default function ClassroomPage({ user }) {
                             setEditingLesson({ ...editingLesson, videoFile: file });
                           }
                         }}
-                        className="block w-full text-sm text-purple-700 file:mr-4 file:py-2 file:px-4 file:rounded file:border-0 file:text-sm file:font-semibold file:bg-purple-600 file:text-white hover:file:bg-purple-700"
+                        className="block w-full text-sm text-purple-400 file:mr-4 file:py-2 file:px-4 file:rounded file:border-0 file:text-sm file:font-semibold file:bg-purple-600 file:text-white hover:file:bg-purple-700"
                       />
                     )}
                   </div>
 
-                  <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 space-y-3">
+                  <div className="bg-blue-500/10 border border-blue-500/30 rounded-lg p-4 space-y-3">
                     <div>
                       <h4 className="font-semibold text-blue-900 mb-2">📝 Markdown Tips:</h4>
-                      <ul className="text-sm text-blue-800 space-y-1">
+                      <ul className="text-sm text-blue-400 space-y-1">
                         <li>• <code># Heading</code> for titles</li>
                         <li>• <code>**bold**</code> for emphasis</li>
                         <li>• <code>`code`</code> for inline code</li>
@@ -1442,7 +1442,7 @@ export default function ClassroomPage({ user }) {
                     
                     <div className="border-t border-blue-300 pt-3">
                       <h4 className="font-semibold text-blue-900 mb-2">🖼️ How to Add Memes/Images:</h4>
-                      <ol className="text-sm text-blue-800 space-y-2">
+                      <ol className="text-sm text-blue-400 space-y-2">
                         <li className="font-medium">1. Find your meme/image online (Google, Imgflip, etc.)</li>
                         <li className="font-medium">2. Right-click the image → "Copy image address" or "Copy image link"</li>
                         <li className="font-medium">3. Paste in this format: <code className="bg-cyber-navy/60 px-1">![Description](paste-url-here)</code></li>

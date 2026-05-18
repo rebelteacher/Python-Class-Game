@@ -480,10 +480,10 @@ export default function TeacherDashboard({ user, setUser }) {
               const neonColors = [
                 { border: 'border-cyber-cyan/30 hover:border-cyber-cyan/80', glow: 'hover:shadow-[0_0_15px_rgba(0,240,255,0.3)]', accent: 'text-cyber-cyan', bg: 'bg-cyber-cyan/10' },
                 { border: 'border-cyber-pink/30 hover:border-cyber-pink/80', glow: 'hover:shadow-[0_0_15px_rgba(255,0,170,0.3)]', accent: 'text-cyber-pink', bg: 'bg-cyber-pink/10' },
-                { border: 'border-purple-500/30 hover:border-purple-500/80', glow: 'hover:shadow-[0_0_15px_rgba(168,85,247,0.3)]', accent: 'text-purple-400', bg: 'bg-purple-500/10' },
-                { border: 'border-blue-500/30 hover:border-blue-500/80', glow: 'hover:shadow-[0_0_15px_rgba(59,130,246,0.3)]', accent: 'text-blue-400', bg: 'bg-blue-500/10' },
+                { border: 'border-purple-500/30 hover:border-purple-500/80', glow: 'hover:shadow-[0_0_15px_rgba(168,85,247,0.3)]', accent: 'text-purple-400', bg: 'bg-purple-500/100/10' },
+                { border: 'border-blue-500/30 hover:border-blue-500/80', glow: 'hover:shadow-[0_0_15px_rgba(59,130,246,0.3)]', accent: 'text-blue-400', bg: 'bg-blue-500/100/10' },
                 { border: 'border-cyber-lime/30 hover:border-cyber-lime/80', glow: 'hover:shadow-[0_0_15px_rgba(57,255,20,0.3)]', accent: 'text-cyber-lime', bg: 'bg-cyber-lime/10' },
-                { border: 'border-orange-500/30 hover:border-orange-500/80', glow: 'hover:shadow-[0_0_15px_rgba(249,115,22,0.3)]', accent: 'text-orange-400', bg: 'bg-orange-500/10' },
+                { border: 'border-orange-500/30 hover:border-orange-500/80', glow: 'hover:shadow-[0_0_15px_rgba(249,115,22,0.3)]', accent: 'text-orange-400', bg: 'bg-orange-500/100/10' },
               ];
               const neon = neonColors[index % neonColors.length];
               

@@ -304,7 +304,7 @@ export default function SkillQuizManager({ user }) {
                     </CardDescription>
                   </div>
                   <div className="flex gap-2">
-                    <Button onClick={() => openAssignDialog()} variant="outline" className="border-purple-300 text-purple-600 hover:bg-purple-50">
+                    <Button onClick={() => openAssignDialog()} variant="outline" className="border-purple-300 text-purple-600 hover:bg-purple-500/10">
                       <Send className="w-4 h-4 mr-2" />
                       Assign Quiz
                     </Button>
@@ -349,7 +349,7 @@ export default function SkillQuizManager({ user }) {
                               e.stopPropagation();
                               openAssignDialog(category);
                             }}
-                            className="border-purple-300 text-purple-600 hover:bg-purple-50"
+                            className="border-purple-300 text-purple-600 hover:bg-purple-500/10"
                           >
                             <Send className="w-3 h-3 mr-1" />
                             Assign
@@ -381,7 +381,7 @@ export default function SkillQuizManager({ user }) {
                                   {q.concept_tags && q.concept_tags.length > 0 && (
                                     <div className="flex gap-1 mt-2">
                                       {q.concept_tags.map((tag, i) => (
-                                        <span key={i} className="px-2 py-0.5 bg-purple-100 text-purple-700 rounded text-xs">
+                                        <span key={i} className="px-2 py-0.5 bg-purple-500/20 text-purple-400 rounded text-xs">
                                           {tag}
                                         </span>
                                       ))}
@@ -392,7 +392,7 @@ export default function SkillQuizManager({ user }) {
                                   variant="ghost"
                                   size="sm"
                                   onClick={() => handleDeleteQuestion(q.id)}
-                                  className="text-red-500 hover:text-red-700 hover:bg-red-50"
+                                  className="text-red-500 hover:text-red-400 hover:bg-red-500/10"
                                 >
                                   <Trash2 className="w-4 h-4" />
                                 </Button>
@@ -455,33 +455,33 @@ export default function SkillQuizManager({ user }) {
                   <div className="space-y-6">
                     {/* Stats */}
                     <div className="grid grid-cols-4 gap-4">
-                      <Card className="bg-purple-50 border-purple-200">
+                      <Card className="bg-purple-500/10 border-purple-500/30">
                         <CardContent className="p-4 text-center">
-                          <div className="text-2xl font-bold text-purple-700">
+                          <div className="text-2xl font-bold text-purple-400">
                             {quizResults.stats.total_attempts}
                           </div>
                           <div className="text-sm text-purple-600">Total Attempts</div>
                         </CardContent>
                       </Card>
-                      <Card className="bg-green-50 border-green-200">
+                      <Card className="bg-green-500/10 border-green-500/30">
                         <CardContent className="p-4 text-center">
-                          <div className="text-2xl font-bold text-green-700">
+                          <div className="text-2xl font-bold text-green-400">
                             {quizResults.stats.average_score.toFixed(1)}%
                           </div>
                           <div className="text-sm text-green-600">Average Score</div>
                         </CardContent>
                       </Card>
-                      <Card className="bg-blue-50 border-blue-200">
+                      <Card className="bg-blue-500/10 border-blue-500/30">
                         <CardContent className="p-4 text-center">
-                          <div className="text-2xl font-bold text-blue-700">
+                          <div className="text-2xl font-bold text-blue-400">
                             {quizResults.stats.highest_score.toFixed(1)}%
                           </div>
                           <div className="text-sm text-blue-600">Highest Score</div>
                         </CardContent>
                       </Card>
-                      <Card className="bg-orange-50 border-orange-200">
+                      <Card className="bg-orange-500/10 border-orange-500/30">
                         <CardContent className="p-4 text-center">
-                          <div className="text-2xl font-bold text-orange-700">
+                          <div className="text-2xl font-bold text-orange-400">
                             {quizResults.stats.lowest_score.toFixed(1)}%
                           </div>
                           <div className="text-sm text-orange-600">Lowest Score</div>
@@ -516,7 +516,7 @@ export default function SkillQuizManager({ user }) {
                                 <td className="px-4 py-3 text-center">
                                   <span className={`font-medium ${
                                     attempt.score >= 80 ? 'text-green-600' :
-                                    attempt.score >= 60 ? 'text-yellow-600' : 'text-red-600'
+                                    attempt.score >= 60 ? 'text-yellow-400' : 'text-red-600'
                                   }`}>
                                     {attempt.score.toFixed(1)}%
                                   </span>
@@ -747,8 +747,8 @@ export default function SkillQuizManager({ user }) {
             </div>
 
             {assignCategory && questionsByCategory[assignCategory] && (
-              <div className="bg-purple-50 p-3 rounded-lg text-sm">
-                <p className="font-medium text-purple-800">
+              <div className="bg-purple-500/10 p-3 rounded-lg text-sm">
+                <p className="font-medium text-purple-400">
                   This quiz will include {questionsByCategory[assignCategory].length} questions
                 </p>
                 <p className="text-purple-600 mt-1">

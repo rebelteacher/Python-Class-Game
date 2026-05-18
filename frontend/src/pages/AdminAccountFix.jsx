@@ -79,7 +79,7 @@ export default function AdminAccountFix() {
 
   return (
     <div className="min-h-screen bg-cyber-black cyber-grid-bg flex items-center justify-center p-6">
-      <Card className="w-full max-w-md border-purple-200">
+      <Card className="w-full max-w-md border-purple-500/30">
         <CardHeader className="space-y-1">
           <div className="flex items-center gap-2">
             <Shield className="w-6 h-6 text-purple-600" />
@@ -107,8 +107,8 @@ export default function AdminAccountFix() {
               </div>
             </div>
 
-            <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-4">
-              <p className="text-sm text-blue-800">
+            <div className="bg-blue-500/10 border border-blue-500/30 rounded-lg p-4 mb-4">
+              <p className="text-sm text-blue-400">
                 <strong>How it works:</strong> This page will restore your account (astapp@spanola.net) to teacher/admin status. No password needed - just click the button below!
               </p>
             </div>
@@ -136,7 +136,7 @@ export default function AdminAccountFix() {
       </Card>
 
       {/* Add Coins Card */}
-      <Card className="w-full max-w-md border-green-200 mt-6">
+      <Card className="w-full max-w-md border-green-500/30 mt-6">
         <CardHeader className="space-y-1">
           <div className="flex items-center space-x-2">
             <Zap className="w-6 h-6 text-green-600" />

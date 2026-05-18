@@ -895,7 +895,7 @@ export default function AssignmentPage({ user, lessonData }) {
                         ? scores.reduce((sum, score) => sum + score, 0) / totalProblems 
                         : 0;
                       const gradeColor = averageScore >= 90 ? "text-green-600" :
-                                        averageScore >= 70 ? "text-yellow-600" :
+                                        averageScore >= 70 ? "text-yellow-400" :
                                         averageScore > 0 ? "text-orange-600" : "text-slate-500";
                       return <span className={gradeColor}>{averageScore.toFixed(1)}%</span>;
                     })()}
@@ -912,17 +912,17 @@ export default function AssignmentPage({ user, lessonData }) {
                 let colorClass = 'bg-cyber-navy/30 text-slate-300 hover:bg-slate-800'; // Not attempted
                 if (problemScore !== null && problemScore !== undefined) {
                   if (problemScore === 100) {
-                    colorClass = 'bg-green-500 text-white hover:bg-green-600'; // Perfect
+                    colorClass = 'bg-green-500/100 text-white hover:bg-green-600'; // Perfect
                   } else if (problemScore >= 70) {
-                    colorClass = 'bg-yellow-400 text-white hover:bg-yellow-500'; // Passing
+                    colorClass = 'bg-yellow-400 text-white hover:bg-yellow-500/100'; // Passing
                   } else {
-                    colorClass = 'bg-red-400 text-white hover:bg-red-500'; // Failed
+                    colorClass = 'bg-red-400 text-white hover:bg-red-500/100'; // Failed
                   }
                 }
                 
                 // Mark as done/final
                 if (isFinal) {
-                  colorClass = 'bg-blue-500 text-white hover:bg-blue-600';
+                  colorClass = 'bg-blue-500/100 text-white hover:bg-blue-600';
                 }
                 
                 // Current problem highlight
@@ -1064,7 +1064,7 @@ export default function AssignmentPage({ user, lessonData }) {
                           href={resourceUrl}
                           target="_blank"
                           rel="noopener noreferrer"
-                          className="inline-flex items-center gap-2 px-4 py-2 bg-blue-50 hover:bg-blue-100 text-blue-700 rounded-lg border border-blue-200 transition-colors"
+                          className="inline-flex items-center gap-2 px-4 py-2 bg-blue-500/10 hover:bg-blue-500/20 text-blue-400 rounded-lg border border-blue-500/30 transition-colors"
                         >
                           <BookOpen className="w-4 h-4" />
                           <span className="font-medium">View Resources</span>
@@ -1081,7 +1081,7 @@ export default function AssignmentPage({ user, lessonData }) {
                         variant="outline"
                         size="sm"
                         onClick={() => setShowLessonPopup(true)}
-                        className="gap-2 text-purple-700 border-purple-300 hover:bg-purple-50"
+                        className="gap-2 text-purple-400 border-purple-300 hover:bg-purple-500/10"
                       >
                         📚 Review Lesson Materials
                       </Button>
@@ -1109,7 +1109,7 @@ export default function AssignmentPage({ user, lessonData }) {
                           }
                         }}
                         variant="outline"
-                        className="w-full gap-2 border-green-600 text-green-700 hover:bg-green-50"
+                        className="w-full gap-2 border-green-600 text-green-400 hover:bg-green-500/10"
                         size="sm"
                       >
                         <Code2 className="w-4 h-4" />
@@ -1134,7 +1134,7 @@ export default function AssignmentPage({ user, lessonData }) {
                   <>
                     {/* Learning Objectives */}
                     {currentProblem.learning_objectives?.length > 0 && (
-                      <Card className="border-cyan-200 bg-cyan-50">
+                      <Card className="border-cyan-200 bg-cyan-500/10">
                         <CardHeader className="pb-2">
                           <CardTitle className="text-base flex items-center gap-2">
                             🎯 Learning Objectives
@@ -1155,7 +1155,7 @@ export default function AssignmentPage({ user, lessonData }) {
 
                     {/* Materials Needed */}
                     {currentProblem.materials_needed?.length > 0 && (
-                      <Card className="border-yellow-200 bg-yellow-50">
+                      <Card className="border-yellow-500/30 bg-yellow-500/10">
                         <CardHeader className="pb-2">
                           <CardTitle className="text-base flex items-center gap-2">
                             🔧 Materials Needed
@@ -1178,7 +1178,7 @@ export default function AssignmentPage({ user, lessonData }) {
 
                     {/* Wiring Instructions */}
                     {currentProblem.wiring_instructions && (
-                      <Card className="border-orange-200 bg-orange-50">
+                      <Card className="border-orange-500/30 bg-orange-500/10">
                         <CardHeader className="pb-2">
                           <CardTitle className="text-base flex items-center gap-2">
                             ⚡ Wiring Instructions
@@ -1210,7 +1210,7 @@ export default function AssignmentPage({ user, lessonData }) {
                 
                 if (isTurtle && hasExpectedImage) {
                   return (
-                    <Card data-testid="expected-output-card" className="border-2 border-green-200 bg-green-50">
+                    <Card data-testid="expected-output-card" className="border-2 border-green-500/30 bg-green-500/10">
                       <CardHeader>
                         <CardTitle className="text-lg">🎯 Expected Output</CardTitle>
                         <CardDescription>Your turtle graphics should look like this</CardDescription>
@@ -1229,12 +1229,12 @@ export default function AssignmentPage({ user, lessonData }) {
                 } else if (isTurtle && !hasExpectedImage) {
                   // Show message when turtle problem has no expected image
                   return (
-                    <Card data-testid="expected-output-card" className="border-2 border-yellow-200 bg-yellow-50">
+                    <Card data-testid="expected-output-card" className="border-2 border-yellow-500/30 bg-yellow-500/10">
                       <CardHeader>
                         <CardTitle className="text-lg">🎯 Expected Output</CardTitle>
                       </CardHeader>
                       <CardContent>
-                        <p className="text-yellow-700 text-sm">
+                        <p className="text-yellow-400 text-sm">
                           Follow the instructions and test cases to create your turtle drawing.
                         </p>
                       </CardContent>
@@ -1242,7 +1242,7 @@ export default function AssignmentPage({ user, lessonData }) {
                   );
                 } else if (!isTurtle && hasExpectedOutput) {
                   return (
-                    <Card data-testid="expected-output-card" className="border-2 border-green-200 bg-green-50">
+                    <Card data-testid="expected-output-card" className="border-2 border-green-500/30 bg-green-500/10">
                       <CardHeader>
                         <CardTitle className="text-lg">Expected Output</CardTitle>
                       </CardHeader>
@@ -1276,13 +1276,13 @@ export default function AssignmentPage({ user, lessonData }) {
                   <div className="overflow-x-auto">
                     <table className="w-full text-sm border-collapse">
                       <thead>
-                        <tr className="bg-indigo-50">
-                          <th className="border border-cyber-cyan/10 px-3 py-2 text-left font-semibold text-indigo-700">#</th>
-                          <th className="border border-cyber-cyan/10 px-3 py-2 text-left font-semibold text-indigo-700">Test Name</th>
-                          <th className="border border-cyber-cyan/10 px-3 py-2 text-left font-semibold text-indigo-700">Input</th>
-                          <th className="border border-cyber-cyan/10 px-3 py-2 text-left font-semibold text-indigo-700">Expected Output</th>
-                          <th className="border border-cyber-cyan/10 px-3 py-2 text-center font-semibold text-indigo-700">Points</th>
-                          {latestSubmission && <th className="border border-cyber-cyan/10 px-3 py-2 text-center font-semibold text-indigo-700">Status</th>}
+                        <tr className="bg-indigo-500/10">
+                          <th className="border border-cyber-cyan/10 px-3 py-2 text-left font-semibold text-indigo-400">#</th>
+                          <th className="border border-cyber-cyan/10 px-3 py-2 text-left font-semibold text-indigo-400">Test Name</th>
+                          <th className="border border-cyber-cyan/10 px-3 py-2 text-left font-semibold text-indigo-400">Input</th>
+                          <th className="border border-cyber-cyan/10 px-3 py-2 text-left font-semibold text-indigo-400">Expected Output</th>
+                          <th className="border border-cyber-cyan/10 px-3 py-2 text-center font-semibold text-indigo-400">Points</th>
+                          {latestSubmission && <th className="border border-cyber-cyan/10 px-3 py-2 text-center font-semibold text-indigo-400">Status</th>}
                         </tr>
                       </thead>
                       <tbody>
@@ -1311,12 +1311,12 @@ export default function AssignmentPage({ user, lessonData }) {
                                 {testCase.description || `Test ${index + 1}`}
                               </td>
                               <td className="border border-cyber-cyan/10 px-3 py-2">
-                                <pre className="whitespace-pre-wrap font-mono text-xs bg-blue-50 p-2 rounded text-blue-800 max-w-xs overflow-x-auto">
+                                <pre className="whitespace-pre-wrap font-mono text-xs bg-blue-500/10 p-2 rounded text-blue-400 max-w-xs overflow-x-auto">
                                   {(testCase.input_data || testCase.input || "(no input)").split('\\n').join('\n')}
                                 </pre>
                               </td>
                               <td className="border border-cyber-cyan/10 px-3 py-2">
-                                <pre className="whitespace-pre-wrap font-mono text-xs bg-green-50 p-2 rounded text-green-800 max-w-xs overflow-x-auto">
+                                <pre className="whitespace-pre-wrap font-mono text-xs bg-green-500/10 p-2 rounded text-green-400 max-w-xs overflow-x-auto">
                                   {(testCase.expected_output || "").split('\\n').join('\n')}
                                 </pre>
                               </td>
@@ -1329,11 +1329,11 @@ export default function AssignmentPage({ user, lessonData }) {
                                 <td className="border border-cyber-cyan/10 px-3 py-2 text-center">
                                   {result ? (
                                     result.passed ? (
-                                      <span className="inline-flex items-center justify-center px-2 py-1 bg-green-100 text-green-700 rounded-full font-semibold text-xs">
+                                      <span className="inline-flex items-center justify-center px-2 py-1 bg-green-500/20 text-green-400 rounded-full font-semibold text-xs">
                                         ✓ Pass
                                       </span>
                                     ) : (
-                                      <span className="inline-flex items-center justify-center px-2 py-1 bg-red-100 text-red-700 rounded-full font-semibold text-xs">
+                                      <span className="inline-flex items-center justify-center px-2 py-1 bg-red-500/20 text-red-400 rounded-full font-semibold text-xs">
                                         ✗ Fail
                                       </span>
                                     )
@@ -1352,8 +1352,8 @@ export default function AssignmentPage({ user, lessonData }) {
                   </div>
                   
                   {/* Helpful tip for students */}
-                  <div className="mt-3 p-3 bg-yellow-50 border border-yellow-200 rounded-lg">
-                    <p className="text-xs text-yellow-800">
+                  <div className="mt-3 p-3 bg-yellow-500/10 border border-yellow-500/30 rounded-lg">
+                    <p className="text-xs text-yellow-400">
                       <strong>💡 Tip:</strong> Your output must match the expected output <strong>exactly</strong> (including spaces, capitalization, and punctuation). 
                       Run your code first to see what your program outputs!
                     </p>
@@ -1362,7 +1362,7 @@ export default function AssignmentPage({ user, lessonData }) {
               </Card>
 
               {latestSubmission && (
-                <Card data-testid="latest-submission-card" className="border-2 border-indigo-200 bg-indigo-50">
+                <Card data-testid="latest-submission-card" className="border-2 border-indigo-200 bg-indigo-500/10">
                   <CardHeader>
                     <CardTitle className="text-lg">Latest Submission</CardTitle>
                     <CardDescription>
@@ -1384,7 +1384,7 @@ export default function AssignmentPage({ user, lessonData }) {
                             ) : (
                               <XCircle className="w-4 h-4 text-red-600" />
                             )}
-                            <span className={result.passed ? "text-green-700" : "text-red-700"}>
+                            <span className={result.passed ? "text-green-400" : "text-red-400"}>
                               {result.description}
                             </span>
                           </div>
@@ -1443,7 +1443,7 @@ export default function AssignmentPage({ user, lessonData }) {
                           disabled={submitting}
                           size="sm"
                           variant="outline"
-                          className="border-green-600 text-green-700 hover:bg-green-50"
+                          className="border-green-600 text-green-400 hover:bg-green-500/10"
                         >
                           Done
                         </Button>
@@ -1613,7 +1613,7 @@ export default function AssignmentPage({ user, lessonData }) {
                               onClick={() => handleRequestHint(1)}
                               disabled={loadingHint || hintStatus.hint1_used || hintStatus.hints_remaining === 0}
                               variant="outline"
-                              className="flex-1 border-yellow-400 text-yellow-700 hover:bg-yellow-50 disabled:opacity-50"
+                              className="flex-1 border-yellow-400 text-yellow-400 hover:bg-yellow-500/10 disabled:opacity-50"
                               size="sm"
                             >
                               <Lightbulb className="w-4 h-4 mr-1" />
@@ -1623,7 +1623,7 @@ export default function AssignmentPage({ user, lessonData }) {
                               onClick={() => handleRequestHint(2)}
                               disabled={loadingHint || !hintStatus.hint1_used || hintStatus.hint2_used || hintStatus.hints_remaining === 0}
                               variant="outline"
-                              className="flex-1 border-orange-400 text-orange-700 hover:bg-orange-50 disabled:opacity-50"
+                              className="flex-1 border-orange-400 text-orange-400 hover:bg-orange-500/10 disabled:opacity-50"
                               size="sm"
                             >
                               <Lightbulb className="w-4 h-4 mr-1" />
@@ -1633,7 +1633,7 @@ export default function AssignmentPage({ user, lessonData }) {
                               onClick={handleMarkFinal}
                               disabled={markingFinal}
                               variant="outline"
-                              className="flex-1 border-green-500 text-green-700 hover:bg-green-50"
+                              className="flex-1 border-green-500 text-green-400 hover:bg-green-500/10"
                               size="sm"
                             >
                               <CheckCircle className="w-4 h-4 mr-1" />
@@ -1656,8 +1656,8 @@ export default function AssignmentPage({ user, lessonData }) {
                       
                       {problemsFinal[getCurrentProblemId()] && (
                         <div className="mt-4 pt-4 border-t">
-                          <div className="bg-green-50 border border-green-200 rounded-lg p-4">
-                            <div className="flex items-center justify-center gap-2 text-green-700 font-semibold mb-2">
+                          <div className="bg-green-500/10 border border-green-500/30 rounded-lg p-4">
+                            <div className="flex items-center justify-center gap-2 text-green-400 font-semibold mb-2">
                               <CheckCircle className="w-5 h-5" />
                               This problem is marked as done!
                             </div>
@@ -1669,7 +1669,7 @@ export default function AssignmentPage({ user, lessonData }) {
                                 onClick={() => setShowProctorDialog(true)}
                                 variant="outline"
                                 size="sm"
-                                className="border-orange-400 text-orange-700 hover:bg-orange-50"
+                                className="border-orange-400 text-orange-400 hover:bg-orange-500/10"
                               >
                                 🔓 Accidentally clicked Done? Unlock with Proctor Code
                               </Button>
@@ -1768,7 +1768,7 @@ export default function AssignmentPage({ user, lessonData }) {
                         )}
                         
                         {/* Helpful note */}
-                        <div className="p-3 bg-cyan-50 border border-cyan-200 rounded-lg text-xs text-cyan-800">
+                        <div className="p-3 bg-cyan-500/10 border border-cyan-200 rounded-lg text-xs text-cyan-800">
                           <strong>💡 Note:</strong> This is a visual simulator for testing display commands. 
                           For full functionality (sensors, pins), flash your code to a real Micro:bit!
                         </div>
@@ -2058,7 +2058,7 @@ export default function AssignmentPage({ user, lessonData }) {
                           )}
                           
                           {/* Helpful note */}
-                          <div className="p-3 bg-cyan-50 border border-cyan-200 rounded-lg text-xs text-cyan-800">
+                          <div className="p-3 bg-cyan-500/10 border border-cyan-200 rounded-lg text-xs text-cyan-800">
                             <strong>💡 Note:</strong> This is a visual simulator for testing display commands. 
                             For full functionality (sensors, pins), flash your code to a real Micro:bit!
                           </div>
@@ -2181,7 +2181,7 @@ export default function AssignmentPage({ user, lessonData }) {
               Here&apos;s a hint to help you solve this problem. Remember to read the feedback too!
             </DialogDescription>
           </DialogHeader>
-          <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4 my-4">
+          <div className="bg-yellow-500/10 border border-yellow-500/30 rounded-lg p-4 my-4">
             <p className="text-slate-200 whitespace-pre-wrap">{currentHint?.text}</p>
           </div>
           <div className="flex justify-between items-center text-sm text-slate-400">

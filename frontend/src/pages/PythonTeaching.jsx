@@ -1982,7 +1982,7 @@ export default function PythonTeaching({ user }) {
           
           <Button
             onClick={() => navigate("/library?type=text")}
-            className="bg-cyber-navy/60 text-blue-600 hover:bg-blue-50"
+            className="bg-cyber-navy/60 text-blue-600 hover:bg-blue-500/10"
           >
             <BookOpen className="w-4 h-4 mr-2" />
             View Problems
@@ -2008,7 +2008,7 @@ export default function PythonTeaching({ user }) {
                     <button
                       onClick={() => setExpandedChapter(expandedChapter === chapterKey ? null : chapterKey)}
                       className={`w-full text-left px-4 py-3 flex items-center justify-between hover:bg-cyber-navy/40 transition-colors border-b ${
-                        selectedChapter === chapterKey ? 'bg-blue-50' : ''
+                        selectedChapter === chapterKey ? 'bg-blue-500/10' : ''
                       }`}
                     >
                       <div className="flex items-center gap-2">
@@ -2032,8 +2032,8 @@ export default function PythonTeaching({ user }) {
                               setSelectedChapter(chapterKey);
                               setSelectedLesson(lesson);
                             }}
-                            className={`w-full text-left px-6 py-2 text-sm border-b border-cyber-cyan/10 hover:bg-blue-50 transition-colors ${
-                              selectedLesson?.id === lesson.id ? 'bg-blue-100 border-l-4 border-l-blue-500' : ''
+                            className={`w-full text-left px-6 py-2 text-sm border-b border-cyber-cyan/10 hover:bg-blue-500/10 transition-colors ${
+                              selectedLesson?.id === lesson.id ? 'bg-blue-500/20 border-l-4 border-l-blue-500' : ''
                             }`}
                           >
                             {lesson.name}
@@ -2055,7 +2055,7 @@ export default function PythonTeaching({ user }) {
                 </CardTitle>
               </CardHeader>
               <CardContent className="space-y-2">
-                <Button onClick={copyCode} className="w-full bg-blue-500 hover:bg-blue-600" size="sm">
+                <Button onClick={copyCode} className="w-full bg-blue-500/100 hover:bg-blue-600" size="sm">
                   <Terminal className="w-4 h-4 mr-2" />
                   Copy Demo Code
                 </Button>
@@ -2135,7 +2135,7 @@ export default function PythonTeaching({ user }) {
                 <ol className="space-y-3">
                   {selectedLesson.demoSteps.map((step, idx) => (
                     <li key={idx} className="flex items-start gap-3">
-                      <span className="flex-shrink-0 w-6 h-6 rounded-full bg-purple-100 text-purple-600 flex items-center justify-center text-sm font-bold">
+                      <span className="flex-shrink-0 w-6 h-6 rounded-full bg-purple-500/20 text-purple-600 flex items-center justify-center text-sm font-bold">
                         {idx + 1}
                       </span>
                       <span>{step}</span>
@@ -2146,7 +2146,7 @@ export default function PythonTeaching({ user }) {
             </Card>
 
             {/* Student Activity */}
-            <Card className="border-2 border-green-200 bg-green-50">
+            <Card className="border-2 border-green-500/30 bg-green-500/10">
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
                   <Users className="w-5 h-5 text-green-600" />
@@ -2162,9 +2162,9 @@ export default function PythonTeaching({ user }) {
             </Card>
 
             {/* Common Errors */}
-            <Card className="border-2 border-red-200 bg-red-50">
+            <Card className="border-2 border-red-500/30 bg-red-500/10">
               <CardHeader>
-                <CardTitle className="flex items-center gap-2 text-red-700">
+                <CardTitle className="flex items-center gap-2 text-red-400">
                   ⚠️ Common Student Errors
                 </CardTitle>
                 <CardDescription>Watch out for these mistakes</CardDescription>
@@ -2172,7 +2172,7 @@ export default function PythonTeaching({ user }) {
               <CardContent>
                 <ul className="space-y-2">
                   {selectedLesson.commonErrors?.map((error, idx) => (
-                    <li key={idx} className="flex items-start gap-2 text-red-700">
+                    <li key={idx} className="flex items-start gap-2 text-red-400">
                       <span className="text-red-500">✗</span>
                       <span>{error}</span>
                     </li>
@@ -2189,7 +2189,7 @@ export default function PythonTeaching({ user }) {
               <CardContent>
                 <div className="flex flex-wrap gap-2">
                   {selectedLesson.keyTerms?.map((term, idx) => (
-                    <span key={idx} className="px-3 py-1 bg-blue-100 text-blue-700 rounded-full text-sm font-mono">
+                    <span key={idx} className="px-3 py-1 bg-blue-500/20 text-blue-400 rounded-full text-sm font-mono">
                       {term}
                     </span>
                   ))}

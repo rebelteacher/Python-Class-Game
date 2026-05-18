@@ -45,9 +45,9 @@ export default function AdminAnalytics({ user }) {
 
   const getFrequencyColor = (frequency) => {
     switch (frequency) {
-      case "Very Active": return "bg-green-100 text-green-800 border-green-300";
-      case "Active": return "bg-blue-100 text-blue-800 border-blue-300";
-      case "Low Activity": return "bg-yellow-100 text-yellow-800 border-yellow-300";
+      case "Very Active": return "bg-green-500/20 text-green-400 border-green-300";
+      case "Active": return "bg-blue-500/20 text-blue-400 border-blue-300";
+      case "Low Activity": return "bg-yellow-500/20 text-yellow-400 border-yellow-300";
       case "Inactive": return "bg-cyber-navy/30 text-slate-200 border-cyber-cyan/15";
       default: return "bg-cyber-navy/30 text-slate-200 border-cyber-cyan/15";
     }

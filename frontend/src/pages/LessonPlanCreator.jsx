@@ -513,7 +513,7 @@ export default function LessonPlanCreator({ user }) {
             </Card>
 
             {/* Standards & Objectives Card */}
-            <Card className="border-purple-200">
+            <Card className="border-purple-500/30">
               <CardHeader className="pb-3">
                 <CardTitle className="text-lg flex items-center gap-2">
                   <Target className="w-5 h-5 text-purple-600" />
@@ -558,7 +558,7 @@ ISTE 1.1.c - Students use technology to seek feedback..."
             </Card>
 
             {/* Generate Card */}
-            <Card className="border-indigo-200 bg-indigo-50">
+            <Card className="border-indigo-200 bg-indigo-500/10">
               <CardHeader className="pb-3">
                 <CardTitle className="text-lg flex items-center gap-2">
                   <Sparkles className="w-5 h-5 text-cyber-cyan" />
@@ -623,8 +623,8 @@ ISTE 1.1.c - Students use technology to seek feedback..."
                 
                 {/* Problem Source Filter - Dropdowns */}
                 <Separator className="my-2" />
-                <div className="bg-green-50 border border-green-200 rounded-lg p-3">
-                  <Label className="text-green-800 font-semibold text-sm flex items-center gap-2 mb-2">
+                <div className="bg-green-500/10 border border-green-500/30 rounded-lg p-3">
+                  <Label className="text-green-400 font-semibold text-sm flex items-center gap-2 mb-2">
                     <ListChecks className="w-4 h-4" />
                     Pull Problems From (Optional)
                   </Label>
@@ -632,7 +632,7 @@ ISTE 1.1.c - Students use technology to seek feedback..."
                   {curriculumStructure.chapters.length > 0 ? (
                     <div className="space-y-2">
                       <div>
-                        <Label className="text-xs text-green-700">Unit / Chapter</Label>
+                        <Label className="text-xs text-green-400">Unit / Chapter</Label>
                         <Select
                           value={lessonInput.problemChapter}
                           onValueChange={(value) => setLessonInput({ 
@@ -657,7 +657,7 @@ ISTE 1.1.c - Students use technology to seek feedback..."
                       {/* Show lessons dropdown if a chapter is selected */}
                       {lessonInput.problemChapter && (
                         <div>
-                          <Label className="text-xs text-green-700">Lesson (Optional)</Label>
+                          <Label className="text-xs text-green-400">Lesson (Optional)</Label>
                           <Select
                             value={lessonInput.problemUnit}
                             onValueChange={(value) => setLessonInput({ 
@@ -685,7 +685,7 @@ ISTE 1.1.c - Students use technology to seek feedback..."
                   ) : (
                     <div className="grid grid-cols-2 gap-2">
                       <div>
-                        <Label htmlFor="problemUnit" className="text-xs text-green-700">Unit</Label>
+                        <Label htmlFor="problemUnit" className="text-xs text-green-400">Unit</Label>
                         <Input
                           id="problemUnit"
                           value={lessonInput.problemUnit}
@@ -695,7 +695,7 @@ ISTE 1.1.c - Students use technology to seek feedback..."
                         />
                       </div>
                       <div>
-                        <Label htmlFor="problemChapter" className="text-xs text-green-700">Chapter</Label>
+                        <Label htmlFor="problemChapter" className="text-xs text-green-400">Chapter</Label>
                         <Input
                           id="problemChapter"
                           value={lessonInput.problemChapter}
@@ -763,7 +763,7 @@ ISTE 1.1.c - Students use technology to seek feedback..."
                             variant="ghost"
                             size="sm"
                             onClick={() => deleteSavedPlan(plan.id)}
-                            className="text-red-500 hover:text-red-700"
+                            className="text-red-500 hover:text-red-400"
                           >
                             <Trash2 className="w-4 h-4" />
                           </Button>
@@ -777,7 +777,7 @@ ISTE 1.1.c - Students use technology to seek feedback..."
 
             {/* Available Problems Panel */}
             {availableProblems.length > 0 && (
-              <Card className="border-green-200">
+              <Card className="border-green-500/30">
                 <CardHeader className="pb-3">
                   <CardTitle 
                     className="text-lg flex items-center justify-between cursor-pointer"
@@ -804,7 +804,7 @@ ISTE 1.1.c - Students use technology to seek feedback..."
                         {availableProblems.map((problem) => (
                           <div 
                             key={problem.id}
-                            className="p-2 bg-green-50 rounded-lg text-sm"
+                            className="p-2 bg-green-500/10 rounded-lg text-sm"
                           >
                             <div className="flex items-center justify-between">
                               <span className="font-medium text-slate-200">{problem.title}</span>
@@ -884,8 +884,8 @@ ISTE 1.1.c - Students use technology to seek feedback..."
                     >
                       <CardTitle className="flex items-center justify-between">
                         <div className="flex items-center gap-3">
-                          <div className="w-10 h-10 bg-indigo-100 rounded-full flex items-center justify-center">
-                            <span className="text-indigo-700 font-bold">D{dayIndex + 1}</span>
+                          <div className="w-10 h-10 bg-indigo-500/20 rounded-full flex items-center justify-center">
+                            <span className="text-indigo-400 font-bold">D{dayIndex + 1}</span>
                           </div>
                           <div>
                             <h3 className="text-lg font-semibold">Day {dayIndex + 1}</h3>
@@ -959,8 +959,8 @@ ISTE 1.1.c - Students use technology to seek feedback..."
                                   
                                   {/* Show suggested problems for practice sections */}
                                   {section.showProblems && day.suggestedProblems?.length > 0 && (
-                                    <div className="mt-3 p-3 bg-green-50 border border-green-200 rounded-lg no-print">
-                                      <h5 className="text-sm font-semibold text-green-800 flex items-center gap-2 mb-2">
+                                    <div className="mt-3 p-3 bg-green-500/10 border border-green-500/30 rounded-lg no-print">
+                                      <h5 className="text-sm font-semibold text-green-400 flex items-center gap-2 mb-2">
                                         <ListChecks className="w-4 h-4" />
                                         Suggested App Problems
                                       </h5>
@@ -976,7 +976,7 @@ ISTE 1.1.c - Students use technology to seek feedback..."
                                                   variant="ghost"
                                                   size="sm"
                                                   onClick={() => copyProblemLink(problemId)}
-                                                  className="h-6 px-2 text-green-600 hover:text-green-800"
+                                                  className="h-6 px-2 text-green-600 hover:text-green-400"
                                                   title="Copy link"
                                                 >
                                                   <Copy className="w-3 h-3" />
@@ -985,7 +985,7 @@ ISTE 1.1.c - Students use technology to seek feedback..."
                                                   variant="ghost"
                                                   size="sm"
                                                   onClick={() => window.open(`/library?problem=${problemId}`, '_blank')}
-                                                  className="h-6 px-2 text-green-600 hover:text-green-800"
+                                                  className="h-6 px-2 text-green-600 hover:text-green-400"
                                                   title="Open in library"
                                                 >
                                                   <ExternalLink className="w-3 h-3" />

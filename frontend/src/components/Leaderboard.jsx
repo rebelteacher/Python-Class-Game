@@ -47,7 +47,7 @@ export default function Leaderboard({ classroomId, currentUserId }) {
               data-testid={`leaderboard-rank-${index + 1}`}
               className={`flex items-center gap-4 p-4 rounded-lg ${
                 student.id === currentUserId
-                  ? "bg-indigo-100 border-2 border-indigo-400"
+                  ? "bg-indigo-500/20 border-2 border-indigo-400"
                   : "bg-cyber-navy/80"
               } shadow-sm hover:shadow-md transition-shadow`}
             >

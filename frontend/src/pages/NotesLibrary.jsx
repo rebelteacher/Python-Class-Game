@@ -352,7 +352,7 @@ export default function NotesLibrary({ user }) {
                     )}
                   </div>
 
-                  <div className="flex items-center space-x-2 p-4 bg-blue-50 rounded-lg">
+                  <div className="flex items-center space-x-2 p-4 bg-blue-500/10 rounded-lg">
                     <Switch
                       id="shareNote"
                       checked={newNote.is_shared}
@@ -459,12 +459,12 @@ export default function NotesLibrary({ user }) {
                   <div className="flex justify-between items-start mb-2">
                     <div className="flex flex-wrap gap-2">
                       {note.chapter && (
-                        <span className="px-2 py-1 bg-blue-100 text-blue-700 rounded text-xs font-medium">
+                        <span className="px-2 py-1 bg-blue-500/20 text-blue-400 rounded text-xs font-medium">
                           📚 {note.chapter}
                         </span>
                       )}
                       {note.is_shared && (
-                        <span className="px-2 py-1 bg-green-100 text-green-700 rounded text-xs font-medium">
+                        <span className="px-2 py-1 bg-green-500/20 text-green-400 rounded text-xs font-medium">
                           <Share2 className="w-3 h-3 inline mr-1" />
                           Shared
                         </span>
@@ -480,7 +480,7 @@ export default function NotesLibrary({ user }) {
                 <CardContent className="space-y-2">
                   {note.category && (
                     <div className="flex flex-wrap gap-2">
-                      <span className="px-2 py-1 bg-indigo-100 text-indigo-700 rounded text-xs font-medium">
+                      <span className="px-2 py-1 bg-indigo-500/20 text-indigo-400 rounded text-xs font-medium">
                         {note.category}
                       </span>
                     </div>
@@ -545,7 +545,7 @@ export default function NotesLibrary({ user }) {
                           }}
                           variant="outline"
                           size="sm"
-                          className="text-red-600 hover:text-red-700"
+                          className="text-red-600 hover:text-red-400"
                         >
                           <Trash2 className="w-4 h-4" />
                         </Button>

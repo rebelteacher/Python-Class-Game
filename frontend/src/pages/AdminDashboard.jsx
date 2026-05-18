@@ -210,7 +210,7 @@ export default function AdminDashboard({ user }) {
 
         {/* Teacher Analytics & Announcements */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
-          <Card className="border-2 border-purple-200 bg-cyber-navy/50">
+          <Card className="border-2 border-purple-500/30 bg-cyber-navy/50">
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <Activity className="w-5 h-5 text-purple-600" />
@@ -320,16 +320,16 @@ export default function AdminDashboard({ user }) {
                     View All Messages
                   </Button>
                   {unreadCount > 0 && (
-                    <div className="px-4 py-2 bg-red-100 border border-red-300 rounded-lg flex items-center gap-2">
+                    <div className="px-4 py-2 bg-red-500/20 border border-red-300 rounded-lg flex items-center gap-2">
                       <Bell className="w-4 h-4 text-red-600" />
-                      <span className="text-sm font-semibold text-red-700">{unreadCount} Unread</span>
+                      <span className="text-sm font-semibold text-red-400">{unreadCount} Unread</span>
                     </div>
                   )}
                 </div>
               </div>
               
-              <div className="bg-blue-50 border border-blue-200 p-3 rounded-lg">
-                <p className="text-sm text-blue-800">
+              <div className="bg-blue-500/10 border border-blue-500/30 p-3 rounded-lg">
+                <p className="text-sm text-blue-400">
                   💡 <strong>How it works:</strong> Users click "Contact Us" on the landing page or send feedback. You get notifications here and can reply directly from your admin dashboard.
                 </p>
               </div>
@@ -392,7 +392,7 @@ export default function AdminDashboard({ user }) {
                                   href={signupLink}
                                   target="_blank"
                                   rel="noopener noreferrer"
-                                  className="text-xs text-blue-600 hover:text-blue-800 underline max-w-xs truncate block"
+                                  className="text-xs text-blue-600 hover:text-blue-400 underline max-w-xs truncate block"
                                   title={signupLink}
                                 >
                                   {signupLink}
@@ -409,7 +409,7 @@ export default function AdminDashboard({ user }) {
                             </td>
                             <td className="p-3">
                               {code.is_active ? (
-                                <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                                <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-500/20 text-green-400">
                                   Available
                                 </span>
                               ) : (
@@ -500,12 +500,12 @@ export default function AdminDashboard({ user }) {
                           </td>
                           <td className="p-3">
                             {teacher.is_active !== false ? (
-                              <span className="inline-flex items-center gap-1 text-xs text-green-700">
+                              <span className="inline-flex items-center gap-1 text-xs text-green-400">
                                 <UserCheck className="w-3 h-3" />
                                 Active
                               </span>
                             ) : (
-                              <span className="inline-flex items-center gap-1 text-xs text-red-700">
+                              <span className="inline-flex items-center gap-1 text-xs text-red-400">
                                 <UserX className="w-3 h-3" />
                                 Inactive
                               </span>

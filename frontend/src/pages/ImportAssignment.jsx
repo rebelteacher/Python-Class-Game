@@ -164,17 +164,17 @@ export default function ImportAssignment({ user }) {
               </div>
               <div className="flex gap-2">
                 <span className={`px-2 py-1 rounded text-xs font-semibold ${
-                  assignment.difficulty === "Easy" ? "bg-green-100 text-green-700" :
-                  assignment.difficulty === "Medium" ? "bg-yellow-100 text-yellow-700" :
-                  "bg-red-100 text-red-700"
+                  assignment.difficulty === "Easy" ? "bg-green-500/20 text-green-400" :
+                  assignment.difficulty === "Medium" ? "bg-yellow-500/20 text-yellow-400" :
+                  "bg-red-500/20 text-red-400"
                 }`}>
                   {assignment.difficulty}
                 </span>
-                <span className="px-2 py-1 bg-indigo-100 text-indigo-700 rounded text-xs font-semibold">
+                <span className="px-2 py-1 bg-indigo-500/20 text-indigo-400 rounded text-xs font-semibold">
                   {assignment.category}
                 </span>
                 {assignment.csta_standard && (
-                  <span className="px-2 py-1 bg-purple-100 text-purple-700 rounded text-xs font-semibold">
+                  <span className="px-2 py-1 bg-purple-500/20 text-purple-400 rounded text-xs font-semibold">
                     {assignment.csta_standard}
                   </span>
                 )}

@@ -144,7 +144,7 @@ export default function TeacherPractice({ user }) {
               </div>
             </div>
             <div className="flex items-center gap-2">
-              <span className="text-sm text-slate-400 bg-green-100 px-3 py-1 rounded-full">Teacher Practice Mode</span>
+              <span className="text-sm text-slate-400 bg-green-500/20 px-3 py-1 rounded-full">Teacher Practice Mode</span>
             </div>
           </div>
         </div>
@@ -168,7 +168,7 @@ export default function TeacherPractice({ user }) {
               </Card>
 
               {problem.expected_output && (
-                <Card className="border-2 border-green-200 bg-green-50">
+                <Card className="border-2 border-green-500/30 bg-green-500/10">
                   <CardHeader>
                     <CardTitle className="text-lg">Expected Output</CardTitle>
                   </CardHeader>
@@ -181,7 +181,7 @@ export default function TeacherPractice({ user }) {
               )}
 
               {/* Teacher Notes Section */}
-              <Card className="border-2 border-purple-200 bg-purple-50">
+              <Card className="border-2 border-purple-500/30 bg-purple-500/10">
                 <CardHeader>
                   <CardTitle className="text-lg flex items-center gap-2">
                     <StickyNote className="w-5 h-5 text-purple-600" />

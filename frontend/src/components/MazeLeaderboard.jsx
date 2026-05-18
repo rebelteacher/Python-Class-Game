@@ -8,9 +8,9 @@ function LeaderboardRow({ entry, index, colorScheme, compact, currentUserId, get
   
   const getBgColor = (scheme, i) => {
     const colors = {
-      yellow: i === 0 ? 'bg-yellow-50 border border-yellow-200' : i === 1 ? 'bg-cyber-navy/40' : i === 2 ? 'bg-orange-50/50' : 'bg-cyber-navy/80',
-      purple: i === 0 ? 'bg-purple-50 border border-purple-200' : i === 1 ? 'bg-cyber-navy/40' : i === 2 ? 'bg-purple-50/50' : 'bg-cyber-navy/80',
-      green: i === 0 ? 'bg-green-50 border border-green-200' : i === 1 ? 'bg-cyber-navy/40' : i === 2 ? 'bg-green-50/50' : 'bg-cyber-navy/80',
+      yellow: i === 0 ? 'bg-yellow-500/10 border border-yellow-500/30' : i === 1 ? 'bg-cyber-navy/40' : i === 2 ? 'bg-orange-500/10/50' : 'bg-cyber-navy/80',
+      purple: i === 0 ? 'bg-purple-500/10 border border-purple-200' : i === 1 ? 'bg-cyber-navy/40' : i === 2 ? 'bg-purple-500/10/50' : 'bg-cyber-navy/80',
+      green: i === 0 ? 'bg-green-500/10 border border-green-500/30' : i === 1 ? 'bg-cyber-navy/40' : i === 2 ? 'bg-green-500/10/50' : 'bg-cyber-navy/80',
     };
     return colors[scheme] || 'bg-cyber-navy/80';
   };

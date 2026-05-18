@@ -97,11 +97,11 @@ export default function LessonPopup({ open, onClose, lessonTitle, materials = []
             href={material.content}
             target="_blank"
             rel="noopener noreferrer"
-            className="flex items-center gap-3 p-4 bg-blue-50 hover:bg-blue-100 rounded-lg border border-blue-200 transition-colors"
+            className="flex items-center gap-3 p-4 bg-blue-500/10 hover:bg-blue-500/20 rounded-lg border border-blue-500/30 transition-colors"
           >
             <ExternalLink className="w-6 h-6 text-blue-600 flex-shrink-0" />
             <div>
-              <div className="font-medium text-blue-800">{material.title || "External Resource"}</div>
+              <div className="font-medium text-blue-400">{material.title || "External Resource"}</div>
               <div className="text-sm text-blue-600 truncate max-w-md">{material.content}</div>
             </div>
           </a>
@@ -138,7 +138,7 @@ export default function LessonPopup({ open, onClose, lessonTitle, materials = []
       >
         <DialogHeader className="border-b pb-4">
           <div className="flex items-center gap-3">
-            <div className="p-2 bg-purple-100 rounded-lg">
+            <div className="p-2 bg-purple-500/20 rounded-lg">
               <BookOpen className="w-6 h-6 text-purple-600" />
             </div>
             <div>

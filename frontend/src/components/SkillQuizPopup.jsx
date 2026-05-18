@@ -155,7 +155,7 @@ export default function SkillQuizPopup({
                 </div>
               )}
               {results?.score >= 60 && results?.score < 80 && (
-                <div className="mt-4 text-yellow-600 font-medium">
+                <div className="mt-4 text-yellow-400 font-medium">
                   Good job! Keep practicing!
                 </div>
               )}
@@ -171,7 +171,7 @@ export default function SkillQuizPopup({
               <div className="space-y-3 max-h-80 overflow-y-auto">
                 {results.results.map((r, idx) => (
                   <Card key={r.question_id} className={`${
-                    r.is_correct ? 'border-green-200 bg-green-50' : 'border-red-200 bg-red-50'
+                    r.is_correct ? 'border-green-500/30 bg-green-500/10' : 'border-red-500/30 bg-red-500/10'
                   }`}>
                     <CardContent className="p-4">
                       <div className="flex items-start gap-3">
@@ -259,7 +259,7 @@ export default function SkillQuizPopup({
             {/* Progress bar */}
             <div className="w-full bg-gray-200 rounded-full h-2 mb-6">
               <div 
-                className="bg-purple-500 h-2 rounded-full transition-all"
+                className="bg-purple-500/100 h-2 rounded-full transition-all"
                 style={{ width: `${(answeredCount / questions.length) * 100}%` }}
               />
             </div>
@@ -270,7 +270,7 @@ export default function SkillQuizPopup({
               {currentQuestion.concept_tags && currentQuestion.concept_tags.length > 0 && (
                 <div className="flex gap-1 flex-wrap mt-2">
                   {currentQuestion.concept_tags.map((tag, i) => (
-                    <span key={i} className="px-2 py-0.5 bg-purple-100 text-purple-700 rounded text-xs">
+                    <span key={i} className="px-2 py-0.5 bg-purple-500/20 text-purple-400 rounded text-xs">
                       {tag}
                     </span>
                   ))}
@@ -292,9 +292,9 @@ export default function SkillQuizPopup({
               ].map((choice) => (
                 <div 
                   key={choice.value} 
-                  className={`flex items-center space-x-3 p-3 rounded-lg border-2 transition-all cursor-pointer hover:bg-purple-50 ${
+                  className={`flex items-center space-x-3 p-3 rounded-lg border-2 transition-all cursor-pointer hover:bg-purple-500/10 ${
                     answers[currentQuestion.id] === choice.value 
-                      ? 'border-purple-500 bg-purple-50' 
+                      ? 'border-purple-500 bg-purple-500/10' 
                       : 'border-cyber-cyan/10'
                   }`}
                   onClick={() => handleAnswerSelect(currentQuestion.id, choice.value)}
@@ -329,9 +329,9 @@ export default function SkillQuizPopup({
                 key={idx}
                 className={`w-8 h-8 rounded-full text-sm font-medium transition-all ${
                   idx === currentIndex 
-                    ? 'bg-purple-500 text-white' 
+                    ? 'bg-purple-500/100 text-white' 
                     : answers[questions[idx]?.id]
-                      ? 'bg-green-100 text-green-700'
+                      ? 'bg-green-500/20 text-green-400'
                       : 'bg-cyber-navy/30 text-slate-500'
                 }`}
                 onClick={() => setCurrentIndex(idx)}

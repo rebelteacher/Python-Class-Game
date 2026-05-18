@@ -495,7 +495,7 @@ export default function TestBuilder({ user }) {
                       {getSelectedQuestionsList().map((question) => (
                         <div
                           key={question.id}
-                          className="border rounded p-3 bg-blue-50"
+                          className="border rounded p-3 bg-blue-500/10"
                         >
                           <div className="flex justify-between items-start gap-2">
                             <p className="text-xs flex-1">{question.question_text}</p>
@@ -513,9 +513,9 @@ export default function TestBuilder({ user }) {
                               {question.chapter || "No chapter"}
                             </span>
                             <span className={`text-xs px-2 py-1 rounded ${
-                              question.difficulty === "Easy" ? "bg-green-100 text-green-700" :
-                              question.difficulty === "Medium" ? "bg-yellow-100 text-yellow-700" :
-                              "bg-red-100 text-red-700"
+                              question.difficulty === "Easy" ? "bg-green-500/20 text-green-400" :
+                              question.difficulty === "Medium" ? "bg-yellow-500/20 text-yellow-400" :
+                              "bg-red-500/20 text-red-400"
                             }`}>
                               {question.difficulty}
                             </span>

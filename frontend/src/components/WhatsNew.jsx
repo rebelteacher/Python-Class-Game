@@ -100,12 +100,12 @@ export default function WhatsNew() {
         onClick={handleOpen}
         variant="outline"
         size="sm"
-        className="gap-2 border-purple-300 text-purple-700 hover:bg-purple-50 relative"
+        className="gap-2 border-purple-300 text-purple-400 hover:bg-purple-500/10 relative"
       >
         <Sparkles className="w-4 h-4" />
         What's New
         {hasNew && (
-          <span className="absolute -top-1 -right-1 w-3 h-3 bg-red-500 rounded-full animate-pulse"></span>
+          <span className="absolute -top-1 -right-1 w-3 h-3 bg-red-500/100 rounded-full animate-pulse"></span>
         )}
       </Button>
 

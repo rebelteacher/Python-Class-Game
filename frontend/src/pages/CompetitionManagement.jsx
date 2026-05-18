@@ -144,8 +144,8 @@ function CompetitionManagement() {
 
   const getStatusBadge = (status) => {
     const styles = {
-      upcoming: 'bg-yellow-100 text-yellow-800 border-yellow-200',
-      active: 'bg-green-100 text-green-800 border-green-200',
+      upcoming: 'bg-yellow-500/20 text-yellow-400 border-yellow-500/30',
+      active: 'bg-green-500/20 text-green-400 border-green-500/30',
       completed: 'bg-cyber-navy/30 text-slate-200 border-cyber-cyan/10'
     };
     return (

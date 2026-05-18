@@ -111,9 +111,9 @@ export default function MicrobitCurriculum({ user }) {
   const getLessonTypeColor = (type) => {
     switch (type) {
       case "quiz":
-        return "bg-purple-100 text-purple-700";
+        return "bg-purple-500/20 text-purple-400";
       case "code":
-        return "bg-blue-100 text-blue-700";
+        return "bg-blue-500/20 text-blue-400";
       default:
         return "bg-cyber-navy/30 text-slate-300";
     }
@@ -155,7 +155,7 @@ export default function MicrobitCurriculum({ user }) {
             </div>
             <Button
               onClick={() => navigate("/library?type=microbit")}
-              className="bg-cyber-navy/60 text-cyan-600 hover:bg-cyan-50"
+              className="bg-cyber-navy/60 text-cyan-600 hover:bg-cyan-500/10"
             >
               <BookOpen className="w-4 h-4 mr-2" />
               Go to Micro:bit Library
@@ -169,7 +169,7 @@ export default function MicrobitCurriculum({ user }) {
         <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
           <Card className="hover:shadow-lg transition-shadow cursor-pointer" onClick={() => navigate("/library?type=microbit")}>
             <CardContent className="p-6 flex items-center gap-4">
-              <div className="p-3 bg-cyan-100 rounded-lg">
+              <div className="p-3 bg-cyan-500/20 rounded-lg">
                 <BookOpen className="w-6 h-6 text-cyan-600" />
               </div>
               <div>
@@ -179,9 +179,9 @@ export default function MicrobitCurriculum({ user }) {
             </CardContent>
           </Card>
           
-          <Card className="hover:shadow-lg transition-shadow cursor-pointer border-2 border-cyan-500 bg-cyan-50" onClick={() => navigate("/microbit/teach")}>
+          <Card className="hover:shadow-lg transition-shadow cursor-pointer border-2 border-cyan-500 bg-cyan-500/10" onClick={() => navigate("/microbit/teach")}>
             <CardContent className="p-6 flex items-center gap-4">
-              <div className="p-3 bg-cyan-500 rounded-lg">
+              <div className="p-3 bg-cyan-500/100 rounded-lg">
                 <Target className="w-6 h-6 text-white" />
               </div>
               <div>
@@ -193,7 +193,7 @@ export default function MicrobitCurriculum({ user }) {
           
           <Card className="hover:shadow-lg transition-shadow cursor-pointer" onClick={() => setShowAssignDialog(true)}>
             <CardContent className="p-6 flex items-center gap-4">
-              <div className="p-3 bg-green-100 rounded-lg">
+              <div className="p-3 bg-green-500/20 rounded-lg">
                 <Zap className="w-6 h-6 text-green-600" />
               </div>
               <div>
@@ -205,7 +205,7 @@ export default function MicrobitCurriculum({ user }) {
           
           <Card className="hover:shadow-lg transition-shadow cursor-pointer" onClick={() => navigate("/teacher/dashboard")}>
             <CardContent className="p-6 flex items-center gap-4">
-              <div className="p-3 bg-purple-100 rounded-lg">
+              <div className="p-3 bg-purple-500/20 rounded-lg">
                 <Target className="w-6 h-6 text-purple-600" />
               </div>
               <div>
@@ -249,7 +249,7 @@ export default function MicrobitCurriculum({ user }) {
         </Card>
 
         {/* Attribution & Official Resources */}
-        <Card className="mb-6 border-cyan-200 bg-cyan-50/50">
+        <Card className="mb-6 border-cyan-200 bg-cyan-500/10/50">
           <CardContent className="p-4">
             <div className="flex items-center justify-between flex-wrap gap-4">
               <div className="flex items-center gap-3">
@@ -299,7 +299,7 @@ export default function MicrobitCurriculum({ user }) {
               <CardHeader 
                 className={`cursor-pointer transition-colors ${
                   selectedUnit?.id === unit.id 
-                    ? 'bg-cyan-50 border-b-2 border-cyan-500' 
+                    ? 'bg-cyan-500/10 border-b-2 border-cyan-500' 
                     : 'hover:bg-cyber-navy/40'
                 }`}
                 onClick={() => setSelectedUnit(selectedUnit?.id === unit.id ? null : unit)}
@@ -307,10 +307,10 @@ export default function MicrobitCurriculum({ user }) {
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-4">
                     <div className={`w-12 h-12 rounded-lg flex items-center justify-center text-white font-bold text-lg ${
-                      unitIndex === 0 ? 'bg-green-500' :
-                      unitIndex === 1 ? 'bg-blue-500' :
-                      unitIndex === 2 ? 'bg-purple-500' :
-                      'bg-orange-500'
+                      unitIndex === 0 ? 'bg-green-500/100' :
+                      unitIndex === 1 ? 'bg-blue-500/100' :
+                      unitIndex === 2 ? 'bg-purple-500/100' :
+                      'bg-orange-500/100'
                     }`}>
                       {unitIndex + 1}
                     </div>
@@ -378,7 +378,7 @@ export default function MicrobitCurriculum({ user }) {
                                 </p>
                                 <div className="flex flex-wrap gap-1">
                                   {lesson.materials.map((mat, i) => (
-                                    <Badge key={i} variant="outline" className="text-xs bg-yellow-50">
+                                    <Badge key={i} variant="outline" className="text-xs bg-yellow-500/10">
                                       {mat}
                                     </Badge>
                                   ))}
@@ -412,10 +412,10 @@ export default function MicrobitCurriculum({ user }) {
         </div>
 
         {/* Tips Card */}
-        <Card className="mt-8 bg-yellow-50 border-yellow-200">
+        <Card className="mt-8 bg-yellow-500/100/10 border-yellow-500/30">
           <CardHeader>
             <CardTitle className="text-lg flex items-center gap-2">
-              <Lightbulb className="w-5 h-5 text-yellow-600" />
+              <Lightbulb className="w-5 h-5 text-yellow-400" />
               Teacher Tips
             </CardTitle>
           </CardHeader>

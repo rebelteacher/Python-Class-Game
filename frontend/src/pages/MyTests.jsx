@@ -152,11 +152,11 @@ export default function MyTests({ user }) {
                           {submitted ? (
                             <CheckCircle className="w-5 h-5 text-green-600" />
                           ) : overdue ? (
-                            <span className="px-2 py-1 bg-red-100 text-red-700 text-xs rounded">
+                            <span className="px-2 py-1 bg-red-500/20 text-red-400 text-xs rounded">
                               Overdue
                             </span>
                           ) : (
-                            <span className="px-2 py-1 bg-green-100 text-green-700 text-xs rounded">
+                            <span className="px-2 py-1 bg-green-500/20 text-green-400 text-xs rounded">
                               Available
                             </span>
                           )}
@@ -229,11 +229,11 @@ export default function MyTests({ user }) {
                         <div className="flex justify-between items-start">
                           <CardTitle className="text-lg">{test.title}</CardTitle>
                           {overdue ? (
-                            <span className="px-2 py-1 bg-red-100 text-red-700 text-xs rounded">
+                            <span className="px-2 py-1 bg-red-500/20 text-red-400 text-xs rounded">
                               Overdue
                             </span>
                           ) : (
-                            <span className="px-2 py-1 bg-green-100 text-green-700 text-xs rounded">
+                            <span className="px-2 py-1 bg-green-500/20 text-green-400 text-xs rounded">
                               Available
                             </span>
                           )}

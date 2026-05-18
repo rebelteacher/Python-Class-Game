@@ -1212,7 +1212,7 @@ export default function BlockSpriteEditor() {
                         key={sprite.id}
                         onClick={() => setSelectedSpriteId(sprite.id)}
                         className={`p-2 border rounded-lg cursor-pointer text-center ${
-                          selectedSpriteId === sprite.id ? 'border-indigo-500 bg-indigo-50' : 'border-cyber-cyan/10'
+                          selectedSpriteId === sprite.id ? 'border-indigo-500 bg-indigo-500/10' : 'border-cyber-cyan/10'
                         }`}
                       >
                         <div className="text-2xl mb-1">

@@ -122,7 +122,7 @@ function ChallengeArena() {
 
   const getTimerColor = () => {
     if (timeLeft > 180) return 'text-green-600';
-    if (timeLeft > 60) return 'text-yellow-600';
+    if (timeLeft > 60) return 'text-yellow-400';
     return 'text-red-600 animate-pulse';
   };
 

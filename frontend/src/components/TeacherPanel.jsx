@@ -129,7 +129,7 @@ export default function TeacherPanel({
   // Get status color
   const getStatusColor = (status) => {
     switch (status) {
-      case 'completed': return 'bg-green-500 text-white';
+      case 'completed': return 'bg-green-500/100 text-white';
       case 'in_progress': return 'bg-yellow-400 text-white';
       case 'not_started': return 'bg-red-400 text-white';
       default: return 'bg-gray-300 text-slate-300';
@@ -186,7 +186,7 @@ export default function TeacherPanel({
         </div>
 
         {/* View Mode Toggle */}
-        <div className="px-4 py-2 bg-cyan-100 border-b border-cyan-200">
+        <div className="px-4 py-2 bg-cyan-500/20 border-b border-cyan-200">
           <div className="text-xs text-slate-400 mb-1">View page as:</div>
           <div className="flex gap-1">
             <Button size="sm" variant="outline" className="flex-1 text-xs h-7">
@@ -262,8 +262,8 @@ export default function TeacherPanel({
                   key={student.id}
                   data-testid={`student-row-${student.id}`}
                   onClick={() => handleStudentClick(student)}
-                  className={`w-full px-4 py-3 flex items-center gap-3 hover:bg-cyan-100 transition-colors text-left ${
-                    selectedStudent?.id === student.id ? 'bg-cyan-100' : ''
+                  className={`w-full px-4 py-3 flex items-center gap-3 hover:bg-cyan-500/20 transition-colors text-left ${
+                    selectedStudent?.id === student.id ? 'bg-cyan-500/20' : ''
                   }`}
                 >
                   {/* Problem Number Badge with Status Color */}
@@ -284,7 +284,7 @@ export default function TeacherPanel({
                       </div>
                     )}
                     {student.status === 'in_progress' && (
-                      <div className="text-xs text-yellow-700">
+                      <div className="text-xs text-yellow-400">
                         {student.attempts} attempt(s)
                       </div>
                     )}
@@ -303,10 +303,10 @@ export default function TeacherPanel({
 
         {/* Summary Footer */}
         {currentProgress && (
-          <div className="px-4 py-3 bg-cyan-100 border-t border-cyan-200 text-xs">
+          <div className="px-4 py-3 bg-cyan-500/20 border-t border-cyan-200 text-xs">
             <div className="flex justify-between text-slate-400">
               <span>
-                <span className="inline-block w-3 h-3 rounded-full bg-green-500 mr-1"></span>
+                <span className="inline-block w-3 h-3 rounded-full bg-green-500/100 mr-1"></span>
                 Done: {currentProgress.completed_students?.length || 0}
               </span>
               <span>
@@ -344,9 +344,9 @@ export default function TeacherPanel({
               {/* Status Bar */}
               <div className="flex items-center gap-4 mb-3 p-3 bg-cyber-navy/40 rounded-lg">
                 <div className={`px-3 py-1 rounded-full text-sm font-medium ${
-                  studentCode.is_final ? 'bg-green-100 text-green-700' :
-                  studentCode.is_passing ? 'bg-yellow-100 text-yellow-700' :
-                  'bg-red-100 text-red-700'
+                  studentCode.is_final ? 'bg-green-500/20 text-green-400' :
+                  studentCode.is_passing ? 'bg-yellow-500/20 text-yellow-400' :
+                  'bg-red-500/20 text-red-400'
                 }`}>
                   {studentCode.is_final ? '✓ Done' : 
                    studentCode.is_passing ? 'Passing' : 'In Progress'}
@@ -379,16 +379,16 @@ export default function TeacherPanel({
               
               {/* Feedback Section */}
               {studentCode.feedback && (
-                <div className="mt-3 p-3 bg-blue-50 border border-blue-200 rounded-lg">
-                  <div className="text-sm font-semibold text-blue-800 mb-1">Feedback:</div>
-                  <div className="text-sm text-blue-700">{studentCode.feedback}</div>
+                <div className="mt-3 p-3 bg-blue-500/10 border border-blue-500/30 rounded-lg">
+                  <div className="text-sm font-semibold text-blue-400 mb-1">Feedback:</div>
+                  <div className="text-sm text-blue-400">{studentCode.feedback}</div>
                 </div>
               )}
               
               {/* Turtle Image if exists */}
               {studentCode.turtle_image && (
-                <div className="mt-3 p-3 bg-green-50 border border-green-200 rounded-lg">
-                  <div className="text-sm font-semibold text-green-800 mb-2">Turtle Output:</div>
+                <div className="mt-3 p-3 bg-green-500/10 border border-green-500/30 rounded-lg">
+                  <div className="text-sm font-semibold text-green-400 mb-2">Turtle Output:</div>
                   <div className="flex justify-center">
                     <img 
                       src={`data:image/png;base64,${studentCode.turtle_image}`}

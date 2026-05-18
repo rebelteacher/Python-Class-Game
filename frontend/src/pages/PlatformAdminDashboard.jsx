@@ -141,7 +141,7 @@ function PlatformAdminDashboard({ user }) {
 
         {/* Summary Stats */}
         <div className="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
-          <Card className="border-2 border-purple-200 bg-gradient-to-br from-purple-50 to-purple-100">
+          <Card className="border-2 border-purple-500/30 bg-gradient-to-br from-purple-50 to-purple-100">
             <CardContent className="pt-6">
               <div className="flex items-center justify-between">
                 <div>
@@ -183,24 +183,24 @@ function PlatformAdminDashboard({ user }) {
               ) : (
                 <div className="space-y-4">
                   {pendingSchoolAdmins.map((admin) => (
-                    <div key={admin.id} className="border rounded-lg p-5 hover:bg-purple-50 transition-colors">
+                    <div key={admin.id} className="border rounded-lg p-5 hover:bg-purple-500/10 transition-colors">
                       <div className="flex items-start justify-between mb-3">
                         <div className="flex-1">
                           <h3 className="font-semibold text-lg text-white">{admin.name}</h3>
                           <p className="text-sm text-slate-400 mb-1">{admin.email}</p>
                           <div className="flex flex-wrap gap-2 mt-2">
-                            <Badge variant="outline" className="bg-blue-50">
+                            <Badge variant="outline" className="bg-blue-500/10">
                               {admin.job_title}
                             </Badge>
-                            <Badge variant="outline" className="bg-green-50">
+                            <Badge variant="outline" className="bg-green-500/10">
                               {admin.school}
                             </Badge>
-                            <Badge variant="outline" className="bg-purple-50">
+                            <Badge variant="outline" className="bg-purple-500/10">
                               {admin.district}
                             </Badge>
                           </div>
                         </div>
-                        <Badge className="bg-yellow-100 text-yellow-800 border-yellow-300">
+                        <Badge className="bg-yellow-500/20 text-yellow-400 border-yellow-300">
                           Pending
                         </Badge>
                       </div>
@@ -215,7 +215,7 @@ function PlatformAdminDashboard({ user }) {
                         <Button 
                           onClick={() => handleRejectSchoolAdmin(admin.id)}
                           variant="outline"
-                          className="flex-1 border-red-300 text-red-600 hover:bg-red-50 gap-2"
+                          className="flex-1 border-red-300 text-red-600 hover:bg-red-500/10 gap-2"
                         >
                           <XCircle className="w-4 h-4" />
                           Reject
@@ -246,21 +246,21 @@ function PlatformAdminDashboard({ user }) {
               ) : (
                 <div className="space-y-4">
                   {pendingDistrictAdmins.map((admin) => (
-                    <div key={admin.id} className="border rounded-lg p-5 hover:bg-pink-50 transition-colors">
+                    <div key={admin.id} className="border rounded-lg p-5 hover:bg-pink-500/10 transition-colors">
                       <div className="flex items-start justify-between mb-3">
                         <div className="flex-1">
                           <h3 className="font-semibold text-lg text-white">{admin.name}</h3>
                           <p className="text-sm text-slate-400 mb-1">{admin.email}</p>
                           <div className="flex flex-wrap gap-2 mt-2">
-                            <Badge variant="outline" className="bg-blue-50">
+                            <Badge variant="outline" className="bg-blue-500/10">
                               {admin.job_title}
                             </Badge>
-                            <Badge variant="outline" className="bg-pink-50">
+                            <Badge variant="outline" className="bg-pink-500/10">
                               {admin.district}
                             </Badge>
                           </div>
                         </div>
-                        <Badge className="bg-yellow-100 text-yellow-800 border-yellow-300">
+                        <Badge className="bg-yellow-500/20 text-yellow-400 border-yellow-300">
                           Pending
                         </Badge>
                       </div>
@@ -275,7 +275,7 @@ function PlatformAdminDashboard({ user }) {
                         <Button 
                           onClick={() => handleRejectDistrictAdmin(admin.id)}
                           variant="outline"
-                          className="flex-1 border-red-300 text-red-600 hover:bg-red-50 gap-2"
+                          className="flex-1 border-red-300 text-red-600 hover:bg-red-500/10 gap-2"
                         >
                           <XCircle className="w-4 h-4" />
                           Reject

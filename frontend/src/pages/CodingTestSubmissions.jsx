@@ -85,7 +85,7 @@ export default function CodingTestSubmissions({ user }) {
   const getScoreColor = (score) => {
     if (score >= 90) return "text-green-600";
     if (score >= 70) return "text-blue-600";
-    if (score >= 50) return "text-yellow-600";
+    if (score >= 50) return "text-yellow-400";
     return "text-red-600";
   };
 
@@ -265,7 +265,7 @@ export default function CodingTestSubmissions({ user }) {
                                 <div 
                                   key={sub.id} 
                                   className={`p-2 rounded text-xs mb-2 ${
-                                    sub.score === bestScore ? 'bg-green-50 border border-green-200' : 'bg-cyber-navy/60 border'
+                                    sub.score === bestScore ? 'bg-green-500/10 border border-green-500/30' : 'bg-cyber-navy/60 border'
                                   }`}
                                 >
                                   <div className="flex justify-between items-center mb-1">

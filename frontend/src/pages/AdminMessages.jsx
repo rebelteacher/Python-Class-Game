@@ -120,9 +120,9 @@ export default function AdminMessages({ user }) {
 
   const getStatusColor = (status) => {
     switch (status) {
-      case "unread": return "bg-red-100 text-red-800";
-      case "read": return "bg-blue-100 text-blue-800";
-      case "resolved": return "bg-green-100 text-green-800";
+      case "unread": return "bg-red-500/20 text-red-400";
+      case "read": return "bg-blue-500/20 text-blue-400";
+      case "resolved": return "bg-green-500/20 text-green-400";
       default: return "bg-cyber-navy/30 text-slate-200";
     }
   };
@@ -170,7 +170,7 @@ export default function AdminMessages({ user }) {
             >
               {f.charAt(0).toUpperCase() + f.slice(1)}
               {f === "unread" && (
-                <span className="ml-2 px-2 py-0.5 bg-red-500 text-white text-xs rounded-full">
+                <span className="ml-2 px-2 py-0.5 bg-red-500/100 text-white text-xs rounded-full">
                   {messages.filter(m => m.status === "unread").length}
                 </span>
               )}
@@ -237,7 +237,7 @@ export default function AdminMessages({ user }) {
                     </div>
 
                     {message.admin_reply && (
-                      <div className="bg-blue-50 p-4 rounded-lg border-l-4 border-blue-500">
+                      <div className="bg-blue-500/10 p-4 rounded-lg border-l-4 border-blue-500">
                         <p className="text-sm font-semibold text-blue-900 mb-2">Your Reply:</p>
                         <p className="text-slate-200 whitespace-pre-wrap">{message.admin_reply}</p>
                         {message.replied_at && (
@@ -286,7 +286,7 @@ export default function AdminMessages({ user }) {
                         onClick={() => handleDelete(message.id)}
                         size="sm"
                         variant="outline"
-                        className="gap-2 text-red-600 hover:text-red-700"
+                        className="gap-2 text-red-600 hover:text-red-400"
                       >
                         <Trash2 className="w-4 h-4" />
                         Delete
@@ -337,8 +337,8 @@ export default function AdminMessages({ user }) {
               />
             </div>
 
-            <div className="bg-yellow-50 border border-yellow-200 p-3 rounded-lg">
-              <p className="text-sm text-yellow-800">
+            <div className="bg-yellow-500/10 border border-yellow-500/30 p-3 rounded-lg">
+              <p className="text-sm text-yellow-400">
                 📧 <strong>Note:</strong> Your reply will be saved here. Copy the user's email ({selectedMessage?.email}) to send your response manually until email integration is set up.
               </p>
             </div>

@@ -163,13 +163,13 @@ export default function TurtleGraphics({ user }) {
         </div>
 
         {/* Info Card */}
-        <div className="mb-6 p-4 bg-blue-50 border border-blue-200 rounded-lg">
+        <div className="mb-6 p-4 bg-blue-500/10 border border-blue-500/30 rounded-lg">
           <h3 className="font-semibold text-blue-900 mb-2">Getting Started with Turtle Graphics</h3>
-          <ul className="text-sm text-blue-800 space-y-1">
-            <li>• Use <code className="bg-blue-100 px-1 rounded">t.forward(distance)</code> to move forward</li>
-            <li>• Use <code className="bg-blue-100 px-1 rounded">t.right(angle)</code> or <code className="bg-blue-100 px-1 rounded">t.left(angle)</code> to turn</li>
-            <li>• Use <code className="bg-blue-100 px-1 rounded">t.color(color_name)</code> to change color</li>
-            <li>• Use <code className="bg-blue-100 px-1 rounded">t.circle(radius)</code> to draw circles</li>
+          <ul className="text-sm text-blue-400 space-y-1">
+            <li>• Use <code className="bg-blue-500/20 px-1 rounded">t.forward(distance)</code> to move forward</li>
+            <li>• Use <code className="bg-blue-500/20 px-1 rounded">t.right(angle)</code> or <code className="bg-blue-500/20 px-1 rounded">t.left(angle)</code> to turn</li>
+            <li>• Use <code className="bg-blue-500/20 px-1 rounded">t.color(color_name)</code> to change color</li>
+            <li>• Use <code className="bg-blue-500/20 px-1 rounded">t.circle(radius)</code> to draw circles</li>
             <li>• Try the examples above and modify them to create your own designs!</li>
           </ul>
         </div>

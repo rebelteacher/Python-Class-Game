@@ -1001,7 +1001,7 @@ export default function TurtleTeaching({ user }) {
           </div>
         </ResizablePanel>
 
-        <ResizableHandle withHandle className="bg-gray-700 hover:bg-green-500 transition-colors" />
+        <ResizableHandle withHandle className="bg-gray-700 hover:bg-green-500/100 transition-colors" />
 
         {/* Turtle Canvas Panel */}
         <ResizablePanel defaultSize={50} minSize={30}>

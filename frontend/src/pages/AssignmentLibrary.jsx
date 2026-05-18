@@ -676,7 +676,7 @@ export default function AssignmentLibrary({ user }) {
                       setSelectedProblems([]);
                     }}
                     variant="outline" 
-                    className="gap-2 bg-orange-50 border-orange-300 hover:bg-orange-100"
+                    className="gap-2 bg-orange-500/10 border-orange-300 hover:bg-orange-500/20"
                   >
                     <CheckSquare className="w-5 h-5" />
                     Select Problems
@@ -685,7 +685,7 @@ export default function AssignmentLibrary({ user }) {
                   <Button 
                     onClick={() => setCreateDialogOpen(true)}
                     variant="outline" 
-                    className="gap-2 bg-purple-50 border-purple-300 hover:bg-purple-100"
+                    className="gap-2 bg-purple-500/10 border-purple-300 hover:bg-purple-500/20"
                   >
                     <Plus className="w-5 h-5" />
                     Create Assignment
@@ -947,7 +947,7 @@ export default function AssignmentLibrary({ user }) {
                     </div>
 
                     {/* Lesson Materials Section */}
-                    <div className="border-2 border-purple-200 bg-purple-50 rounded-lg p-4">
+                    <div className="border-2 border-purple-500/30 bg-purple-500/10 rounded-lg p-4">
                       <div className="flex items-center justify-between mb-3">
                         <div>
                           <Label className="text-lg font-semibold flex items-center gap-2">
@@ -974,7 +974,7 @@ export default function AssignmentLibrary({ user }) {
                       {newProblem.lesson_materials?.length > 0 && (
                         <div className="space-y-3">
                           {newProblem.lesson_materials.map((material, index) => (
-                            <div key={index} className="bg-cyber-navy/60 p-3 rounded-lg border border-purple-200">
+                            <div key={index} className="bg-cyber-navy/60 p-3 rounded-lg border border-purple-500/30">
                               <div className="flex items-center gap-2 mb-2">
                                 <select
                                   value={material.type}
@@ -1008,7 +1008,7 @@ export default function AssignmentLibrary({ user }) {
                                     const materials = newProblem.lesson_materials.filter((_, i) => i !== index);
                                     setNewProblem({ ...newProblem, lesson_materials: materials });
                                   }}
-                                  className="text-red-500 hover:text-red-700 hover:bg-red-50"
+                                  className="text-red-500 hover:text-red-400 hover:bg-red-500/10"
                                 >
                                   ✕
                                 </Button>
@@ -1053,7 +1053,7 @@ export default function AssignmentLibrary({ user }) {
                   </div>
 
                   {/* Assignment Type Selection */}
-                  <div className="border-2 border-green-200 bg-green-50 rounded-lg p-4">
+                  <div className="border-2 border-green-500/30 bg-green-500/10 rounded-lg p-4">
                     <div className="flex items-center justify-between mb-3">
                       <div>
                         <Label className="text-lg font-semibold">Assignment Type</Label>
@@ -1064,7 +1064,7 @@ export default function AssignmentLibrary({ user }) {
                           type="button"
                           variant="outline"
                           size="sm"
-                          className={newProblem.assignment_type === "block" ? "bg-purple-500 text-white" : ""}
+                          className={newProblem.assignment_type === "block" ? "bg-purple-500/100 text-white" : ""}
                           onClick={() => setNewProblem({ ...newProblem, assignment_type: "block" })}
                         >
                           🧩 Block
@@ -1073,7 +1073,7 @@ export default function AssignmentLibrary({ user }) {
                           type="button"
                           variant="outline"
                           size="sm"
-                          className={newProblem.assignment_type === "code" ? "bg-blue-500 text-white" : ""}
+                          className={newProblem.assignment_type === "code" ? "bg-blue-500/100 text-white" : ""}
                           onClick={() => setNewProblem({ ...newProblem, assignment_type: "code" })}
                         >
                           💻 Code
@@ -1082,7 +1082,7 @@ export default function AssignmentLibrary({ user }) {
                           type="button"
                           variant="outline"
                           size="sm"
-                          className={newProblem.assignment_type === "turtle" ? "bg-green-500 text-white" : ""}
+                          className={newProblem.assignment_type === "turtle" ? "bg-green-500/100 text-white" : ""}
                           onClick={() => setNewProblem({ ...newProblem, assignment_type: "turtle" })}
                         >
                           🐢 Turtle
@@ -1091,7 +1091,7 @@ export default function AssignmentLibrary({ user }) {
                           type="button"
                           variant="outline"
                           size="sm"
-                          className={newProblem.assignment_type === "microbit" ? "bg-cyan-500 text-white" : ""}
+                          className={newProblem.assignment_type === "microbit" ? "bg-cyan-500/100 text-white" : ""}
                           onClick={() => setNewProblem({ ...newProblem, assignment_type: "microbit" })}
                         >
                           ⚡ Micro:bit
@@ -1102,7 +1102,7 @@ export default function AssignmentLibrary({ user }) {
                     {/* Micro:bit Specific Fields */}
                     {newProblem.assignment_type === "microbit" && (
                       <div className="space-y-4 mt-4 pt-4 border-t border-cyan-300">
-                        <div className="bg-cyan-50 border border-cyan-200 rounded-lg p-3">
+                        <div className="bg-cyan-500/10 border border-cyan-200 rounded-lg p-3">
                           <p className="text-sm text-cyan-800">
                             <strong>⚡ Micro:bit Assignment:</strong> Students will use the virtual simulator to test their code. 
                             Grading is based on code patterns (not execution).
@@ -1154,14 +1154,14 @@ export default function AssignmentLibrary({ user }) {
                           />
                         </div>
                         
-                        <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-3">
-                          <Label className="font-semibold text-yellow-800">Pattern-Based Test Cases</Label>
-                          <p className="text-xs text-yellow-700 mb-2">
+                        <div className="bg-yellow-500/10 border border-yellow-500/30 rounded-lg p-3">
+                          <Label className="font-semibold text-yellow-400">Pattern-Based Test Cases</Label>
+                          <p className="text-xs text-yellow-400 mb-2">
                             For Micro:bit, test cases check if code contains specific patterns (not execution).
                             Use the Test Cases section below to define patterns to look for.
                           </p>
-                          <p className="text-xs text-yellow-600">
-                            Example patterns: <code className="bg-yellow-100 px-1">display.show</code>, <code className="bg-yellow-100 px-1">while True:</code>, <code className="bg-yellow-100 px-1">button_a</code>
+                          <p className="text-xs text-yellow-400">
+                            Example patterns: <code className="bg-yellow-500/20 px-1">display.show</code>, <code className="bg-yellow-500/20 px-1">while True:</code>, <code className="bg-yellow-500/20 px-1">button_a</code>
                           </p>
                         </div>
                       </div>
@@ -1287,7 +1287,7 @@ export default function AssignmentLibrary({ user }) {
                                 
                                 {/* Show maze data summary if set */}
                                 {newProblem.maze_data && (
-                                  <div className="p-2 bg-green-100 rounded text-sm">
+                                  <div className="p-2 bg-green-500/20 rounded text-sm">
                                     ✅ Maze configured: {newProblem.maze_data.walls?.length || 0} walls, {newProblem.goals?.length || 0} goals
                                   </div>
                                 )}
@@ -1301,7 +1301,7 @@ export default function AssignmentLibrary({ user }) {
 
                   {/* Partial Credit Rules */}
                   {newProblem.assignment_type === "code" && (
-                    <div className="border-2 border-blue-200 bg-blue-50 rounded-lg p-4">
+                    <div className="border-2 border-blue-500/30 bg-blue-500/10 rounded-lg p-4">
                       <Label className="text-lg font-semibold">Partial Credit Rules</Label>
                       <p className="text-sm text-slate-400 mt-1 mb-3">Customize penalties/bonuses for consistent grading</p>
                       
@@ -1384,7 +1384,7 @@ export default function AssignmentLibrary({ user }) {
                   {/* Starter Code/Blocks Section */}
                   {newProblem.assignment_type === "block" ? (
                     /* Block Type - Show Blockly Editor for Starter Blocks */
-                    <div className="border-2 border-purple-200 bg-purple-50 rounded-lg p-4">
+                    <div className="border-2 border-purple-500/30 bg-purple-500/10 rounded-lg p-4">
                       <Label className="text-lg font-semibold flex items-center gap-2 mb-3">
                         🧩 Starter Blocks (Optional)
                       </Label>
@@ -1423,7 +1423,7 @@ export default function AssignmentLibrary({ user }) {
                   {/* Solution Code/Blocks Section */}
                   {newProblem.assignment_type === "block" ? (
                     /* Block Type - Show Blockly Editor for Solution Blocks */
-                    <div className="border-2 border-green-200 bg-green-50 rounded-lg p-4">
+                    <div className="border-2 border-green-500/30 bg-green-500/10 rounded-lg p-4">
                       <div className="flex items-center justify-between mb-3">
                         <div>
                           <Label className="text-lg font-semibold flex items-center gap-2">
@@ -1483,7 +1483,7 @@ export default function AssignmentLibrary({ user }) {
                     </div>
                   ) : newProblem.assignment_type === "microbit" ? (
                     /* Micro:bit Type - Show Code Editor + Simulator */
-                    <div className="border-2 border-cyan-200 bg-cyan-50 rounded-lg p-4">
+                    <div className="border-2 border-cyan-200 bg-cyan-500/10 rounded-lg p-4">
                       <Label className="text-lg font-semibold flex items-center gap-2">
                         ⚡ Solution Code & Simulator Test *
                       </Label>
@@ -1558,7 +1558,7 @@ export default function AssignmentLibrary({ user }) {
                                 size="sm"
                                 variant="outline"
                                 onClick={() => setTurtlePreviewOpen(true)}
-                                className="bg-blue-50 border-blue-300 hover:bg-blue-100"
+                                className="bg-blue-500/10 border-blue-300 hover:bg-blue-500/20"
                               >
                                 <Play className="w-4 h-4 mr-1" />
                                 Live Preview
@@ -1596,7 +1596,7 @@ export default function AssignmentLibrary({ user }) {
                   )}
                   
                   {(newProblem.assignment_type === "turtle" || newProblem.assignment_type === "block") && newProblem.expected_turtle_image && (
-                    <div className="border-2 border-green-200 bg-green-50 rounded-lg p-4">
+                    <div className="border-2 border-green-500/30 bg-green-500/10 rounded-lg p-4">
                       <Label className="font-semibold">Expected Output Preview</Label>
                       <img 
                         src={`data:image/png;base64,${newProblem.expected_turtle_image}`}
@@ -1610,7 +1610,7 @@ export default function AssignmentLibrary({ user }) {
 
                   {/* Test Cases Builder - for Code assignments */}
                   {newProblem.assignment_type === "code" && (
-                    <div className="border-2 border-yellow-200 bg-yellow-50 rounded-lg p-4">
+                    <div className="border-2 border-yellow-500/30 bg-yellow-500/10 rounded-lg p-4">
                       <div className="flex items-center justify-between mb-3">
                         <div>
                           <Label className="text-lg font-semibold">Test Cases (Optional but Recommended)</Label>
@@ -1647,7 +1647,7 @@ export default function AssignmentLibrary({ user }) {
                                     const newTestCases = newProblem.test_cases.filter((_, i) => i !== index);
                                     setNewProblem({ ...newProblem, test_cases: newTestCases });
                                   }}
-                                  className="text-red-600 hover:text-red-700"
+                                  className="text-red-600 hover:text-red-400"
                                 >
                                   Remove
                                 </Button>
@@ -1703,7 +1703,7 @@ export default function AssignmentLibrary({ user }) {
 
                   {/* Test Cases Builder - for Turtle and Block assignments (Pattern + Count) */}
                   {(newProblem.assignment_type === "turtle" || newProblem.assignment_type === "block") && (
-                    <div className="border-2 border-green-200 bg-green-50 rounded-lg p-4">
+                    <div className="border-2 border-green-500/30 bg-green-500/10 rounded-lg p-4">
                       <div className="flex items-center justify-between mb-3">
                         <div>
                           <Label className="text-lg font-semibold">🐢 Turtle Test Cases</Label>
@@ -1740,7 +1740,7 @@ export default function AssignmentLibrary({ user }) {
                             </thead>
                             <tbody>
                               {newProblem.test_cases.map((testCase, index) => (
-                                <tr key={index} className="border-b border-green-200 hover:bg-green-100">
+                                <tr key={index} className="border-b border-green-500/30 hover:bg-green-500/20">
                                   <td className="py-2 px-2">
                                     <Input
                                       placeholder="e.g., Uses circle"
@@ -1802,7 +1802,7 @@ export default function AssignmentLibrary({ user }) {
                                         const newTestCases = newProblem.test_cases.filter((_, i) => i !== index);
                                         setNewProblem({ ...newProblem, test_cases: newTestCases });
                                       }}
-                                      className="text-red-600 hover:text-red-700 h-8 w-8 p-0"
+                                      className="text-red-600 hover:text-red-400 h-8 w-8 p-0"
                                     >
                                       ✕
                                     </Button>
@@ -1821,7 +1821,7 @@ export default function AssignmentLibrary({ user }) {
 
                   {/* Test Cases Builder - for Micro:bit assignments (Pattern-based) */}
                   {newProblem.assignment_type === "microbit" && (
-                    <div className="border-2 border-cyan-200 bg-cyan-50 rounded-lg p-4">
+                    <div className="border-2 border-cyan-200 bg-cyan-500/10 rounded-lg p-4">
                       <div className="flex items-center justify-between mb-3">
                         <div>
                           <Label className="text-lg font-semibold">Pattern Test Cases</Label>
@@ -1858,7 +1858,7 @@ export default function AssignmentLibrary({ user }) {
                                     const newTestCases = newProblem.test_cases.filter((_, i) => i !== index);
                                     setNewProblem({ ...newProblem, test_cases: newTestCases });
                                   }}
-                                  className="text-red-600 hover:text-red-700"
+                                  className="text-red-600 hover:text-red-400"
                                 >
                                   Remove
                                 </Button>
@@ -1930,7 +1930,7 @@ export default function AssignmentLibrary({ user }) {
 
                   {/* Test Cases Builder - for Block assignments (Block-based checking) */}
                   {newProblem.assignment_type === "block" && (
-                    <div className="border-2 border-purple-200 bg-purple-50 rounded-lg p-4">
+                    <div className="border-2 border-purple-500/30 bg-purple-500/10 rounded-lg p-4">
                       <div className="flex items-center justify-between mb-3">
                         <div>
                           <Label className="text-lg font-semibold">🧱 Block Test Cases</Label>
@@ -1967,7 +1967,7 @@ export default function AssignmentLibrary({ user }) {
                             </thead>
                             <tbody>
                               {newProblem.test_cases.map((testCase, index) => (
-                                <tr key={index} className="border-b border-purple-200 hover:bg-purple-100">
+                                <tr key={index} className="border-b border-purple-500/30 hover:bg-purple-500/20">
                                   <td className="py-2 px-2">
                                     <Input
                                       placeholder="e.g., Uses repeat loop"
@@ -2096,7 +2096,7 @@ export default function AssignmentLibrary({ user }) {
                                         const newTestCases = newProblem.test_cases.filter((_, i) => i !== index);
                                         setNewProblem({ ...newProblem, test_cases: newTestCases });
                                       }}
-                                      className="text-red-600 hover:text-red-700 h-8 w-8 p-0"
+                                      className="text-red-600 hover:text-red-400 h-8 w-8 p-0"
                                     >
                                       ✕
                                     </Button>
@@ -2112,7 +2112,7 @@ export default function AssignmentLibrary({ user }) {
 
                   {/* Turtle Live Preview for Create */}
                   {newProblem.assignment_type === "turtle" && newProblem.solution_code && (
-                    <div className="border-2 border-green-200 bg-green-50 rounded-lg p-4">
+                    <div className="border-2 border-green-500/30 bg-green-500/10 rounded-lg p-4">
                       <Label className="text-lg font-semibold mb-3 block">🐢 Live Preview</Label>
                       <AnimatedTurtle
                         code={newProblem.solution_code}
@@ -2294,7 +2294,7 @@ export default function AssignmentLibrary({ user }) {
                   setTypeFilter("");
                   setSearchParams({});
                 }}
-                className="text-red-600 border-red-300 hover:bg-red-50"
+                className="text-red-600 border-red-300 hover:bg-red-500/10"
               >
                 Clear Filters
               </Button>
@@ -2305,17 +2305,17 @@ export default function AssignmentLibrary({ user }) {
           {(chapterFilter !== "all" || lessonFilter !== "all" || typeFilter) && (
             <div className="flex flex-wrap gap-2 text-sm">
               {typeFilter && (
-                <span className="px-2 py-1 bg-blue-100 text-blue-800 rounded">
+                <span className="px-2 py-1 bg-blue-500/20 text-blue-400 rounded">
                   Type: {typeFilter}
                 </span>
               )}
               {chapterFilter !== "all" && (
-                <span className="px-2 py-1 bg-green-100 text-green-800 rounded">
+                <span className="px-2 py-1 bg-green-500/20 text-green-400 rounded">
                   Chapter: {chapterFilter}
                 </span>
               )}
               {lessonFilter !== "all" && (
-                <span className="px-2 py-1 bg-purple-100 text-purple-800 rounded">
+                <span className="px-2 py-1 bg-purple-500/20 text-purple-400 rounded">
                   Lesson: {lessonFilter}
                 </span>
               )}
@@ -2436,7 +2436,7 @@ export default function AssignmentLibrary({ user }) {
                                               data-testid={`library-card-${problem.id}`}
                                               className={`hover:shadow-lg transition-all border-2 ${
                                                 selectionMode && selectedProblems.includes(problem.id)
-                                                  ? 'border-purple-500 bg-purple-50'
+                                                  ? 'border-purple-500 bg-purple-500/10'
                                                   : 'border-cyber-cyan/10'
                                               } ${selectionMode ? 'cursor-pointer' : ''}`}
                                               onClick={() => selectionMode && toggleProblemSelection(problem.id)}
@@ -2460,10 +2460,10 @@ export default function AssignmentLibrary({ user }) {
                                                 <CardTitle className="text-lg flex items-center gap-2">
                                                   {problem.title}
                                                   {problem.assignment_type === "turtle" && (
-                                                    <span className="px-2 py-0.5 bg-green-100 text-green-700 rounded text-xs font-medium">🐢 Turtle</span>
+                                                    <span className="px-2 py-0.5 bg-green-500/20 text-green-400 rounded text-xs font-medium">🐢 Turtle</span>
                                                   )}
                                                   {problem.assignment_type === "microbit" && (
-                                                    <span className="px-2 py-0.5 bg-cyan-100 text-cyan-700 rounded text-xs font-medium">⚡ Micro:bit</span>
+                                                    <span className="px-2 py-0.5 bg-cyan-500/20 text-cyan-700 rounded text-xs font-medium">⚡ Micro:bit</span>
                                                   )}
                                                 </CardTitle>
                                                 <CardDescription className="line-clamp-2">{problem.description}</CardDescription>
@@ -2476,20 +2476,20 @@ export default function AssignmentLibrary({ user }) {
                                                     </span>
                                                   )}
                                                   {problem.chapter && (
-                                                    <span className="px-2 py-1 bg-blue-100 text-blue-700 rounded text-xs font-medium">
+                                                    <span className="px-2 py-1 bg-blue-500/20 text-blue-400 rounded text-xs font-medium">
                                                       📚 {problem.chapter}
                                                     </span>
                                                   )}
                                                   {problem.lesson && (
-                                                    <span className="px-2 py-1 bg-teal-100 text-cyber-cyan rounded text-xs font-medium">
+                                                    <span className="px-2 py-1 bg-teal-500/20 text-cyber-cyan rounded text-xs font-medium">
                                                       📖 {problem.lesson}
                                                     </span>
                                                   )}
-                                                  <span className="px-2 py-1 bg-indigo-100 text-indigo-700 rounded text-xs font-medium">
+                                                  <span className="px-2 py-1 bg-indigo-500/20 text-indigo-400 rounded text-xs font-medium">
                                                     {problem.category}
                                                   </span>
                                                   {problem.csta_standard && (
-                                                    <span className="px-2 py-1 bg-purple-100 text-purple-700 rounded text-xs font-medium">
+                                                    <span className="px-2 py-1 bg-purple-500/20 text-purple-400 rounded text-xs font-medium">
                                                       {problem.csta_standard}
                                                     </span>
                                                   )}
@@ -2537,7 +2537,7 @@ export default function AssignmentLibrary({ user }) {
                                                           handleDeleteProblem(problem.id, problem.title);
                                                         }}
                                                         variant="outline"
-                                                        className="flex-1 border-red-300 text-red-600 hover:bg-red-50"
+                                                        className="flex-1 border-red-300 text-red-600 hover:bg-red-500/10"
                                                         size="sm"
                                                       >
                                                         <Trash2 className="w-4 h-4 mr-1" />
@@ -2551,7 +2551,7 @@ export default function AssignmentLibrary({ user }) {
                                                         navigate(`/teacher-practice/${problem.id}`);
                                                       }}
                                                       variant="outline"
-                                                      className="w-full bg-green-50 border-green-300 hover:bg-green-100"
+                                                      className="w-full bg-green-500/10 border-green-300 hover:bg-green-500/20"
                                                       size="sm"
                                                     >
                                                       <Code2 className="w-4 h-4 mr-1" />
@@ -2745,7 +2745,7 @@ export default function AssignmentLibrary({ user }) {
 
                 {/* Starter Code/Blocks - conditional based on assignment type */}
                 {editingProblem.assignment_type === "block" ? (
-                  <div className="border-2 border-purple-200 bg-purple-50 rounded-lg p-4">
+                  <div className="border-2 border-purple-500/30 bg-purple-500/10 rounded-lg p-4">
                     <Label className="text-lg font-semibold flex items-center gap-2 mb-3">
                       🧩 Starter Blocks (Optional)
                     </Label>
@@ -2780,7 +2780,7 @@ export default function AssignmentLibrary({ user }) {
 
                 {/* Solution Code/Blocks - conditional based on assignment type */}
                 {editingProblem.assignment_type === "block" ? (
-                  <div className="border-2 border-green-200 bg-green-50 rounded-lg p-4">
+                  <div className="border-2 border-green-500/30 bg-green-500/10 rounded-lg p-4">
                     <div className="mb-3">
                       <Label className="text-lg font-semibold flex items-center gap-2">
                         ✅ Solution Blocks *
@@ -2803,7 +2803,7 @@ export default function AssignmentLibrary({ user }) {
                     </div>
                   </div>
                 ) : editingProblem.assignment_type === "microbit" ? (
-                  <div className="border-2 border-cyan-200 bg-cyan-50 rounded-lg p-4">
+                  <div className="border-2 border-cyan-200 bg-cyan-500/10 rounded-lg p-4">
                     <Label className="text-lg font-semibold flex items-center gap-2">
                       ⚡ Solution Code & Simulator Test *
                     </Label>
@@ -2862,7 +2862,7 @@ export default function AssignmentLibrary({ user }) {
 
                 {/* Test Cases Builder for Edit - Code type */}
                 {editingProblem.assignment_type === "code" && (
-                  <div className="border-2 border-yellow-200 bg-yellow-50 rounded-lg p-4">
+                  <div className="border-2 border-yellow-500/30 bg-yellow-500/10 rounded-lg p-4">
                     <div className="flex items-center justify-between mb-3">
                       <div>
                         <Label className="text-lg font-semibold">Test Cases (Optional but Recommended)</Label>
@@ -2899,7 +2899,7 @@ export default function AssignmentLibrary({ user }) {
                                   const newTestCases = editingProblem.test_cases.filter((_, i) => i !== index);
                                   setEditingProblem({ ...editingProblem, test_cases: newTestCases });
                                 }}
-                                className="text-red-600 hover:text-red-700"
+                                className="text-red-600 hover:text-red-400"
                               >
                                 Remove
                               </Button>
@@ -2955,7 +2955,7 @@ export default function AssignmentLibrary({ user }) {
 
                 {/* Test Cases Builder for Edit - Turtle type (Table format) */}
                 {editingProblem.assignment_type === "turtle" && (
-                  <div className="border-2 border-green-200 bg-green-50 rounded-lg p-4">
+                  <div className="border-2 border-green-500/30 bg-green-500/10 rounded-lg p-4">
                     <div className="flex items-center justify-between mb-3">
                       <div>
                         <Label className="text-lg font-semibold">🐢 Turtle Test Cases</Label>
@@ -2992,7 +2992,7 @@ export default function AssignmentLibrary({ user }) {
                           </thead>
                           <tbody>
                             {editingProblem.test_cases.map((testCase, index) => (
-                              <tr key={index} className="border-b border-green-200 hover:bg-green-100">
+                              <tr key={index} className="border-b border-green-500/30 hover:bg-green-500/20">
                                 <td className="py-2 px-2">
                                   <Input
                                     placeholder="e.g., Uses circle"
@@ -3054,7 +3054,7 @@ export default function AssignmentLibrary({ user }) {
                                       const newTestCases = editingProblem.test_cases.filter((_, i) => i !== index);
                                       setEditingProblem({ ...editingProblem, test_cases: newTestCases });
                                     }}
-                                    className="text-red-600 hover:text-red-700 h-8 w-8 p-0"
+                                    className="text-red-600 hover:text-red-400 h-8 w-8 p-0"
                                   >
                                     ✕
                                   </Button>
@@ -3073,7 +3073,7 @@ export default function AssignmentLibrary({ user }) {
 
                 {/* Test Cases Builder for Edit - Micro:bit type */}
                 {editingProblem.assignment_type === "microbit" && (
-                  <div className="border-2 border-cyan-200 bg-cyan-50 rounded-lg p-4">
+                  <div className="border-2 border-cyan-200 bg-cyan-500/10 rounded-lg p-4">
                     <div className="flex items-center justify-between mb-3">
                       <div>
                         <Label className="text-lg font-semibold">Pattern Test Cases</Label>
@@ -3110,7 +3110,7 @@ export default function AssignmentLibrary({ user }) {
                                   const newTestCases = editingProblem.test_cases.filter((_, i) => i !== index);
                                   setEditingProblem({ ...editingProblem, test_cases: newTestCases });
                                 }}
-                                className="text-red-600 hover:text-red-700"
+                                className="text-red-600 hover:text-red-400"
                               >
                                 Remove
                               </Button>
@@ -3182,7 +3182,7 @@ export default function AssignmentLibrary({ user }) {
 
                 {/* Test Cases Builder for Edit - Block type (Table format) */}
                 {editingProblem.assignment_type === "block" && (
-                  <div className="border-2 border-purple-200 bg-purple-50 rounded-lg p-4">
+                  <div className="border-2 border-purple-500/30 bg-purple-500/10 rounded-lg p-4">
                     <div className="flex items-center justify-between mb-3">
                       <div>
                         <Label className="text-lg font-semibold">🧱 Block Test Cases</Label>
@@ -3219,7 +3219,7 @@ export default function AssignmentLibrary({ user }) {
                           </thead>
                           <tbody>
                             {editingProblem.test_cases.map((testCase, index) => (
-                              <tr key={index} className="border-b border-purple-200 hover:bg-purple-100">
+                              <tr key={index} className="border-b border-purple-500/30 hover:bg-purple-500/20">
                                 <td className="py-2 px-2">
                                   <Input
                                     placeholder="e.g., Uses repeat loop"
@@ -3348,7 +3348,7 @@ export default function AssignmentLibrary({ user }) {
                                       const newTestCases = editingProblem.test_cases.filter((_, i) => i !== index);
                                       setEditingProblem({ ...editingProblem, test_cases: newTestCases });
                                     }}
-                                    className="text-red-600 hover:text-red-700 h-8 w-8 p-0"
+                                    className="text-red-600 hover:text-red-400 h-8 w-8 p-0"
                                   >
                                     ✕
                                   </Button>
@@ -3364,7 +3364,7 @@ export default function AssignmentLibrary({ user }) {
 
                 {/* Turtle Preview for Edit */}
                 {editingProblem.assignment_type === "turtle" && editingProblem.solution_code && (
-                  <div className="border-2 border-green-200 bg-green-50 rounded-lg p-4">
+                  <div className="border-2 border-green-500/30 bg-green-500/10 rounded-lg p-4">
                     <Label className="text-lg font-semibold mb-3 block">🐢 Live Preview</Label>
                     <AnimatedTurtle
                       code={editingProblem.solution_code}
@@ -4108,11 +4108,11 @@ function CodingTestBuilder({ open, onOpenChange, selectedProblems, problems, onS
         <form onSubmit={handleSubmit} className="space-y-4">
           {/* Selected Problems Display */}
           {selectedProblems.length > 0 && (
-            <div className="p-3 bg-blue-50 rounded border border-blue-200">
+            <div className="p-3 bg-blue-500/10 rounded border border-blue-500/30">
               <p className="font-semibold text-sm text-blue-900 mb-2">
                 Selected Problems ({selectedProblems.length})
               </p>
-              <ol className="space-y-1 text-sm text-blue-700 list-decimal list-inside">
+              <ol className="space-y-1 text-sm text-blue-400 list-decimal list-inside">
                 {selectedProblems.map((problemId) => {
                   const problem = problems.find(p => p.id === problemId);
                   return problem ? (

@@ -287,7 +287,7 @@ export default function BlockTeaching({ user }) {
           
           <Button
             onClick={openTurtleBlocks}
-            className="bg-cyber-navy/60 text-orange-600 hover:bg-orange-50"
+            className="bg-cyber-navy/60 text-orange-600 hover:bg-orange-500/10"
           >
             <Play className="w-4 h-4 mr-2" />
             Open Turtle Blocks
@@ -331,7 +331,7 @@ export default function BlockTeaching({ user }) {
                           key={lesson.id}
                           onClick={() => setSelectedLesson(lesson)}
                           className={`w-full text-left px-4 py-3 border-b hover:bg-cyber-navy/40 transition-colors ${
-                            selectedLesson.id === lesson.id ? 'bg-orange-50 border-l-4 border-l-orange-500' : ''
+                            selectedLesson.id === lesson.id ? 'bg-orange-500/10 border-l-4 border-l-orange-500' : ''
                           }`}
                         >
                           <div className="font-medium">{lesson.name}</div>
@@ -349,7 +349,7 @@ export default function BlockTeaching({ user }) {
                       </CardTitle>
                     </CardHeader>
                     <CardContent className="space-y-2">
-                      <Button onClick={openTurtleBlocks} className="w-full bg-purple-500 hover:bg-purple-600">
+                      <Button onClick={openTurtleBlocks} className="w-full bg-purple-500/100 hover:bg-purple-600">
                         <Play className="w-4 h-4 mr-2" />
                         Open Turtle Blocks
                       </Button>
@@ -408,7 +408,7 @@ export default function BlockTeaching({ user }) {
                       <ol className="space-y-3">
                         {selectedLesson.demoSteps.map((step, idx) => (
                           <li key={idx} className="flex items-start gap-3">
-                            <span className="flex-shrink-0 w-6 h-6 rounded-full bg-purple-100 text-purple-600 flex items-center justify-center text-sm font-bold">
+                            <span className="flex-shrink-0 w-6 h-6 rounded-full bg-purple-500/20 text-purple-600 flex items-center justify-center text-sm font-bold">
                               {idx + 1}
                             </span>
                             <span>{step}</span>
@@ -419,7 +419,7 @@ export default function BlockTeaching({ user }) {
                   </Card>
 
                   {/* Student Activity */}
-                  <Card className="border-2 border-green-200 bg-green-50">
+                  <Card className="border-2 border-green-500/30 bg-green-500/10">
                     <CardHeader>
                       <CardTitle className="flex items-center gap-2">
                         <Users className="w-5 h-5 text-green-600" />
@@ -435,17 +435,17 @@ export default function BlockTeaching({ user }) {
                   </Card>
 
                   {/* Turtle Blocks Link */}
-                  <Card className="bg-gradient-to-r from-purple-100 to-blue-100 border-purple-200">
+                  <Card className="bg-gradient-to-r from-purple-100 to-blue-100 border-purple-500/30">
                     <CardContent className="py-6">
                       <div className="flex items-center justify-between">
                         <div className="flex items-center gap-4">
                           <span className="text-4xl">🐢</span>
                           <div>
-                            <h3 className="font-bold text-purple-800">Ready to Demo?</h3>
+                            <h3 className="font-bold text-purple-400">Ready to Demo?</h3>
                             <p className="text-sm text-purple-600">Open Turtle Blocks and share your screen with students</p>
                           </div>
                         </div>
-                        <Button onClick={openTurtleBlocks} className="bg-purple-500 hover:bg-purple-600">
+                        <Button onClick={openTurtleBlocks} className="bg-purple-500/100 hover:bg-purple-600">
                           <Play className="w-4 h-4 mr-2" />
                           Open Turtle Blocks
                         </Button>
@@ -455,17 +455,17 @@ export default function BlockTeaching({ user }) {
 
                   {/* Python Preview Note */}
                   {selectedLesson.id === "4-3" && (
-                    <Card className="bg-gradient-to-r from-green-100 to-emerald-100 border-green-200">
+                    <Card className="bg-gradient-to-r from-green-100 to-emerald-100 border-green-500/30">
                       <CardContent className="py-6">
                         <div className="flex items-center justify-between">
                           <div className="flex items-center gap-4">
                             <span className="text-4xl">🐍</span>
                             <div>
-                              <h3 className="font-bold text-green-800">Ready for Text Coding?</h3>
+                              <h3 className="font-bold text-green-400">Ready for Text Coding?</h3>
                               <p className="text-sm text-green-600">Students who have mastered blocks can move to Python Turtle</p>
                             </div>
                           </div>
-                          <Button onClick={() => navigate("/turtle-curriculum")} className="bg-green-500 hover:bg-green-600">
+                          <Button onClick={() => navigate("/turtle-curriculum")} className="bg-green-500/100 hover:bg-green-600">
                             <ArrowRight className="w-4 h-4 mr-2" />
                             Go to Turtle Unit
                           </Button>

@@ -707,10 +707,10 @@ export default function QuestionBank({ user }) {
   // Get unit type badge
   const getUnitTypeBadge = (unitType) => {
     const badges = {
-      "block": { bg: "bg-purple-100", text: "text-purple-700", label: "🧱 Block" },
-      "turtle": { bg: "bg-green-100", text: "text-green-700", label: "🐢 Turtle" },
-      "code": { bg: "bg-blue-100", text: "text-blue-700", label: "🐍 Python" },
-      "microbit": { bg: "bg-cyan-100", text: "text-cyan-700", label: "⚡ Micro:bit" }
+      "block": { bg: "bg-purple-500/20", text: "text-purple-400", label: "🧱 Block" },
+      "turtle": { bg: "bg-green-500/20", text: "text-green-400", label: "🐢 Turtle" },
+      "code": { bg: "bg-blue-500/20", text: "text-blue-400", label: "🐍 Python" },
+      "microbit": { bg: "bg-cyan-500/20", text: "text-cyan-700", label: "⚡ Micro:bit" }
     };
     return badges[unitType] || { bg: "bg-cyber-navy/30", text: "text-slate-300", label: "❓ Unassigned" };
   };
@@ -818,7 +818,7 @@ What is 2+2?,3,4,5,6,B,code,Unit 3: Python Text,Chapter 1,Lesson 1,Easy</pre>
                         onClick={() => setBlockMode(!blockMode)}
                         className={`flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-medium transition-colors ${
                           blockMode 
-                            ? 'bg-indigo-100 text-indigo-700 border border-indigo-300' 
+                            ? 'bg-indigo-500/20 text-indigo-400 border border-indigo-300' 
                             : 'bg-cyber-navy/30 text-slate-400 border border-cyber-cyan/15'
                         }`}
                       >
@@ -1236,9 +1236,9 @@ What is 2+2?,3,4,5,6,B,code,Unit 3: Python Text,Chapter 1,Lesson 1,Easy</pre>
                                               {badge.label}
                                             </span>
                                             <span className={`px-2 py-1 rounded text-xs font-semibold ${
-                                              question.difficulty === "Easy" ? "bg-green-100 text-green-700" :
-                                              question.difficulty === "Medium" ? "bg-yellow-100 text-yellow-700" :
-                                              "bg-red-100 text-red-700"
+                                              question.difficulty === "Easy" ? "bg-green-500/20 text-green-400" :
+                                              question.difficulty === "Medium" ? "bg-yellow-500/20 text-yellow-400" :
+                                              "bg-red-500/20 text-red-400"
                                             }`}>
                                               {question.difficulty}
                                             </span>
@@ -1299,7 +1299,7 @@ What is 2+2?,3,4,5,6,B,code,Unit 3: Python Text,Chapter 1,Lesson 1,Easy</pre>
                                               onClick={() => handleDeleteQuestion(question.id)}
                                               variant="outline"
                                               size="sm"
-                                              className="text-red-600 hover:text-red-700"
+                                              className="text-red-600 hover:text-red-400"
                                             >
                                               <Trash2 className="w-4 h-4" />
                                             </Button>
@@ -1350,7 +1350,7 @@ What is 2+2?,3,4,5,6,B,code,Unit 3: Python Text,Chapter 1,Lesson 1,Easy</pre>
                     onClick={() => setEditBlockMode(!editBlockMode)}
                     className={`flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-medium transition-colors ${
                       editBlockMode 
-                        ? 'bg-indigo-100 text-indigo-700 border border-indigo-300' 
+                        ? 'bg-indigo-500/20 text-indigo-400 border border-indigo-300' 
                         : 'bg-cyber-navy/30 text-slate-400 border border-cyber-cyan/15'
                     }`}
                   >

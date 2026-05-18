@@ -31,7 +31,7 @@ export default function LessonModal({ isOpen, onClose, lesson }) {
           <DialogHeader>
             <div className="flex items-start justify-between">
               <div className="flex items-center gap-3">
-                <div className="p-2 bg-blue-100 rounded-lg">
+                <div className="p-2 bg-blue-500/20 rounded-lg">
                   <BookOpen className="w-6 h-6 text-blue-600" />
                 </div>
                 <div>
@@ -82,7 +82,7 @@ export default function LessonModal({ isOpen, onClose, lesson }) {
                       </code>
                     </pre>
                   ) : (
-                    <code className="bg-blue-100 text-blue-800 px-1.5 py-0.5 rounded text-sm font-mono" {...props}>
+                    <code className="bg-blue-500/20 text-blue-400 px-1.5 py-0.5 rounded text-sm font-mono" {...props}>
                       {children}
                     </code>
                   );
@@ -113,7 +113,7 @@ export default function LessonModal({ isOpen, onClose, lesson }) {
                   return (
                     <a
                       {...props}
-                      className="text-blue-600 hover:text-blue-800 underline"
+                      className="text-blue-600 hover:text-blue-400 underline"
                       target="_blank"
                       rel="noopener noreferrer"
                     />
@@ -133,7 +133,7 @@ export default function LessonModal({ isOpen, onClose, lesson }) {
                 // Blockquotes
                 blockquote({node, ...props}) {
                   return (
-                    <blockquote className="border-l-4 border-blue-500 pl-4 py-2 my-4 bg-blue-50 italic text-slate-300" {...props} />
+                    <blockquote className="border-l-4 border-blue-500 pl-4 py-2 my-4 bg-blue-500/10 italic text-slate-300" {...props} />
                   );
                 },
               }}

@@ -142,7 +142,7 @@ export default function StudentSandbox({ user }) {
       <div className="p-6">
         <div className="max-w-7xl mx-auto">
           {/* Info Banner */}
-          <Card className="mb-6 border-purple-200 bg-gradient-to-r from-purple-50 to-pink-50">
+          <Card className="mb-6 border-purple-500/30 bg-gradient-to-r from-purple-50 to-pink-50">
             <CardContent className="pt-6">
               <div className="flex items-start gap-4">
                 <Code2 className="w-8 h-8 text-purple-600 flex-shrink-0 mt-1" />
@@ -150,7 +150,7 @@ export default function StudentSandbox({ user }) {
                   <h2 className="text-lg font-semibold text-purple-900 mb-2">
                     Practice Python Coding - No Limits!
                   </h2>
-                  <p className="text-sm text-purple-700">
+                  <p className="text-sm text-purple-400">
                     This is your personal coding playground. Write any Python code you want, test your ideas, 
                     and experiment freely. Your code won't be graded or saved - this is just for practice and fun! 🚀
                   </p>
@@ -195,7 +195,7 @@ export default function StudentSandbox({ user }) {
               </Panel>
 
               {/* Resize Handle */}
-              <PanelResizeHandle className="w-2 bg-gray-300 hover:bg-purple-500 transition-colors cursor-col-resize mx-2" />
+              <PanelResizeHandle className="w-2 bg-gray-300 hover:bg-purple-500/100 transition-colors cursor-col-resize mx-2" />
 
               {/* Output - Right - Full Space */}
               <Panel defaultSize={45} minSize={35}>
@@ -217,11 +217,11 @@ export default function StudentSandbox({ user }) {
           </div>
 
           {/* Quick Tips */}
-          <Card className="mt-6 border-blue-200 bg-gradient-to-r from-blue-50 to-purple-50">
+          <Card className="mt-6 border-blue-500/30 bg-gradient-to-r from-blue-50 to-purple-50">
             <CardContent className="pt-3 pb-3">
               <h3 className="font-semibold text-blue-900 mb-1 text-sm">💡 Quick Tips:</h3>
-              <ul className="text-xs text-blue-700 space-y-0.5">
-                <li>• <strong>NEW!</strong> Code with <code className="bg-blue-100 px-1 rounded">input()</code> shows an interactive dialog</li>
+              <ul className="text-xs text-blue-400 space-y-0.5">
+                <li>• <strong>NEW!</strong> Code with <code className="bg-blue-500/20 px-1 rounded">input()</code> shows an interactive dialog</li>
                 <li>• Toggle light/dark theme • Press <strong>Clear</strong> to reset</li>
               </ul>
             </CardContent>

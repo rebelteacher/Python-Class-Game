@@ -458,7 +458,7 @@ export default function CodingTestTaking({ user }) {
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-6">
-            <div className="bg-blue-50 p-6 rounded-lg text-white">
+            <div className="bg-blue-500/10 p-6 rounded-lg text-white">
               <h3 className="font-semibold mb-3 text-lg">Test Information:</h3>
               <ul className="space-y-2 text-sm">
                 <li className="flex items-center gap-2">
@@ -473,12 +473,12 @@ export default function CodingTestTaking({ user }) {
               </ul>
             </div>
 
-            <div className="bg-yellow-50 p-4 rounded-lg border-2 border-yellow-300">
+            <div className="bg-yellow-500/10 p-4 rounded-lg border-2 border-yellow-300">
               <h3 className="font-semibold mb-2 text-yellow-900 flex items-center gap-2">
                 <AlertTriangle className="w-5 h-5" />
                 Important Rules:
               </h3>
-              <ul className="text-sm text-yellow-800 space-y-1">
+              <ul className="text-sm text-yellow-400 space-y-1">
                 <li>• Test will open in <strong>fullscreen mode</strong></li>
                 <li>• Stay in fullscreen throughout the test</li>
                 <li>• If you exit fullscreen, you&apos;ll need a proctor code to continue</li>
@@ -811,7 +811,7 @@ export default function CodingTestTaking({ user }) {
                 <p className={`text-6xl font-bold ${
                   testResults.overall_score >= 90 ? 'text-green-600' :
                   testResults.overall_score >= 70 ? 'text-blue-600' :
-                  testResults.overall_score >= 50 ? 'text-yellow-600' :
+                  testResults.overall_score >= 50 ? 'text-yellow-400' :
                   'text-red-600'
                 }`}>
                   {Math.round(testResults.overall_score)}%
@@ -831,7 +831,7 @@ export default function CodingTestTaking({ user }) {
                       <span className={`text-xl font-bold ${
                         submission.score >= 90 ? 'text-green-600' :
                         submission.score >= 70 ? 'text-blue-600' :
-                        submission.score >= 50 ? 'text-yellow-600' :
+                        submission.score >= 50 ? 'text-yellow-400' :
                         'text-red-600'
                       }`}>
                         {Math.round(submission.score)}%

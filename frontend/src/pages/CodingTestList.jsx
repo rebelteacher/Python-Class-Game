@@ -73,7 +73,7 @@ export default function CodingTestList({ user }) {
     if (dueDate && now > dueDate) {
       return "bg-cyber-navy/30 text-slate-300";
     }
-    return "bg-green-100 text-green-700";
+    return "bg-green-500/20 text-green-400";
   };
 
   const getStatusText = (test) => {
@@ -147,17 +147,17 @@ export default function CodingTestList({ user }) {
                       
                       <div className="mt-3 flex flex-wrap gap-2 text-sm text-slate-400">
                         {test.chapter && (
-                          <span className="px-2 py-1 bg-blue-50 rounded">
+                          <span className="px-2 py-1 bg-blue-500/10 rounded">
                             {test.chapter}
                           </span>
                         )}
                         {test.lesson && (
-                          <span className="px-2 py-1 bg-purple-50 rounded">
+                          <span className="px-2 py-1 bg-purple-500/10 rounded">
                             {test.lesson}
                           </span>
                         )}
                         {test.time_limit_minutes > 0 && (
-                          <span className="flex items-center gap-1 px-2 py-1 bg-orange-50 rounded">
+                          <span className="flex items-center gap-1 px-2 py-1 bg-orange-500/10 rounded">
                             <Clock className="w-3 h-3" />
                             {test.time_limit_minutes} min
                           </span>
@@ -187,12 +187,12 @@ export default function CodingTestList({ user }) {
                     </div>
                     
                     {test.proctor_code && (
-                      <div className="p-3 bg-yellow-50 border border-yellow-200 rounded">
+                      <div className="p-3 bg-yellow-500/10 border border-yellow-500/30 rounded">
                         <p className="text-sm font-semibold text-yellow-900 mb-1">Proctor Code:</p>
-                        <p className="text-2xl font-mono font-bold text-yellow-800 tracking-widest">
+                        <p className="text-2xl font-mono font-bold text-yellow-400 tracking-widest">
                           {test.proctor_code}
                         </p>
-                        <p className="text-xs text-yellow-700 mt-1">
+                        <p className="text-xs text-yellow-400 mt-1">
                           Students need this code if they exit fullscreen during the test
                         </p>
                       </div>

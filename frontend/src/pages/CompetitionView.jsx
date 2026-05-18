@@ -57,8 +57,8 @@ function CompetitionView() {
 
   const getStatusBadge = (status) => {
     const styles = {
-      upcoming: 'bg-yellow-100 text-yellow-800 border-yellow-200',
-      active: 'bg-green-100 text-green-800 border-green-200',
+      upcoming: 'bg-yellow-500/20 text-yellow-400 border-yellow-500/30',
+      active: 'bg-green-500/20 text-green-400 border-green-500/30',
       completed: 'bg-cyber-navy/30 text-slate-200 border-cyber-cyan/10'
     };
     return (
@@ -170,18 +170,18 @@ function CompetitionView() {
           <Card className="mb-8 bg-gradient-to-r from-yellow-50 to-yellow-100 border-2 border-yellow-300">
             <CardContent className="py-6">
               <div className="flex items-center justify-center gap-4">
-                <Trophy className="w-12 h-12 text-yellow-600" />
+                <Trophy className="w-12 h-12 text-yellow-400" />
                 <div className="text-center">
-                  <p className="text-sm font-semibold text-yellow-800 mb-1">CHAMPION</p>
+                  <p className="text-sm font-semibold text-yellow-400 mb-1">CHAMPION</p>
                   <p className="text-2xl font-bold text-yellow-900">{winner.classroom_name}</p>
-                  <p className="text-sm text-yellow-700">
+                  <p className="text-sm text-yellow-400">
                     {winner.avg_problems_per_student} avg problems/student • {winner.avg_xp_per_student} avg XP/student
                   </p>
-                  <p className="text-xs text-yellow-600">
+                  <p className="text-xs text-yellow-400">
                     ({winner.num_students} students • {winner.problems_solved} total problems • {winner.xp_gained} total XP)
                   </p>
                 </div>
-                <Trophy className="w-12 h-12 text-yellow-600" />
+                <Trophy className="w-12 h-12 text-yellow-400" />
               </div>
             </CardContent>
           </Card>
@@ -211,9 +211,9 @@ function CompetitionView() {
                   <Card 
                     key={standing.classroom_id}
                     className={`border-2 ${
-                      standing.rank === 1 ? 'border-yellow-400 bg-yellow-50' : 
+                      standing.rank === 1 ? 'border-yellow-400 bg-yellow-500/10' : 
                       standing.rank === 2 ? 'border-gray-400 bg-cyber-navy/40' :
-                      standing.rank === 3 ? 'border-orange-400 bg-orange-50' :
+                      standing.rank === 3 ? 'border-orange-400 bg-orange-500/10' :
                       'border-cyber-cyan/10'
                     }`}
                   >
@@ -251,22 +251,22 @@ function CompetitionView() {
                       {(standing.captain || standing.mvc) && (
                         <div className="mt-4 pt-4 border-t grid md:grid-cols-2 gap-4">
                           {standing.captain && (
-                            <div className="flex items-center gap-2 bg-blue-50 p-3 rounded-lg">
+                            <div className="flex items-center gap-2 bg-blue-500/10 p-3 rounded-lg">
                               <Crown className="w-5 h-5 text-blue-600" />
                               <div>
-                                <p className="text-xs font-semibold text-blue-800">CLASS CAPTAIN</p>
+                                <p className="text-xs font-semibold text-blue-400">CLASS CAPTAIN</p>
                                 <p className="text-sm font-bold text-blue-900">{standing.captain.student_name}</p>
-                                <p className="text-xs text-blue-700">{standing.captain.problems_solved} problems</p>
+                                <p className="text-xs text-blue-400">{standing.captain.problems_solved} problems</p>
                               </div>
                             </div>
                           )}
                           {standing.mvc && (
-                            <div className="flex items-center gap-2 bg-purple-50 p-3 rounded-lg">
+                            <div className="flex items-center gap-2 bg-purple-500/10 p-3 rounded-lg">
                               <Star className="w-5 h-5 text-purple-600" />
                               <div>
-                                <p className="text-xs font-semibold text-purple-800">MVC (Most Valuable Coder)</p>
+                                <p className="text-xs font-semibold text-purple-400">MVC (Most Valuable Coder)</p>
                                 <p className="text-sm font-bold text-purple-900">{standing.mvc.student_name}</p>
-                                <p className="text-xs text-purple-700">{standing.mvc.xp_gained} XP</p>
+                                <p className="text-xs text-purple-400">{standing.mvc.xp_gained} XP</p>
                               </div>
                             </div>
                           )}
@@ -284,7 +284,7 @@ function CompetitionView() {
                               <div 
                                 key={student.student_id} 
                                 className={`flex items-center justify-between p-2 rounded ${
-                                  student.is_eligible ? 'bg-green-50' : 'bg-cyber-navy/40'
+                                  student.is_eligible ? 'bg-green-500/10' : 'bg-cyber-navy/40'
                                 }`}
                               >
                                 <div className="flex-1">
@@ -298,7 +298,7 @@ function CompetitionView() {
                                     <div className="flex-1 bg-slate-800 rounded-full h-2">
                                       <div 
                                         className={`h-2 rounded-full ${
-                                          student.is_eligible ? 'bg-green-500' : 'bg-orange-400'
+                                          student.is_eligible ? 'bg-green-500/100' : 'bg-orange-400'
                                         }`}
                                         style={{ width: `${student.progress_percent}%` }}
                                       />

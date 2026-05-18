@@ -391,11 +391,11 @@ export default function TestReports({ user }) {
                             {test.title}
                           </Label>
                           {test.results_released ? (
-                            <span className="text-xs bg-green-100 text-green-700 px-2 py-0.5 rounded-full">
+                            <span className="text-xs bg-green-500/20 text-green-400 px-2 py-0.5 rounded-full">
                               Released
                             </span>
                           ) : (
-                            <span className="text-xs bg-yellow-100 text-yellow-700 px-2 py-0.5 rounded-full">
+                            <span className="text-xs bg-yellow-500/20 text-yellow-400 px-2 py-0.5 rounded-full">
                               Not Released
                             </span>
                           )}
@@ -406,7 +406,7 @@ export default function TestReports({ user }) {
                           onClick={() => handleReleaseResults(test.id)}
                           disabled={releasingResults}
                           className={test.results_released 
-                            ? "text-yellow-600 border-yellow-300 hover:bg-yellow-50" 
+                            ? "text-yellow-400 border-yellow-300 hover:bg-yellow-500/10" 
                             : "bg-green-600 hover:bg-green-700"
                           }
                         >
@@ -494,9 +494,9 @@ export default function TestReports({ user }) {
                   <div className="flex items-center justify-between">
                     <div>
                       <p className="text-sm text-slate-400">Lowest Score</p>
-                      <p className="text-3xl font-bold text-yellow-600">{stats.lowest}%</p>
+                      <p className="text-3xl font-bold text-yellow-400">{stats.lowest}%</p>
                     </div>
-                    <TrendingDown className="w-8 h-8 text-yellow-600" />
+                    <TrendingDown className="w-8 h-8 text-yellow-400" />
                   </div>
                 </CardContent>
               </Card>
@@ -565,7 +565,7 @@ export default function TestReports({ user }) {
                               <span className={`font-bold ${
                                 result.score >= 90 ? "text-green-600" :
                                 result.score >= 80 ? "text-blue-600" :
-                                result.score >= 70 ? "text-yellow-600" :
+                                result.score >= 70 ? "text-yellow-400" :
                                 "text-red-600"
                               }`}>
                                 {result.score.toFixed(1)}%

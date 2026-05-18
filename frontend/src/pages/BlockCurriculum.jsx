@@ -83,13 +83,13 @@ const CHAPTER_COLORS = [
 // Problem type to badge styling
 const getProblemTypeBadge = (type) => {
   const styles = {
-    "Class Practice": "bg-blue-100 text-blue-700",
-    "Independent Practice": "bg-green-100 text-green-700",
-    "Paired Programming": "bg-purple-100 text-purple-700",
-    "Debugging": "bg-red-100 text-red-700",
-    "Challenge": "bg-orange-100 text-orange-700",
+    "Class Practice": "bg-blue-500/20 text-blue-400",
+    "Independent Practice": "bg-green-500/20 text-green-400",
+    "Paired Programming": "bg-purple-500/20 text-purple-400",
+    "Debugging": "bg-red-500/20 text-red-400",
+    "Challenge": "bg-orange-500/20 text-orange-400",
     "Project": "bg-pink-100 text-pink-700",
-    "Assessment": "bg-yellow-100 text-yellow-700"
+    "Assessment": "bg-yellow-500/20 text-yellow-400"
   };
   return styles[type] || "bg-cyber-navy/30 text-slate-300";
 };
@@ -439,7 +439,7 @@ export default function BlockCurriculum({ user }) {
         <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
           <Card className="hover:shadow-lg transition-shadow cursor-pointer" onClick={() => navigate("/library?type=block")}>
             <CardContent className="p-6 flex items-center gap-4">
-              <div className="p-3 bg-purple-100 rounded-lg">
+              <div className="p-3 bg-purple-500/20 rounded-lg">
                 <BookOpen className="w-6 h-6 text-purple-600" />
               </div>
               <div>
@@ -449,9 +449,9 @@ export default function BlockCurriculum({ user }) {
             </CardContent>
           </Card>
           
-          <Card className="hover:shadow-lg transition-shadow cursor-pointer border-2 border-purple-500 bg-purple-50" onClick={() => navigate("/blocks/teach")}>
+          <Card className="hover:shadow-lg transition-shadow cursor-pointer border-2 border-purple-500 bg-purple-500/10" onClick={() => navigate("/blocks/teach")}>
             <CardContent className="p-6 flex items-center gap-4">
-              <div className="p-3 bg-purple-500 rounded-lg">
+              <div className="p-3 bg-purple-500/100 rounded-lg">
                 <Play className="w-6 h-6 text-white" />
               </div>
               <div>
@@ -461,9 +461,9 @@ export default function BlockCurriculum({ user }) {
             </CardContent>
           </Card>
           
-          <Card className="hover:shadow-lg transition-shadow cursor-pointer border-2 border-blue-500 bg-blue-50" onClick={() => navigate("/turtle-blocks")}>
+          <Card className="hover:shadow-lg transition-shadow cursor-pointer border-2 border-blue-500 bg-blue-500/10" onClick={() => navigate("/turtle-blocks")}>
             <CardContent className="p-6 flex items-center gap-4">
-              <div className="p-3 bg-blue-500 rounded-lg">
+              <div className="p-3 bg-blue-500/100 rounded-lg">
                 <span className="text-2xl">🐢</span>
               </div>
               <div>
@@ -474,7 +474,7 @@ export default function BlockCurriculum({ user }) {
           </Card>
           
           <Card className="hover:shadow-lg transition-shadow cursor-pointer" onClick={() => navigate("/teacher/dashboard")}>            <CardContent className="p-6 flex items-center gap-4">
-              <div className="p-3 bg-green-100 rounded-lg">
+              <div className="p-3 bg-green-500/20 rounded-lg">
                 <Clock className="w-6 h-6 text-green-600" />
               </div>
               <div>
@@ -486,13 +486,13 @@ export default function BlockCurriculum({ user }) {
         </div>
 
         {/* Learning Objectives Banner */}
-        <Card className="mb-8 bg-gradient-to-r from-purple-100 to-indigo-100 border-purple-200">
+        <Card className="mb-8 bg-gradient-to-r from-purple-100 to-indigo-100 border-purple-500/30">
           <CardContent className="p-6">
             <div className="flex items-start gap-4">
               <Lightbulb className="w-8 h-8 text-purple-600 flex-shrink-0 mt-1" />
               <div>
                 <h3 className="font-bold text-purple-900 mb-2">Unit 1 Competencies (DOK 2-3)</h3>
-                <ul className="text-sm text-purple-800 space-y-1">
+                <ul className="text-sm text-purple-400 space-y-1">
                   <li>✓ Reinforce and apply block-based programming concepts</li>
                   <li>✓ Review, revisit, and remediate key programming concepts</li>
                   <li>✓ Prepare for transition to text-based programming</li>
@@ -613,7 +613,7 @@ export default function BlockCurriculum({ user }) {
                                 onClick={() => navigate(`/lesson/block/${encodeURIComponent(chapter)}/${encodeURIComponent(lesson)}`)}
                               >
                                 <div className="flex items-center gap-3">
-                                  <div className="w-8 h-8 bg-purple-100 rounded-full flex items-center justify-center text-purple-600 font-bold text-sm">
+                                  <div className="w-8 h-8 bg-purple-500/20 rounded-full flex items-center justify-center text-purple-600 font-bold text-sm">
                                     {lessonIndex + 1}
                                   </div>
                                   <div>
@@ -626,7 +626,7 @@ export default function BlockCurriculum({ user }) {
                                     <Button
                                       size="sm"
                                       variant="ghost"
-                                      className="text-red-500 hover:text-red-700 hover:bg-red-50"
+                                      className="text-red-500 hover:text-red-400 hover:bg-red-500/10"
                                       onClick={(e) => {
                                         e.stopPropagation();
                                         handleDeleteLesson(customLessonObj);
@@ -694,9 +694,9 @@ export default function BlockCurriculum({ user }) {
                                                 {problem.problem_type}
                                               </span>
                                               <span className={`px-2 py-0.5 rounded text-xs font-medium ${
-                                                problem.difficulty === "Easy" ? "bg-green-100 text-green-700" :
-                                                problem.difficulty === "Medium" ? "bg-yellow-100 text-yellow-700" :
-                                                "bg-red-100 text-red-700"
+                                                problem.difficulty === "Easy" ? "bg-green-500/20 text-green-400" :
+                                                problem.difficulty === "Medium" ? "bg-yellow-500/20 text-yellow-400" :
+                                                "bg-red-500/20 text-red-400"
                                               }`}>
                                                 {problem.difficulty}
                                               </span>
@@ -736,7 +736,7 @@ export default function BlockCurriculum({ user }) {
                       {/* Add Lesson Button within chapter */}
                       <Button
                         variant="ghost"
-                        className="w-full border-2 border-dashed border-cyber-cyan/10 hover:border-purple-300 hover:bg-purple-50"
+                        className="w-full border-2 border-dashed border-cyber-cyan/10 hover:border-purple-300 hover:bg-purple-500/10"
                         onClick={() => {
                           setSelectedChapterForLesson(chapter);
                           setShowAddLessonDialog(true);
@@ -810,9 +810,9 @@ export default function BlockCurriculum({ user }) {
                     {selectedProblem.problem_type}
                   </span>
                   <span className={`px-2 py-0.5 rounded text-xs font-medium ${
-                    selectedProblem.difficulty === "Easy" ? "bg-green-100 text-green-700" :
-                    selectedProblem.difficulty === "Medium" ? "bg-yellow-100 text-yellow-700" :
-                    "bg-red-100 text-red-700"
+                    selectedProblem.difficulty === "Easy" ? "bg-green-500/20 text-green-400" :
+                    selectedProblem.difficulty === "Medium" ? "bg-yellow-500/20 text-yellow-400" :
+                    "bg-red-500/20 text-red-400"
                   }`}>
                     {selectedProblem.difficulty}
                   </span>

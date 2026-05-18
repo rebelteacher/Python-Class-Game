@@ -54,6 +54,21 @@ const blocklyStyles = `
   .blocklyFieldGroup * {
     pointer-events: auto !important;
   }
+  /* Force Blockly toolbox category text to be dark/visible */
+  .blocklyToolboxCategory .blocklyTreeLabel,
+  .blocklyToolboxCategory span,
+  .blocklyTreeRow .blocklyTreeLabel {
+    color: #1e293b !important;
+    font-weight: 600 !important;
+  }
+  /* Ensure the toolbox background stays light */
+  .blocklyToolboxDiv {
+    background-color: #f1f5f9 !important;
+  }
+  /* Make the flyout background slightly visible */
+  .blocklyFlyoutBackground {
+    fill: #e2e8f0 !important;
+  }
 `;
 
 // Define turtle-specific blocks
@@ -1389,7 +1404,7 @@ const TurtleBlocklyEditor = forwardRef(({
               <Button
                 type="button"
                 size="sm"
-                className="bg-green-500 hover:bg-green-600 text-xs h-7"
+                className="bg-green-500/100 hover:bg-green-600 text-xs h-7"
                 onClick={(e) => {
                   e.preventDefault();
                   e.stopPropagation();

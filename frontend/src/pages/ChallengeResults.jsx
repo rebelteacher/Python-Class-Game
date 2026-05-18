@@ -78,7 +78,7 @@ function ChallengeResults() {
                   <>
                     <Trophy className="w-20 h-20 text-yellow-500 mx-auto mb-4" />
                     <h1 className="text-4xl font-bold text-yellow-900 mb-2">🎉 VICTORY! 🎉</h1>
-                    <p className="text-xl text-yellow-700">You defeated {opponentName}!</p>
+                    <p className="text-xl text-yellow-400">You defeated {opponentName}!</p>
                   </>
                 ) : (
                   <>
@@ -94,7 +94,7 @@ function ChallengeResults() {
 
         {/* Scores Comparison */}
         <div className="grid md:grid-cols-2 gap-6 mb-8">
-          <Card className={isWinner && bothCompleted ? 'border-2 border-yellow-400 bg-yellow-50' : ''}>
+          <Card className={isWinner && bothCompleted ? 'border-2 border-yellow-400 bg-yellow-500/10' : ''}>
             <CardHeader>
               <CardTitle className="flex items-center justify-between">
                 <span>{user.name} (You)</span>
@@ -120,7 +120,7 @@ function ChallengeResults() {
             </CardContent>
           </Card>
 
-          <Card className={!isWinner && bothCompleted ? 'border-2 border-yellow-400 bg-yellow-50' : ''}>
+          <Card className={!isWinner && bothCompleted ? 'border-2 border-yellow-400 bg-yellow-500/10' : ''}>
             <CardHeader>
               <CardTitle className="flex items-center justify-between">
                 <span>{opponentName}</span>
@@ -153,13 +153,13 @@ function ChallengeResults() {
 
         {/* Status Message */}
         {!bothCompleted && (
-          <Card className="mb-8 bg-blue-50 border-blue-200">
+          <Card className="mb-8 bg-blue-500/10 border-blue-500/30">
             <CardContent className="py-6 text-center">
               <Zap className="w-12 h-12 text-blue-500 mx-auto mb-3" />
               <p className="text-lg text-blue-900 font-semibold">
                 Waiting for {opponentName} to complete the challenge...
               </p>
-              <p className="text-sm text-blue-700 mt-2">
+              <p className="text-sm text-blue-400 mt-2">
                 Check back later to see the final results!
               </p>
             </CardContent>

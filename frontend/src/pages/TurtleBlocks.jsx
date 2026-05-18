@@ -1043,14 +1043,14 @@ export default function TurtleBlocks({ user }) {
   return (
     <div className="min-h-screen bg-cyber-black cyber-grid-bg">
       {/* Header */}
-      <div className="bg-white/80 backdrop-blur-sm border-b border-purple-200 sticky top-0 z-50">
+      <div className="bg-white/80 backdrop-blur-sm border-b border-purple-500/30 sticky top-0 z-50">
         <div className="max-w-full mx-auto px-4 py-3">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-4">
               <Button
                 variant="ghost"
                 onClick={() => navigate("/blocks-curriculum")}
-                className="hover:bg-purple-100"
+                className="hover:bg-purple-500/20"
               >
                 <ArrowLeft className="w-4 h-4 mr-2" />
                 Back to Curriculum
@@ -1116,7 +1116,7 @@ export default function TurtleBlocks({ user }) {
           {/* Block Editor / Code View */}
           <ResizablePanel defaultSize={55} minSize={30}>
             <div className="h-full p-4">
-              <Card className="h-full overflow-hidden shadow-lg border-2 border-purple-200">
+              <Card className="h-full overflow-hidden shadow-lg border-2 border-purple-500/30">
                 <CardContent className="p-0 h-full relative">
                   {/* Code View */}
                   <div 
@@ -1144,7 +1144,7 @@ export default function TurtleBlocks({ user }) {
           {/* Turtle Canvas */}
           <ResizablePanel defaultSize={45} minSize={30}>
             <div className="h-full p-4">
-              <Card className="h-full overflow-hidden shadow-lg border-2 border-blue-200">
+              <Card className="h-full overflow-hidden shadow-lg border-2 border-blue-500/30">
                 <CardContent className="p-4 h-full flex flex-col">
                   <div className="flex items-center justify-between mb-3">
                     <div className="flex items-center gap-2">
@@ -1155,7 +1155,7 @@ export default function TurtleBlocks({ user }) {
                       variant="ghost"
                       size="sm"
                       onClick={() => setShowGrid(!showGrid)}
-                      className={showGrid ? "bg-blue-100" : ""}
+                      className={showGrid ? "bg-blue-500/20" : ""}
                     >
                       <Grid className="w-4 h-4" />
                     </Button>

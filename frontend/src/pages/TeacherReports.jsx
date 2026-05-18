@@ -384,7 +384,7 @@ export default function TeacherReports({ user }) {
             )}
 
             {/* Report Description */}
-            <Card className="bg-blue-50 border-blue-200">
+            <Card className="bg-blue-500/10 border-blue-500/30">
               <CardContent className="pt-4">
                 <div className="flex gap-3">
                   <AlertCircle className="w-5 h-5 text-blue-600 flex-shrink-0 mt-0.5" />
@@ -474,9 +474,9 @@ export default function TeacherReports({ user }) {
                         {reportData.assignments.map(assignment => {
                           const scoreData = student.scores[assignment.id];
                           const score = scoreData ? scoreData.average_score : 0;
-                          const bgColor = score >= 90 ? "bg-green-100" : 
-                                        score >= 70 ? "bg-yellow-100" : 
-                                        score > 0 ? "bg-orange-100" : "bg-red-100";
+                          const bgColor = score >= 90 ? "bg-green-500/20" : 
+                                        score >= 70 ? "bg-yellow-500/20" : 
+                                        score > 0 ? "bg-orange-500/20" : "bg-red-500/20";
                           
                           return (
                             <td key={assignment.id} className={`border border-cyber-cyan/15 px-4 py-2 text-center ${bgColor}`}>
@@ -516,7 +516,7 @@ export default function TeacherReports({ user }) {
                     
                     {student.missing_assignments.length > 0 && (
                       <div className="mb-3">
-                        <h4 className="font-medium text-red-700 mb-2">Missing (Not Started):</h4>
+                        <h4 className="font-medium text-red-400 mb-2">Missing (Not Started):</h4>
                         <ul className="list-disc list-inside space-y-1 ml-2">
                           {student.missing_assignments.map(assignment => (
                             <li key={assignment.assignment_id} className="text-sm">
@@ -529,7 +529,7 @@ export default function TeacherReports({ user }) {
                     
                     {student.incomplete_assignments.length > 0 && (
                       <div>
-                        <h4 className="font-medium text-orange-700 mb-2">Incomplete:</h4>
+                        <h4 className="font-medium text-orange-400 mb-2">Incomplete:</h4>
                         <ul className="list-disc list-inside space-y-1 ml-2">
                           {student.incomplete_assignments.map(assignment => (
                             <li key={assignment.assignment_id} className="text-sm">

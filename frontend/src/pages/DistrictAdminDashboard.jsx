@@ -86,7 +86,7 @@ function DistrictAdminDashboard({ user }) {
 
         {/* Stats Cards */}
         <div className="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
-          <Card className="border-2 border-blue-200 bg-cyber-black cyber-grid-bg">
+          <Card className="border-2 border-blue-500/30 bg-cyber-black cyber-grid-bg">
             <CardContent className="pt-6">
               <div className="flex items-center justify-between">
                 <div>
@@ -110,7 +110,7 @@ function DistrictAdminDashboard({ user }) {
             </CardContent>
           </Card>
 
-          <Card className="border-2 border-purple-200 bg-gradient-to-br from-purple-50 to-purple-100">
+          <Card className="border-2 border-purple-500/30 bg-gradient-to-br from-purple-50 to-purple-100">
             <CardContent className="pt-6">
               <div className="flex items-center justify-between">
                 <div>
@@ -192,7 +192,7 @@ function DistrictAdminDashboard({ user }) {
                           <td className="p-3 text-slate-400">{teacher.email}</td>
                           <td className="p-3">{teacher.school || 'Not specified'}</td>
                           <td className="p-3">
-                            <span className="px-2 py-1 bg-green-100 text-green-700 text-xs rounded-full">
+                            <span className="px-2 py-1 bg-green-500/20 text-green-400 text-xs rounded-full">
                               Active
                             </span>
                           </td>

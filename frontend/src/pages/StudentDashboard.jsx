@@ -606,7 +606,7 @@ export default function StudentDashboard({ user, setUser, refreshUser }) {
               </div>
               <div className="flex justify-between">
                 <span className="text-slate-400">Perfect Scores:</span>
-                <span className="font-semibold text-yellow-600">⭐ {userProfile.perfect_scores || 0}</span>
+                <span className="font-semibold text-yellow-400">⭐ {userProfile.perfect_scores || 0}</span>
               </div>
               <div className="flex justify-between">
                 <span className="text-slate-400">Current Streak:</span>
@@ -632,7 +632,7 @@ export default function StudentDashboard({ user, setUser, refreshUser }) {
               <Button 
                 data-testid="open-shop-btn"
                 onClick={() => setShopDialogOpen(true)} 
-                className="w-full bg-orange-500 hover:bg-orange-600 gap-2"
+                className="w-full bg-orange-500/100 hover:bg-orange-600 gap-2"
                 size="sm"
               >
                 <ShoppingBag className="w-4 h-4" />
@@ -674,7 +674,7 @@ export default function StudentDashboard({ user, setUser, refreshUser }) {
         )}
 
         {/* Challenge Section */}
-        <Card className="mb-8 bg-gradient-to-r from-orange-50 to-red-50 border-2 border-orange-200">
+        <Card className="mb-8 bg-gradient-to-r from-orange-50 to-red-50 border-2 border-orange-500/30">
           <CardHeader>
             <CardTitle className="text-2xl flex items-center gap-2">
               <Trophy className="w-6 h-6 text-orange-600" />
@@ -766,7 +766,7 @@ export default function StudentDashboard({ user, setUser, refreshUser }) {
 
             {/* Pending Challenge Notifications - Inside Battle Arena */}
             {pendingChallenges.length > 0 && (
-              <div className="mt-6 pt-6 border-t border-orange-200">
+              <div className="mt-6 pt-6 border-t border-orange-500/30">
                 <h3 className="text-lg font-bold text-red-600 mb-3 flex items-center gap-2 animate-pulse">
                   <Zap className="w-5 h-5" />
                   ⚔️ Challenge Notifications!
@@ -778,7 +778,7 @@ export default function StudentDashboard({ user, setUser, refreshUser }) {
                     
                     return (
                       <div key={challenge.id} className={`border-2 rounded-lg p-4 ${
-                        isAccepted ? 'border-green-400 bg-green-50' : 'border-red-400 bg-red-50'
+                        isAccepted ? 'border-green-400 bg-green-500/10' : 'border-red-400 bg-red-500/10'
                       }`}>
                         <div className="flex flex-col gap-3">
                           <div>
@@ -787,7 +787,7 @@ export default function StudentDashboard({ user, setUser, refreshUser }) {
                                 <p className="font-bold text-green-900">
                                   🎉 {challenge.challenged_name} accepted your challenge!
                                 </p>
-                                <p className="text-sm text-green-700">
+                                <p className="text-sm text-green-400">
                                   Ready to battle? Click "Start Battle" below!
                                 </p>
                               </>
@@ -796,7 +796,7 @@ export default function StudentDashboard({ user, setUser, refreshUser }) {
                                 <p className="font-bold text-red-900">
                                   {challenge.challenger_name} has challenged you to a duel!
                                 </p>
-                                <p className="text-sm text-red-700">
+                                <p className="text-sm text-red-400">
                                   5-minute coding battle • Random problem
                                 </p>
                               </>
@@ -821,7 +821,7 @@ export default function StudentDashboard({ user, setUser, refreshUser }) {
                                 <Button
                                   onClick={() => handleDeclineChallenge(challenge.id)}
                                   variant="outline"
-                                  className="flex-1 border-red-300 text-red-700 hover:bg-red-100"
+                                  className="flex-1 border-red-300 text-red-400 hover:bg-red-500/20"
                                 >
                                   Decline 🐔
                                 </Button>
@@ -895,12 +895,12 @@ export default function StudentDashboard({ user, setUser, refreshUser }) {
             <CardContent className="p-6">
               <div className="flex items-start justify-between">
                 <div className="flex items-start gap-4">
-                  <div className="p-3 bg-indigo-100 rounded-lg">
+                  <div className="p-3 bg-indigo-500/20 rounded-lg">
                     <Video className="w-8 h-8 text-cyber-cyan" />
                   </div>
                   <div>
                     <h3 className="text-lg font-semibold text-indigo-900">Video Library</h3>
-                    <p className="text-sm text-indigo-700">
+                    <p className="text-sm text-indigo-400">
                       Watch tutorial videos organized by chapter - learn at your own pace!
                     </p>
                   </div>
@@ -919,16 +919,16 @@ export default function StudentDashboard({ user, setUser, refreshUser }) {
 
         {/* Practice Sandbox Card */}
         <div className="mb-8">
-          <Card className="border-2 border-purple-200 bg-gradient-to-br from-purple-50 to-pink-50">
+          <Card className="border-2 border-purple-500/30 bg-gradient-to-br from-purple-50 to-pink-50">
             <CardContent className="p-6">
               <div className="flex items-start justify-between">
                 <div className="flex items-start gap-4">
-                  <div className="p-3 bg-purple-100 rounded-lg">
+                  <div className="p-3 bg-purple-500/20 rounded-lg">
                     <Code2 className="w-8 h-8 text-purple-600" />
                   </div>
                   <div>
                     <h3 className="text-lg font-semibold text-purple-900">Practice Coding</h3>
-                    <p className="text-sm text-purple-700">
+                    <p className="text-sm text-purple-400">
                       Try out your Python skills in a free-style coding sandbox - no assignments, just practice!
                     </p>
                   </div>
@@ -947,16 +947,16 @@ export default function StudentDashboard({ user, setUser, refreshUser }) {
 
         {/* Turtle Graphics Card */}
         <div className="mb-8">
-          <Card className="border-2 border-green-200 bg-gradient-to-br from-green-50 to-blue-50">
+          <Card className="border-2 border-green-500/30 bg-gradient-to-br from-green-50 to-blue-50">
             <CardContent className="p-6">
               <div className="flex items-start justify-between">
                 <div className="flex items-start gap-4">
-                  <div className="p-3 bg-green-100 rounded-lg text-2xl">
+                  <div className="p-3 bg-green-500/20 rounded-lg text-2xl">
                     🐢
                   </div>
                   <div>
                     <h3 className="text-lg font-semibold text-green-900">Turtle Graphics</h3>
-                    <p className="text-sm text-green-700">
+                    <p className="text-sm text-green-400">
                       Learn Python with visual programming! Draw shapes, patterns, and art with turtle graphics.
                     </p>
                   </div>
@@ -976,7 +976,7 @@ export default function StudentDashboard({ user, setUser, refreshUser }) {
         {competitions.length > 0 && (
           <div className="mb-8">
             <h2 className="text-2xl font-bold text-white mb-4 flex items-center gap-2">
-              <Trophy className="w-6 h-6 text-yellow-600" />
+              <Trophy className="w-6 h-6 text-yellow-400" />
               Active Competitions
             </h2>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -990,7 +990,7 @@ export default function StudentDashboard({ user, setUser, refreshUser }) {
                   <Card 
                     key={comp.id} 
                     className={`hover:shadow-lg transition-shadow cursor-pointer ${
-                      isActive ? 'border-2 border-green-400 bg-green-50' : 'border-2 border-yellow-400 bg-yellow-50'
+                      isActive ? 'border-2 border-green-400 bg-green-500/10' : 'border-2 border-yellow-400 bg-yellow-500/10'
                     }`}
                     onClick={() => navigate(`/student/competition/${comp.id}`)}
                   >
@@ -998,7 +998,7 @@ export default function StudentDashboard({ user, setUser, refreshUser }) {
                       <div className="flex justify-between items-start">
                         <CardTitle className="text-lg">{comp.title}</CardTitle>
                         <span className={`px-2 py-1 text-xs rounded font-semibold ${
-                          isActive ? 'bg-green-100 text-green-700' : 'bg-yellow-100 text-yellow-700'
+                          isActive ? 'bg-green-500/20 text-green-400' : 'bg-yellow-500/20 text-yellow-400'
                         }`}>
                           {isActive ? '🔴 LIVE' : 'UPCOMING'}
                         </span>
@@ -1056,11 +1056,11 @@ export default function StudentDashboard({ user, setUser, refreshUser }) {
                       <div className="flex justify-between items-start">
                         <CardTitle className="text-lg">{test.title}</CardTitle>
                         {isOverdue ? (
-                          <span className="px-2 py-1 bg-red-100 text-red-700 text-xs rounded">
+                          <span className="px-2 py-1 bg-red-500/20 text-red-400 text-xs rounded">
                             Overdue
                           </span>
                         ) : (
-                          <span className="px-2 py-1 bg-green-100 text-green-700 text-xs rounded">
+                          <span className="px-2 py-1 bg-green-500/20 text-green-400 text-xs rounded">
                             Available
                           </span>
                         )}
@@ -1289,7 +1289,7 @@ export default function StudentDashboard({ user, setUser, refreshUser }) {
                                 <Folder className="w-6 h-6 text-green-500" />
                               )}
                               <h3 className="text-lg font-semibold text-white">{chapter}</h3>
-                              <span className="ml-auto text-sm text-slate-500 bg-green-50 px-3 py-1 rounded-full">
+                              <span className="ml-auto text-sm text-slate-500 bg-green-500/10 px-3 py-1 rounded-full">
                                 {Object.keys(lessons).length} lesson{Object.keys(lessons).length !== 1 ? 's' : ''}
                               </span>
                             </div>
@@ -1303,10 +1303,10 @@ export default function StudentDashboard({ user, setUser, refreshUser }) {
                                   const assignments = lessons[lesson];
                                   
                                   return (
-                                    <div key={lessonKey} className="border rounded-lg bg-green-50">
+                                    <div key={lessonKey} className="border rounded-lg bg-green-500/10">
                                       {/* Lesson Folder */}
                                       <div
-                                        className="flex items-center gap-3 p-3 cursor-pointer hover:bg-green-100 transition-colors rounded-lg"
+                                        className="flex items-center gap-3 p-3 cursor-pointer hover:bg-green-500/20 transition-colors rounded-lg"
                                         onClick={() => toggleLesson(lessonKey)}
                                       >
                                         {isLessonExpanded ? (
