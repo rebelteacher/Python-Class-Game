@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Textarea } from "@/components/ui/textarea";
-import { ArrowLeft, Play, Send, CheckCircle, XCircle, Code2, Lightbulb, X, BookOpen, Cpu, RotateCcw, ExternalLink, Blocks, Pencil, Save } from "lucide-react";
+import { ArrowLeft, Play, Send, CheckCircle, XCircle, Code2, Lightbulb, X, BookOpen, Cpu, RotateCcw, ExternalLink, Blocks, Pencil, Save, Trash2 } from "lucide-react";
 import Editor from "@monaco-editor/react";
 import { Panel, PanelGroup, PanelResizeHandle } from "react-resizable-panels";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
@@ -403,6 +403,34 @@ export default function AssignmentPage({ user, lessonData }) {
       setSavingInstructions(false);
     }
   };
+
+  const handleRemoveProblemFromLesson = async (problemId, problemTitle) => {
+    if (!assignment?.is_lesson) return;
+    if (!window.confirm(`Remove "${problemTitle}" from this lesson? The problem will still exist in the library.`)) return;
+    
+    try {
+      await axios.post(`${API}/curriculum/remove-problem-from-lesson`, {
+        problem_id: problemId,
+      }, { withCredentials: true });
+      
+      // Remove from local state
+      const updatedProblems = assignment.problems.filter(p => p.id !== problemId);
+      const updatedProblemIds = assignment.problem_ids.filter(id => id !== problemId);
+      setAssignment({ ...assignment, problems: updatedProblems, problem_ids: updatedProblemIds });
+      
+      // Adjust currentProblemIndex if needed
+      if (currentProblemIndex >= updatedProblems.length) {
+        setCurrentProblemIndex(Math.max(0, updatedProblems.length - 1));
+      }
+      
+      toast.success(`Removed "${problemTitle}" from lesson`);
+    } catch (err) {
+      console.error("Error removing problem:", err);
+      toast.error("Failed to remove problem");
+    }
+  };
+
+
 
 
   const handleRunCode = async (providedInput = null) => {
@@ -903,18 +931,34 @@ export default function AssignmentPage({ user, lessonData }) {
                 }
                 
                 return (
-                  <button
-                    key={problem.id}
-                    onClick={() => setCurrentProblemIndex(index)}
-                    className={`px-4 py-2 rounded-lg text-sm font-medium whitespace-nowrap transition-colors ${colorClass}`}
-                  >
-                    {problemScore === 100 && '✓ '}
-                    {isFinal && problemScore !== 100 && '✔ '}
-                    {index + 1}. {problem.title}
-                    {problemScore !== null && problemScore !== undefined && (
-                      <span className="ml-1 text-xs">({problemScore.toFixed(0)}%)</span>
+                  <div key={problem.id} className="relative inline-flex group">
+                    <button
+                      onClick={() => setCurrentProblemIndex(index)}
+                      className={`px-4 py-2 rounded-lg text-sm font-medium whitespace-nowrap transition-colors ${colorClass} ${
+                        assignment?.is_lesson && isTeacher ? 'pr-8' : ''
+                      }`}
+                    >
+                      {problemScore === 100 && '✓ '}
+                      {isFinal && problemScore !== 100 && '✔ '}
+                      {index + 1}. {problem.title}
+                      {problemScore !== null && problemScore !== undefined && (
+                        <span className="ml-1 text-xs">({problemScore.toFixed(0)}%)</span>
+                      )}
+                    </button>
+                    {assignment?.is_lesson && isTeacher && (
+                      <button
+                        data-testid={`remove-problem-${problem.id}`}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleRemoveProblemFromLesson(problem.id, problem.title);
+                        }}
+                        className="absolute -top-1 -right-1 w-5 h-5 bg-cyber-red text-white rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity hover:shadow-[0_0_8px_rgba(255,51,102,0.5)] z-10"
+                        title="Remove from lesson"
+                      >
+                        <X className="w-3 h-3" />
+                      </button>
                     )}
-                  </button>
+                  </div>
                 );
               })}
             </div>
@@ -1872,77 +1916,32 @@ export default function AssignmentPage({ user, lessonData }) {
             ) : (
               // Teacher Demo/Sandbox Mode - Interactive coding without submissions
               assignment.problems?.[currentProblemIndex]?.assignment_type === "block" ? (
-                /* Block-Based Teacher Demo - Scratch Integration */
-                <div className="h-full flex flex-col">
-                  {/* Header */}
-                  <div className="flex items-center justify-between bg-gradient-to-r from-orange-500 to-yellow-500 text-white p-4 rounded-t-lg">
-                    <div className="flex items-center gap-3">
-                      <img 
-                        src="https://scratch.mit.edu/images/logo_sm.png" 
-                        alt="Scratch" 
-                        className="h-10 bg-cyber-navy/60 rounded p-1"
-                      />
-                      <div>
-                        <span className="font-bold text-xl">Scratch Teaching Mode</span>
-                        <p className="text-sm text-orange-100">🎓 Teacher Demo - Students upload screenshots to submit</p>
-                      </div>
-                    </div>
+                /* Block-Based Teacher Mode - Same editor as students */
+                <div className="h-full flex flex-col pr-0">
+                  {/* Compact header */}
+                  <div className="flex items-center justify-between bg-cyber-navy/60 border-b px-3 py-2 flex-shrink-0">
+                    <span className="font-semibold text-slate-300 font-orbitron text-sm uppercase tracking-wider">Block Coding — Teacher Preview</span>
                   </div>
-                  
-                  {/* Problem info */}
-                  <div className="bg-orange-50 border-b border-orange-200 p-4">
-                    <h3 className="font-bold text-orange-800 mb-1">📋 Challenge:</h3>
-                    <p className="text-slate-300">
-                      {assignment.problems?.[currentProblemIndex]?.description || "Complete the Scratch challenge"}
-                    </p>
-                  </div>
-                  
-                  {/* Main content area */}
-                  <div className="flex-1 flex flex-col items-center justify-center bg-gradient-to-br from-orange-100 to-yellow-100 p-8">
-                    <div className="text-center max-w-lg">
-                      <div className="text-8xl mb-6">🐱</div>
-                      <h2 className="text-2xl font-bold text-orange-800 mb-4">Ready to Teach with Scratch!</h2>
-                      <p className="text-slate-400 mb-6">
-                        Click the button below to open the Scratch editor. Share your screen with students while you demonstrate the solution.
-                      </p>
-                      
-                      <Button
-                        onClick={() => window.open('https://scratch.mit.edu/projects/editor/', '_blank')}
-                        className="bg-orange-500 hover:bg-orange-600 text-white px-8 py-4 text-lg h-auto"
-                      >
-                        <ExternalLink className="w-5 h-5 mr-2" />
-                        Open Scratch Editor
-                      </Button>
-                      
-                      <div className="mt-8 grid grid-cols-2 gap-4">
-                        <Button
-                          onClick={() => navigate('/blocks/teach')}
-                          variant="outline"
-                          className="border-orange-300 text-orange-700 hover:bg-orange-100"
-                        >
-                          <BookOpen className="w-4 h-4 mr-2" />
-                          Teaching Guide
-                        </Button>
-                        <Button
-                          onClick={() => navigate('/blocks-curriculum')}
-                          variant="outline"
-                          className="border-orange-300 text-orange-700 hover:bg-orange-100"
-                        >
-                          📚 Curriculum
-                        </Button>
-                      </div>
-                    </div>
-                  </div>
-                  
-                  {/* Footer tips */}
-                  <div className="bg-orange-200 p-3">
-                    <div className="flex items-center justify-between">
-                      <div className="text-sm text-orange-800">
-                        <strong>💡 Teaching Tips:</strong>
-                        <span className="ml-2">Share your screen • Students follow along • They submit screenshots for grading</span>
-                      </div>
-                      <span className="text-green-700 font-semibold text-sm">🎓 Teacher Mode</span>
-                    </div>
+
+                  {/* TurtleBlocklyEditor with inline AnimatedTurtle */}
+                  <div className="flex-1 overflow-hidden">
+                    <TurtleBlocklyEditor
+                      key={`teacher-block-editor-${currentProblemIndex}-${assignment.problems[currentProblemIndex]?.id || 'new'}`}
+                      ref={turtleBlocksRef}
+                      onCodeChange={(pythonCode, xml) => {
+                        setCode(pythonCode);
+                        setBlockCode(pythonCode);
+                        if (xml) {
+                          setBlockXml(xml);
+                          const currentProblemId = getCurrentProblemId();
+                          const newState = { ...savedXmlPerProblem, [currentProblemId]: xml };
+                          setSavedXmlPerProblem(newState);
+                          localStorage.setItem(`saved_xml_${effectiveAssignmentId}`, JSON.stringify(newState));
+                        }
+                      }}
+                      initialXml={savedXmlPerProblem[getCurrentProblemId()] || ""}
+                      showMonacoEditor={false}
+                    />
                   </div>
                 </div>
               ) : (

@@ -2434,6 +2434,33 @@ async def save_lesson_instructions(request: Request):
     return {"success": True, "message": "Instructions saved"}
 
 
+@api_router.post("/curriculum/remove-problem-from-lesson")
+async def remove_problem_from_lesson(request: Request):
+    """Remove a problem from a lesson by clearing its lesson field (teacher only).
+    The problem stays in the database but is no longer associated with the lesson."""
+    user = await get_current_user(request)
+    if user["role"] != "teacher":
+        raise HTTPException(status_code=403, detail="Only teachers can remove problems from lessons")
+    
+    body = await request.json()
+    problem_id = body.get("problem_id")
+    
+    if not problem_id:
+        raise HTTPException(status_code=400, detail="problem_id is required")
+    
+    # Clear the lesson field so the problem is no longer in any lesson
+    result = await db.problems.update_one(
+        {"id": problem_id},
+        {"$set": {"lesson": "", "removed_from_lesson_by": user["id"], "removed_at": datetime.now(timezone.utc).isoformat()}}
+    )
+    
+    if result.modified_count == 0:
+        raise HTTPException(status_code=404, detail="Problem not found")
+    
+    return {"success": True, "message": "Problem removed from lesson"}
+
+
+
 # ----- Code Execution -----
 
 def normalize_output(output: str) -> str:
