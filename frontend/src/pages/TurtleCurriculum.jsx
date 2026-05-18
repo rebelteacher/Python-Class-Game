@@ -705,10 +705,14 @@ export default function TurtleCurriculum({ user }) {
                         <div className="flex items-center gap-2">
                           <Button
                             size="sm"
-                            onClick={() => handleAssignLesson(lesson, unit)}
-                            className="bg-green-600 hover:bg-green-700"
+                            onClick={() => {
+                              const chapterName = CHAPTER_MAPPING[unit.id];
+                              navigate(`/lesson/turtle/${encodeURIComponent(chapterName || "Chapter 1: First Steps")}/${encodeURIComponent("Lesson " + (index + 1) + ": " + lesson.title)}`);
+                            }}
+                            className="bg-cyber-cyan text-cyber-black font-orbitron text-xs uppercase tracking-widest rounded-none border border-cyber-cyan hover:shadow-[0_0_12px_rgba(0,240,255,0.5)] font-bold gap-1 transition-all"
                           >
-                            Assign to Class
+                            <Play className="w-4 h-4" />
+                            Start Lesson
                           </Button>
                           <Button
                             size="sm"

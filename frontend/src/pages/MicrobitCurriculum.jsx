@@ -393,12 +393,11 @@ export default function MicrobitCurriculum({ user }) {
                               <Button
                                 size="sm"
                                 onClick={() => {
-                                  setSelectedLesson(lesson);
-                                  setShowAssignDialog(true);
+                                  navigate(`/lesson/microbit/${encodeURIComponent(unit.title)}/${encodeURIComponent(lesson.title)}`);
                                 }}
-                                className="bg-cyan-600 hover:bg-cyan-700"
+                                className="bg-cyber-cyan text-cyber-black font-orbitron text-xs uppercase tracking-widest rounded-none border border-cyber-cyan hover:shadow-[0_0_12px_rgba(0,240,255,0.5)] font-bold gap-1 transition-all"
                               >
-                                Assign to Class
+                                Start Lesson
                               </Button>
                             </div>
                           )}

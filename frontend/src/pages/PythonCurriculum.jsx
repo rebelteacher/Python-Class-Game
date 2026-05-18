@@ -813,6 +813,16 @@ export default function PythonCurriculum({ user }) {
                             </div>
                           </div>
                           <div className="flex items-center gap-2">
+                            <Button
+                              size="sm"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                navigate(`/lesson/code/${encodeURIComponent(unit.title)}/${encodeURIComponent(`Lesson ${lessonIndex + 1} ${lesson.title}`)}`);
+                              }}
+                              className="bg-cyber-cyan text-cyber-black font-orbitron text-xs uppercase tracking-widest rounded-none border border-cyber-cyan hover:shadow-[0_0_12px_rgba(0,240,255,0.5)] font-bold gap-1 transition-all"
+                            >
+                              Start Lesson
+                            </Button>
                             <Button 
                               size="sm" 
                               variant="outline"

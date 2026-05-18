@@ -610,7 +610,7 @@ export default function BlockCurriculum({ user }) {
                               {/* Lesson Header */}
                               <div
                                 className="flex items-center justify-between p-4 bg-cyber-navy/40 cursor-pointer hover:bg-cyber-navy/30"
-                                onClick={() => toggleLesson(lessonKey)}
+                                onClick={() => navigate(`/lesson/block/${encodeURIComponent(chapter)}/${encodeURIComponent(lesson)}`)}
                               >
                                 <div className="flex items-center gap-3">
                                   <div className="w-8 h-8 bg-purple-100 rounded-full flex items-center justify-center text-purple-600 font-bold text-sm">
@@ -645,6 +645,17 @@ export default function BlockCurriculum({ user }) {
                                   >
                                     <BookOpen className="w-4 h-4 mr-1" />
                                     View in Library
+                                  </Button>
+                                  <Button
+                                    size="sm"
+                                    onClick={(e) => {
+                                      e.stopPropagation();
+                                      navigate(`/lesson/block/${encodeURIComponent(chapter)}/${encodeURIComponent(lesson)}`);
+                                    }}
+                                    className="bg-cyber-cyan text-cyber-black font-orbitron text-xs uppercase tracking-widest rounded-none border border-cyber-cyan hover:shadow-[0_0_12px_rgba(0,240,255,0.5)] font-bold gap-1 transition-all"
+                                  >
+                                    <Play className="w-4 h-4" />
+                                    Start Lesson
                                   </Button>
                                   {isLessonExpanded ? (
                                     <ChevronDown className="w-5 h-5 text-slate-500" />
