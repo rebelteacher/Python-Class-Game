@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Textarea } from "@/components/ui/textarea";
-import { ArrowLeft, Play, Send, CheckCircle, XCircle, Code2, Lightbulb, X, BookOpen, Cpu, RotateCcw, ExternalLink, Blocks } from "lucide-react";
+import { ArrowLeft, Play, Send, CheckCircle, XCircle, Code2, Lightbulb, X, BookOpen, Cpu, RotateCcw, ExternalLink, Blocks, Pencil, Save } from "lucide-react";
 import Editor from "@monaco-editor/react";
 import { Panel, PanelGroup, PanelResizeHandle } from "react-resizable-panels";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
@@ -26,6 +26,37 @@ import TurtleBlocklyEditor from "@/components/TurtleBlocklyEditor";
 
 const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
 const API = `${BACKEND_URL}/api`;
+
+// Format markdown-like content into styled HTML for lesson instructions
+const formatLessonMarkdown = (content) => {
+  if (!content) return "";
+  const escapeHtml = (text) => text
+    .replace(/&/g, '&amp;').replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+
+  let result = content;
+  // Fenced code blocks
+  result = result.replace(/```(\w+)?\n([\s\S]*?)```/g, (_, lang, code) => {
+    return `<pre class="bg-[#0A0E17] p-3 rounded border border-[#00F0FF]/20 overflow-x-auto my-3"><code class="text-[#39FF14] font-mono text-xs whitespace-pre-wrap">${escapeHtml(code.trim())}</code></pre>`;
+  });
+  // Inline code
+  result = result.replace(/`([^`]+)`/g, (_, code) => {
+    return `<code class="bg-[#0F172A] px-1 py-0.5 rounded text-[#39FF14] font-mono text-xs">${escapeHtml(code)}</code>`;
+  });
+  // Markdown formatting
+  result = result
+    .replace(/^### (.*$)/gim, '<h3 class="text-sm font-bold text-[#39FF14] mb-1 mt-3 font-orbitron uppercase tracking-wider">$1</h3>')
+    .replace(/^## (.*$)/gim, '<h2 class="text-base font-bold text-[#FF00AA] mb-2 mt-4 font-orbitron uppercase tracking-wider">$1</h2>')
+    .replace(/^# (.*$)/gim, '<h1 class="text-lg font-bold text-[#00F0FF] mb-2 font-orbitron uppercase tracking-wider">$1</h1>')
+    .replace(/\*\*(.*?)\*\*/g, '<strong class="text-[#00F0FF]">$1</strong>')
+    .replace(/\*(.*?)\*/g, '<em class="text-[#FF00AA]">$1</em>')
+    .replace(/^- (.*$)/gim, '<li class="ml-3 text-slate-300 mb-1 flex items-start gap-1.5 text-sm"><span class="text-[#00F0FF] mt-0.5 text-xs">&#9656;</span><span>$1</span></li>')
+    .replace(/\n\n/g, '</p><p class="mb-2 text-slate-300 leading-relaxed text-sm">')
+    .replace(/\n/g, '<br>');
+  return `<p class="mb-2 text-slate-300 leading-relaxed text-sm">${result}</p>`;
+};
+
+
 
 export default function AssignmentPage({ user, lessonData }) {
   const { assignmentId } = useParams();
@@ -48,6 +79,13 @@ export default function AssignmentPage({ user, lessonData }) {
   const [currentProblemIndex, setCurrentProblemIndex] = useState(0);
   const [darkMode, setDarkMode] = useState(false); // Dark mode toggle
   const [markingFinal, setMarkingFinal] = useState(false);
+  
+  // Lesson instructions state
+  const [lessonInstructions, setLessonInstructions] = useState("");
+  const [editingInstructions, setEditingInstructions] = useState(false);
+  const [instructionsDraft, setInstructionsDraft] = useState("");
+  const [savingInstructions, setSavingInstructions] = useState(false);
+  const [lessonView, setLessonView] = useState("instruction"); // "instruction" | "practice"
   const [testInput, setTestInput] = useState(""); // For input() functions
   const [showInteractiveDialog, setShowInteractiveDialog] = useState(false); // Interactive input mode
   
@@ -270,6 +308,8 @@ export default function AssignmentPage({ user, lessonData }) {
       // If lessonData is provided (auto-assign), use it directly
       if (lessonData) {
         setAssignment(lessonData);
+        setLessonInstructions(lessonData.instructions || "");
+        // Start on the first Class Practice problem for instruction view
         const starterCode = lessonData.problems?.[0]?.starter_code || "# Write your code here\n";
         setCode(starterCode);
         setLoading(false);
@@ -342,6 +382,28 @@ export default function AssignmentPage({ user, lessonData }) {
       console.error("Error fetching submissions:", error);
     }
   };
+
+  const handleSaveInstructions = async () => {
+    if (!assignment?.is_lesson) return;
+    setSavingInstructions(true);
+    try {
+      await axios.put(`${API}/curriculum/lesson-instructions`, {
+        assignment_type: assignment.assignment_type,
+        chapter: assignment.chapter,
+        lesson: assignment.lesson,
+        instructions: instructionsDraft,
+      }, { withCredentials: true });
+      setLessonInstructions(instructionsDraft);
+      setEditingInstructions(false);
+      toast.success("Instructions saved!");
+    } catch (err) {
+      console.error("Error saving instructions:", err);
+      toast.error("Failed to save instructions");
+    } finally {
+      setSavingInstructions(false);
+    }
+  };
+
 
   const handleRunCode = async (providedInput = null) => {
     // Get current problem
@@ -868,12 +930,67 @@ export default function AssignmentPage({ user, lessonData }) {
             <div className="space-y-4 pr-2 h-full overflow-y-auto pl-0">
               <Card data-testid="assignment-instructions" className="ml-0 rounded-l-none border-l-0">
                 <CardHeader className="pb-2 px-3">
-                  <CardTitle className="text-base">Instructions</CardTitle>
+                  <div className="flex items-center justify-between">
+                    <CardTitle className="text-base">Instructions</CardTitle>
+                    {/* Edit button for teacher on lesson pages */}
+                    {assignment?.is_lesson && user?.role === "teacher" && !editingInstructions && (
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        data-testid="edit-instructions-btn"
+                        onClick={() => { setInstructionsDraft(lessonInstructions); setEditingInstructions(true); }}
+                        className="h-7 px-2 text-cyber-cyan hover:text-cyber-cyan/80 hover:bg-cyber-cyan/10 rounded-none"
+                      >
+                        <Pencil className="w-3.5 h-3.5 mr-1" />
+                        <span className="text-xs font-orbitron uppercase tracking-wider">Edit</span>
+                      </Button>
+                    )}
+                  </div>
                 </CardHeader>
                 <CardContent className="pt-0 px-3">
-                  <p className="text-slate-300 whitespace-pre-wrap text-sm">
+                  {/* Lesson instructions editing mode */}
+                  {assignment?.is_lesson && editingInstructions ? (
+                    <div className="space-y-2">
+                      <Textarea
+                        data-testid="lesson-instructions-editor"
+                        value={instructionsDraft}
+                        onChange={(e) => setInstructionsDraft(e.target.value)}
+                        placeholder="Write lesson instructions here using markdown...&#10;&#10;# Heading&#10;## Subheading&#10;**bold text**&#10;- bullet point&#10;`inline code`&#10;```python&#10;code block&#10;```"
+                        className="min-h-[300px] bg-cyber-black/50 border-cyber-cyan/30 text-white font-fira text-sm rounded-none resize-y"
+                      />
+                      <div className="flex gap-2">
+                        <Button
+                          data-testid="save-instructions-btn"
+                          size="sm"
+                          onClick={handleSaveInstructions}
+                          disabled={savingInstructions}
+                          className="bg-cyber-cyan text-cyber-black font-orbitron text-xs uppercase tracking-widest rounded-none font-bold gap-1"
+                        >
+                          <Save className="w-3.5 h-3.5" />
+                          {savingInstructions ? "Saving..." : "Save"}
+                        </Button>
+                        <Button
+                          size="sm"
+                          variant="ghost"
+                          onClick={() => setEditingInstructions(false)}
+                          className="text-slate-400 rounded-none text-xs"
+                        >
+                          Cancel
+                        </Button>
+                      </div>
+                    </div>
+                  ) : assignment?.is_lesson && lessonInstructions ? (
+                    /* Rendered lesson instructions */
+                    <div
+                      className="text-sm leading-relaxed font-chakra lesson-instructions-content"
+                      dangerouslySetInnerHTML={{ __html: formatLessonMarkdown(lessonInstructions) }}
+                    />
+                  ) : (
+                    /* Default: show problem description */
+                    <p className="text-slate-300 whitespace-pre-wrap text-sm">
                     {(assignment.problems && assignment.problems[currentProblemIndex]?.description) || assignment.description || "No description provided."}
                   </p>
+                  )}
                   
                   {/* Resources Link - Show for students and teachers */}
                   {assignment.problems?.[currentProblemIndex]?.resources_link && (() => {

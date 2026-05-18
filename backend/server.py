@@ -2380,6 +2380,13 @@ async def get_lesson_problems(request: Request, assignment_type: str, chapter: s
     # Build a virtual assignment-like response
     lesson_id = f"lesson_{assignment_type}_{chapter}_{lesson}".replace(" ", "_").replace(":", "").lower()
     
+    # Fetch lesson instructions if they exist
+    lesson_doc = await db.lesson_instructions.find_one(
+        {"assignment_type": assignment_type, "chapter": chapter, "lesson": lesson},
+        {"_id": 0}
+    )
+    instructions = lesson_doc.get("instructions", "") if lesson_doc else ""
+    
     return {
         "id": lesson_id,
         "title": f"{lesson}",
@@ -2391,7 +2398,40 @@ async def get_lesson_problems(request: Request, assignment_type: str, chapter: s
         "is_locked": False,
         "problems": raw_problems,
         "problem_ids": problem_ids,
+        "instructions": instructions,
     }
+
+@api_router.put("/curriculum/lesson-instructions")
+async def save_lesson_instructions(request: Request):
+    """Save/update lesson instructions (teacher/admin only)"""
+    user = await get_current_user(request)
+    if user["role"] != "teacher":
+        raise HTTPException(status_code=403, detail="Only teachers can edit lesson instructions")
+    
+    body = await request.json()
+    assignment_type = body.get("assignment_type")
+    chapter = body.get("chapter")
+    lesson = body.get("lesson")
+    instructions = body.get("instructions", "")
+    
+    if not all([assignment_type, chapter, lesson]):
+        raise HTTPException(status_code=400, detail="assignment_type, chapter, and lesson are required")
+    
+    # Upsert the instructions
+    await db.lesson_instructions.update_one(
+        {"assignment_type": assignment_type, "chapter": chapter, "lesson": lesson},
+        {"$set": {
+            "assignment_type": assignment_type,
+            "chapter": chapter,
+            "lesson": lesson,
+            "instructions": instructions,
+            "updated_by": user["id"],
+            "updated_at": datetime.now(timezone.utc).isoformat(),
+        }},
+        upsert=True
+    )
+    
+    return {"success": True, "message": "Instructions saved"}
 
 
 # ----- Code Execution -----

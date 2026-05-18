@@ -117,6 +117,7 @@ A coding education platform for K-12 students featuring multiple programming env
 - [x] **Backend: Lesson Submissions** — Updated submission endpoint to accept lesson-based submissions (no real assignment document needed)
 - [x] **Frontend: LessonPage wrapper** — Fetches lesson data and passes to AssignmentPage
 - [x] **Frontend: AssignmentPage accepts lessonData prop** — Reuses the existing 3-column layout for both assigned and auto-loaded lessons
+- [x] **Lesson Instructions**: Teacher-editable markdown instructions per lesson, stored in `lesson_instructions` collection. Teachers see Edit button, students see formatted read-only view. Supports full markdown (headings, bold, code blocks, bullets) with cyberpunk styling (cyan/pink/lime).
 - [x] **Route**: `/lesson/:assignmentType/:chapter/:lesson` — Directly navigable lesson URLs
 
 ### Completed (May 2025)
