@@ -7,6 +7,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { ArrowLeft, Lock, Mail } from "lucide-react";
+import CyberRain from "@/components/CyberRain";
 
 const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
 const API = `${BACKEND_URL}/api`;
@@ -65,11 +66,12 @@ export default function TeacherLogin() {
   };
 
   return (
-    <div className="min-h-screen bg-cyber-black cyber-grid-bg flex items-center justify-center p-6">
-      <Card className="w-full max-w-md bg-cyber-navy/80 backdrop-blur-xl border border-cyber-cyan/20 rounded-none shadow-[0_0_30px_rgba(0,240,255,0.1)]">
+    <div className="min-h-screen bg-cyber-black cyber-grid-bg flex items-center justify-center p-6 relative overflow-hidden">
+      <CyberRain density={30} speed={1} />
+      <Card className="w-full max-w-md bg-cyber-navy/80 backdrop-blur-xl border border-cyber-cyan/20 rounded-none shadow-[0_0_30px_rgba(0,240,255,0.1)] relative z-10">
         <CardHeader className="space-y-1">
           <div className="flex items-center justify-between">
-            <CardTitle className="text-xl font-orbitron text-cyber-cyan uppercase tracking-wider">Teacher Login</CardTitle>
+            <CardTitle className="text-xl font-orbitron text-cyber-cyan uppercase tracking-wider heading-glow-cyan">Teacher Login</CardTitle>
             <Button
               variant="ghost"
               size="sm"

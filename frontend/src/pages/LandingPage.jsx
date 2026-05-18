@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { Code2, Users, BookOpen, CheckCircle, GraduationCap, UserCircle, MessageCircle, Zap, Terminal, Cpu } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import ContactForm from "@/components/ContactForm";
+import CyberRain from "@/components/CyberRain";
 
 const REDIRECT_URL = window.location.origin + "/student/dashboard";
 const AUTH_BASE_URL = "https://auth.emergentagent.com";
@@ -21,9 +22,10 @@ export default function LandingPage() {
   };
 
   return (
-    <div data-testid="landing-page" className="min-h-screen bg-cyber-black cyber-grid-bg">
+    <div data-testid="landing-page" className="min-h-screen bg-cyber-black cyber-grid-bg relative overflow-hidden">
+      <CyberRain density={40} speed={1.2} />
       {/* Nav */}
-      <nav className="px-6 lg:px-12 py-5 flex justify-between items-center backdrop-blur-xl bg-cyber-black/80 border-b border-cyber-cyan/20 sticky top-0 z-50">
+      <nav className="px-6 lg:px-12 py-5 flex justify-between items-center backdrop-blur-xl bg-cyber-black/80 border-b border-cyber-cyan/20 sticky top-0 z-50 relative">
         <div className="flex items-center gap-3">
           <Code2 className="w-7 h-7 text-cyber-cyan drop-shadow-[0_0_8px_rgba(0,240,255,0.8)]" />
           <span className="text-xl font-orbitron font-bold text-white tracking-wider">
@@ -58,7 +60,7 @@ export default function LandingPage() {
         </div>
       </nav>
 
-      <main className="px-6 lg:px-12">
+      <main className="px-6 lg:px-12 relative z-10">
         {/* Hero Section */}
         <section className="py-24 lg:py-32 max-w-5xl">
           <div className="flex items-center gap-2 mb-6">
@@ -67,8 +69,8 @@ export default function LandingPage() {
           </div>
           
           <h1 className="font-chakra font-bold text-white leading-[0.95] mb-8">
-            <span className="text-4xl sm:text-5xl lg:text-6xl block">Where Code</span>
-            <span className="text-4xl sm:text-5xl lg:text-6xl block mt-2 text-glow-cyan text-cyber-cyan">Meets Competition</span>
+            <span className="text-4xl sm:text-5xl lg:text-6xl block heading-glow-cyan">Where Code</span>
+            <span className="text-4xl sm:text-5xl lg:text-6xl block mt-2 text-cyber-cyan heading-glow-cyan">Meets Competition</span>
           </h1>
           
           <p className="text-base lg:text-lg text-slate-400 mb-12 max-w-xl font-chakra leading-relaxed">

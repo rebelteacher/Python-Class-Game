@@ -9,6 +9,7 @@ import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, Di
 import { Label } from "@/components/ui/label";
 import { Users, Plus, LogOut, Code2, RefreshCw, BookOpen, FileSpreadsheet, Shield, FileText, FileQuestion, Trophy, Video, Bell, Trash2, Cpu } from "lucide-react";
 import WhatsNew from "@/components/WhatsNew";
+import CyberRain from "@/components/CyberRain";
 
 const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
 const API = `${BACKEND_URL}/api`;
@@ -167,9 +168,10 @@ export default function TeacherDashboard({ user, setUser }) {
   };
 
   return (
-    <div data-testid="teacher-dashboard" className="min-h-screen bg-cyber-black cyber-grid-bg flex">
+    <div data-testid="teacher-dashboard" className="min-h-screen bg-cyber-black cyber-grid-bg flex relative overflow-hidden">
+      <CyberRain density={25} speed={0.8} />
       {/* Left Sidebar */}
-      <aside className="w-48 bg-cyber-navy/90 backdrop-blur-xl min-h-screen flex flex-col py-4 px-3 border-r border-cyber-cyan/20">
+      <aside className="w-48 bg-cyber-navy/90 backdrop-blur-xl min-h-screen flex flex-col py-4 px-3 border-r border-cyber-cyan/20 relative z-10">
         {/* Logo */}
         <div className="flex items-center gap-2 mb-6 px-2">
           <Code2 className="w-6 h-6 text-cyber-cyan drop-shadow-[0_0_6px_rgba(0,240,255,0.8)]" />
@@ -264,12 +266,12 @@ export default function TeacherDashboard({ user, setUser }) {
       </aside>
 
       {/* Main Content */}
-      <div className="flex-1 overflow-auto">
+      <div className="flex-1 overflow-auto relative z-10">
         {/* Header */}
         <header className="bg-cyber-navy/80 backdrop-blur-xl border-b border-cyber-cyan/20 px-6 py-4">
           <div className="flex justify-between items-center">
             <div>
-              <h1 className="text-xl font-orbitron text-white uppercase tracking-wider">Teacher Dashboard</h1>
+              <h1 className="text-xl font-orbitron text-white uppercase tracking-wider heading-glow-cyan">Teacher Dashboard</h1>
               <p className="text-slate-400 text-sm font-chakra">Manage your classes and curriculum</p>
             </div>
             <div className="flex items-center gap-3">
@@ -410,7 +412,7 @@ export default function TeacherDashboard({ user, setUser }) {
         <div className="mt-6">
           <div className="flex justify-between items-center mb-8">
             <div>
-              <h1 className="text-2xl font-orbitron text-white uppercase tracking-wider mb-1">My Classrooms</h1>
+              <h1 className="text-2xl font-orbitron text-white uppercase tracking-wider mb-1 heading-glow-cyan">My Classrooms</h1>
               <p className="text-slate-400 font-chakra text-sm">Manage your classrooms and assignments</p>
             </div>
             <Dialog open={createDialogOpen} onOpenChange={setCreateDialogOpen}>
