@@ -6982,6 +6982,129 @@ async def get_classroom_leaderboard(classroom_id: str, request: Request):
     
     return leaderboard[:10]  # Top 10
 
+@api_router.get("/leaderboard/ranks/{student_id}")
+async def get_student_ranks(student_id: str, request: Request):
+    """Get a student's rank across Class, Teacher, and Overall categories + top 3 per category"""
+    user = await get_current_user(request)
+    
+    student = await db.users.find_one({"id": student_id}, {"_id": 0})
+    if not student:
+        raise HTTPException(status_code=404, detail="Student not found")
+    
+    student_xp = student.get("xp", 0)
+    student_name = student.get("name", "Unknown")
+    
+    # --- Class Rank ---
+    # Find classrooms this student is in
+    classrooms = await db.classrooms.find(
+        {"students": student_id},
+        {"_id": 0, "id": 1, "students": 1, "teacher_id": 1, "name": 1}
+    ).to_list(100)
+    
+    class_rank = None
+    class_top3 = []
+    class_name = ""
+    teacher_id = None
+    
+    if classrooms:
+        # Use the first classroom for class rank
+        classroom = classrooms[0]
+        class_name = classroom.get("name", "")
+        teacher_id = classroom.get("teacher_id")
+        class_student_ids = classroom.get("students", [])
+        class_students = await db.users.find(
+            {"id": {"$in": class_student_ids}, "role": "student"},
+            {"_id": 0, "id": 1, "name": 1, "xp": 1}
+        ).to_list(1000)
+        class_students.sort(key=lambda x: x.get("xp", 0), reverse=True)
+        
+        for i, s in enumerate(class_students):
+            if s["id"] == student_id:
+                class_rank = i + 1
+                break
+        
+        class_top3 = [{"name": s["name"], "xp": s.get("xp", 0)} for s in class_students[:3]]
+    
+    # --- Teacher Rank ---
+    teacher_rank = None
+    teacher_top3 = []
+    teacher_name = ""
+    
+    if teacher_id:
+        teacher = await db.users.find_one({"id": teacher_id}, {"_id": 0, "name": 1})
+        teacher_name = teacher.get("name", "") if teacher else ""
+        
+        # Get all classrooms for this teacher
+        teacher_classrooms = await db.classrooms.find(
+            {"teacher_id": teacher_id},
+            {"_id": 0, "students": 1}
+        ).to_list(100)
+        
+        all_teacher_student_ids = set()
+        for tc in teacher_classrooms:
+            all_teacher_student_ids.update(tc.get("students", []))
+        
+        teacher_students = await db.users.find(
+            {"id": {"$in": list(all_teacher_student_ids)}, "role": "student"},
+            {"_id": 0, "id": 1, "name": 1, "xp": 1}
+        ).to_list(5000)
+        teacher_students.sort(key=lambda x: x.get("xp", 0), reverse=True)
+        
+        for i, s in enumerate(teacher_students):
+            if s["id"] == student_id:
+                teacher_rank = i + 1
+                break
+        
+        teacher_top3 = [{"name": s["name"], "xp": s.get("xp", 0)} for s in teacher_students[:3]]
+    
+    # --- Overall Rank ---
+    all_students = await db.users.find(
+        {"role": "student"},
+        {"_id": 0, "id": 1, "name": 1, "xp": 1}
+    ).to_list(10000)
+    all_students.sort(key=lambda x: x.get("xp", 0), reverse=True)
+    
+    overall_rank = None
+    for i, s in enumerate(all_students):
+        if s["id"] == student_id:
+            overall_rank = i + 1
+            break
+    
+    overall_top3 = [{"name": s["name"], "xp": s.get("xp", 0)} for s in all_students[:3]]
+    
+    def ordinal(n):
+        if n is None:
+            return "N/A"
+        s = str(n)
+        if s.endswith("11") or s.endswith("12") or s.endswith("13"):
+            return f"{n}th"
+        if s.endswith("1"):
+            return f"{n}st"
+        if s.endswith("2"):
+            return f"{n}nd"
+        if s.endswith("3"):
+            return f"{n}rd"
+        return f"{n}th"
+    
+    return {
+        "student_name": student_name,
+        "student_xp": student_xp,
+        "class_rank": ordinal(class_rank),
+        "class_rank_num": class_rank,
+        "class_name": class_name,
+        "class_top3": class_top3,
+        "teacher_rank": ordinal(teacher_rank),
+        "teacher_rank_num": teacher_rank,
+        "teacher_name": teacher_name,
+        "teacher_top3": teacher_top3,
+        "overall_rank": ordinal(overall_rank),
+        "overall_rank_num": overall_rank,
+        "overall_top3": overall_top3,
+        "total_students": len(all_students),
+    }
+
+
+
 @api_router.get("/shop")
 async def get_shop_items(request: Request):
     """Get all shop items"""

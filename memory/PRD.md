@@ -112,6 +112,7 @@ A coding education platform for K-12 students featuring multiple programming env
 - [x] Looks blocks, MC Test features, Grid toggle, etc.
 
 ### Phase 2: Student Lesson Flow (In Progress, May 2025)
+- [x] **Leaderboard Redesign** — New 3-category leaderboard on Student Dashboard: Class Rank, Teacher Rank, Overall Rank. Top 3 per category with gold/silver/bronze badges. Backend: `GET /api/leaderboard/ranks/:studentId`
 - [x] **Backend: Curriculum Units API** (`/api/curriculum/units`) — Returns all units with chapters, lessons, and problem counts
 - [x] **Backend: Lesson Problems API** (`/api/curriculum/lesson-problems`) — Returns problems for a specific lesson sorted by type (Class Practice → Paired → Independent → Challenge), formatted like an assignment
 - [x] **Backend: Lesson Submissions** — Updated submission endpoint to accept lesson-based submissions (no real assignment document needed)

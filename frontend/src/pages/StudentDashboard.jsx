@@ -643,35 +643,20 @@ export default function StudentDashboard({ user, setUser, refreshUser }) {
         </div>
 
         {/* Leaderboard Section */}
-        {classrooms.length > 0 && (
-          <Card className="mb-8">
-            <CardHeader>
-              <CardTitle className="text-2xl flex items-center gap-2">
-                <Trophy className="w-6 h-6 text-yellow-500" />
-                Leaderboard
-              </CardTitle>
-              <CardDescription>
-                See how you rank in your classrooms
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <Tabs defaultValue={classrooms[0]?.id || ""}>
-                <TabsList className="mb-4">
-                  {classrooms.map((classroom) => (
-                    <TabsTrigger key={classroom.id} value={classroom.id}>
-                      {classroom.name}
-                    </TabsTrigger>
-                  ))}
-                </TabsList>
-                {classrooms.map((classroom) => (
-                  <TabsContent key={classroom.id} value={classroom.id}>
-                    <Leaderboard classroomId={classroom.id} currentUserId={user.id} />
-                  </TabsContent>
-                ))}
-              </Tabs>
-            </CardContent>
-          </Card>
-        )}
+        <Card className="mb-8 bg-cyber-navy/40 border border-cyber-cyan/20 rounded-none">
+          <CardHeader>
+            <CardTitle className="text-xl font-orbitron text-cyber-cyan uppercase tracking-wider heading-glow-cyan flex items-center gap-2">
+              <Trophy className="w-5 h-5 text-yellow-400" />
+              Leaderboard
+            </CardTitle>
+            <CardDescription className="text-slate-500 font-chakra">
+              Your rank across class, teacher, and platform
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <Leaderboard currentUserId={user.id} />
+          </CardContent>
+        </Card>
 
         {/* Challenge Section */}
         <Card className="mb-8 bg-gradient-to-r from-orange-50 to-red-50 border-2 border-orange-500/30">
