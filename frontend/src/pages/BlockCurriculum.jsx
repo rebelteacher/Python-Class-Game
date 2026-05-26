@@ -436,19 +436,7 @@ export default function BlockCurriculum({ user }) {
 
       <div className="max-w-6xl mx-auto px-6 py-8">
         {/* Quick Actions */}
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
-          <Card className="hover:shadow-lg transition-shadow cursor-pointer" onClick={() => navigate("/library?type=block")}>
-            <CardContent className="p-6 flex items-center gap-4">
-              <div className="p-3 bg-purple-500/20 rounded-lg">
-                <BookOpen className="w-6 h-6 text-purple-600" />
-              </div>
-              <div>
-                <h3 className="font-semibold">Problem Library</h3>
-                <p className="text-sm text-slate-400">View & create Block problems</p>
-              </div>
-            </CardContent>
-          </Card>
-          
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
           <Card className="hover:shadow-lg transition-shadow cursor-pointer border-2 border-purple-500 bg-purple-500/10" onClick={() => navigate("/blocks/teach")}>
             <CardContent className="p-6 flex items-center gap-4">
               <div className="p-3 bg-purple-500/100 rounded-lg">
@@ -508,12 +496,8 @@ export default function BlockCurriculum({ user }) {
             <Boxes className="w-16 h-16 text-gray-300 mx-auto mb-4" />
             <h3 className="text-xl font-semibold text-slate-300 mb-2">No Block Problems Yet</h3>
             <p className="text-slate-500 mb-4">
-              Create block-based problems in the library to populate this curriculum.
+              Block-based problems will appear here once they are created.
             </p>
-            <Button onClick={() => navigate("/library?type=block")}>
-              <BookOpen className="w-4 h-4 mr-2" />
-              Go to Problem Library
-            </Button>
           </Card>
         )}
 

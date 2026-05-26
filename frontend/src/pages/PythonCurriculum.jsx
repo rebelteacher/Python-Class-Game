@@ -688,19 +688,7 @@ export default function PythonCurriculum({ user }) {
 
       {/* Quick Actions */}
       <div className="max-w-6xl mx-auto px-6 -mt-6">
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-          <Card className="bg-cyber-navy/60 backdrop-blur-sm shadow-lg hover:shadow-xl transition-shadow cursor-pointer" onClick={() => navigate("/library?type=code")}>
-            <CardContent className="p-4 flex items-center gap-3">
-              <div className="w-10 h-10 bg-blue-500/20 rounded-lg flex items-center justify-center">
-                <Library className="w-5 h-5 text-blue-600" />
-              </div>
-              <div>
-                <p className="font-medium text-sm">Problem Library</p>
-                <p className="text-xs text-slate-500">Browse & add problems</p>
-              </div>
-            </CardContent>
-          </Card>
-          
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           <Card className="bg-cyber-navy/60 backdrop-blur-sm shadow-lg hover:shadow-xl transition-shadow cursor-pointer border-2 border-blue-500/30" onClick={() => navigate("/python/teach")}>
             <CardContent className="p-4 flex items-center gap-3">
               <div className="w-10 h-10 bg-blue-500/100 rounded-lg flex items-center justify-center">

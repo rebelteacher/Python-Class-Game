@@ -7,7 +7,7 @@ import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
-import { Users, Plus, LogOut, Code2, RefreshCw, BookOpen, FileSpreadsheet, Shield, FileText, FileQuestion, Trophy, Video, Bell, Trash2, Cpu } from "lucide-react";
+import { Users, Plus, LogOut, Code2, RefreshCw, BookOpen, FileSpreadsheet, Shield, FileText, FileQuestion, Trophy, Video, Bell, Trash2, Cpu, Archive, ArchiveRestore } from "lucide-react";
 import WhatsNew from "@/components/WhatsNew";
 import CyberRain from "@/components/CyberRain";
 
@@ -20,6 +20,7 @@ export default function TeacherDashboard({ user, setUser }) {
   const [createDialogOpen, setCreateDialogOpen] = useState(false);
   const [newClassName, setNewClassName] = useState("");
   const [unreadCount, setUnreadCount] = useState(0);
+  const [showArchived, setShowArchived] = useState(false);
   const navigate = useNavigate();
 
   // Fun classroom name suggestions
@@ -58,9 +59,9 @@ export default function TeacherDashboard({ user, setUser }) {
     }
   };
 
-  const fetchClassrooms = async () => {
+  const fetchClassrooms = async (includeArchived = false) => {
     try {
-      const response = await axios.get(`${API}/classrooms`, {
+      const response = await axios.get(`${API}/classrooms?include_archived=${includeArchived}`, {
         withCredentials: true,
       });
       setClassrooms(response.data);
@@ -166,6 +167,31 @@ export default function TeacherDashboard({ user, setUser }) {
       toast.error(error.response?.data?.detail || "Failed to delete classroom");
     }
   };
+
+  const handleArchiveClassroom = async (classroomId, classroomName, isArchived, e) => {
+    e.stopPropagation();
+    const action = isArchived ? "unarchive" : "archive";
+    if (!window.confirm(`${isArchived ? "Unarchive" : "Archive"} "${classroomName}"?${!isArchived ? "\n\nArchived classrooms are hidden from the main view but all data is preserved." : ""}`)) return;
+    
+    try {
+      await axios.put(`${API}/classrooms/${classroomId}/${action}`, {}, {
+        withCredentials: true,
+      });
+      toast.success(`Classroom ${isArchived ? "unarchived" : "archived"} successfully`);
+      fetchClassrooms(showArchived);
+    } catch (error) {
+      console.error(`Error ${action} classroom:`, error);
+      toast.error(`Failed to ${action} classroom`);
+    }
+  };
+
+  const toggleShowArchived = () => {
+    const newVal = !showArchived;
+    setShowArchived(newVal);
+    fetchClassrooms(newVal);
+  };
+
+
 
   return (
     <div data-testid="teacher-dashboard" className="min-h-screen bg-cyber-black cyber-grid-bg flex relative overflow-hidden">
@@ -370,12 +396,25 @@ export default function TeacherDashboard({ user, setUser }) {
               <p className="text-slate-400 font-chakra text-sm">Manage your classrooms and assignments</p>
             </div>
             <Dialog open={createDialogOpen} onOpenChange={setCreateDialogOpen}>
-              <DialogTrigger asChild>
-                <Button data-testid="create-classroom-btn" className="bg-cyber-pink text-white hover:shadow-[0_0_20px_rgba(255,0,170,0.5)] gap-2 font-orbitron text-xs uppercase tracking-widest rounded-none border border-cyber-pink transition-all duration-300">
-                  <Plus className="w-5 h-5" />
-                  Create Classroom
+              <div className="flex gap-2">
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={toggleShowArchived}
+                  className={`gap-2 font-chakra text-xs rounded-none ${
+                    showArchived ? 'text-yellow-400 border border-yellow-400/30 bg-yellow-400/10' : 'text-slate-500 border border-slate-700'
+                  }`}
+                >
+                  <Archive className="w-4 h-4" />
+                  {showArchived ? "Hide Archived" : "Show Archived"}
                 </Button>
-              </DialogTrigger>
+                <DialogTrigger asChild>
+                  <Button data-testid="create-classroom-btn" className="bg-cyber-pink text-white hover:shadow-[0_0_20px_rgba(255,0,170,0.5)] gap-2 font-orbitron text-xs uppercase tracking-widest rounded-none border border-cyber-pink transition-all duration-300">
+                    <Plus className="w-5 h-5" />
+                    Create Classroom
+                  </Button>
+                </DialogTrigger>
+              </div>
               <DialogContent data-testid="create-classroom-dialog" className="bg-cyber-navy border border-cyber-cyan/30 rounded-none">
                 <DialogHeader>
                   <DialogTitle className="font-orbitron text-cyber-cyan uppercase tracking-wider">Create New Classroom</DialogTitle>
@@ -449,16 +488,32 @@ export default function TeacherDashboard({ user, setUser }) {
                   onClick={() => navigate(`/classroom/${classroom.id}`)}
                 >
                   {/* Delete Button - appears on hover */}
-                  <button
-                    onClick={(e) => handleDeleteClassroom(classroom.id, classroom.name, e)}
-                    className="absolute top-2 right-2 p-2 bg-cyber-red/80 text-white rounded-none opacity-0 group-hover:opacity-100 transition-opacity hover:bg-cyber-red hover:shadow-[0_0_10px_rgba(255,51,102,0.5)] z-10"
-                    title="Delete Classroom"
-                  >
-                    <Trash2 className="w-4 h-4" />
-                  </button>
+                  <div className="absolute top-2 right-2 flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity z-10">
+                    <button
+                      onClick={(e) => handleArchiveClassroom(classroom.id, classroom.name, classroom.is_archived, e)}
+                      className={`p-2 rounded-none transition-all ${
+                        classroom.is_archived
+                          ? 'bg-cyber-lime/80 text-white hover:bg-cyber-lime hover:shadow-[0_0_10px_rgba(57,255,20,0.5)]'
+                          : 'bg-yellow-500/80 text-white hover:bg-yellow-500 hover:shadow-[0_0_10px_rgba(234,179,8,0.5)]'
+                      }`}
+                      title={classroom.is_archived ? "Unarchive Classroom" : "Archive Classroom"}
+                    >
+                      {classroom.is_archived ? <ArchiveRestore className="w-4 h-4" /> : <Archive className="w-4 h-4" />}
+                    </button>
+                    <button
+                      onClick={(e) => handleDeleteClassroom(classroom.id, classroom.name, e)}
+                      className="p-2 bg-cyber-red/80 text-white rounded-none hover:bg-cyber-red hover:shadow-[0_0_10px_rgba(255,51,102,0.5)]"
+                      title="Delete Classroom"
+                    >
+                      <Trash2 className="w-4 h-4" />
+                    </button>
+                  </div>
                   
-                  <CardHeader className={`${neon.bg} border-b border-white/5`}>
-                    <CardTitle className={`text-lg font-orbitron ${neon.accent} uppercase tracking-wider`}>{classroom.name}</CardTitle>
+                  <CardHeader className={`${neon.bg} border-b border-white/5 ${classroom.is_archived ? 'opacity-60' : ''}`}>
+                    <CardTitle className={`text-lg font-orbitron ${neon.accent} uppercase tracking-wider`}>
+                      {classroom.is_archived && <Archive className="w-4 h-4 inline mr-2 text-yellow-400" />}
+                      {classroom.name}
+                    </CardTitle>
                     <CardDescription>
                       <span className={`inline-block px-3 py-1 ${neon.bg} ${neon.accent} rounded-none text-xs font-fira font-semibold border ${neon.border.split(' ')[0]}`}>
                         {classroom.class_code}

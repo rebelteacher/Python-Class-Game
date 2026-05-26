@@ -531,19 +531,7 @@ export default function TurtleCurriculum({ user }) {
 
       <div className="container mx-auto px-6 py-8">
         {/* Quick Actions */}
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
-          <Card className="hover:shadow-lg transition-shadow cursor-pointer" onClick={() => navigate("/library?type=turtle")}>
-            <CardContent className="p-6 flex items-center gap-4">
-              <div className="p-3 bg-green-500/20 rounded-lg">
-                <BookOpen className="w-6 h-6 text-green-600" />
-              </div>
-              <div>
-                <h3 className="font-semibold">Problem Library</h3>
-                <p className="text-sm text-slate-400">View & create Turtle problems</p>
-              </div>
-            </CardContent>
-          </Card>
-          
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
           <Card className="hover:shadow-lg transition-shadow cursor-pointer border-2 border-green-500 bg-green-500/10" onClick={() => navigate("/turtle/teach")}>
             <CardContent className="p-6 flex items-center gap-4">
               <div className="p-3 bg-green-500/100 rounded-lg">
