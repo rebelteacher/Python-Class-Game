@@ -19,7 +19,11 @@ import {
   UserX,
   Coins,
   MessageCircle,
-  Bell
+  Bell,
+  FileQuestion,
+  Code2,
+  Cpu,
+  Video
 } from "lucide-react";
 
 const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
@@ -289,6 +293,50 @@ export default function AdminDashboard({ user }) {
               >
                 <UserCheck className="w-4 h-4 mr-2" />
                 Approve Admin Requests
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* Content Tools */}
+        <Card className="mb-8 bg-cyber-navy/50 border border-cyber-cyan/20 rounded-none">
+          <CardHeader className="pb-3 border-b border-cyber-cyan/10">
+            <CardTitle className="text-sm font-orbitron text-cyber-cyan flex items-center gap-2 uppercase tracking-wider">
+              Content & Assessment Tools
+            </CardTitle>
+            <CardDescription className="text-slate-500 font-chakra">
+              Problem library, test builders, and content management
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="pt-4">
+            <div className="grid grid-cols-3 gap-3">
+              <Button variant="outline" size="sm" onClick={() => navigate("/library")} className="justify-start text-sm h-10 bg-transparent border-slate-700 text-slate-300 hover:border-cyber-cyan/50 hover:text-cyber-cyan rounded-none font-chakra">
+                <BookOpen className="w-4 h-4 mr-2 text-cyber-cyan" />
+                Assignment Library
+              </Button>
+              <Button variant="outline" size="sm" onClick={() => navigate("/question-bank")} className="justify-start text-sm h-10 bg-transparent border-slate-700 text-slate-300 hover:border-cyber-cyan/50 hover:text-cyber-cyan rounded-none font-chakra">
+                <FileQuestion className="w-4 h-4 mr-2 text-cyber-cyan" />
+                Question Bank
+              </Button>
+              <Button variant="outline" size="sm" onClick={() => navigate("/test-builder")} className="justify-start text-sm h-10 bg-transparent border-slate-700 text-slate-300 hover:border-cyber-pink/50 hover:text-cyber-pink rounded-none font-chakra">
+                <FileQuestion className="w-4 h-4 mr-2 text-cyber-pink" />
+                MC Test Builder
+              </Button>
+              <Button variant="outline" size="sm" onClick={() => navigate("/coding-tests")} className="justify-start text-sm h-10 bg-transparent border-slate-700 text-slate-300 hover:border-cyber-lime/50 hover:text-cyber-lime rounded-none font-chakra">
+                <Code2 className="w-4 h-4 mr-2 text-cyber-lime" />
+                Coding Tests
+              </Button>
+              <Button variant="outline" size="sm" onClick={() => navigate("/skill-quiz-manager")} className="justify-start text-sm h-10 bg-transparent border-slate-700 text-slate-300 hover:border-purple-400/50 hover:text-purple-400 rounded-none font-chakra">
+                <Cpu className="w-4 h-4 mr-2 text-purple-400" />
+                Skill Quizzes
+              </Button>
+              <Button variant="outline" size="sm" onClick={() => navigate("/notes")} className="justify-start text-sm h-10 bg-transparent border-slate-700 text-slate-300 hover:border-orange-400/50 hover:text-orange-400 rounded-none font-chakra">
+                <FileText className="w-4 h-4 mr-2 text-orange-400" />
+                Notes
+              </Button>
+              <Button variant="outline" size="sm" onClick={() => navigate("/video-library")} className="justify-start text-sm h-10 bg-transparent border-slate-700 text-slate-300 hover:border-red-400/50 hover:text-red-400 rounded-none font-chakra">
+                <Video className="w-4 h-4 mr-2 text-red-400" />
+                Videos
               </Button>
             </div>
           </CardContent>

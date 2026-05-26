@@ -192,15 +192,6 @@ export default function TeacherDashboard({ user, setUser }) {
             </Button>
           )}
           <Button 
-            data-testid="library-nav-btn" 
-            onClick={() => navigate("/library")} 
-            variant="ghost"
-            className="w-full justify-start gap-2 text-slate-300 hover:bg-cyber-cyan/10 hover:text-cyber-cyan text-sm font-chakra rounded-none"
-          >
-            <BookOpen className="w-4 h-4" />
-            Library
-          </Button>
-          <Button 
             data-testid="lesson-plans-nav-btn" 
             onClick={() => navigate("/lesson-plans")} 
             variant="ghost"
@@ -340,44 +331,7 @@ export default function TeacherDashboard({ user, setUser }) {
         </div>
 
         {/* Tools & Reports Row */}
-        <div className="grid grid-cols-2 gap-4 mb-6">
-          {/* Tools Section */}
-          <Card className="bg-cyber-navy/50 border border-cyber-cyan/20 rounded-none">
-            <CardHeader className="pb-3 border-b border-cyber-cyan/10">
-              <CardTitle className="text-sm font-orbitron text-cyber-cyan flex items-center gap-2 uppercase tracking-wider">
-                Tools
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="pt-4">
-              <div className="grid grid-cols-2 gap-2">
-                <Button variant="outline" size="sm" onClick={() => navigate("/question-bank")} className="justify-start text-sm h-9 bg-transparent border-slate-700 text-slate-300 hover:border-cyber-cyan/50 hover:text-cyber-cyan rounded-none font-chakra">
-                  <FileQuestion className="w-4 h-4 mr-2 text-cyber-cyan" />
-                  Question Bank
-                </Button>
-                <Button variant="outline" size="sm" onClick={() => navigate("/test-builder")} className="justify-start text-sm h-9 bg-transparent border-slate-700 text-slate-300 hover:border-cyber-pink/50 hover:text-cyber-pink rounded-none font-chakra">
-                  <FileQuestion className="w-4 h-4 mr-2 text-cyber-pink" />
-                  MC Test Builder
-                </Button>
-                <Button variant="outline" size="sm" onClick={() => navigate("/coding-tests")} className="justify-start text-sm h-9 bg-transparent border-slate-700 text-slate-300 hover:border-cyber-lime/50 hover:text-cyber-lime rounded-none font-chakra">
-                  <Code2 className="w-4 h-4 mr-2 text-cyber-lime" />
-                  Coding Tests
-                </Button>
-                <Button variant="outline" size="sm" onClick={() => navigate("/skill-quiz-manager")} className="justify-start text-sm h-9 bg-transparent border-slate-700 text-slate-300 hover:border-purple-400/50 hover:text-purple-400 rounded-none font-chakra">
-                  <Cpu className="w-4 h-4 mr-2 text-purple-400" />
-                  Skill Quizzes
-                </Button>
-                <Button variant="outline" size="sm" onClick={() => navigate("/notes")} className="justify-start text-sm h-9 bg-transparent border-slate-700 text-slate-300 hover:border-orange-400/50 hover:text-orange-400 rounded-none font-chakra">
-                  <FileText className="w-4 h-4 mr-2 text-orange-400" />
-                  Notes
-                </Button>
-                <Button variant="outline" size="sm" onClick={() => navigate("/video-library")} className="justify-start text-sm h-9 bg-transparent border-slate-700 text-slate-300 hover:border-red-400/50 hover:text-red-400 rounded-none font-chakra">
-                  <Video className="w-4 h-4 mr-2 text-red-400" />
-                  Videos
-                </Button>
-              </div>
-            </CardContent>
-          </Card>
-
+        <div className="grid grid-cols-1 gap-4 mb-6">
           {/* Reports Section */}
           <Card className="bg-cyber-navy/50 border border-cyber-pink/20 rounded-none">
             <CardHeader className="pb-3 border-b border-cyber-pink/10">
@@ -386,7 +340,7 @@ export default function TeacherDashboard({ user, setUser }) {
               </CardTitle>
             </CardHeader>
             <CardContent className="pt-4">
-              <div className="grid grid-cols-2 gap-2">
+              <div className="grid grid-cols-4 gap-2">
                 <Button variant="outline" size="sm" onClick={() => navigate("/teacher-reports")} className="justify-start text-sm h-9 bg-transparent border-slate-700 text-slate-300 hover:border-cyber-cyan/50 hover:text-cyber-cyan rounded-none font-chakra">
                   <FileSpreadsheet className="w-4 h-4 mr-2 text-cyber-cyan" />
                   Student Reports
