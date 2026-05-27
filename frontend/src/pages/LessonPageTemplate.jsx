@@ -24,20 +24,19 @@ const formatLessonContent = (content) => {
   });
   // Inline code
   result = result.replace(/`([^`]+)`/g, (_, code) => {
-    return `<code class="bg-[#0F172A] px-1.5 py-0.5 rounded text-[#39FF14] font-mono text-sm">${escapeHtml(code)}</code>`;
+    return `<code class="bg-[#0F172A] px-1.5 py-0.5 rounded text-[#39FF14] font-mono text-sm border border-[#39FF14]/20">${escapeHtml(code)}</code>`;
   });
   // Markdown formatting
   result = result
-    .replace(/^### (.*$)/gim, '<h3 class="text-lg font-bold text-[#39FF14] mb-2 mt-5 font-orbitron uppercase tracking-wider text-sm">$1</h3>')
-    .replace(/^## (.*$)/gim, '<h2 class="text-xl font-bold text-[#FF00AA] mb-3 mt-6 font-orbitron uppercase tracking-wider">$1</h2>')
-    .replace(/^# (.*$)/gim, '<h1 class="text-2xl font-bold text-[#00F0FF] mb-4 font-orbitron uppercase tracking-wider">$1</h1>')
-    .replace(/\*\*(.*?)\*\*/g, '<strong class="text-[#00F0FF]">$1</strong>')
+    .replace(/^### (.*$)/gim, '<h3 class="text-base font-bold text-[#FF00AA] mb-2 mt-5 font-orbitron tracking-wider" style="text-shadow: 0 0 8px rgba(255,0,170,0.5), 0 0 20px rgba(255,0,170,0.2)">$1</h3>')
+    .replace(/^## (.*$)/gim, '<h2 class="text-lg font-bold text-[#FF00AA] mb-3 mt-6 font-orbitron tracking-wider" style="text-shadow: 0 0 10px rgba(255,0,170,0.6), 0 0 25px rgba(255,0,170,0.3)">$1</h2>')
+    .replace(/^# (.*$)/gim, '<h1 class="text-xl font-bold text-[#00F0FF] mb-3 font-orbitron tracking-wider" style="text-shadow: 0 0 10px rgba(0,240,255,0.6), 0 0 25px rgba(0,240,255,0.3)">$1</h1>')
+    .replace(/\*\*(.*?)\*\*/g, '<strong class="text-[#00F0FF] font-semibold">$1</strong>')
     .replace(/\*(.*?)\*/g, '<em class="text-[#FF00AA]">$1</em>')
-    .replace(/^- (.*$)/gim, '<li class="ml-4 text-slate-300 mb-1 flex items-start gap-2"><span class="text-[#00F0FF] mt-1">&#9656;</span><span>$1</span></li>')
-    .replace(/^\d+\. (.*$)/gim, '<li class="ml-4 text-slate-300 mb-1 list-decimal">$1</li>')
-    .replace(/\n\n/g, '</p><p class="mb-3 text-slate-300 leading-relaxed">')
+    .replace(/^- (.*$)/gim, '<li class="ml-3 text-slate-300 mb-1.5 flex items-start gap-2 text-sm"><span class="text-[#00F0FF] mt-0.5 text-xs">&#9656;</span><span>$1</span></li>')
+    .replace(/\n\n/g, '</p><p class="mb-3 text-slate-300 leading-relaxed text-sm">')
     .replace(/\n/g, '<br>');
-  return `<p class="mb-3 text-slate-300 leading-relaxed">${result}</p>`;
+  return `<p class="mb-3 text-slate-300 leading-relaxed text-sm">${result}</p>`;
 };
 
 // Demo lesson data

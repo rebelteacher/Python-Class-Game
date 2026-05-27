@@ -37,23 +37,23 @@ const formatLessonMarkdown = (content) => {
   let result = content;
   // Fenced code blocks
   result = result.replace(/```(\w+)?\n([\s\S]*?)```/g, (_, lang, code) => {
-    return `<pre class="bg-[#0A0E17] p-3 rounded border border-[#00F0FF]/20 overflow-x-auto my-3"><code class="text-[#39FF14] font-mono text-xs whitespace-pre-wrap">${escapeHtml(code.trim())}</code></pre>`;
+    return `<pre class="bg-[#0A0E17] p-4 rounded border border-[#00F0FF]/20 overflow-x-auto my-4"><code class="text-[#39FF14] font-mono text-sm whitespace-pre-wrap">${escapeHtml(code.trim())}</code></pre>`;
   });
   // Inline code
   result = result.replace(/`([^`]+)`/g, (_, code) => {
-    return `<code class="bg-[#0F172A] px-1 py-0.5 rounded text-[#39FF14] font-mono text-xs">${escapeHtml(code)}</code>`;
+    return `<code class="bg-[#0F172A] px-1.5 py-0.5 rounded text-[#39FF14] font-mono text-sm border border-[#39FF14]/20">${escapeHtml(code)}</code>`;
   });
   // Markdown formatting
   result = result
-    .replace(/^### (.*$)/gim, '<h3 class="text-sm font-bold text-[#39FF14] mb-1 mt-3 font-orbitron uppercase tracking-wider">$1</h3>')
-    .replace(/^## (.*$)/gim, '<h2 class="text-base font-bold text-[#FF00AA] mb-2 mt-4 font-orbitron uppercase tracking-wider">$1</h2>')
-    .replace(/^# (.*$)/gim, '<h1 class="text-lg font-bold text-[#00F0FF] mb-2 font-orbitron uppercase tracking-wider">$1</h1>')
-    .replace(/\*\*(.*?)\*\*/g, '<strong class="text-[#00F0FF]">$1</strong>')
+    .replace(/^### (.*$)/gim, '<h3 class="text-base font-bold text-[#FF00AA] mb-2 mt-5 font-orbitron tracking-wider" style="text-shadow: 0 0 8px rgba(255,0,170,0.5), 0 0 20px rgba(255,0,170,0.2)">$1</h3>')
+    .replace(/^## (.*$)/gim, '<h2 class="text-lg font-bold text-[#FF00AA] mb-3 mt-6 font-orbitron tracking-wider" style="text-shadow: 0 0 10px rgba(255,0,170,0.6), 0 0 25px rgba(255,0,170,0.3)">$1</h2>')
+    .replace(/^# (.*$)/gim, '<h1 class="text-xl font-bold text-[#00F0FF] mb-3 font-orbitron tracking-wider" style="text-shadow: 0 0 10px rgba(0,240,255,0.6), 0 0 25px rgba(0,240,255,0.3)">$1</h1>')
+    .replace(/\*\*(.*?)\*\*/g, '<strong class="text-[#00F0FF] font-semibold">$1</strong>')
     .replace(/\*(.*?)\*/g, '<em class="text-[#FF00AA]">$1</em>')
-    .replace(/^- (.*$)/gim, '<li class="ml-3 text-slate-300 mb-1 flex items-start gap-1.5 text-sm"><span class="text-[#00F0FF] mt-0.5 text-xs">&#9656;</span><span>$1</span></li>')
-    .replace(/\n\n/g, '</p><p class="mb-2 text-slate-300 leading-relaxed text-sm">')
+    .replace(/^- (.*$)/gim, '<li class="ml-3 text-slate-300 mb-1.5 flex items-start gap-2 text-sm"><span class="text-[#00F0FF] mt-0.5 text-xs">&#9656;</span><span>$1</span></li>')
+    .replace(/\n\n/g, '</p><p class="mb-3 text-slate-300 leading-relaxed text-sm">')
     .replace(/\n/g, '<br>');
-  return `<p class="mb-2 text-slate-300 leading-relaxed text-sm">${result}</p>`;
+  return `<p class="mb-3 text-slate-300 leading-relaxed text-sm">${result}</p>`;
 };
 
 
@@ -1030,10 +1030,13 @@ export default function AssignmentPage({ user, lessonData }) {
                       dangerouslySetInnerHTML={{ __html: formatLessonMarkdown(lessonInstructions) }}
                     />
                   ) : (
-                    /* Default: show problem description */
-                    <p className="text-slate-300 whitespace-pre-wrap text-sm">
-                    {(assignment.problems && assignment.problems[currentProblemIndex]?.description) || assignment.description || "No description provided."}
-                  </p>
+                    /* Default: show problem description with markdown formatting */
+                    <div
+                      className="text-sm leading-relaxed font-chakra lesson-instructions-content"
+                      dangerouslySetInnerHTML={{ __html: formatLessonMarkdown(
+                        (assignment.problems && assignment.problems[currentProblemIndex]?.description) || assignment.description || "No description provided."
+                      ) }}
+                    />
                   )}
                   
                   {/* Resources Link - Show for students and teachers */}
