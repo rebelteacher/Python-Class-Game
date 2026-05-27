@@ -935,7 +935,7 @@ export default function AssignmentPage({ user, lessonData }) {
                     <button
                       onClick={() => setCurrentProblemIndex(index)}
                       className={`px-4 py-2 rounded-lg text-sm font-medium whitespace-nowrap transition-colors ${colorClass} ${
-                        assignment?.is_lesson && isTeacher ? 'pr-8' : ''
+                        assignment?.is_lesson && user?.is_admin ? 'pr-8' : ''
                       }`}
                     >
                       {problemScore === 100 && '✓ '}
@@ -945,7 +945,7 @@ export default function AssignmentPage({ user, lessonData }) {
                         <span className="ml-1 text-xs">({problemScore.toFixed(0)}%)</span>
                       )}
                     </button>
-                    {assignment?.is_lesson && isTeacher && (
+                    {assignment?.is_lesson && user?.is_admin && (
                       <button
                         data-testid={`remove-problem-${problem.id}`}
                         onClick={(e) => {
@@ -976,8 +976,8 @@ export default function AssignmentPage({ user, lessonData }) {
                 <CardHeader className="pb-2 px-3">
                   <div className="flex items-center justify-between">
                     <CardTitle className="text-base">Instructions</CardTitle>
-                    {/* Edit button for teacher on lesson pages */}
-                    {assignment?.is_lesson && user?.role === "teacher" && !editingInstructions && (
+                    {/* Edit button for admin only on lesson pages */}
+                    {assignment?.is_lesson && user?.is_admin && !editingInstructions && (
                       <Button
                         variant="ghost"
                         size="sm"

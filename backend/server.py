@@ -2403,10 +2403,10 @@ async def get_lesson_problems(request: Request, assignment_type: str, chapter: s
 
 @api_router.put("/curriculum/lesson-instructions")
 async def save_lesson_instructions(request: Request):
-    """Save/update lesson instructions (teacher/admin only)"""
+    """Save/update lesson instructions (admin only)"""
     user = await get_current_user(request)
-    if user["role"] != "teacher":
-        raise HTTPException(status_code=403, detail="Only teachers can edit lesson instructions")
+    if user["role"] != "teacher" or not user.get("is_admin"):
+        raise HTTPException(status_code=403, detail="Only admins can edit lesson instructions")
     
     body = await request.json()
     assignment_type = body.get("assignment_type")
@@ -2436,11 +2436,11 @@ async def save_lesson_instructions(request: Request):
 
 @api_router.post("/curriculum/remove-problem-from-lesson")
 async def remove_problem_from_lesson(request: Request):
-    """Remove a problem from a lesson by clearing its lesson field (teacher only).
+    """Remove a problem from a lesson by clearing its lesson field (admin only).
     The problem stays in the database but is no longer associated with the lesson."""
     user = await get_current_user(request)
-    if user["role"] != "teacher":
-        raise HTTPException(status_code=403, detail="Only teachers can remove problems from lessons")
+    if user["role"] != "teacher" or not user.get("is_admin"):
+        raise HTTPException(status_code=403, detail="Only admins can remove problems from lessons")
     
     body = await request.json()
     problem_id = body.get("problem_id")
