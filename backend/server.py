@@ -3782,7 +3782,7 @@ async def submit_assignment(submission: SubmissionCreate, request: Request):
             }
             for line in code.split('\n'):
                 stripped = line.strip()
-                if stripped.startswith('# EVENT: When program starts'):
+                if stripped.startswith('# EVENT: When program starts') or stripped == '# Startup code':
                     event_counts['event_start'] += 1
                 elif stripped.startswith('# EVENT: When') and 'key pressed' in stripped:
                     event_counts['event_key'] += 1
@@ -3919,6 +3919,30 @@ async def submit_assignment(submission: SubmissionCreate, request: Request):
                     description = tc.get('description', f'Uses {pattern}')
                     
                     total_points += points
+                    
+                    # If pattern is empty, try to infer from description
+                    if not pattern and description:
+                        desc_lower = description.lower()
+                        infer_map = {
+                            'pen up': 'turtle_penup', 'penup': 'turtle_penup',
+                            'pen down': 'turtle_pendown', 'pendown': 'turtle_pendown',
+                            'forward': 'turtle_forward', 'move forward': 'turtle_forward',
+                            'backward': 'turtle_backward', 'move backward': 'turtle_backward',
+                            'turn left': 'turtle_left', 'turn right': 'turtle_right',
+                            'go to': 'turtle_goto', 'goto': 'turtle_goto',
+                            'when program starts': 'event_start', 'program starts': 'event_start',
+                            'when key pressed': 'event_key', 'key pressed': 'event_key',
+                            'when clicked': 'event_click',
+                            'home': 'turtle_home', 'go home': 'turtle_home',
+                            'set color': 'set_color', 'color': 'set_color',
+                            'circle': 'turtle_circle', 'dot': 'turtle_dot',
+                            'hide': 'turtle_hide', 'show': 'turtle_show',
+                        }
+                        for keyword, inferred in infer_map.items():
+                            if keyword in desc_lower:
+                                pattern = inferred
+                                logger.info(f"Inferred pattern '{pattern}' from description '{description}'")
+                                break
                     
                     # Map pattern to command type
                     cmd_type = pattern_to_command.get(pattern, pattern)

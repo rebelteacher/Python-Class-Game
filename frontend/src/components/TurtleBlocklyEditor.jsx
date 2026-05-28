@@ -1054,7 +1054,7 @@ const generatePythonCode = (workspace) => {
   
   // Generate startup code
   if (eventHandlers.onStart.length > 0) {
-    code += "# Startup code\n";
+    code += "# EVENT: When program starts\n";
     for (const block of eventHandlers.onStart) {
       code += processBlockChain(block);
     }
