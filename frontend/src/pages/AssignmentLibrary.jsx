@@ -1988,10 +1988,10 @@ export default function AssignmentLibrary({ user }) {
                                         newTestCases[index].pattern = e.target.value;
                                         setNewProblem({ ...newProblem, test_cases: newTestCases });
                                       }}
-                                      className="h-8 text-sm w-full border rounded px-2"
+                                      className="h-8 text-sm w-full border rounded px-2 bg-cyber-black text-white border-cyber-cyan/30"
                                     >
                                       <option value="">Select block...</option>
-                                      <optgroup label="🚩 Events">
+                                      <optgroup label="Events">
                                         <option value="event_start">When Program Starts</option>
                                         <option value="event_key">When Key Pressed</option>
                                         <option value="event_click">When Clicked</option>
@@ -3240,10 +3240,10 @@ export default function AssignmentLibrary({ user }) {
                                       newTestCases[index].pattern = e.target.value;
                                       setEditingProblem({ ...editingProblem, test_cases: newTestCases });
                                     }}
-                                    className="h-8 text-sm w-full border rounded px-2"
+                                    className="h-8 text-sm w-full border rounded px-2 bg-cyber-black text-white border-cyber-cyan/30"
                                   >
                                     <option value="">Select block...</option>
-                                    <optgroup label="🚩 Events">
+                                    <optgroup label="Events">
                                       <option value="event_start">When Program Starts</option>
                                       <option value="event_key">When Key Pressed</option>
                                       <option value="event_click">When Clicked</option>

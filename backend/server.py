@@ -3776,6 +3776,23 @@ async def submit_assignment(submission: SubmissionCreate, request: Request):
             student_commands = extract_turtle_commands(code)
             logger.info(f"Student commands: {student_commands}")
             
+            # Count event blocks from comment markers in generated code
+            event_counts = {
+                'event_start': 0, 'event_key': 0, 'event_click': 0, 'event_mouse': 0,
+            }
+            for line in code.split('\n'):
+                stripped = line.strip()
+                if stripped.startswith('# EVENT: When program starts'):
+                    event_counts['event_start'] += 1
+                elif stripped.startswith('# EVENT: When') and 'key pressed' in stripped:
+                    event_counts['event_key'] += 1
+                elif stripped.startswith('# EVENT: When turtle clicked'):
+                    event_counts['event_click'] += 1
+                elif stripped.startswith('# EVENT: When mouse moves'):
+                    event_counts['event_mouse'] += 1
+            
+            logger.info(f"Event counts from comments: {event_counts}")
+            
             # Count command types in student code
             def count_command_types(commands):
                 counts = {
@@ -3905,7 +3922,12 @@ async def submit_assignment(submission: SubmissionCreate, request: Request):
                     
                     # Map pattern to command type
                     cmd_type = pattern_to_command.get(pattern, pattern)
-                    actual_count = student_counts.get(cmd_type, 0)
+                    
+                    # Check event blocks first (from XML comments), then regular commands
+                    if cmd_type in event_counts or pattern in event_counts:
+                        actual_count = event_counts.get(cmd_type, event_counts.get(pattern, 0))
+                    else:
+                        actual_count = student_counts.get(cmd_type, 0)
                     
                     passed = actual_count >= min_count
                     if passed:
