@@ -60,6 +60,7 @@ import LessonPlanCreator from "./pages/LessonPlanCreator";
 import LessonPageTemplate from "./pages/LessonPageTemplate";
 import LessonPage from "./pages/LessonPage";
 import AdminLessonManager from "./pages/AdminLessonManager";
+import StudentCurriculum from "./pages/StudentCurriculum";
 
 const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
 const API = `${BACKEND_URL}/api`;
@@ -568,6 +569,10 @@ function App() {
               <Route path="/teacher-signup" element={<TeacherSignup />} />
               <Route path="/school-admin-signup" element={<SchoolAdminSignup />} />
               <Route path="/lesson-demo" element={<LessonPageTemplate />} />
+              <Route
+                path="/student/curriculum"
+                element={user ? <StudentCurriculum user={user} /> : <Navigate to="/" />}
+              />
               <Route
                 path="/admin/lesson-manager"
                 element={user?.is_admin ? <AdminLessonManager user={user} /> : <Navigate to="/" />}

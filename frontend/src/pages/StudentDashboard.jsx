@@ -1102,7 +1102,26 @@ export default function StudentDashboard({ user, setUser, refreshUser }) {
             </Button>
           </div>
         ) : (
-          <Card className="mb-8">
+        <>
+        {/* Curriculum / Lessons */}
+        <Card className="mb-8 bg-cyber-navy/40 border border-cyber-cyan/20 rounded-none cursor-pointer hover:border-cyber-cyan/50 hover:shadow-[0_0_15px_rgba(0,240,255,0.2)] transition-all"
+          onClick={() => navigate("/student/curriculum")}>
+          <CardContent className="p-6 flex items-center justify-between">
+            <div className="flex items-center gap-4">
+              <div className="w-12 h-12 border border-cyber-cyan/40 flex items-center justify-center">
+                <BookOpen className="w-6 h-6 text-cyber-cyan" />
+              </div>
+              <div>
+                <h3 className="font-orbitron text-white uppercase tracking-wider text-sm">Lessons & Curriculum</h3>
+                <p className="text-slate-500 font-chakra text-sm">Work through coding lessons at your own pace</p>
+              </div>
+            </div>
+            <ChevronRight className="w-5 h-5 text-cyber-cyan" />
+          </CardContent>
+        </Card>
+
+        {/* My Assignments */}
+        <Card className="mb-8">
             <CardHeader>
               <CardTitle className="text-2xl flex items-center gap-2">
                 <BookOpen className="w-6 h-6 text-cyber-cyan" />
@@ -1363,6 +1382,7 @@ export default function StudentDashboard({ user, setUser, refreshUser }) {
               </Tabs>
             </CardContent>
           </Card>
+        </>
         )}
 
         {/* Shop Dialog */}

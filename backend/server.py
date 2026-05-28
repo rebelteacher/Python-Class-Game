@@ -345,6 +345,7 @@ class Classroom(BaseModel):
     class_code: str
     students: List[str] = Field(default_factory=list)
     is_archived: bool = False
+    unlocked_lessons: List[str] = Field(default_factory=list)  # List of "assignment_type|chapter|lesson" keys
     created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
 
 class ClassroomCreate(BaseModel):
@@ -2559,6 +2560,120 @@ async def delete_lesson(request: Request):
     
     return {"success": True, "message": f"Lesson '{lesson_name}' deleted", "problems_affected": result.modified_count}
 
+
+
+
+@api_router.post("/classrooms/{classroom_id}/toggle-lesson-lock")
+async def toggle_lesson_lock(classroom_id: str, request: Request):
+    """Lock or unlock a lesson for a specific classroom"""
+    user = await get_current_user(request)
+    if user["role"] != "teacher":
+        raise HTTPException(status_code=403, detail="Only teachers can manage lesson locks")
+    
+    body = await request.json()
+    lesson_key = body.get("lesson_key")  # "assignment_type|chapter|lesson"
+    action = body.get("action", "unlock")  # "lock" or "unlock"
+    
+    if not lesson_key:
+        raise HTTPException(status_code=400, detail="lesson_key is required")
+    
+    classroom = await db.classrooms.find_one({"id": classroom_id, "teacher_id": user["id"]})
+    if not classroom:
+        raise HTTPException(status_code=404, detail="Classroom not found")
+    
+    unlocked = classroom.get("unlocked_lessons", [])
+    
+    if action == "unlock":
+        if lesson_key not in unlocked:
+            unlocked.append(lesson_key)
+    else:
+        unlocked = [k for k in unlocked if k != lesson_key]
+    
+    await db.classrooms.update_one(
+        {"id": classroom_id},
+        {"$set": {"unlocked_lessons": unlocked}}
+    )
+    
+    return {"success": True, "action": action, "lesson_key": lesson_key, "unlocked_count": len(unlocked)}
+
+@api_router.post("/classrooms/{classroom_id}/bulk-toggle-lessons")
+async def bulk_toggle_lessons(classroom_id: str, request: Request):
+    """Bulk lock/unlock lessons for a classroom"""
+    user = await get_current_user(request)
+    if user["role"] != "teacher":
+        raise HTTPException(status_code=403, detail="Only teachers can manage lesson locks")
+    
+    body = await request.json()
+    lesson_keys = body.get("lesson_keys", [])
+    action = body.get("action", "unlock")
+    
+    classroom = await db.classrooms.find_one({"id": classroom_id, "teacher_id": user["id"]})
+    if not classroom:
+        raise HTTPException(status_code=404, detail="Classroom not found")
+    
+    unlocked = set(classroom.get("unlocked_lessons", []))
+    
+    if action == "unlock":
+        unlocked.update(lesson_keys)
+    else:
+        unlocked -= set(lesson_keys)
+    
+    await db.classrooms.update_one(
+        {"id": classroom_id},
+        {"$set": {"unlocked_lessons": list(unlocked)}}
+    )
+    
+    return {"success": True, "unlocked_count": len(unlocked)}
+
+@api_router.get("/student/curriculum")
+async def get_student_curriculum(request: Request):
+    """Get the full curriculum for a student with lock status based on their classrooms"""
+    user = await get_current_user(request)
+    
+    # Get student's classrooms to determine unlocked lessons
+    classrooms = await db.classrooms.find(
+        {"students": user["id"]},
+        {"_id": 0, "id": 1, "name": 1, "unlocked_lessons": 1}
+    ).to_list(100)
+    
+    # Collect all unlocked lesson keys across all classrooms
+    all_unlocked = set()
+    for c in classrooms:
+        all_unlocked.update(c.get("unlocked_lessons", []))
+    
+    # Build curriculum structure
+    unit_map = {
+        "Unit 1: Block-Based Coding": "block",
+        "Unit 2: Turtle Graphics": "turtle",
+        "Unit 3: Python Text": "code",
+        "Unit 4: Micro:bit": "microbit",
+    }
+    
+    units = []
+    for unit_name, atype in unit_map.items():
+        chapters_raw = await db.problems.distinct("chapter", {"assignment_type": atype})
+        chapters = []
+        for ch in sorted(chapters_raw):
+            if not ch:
+                continue
+            lessons_raw = await db.problems.distinct("lesson", {"assignment_type": atype, "chapter": ch})
+            lessons = []
+            for le in sorted(lessons_raw):
+                if not le:
+                    continue
+                lesson_key = f"{atype}|{ch}|{le}"
+                count = await db.problems.count_documents({"assignment_type": atype, "chapter": ch, "lesson": le})
+                is_unlocked = lesson_key in all_unlocked
+                lessons.append({
+                    "name": le,
+                    "problem_count": count,
+                    "lesson_key": lesson_key,
+                    "is_unlocked": is_unlocked,
+                })
+            chapters.append({"name": ch, "lessons": lessons})
+        units.append({"name": unit_name, "assignment_type": atype, "chapters": chapters})
+    
+    return {"units": units, "classrooms": [{"id": c["id"], "name": c["name"]} for c in classrooms]}
 
 
 # ----- Code Execution -----

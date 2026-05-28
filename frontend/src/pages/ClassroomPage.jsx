@@ -9,7 +9,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { ArrowLeft, Plus, Users, BookOpen, Trash2, Code2, Trophy, Swords, Edit, Calendar, Clock, Folder, FolderOpen, ChevronRight, ChevronDown, FileQuestion } from "lucide-react";
+import { ArrowLeft, Plus, Users, BookOpen, Trash2, Code2, Trophy, Swords, Edit, Calendar, Clock, Folder, FolderOpen, ChevronRight, ChevronDown, FileQuestion, Lock, Unlock } from "lucide-react";
 import Leaderboard from "@/components/Leaderboard";
 import BattleZone from "@/components/BattleZone";
 
@@ -28,6 +28,9 @@ export default function ClassroomPage({ user }) {
   const [editScheduleDialogOpen, setEditScheduleDialogOpen] = useState(false);
   const [editingAssignment, setEditingAssignment] = useState(null);
   const [lessonDialogOpen, setLessonDialogOpen] = useState(false);
+  const [curriculumData, setCurriculumData] = useState([]);
+  const [unlockedLessons, setUnlockedLessons] = useState(new Set());
+  const [expandedCurrChapters, setExpandedCurrChapters] = useState(new Set());
   const [editingLesson, setEditingLesson] = useState(null);
   const [lessonPreview, setLessonPreview] = useState(false);
   const [expandedFolders, setExpandedFolders] = useState(new Set(['classwork', 'tests'])); // Open by default
@@ -46,6 +49,7 @@ export default function ClassroomPage({ user }) {
     fetchAssignments();
     fetchTests();
     fetchCodingTests();
+    fetchCurriculumLocks();
   }, [classroomId]);
 
   const toggleFolder = (folder) => {
@@ -133,6 +137,10 @@ export default function ClassroomPage({ user }) {
         withCredentials: true,
       });
       setClassroom(response.data);
+      // Load unlocked lessons
+      if (response.data?.unlocked_lessons) {
+        setUnlockedLessons(new Set(response.data.unlocked_lessons));
+      }
     } catch (error) {
       console.error("Error fetching classroom:", error);
       toast.error("Failed to load classroom");
@@ -152,6 +160,39 @@ export default function ClassroomPage({ user }) {
       toast.error("Failed to load assignments");
     }
   };
+
+  const fetchCurriculumLocks = async () => {
+    try {
+      const response = await axios.get(`${API}/curriculum/units`, { withCredentials: true });
+      setCurriculumData(response.data);
+      // Load current unlocked lessons from classroom data
+      if (classroom?.unlocked_lessons) {
+        setUnlockedLessons(new Set(classroom.unlocked_lessons));
+      }
+    } catch (error) {
+      console.error("Error fetching curriculum:", error);
+    }
+  };
+
+  const handleToggleLessonLock = async (lessonKey) => {
+    const isCurrentlyUnlocked = unlockedLessons.has(lessonKey);
+    const action = isCurrentlyUnlocked ? "lock" : "unlock";
+    try {
+      await axios.post(`${API}/classrooms/${classroomId}/toggle-lesson-lock`, {
+        lesson_key: lessonKey, action,
+      }, { withCredentials: true });
+      setUnlockedLessons(prev => {
+        const next = new Set(prev);
+        isCurrentlyUnlocked ? next.delete(lessonKey) : next.add(lessonKey);
+        return next;
+      });
+    } catch (error) {
+      console.error("Error toggling lesson lock:", error);
+      toast.error("Failed to update lesson lock");
+    }
+  };
+
+
 
   const fetchTests = async () => {
     try {
@@ -496,6 +537,12 @@ export default function ClassroomPage({ user }) {
               <TabsTrigger data-testid="students-tab" value="students" className="gap-2">
                 <Users className="w-4 h-4" />
                 Students
+              </TabsTrigger>
+            )}
+            {isTeacher && (
+              <TabsTrigger data-testid="lessons-tab" value="lessons" className="gap-2">
+                <Lock className="w-4 h-4" />
+                Lesson Locks
               </TabsTrigger>
             )}
           </TabsList>
@@ -1207,6 +1254,83 @@ export default function ClassroomPage({ user }) {
                   ))}
                 </div>
               )}
+            </TabsContent>
+          )}
+
+          {/* Lesson Locks Tab */}
+          {isTeacher && (
+            <TabsContent value="lessons">
+              <div className="space-y-4">
+                <div className="flex items-center justify-between mb-4">
+                  <div>
+                    <h3 className="text-lg font-orbitron text-white uppercase tracking-wider">Lesson Locks</h3>
+                    <p className="text-sm text-slate-500 font-chakra">Toggle which lessons students in this class can access</p>
+                  </div>
+                  <span className="text-xs font-fira text-cyber-cyan">{unlockedLessons.size} unlocked</span>
+                </div>
+
+                {curriculumData.map(unit => (
+                  <div key={unit.name} className="border border-cyber-cyan/15 rounded-none">
+                    <div className="p-3 bg-cyber-navy/40 border-b border-cyber-cyan/10">
+                      <span className="font-orbitron text-sm text-white uppercase tracking-wider">{unit.name}</span>
+                    </div>
+                    <div className="divide-y divide-cyber-cyan/5">
+                      {unit.chapters.map(chapter => (
+                        <div key={chapter.name}>
+                          <button
+                            onClick={() => setExpandedCurrChapters(prev => {
+                              const next = new Set(prev);
+                              next.has(chapter.name) ? next.delete(chapter.name) : next.add(chapter.name);
+                              return next;
+                            })}
+                            className="w-full flex items-center justify-between px-4 py-2 hover:bg-cyber-navy/30 transition-colors"
+                          >
+                            <div className="flex items-center gap-2">
+                              {expandedCurrChapters.has(chapter.name) ? <ChevronDown className="w-3.5 h-3.5 text-cyber-cyan" /> : <ChevronRight className="w-3.5 h-3.5 text-slate-600" />}
+                              <span className="text-sm font-chakra text-slate-300">{chapter.name}</span>
+                            </div>
+                            <span className="text-xs text-slate-600">{chapter.lessons.length} lessons</span>
+                          </button>
+
+                          {expandedCurrChapters.has(chapter.name) && (
+                            <div className="pl-8 pr-4 pb-2 space-y-1">
+                              {chapter.lessons.map(lesson => {
+                                const lessonKey = `${unit.assignment_type}|${chapter.name}|${lesson.name}`;
+                                const isUnlocked = unlockedLessons.has(lessonKey);
+                                return (
+                                  <div key={lessonKey} className="flex items-center justify-between py-1.5">
+                                    <div className="flex items-center gap-2">
+                                      {isUnlocked
+                                        ? <Unlock className="w-3.5 h-3.5 text-cyber-lime" />
+                                        : <Lock className="w-3.5 h-3.5 text-slate-600" />}
+                                      <span className={`text-sm font-chakra ${isUnlocked ? 'text-slate-200' : 'text-slate-500'}`}>
+                                        {lesson.name}
+                                      </span>
+                                      <span className="text-xs text-slate-600 font-fira">{lesson.problem_count}</span>
+                                    </div>
+                                    <Button
+                                      size="sm"
+                                      variant="ghost"
+                                      onClick={() => handleToggleLessonLock(lessonKey)}
+                                      className={`rounded-none h-7 px-3 text-xs font-orbitron uppercase tracking-wider ${
+                                        isUnlocked
+                                          ? 'text-cyber-red hover:bg-cyber-red/10 border border-cyber-red/30'
+                                          : 'text-cyber-lime hover:bg-cyber-lime/10 border border-cyber-lime/30'
+                                      }`}
+                                    >
+                                      {isUnlocked ? 'Lock' : 'Unlock'}
+                                    </Button>
+                                  </div>
+                                );
+                              })}
+                            </div>
+                          )}
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                ))}
+              </div>
             </TabsContent>
           )}
         </Tabs>
