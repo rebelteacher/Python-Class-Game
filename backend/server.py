@@ -2461,6 +2461,106 @@ async def remove_problem_from_lesson(request: Request):
 
 
 
+@api_router.post("/curriculum/rename-lesson")
+async def rename_lesson(request: Request):
+    """Rename a lesson - updates all problems and lesson instructions"""
+    user = await get_current_user(request)
+    if user["role"] != "teacher" or not user.get("is_admin"):
+        raise HTTPException(status_code=403, detail="Only admins can rename lessons")
+    
+    body = await request.json()
+    assignment_type = body.get("assignment_type")
+    chapter = body.get("chapter")
+    old_name = body.get("old_name")
+    new_name = body.get("new_name", "").strip()
+    
+    if not all([assignment_type, chapter, old_name, new_name]):
+        raise HTTPException(status_code=400, detail="assignment_type, chapter, old_name, and new_name are required")
+    
+    # Update all problems with this lesson name
+    result = await db.problems.update_many(
+        {"assignment_type": assignment_type, "chapter": chapter, "lesson": old_name},
+        {"$set": {"lesson": new_name}}
+    )
+    
+    # Update lesson instructions if they exist
+    await db.lesson_instructions.update_many(
+        {"assignment_type": assignment_type, "chapter": chapter, "lesson": old_name},
+        {"$set": {"lesson": new_name}}
+    )
+    
+    return {"success": True, "message": f"Renamed lesson to '{new_name}'", "problems_updated": result.modified_count}
+
+@api_router.post("/curriculum/add-lesson")
+async def add_lesson(request: Request):
+    """Add a new empty lesson to a chapter"""
+    user = await get_current_user(request)
+    if user["role"] != "teacher" or not user.get("is_admin"):
+        raise HTTPException(status_code=403, detail="Only admins can add lessons")
+    
+    body = await request.json()
+    assignment_type = body.get("assignment_type")
+    chapter = body.get("chapter")
+    lesson_name = body.get("lesson_name", "").strip()
+    
+    if not all([assignment_type, chapter, lesson_name]):
+        raise HTTPException(status_code=400, detail="assignment_type, chapter, and lesson_name are required")
+    
+    # Check if lesson already exists
+    existing = await db.problems.find_one({"assignment_type": assignment_type, "chapter": chapter, "lesson": lesson_name})
+    if existing:
+        raise HTTPException(status_code=400, detail=f"Lesson '{lesson_name}' already exists in this chapter")
+    
+    # Create a placeholder problem so the lesson shows up
+    import uuid
+    placeholder = {
+        "id": str(uuid.uuid4()),
+        "title": f"New Problem - {lesson_name}",
+        "description": "Edit this problem in the Assignment Library",
+        "assignment_type": assignment_type,
+        "chapter": chapter,
+        "lesson": lesson_name,
+        "problem_type": "Class Practice",
+        "difficulty": "Easy",
+        "starter_code": "",
+        "solution_code": "",
+        "test_cases": [],
+        "created_by": user["id"],
+    }
+    await db.problems.insert_one(placeholder)
+    
+    return {"success": True, "message": f"Lesson '{lesson_name}' created", "problem_id": placeholder["id"]}
+
+@api_router.post("/curriculum/delete-lesson")
+async def delete_lesson(request: Request):
+    """Delete a lesson by clearing the lesson field from all its problems"""
+    user = await get_current_user(request)
+    if user["role"] != "teacher" or not user.get("is_admin"):
+        raise HTTPException(status_code=403, detail="Only admins can delete lessons")
+    
+    body = await request.json()
+    assignment_type = body.get("assignment_type")
+    chapter = body.get("chapter")
+    lesson_name = body.get("lesson_name")
+    
+    if not all([assignment_type, chapter, lesson_name]):
+        raise HTTPException(status_code=400, detail="assignment_type, chapter, and lesson_name are required")
+    
+    # Clear lesson field from all problems (keeps them in DB but unassigned)
+    result = await db.problems.update_many(
+        {"assignment_type": assignment_type, "chapter": chapter, "lesson": lesson_name},
+        {"$set": {"lesson": "", "removed_from_lesson_by": user["id"]}}
+    )
+    
+    # Also remove lesson instructions
+    await db.lesson_instructions.delete_many(
+        {"assignment_type": assignment_type, "chapter": chapter, "lesson": lesson_name}
+    )
+    
+    return {"success": True, "message": f"Lesson '{lesson_name}' deleted", "problems_affected": result.modified_count}
+
+
+
 # ----- Code Execution -----
 
 def normalize_output(output: str) -> str:

@@ -53,6 +53,10 @@ export default function AdminLessonManager({ user }) {
   const [editingInstructions, setEditingInstructions] = useState(null);
   const [instructionsDraft, setInstructionsDraft] = useState("");
   const [savingInstructions, setSavingInstructions] = useState(false);
+  const [renamingLesson, setRenamingLesson] = useState(null); // lessonKey being renamed
+  const [renameValue, setRenameValue] = useState("");
+  const [addingLesson, setAddingLesson] = useState(null); // chapter name where adding
+  const [newLessonName, setNewLessonName] = useState("");
 
   const fetchUnits = useCallback(async () => {
     try {
@@ -140,6 +144,55 @@ export default function AdminLessonManager({ user }) {
     }
   };
 
+  const handleRenameLesson = async (assignmentType, chapter, oldName, newName) => {
+    if (!newName.trim() || newName.trim() === oldName) {
+      setRenamingLesson(null);
+      return;
+    }
+    try {
+      await axios.post(`${API}/curriculum/rename-lesson`, {
+        assignment_type: assignmentType, chapter, old_name: oldName, new_name: newName.trim(),
+      }, { withCredentials: true });
+      toast.success(`Renamed to "${newName.trim()}"`);
+      setRenamingLesson(null);
+      setRenameValue("");
+      fetchUnits(); // Refresh to show new name
+    } catch (error) {
+      console.error("Error renaming lesson:", error);
+      toast.error(error.response?.data?.detail || "Failed to rename lesson");
+    }
+  };
+
+  const handleAddLesson = async (assignmentType, chapter) => {
+    if (!newLessonName.trim()) return;
+    try {
+      await axios.post(`${API}/curriculum/add-lesson`, {
+        assignment_type: assignmentType, chapter, lesson_name: newLessonName.trim(),
+      }, { withCredentials: true });
+      toast.success(`Lesson "${newLessonName.trim()}" created`);
+      setAddingLesson(null);
+      setNewLessonName("");
+      fetchUnits(); // Refresh
+    } catch (error) {
+      console.error("Error adding lesson:", error);
+      toast.error(error.response?.data?.detail || "Failed to add lesson");
+    }
+  };
+
+  const handleDeleteLesson = async (assignmentType, chapter, lessonName, problemCount) => {
+    if (!window.confirm(`Delete "${lessonName}"?\n\n${problemCount} problem(s) will be unassigned from this lesson but kept in the library.`)) return;
+    try {
+      await axios.post(`${API}/curriculum/delete-lesson`, {
+        assignment_type: assignmentType, chapter, lesson_name: lessonName,
+      }, { withCredentials: true });
+      toast.success(`Lesson "${lessonName}" deleted`);
+      fetchUnits(); // Refresh
+    } catch (error) {
+      console.error("Error deleting lesson:", error);
+      toast.error("Failed to delete lesson");
+    }
+  };
+
   const currentUnit = units.find(u => u.assignment_type === selectedUnit);
 
   if (loading) {
@@ -213,29 +266,52 @@ export default function AdminLessonManager({ user }) {
                           return (
                             <div key={lesson.name} className="border-b border-cyber-cyan/5 last:border-b-0">
                               {/* Lesson Header */}
-                              <button
-                                onClick={() => toggleLesson(currentUnit.assignment_type, chapter.name, lesson.name)}
-                                className="w-full flex items-center justify-between px-6 py-3 hover:bg-cyber-navy/30 transition-colors"
-                              >
-                                <div className="flex items-center gap-2">
-                                  {isExpanded ? <ChevronDown className="w-3.5 h-3.5 text-cyber-pink" /> : <ChevronRight className="w-3.5 h-3.5 text-slate-600" />}
-                                  <span className="text-sm font-chakra text-slate-300">{lesson.name}</span>
-                                  <span className="text-xs text-slate-600 font-fira">{lesson.problem_count} problems</span>
+                              <div className="flex items-center justify-between px-6 py-3 hover:bg-cyber-navy/30 transition-colors">
+                                <div className="flex items-center gap-2 flex-1 min-w-0 cursor-pointer" onClick={() => toggleLesson(currentUnit.assignment_type, chapter.name, lesson.name)}>
+                                  {isExpanded ? <ChevronDown className="w-3.5 h-3.5 text-cyber-pink shrink-0" /> : <ChevronRight className="w-3.5 h-3.5 text-slate-600 shrink-0" />}
+                                  {renamingLesson === lessonKey ? (
+                                    <form onSubmit={(e) => { e.preventDefault(); handleRenameLesson(currentUnit.assignment_type, chapter.name, lesson.name, renameValue); }}
+                                      className="flex items-center gap-2 flex-1"
+                                      onClick={(e) => e.stopPropagation()}>
+                                      <Input
+                                        value={renameValue}
+                                        onChange={(e) => setRenameValue(e.target.value)}
+                                        autoFocus
+                                        className="h-7 text-sm bg-cyber-black/50 border-cyber-cyan/30 text-white rounded-none font-chakra"
+                                        onKeyDown={(e) => { if (e.key === 'Escape') setRenamingLesson(null); }}
+                                      />
+                                      <Button type="submit" size="sm" className="bg-cyber-cyan text-cyber-black rounded-none h-7 px-2 text-xs font-bold">
+                                        <Save className="w-3 h-3" />
+                                      </Button>
+                                      <Button type="button" size="sm" variant="ghost" onClick={() => setRenamingLesson(null)} className="text-slate-400 rounded-none h-7 px-2 text-xs">
+                                        <X className="w-3 h-3" />
+                                      </Button>
+                                    </form>
+                                  ) : (
+                                    <>
+                                      <span className="text-sm font-chakra text-slate-300 truncate">{lesson.name}</span>
+                                      <span className="text-xs text-slate-600 font-fira shrink-0">{lesson.problem_count} problems</span>
+                                    </>
+                                  )}
                                 </div>
-                                <div className="flex items-center gap-2">
-                                  <Button
-                                    size="sm"
-                                    variant="ghost"
-                                    onClick={(e) => {
-                                      e.stopPropagation();
-                                      navigate(`/lesson/${currentUnit.assignment_type}/${encodeURIComponent(chapter.name)}/${encodeURIComponent(lesson.name)}`);
-                                    }}
-                                    className="text-cyber-cyan hover:bg-cyber-cyan/10 rounded-none text-xs h-7 px-2"
-                                  >
+                                <div className="flex items-center gap-1 shrink-0 ml-2">
+                                  <Button size="sm" variant="ghost"
+                                    onClick={() => { setRenamingLesson(lessonKey); setRenameValue(lesson.name); }}
+                                    className="text-slate-500 hover:text-cyber-cyan hover:bg-cyber-cyan/10 rounded-none h-7 w-7 p-0" title="Rename lesson">
+                                    <Pencil className="w-3.5 h-3.5" />
+                                  </Button>
+                                  <Button size="sm" variant="ghost"
+                                    onClick={() => handleDeleteLesson(currentUnit.assignment_type, chapter.name, lesson.name, lesson.problem_count)}
+                                    className="text-slate-500 hover:text-cyber-red hover:bg-cyber-red/10 rounded-none h-7 w-7 p-0" title="Delete lesson">
+                                    <Trash2 className="w-3.5 h-3.5" />
+                                  </Button>
+                                  <Button size="sm" variant="ghost"
+                                    onClick={() => navigate(`/lesson/${currentUnit.assignment_type}/${encodeURIComponent(chapter.name)}/${encodeURIComponent(lesson.name)}`)}
+                                    className="text-cyber-cyan hover:bg-cyber-cyan/10 rounded-none text-xs h-7 px-2">
                                     Preview
                                   </Button>
                                 </div>
-                              </button>
+                              </div>
 
                               {/* Expanded Lesson Content */}
                               {isExpanded && (
@@ -318,6 +394,38 @@ export default function AdminLessonManager({ user }) {
                             </div>
                           );
                         })}
+                        
+                        {/* Add Lesson Button */}
+                        <div className="px-6 py-3 border-t border-dashed border-cyber-lime/20">
+                          {addingLesson === chapter.name ? (
+                            <form onSubmit={(e) => { e.preventDefault(); handleAddLesson(currentUnit.assignment_type, chapter.name); }}
+                              className="flex items-center gap-2">
+                              <Input
+                                value={newLessonName}
+                                onChange={(e) => setNewLessonName(e.target.value)}
+                                placeholder="e.g., Lesson 4: Advanced Topics"
+                                autoFocus
+                                className="h-8 text-sm bg-cyber-black/50 border-cyber-lime/30 text-white rounded-none font-chakra flex-1"
+                                onKeyDown={(e) => { if (e.key === 'Escape') { setAddingLesson(null); setNewLessonName(""); } }}
+                              />
+                              <Button type="submit" size="sm" className="bg-cyber-lime text-cyber-black rounded-none h-8 px-3 text-xs font-orbitron font-bold gap-1">
+                                <Plus className="w-3.5 h-3.5" /> Add
+                              </Button>
+                              <Button type="button" size="sm" variant="ghost" onClick={() => { setAddingLesson(null); setNewLessonName(""); }}
+                                className="text-slate-400 rounded-none h-8 px-2 text-xs">
+                                Cancel
+                              </Button>
+                            </form>
+                          ) : (
+                            <button
+                              onClick={() => setAddingLesson(chapter.name)}
+                              className="flex items-center gap-2 text-cyber-lime/60 hover:text-cyber-lime text-xs font-chakra transition-colors"
+                            >
+                              <Plus className="w-3.5 h-3.5" />
+                              Add Lesson to {chapter.name}
+                            </button>
+                          )}
+                        </div>
                       </div>
                     )}
                   </div>
