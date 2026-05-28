@@ -92,6 +92,7 @@ export default function StudentDashboard({ user, setUser, refreshUser }) {
   const [selectedClassroom, setSelectedClassroom] = useState("");
   const [selectedOpponent, setSelectedOpponent] = useState("");
   const [completedAssignmentIds, setCompletedAssignmentIds] = useState(new Set());
+  const [lastActivity, setLastActivity] = useState(null);
   const navigate = useNavigate();
   const location = useLocation();
 
@@ -105,6 +106,7 @@ export default function StudentDashboard({ user, setUser, refreshUser }) {
     fetchShopItems();
     fetchUserProfile();
     fetchCompletedAssignments();
+    fetchLastActivity();
   }, [location.key]); // location.key changes on every navigation
   
   // Also update when the user prop changes (from parent)
@@ -135,6 +137,21 @@ export default function StudentDashboard({ user, setUser, refreshUser }) {
       setCompletedAssignmentIds(new Set(response.data.completed_assignment_ids));
     } catch (error) {
       console.error("Error fetching completed assignments:", error);
+    }
+  };
+
+  const fetchLastActivity = async () => {
+    try {
+      const response = await axios.get(`${API}/student/last-activity`, {
+        withCredentials: true,
+      });
+      if (response.data?.has_activity) {
+        setLastActivity(response.data);
+      } else {
+        setLastActivity(null);
+      }
+    } catch (error) {
+      console.error("Error fetching last activity:", error);
     }
   };
 
@@ -1103,6 +1120,61 @@ export default function StudentDashboard({ user, setUser, refreshUser }) {
           </div>
         ) : (
         <>
+        {/* Continue Where You Left Off - Hero Card */}
+        {lastActivity && (
+          <Card
+            data-testid="continue-hero-card"
+            className="mb-6 bg-gradient-to-br from-cyber-magenta/10 via-cyber-navy/40 to-cyber-cyan/10 border border-cyber-magenta/40 rounded-none cursor-pointer hover:border-cyber-magenta/70 hover:shadow-[0_0_25px_rgba(255,0,200,0.35)] transition-all relative overflow-hidden group"
+            onClick={() => navigate(lastActivity.deep_link)}
+          >
+            <div className="absolute inset-0 bg-[linear-gradient(90deg,transparent_0%,rgba(255,0,200,0.04)_50%,transparent_100%)] opacity-0 group-hover:opacity-100 transition-opacity" />
+            <CardContent className="p-6 flex items-center justify-between gap-4 relative">
+              <div className="flex items-center gap-4 min-w-0 flex-1">
+                <div className="w-14 h-14 border border-cyber-magenta/60 flex items-center justify-center bg-cyber-magenta/10 shrink-0">
+                  <Zap className="w-7 h-7 text-cyber-magenta" />
+                </div>
+                <div className="min-w-0 flex-1">
+                  <div className="text-[10px] font-orbitron uppercase tracking-[0.2em] text-cyber-magenta mb-1">
+                    Continue where you left off
+                  </div>
+                  <h3 className="font-orbitron text-white uppercase tracking-wider text-base truncate" data-testid="continue-lesson-title">
+                    {lastActivity.chapter} · {lastActivity.lesson}
+                  </h3>
+                  {lastActivity.problem_title && (
+                    <p className="text-slate-400 font-chakra text-sm truncate mt-0.5">
+                      Last problem: <span className="text-slate-200">{lastActivity.problem_title}</span>
+                      {lastActivity.is_passing && (
+                        <span className="ml-2 text-cyber-cyan">✓ Passed</span>
+                      )}
+                    </p>
+                  )}
+                  {lastActivity.lesson_total > 0 && (
+                    <div className="flex items-center gap-2 mt-2">
+                      <div className="h-1.5 w-32 bg-cyber-navy/80 border border-cyber-magenta/30 overflow-hidden">
+                        <div
+                          className="h-full bg-cyber-magenta shadow-[0_0_8px_rgba(255,0,200,0.6)]"
+                          style={{ width: `${Math.min(100, (lastActivity.lesson_completed / lastActivity.lesson_total) * 100)}%` }}
+                        />
+                      </div>
+                      <span className="text-xs font-chakra text-slate-400">
+                        {lastActivity.lesson_completed} / {lastActivity.lesson_total} complete
+                      </span>
+                    </div>
+                  )}
+                </div>
+              </div>
+              <Button
+                data-testid="continue-resume-btn"
+                className="bg-cyber-magenta text-white hover:shadow-[0_0_15px_rgba(255,0,200,0.6)] font-orbitron uppercase tracking-wider text-xs shrink-0"
+                onClick={(e) => { e.stopPropagation(); navigate(lastActivity.deep_link); }}
+              >
+                Resume
+                <ChevronRight className="w-4 h-4 ml-1" />
+              </Button>
+            </CardContent>
+          </Card>
+        )}
+
         {/* Curriculum / Lessons */}
         <Card className="mb-8 bg-cyber-navy/40 border border-cyber-cyan/20 rounded-none cursor-pointer hover:border-cyber-cyan/50 hover:shadow-[0_0_15px_rgba(0,240,255,0.2)] transition-all"
           onClick={() => navigate("/student/curriculum")}>

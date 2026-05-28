@@ -5237,6 +5237,65 @@ async def mark_submission_final(submission_id: str, request: Request):
     return {"success": True, "message": "Submission marked as final"}
 
 
+@api_router.get("/student/last-activity")
+async def get_student_last_activity(request: Request):
+    """Return the student's most recent submission with deep-link context for the curriculum lesson."""
+    user = await get_current_user(request)
+    if user["role"] != "student":
+        raise HTTPException(status_code=403, detail="Only students can access this endpoint")
+
+    # Walk back through recent submissions to find one with a real curriculum-linked problem.
+    # This skips orphaned submissions whose problem no longer exists or lacks chapter/lesson context.
+    recent_subs = await db.submissions.find(
+        {"student_id": user["id"]},
+        {"_id": 0, "problem_id": 1, "submitted_at": 1, "is_passing": 1}
+    ).sort("submitted_at", -1).limit(50).to_list(50)
+    if not recent_subs:
+        return {"has_activity": False}
+
+    problem = None
+    latest = None
+    for sub in recent_subs:
+        candidate = await db.problems.find_one({"id": sub.get("problem_id")}, {"_id": 0})
+        if candidate and candidate.get("chapter") and candidate.get("lesson"):
+            problem = candidate
+            latest = sub
+            break
+    if not problem:
+        return {"has_activity": False}
+
+    chapter = problem["chapter"]
+    lesson = problem["lesson"]
+    assignment_type = problem.get("assignment_type") or "code"
+
+    # Count completed (passing) problems in this lesson for progress indicator
+    lesson_problems = await db.problems.find(
+        {"assignment_type": assignment_type, "chapter": chapter, "lesson": lesson},
+        {"_id": 0, "id": 1}
+    ).to_list(200)
+    lesson_problem_ids = [p["id"] for p in lesson_problems]
+
+    passing_subs = await db.submissions.find(
+        {"student_id": user["id"], "problem_id": {"$in": lesson_problem_ids}, "is_passing": True},
+        {"_id": 0, "problem_id": 1}
+    ).to_list(1000)
+    completed_ids = {s["problem_id"] for s in passing_subs}
+
+    from urllib.parse import quote
+    return {
+        "has_activity": True,
+        "assignment_type": assignment_type,
+        "chapter": chapter,
+        "lesson": lesson,
+        "problem_title": problem.get("title", ""),
+        "submitted_at": latest["submitted_at"].isoformat() if hasattr(latest.get("submitted_at"), "isoformat") else latest.get("submitted_at"),
+        "is_passing": latest.get("is_passing", False),
+        "lesson_total": len(lesson_problem_ids),
+        "lesson_completed": len(completed_ids),
+        "deep_link": f"/lesson/{assignment_type}/{quote(chapter, safe='')}/{quote(lesson, safe='')}",
+    }
+
+
 @api_router.get("/student/completed-assignments")
 async def get_completed_assignments(request: Request):
     """Get all assignment IDs that the student has completed (has at least one final submission)"""

@@ -229,5 +229,6 @@ A coding education platform for K-12 students featuring multiple programming env
 - Block grading engine fixed (event blocks, empty dropdowns) — 37% → 100% accuracy
 - Removed legacy "My Assignments" block from StudentDashboard (students enter via curriculum)
 - Fixed StudentDashboard.jsx parsing error from incremental edit corruption
+- Added "Continue where you left off" hero card on StudentDashboard with `GET /api/student/last-activity` endpoint (deep-links into last lesson + shows lesson progress bar)
 
 *Last Updated: Feb 28, 2026*
