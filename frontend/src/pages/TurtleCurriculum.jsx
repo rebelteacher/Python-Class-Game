@@ -401,10 +401,28 @@ export default function TurtleCurriculum({ user }) {
   const [selectedLesson, setSelectedLesson] = useState(null);
   const [selectedClassroom, setSelectedClassroom] = useState("");
   const [loading, setLoading] = useState(false);
+  const [dbLessonNames, setDbLessonNames] = useState({}); // chapter -> [lesson names]
 
   useEffect(() => {
     fetchClassrooms();
+    fetchDbLessonNames();
   }, []);
+
+  const fetchDbLessonNames = async () => {
+    try {
+      const response = await axios.get(`${API}/curriculum/units`, { withCredentials: true });
+      const turtleUnit = response.data.find(u => u.assignment_type === 'turtle');
+      if (turtleUnit) {
+        const mapping = {};
+        for (const ch of turtleUnit.chapters) {
+          mapping[ch.name] = ch.lessons.map(l => l.name);
+        }
+        setDbLessonNames(mapping);
+      }
+    } catch (error) {
+      console.error("Error fetching DB lesson names:", error);
+    }
+  };
 
   const fetchClassrooms = async () => {
     try {
@@ -695,7 +713,9 @@ export default function TurtleCurriculum({ user }) {
                             size="sm"
                             onClick={() => {
                               const chapterName = CHAPTER_MAPPING[unit.id];
-                              navigate(`/lesson/turtle/${encodeURIComponent(chapterName || "Chapter 1: First Steps")}/${encodeURIComponent("Lesson " + (index + 1) + ": " + lesson.title)}`);
+                              const dbLessons = dbLessonNames[chapterName] || [];
+                              const dbLessonName = dbLessons[index] || `Lesson ${index + 1}: ${lesson.title}`;
+                              navigate(`/lesson/turtle/${encodeURIComponent(chapterName || "Chapter 1: First Steps")}/${encodeURIComponent(dbLessonName)}`);
                             }}
                             className="bg-cyber-cyan text-cyber-black font-orbitron text-xs uppercase tracking-widest rounded-none border border-cyber-cyan hover:shadow-[0_0_12px_rgba(0,240,255,0.5)] font-bold gap-1 transition-all"
                           >

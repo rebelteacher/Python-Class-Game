@@ -1120,121 +1120,16 @@ export default function StudentDashboard({ user, setUser, refreshUser }) {
           </CardContent>
         </Card>
 
-        {/* My Assignments */}
-        <Card className="mb-8">
-            <CardHeader>
-              <CardTitle className="text-2xl flex items-center gap-2">
-                <BookOpen className="w-6 h-6 text-cyber-cyan" />
-                My Assignments
-              </CardTitle>
-              <CardDescription>
-                Track your progress and complete assignments
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <Tabs defaultValue="todo" className="w-full">
-                <TabsList className="mb-4">
-                  <TabsTrigger value="todo" className="gap-2">
-                    <FileText className="w-4 h-4" />
-                    To Do ({Object.values(toDoAssignments).reduce((acc, chapter) => 
-                      acc + Object.values(chapter).reduce((sum, lessons) => sum + lessons.length, 0), 0)})
-                  </TabsTrigger>
-                  <TabsTrigger value="completed" className="gap-2">
-                    <CheckCircle className="w-4 h-4" />
-                    Completed ({Object.values(completedAssignments).reduce((acc, chapter) => 
-                      acc + Object.values(chapter).reduce((sum, lessons) => sum + lessons.length, 0), 0)})
-                  </TabsTrigger>
-                </TabsList>
+        )}
 
-                {/* To Do Tab */}
-                <TabsContent value="todo">
-                  {Object.keys(toDoAssignments).length === 0 ? (
-                    <div className="text-center py-12">
-                      <CheckCircle className="w-16 h-16 text-green-400 mx-auto mb-4" />
-                      <h3 className="text-xl font-semibold text-slate-300 mb-2">All caught up! 🎉</h3>
-                      <p className="text-slate-500">You've completed all your assignments</p>
-                    </div>
-                  ) : (
-                    <div className="space-y-4">
-                      {Object.keys(toDoAssignments).sort(naturalSort).map((chapter) => {
-                        const isChapterExpanded = expandedChapters.has(chapter);
-                        const lessons = toDoAssignments[chapter];
-              
-              return (
-                <div key={chapter} className="border rounded-lg bg-cyber-navy/60 backdrop-blur-sm">
-                  {/* Chapter Folder */}
-                  <div
-                    className="flex items-center gap-3 p-4 cursor-pointer hover:bg-cyber-navy/40 transition-colors"
-                    onClick={() => toggleChapter(chapter)}
-                  >
-                    {isChapterExpanded ? (
-                      <ChevronDown className="w-5 h-5 text-slate-400" />
-                    ) : (
-                      <ChevronRight className="w-5 h-5 text-slate-400" />
-                    )}
-                    {isChapterExpanded ? (
-                      <FolderOpen className="w-6 h-6 text-blue-500" />
-                    ) : (
-                      <Folder className="w-6 h-6 text-blue-500" />
-                    )}
-                    <h3 className="text-lg font-semibold text-white">{chapter}</h3>
-                    <span className="ml-auto text-sm text-slate-500 bg-cyber-navy/30 px-3 py-1 rounded-full">
-                      {Object.keys(lessons).length} lesson{Object.keys(lessons).length !== 1 ? 's' : ''}
-                    </span>
-                  </div>
-
-                  {/* Lessons in Chapter */}
-                  {isChapterExpanded && (
-                    <div className="pl-8 pr-4 pb-4 space-y-3">
-                      {Object.keys(lessons).sort(naturalSort).map((lesson) => {
-                        const lessonKey = `${chapter}-${lesson}`;
-                        const isLessonExpanded = expandedLessons.has(lessonKey);
-                        const assignments = lessons[lesson];
-                        
-                        return (
-                          <div key={lessonKey} className="border rounded-lg bg-cyber-navy/40">
-                            {/* Lesson Folder */}
-                            <div
-                              className="flex items-center gap-3 p-3 cursor-pointer hover:bg-cyber-navy/30 transition-colors rounded-lg"
-                              onClick={() => toggleLesson(lessonKey)}
-                            >
-                              {isLessonExpanded ? (
-                                <ChevronDown className="w-4 h-4 text-slate-400" />
-                              ) : (
-                                <ChevronRight className="w-4 h-4 text-slate-400" />
-                              )}
-                              {isLessonExpanded ? (
-                                <FolderOpen className="w-5 h-5 text-teal-500" />
-                              ) : (
-                                <Folder className="w-5 h-5 text-teal-500" />
-                              )}
-                              <h4 className="text-md font-medium text-slate-200">{lesson}</h4>
-                              <span className="ml-auto text-xs text-slate-500 bg-cyber-navy/60 px-2 py-1 rounded-full">
-                                {assignments.length} assignment{assignments.length !== 1 ? 's' : ''}
-                              </span>
-                            </div>
-
-                            {/* Assignments in Lesson */}
-                            {isLessonExpanded && (
-                              <div className="p-3 pt-0 space-y-2">
-                                {assignments.map((assignment) => (
-                                  <Card
-                                    key={assignment.id}
-                                    data-testid={`assignment-card-${assignment.id}`}
-                                    className="hover:shadow-md transition-shadow cursor-pointer border-2 border-cyber-cyan/10 hover:border-teal-300"
-                                    onClick={() => navigate(`/assignment/${assignment.id}`)}
-                                  >
-                                    <CardHeader className="pb-3">
-                                      <div className="flex justify-between items-start">
-                                        <CardTitle className="text-base">{assignment.title}</CardTitle>
-                                        <span className="text-xs text-slate-500 bg-cyber-navy/60 px-2 py-1 rounded border">
-                                          {assignment.classroom_name}
-                                        </span>
-                                      </div>
-                                      <CardDescription className="text-sm">{assignment.description}</CardDescription>
-                                    </CardHeader>
-                                    <CardContent className="pt-0">
-                                      <div className="flex items-center justify-between text-sm">
+        {/* Shop Dialog */}
+        {/* Shop Dialog */}
+        <Dialog open={shopDialogOpen} onOpenChange={setShopDialogOpen}>
+          <DialogContent className="max-w-4xl max-h-[80vh] overflow-y-auto" data-testid="shop-dialog">
+            <DialogHeader>
+              <DialogTitle className="text-2xl flex items-center gap-2">
+                <ShoppingBag className="w-6 h-6" />
+                Virtual Shop
                                         <span className="text-slate-400">
                                           {assignment.problem_ids?.length || 0} problems
                                         </span>

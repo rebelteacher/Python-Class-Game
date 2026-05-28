@@ -35,13 +35,31 @@ export default function MicrobitCurriculum({ user }) {
   const [classrooms, setClassrooms] = useState([]);
   const [selectedClassrooms, setSelectedClassrooms] = useState([]);
   const [creating, setCreating] = useState(false);
+  const [dbLessonNames, setDbLessonNames] = useState({}); // chapter -> [lesson names]
 
   useEffect(() => {
     fetchCurriculum();
+    fetchDbLessonNames();
     if (user?.role === "teacher") {
       fetchClassrooms();
     }
   }, [user]);
+
+  const fetchDbLessonNames = async () => {
+    try {
+      const response = await axios.get(`${API}/curriculum/units`, { withCredentials: true });
+      const mbUnit = response.data.find(u => u.assignment_type === 'microbit');
+      if (mbUnit) {
+        const mapping = {};
+        for (const ch of mbUnit.chapters) {
+          mapping[ch.name] = ch.lessons.map(l => l.name);
+        }
+        setDbLessonNames(mapping);
+      }
+    } catch (error) {
+      console.error("Error fetching DB lesson names:", error);
+    }
+  };
 
   const fetchCurriculum = async () => {
     try {
@@ -381,7 +399,9 @@ export default function MicrobitCurriculum({ user }) {
                               <Button
                                 size="sm"
                                 onClick={() => {
-                                  navigate(`/lesson/microbit/${encodeURIComponent(unit.title)}/${encodeURIComponent(lesson.title)}`);
+                                  const dbLessons = dbLessonNames[unit.title] || [];
+                                  const dbLessonName = dbLessons[lessonIndex] || lesson.title;
+                                  navigate(`/lesson/microbit/${encodeURIComponent(unit.title)}/${encodeURIComponent(dbLessonName)}`);
                                 }}
                                 className="bg-cyber-cyan text-cyber-black font-orbitron text-xs uppercase tracking-widest rounded-none border border-cyber-cyan hover:shadow-[0_0_12px_rgba(0,240,255,0.5)] font-bold gap-1 transition-all"
                               >

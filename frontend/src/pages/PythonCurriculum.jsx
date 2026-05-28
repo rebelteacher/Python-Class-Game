@@ -555,6 +555,7 @@ export default function PythonCurriculum({ user }) {
   });
   const [classrooms, setClassrooms] = useState([]);
   const [problemCounts, setProblemCounts] = useState({});
+  const [dbLessonNames, setDbLessonNames] = useState({});
 
   const loadCustomCurriculum = async () => {
     // Load any custom chapters from localStorage or API
@@ -601,7 +602,24 @@ export default function PythonCurriculum({ user }) {
     fetchClassrooms();
     fetchProblemCounts();
     loadCustomCurriculum();
+    fetchDbLessonNames();
   }, []);
+
+  const fetchDbLessonNames = async () => {
+    try {
+      const response = await axios.get(`${API}/curriculum/units`, { withCredentials: true });
+      const pyUnit = response.data.find(u => u.assignment_type === 'code');
+      if (pyUnit) {
+        const mapping = {};
+        for (const ch of pyUnit.chapters) {
+          mapping[ch.name] = ch.lessons.map(l => l.name);
+        }
+        setDbLessonNames(mapping);
+      }
+    } catch (error) {
+      console.error("Error fetching DB lesson names:", error);
+    }
+  };
 
   const toggleUnit = (unitId) => {
     setExpandedUnits(prev => ({
@@ -805,7 +823,9 @@ export default function PythonCurriculum({ user }) {
                               size="sm"
                               onClick={(e) => {
                                 e.stopPropagation();
-                                navigate(`/lesson/code/${encodeURIComponent(unit.title)}/${encodeURIComponent(`Lesson ${lessonIndex + 1} ${lesson.title}`)}`);
+                                const dbLessons = dbLessonNames[unit.title] || [];
+                                const dbLessonName = dbLessons[lessonIndex] || `Lesson ${lessonIndex + 1} ${lesson.title}`;
+                                navigate(`/lesson/code/${encodeURIComponent(unit.title)}/${encodeURIComponent(dbLessonName)}`);
                               }}
                               className="bg-cyber-cyan text-cyber-black font-orbitron text-xs uppercase tracking-widest rounded-none border border-cyber-cyan hover:shadow-[0_0_12px_rgba(0,240,255,0.5)] font-bold gap-1 transition-all"
                             >
