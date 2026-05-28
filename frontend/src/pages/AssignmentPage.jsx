@@ -945,7 +945,7 @@ export default function AssignmentPage({ user, lessonData }) {
                         <span className="ml-1 text-xs">({problemScore.toFixed(0)}%)</span>
                       )}
                     </button>
-                    {assignment?.is_lesson && user?.is_admin && (
+                    {assignment?.is_lesson && user?.is_admin && user?.email === 'astapp@spanola.net' && (
                       <button
                         data-testid={`remove-problem-${problem.id}`}
                         onClick={(e) => {
@@ -976,19 +976,7 @@ export default function AssignmentPage({ user, lessonData }) {
                 <CardHeader className="pb-2 px-3">
                   <div className="flex items-center justify-between">
                     <CardTitle className="text-base">Instructions</CardTitle>
-                    {/* Edit button for admin only on lesson pages */}
-                    {assignment?.is_lesson && user?.is_admin && !editingInstructions && (
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        data-testid="edit-instructions-btn"
-                        onClick={() => { setInstructionsDraft(lessonInstructions); setEditingInstructions(true); }}
-                        className="h-7 px-2 text-cyber-cyan hover:text-cyber-cyan/80 hover:bg-cyber-cyan/10 rounded-none"
-                      >
-                        <Pencil className="w-3.5 h-3.5 mr-1" />
-                        <span className="text-xs font-orbitron uppercase tracking-wider">Edit</span>
-                      </Button>
-                    )}
+                    {/* Edit instructions - only accessible from Admin Lesson Manager */}
                   </div>
                 </CardHeader>
                 <CardContent className="pt-0 px-3">
@@ -1410,7 +1398,7 @@ export default function AssignmentPage({ user, lessonData }) {
               /* Check if this is a block assignment - use simplified full-width layout */
               assignment.problems?.[currentProblemIndex]?.assignment_type === "block" ? (
                 /* Block-Based Layout - TurtleBlocklyEditor takes full space with inline preview */
-                <div className="h-full flex flex-col pr-0">
+                <div className="h-full flex flex-col pr-0" style={{ maxHeight: 'calc(100vh - 180px)' }}>
                   {/* Compact header with score and submit */}
                   <div className="flex items-center justify-between bg-cyber-navy/60 border-b px-3 py-2 flex-shrink-0 rounded-tr-none">
                     <div className="flex items-center gap-3">
@@ -1920,14 +1908,14 @@ export default function AssignmentPage({ user, lessonData }) {
               // Teacher Demo/Sandbox Mode - Interactive coding without submissions
               assignment.problems?.[currentProblemIndex]?.assignment_type === "block" ? (
                 /* Block-Based Teacher Mode - Same editor as students */
-                <div className="h-full flex flex-col pr-0">
+                <div className="h-full flex flex-col pr-0" style={{ maxHeight: 'calc(100vh - 180px)' }}>
                   {/* Compact header */}
                   <div className="flex items-center justify-between bg-cyber-navy/60 border-b px-3 py-2 flex-shrink-0">
-                    <span className="font-semibold text-slate-300 font-orbitron text-sm uppercase tracking-wider">Block Coding — Teacher Preview</span>
+                    <span className="font-semibold text-slate-300 font-orbitron text-sm uppercase tracking-wider">Block Coding</span>
                   </div>
 
                   {/* TurtleBlocklyEditor with inline AnimatedTurtle */}
-                  <div className="flex-1 overflow-hidden">
+                  <div className="flex-1 min-h-0 overflow-hidden">
                     <TurtleBlocklyEditor
                       key={`teacher-block-editor-${currentProblemIndex}-${assignment.problems[currentProblemIndex]?.id || 'new'}`}
                       ref={turtleBlocksRef}

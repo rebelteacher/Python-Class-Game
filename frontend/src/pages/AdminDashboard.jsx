@@ -310,6 +310,10 @@ export default function AdminDashboard({ user }) {
           </CardHeader>
           <CardContent className="pt-4">
             <div className="grid grid-cols-3 gap-3">
+              <Button variant="outline" size="sm" onClick={() => navigate("/admin/lesson-manager")} className="justify-start text-sm h-10 bg-transparent border-cyber-pink/40 text-cyber-pink hover:border-cyber-pink/60 hover:bg-cyber-pink/10 rounded-none font-chakra">
+                <BookOpen className="w-4 h-4 mr-2 text-cyber-pink" />
+                Lesson Manager
+              </Button>
               <Button variant="outline" size="sm" onClick={() => navigate("/library")} className="justify-start text-sm h-10 bg-transparent border-slate-700 text-slate-300 hover:border-cyber-cyan/50 hover:text-cyber-cyan rounded-none font-chakra">
                 <BookOpen className="w-4 h-4 mr-2 text-cyber-cyan" />
                 Assignment Library
