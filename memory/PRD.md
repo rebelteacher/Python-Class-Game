@@ -219,4 +219,15 @@ A coding education platform for K-12 students featuring multiple programming env
 
 ---
 
-*Last Updated: May 12, 2025*
+### Feb 2026 — Cyberpunk Redesign + Curriculum Auto-Assign
+- Phase 1 Cyberpunk UI overhaul (CyberRain particle bg, neon palette, Orbitron/Chakra fonts)
+- Auto-assigned curriculum lesson flow (3-column lesson layout)
+- AdminLessonManager (add/rename/delete lessons & problems)
+- Classroom archive + Lesson Locks (teacher tab)
+- Markdown rendering for lesson instructions + problem descriptions
+- Leaderboard redesign (overall / teacher / class ranks)
+- Block grading engine fixed (event blocks, empty dropdowns) — 37% → 100% accuracy
+- Removed legacy "My Assignments" block from StudentDashboard (students enter via curriculum)
+- Fixed StudentDashboard.jsx parsing error from incremental edit corruption
+
+*Last Updated: Feb 28, 2026*
