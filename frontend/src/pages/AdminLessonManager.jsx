@@ -237,19 +237,29 @@ export default function AdminLessonManager({ user }) {
       <div className="flex h-[calc(100vh-57px)]">
         {/* Sidebar - Unit Selection */}
         <div className="w-56 bg-cyber-navy/50 border-r border-cyber-cyan/20 p-3 flex flex-col gap-1 shrink-0">
-          {UNIT_TYPES.map(unit => (
-            <button
-              key={unit.value}
-              onClick={() => setSelectedUnit(unit.value)}
-              className={`text-left px-3 py-2 text-sm font-chakra rounded-none transition-all ${
-                selectedUnit === unit.value
-                  ? 'bg-cyber-cyan/10 text-cyber-cyan border border-cyber-cyan/30'
-                  : 'text-slate-400 hover:text-white hover:bg-cyber-navy/60 border border-transparent'
-              }`}
-            >
-              {unit.label}
-            </button>
-          ))}
+          {UNIT_TYPES.map(unit => {
+            const unitData = units.find(u => u.assignment_type === unit.value);
+            const unitHasOrphans = unitData?.chapters?.some(c => c.lessons?.some(l => l.is_orphan));
+            return (
+              <button
+                key={unit.value}
+                onClick={() => setSelectedUnit(unit.value)}
+                data-testid={`unit-tab-${unit.value}`}
+                className={`text-left px-3 py-2 text-sm font-chakra rounded-none transition-all flex items-center justify-between gap-2 ${
+                  selectedUnit === unit.value
+                    ? 'bg-cyber-cyan/10 text-cyber-cyan border border-cyber-cyan/30'
+                    : 'text-slate-400 hover:text-white hover:bg-cyber-navy/60 border border-transparent'
+                }`}
+              >
+                <span>{unit.label}</span>
+                <span
+                  data-testid={`unit-health-${unit.value}`}
+                  title={unitHasOrphans ? "This unit has orphan problems" : "All clean"}
+                  className={`w-2 h-2 rounded-full shrink-0 ${unitHasOrphans ? "bg-amber-400 shadow-[0_0_6px_rgba(251,191,36,0.7)] animate-pulse" : "bg-green-500 shadow-[0_0_6px_rgba(34,197,94,0.5)]"}`}
+                />
+              </button>
+            );
+          })}
         </div>
 
         {/* Main Content */}
@@ -257,7 +267,9 @@ export default function AdminLessonManager({ user }) {
           <div className="p-6 max-w-4xl">
             {currentUnit ? (
               <div className="space-y-4">
-                {currentUnit.chapters.map(chapter => (
+                {currentUnit.chapters.map(chapter => {
+                  const chapterHasOrphans = chapter.lessons?.some(l => l.is_orphan);
+                  return (
                   <div key={chapter.name} className="border border-cyber-cyan/20 rounded-none">
                     {/* Chapter Header */}
                     <button
@@ -267,6 +279,11 @@ export default function AdminLessonManager({ user }) {
                       <div className="flex items-center gap-2">
                         {expandedChapters.has(chapter.name) ? <ChevronDown className="w-4 h-4 text-cyber-cyan" /> : <ChevronRight className="w-4 h-4 text-slate-500" />}
                         <span className="font-orbitron text-sm text-white uppercase tracking-wider">{chapter.name}</span>
+                        <span
+                          data-testid={`chapter-health-${chapter.name}`}
+                          title={chapterHasOrphans ? "Chapter has orphan problems — click to expand and clean up" : "All clean"}
+                          className={`w-2 h-2 rounded-full shrink-0 ml-1 ${chapterHasOrphans ? "bg-amber-400 shadow-[0_0_6px_rgba(251,191,36,0.7)] animate-pulse" : "bg-green-500 shadow-[0_0_6px_rgba(34,197,94,0.5)]"}`}
+                        />
                       </div>
                       <span className="text-xs text-slate-500 font-chakra">{chapter.problem_count} problems / {chapter.lessons.length} lessons</span>
                     </button>
@@ -468,7 +485,8 @@ export default function AdminLessonManager({ user }) {
                       </div>
                     )}
                   </div>
-                ))}
+                  );
+                })}
               </div>
             ) : (
               <p className="text-slate-500 text-center py-20 font-chakra">Select a unit to manage lessons</p>
