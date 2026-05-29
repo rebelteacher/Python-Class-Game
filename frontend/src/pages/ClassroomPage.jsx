@@ -515,12 +515,14 @@ export default function ClassroomPage({ user }) {
       </nav>
 
       <main className="container mx-auto px-6 py-10">
-        <Tabs defaultValue="assignments" className="w-full">
+        <Tabs defaultValue={isTeacher ? "tests" : "assignments"} className="w-full">
           <TabsList className="mb-8">
-            <TabsTrigger data-testid="assignments-tab" value="assignments" className="gap-2">
-              <BookOpen className="w-4 h-4" />
-              Assignments
-            </TabsTrigger>
+            {!isTeacher && (
+              <TabsTrigger data-testid="assignments-tab" value="assignments" className="gap-2">
+                <BookOpen className="w-4 h-4" />
+                Assignments
+              </TabsTrigger>
+            )}
             <TabsTrigger data-testid="tests-tab" value="tests" className="gap-2">
               <FileQuestion className="w-4 h-4" />
               Tests

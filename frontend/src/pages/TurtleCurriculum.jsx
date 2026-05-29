@@ -722,18 +722,21 @@ export default function TurtleCurriculum({ user }) {
                             <Play className="w-4 h-4" />
                             Start Lesson
                           </Button>
-                          <Button
-                            size="sm"
-                            variant="outline"
-                            onClick={() => {
-                              const chapterName = CHAPTER_MAPPING[unit.id];
-                              console.log('Unit ID:', unit.id, 'Mapped Chapter:', chapterName);
-                              navigate(`/library?type=turtle&chapter=${encodeURIComponent(chapterName || "Chapter 1: First Steps")}`);
-                            }}
-                          >
-                            <BookOpen className="w-4 h-4 mr-1" />
-                            Problems
-                          </Button>
+                          {user?.is_admin && (
+                            <Button
+                              size="sm"
+                              variant="outline"
+                              data-testid="view-in-library-btn"
+                              onClick={() => {
+                                const chapterName = CHAPTER_MAPPING[unit.id];
+                                console.log('Unit ID:', unit.id, 'Mapped Chapter:', chapterName);
+                                navigate(`/library?type=turtle&chapter=${encodeURIComponent(chapterName || "Chapter 1: First Steps")}`);
+                              }}
+                            >
+                              <BookOpen className="w-4 h-4 mr-1" />
+                              Problems
+                            </Button>
+                          )}
                         </div>
                         </div>
                       </div>

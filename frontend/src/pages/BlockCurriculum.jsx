@@ -619,17 +619,20 @@ export default function BlockCurriculum({ user }) {
                                       <Trash2 className="w-4 h-4" />
                                     </Button>
                                   )}
-                                  <Button
-                                    size="sm"
-                                    variant="outline"
-                                    onClick={(e) => {
-                                      e.stopPropagation();
-                                      navigate(`/library?type=block&chapter=${encodeURIComponent(chapter)}&lesson=${encodeURIComponent(lesson)}`);
-                                    }}
-                                  >
-                                    <BookOpen className="w-4 h-4 mr-1" />
-                                    View in Library
-                                  </Button>
+                                  {user?.is_admin && (
+                                    <Button
+                                      size="sm"
+                                      variant="outline"
+                                      data-testid="view-in-library-btn"
+                                      onClick={(e) => {
+                                        e.stopPropagation();
+                                        navigate(`/library?type=block&chapter=${encodeURIComponent(chapter)}&lesson=${encodeURIComponent(lesson)}`);
+                                      }}
+                                    >
+                                      <BookOpen className="w-4 h-4 mr-1" />
+                                      View in Library
+                                    </Button>
+                                  )}
                                   <Button
                                     size="sm"
                                     onClick={(e) => {
