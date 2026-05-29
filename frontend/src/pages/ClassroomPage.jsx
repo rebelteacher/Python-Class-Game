@@ -9,7 +9,9 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { ArrowLeft, Plus, Users, BookOpen, Trash2, Code2, Trophy, Swords, Edit, Calendar, Clock, Folder, FolderOpen, ChevronRight, ChevronDown, FileQuestion, Lock, Unlock } from "lucide-react";
+import { Checkbox } from "@/components/ui/checkbox";
+import { Switch } from "@/components/ui/switch";
+import { ArrowLeft, Plus, Users, BookOpen, Trash2, Code2, Trophy, Swords, Edit, Calendar, Clock, Folder, FolderOpen, ChevronRight, ChevronDown, FileQuestion, Lock, Unlock, X } from "lucide-react";
 import Leaderboard from "@/components/Leaderboard";
 import BattleZone from "@/components/BattleZone";
 
@@ -23,6 +25,17 @@ export default function ClassroomPage({ user }) {
   const [assignments, setAssignments] = useState([]);
   const [tests, setTests] = useState([]);
   const [codingTests, setCodingTests] = useState([]);
+  const [testAssignments, setTestAssignments] = useState([]);
+  const [assignDialogOpen, setAssignDialogOpen] = useState(false);
+  const [testLibrary, setTestLibrary] = useState([]);
+  const [librarySearch, setLibrarySearch] = useState("");
+  const [selectedLibraryTest, setSelectedLibraryTest] = useState(null);
+  const [myClassrooms, setMyClassrooms] = useState([]);
+  const [scheduleByClassroom, setScheduleByClassroom] = useState({}); // { [classroomId]: { selected, available_from, due_at } }
+  const [assignAllowLate, setAssignAllowLate] = useState(false);
+  const [assignLatePenalty, setAssignLatePenalty] = useState(0);
+  const [assignAutoReleaseResults, setAssignAutoReleaseResults] = useState(true);
+  const [assignSubmitting, setAssignSubmitting] = useState(false);
   const [loading, setLoading] = useState(true);
   const [createDialogOpen, setCreateDialogOpen] = useState(false);
   const [editScheduleDialogOpen, setEditScheduleDialogOpen] = useState(false);
@@ -50,6 +63,7 @@ export default function ClassroomPage({ user }) {
     fetchTests();
     fetchCodingTests();
     fetchCurriculumLocks();
+    fetchTestAssignments();
   }, [classroomId]);
 
   const toggleFolder = (folder) => {
@@ -215,6 +229,99 @@ export default function ClassroomPage({ user }) {
     } catch (error) {
       console.error("Error fetching coding tests:", error);
       toast.error("Failed to load coding tests");
+    }
+  };
+
+  const fetchTestAssignments = async () => {
+    try {
+      const res = await axios.get(`${API}/classrooms/${classroomId}/test-assignments`, { withCredentials: true });
+      setTestAssignments(res.data.assignments || []);
+    } catch (error) {
+      console.error("Error fetching test assignments:", error);
+    }
+  };
+
+  const openAssignDialog = async () => {
+    try {
+      const [libRes, classroomsRes] = await Promise.all([
+        axios.get(`${API}/admin-tests/library`, { withCredentials: true }),
+        axios.get(`${API}/classrooms`, { withCredentials: true }),
+      ]);
+      setTestLibrary(libRes.data.tests || []);
+      const teacherClassrooms = (classroomsRes.data || []).filter(c => !c.is_archived);
+      setMyClassrooms(teacherClassrooms);
+      // Default: only the current classroom is preselected
+      const initSchedule = {};
+      teacherClassrooms.forEach(c => {
+        initSchedule[c.id] = {
+          selected: c.id === classroomId,
+          available_from: "",
+          due_at: "",
+        };
+      });
+      setScheduleByClassroom(initSchedule);
+      setSelectedLibraryTest(null);
+      setLibrarySearch("");
+      setAssignAllowLate(false);
+      setAssignLatePenalty(0);
+      setAssignAutoReleaseResults(true);
+      setAssignDialogOpen(true);
+    } catch (error) {
+      console.error("Error opening assign dialog:", error);
+      toast.error("Failed to load test library");
+    }
+  };
+
+  const submitAssignTest = async () => {
+    if (!selectedLibraryTest) {
+      toast.error("Pick a test from the library");
+      return;
+    }
+    const schedules = Object.entries(scheduleByClassroom)
+      .filter(([, v]) => v.selected)
+      .map(([cid, v]) => ({
+        classroom_id: cid,
+        available_from: v.available_from || null,
+        due_at: v.due_at || null,
+      }));
+    if (schedules.length === 0) {
+      toast.error("Select at least one classroom");
+      return;
+    }
+    setAssignSubmitting(true);
+    try {
+      const res = await axios.post(
+        `${API}/test-assignments/bulk`,
+        {
+          test_id: selectedLibraryTest.id,
+          test_type: selectedLibraryTest.test_type,
+          schedules,
+          allow_late: assignAllowLate,
+          late_penalty_percent: assignLatePenalty,
+          auto_release_results: assignAutoReleaseResults,
+        },
+        { withCredentials: true }
+      );
+      toast.success(`Assigned to ${res.data.assigned} classroom${res.data.assigned !== 1 ? "s" : ""}`);
+      setAssignDialogOpen(false);
+      fetchTestAssignments();
+    } catch (error) {
+      console.error("Error assigning test:", error);
+      toast.error(error.response?.data?.detail || "Failed to assign test");
+    } finally {
+      setAssignSubmitting(false);
+    }
+  };
+
+  const handleDeleteTestAssignment = async (assignmentId) => {
+    if (!window.confirm("Unassign this test from the classroom? Students will lose access.")) return;
+    try {
+      await axios.delete(`${API}/test-assignments/${assignmentId}`, { withCredentials: true });
+      toast.success("Test unassigned");
+      fetchTestAssignments();
+    } catch (error) {
+      console.error("Error deleting test assignment:", error);
+      toast.error("Failed to unassign test");
     }
   };
 
@@ -515,14 +622,8 @@ export default function ClassroomPage({ user }) {
       </nav>
 
       <main className="container mx-auto px-6 py-10">
-        <Tabs defaultValue={isTeacher ? "tests" : "assignments"} className="w-full">
+        <Tabs defaultValue="tests" className="w-full">
           <TabsList className="mb-8">
-            {!isTeacher && (
-              <TabsTrigger data-testid="assignments-tab" value="assignments" className="gap-2">
-                <BookOpen className="w-4 h-4" />
-                Assignments
-              </TabsTrigger>
-            )}
             <TabsTrigger data-testid="tests-tab" value="tests" className="gap-2">
               <FileQuestion className="w-4 h-4" />
               Tests
@@ -551,230 +652,109 @@ export default function ClassroomPage({ user }) {
 
           <TabsContent value="tests">
             <div className="flex justify-between items-center mb-6">
-              <h2 className="text-2xl font-bold text-white">Tests</h2>
+              <div>
+                <h2 className="text-2xl font-bold text-white">Tests</h2>
+                <p className="text-sm text-slate-500 font-chakra">
+                  {isTeacher
+                    ? "Assign tests from the admin library and schedule each class separately."
+                    : "Tests your teacher has assigned to this class."}
+                </p>
+              </div>
+              {isTeacher && (
+                <Button
+                  data-testid="open-assign-test-btn"
+                  onClick={openAssignDialog}
+                  className="bg-cyber-cyan text-cyber-black hover:shadow-[0_0_15px_rgba(0,240,255,0.5)] font-orbitron uppercase tracking-widest text-xs rounded-none gap-2"
+                >
+                  <Plus className="w-4 h-4" />
+                  Assign Test
+                </Button>
+              )}
             </div>
 
-            {tests.length === 0 && codingTests.length === 0 ? (
-              <div className="text-center py-20">
+            {testAssignments.length === 0 ? (
+              <div className="text-center py-20 border border-cyber-cyan/20 rounded-none bg-cyber-navy/30">
                 <FileQuestion className="w-16 h-16 text-slate-500 mx-auto mb-4" />
-                <h3 className="text-xl font-semibold text-slate-300 mb-2">No tests assigned yet</h3>
+                <h3 className="text-xl font-semibold text-slate-300 mb-2">
+                  {isTeacher ? "No tests assigned to this class yet" : "No tests available yet"}
+                </h3>
                 <p className="text-slate-500 mb-6">
-                  {isTeacher 
-                    ? "Create MC tests or Coding tests to assess your students"
-                    : "Tests will appear here when your teacher assigns them"}
+                  {isTeacher
+                    ? "Click 'Assign Test' to browse the admin library and schedule one."
+                    : "Tests will appear here as soon as your teacher assigns them."}
                 </p>
-                {isTeacher && (
-                  <div className="flex gap-3 justify-center">
-                    <Button onClick={() => navigate("/test-builder")} className="bg-cyber-cyan text-cyber-black hover:shadow-[0_0_15px_rgba(0,240,255,0.5)] font-bold">
-                      <Plus className="w-4 h-4 mr-2" />
-                      MC Test
-                    </Button>
-                    <Button onClick={() => navigate("/coding-tests")} className="bg-purple-600 hover:bg-purple-700">
-                      <Plus className="w-4 h-4 mr-2" />
-                      Coding Test
-                    </Button>
-                  </div>
-                )}
               </div>
             ) : (
-              <div className="space-y-8">
-                {/* Coding Tests Section */}
-                {codingTests.length > 0 && (
-                  <div>
-                    <h3 className="text-lg font-semibold text-white mb-4 flex items-center gap-2">
-                      <Code2 className="w-5 h-5 text-purple-600" />
-                      Coding Tests
-                    </h3>
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                      {codingTests.map((test) => {
-                        const now = new Date();
-                        const availableDate = test.available_date ? new Date(test.available_date) : null;
-                        const dueDate = test.due_date ? new Date(test.due_date) : null;
-                        
-                        const isScheduled = availableDate && now < availableDate;
-                        const isClosed = dueDate && now > dueDate;
-                        const isAvailable = !isScheduled && !isClosed;
-
-                        if (!isTeacher && isScheduled) return null;
-
-                        return (
-                          <Card key={test.id} className="hover:shadow-lg transition-shadow">
-                            <CardHeader>
-                              <CardTitle className="flex items-center justify-between">
-                                <span>{test.title}</span>
-                                {isScheduled && (
-                                  <span className="px-2 py-1 bg-yellow-500/20 text-yellow-400 text-xs rounded">Scheduled</span>
-                                )}
-                                {isClosed && (
-                                  <span className="px-2 py-1 bg-cyber-navy/30 text-slate-200 text-xs rounded">Closed</span>
-                                )}
-                                {isAvailable && (
-                                  <span className="px-2 py-1 bg-green-500/20 text-green-400 text-xs rounded">Available</span>
-                                )}
-                              </CardTitle>
-                              <CardDescription>{test.description}</CardDescription>
-                            </CardHeader>
-                            <CardContent>
-                              <div className="space-y-2 text-sm text-slate-400">
-                                <div className="flex items-center gap-2">
-                                  <Code2 className="w-4 h-4" />
-                                  <span>{test.problem_ids?.length || 0} problems</span>
-                                </div>
-                                {test.time_limit_minutes > 0 && (
-                                  <div className="flex items-center gap-2">
-                                    <Clock className="w-4 h-4" />
-                                    <span>{test.time_limit_minutes} minute limit</span>
-                                  </div>
-                                )}
-                                {dueDate && (
-                                  <div className="flex items-center gap-2">
-                                    <Calendar className="w-4 h-4" />
-                                    <span>Due: {dueDate.toLocaleDateString()}</span>
-                                  </div>
-                                )}
-                                {isTeacher && test.proctor_code && (
-                                  <div className="mt-3 p-2 bg-yellow-500/10 border border-yellow-500/30 rounded">
-                                    <p className="text-xs font-semibold text-yellow-900">Proctor Code:</p>
-                                    <p className="text-lg font-mono font-bold text-yellow-400">{test.proctor_code}</p>
-                                  </div>
-                                )}
-                              </div>
-                              
-                              {/* Action Buttons for Teachers */}
-                              {isTeacher && (
-                                <div className="mt-4 flex gap-2">
-                                  <Button
-                                    onClick={() => {
-                                      // Set up editing state for schedule
-                                      setEditingAssignment({
-                                        id: test.id,
-                                        title: test.title,
-                                        available_date: availableDate ? availableDate.toISOString().split('T')[0] : '',
-                                        available_time: availableDate ? availableDate.toISOString().split('T')[1].substring(0, 5) : '00:00',
-                                        due_date: dueDate ? dueDate.toISOString().split('T')[0] : '',
-                                        due_time: dueDate ? dueDate.toISOString().split('T')[1].substring(0, 5) : '23:59',
-                                        isCodingTest: true // Flag to identify coding test
-                                      });
-                                      setEditScheduleDialogOpen(true);
-                                    }}
-                                    variant="outline"
-                                    size="sm"
-                                  >
-                                    <Edit className="w-4 h-4 mr-1" />
-                                    Edit
-                                  </Button>
-                                  <Button
-                                    onClick={() => navigate(`/coding-tests/${test.id}/submissions`)}
-                                    variant="outline"
-                                    size="sm"
-                                    className="flex-1"
-                                  >
-                                    View Results
-                                  </Button>
-                                  <Button
-                                    onClick={async () => {
-                                      if (window.confirm('Are you sure you want to delete this coding test?')) {
-                                        try {
-                                          await axios.delete(`${API}/coding-tests/${test.id}`, {
-                                            withCredentials: true
-                                          });
-                                          toast.success('Coding test deleted successfully');
-                                          fetchCodingTests();
-                                        } catch (error) {
-                                          console.error('Error deleting test:', error);
-                                          toast.error('Failed to delete test');
-                                        }
-                                      }
-                                    }}
-                                    variant="outline"
-                                    size="sm"
-                                    className="text-red-600 hover:bg-red-500/10"
-                                  >
-                                    <Trash2 className="w-4 h-4" />
-                                  </Button>
-                                </div>
-                              )}
-                            </CardContent>
-                          </Card>
-                        );
-                      })}
-                    </div>
-                  </div>
-                )}
-
-                {/* MC Tests Section */}
-                {tests.length > 0 && (
-                  <div>
-                    <h3 className="text-lg font-semibold text-white mb-4 flex items-center gap-2">
-                      <FileQuestion className="w-5 h-5 text-cyber-cyan" />
-                      Multiple Choice Tests
-                    </h3>
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                {tests.map((test) => {
+              <div data-testid="test-assignments-list" className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                {testAssignments.map((a) => {
                   const now = new Date();
-                  const availableDate = test.available_date ? new Date(test.available_date) : null;
-                  const dueDate = test.due_date ? new Date(test.due_date) : null;
-                  
-                  const isScheduled = availableDate && now < availableDate;
-                  const isClosed = dueDate && now > dueDate;
+                  const availFrom = a.available_from ? new Date(a.available_from) : null;
+                  const dueAt = a.due_at ? new Date(a.due_at) : null;
+                  const isScheduled = availFrom && now < availFrom;
+                  const isClosed = dueAt && now > dueAt;
                   const isAvailable = !isScheduled && !isClosed;
-
-                  // Students shouldn't see scheduled tests
-                  if (!isTeacher && isScheduled) return null;
+                  const typeBadgeClass = a.test_type === "coding"
+                    ? "border-purple-500/50 text-purple-300 bg-purple-500/10"
+                    : "border-cyber-cyan/50 text-cyber-cyan bg-cyber-cyan/10";
 
                   return (
-                    <Card key={test.id} className="hover:shadow-lg transition-shadow">
-                      <CardHeader>
-                        <div className="flex justify-between items-start">
-                          <CardTitle className="text-lg">{test.title}</CardTitle>
-                          {isScheduled && (
-                            <span className="px-2 py-1 bg-yellow-500/20 text-yellow-400 text-xs rounded">
-                              Scheduled
-                            </span>
+                    <Card key={a.assignment_id} data-testid={`test-assignment-${a.assignment_id}`} className="bg-cyber-navy/40 border border-cyber-cyan/20 rounded-none hover:border-cyber-cyan/50 transition-all">
+                      <CardHeader className="pb-3">
+                        <div className="flex items-start justify-between gap-2">
+                          <div className="min-w-0">
+                            <CardTitle className="text-white font-orbitron text-sm uppercase tracking-wider truncate">{a.title}</CardTitle>
+                            {(a.chapter || a.lesson) && (
+                              <CardDescription className="text-xs text-slate-500 truncate">
+                                {[a.chapter, a.lesson].filter(Boolean).join(" · ")}
+                              </CardDescription>
+                            )}
+                          </div>
+                          <span className={`px-2 py-0.5 border text-[10px] font-orbitron uppercase tracking-widest rounded-none shrink-0 ${typeBadgeClass}`}>
+                            {a.test_type === "coding" ? "Coding" : "MC"}
+                          </span>
+                        </div>
+                      </CardHeader>
+                      <CardContent className="space-y-2 text-sm">
+                        <div className="flex items-center gap-2 text-slate-400">
+                          <FileQuestion className="w-4 h-4" />
+                          <span>{a.num_questions} {a.test_type === "coding" ? "problems" : "questions"}</span>
+                          {a.time_limit_minutes > 0 && (
+                            <>
+                              <Clock className="w-4 h-4 ml-2" />
+                              <span>{a.time_limit_minutes}m</span>
+                            </>
                           )}
-                          {isAvailable && (
-                            <span className="px-2 py-1 bg-green-500/20 text-green-400 text-xs rounded">
-                              Available
-                            </span>
+                        </div>
+                        {availFrom && (
+                          <div className="flex items-center gap-2 text-slate-400 text-xs">
+                            <Calendar className="w-3.5 h-3.5" />
+                            <span>Opens: {availFrom.toLocaleString()}</span>
+                          </div>
+                        )}
+                        {dueAt && (
+                          <div className="flex items-center gap-2 text-slate-400 text-xs">
+                            <Calendar className="w-3.5 h-3.5" />
+                            <span>Due: {dueAt.toLocaleString()}</span>
+                          </div>
+                        )}
+                        <div className="pt-2">
+                          {isScheduled && (
+                            <span className="px-2 py-1 bg-yellow-500/10 border border-yellow-500/40 text-yellow-400 text-xs rounded-none font-orbitron uppercase tracking-widest">Scheduled</span>
                           )}
                           {isClosed && (
-                            <span className="px-2 py-1 bg-cyber-navy/30 text-slate-300 text-xs rounded">
-                              Closed
-                            </span>
+                            <span className="px-2 py-1 bg-slate-500/10 border border-slate-500/40 text-slate-400 text-xs rounded-none font-orbitron uppercase tracking-widest">Closed</span>
+                          )}
+                          {isAvailable && (
+                            <span className="px-2 py-1 bg-green-500/10 border border-green-500/40 text-green-400 text-xs rounded-none font-orbitron uppercase tracking-widest">Available</span>
                           )}
                         </div>
-                        <CardDescription>{test.description || "No description"}</CardDescription>
-                      </CardHeader>
-                      <CardContent>
-                        <div className="space-y-2 text-sm text-slate-400">
-                          <div className="flex items-center gap-2">
-                            <FileQuestion className="w-4 h-4" />
-                            <span>{test.num_questions} questions (from pool of {test.question_pool_ids?.length || 0})</span>
-                          </div>
-                          {test.time_limit_minutes > 0 && (
-                            <div className="flex items-center gap-2">
-                              <Calendar className="w-4 h-4" />
-                              <span>{test.time_limit_minutes} minute time limit</span>
-                            </div>
-                          )}
-                          {availableDate && (
-                            <div className="flex items-center gap-2">
-                              <Calendar className="w-4 h-4" />
-                              <span>Available: {availableDate.toLocaleString()}</span>
-                            </div>
-                          )}
-                          {dueDate && (
-                            <div className="flex items-center gap-2">
-                              <Calendar className="w-4 h-4" />
-                              <span>Due: {dueDate.toLocaleString()}</span>
-                            </div>
-                          )}
-                        </div>
-                        <div className="mt-4 flex gap-2">
+                        <div className="pt-3 flex gap-2">
                           {!isTeacher && isAvailable && (
-                            <Button 
-                              onClick={() => navigate(`/test/${test.id}`)}
-                              className="w-full bg-cyber-cyan text-cyber-black hover:shadow-[0_0_15px_rgba(0,240,255,0.5)] font-bold"
+                            <Button
+                              data-testid={`take-test-${a.assignment_id}`}
+                              size="sm"
+                              className="flex-1 bg-cyber-cyan text-cyber-black hover:shadow-[0_0_15px_rgba(0,240,255,0.5)] font-orbitron uppercase tracking-widest text-xs rounded-none"
+                              onClick={() => navigate(a.test_type === "coding" ? `/coding-test/${a.test_id}` : `/test/${a.test_id}`)}
                             >
                               Start Test
                             </Button>
@@ -782,55 +762,19 @@ export default function ClassroomPage({ user }) {
                           {isTeacher && (
                             <>
                               <Button
-                                onClick={() => {
-                                  const availDate = test.available_date ? new Date(test.available_date) : null;
-                                  const dueDate = test.due_date ? new Date(test.due_date) : null;
-                                  
-                                  setEditingAssignment({
-                                    id: test.id,
-                                    title: test.title,
-                                    chapter: test.chapter || '',
-                                    lesson: test.lesson || '',
-                                    available_date: availDate ? availDate.toISOString().split('T')[0] : '',
-                                    available_time: availDate ? availDate.toISOString().split('T')[1].substring(0, 5) : '00:00',
-                                    due_date: dueDate ? dueDate.toISOString().split('T')[0] : '',
-                                    due_time: dueDate ? dueDate.toISOString().split('T')[1].substring(0, 5) : '23:59',
-                                    isTest: true // Mark as test so we update the right collection
-                                  });
-                                  setEditScheduleDialogOpen(true);
-                                }}
-                                variant="outline"
                                 size="sm"
+                                variant="outline"
+                                className="flex-1 rounded-none"
+                                onClick={() => navigate(a.test_type === "coding" ? `/coding-tests/${a.test_id}/submissions` : `/test/${a.test_id}/results`)}
                               >
-                                <Edit className="w-4 h-4 mr-1" />
-                                Edit
+                                Results
                               </Button>
                               <Button
-                                onClick={() => navigate(`/test-reports`, { state: { classroomId: classroomId, selectedTestId: test.id } })}
-                                variant="outline"
                                 size="sm"
-                                className="flex-1"
-                              >
-                                View Results
-                              </Button>
-                              <Button
-                                onClick={async () => {
-                                  if (window.confirm('Are you sure you want to delete this MC test? This will also delete all student submissions.')) {
-                                    try {
-                                      await axios.delete(`${API}/mc-tests/${test.id}`, {
-                                        withCredentials: true
-                                      });
-                                      toast.success('Test deleted successfully');
-                                      fetchTests();
-                                    } catch (error) {
-                                      console.error('Error deleting test:', error);
-                                      toast.error('Failed to delete test');
-                                    }
-                                  }
-                                }}
-                                variant="outline"
-                                size="sm"
-                                className="text-red-600 hover:bg-red-500/10"
+                                variant="ghost"
+                                data-testid={`unassign-test-${a.assignment_id}`}
+                                className="text-red-400 hover:text-red-300 hover:bg-red-500/10"
+                                onClick={() => handleDeleteTestAssignment(a.assignment_id)}
                               >
                                 <Trash2 className="w-4 h-4" />
                               </Button>
@@ -841,9 +785,6 @@ export default function ClassroomPage({ user }) {
                     </Card>
                   );
                 })}
-                    </div>
-                  </div>
-                )}
               </div>
             )}
           </TabsContent>
@@ -854,385 +795,6 @@ export default function ClassroomPage({ user }) {
 
           <TabsContent value="leaderboard">
             <Leaderboard classroomId={classroomId} currentUserId={user.id} />
-          </TabsContent>
-
-          <TabsContent value="assignments">
-            <div className="flex justify-between items-center mb-6">
-              <h2 className="text-2xl font-bold text-white">Assignments</h2>
-              {isTeacher && (
-                <Dialog open={createDialogOpen} onOpenChange={setCreateDialogOpen}>
-                  <DialogTrigger asChild>
-                    <Button data-testid="create-assignment-btn" className="bg-cyber-cyan text-cyber-black hover:shadow-[0_0_15px_rgba(0,240,255,0.5)] font-bold gap-2">
-                      <Plus className="w-5 h-5" />
-                      Create Assignment
-                    </Button>
-                  </DialogTrigger>
-                  <DialogContent data-testid="create-assignment-dialog" className="max-w-3xl max-h-[90vh] overflow-y-auto">
-                    <DialogHeader>
-                      <DialogTitle>Create New Assignment</DialogTitle>
-                      <DialogDescription>
-                        Create a Python coding assignment with test cases
-                      </DialogDescription>
-                    </DialogHeader>
-                    <form onSubmit={handleCreateAssignment} className="space-y-4">
-                      <div>
-                        <Label htmlFor="title">Title *</Label>
-                        <Input
-                          data-testid="assignment-title-input"
-                          id="title"
-                          placeholder="e.g., Sum of Two Numbers"
-                          value={newAssignment.title}
-                          onChange={(e) => setNewAssignment({ ...newAssignment, title: e.target.value })}
-                          className="mt-1"
-                        />
-                      </div>
-
-                      <div>
-                        <Label htmlFor="description">Description</Label>
-                        <Textarea
-                          data-testid="assignment-description-input"
-                          id="description"
-                          placeholder="Describe the assignment..."
-                          value={newAssignment.description}
-                          onChange={(e) => setNewAssignment({ ...newAssignment, description: e.target.value })}
-                          className="mt-1"
-                          rows={3}
-                        />
-                      </div>
-
-                      <div>
-                        <Label htmlFor="starterCode">Starter Code (Optional)</Label>
-                        <Textarea
-                          data-testid="assignment-starter-code-input"
-                          id="starterCode"
-                          placeholder="# Starter code for students..."
-                          value={newAssignment.starter_code}
-                          onChange={(e) => setNewAssignment({ ...newAssignment, starter_code: e.target.value })}
-                          className="mt-1 font-mono text-sm"
-                          rows={5}
-                        />
-                      </div>
-
-                      <div>
-                        <Label htmlFor="solutionCode">Solution Code *</Label>
-                        <Textarea
-                          data-testid="assignment-solution-code-input"
-                          id="solutionCode"
-                          placeholder="# Your solution code..."
-                          value={newAssignment.solution_code}
-                          onChange={(e) => setNewAssignment({ ...newAssignment, solution_code: e.target.value })}
-                          className="mt-1 font-mono text-sm"
-                          rows={8}
-                        />
-                      </div>
-
-                      <div>
-                        <div className="flex justify-between items-center mb-2">
-                          <Label>Test Cases (Optional)</Label>
-                          <Button data-testid="add-test-case-btn" type="button" onClick={addTestCase} size="sm" variant="outline">
-                            <Plus className="w-4 h-4 mr-1" />
-                            Add Test Case
-                          </Button>
-                        </div>
-                        <p className="text-xs text-slate-500 mb-3">
-                          Leave empty to grade based on output comparison only. Add test cases for specific input/output validation.
-                        </p>
-                        {newAssignment.test_cases.map((testCase, index) => (
-                          <Card key={index} className="mb-3">
-                            <CardContent className="pt-4">
-                              <div className="flex justify-between items-start mb-2">
-                                <Label className="text-sm font-semibold">Test Case {index + 1}</Label>
-                                {newAssignment.test_cases.length > 1 && (
-                                  <Button
-                                    data-testid={`remove-test-case-${index}-btn`}
-                                    type="button"
-                                    onClick={() => removeTestCase(index)}
-                                    size="sm"
-                                    variant="ghost"
-                                    className="h-6 w-6 p-0 text-red-600"
-                                  >
-                                    <Trash2 className="w-4 h-4" />
-                                  </Button>
-                                )}
-                              </div>
-                              <div className="space-y-2">
-                                <div>
-                                  <Label className="text-xs">Description</Label>
-                                  <Input
-                                    data-testid={`test-case-${index}-description`}
-                                    placeholder="e.g., Test with positive numbers"
-                                    value={testCase.description}
-                                    onChange={(e) => updateTestCase(index, "description", e.target.value)}
-                                    className="mt-1"
-                                  />
-                                </div>
-                                <div>
-                                  <Label className="text-xs">Input Data</Label>
-                                  <Textarea
-                                    data-testid={`test-case-${index}-input`}
-                                    placeholder="Input for the program..."
-                                    value={testCase.input_data}
-                                    onChange={(e) => updateTestCase(index, "input_data", e.target.value)}
-                                    className="mt-1 font-mono text-sm"
-                                    rows={2}
-                                  />
-                                </div>
-                                <div>
-                                  <Label className="text-xs">Expected Output</Label>
-                                  <Textarea
-                                    data-testid={`test-case-${index}-output`}
-                                    placeholder="Expected output..."
-                                    value={testCase.expected_output}
-                                    onChange={(e) => updateTestCase(index, "expected_output", e.target.value)}
-                                    className="mt-1 font-mono text-sm"
-                                    rows={2}
-                                  />
-                                </div>
-                              </div>
-                            </CardContent>
-                          </Card>
-                        ))}
-                      </div>
-
-                      <Button data-testid="create-assignment-submit-btn" type="submit" className="w-full bg-cyber-cyan text-cyber-black hover:shadow-[0_0_15px_rgba(0,240,255,0.5)] font-bold">
-                        Create Assignment
-                      </Button>
-                    </form>
-                  </DialogContent>
-                </Dialog>
-              )}
-            </div>
-
-            {assignments.length === 0 && tests.length === 0 ? (
-              <div data-testid="no-assignments" className="text-center py-20">
-                <BookOpen className="w-16 h-16 text-slate-500 mx-auto mb-4" />
-                <h3 className="text-xl font-semibold text-slate-300 mb-2">No assignments or tests yet</h3>
-                {isTeacher && (
-                  <>
-                    <p className="text-slate-500 mb-6">Create your first assignment</p>
-                    <Button data-testid="create-first-assignment-btn" onClick={() => setCreateDialogOpen(true)} className="bg-cyber-cyan text-cyber-black hover:shadow-[0_0_15px_rgba(0,240,255,0.5)] font-bold">
-                      <Plus className="w-4 h-4 mr-2" />
-                      Create Assignment
-                    </Button>
-                  </>
-                )}
-              </div>
-            ) : (
-              <div className="space-y-6">
-                {/* Top-level folders: Classwork and Tests */}
-                {['classwork', 'tests'].map((folderType) => {
-                  const isFolderExpanded = expandedFolders.has(folderType);
-                  const folderData = organizedAssignments[folderType] || {};
-                  const hasContent = Object.keys(folderData).length > 0;
-                  
-                  if (!hasContent) return null;
-                  
-                  return (
-                    <div key={folderType} className="border-2 rounded-lg bg-cyber-navy/50 shadow-md">
-                      {/* Main Folder Header */}
-                      <div
-                        className="flex items-center gap-3 p-5 cursor-pointer hover:bg-cyber-navy/60/50 transition-colors"
-                        onClick={() => toggleFolder(folderType)}
-                      >
-                        {isFolderExpanded ? (
-                          <ChevronDown className="w-6 h-6 text-slate-300" />
-                        ) : (
-                          <ChevronRight className="w-6 h-6 text-slate-300" />
-                        )}
-                        {isFolderExpanded ? (
-                          <FolderOpen className="w-7 h-7 text-purple-600" />
-                        ) : (
-                          <Folder className="w-7 h-7 text-purple-600" />
-                        )}
-                        <h2 className="text-2xl font-bold text-white capitalize">{folderType}</h2>
-                        <span className="ml-auto text-sm text-slate-400 bg-cyber-navy/60 px-3 py-1 rounded-full font-medium">
-                          {Object.keys(folderData).length} chapter{Object.keys(folderData).length !== 1 ? 's' : ''}
-                        </span>
-                      </div>
-                      
-                      {/* Chapters within folder */}
-                      {isFolderExpanded && (
-                        <div className="px-4 pb-4 space-y-3">
-                          {Object.keys(folderData).sort().map((chapter) => {
-                            const chapterKey = `${folderType}-${chapter}`;
-                            const isChapterExpanded = expandedChapters.has(chapterKey);
-                            const lessons = folderData[chapter];
-                  
-                            return (
-                              <div key={chapterKey} className="border rounded-lg bg-cyber-navy/60 backdrop-blur-sm">
-                                {/* Chapter Folder */}
-                                <div
-                                  className="flex items-center gap-3 p-4 cursor-pointer hover:bg-cyber-navy/40 transition-colors"
-                                  onClick={() => toggleChapter(chapterKey)}
-                                >
-                                  {isChapterExpanded ? (
-                                    <ChevronDown className="w-5 h-5 text-slate-400" />
-                                  ) : (
-                                    <ChevronRight className="w-5 h-5 text-slate-400" />
-                                  )}
-                                  {isChapterExpanded ? (
-                                    <FolderOpen className="w-6 h-6 text-blue-500" />
-                                  ) : (
-                                    <Folder className="w-6 h-6 text-blue-500" />
-                                  )}
-                                  <h3 className="text-lg font-semibold text-white">{chapter}</h3>
-                                  <span className="ml-auto text-sm text-slate-500 bg-cyber-navy/30 px-3 py-1 rounded-full">
-                                    {Object.keys(lessons).length} lesson{Object.keys(lessons).length !== 1 ? 's' : ''}
-                                  </span>
-                                </div>
-
-                                {/* Lessons in Chapter */}
-                                {isChapterExpanded && (
-                                  <div className="pl-8 pr-4 pb-4 space-y-3">
-                                    {Object.keys(lessons).sort().map((lesson) => {
-                                      const lessonKey = `${chapterKey}-${lesson}`;
-                                      const isLessonExpanded = expandedLessons.has(lessonKey);
-                                      const lessonAssignments = lessons[lesson];
-                            
-                                      return (
-                                        <div key={lessonKey} className="border rounded-lg bg-cyber-navy/40">
-                                {/* Lesson Folder */}
-                                <div
-                                  className="flex items-center gap-3 p-3 cursor-pointer hover:bg-cyber-navy/30 transition-colors rounded-lg"
-                                  onClick={() => toggleLesson(lessonKey)}
-                                >
-                                  {isLessonExpanded ? (
-                                    <ChevronDown className="w-4 h-4 text-slate-400" />
-                                  ) : (
-                                    <ChevronRight className="w-4 h-4 text-slate-400" />
-                                  )}
-                                  {isLessonExpanded ? (
-                                    <FolderOpen className="w-5 h-5 text-teal-500" />
-                                  ) : (
-                                    <Folder className="w-5 h-5 text-teal-500" />
-                                  )}
-                                  <h4 className="text-md font-medium text-slate-200">{lesson}</h4>
-                                  <span className="ml-auto text-xs text-slate-500 bg-cyber-navy/60 px-2 py-1 rounded-full">
-                                    {lessonAssignments.length} assignment{lessonAssignments.length !== 1 ? 's' : ''}
-                                  </span>
-                                </div>
-
-                                {/* Assignments in Lesson */}
-                                {isLessonExpanded && (
-                                  <div className="p-3 pt-0 grid md:grid-cols-2 gap-4">
-                                    {lessonAssignments.map((assignment) => (
-                                      <Card
-                                        data-testid={`assignment-card-${assignment.id}`}
-                                        key={assignment.id}
-                                        className="hover:shadow-lg transition-shadow border-2 border-cyber-cyan/10"
-                                      >
-                                        <CardHeader>
-                                          <CardTitle className="text-lg">{assignment.title}</CardTitle>
-                                          <CardDescription className="line-clamp-2">{assignment.description}</CardDescription>
-                                        </CardHeader>
-                                        <CardContent>
-                                          <div className="text-sm text-slate-400 mb-3">
-                                            {assignment.problem_count ? `${assignment.problem_count} problems` : `${assignment.test_cases?.length || 0} test cases`}
-                                          </div>
-                                          {isTeacher && assignment.proctor_code && (
-                                            <div className="mb-3 p-2 bg-yellow-500/10 border border-yellow-500/30 rounded">
-                                              <p className="text-xs font-semibold text-yellow-900">Proctor Code:</p>
-                                              <p className="text-lg font-mono font-bold text-yellow-400">{assignment.proctor_code}</p>
-                                              <p className="text-xs text-yellow-400 mt-1">Share with students who need to unlock this assignment</p>
-                                            </div>
-                                          )}
-                                          <div className="flex gap-2">
-                                            <Button
-                                              onClick={() => {
-                                                // Check if this is a test or assignment
-                                                const isTest = assignment.num_questions !== undefined || assignment.question_pool_ids !== undefined;
-                                                if (isTest && isTeacher) {
-                                                  // Teachers view test results
-                                                  navigate(`/test-reports`, { state: { classroomId: classroomId, selectedTestId: assignment.id } });
-                                                } else if (isTest) {
-                                                  // Students take test
-                                                  navigate(`/test/${assignment.id}`);
-                                                } else {
-                                                  // Regular assignment
-                                                  navigate(`/assignment/${assignment.id}`, { state: { classroomId: classroomId } });
-                                                }
-                                              }}
-                                              className="flex-1"
-                                              size="sm"
-                                            >
-                                              {assignment.num_questions !== undefined || assignment.question_pool_ids !== undefined ? 
-                                                (isTeacher ? "View Results" : "Start Test") : "View"}
-                                            </Button>
-                                            {isTeacher && !(assignment.num_questions !== undefined || assignment.question_pool_ids !== undefined) && (
-                                              <>
-                                                <Button
-                                                  onClick={(e) => {
-                                                    e.stopPropagation();
-                                                    const availDate = assignment.available_date ? new Date(assignment.available_date) : null;
-                                                    const dueDate = assignment.due_date ? new Date(assignment.due_date) : null;
-                                                    
-                                                    setEditingAssignment({
-                                                      id: assignment.id,
-                                                      title: assignment.title,
-                                                      chapter: assignment.chapter || '',
-                                                      lesson: assignment.lesson || '',
-                                                      available_date: availDate ? availDate.toISOString().split('T')[0] : '',
-                                                      available_time: availDate ? availDate.toISOString().split('T')[1].substring(0, 5) : '00:00',
-                                                      due_date: dueDate ? dueDate.toISOString().split('T')[0] : '',
-                                                      due_time: dueDate ? dueDate.toISOString().split('T')[1].substring(0, 5) : '23:59',
-                                                      allow_late_submission: assignment.allow_late_submission ?? true,
-                                                      late_penalty_percent: assignment.late_penalty_percent || 0
-                                                    });
-                                                    setEditScheduleDialogOpen(true);
-                                                  }}
-                                                  variant="outline"
-                                                  size="sm"
-                                                  className="gap-1"
-                                                >
-                                                  <Edit className="w-4 h-4" />
-                                                  Edit
-                                                </Button>
-                                                <Button
-                                                  onClick={(e) => {
-                                                    e.stopPropagation();
-                                                    handleOpenLessonDialog(assignment);
-                                                  }}
-                                                  variant="outline"
-                                                  size="sm"
-                                                  className="gap-1 bg-blue-500/10 text-blue-400 hover:bg-blue-500/20 border-blue-300"
-                                                >
-                                                  <BookOpen className="w-4 h-4" />
-                                                  Lesson
-                                                </Button>
-                                                <Button
-                                                  onClick={(e) => {
-                                                    e.stopPropagation();
-                                                    handleDeleteAssignment(assignment.id, assignment.title);
-                                                  }}
-                                                  variant="outline"
-                                                  size="sm"
-                                                  className="text-red-600 hover:text-red-400 hover:bg-red-500/10"
-                                                >
-                                                  <Trash2 className="w-4 h-4" />
-                                                </Button>
-                                              </>
-                                            )}
-                                          </div>
-                                        </CardContent>
-                                      </Card>
-                                    ))}
-                                  </div>
-                                        )}
-                                      </div>
-                                    );
-                                  })}
-                                </div>
-                              )}
-                            </div>
-                          );
-                        })}
-                        </div>
-                      )}
-                    </div>
-                  );
-                })}
-              </div>
-            )}
           </TabsContent>
 
           {isTeacher && (
@@ -1621,6 +1183,216 @@ export default function ClassroomPage({ user }) {
                     className="bg-blue-600 hover:bg-blue-700"
                   >
                     {editingLesson.id ? "Update" : "Create"} Lesson
+                  </Button>
+                </div>
+              </div>
+            </DialogContent>
+          </Dialog>
+        )}
+
+        {/* Assign Test Dialog (teacher only) */}
+        {isTeacher && (
+          <Dialog open={assignDialogOpen} onOpenChange={setAssignDialogOpen}>
+            <DialogContent data-testid="assign-test-dialog" className="max-w-4xl max-h-[90vh] overflow-y-auto bg-cyber-navy/95 border border-cyber-cyan/40 rounded-none">
+              <DialogHeader>
+                <DialogTitle className="text-white font-orbitron uppercase tracking-widest text-lg">
+                  Assign Test
+                </DialogTitle>
+                <DialogDescription className="text-slate-400 font-chakra">
+                  Pick a test from the admin library, then schedule it for one or more of your classes.
+                </DialogDescription>
+              </DialogHeader>
+
+              <div className="space-y-6">
+                {/* Step 1: Pick a test */}
+                <div>
+                  <Label className="text-cyber-cyan font-orbitron text-xs uppercase tracking-widest">1. Choose a Test</Label>
+                  <Input
+                    data-testid="library-search"
+                    placeholder="Search by title, chapter, or lesson"
+                    value={librarySearch}
+                    onChange={(e) => setLibrarySearch(e.target.value)}
+                    className="mt-2 bg-cyber-black/50 border-cyber-cyan/30 rounded-none text-white"
+                  />
+                  <div className="mt-3 max-h-64 overflow-y-auto border border-cyber-cyan/20 rounded-none divide-y divide-cyber-cyan/10">
+                    {testLibrary.length === 0 ? (
+                      <div className="p-6 text-center text-slate-500 text-sm">
+                        No admin-created tests in the library yet. Ask an admin to create some.
+                      </div>
+                    ) : (
+                      testLibrary
+                        .filter(t => {
+                          const q = librarySearch.trim().toLowerCase();
+                          if (!q) return true;
+                          return (
+                            (t.title || "").toLowerCase().includes(q) ||
+                            (t.chapter || "").toLowerCase().includes(q) ||
+                            (t.lesson || "").toLowerCase().includes(q)
+                          );
+                        })
+                        .map((t) => {
+                          const isSelected = selectedLibraryTest?.id === t.id && selectedLibraryTest?.test_type === t.test_type;
+                          const typeBadge = t.test_type === "coding"
+                            ? "border-purple-500/50 text-purple-300 bg-purple-500/10"
+                            : "border-cyber-cyan/50 text-cyber-cyan bg-cyber-cyan/10";
+                          return (
+                            <button
+                              key={`${t.test_type}-${t.id}`}
+                              type="button"
+                              data-testid={`library-test-${t.id}`}
+                              onClick={() => setSelectedLibraryTest(t)}
+                              className={`w-full text-left p-3 hover:bg-cyber-cyan/5 transition-colors flex items-center justify-between gap-3 ${isSelected ? "bg-cyber-cyan/10 border-l-2 border-l-cyber-cyan" : ""}`}
+                            >
+                              <div className="min-w-0">
+                                <div className="text-sm text-white font-medium truncate">{t.title}</div>
+                                {(t.chapter || t.lesson) && (
+                                  <div className="text-xs text-slate-500 truncate">{[t.chapter, t.lesson].filter(Boolean).join(" · ")}</div>
+                                )}
+                              </div>
+                              <div className="flex items-center gap-2 shrink-0">
+                                <span className="text-xs text-slate-500">
+                                  {t.test_type === "coding" ? `${t.num_questions} problems` : `${t.num_questions}/${t.pool_size} qs`}
+                                </span>
+                                <span className={`px-2 py-0.5 border text-[10px] font-orbitron uppercase tracking-widest rounded-none ${typeBadge}`}>
+                                  {t.test_type === "coding" ? "Coding" : "MC"}
+                                </span>
+                              </div>
+                            </button>
+                          );
+                        })
+                    )}
+                  </div>
+                </div>
+
+                {/* Step 2: Per-classroom schedule */}
+                <div>
+                  <Label className="text-cyber-cyan font-orbitron text-xs uppercase tracking-widest">2. Schedule per Class</Label>
+                  <p className="text-xs text-slate-500 mt-1 mb-3 font-chakra">
+                    Select the classes you want to assign this test to. Each class can have its own start and due time.
+                  </p>
+                  <div className="space-y-3">
+                    {myClassrooms.map((c) => {
+                      const sched = scheduleByClassroom[c.id] || { selected: false, available_from: "", due_at: "" };
+                      return (
+                        <div
+                          key={c.id}
+                          className={`border rounded-none p-3 transition-all ${sched.selected ? "border-cyber-cyan/50 bg-cyber-cyan/5" : "border-cyber-cyan/15 bg-cyber-navy/30"}`}
+                        >
+                          <div className="flex items-center gap-3">
+                            <Checkbox
+                              data-testid={`classroom-checkbox-${c.id}`}
+                              checked={sched.selected}
+                              onCheckedChange={(checked) => {
+                                setScheduleByClassroom(prev => ({
+                                  ...prev,
+                                  [c.id]: { ...sched, selected: !!checked },
+                                }));
+                              }}
+                            />
+                            <div className="flex-1 min-w-0">
+                              <div className="text-sm text-white font-medium truncate">{c.name}</div>
+                              <div className="text-xs text-slate-500">{c.student_ids?.length || 0} students · {c.class_code}</div>
+                            </div>
+                          </div>
+                          {sched.selected && (
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-3 mt-3 pl-7">
+                              <div>
+                                <Label className="text-xs text-slate-400">Available From</Label>
+                                <Input
+                                  data-testid={`available-from-${c.id}`}
+                                  type="datetime-local"
+                                  value={sched.available_from}
+                                  onChange={(e) => setScheduleByClassroom(prev => ({
+                                    ...prev,
+                                    [c.id]: { ...sched, available_from: e.target.value },
+                                  }))}
+                                  className="mt-1 bg-cyber-black/50 border-cyber-cyan/30 rounded-none text-white text-sm"
+                                />
+                              </div>
+                              <div>
+                                <Label className="text-xs text-slate-400">Due At</Label>
+                                <Input
+                                  data-testid={`due-at-${c.id}`}
+                                  type="datetime-local"
+                                  value={sched.due_at}
+                                  onChange={(e) => setScheduleByClassroom(prev => ({
+                                    ...prev,
+                                    [c.id]: { ...sched, due_at: e.target.value },
+                                  }))}
+                                  className="mt-1 bg-cyber-black/50 border-cyber-cyan/30 rounded-none text-white text-sm"
+                                />
+                              </div>
+                            </div>
+                          )}
+                        </div>
+                      );
+                    })}
+                    {myClassrooms.length === 0 && (
+                      <div className="text-center text-slate-500 text-sm py-4">
+                        You don't have any active classrooms.
+                      </div>
+                    )}
+                  </div>
+                </div>
+
+                {/* Step 3: Global options */}
+                <div>
+                  <Label className="text-cyber-cyan font-orbitron text-xs uppercase tracking-widest">3. Options</Label>
+                  <div className="space-y-3 mt-3">
+                    <div className="flex items-center justify-between bg-cyber-black/40 border border-cyber-cyan/15 p-3 rounded-none">
+                      <div>
+                        <div className="text-sm text-white">Auto-release results after due date</div>
+                        <div className="text-xs text-slate-500">Students see their answers once the due time has passed.</div>
+                      </div>
+                      <Switch
+                        data-testid="auto-release-switch"
+                        checked={assignAutoReleaseResults}
+                        onCheckedChange={setAssignAutoReleaseResults}
+                      />
+                    </div>
+                    <div className="flex items-center justify-between bg-cyber-black/40 border border-cyber-cyan/15 p-3 rounded-none">
+                      <div>
+                        <div className="text-sm text-white">Allow late submission</div>
+                        <div className="text-xs text-slate-500">Accept submissions after the due time (with optional penalty).</div>
+                      </div>
+                      <Switch
+                        data-testid="allow-late-switch"
+                        checked={assignAllowLate}
+                        onCheckedChange={setAssignAllowLate}
+                      />
+                    </div>
+                    {assignAllowLate && (
+                      <div className="flex items-center gap-3 bg-cyber-black/40 border border-cyber-cyan/15 p-3 rounded-none">
+                        <Label className="text-sm text-white shrink-0">Late penalty (%)</Label>
+                        <Input
+                          data-testid="late-penalty-input"
+                          type="number"
+                          min="0"
+                          max="100"
+                          value={assignLatePenalty}
+                          onChange={(e) => setAssignLatePenalty(parseInt(e.target.value || "0", 10))}
+                          className="bg-cyber-black/50 border-cyber-cyan/30 rounded-none text-white w-24"
+                        />
+                      </div>
+                    )}
+                  </div>
+                </div>
+
+                <div className="flex justify-end gap-2 pt-2">
+                  <Button
+                    variant="outline"
+                    onClick={() => setAssignDialogOpen(false)}
+                    className="rounded-none"
+                  >
+                    Cancel
+                  </Button>
+                  <Button
+                    data-testid="submit-assign-test-btn"
+                    onClick={submitAssignTest}
+                    disabled={assignSubmitting || !selectedLibraryTest}
+                    className="bg-cyber-cyan text-cyber-black hover:shadow-[0_0_15px_rgba(0,240,255,0.5)] font-orbitron uppercase tracking-widest text-xs rounded-none"
+                  >
+                    {assignSubmitting ? "Assigning..." : "Assign Test"}
                   </Button>
                 </div>
               </div>

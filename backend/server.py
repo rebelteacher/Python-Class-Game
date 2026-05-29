@@ -782,6 +782,22 @@ class CodingTestSubmit(BaseModel):
     code: str
     time_taken_seconds: int = 0
 
+
+# Test Assignment - links a master (admin-created) test to a classroom with per-classroom scheduling
+class TestAssignment(BaseModel):
+    model_config = ConfigDict(extra="ignore")
+    id: str = Field(default_factory=lambda: str(uuid.uuid4()))
+    test_id: str
+    test_type: str  # "mc" or "coding"
+    classroom_id: str
+    teacher_id: str
+    available_from: Optional[datetime] = None
+    due_at: Optional[datetime] = None
+    allow_late: bool = False
+    late_penalty_percent: int = 0
+    auto_release_results: bool = True
+    assigned_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+
 # Maze Challenge Attempt - for tracking maze completions and leaderboards
 class MazeAttempt(BaseModel):
     model_config = ConfigDict(extra="ignore")
@@ -8571,6 +8587,219 @@ async def bulk_delete_mc_questions(data: dict, request: Request):
         "deleted": result.deleted_count,
         "message": f"Deleted {result.deleted_count} questions"
     }
+
+
+@api_router.get("/admin-tests/library")
+async def get_admin_test_library(request: Request):
+    """List all MC + coding tests created by admin users (master library for teachers to assign)."""
+    user = await get_current_user(request)
+    if user["role"] != "teacher":
+        raise HTTPException(status_code=403, detail="Only teachers can browse the test library")
+
+    # Find all teacher ids that are admins
+    admin_cursor = db.users.find({"role": "teacher", "is_admin": True}, {"_id": 0, "id": 1})
+    admin_ids = [u["id"] async for u in admin_cursor]
+    if not admin_ids:
+        return {"tests": []}
+
+    mc_cursor = db.mc_tests.find({"teacher_id": {"$in": admin_ids}}, {"_id": 0})
+    coding_cursor = db.coding_tests.find({"teacher_id": {"$in": admin_ids}}, {"_id": 0})
+    mc_tests = await mc_cursor.to_list(1000)
+    coding_tests = await coding_cursor.to_list(1000)
+
+    library = []
+    for t in mc_tests:
+        library.append({
+            "id": t["id"],
+            "title": t.get("title", ""),
+            "description": t.get("description", ""),
+            "test_type": "mc",
+            "chapter": t.get("chapter", ""),
+            "lesson": t.get("lesson", ""),
+            "num_questions": t.get("num_questions", 0),
+            "pool_size": len(t.get("question_pool_ids", []) or []),
+            "time_limit_minutes": t.get("time_limit_minutes", 0),
+        })
+    for t in coding_tests:
+        library.append({
+            "id": t["id"],
+            "title": t.get("title", ""),
+            "description": t.get("description", ""),
+            "test_type": "coding",
+            "chapter": t.get("chapter", ""),
+            "lesson": t.get("lesson", ""),
+            "num_questions": len(t.get("problem_ids", []) or []),
+            "pool_size": len(t.get("problem_ids", []) or []),
+            "time_limit_minutes": t.get("time_limit_minutes", 0),
+        })
+
+    library.sort(key=lambda x: (x["chapter"] or "", x["lesson"] or "", x["title"]))
+    return {"tests": library}
+
+
+def _parse_central_to_utc(value):
+    """Parse an ISO string (treated as Central Time) and return a UTC datetime, or None."""
+    if not value:
+        return None
+    central = pytz.timezone('America/Chicago')
+    naive_dt = datetime.fromisoformat(value.replace('Z', ''))
+    if naive_dt.tzinfo is not None:
+        return naive_dt.astimezone(timezone.utc)
+    return central.localize(naive_dt).astimezone(timezone.utc)
+
+
+@api_router.post("/test-assignments/bulk")
+async def bulk_assign_test(request: Request):
+    """Assign a single master test to one or more classrooms with per-classroom scheduling.
+
+    Body shape: {
+      test_id, test_type ('mc'|'coding'),
+      schedules: [{classroom_id, available_from, due_at}],
+      allow_late, late_penalty_percent, auto_release_results
+    }
+    """
+    user = await get_current_user(request)
+    if user["role"] != "teacher":
+        raise HTTPException(status_code=403, detail="Only teachers can assign tests")
+
+    body = await request.json()
+    test_id = body.get("test_id")
+    test_type = body.get("test_type")
+    schedules = body.get("schedules") or []
+    allow_late = bool(body.get("allow_late", False))
+    late_penalty_percent = int(body.get("late_penalty_percent", 0) or 0)
+    auto_release_results = bool(body.get("auto_release_results", True))
+
+    if not test_id or test_type not in ("mc", "coding"):
+        raise HTTPException(status_code=400, detail="test_id and valid test_type required")
+    if not schedules:
+        raise HTTPException(status_code=400, detail="At least one classroom schedule required")
+
+    # Verify test exists in master library (created by admin)
+    coll = db.mc_tests if test_type == "mc" else db.coding_tests
+    master = await coll.find_one({"id": test_id}, {"_id": 0, "teacher_id": 1, "title": 1})
+    if not master:
+        raise HTTPException(status_code=404, detail="Test not found")
+    creator = await db.users.find_one({"id": master["teacher_id"]}, {"_id": 0, "is_admin": 1})
+    if not creator or not creator.get("is_admin"):
+        raise HTTPException(status_code=403, detail="Only admin-created tests can be assigned from the library")
+
+    created = []
+    for sched in schedules:
+        classroom_id = sched.get("classroom_id")
+        if not classroom_id:
+            continue
+        # Verify teacher owns the classroom
+        classroom = await db.classrooms.find_one({"id": classroom_id, "teacher_id": user["id"]})
+        if not classroom:
+            raise HTTPException(status_code=403, detail=f"You don't own classroom {classroom_id}")
+
+        # Upsert: if an assignment for (test_id, classroom_id) exists, update; else create
+        available_from = _parse_central_to_utc(sched.get("available_from"))
+        due_at = _parse_central_to_utc(sched.get("due_at"))
+
+        existing = await db.test_assignments.find_one({"test_id": test_id, "classroom_id": classroom_id})
+        if existing:
+            await db.test_assignments.update_one(
+                {"id": existing["id"]},
+                {"$set": {
+                    "available_from": available_from,
+                    "due_at": due_at,
+                    "allow_late": allow_late,
+                    "late_penalty_percent": late_penalty_percent,
+                    "auto_release_results": auto_release_results,
+                    "teacher_id": user["id"],
+                }}
+            )
+            created.append(existing["id"])
+        else:
+            assignment = TestAssignment(
+                test_id=test_id,
+                test_type=test_type,
+                classroom_id=classroom_id,
+                teacher_id=user["id"],
+                available_from=available_from,
+                due_at=due_at,
+                allow_late=allow_late,
+                late_penalty_percent=late_penalty_percent,
+                auto_release_results=auto_release_results,
+            )
+            await db.test_assignments.insert_one(assignment.model_dump())
+            created.append(assignment.id)
+
+    return {"assigned": len(created), "assignment_ids": created}
+
+
+@api_router.get("/classrooms/{classroom_id}/test-assignments")
+async def list_classroom_test_assignments(classroom_id: str, request: Request):
+    """List test assignments for a classroom. Teachers see all, students see only available_from <= now."""
+    user = await get_current_user(request)
+    classroom = await db.classrooms.find_one({"id": classroom_id}, {"_id": 0})
+    if not classroom:
+        raise HTTPException(status_code=404, detail="Classroom not found")
+
+    is_teacher = user["role"] == "teacher" and classroom.get("teacher_id") == user["id"]
+    is_enrolled_student = user["role"] == "student" and user["id"] in (classroom.get("student_ids", []) or [])
+    if not (is_teacher or is_enrolled_student or user.get("is_admin")):
+        raise HTTPException(status_code=403, detail="Access denied")
+
+    cursor = db.test_assignments.find({"classroom_id": classroom_id}, {"_id": 0})
+    assignments = await cursor.to_list(500)
+
+    now = datetime.now(timezone.utc)
+    enriched = []
+    for a in assignments:
+        # For students, hide tests that aren't available yet
+        avail = a.get("available_from")
+        if not is_teacher and avail and avail > now:
+            continue
+
+        coll = db.mc_tests if a["test_type"] == "mc" else db.coding_tests
+        test = await coll.find_one({"id": a["test_id"]}, {"_id": 0})
+        if not test:
+            continue
+
+        # For students, hide solution code in coding tests
+        if user["role"] == "student" and a["test_type"] == "coding":
+            test.pop("problem_ids", None)  # they get problems via the start endpoint
+
+        enriched.append({
+            "assignment_id": a["id"],
+            "test_id": a["test_id"],
+            "test_type": a["test_type"],
+            "title": test.get("title", ""),
+            "description": test.get("description", ""),
+            "chapter": test.get("chapter", ""),
+            "lesson": test.get("lesson", ""),
+            "time_limit_minutes": test.get("time_limit_minutes", 0),
+            "num_questions": test.get("num_questions") if a["test_type"] == "mc" else len(test.get("problem_ids", []) or []),
+            "available_from": a.get("available_from").isoformat() if a.get("available_from") else None,
+            "due_at": a.get("due_at").isoformat() if a.get("due_at") else None,
+            "allow_late": a.get("allow_late", False),
+            "late_penalty_percent": a.get("late_penalty_percent", 0),
+            "auto_release_results": a.get("auto_release_results", True),
+            "assigned_at": a.get("assigned_at").isoformat() if a.get("assigned_at") else None,
+        })
+
+    enriched.sort(key=lambda x: x.get("available_from") or x.get("assigned_at") or "")
+    return {"assignments": enriched}
+
+
+@api_router.delete("/test-assignments/{assignment_id}")
+async def delete_test_assignment(assignment_id: str, request: Request):
+    """Unassign a test from a classroom (teacher only)."""
+    user = await get_current_user(request)
+    if user["role"] != "teacher":
+        raise HTTPException(status_code=403, detail="Only teachers can unassign tests")
+
+    assignment = await db.test_assignments.find_one({"id": assignment_id}, {"_id": 0})
+    if not assignment:
+        raise HTTPException(status_code=404, detail="Assignment not found")
+    if assignment.get("teacher_id") != user["id"]:
+        raise HTTPException(status_code=403, detail="You did not create this assignment")
+
+    await db.test_assignments.delete_one({"id": assignment_id})
+    return {"deleted": True}
 
 
 @api_router.post("/mc-tests")

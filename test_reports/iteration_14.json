@@ -1,0 +1,85 @@
+{
+  "summary": "Backend-only testing for new Test Assignment system (admin library, bulk assign, list, delete). Ran 21 pytest cases via session-token injection. 19/21 PASSED. Discovered 1 CRITICAL backend bug: GET /api/classrooms/{id}/test-assignments returns 500 for STUDENTS when an assignment has a non-null available_from due to naive-vs-aware datetime comparison.",
+  "backend_issues": {
+    "critical": [
+      {
+        "endpoint": "GET /api/classrooms/{classroom_id}/test-assignments",
+        "issue": "Returns 500 (TypeError: can't compare offset-naive and offset-aware datetimes) whenever the caller is a student AND the assignment has a non-null available_from. Motor returns datetimes from MongoDB as TZ-naive while `now = datetime.now(timezone.utc)` is aware. Comparison at server.py line ~8754 (`avail > now`) crashes. This breaks the student visibility feature entirely (the core requirement) once any teacher actually schedules a test.",
+        "priority": "CRITICAL",
+        "fix": "Normalize `avail` (and any other datetimes read from Mongo) to UTC-aware before comparison. e.g. `if avail.tzinfo is None: avail = avail.replace(tzinfo=timezone.utc)` before the `avail > now` check. Same pattern as already used in get_current_user() lines 226-227.",
+        "reproduction": "1) POST /api/test-assignments/bulk with schedules[0].available_from set to any ISO string (past OR future).  2) GET /api/classrooms/{cls}/test-assignments using a STUDENT session in that classroom -> 500. Teacher GET works because is_teacher short-circuits before the comparison."
+      }
+    ],
+    "minor": [
+      {
+        "endpoint": "GET /api/classrooms/{id}/test-assignments",
+        "issue": "available_from / due_at / assigned_at are returned via `.isoformat()` on naive datetimes (Motor strips tz). Output strings have no timezone suffix, which is ambiguous for the frontend. Recommend forcing UTC-aware before isoformat so 'Z'/+00:00 is included."
+      }
+    ]
+  },
+  "frontend_issues": {
+    "ui_bugs": [],
+    "integration_issues": [],
+    "design_issues": []
+  },
+  "passed_tests": [
+    "GET /api/admin-tests/library returns only admin-created tests (non-admin's MC test excluded)",
+    "Library response contains both 'mc' and 'coding' test_type entries with all required keys (id, title, test_type, chapter, lesson, num_questions, pool_size, time_limit_minutes)",
+    "GET /api/admin-tests/library rejects students with 403",
+    "GET /api/admin-tests/library rejects unauthenticated with 401",
+    "POST /api/test-assignments/bulk happy path creates 1 assignment per classroom (assigned=1)",
+    "POST /api/test-assignments/bulk UPSERTS on duplicate (same test_id+classroom_id) - assignment_id is preserved and fields (allow_late, late_penalty_percent, auto_release_results) are updated",
+    "POST /api/test-assignments/bulk returns 403 for non-admin-created tests",
+    "POST /api/test-assignments/bulk returns 400 for empty schedules[]",
+    "POST /api/test-assignments/bulk returns 400 for invalid test_type ('essay')",
+    "POST /api/test-assignments/bulk returns 404 for unknown test_id",
+    "POST /api/test-assignments/bulk returns 403 when teacher does NOT own the target classroom",
+    "POST /api/test-assignments/bulk returns 403 when caller role is student",
+    "GET /api/classrooms/{id}/test-assignments returns all assignments for the owning teacher (available_from=null case)",
+    "GET /api/classrooms/{id}/test-assignments returns 403 for student NOT enrolled in the classroom",
+    "GET /api/classrooms/{id}/test-assignments returns 404 for non-existent classroom",
+    "DELETE /api/test-assignments/{id} returns 403 for a different teacher (not the creator)",
+    "DELETE /api/test-assignments/{id} returns 403 for student",
+    "DELETE /api/test-assignments/{id} returns 404 for non-existent id",
+    "DELETE /api/test-assignments/{id} succeeds for owning teacher and the assignment disappears from subsequent GET"
+  ],
+  "failed_tests": [
+    "TestListAssignments::test_student_sees_only_currently_available - expected 200 (and assignment hidden) but got 500 due to datetime tz bug",
+    "TestListAssignments::test_student_sees_when_available_from_is_past - expected 200 (and assignment visible) but got 500 due to same datetime tz bug"
+  ],
+  "test_report_links": [
+    "/app/backend/tests/test_test_assignments.py",
+    "/app/test_reports/pytest/test_assignments_results.xml"
+  ],
+  "action_items": [
+    "Fix datetime TZ bug in list_classroom_test_assignments (server.py ~line 8754 and ~8776-8781): coerce `available_from`/`due_at`/`assigned_at` read from Mongo to UTC-aware before comparing or serializing. Suggested helper: `def _aware(dt): return dt.replace(tzinfo=timezone.utc) if dt and dt.tzinfo is None else dt`.",
+    "After fix, re-run /app/backend/tests/test_test_assignments.py — the 2 failing tests should pass and prove student visibility filtering works in both directions (future hides, past shows)."
+  ],
+  "critical_code_review_comments": [
+    "TZ inconsistency: input dates are correctly converted via _parse_central_to_utc (returns tz-aware UTC), but values read back from Mongo via Motor are naive. The endpoint must normalize on read. Pattern is already established in get_current_user() (lines 226-227) - reuse it.",
+    "POST /api/test-assignments/bulk silently SKIPS schedules with missing classroom_id (sched.get('classroom_id') falsy -> continue). Consider returning 400 instead so callers don't think it succeeded.",
+    "Library entry 'pool_size' for MC tests uses len(question_pool_ids) but 'num_questions' uses the stored num_questions field. Frontend should be aware these can differ; for coding tests both fields are set to the same value (len(problem_ids)), which is slightly inconsistent semantics across types.",
+    "server.py is ~15k lines; should be split into modules (auth, tests, classrooms, assignments, etc.) per code-review guideline (>700 lines)."
+  ],
+  "updated_files": [
+    "/app/backend/tests/test_test_assignments.py (new)"
+  ],
+  "success_rate": {
+    "backend": "90.5% (19/21)",
+    "frontend": "N/A (skipped per request)"
+  },
+  "test_credentials": {
+    "admin_teacher_email": "astapp@spanola.net",
+    "auth_strategy": "Direct insert into MongoDB 'sessions' collection (Emergent Auth). Test file creates TEST_ prefixed sessions/users and cleans up after the module finishes via pytest module-scoped fixture."
+  },
+  "seed_data_creation": "Tests create TEST_-prefixed: 1 non-admin teacher, 1 student, 1 classroom owned by non-admin, 1 MC test owned by non-admin, 1 MC test owned by admin, plus 3 sessions. All deleted in module teardown.",
+  "retest_needed": true,
+  "should_main_agent_self_test": false,
+  "context_for_next_testing_agent": "Test file: /app/backend/tests/test_test_assignments.py. Run with: `pytest /app/backend/tests/test_test_assignments.py -v --junitxml=/app/test_reports/pytest/test_assignments_results.xml`. After main agent fixes the datetime TZ bug, the 2 currently-failing student-visibility tests should pass. Fixture is module-scoped and self-cleans TEST_ prefixed rows. No frontend testing was requested or done in this iteration.",
+  "rca_of_the_issue": {
+    "bug": "GET /api/classrooms/{id}/test-assignments returns 500 for students when assignment has available_from set.",
+    "root_cause": "MongoDB BSON dates are stored as UTC but Motor returns them as TZ-naive Python datetimes. server.py line ~8754 compares `avail > now` where `now = datetime.now(timezone.utc)` (tz-aware). Python raises TypeError when comparing naive vs aware datetimes.",
+    "evidence": "Backend log: `TypeError: can't compare offset-naive and offset-aware datetimes`. Verified independently by inserting a tz-aware datetime via Motor and reading it back — `tzinfo` is None on read.",
+    "mitigation": "Replace line 8753-8755 logic with: `avail = a.get('available_from')\nif avail and avail.tzinfo is None: avail = avail.replace(tzinfo=timezone.utc)\nif not is_teacher and avail and avail > now: continue`. Apply the same coercion before isoformat() on lines 8776-8781 so clients receive ISO-8601 strings with timezone suffix."
+  }
+}
