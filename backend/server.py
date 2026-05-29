@@ -2326,9 +2326,12 @@ async def get_assignment(assignment_id: str, request: Request):
 
 @api_router.get("/curriculum/units")
 async def get_curriculum_units(request: Request):
-    """Get all units with their chapters and lesson counts"""
+    """Get all units with their chapters and lesson counts.
+    Also surfaces orphan problems (lesson="") as a synthetic '(Unassigned)' lesson per chapter
+    so admins can clean them up via the Lesson Manager.
+    """
     user = await get_current_user(request)  # noqa: F841
-    
+
     # Define unit-to-assignment_type mapping
     unit_map = {
         "Unit 1: Block-Based Coding": "block",
@@ -2336,7 +2339,7 @@ async def get_curriculum_units(request: Request):
         "Unit 3: Python Text": "code",
         "Unit 4: Micro:bit": "microbit",
     }
-    
+
     units = []
     for unit_name, atype in unit_map.items():
         chapters_raw = await db.problems.distinct("chapter", {"assignment_type": atype})
@@ -2346,14 +2349,18 @@ async def get_curriculum_units(request: Request):
                 continue
             lessons_raw = await db.problems.distinct("lesson", {"assignment_type": atype, "chapter": ch})
             lessons = []
-            for le in sorted(lessons_raw):
-                if not le:
-                    continue
+            orphan_count = 0
+            for le in sorted(lessons_raw, key=lambda x: x or ""):
                 count = await db.problems.count_documents({"assignment_type": atype, "chapter": ch, "lesson": le})
-                lessons.append({"name": le, "problem_count": count})
+                if not le:
+                    orphan_count = count
+                    continue
+                lessons.append({"name": le, "problem_count": count, "is_orphan": False})
+            if orphan_count > 0:
+                lessons.append({"name": "(Unassigned)", "problem_count": orphan_count, "is_orphan": True})
             chapters.append({"name": ch, "lessons": lessons, "problem_count": sum(le["problem_count"] for le in lessons)})
         units.append({"name": unit_name, "assignment_type": atype, "chapters": chapters, "problem_count": sum(c["problem_count"] for c in chapters)})
-    
+
     return units
 
 @api_router.get("/curriculum/lesson-problems")
@@ -2575,6 +2582,32 @@ async def delete_lesson(request: Request):
     )
     
     return {"success": True, "message": f"Lesson '{lesson_name}' deleted", "problems_affected": result.modified_count}
+
+
+@api_router.post("/curriculum/delete-orphan-problems")
+async def delete_orphan_problems(request: Request):
+    """Hard-delete all problems with an empty lesson in a given chapter (admin only).
+    Used by the Lesson Manager to clean up the synthetic '(Unassigned)' lesson surfaced when
+    problems have no formal lesson assigned (which would otherwise appear as 'General' on the
+    student/teacher curriculum view).
+    """
+    user = await get_current_user(request)
+    if user["role"] != "teacher" or not user.get("is_admin"):
+        raise HTTPException(status_code=403, detail="Only admins can delete orphan problems")
+
+    body = await request.json()
+    assignment_type = body.get("assignment_type")
+    chapter = body.get("chapter")
+
+    if not all([assignment_type, chapter]):
+        raise HTTPException(status_code=400, detail="assignment_type and chapter are required")
+
+    result = await db.problems.delete_many({
+        "assignment_type": assignment_type,
+        "chapter": chapter,
+        "$or": [{"lesson": ""}, {"lesson": {"$exists": False}}, {"lesson": None}],
+    })
+    return {"success": True, "deleted": result.deleted_count}
 
 
 

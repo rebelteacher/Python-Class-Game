@@ -239,5 +239,7 @@ A coding education platform for K-12 students featuring multiple programming env
   - `DELETE /api/test-assignments/{id}` — owning teacher only
   - ClassroomPage Tests tab: "Assign Test" dialog with searchable library, per-classroom datetime-local schedule, switches for allow-late + auto-release, late penalty % input
   - 21/21 pytest cases passing in `/app/backend/tests/test_test_assignments.py`
+- Removed "View in Library" / "Problems" button completely from BlockCurriculum, PythonCurriculum, TurtleCurriculum (admins included)
+- Surfaced orphan problems (lesson="") as a synthetic "(Unassigned)" lesson in `/api/curriculum/units` so admins can clean them up via the Lesson Manager. New endpoint `POST /api/curriculum/delete-orphan-problems` hard-deletes them.
 
 *Last Updated: Feb 28, 2026*

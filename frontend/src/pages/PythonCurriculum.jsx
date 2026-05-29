@@ -831,20 +831,7 @@ export default function PythonCurriculum({ user }) {
                             >
                               Start Lesson
                             </Button>
-                            {user?.is_admin && (
-                              <Button 
-                                size="sm" 
-                                variant="outline"
-                                data-testid="view-in-library-btn"
-                                onClick={(e) => {
-                                  e.stopPropagation();
-                                  navigate(`/library?type=code&chapter=${encodeURIComponent(unit.title)}&lesson=${encodeURIComponent(`Lesson ${lessonIndex + 1} ${lesson.title}`)}`);
-                                }}
-                              >
-                                <Library className="w-4 h-4 mr-1" />
-                                Problems
-                              </Button>
-                            )}
+
                           </div>
                         </div>
                         

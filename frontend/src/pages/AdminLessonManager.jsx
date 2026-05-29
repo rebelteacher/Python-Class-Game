@@ -193,6 +193,23 @@ export default function AdminLessonManager({ user }) {
     }
   };
 
+  const handleDeleteOrphans = async (assignmentType, chapter, problemCount) => {
+    if (!window.confirm(
+      `Permanently delete ${problemCount} orphan problem(s) under "${chapter}"?\n\n` +
+      `These problems have no formal lesson assignment and will be removed from the database. This cannot be undone.`
+    )) return;
+    try {
+      const res = await axios.post(`${API}/curriculum/delete-orphan-problems`, {
+        assignment_type: assignmentType, chapter,
+      }, { withCredentials: true });
+      toast.success(`Deleted ${res.data.deleted} orphan problem(s)`);
+      fetchUnits();
+    } catch (error) {
+      console.error("Error deleting orphans:", error);
+      toast.error("Failed to delete orphan problems");
+    }
+  };
+
   const currentUnit = units.find(u => u.assignment_type === selectedUnit);
 
   if (loading) {
@@ -264,9 +281,29 @@ export default function AdminLessonManager({ user }) {
                           const instructions = lessonInstructions[lessonKey] || "";
 
                           return (
-                            <div key={lesson.name} className="border-b border-cyber-cyan/5 last:border-b-0">
+                            <div key={lesson.name} className={`border-b border-cyber-cyan/5 last:border-b-0 ${lesson.is_orphan ? "bg-cyber-red/5" : ""}`}>
                               {/* Lesson Header */}
                               <div className="flex items-center justify-between px-6 py-3 hover:bg-cyber-navy/30 transition-colors">
+                                {lesson.is_orphan ? (
+                                  <>
+                                    <div className="flex items-center gap-2 flex-1 min-w-0">
+                                      <span className="text-xs font-orbitron uppercase tracking-widest text-amber-400 shrink-0">⚠ Orphan</span>
+                                      <span className="text-sm font-chakra text-slate-300">{lesson.name}</span>
+                                      <span className="text-xs text-slate-500 font-fira shrink-0">{lesson.problem_count} problems with no lesson assigned</span>
+                                    </div>
+                                    <Button
+                                      data-testid={`delete-orphans-${currentUnit.assignment_type}-${chapter.name}`}
+                                      size="sm"
+                                      onClick={() => handleDeleteOrphans(currentUnit.assignment_type, chapter.name, lesson.problem_count)}
+                                      className="bg-cyber-red/20 border border-cyber-red/50 text-cyber-red hover:bg-cyber-red/30 font-orbitron text-xs uppercase tracking-widest rounded-none h-7 px-3 gap-1"
+                                      title="Permanently delete these orphan problems"
+                                    >
+                                      <Trash2 className="w-3.5 h-3.5" />
+                                      Clean Up
+                                    </Button>
+                                  </>
+                                ) : (
+                                <>
                                 <div className="flex items-center gap-2 flex-1 min-w-0 cursor-pointer" onClick={() => toggleLesson(currentUnit.assignment_type, chapter.name, lesson.name)}>
                                   {isExpanded ? <ChevronDown className="w-3.5 h-3.5 text-cyber-pink shrink-0" /> : <ChevronRight className="w-3.5 h-3.5 text-slate-600 shrink-0" />}
                                   {renamingLesson === lessonKey ? (
@@ -311,10 +348,12 @@ export default function AdminLessonManager({ user }) {
                                     Preview
                                   </Button>
                                 </div>
+                                </>
+                                )}
                               </div>
 
                               {/* Expanded Lesson Content */}
-                              {isExpanded && (
+                              {!lesson.is_orphan && isExpanded && (
                                 <div className="px-6 pb-4 space-y-3">
                                   {/* Instructions Section */}
                                   <div className="border border-cyber-cyan/15 rounded-none">
