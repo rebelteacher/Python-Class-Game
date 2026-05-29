@@ -230,5 +230,14 @@ A coding education platform for K-12 students featuring multiple programming env
 - Removed legacy "My Assignments" block from StudentDashboard (students enter via curriculum)
 - Fixed StudentDashboard.jsx parsing error from incremental edit corruption
 - Added "Continue where you left off" hero card on StudentDashboard with `GET /api/student/last-activity` endpoint (deep-links into last lesson + shows lesson progress bar)
+- Removed the legacy "Assignments" tab + content entirely from ClassroomPage (students access problems via curriculum)
+- Built Admin Test Library + bulk Test Assignment system:
+  - New `test_assignments` collection (test_id, classroom_id, per-classroom available_from/due_at, allow_late/penalty, auto_release_results)
+  - `GET /api/admin-tests/library` — returns master library (MC + coding tests where creator is_admin=true)
+  - `POST /api/test-assignments/bulk` — assign one test to many classrooms with per-classroom scheduling (upserts on duplicate)
+  - `GET /api/classrooms/{id}/test-assignments` — teacher sees all, student sees only available_from<=now (TZ-aware comparison)
+  - `DELETE /api/test-assignments/{id}` — owning teacher only
+  - ClassroomPage Tests tab: "Assign Test" dialog with searchable library, per-classroom datetime-local schedule, switches for allow-late + auto-release, late penalty % input
+  - 21/21 pytest cases passing in `/app/backend/tests/test_test_assignments.py`
 
 *Last Updated: Feb 28, 2026*

@@ -8746,11 +8746,20 @@ async def list_classroom_test_assignments(classroom_id: str, request: Request):
     cursor = db.test_assignments.find({"classroom_id": classroom_id}, {"_id": 0})
     assignments = await cursor.to_list(500)
 
+    def _aware(dt):
+        if dt and dt.tzinfo is None:
+            return dt.replace(tzinfo=timezone.utc)
+        return dt
+
     now = datetime.now(timezone.utc)
     enriched = []
     for a in assignments:
+        # Coerce datetimes read back from Mongo (Motor returns them naive) to UTC-aware
+        avail = _aware(a.get("available_from"))
+        due = _aware(a.get("due_at"))
+        assigned = _aware(a.get("assigned_at"))
+
         # For students, hide tests that aren't available yet
-        avail = a.get("available_from")
         if not is_teacher and avail and avail > now:
             continue
 
@@ -8773,12 +8782,12 @@ async def list_classroom_test_assignments(classroom_id: str, request: Request):
             "lesson": test.get("lesson", ""),
             "time_limit_minutes": test.get("time_limit_minutes", 0),
             "num_questions": test.get("num_questions") if a["test_type"] == "mc" else len(test.get("problem_ids", []) or []),
-            "available_from": a.get("available_from").isoformat() if a.get("available_from") else None,
-            "due_at": a.get("due_at").isoformat() if a.get("due_at") else None,
+            "available_from": avail.isoformat() if avail else None,
+            "due_at": due.isoformat() if due else None,
             "allow_late": a.get("allow_late", False),
             "late_penalty_percent": a.get("late_penalty_percent", 0),
             "auto_release_results": a.get("auto_release_results", True),
-            "assigned_at": a.get("assigned_at").isoformat() if a.get("assigned_at") else None,
+            "assigned_at": assigned.isoformat() if assigned else None,
         })
 
     enriched.sort(key=lambda x: x.get("available_from") or x.get("assigned_at") or "")
