@@ -692,15 +692,21 @@ function parseCode(code, parentVars = {}) {
       continue;
     }
     
-    // Parse write command - t.write("text", ...) or t.write(variable, ...)
+    // Parse write command - t.write("text", ...) or t.write(variable, ...) or t.write(t.heading(), ...)
     // First try to match quoted string
     match = trimmed.match(new RegExp(`${turtlePrefix}write\\s*\\(\\s*["']([^"']*?)["']`));
     if (match) {
       commands.push({ type: 'write', args: [match[1]], line: lineNum });
       continue;
     }
-    // Then try to match variable reference (unquoted identifier)
-    match = trimmed.match(new RegExp(`${turtlePrefix}write\\s*\\(\\s*([a-zA-Z_]\\w*)`));
+    // Try to match turtle reporter calls: t.heading() / heading() / t.xcor() / xcor() / t.ycor() / ycor()
+    match = trimmed.match(new RegExp(`${turtlePrefix}write\\s*\\(\\s*(?:t\\.|turtle\\.)?(heading|xcor|ycor)\\s*\\(\\s*\\)`));
+    if (match) {
+      commands.push({ type: 'write', args: [''], isReporter: true, reporter: match[1], line: lineNum });
+      continue;
+    }
+    // Then try to match variable reference (unquoted identifier, NOT followed by a dot or paren — avoids matching 't' from t.heading())
+    match = trimmed.match(new RegExp(`${turtlePrefix}write\\s*\\(\\s*([a-zA-Z_]\\w*)(?!\\s*[.(])`));
     if (match) {
       const varName = match[1];
       commands.push({ type: 'write', args: [varName], isVariable: true, varName: varName, line: lineNum });
@@ -1720,8 +1726,14 @@ const AnimatedTurtle = forwardRef(function AnimatedTurtle({
           // Store text at turtle's current position so it persists on canvas
           let text = cmd.args?.[0] || '';
           
-          // Check if text is a variable reference (no quotes) and resolve it
-          if (cmd.isVariable && cmd.varName) {
+          // Check if text is a turtle reporter call (e.g. t.heading(), t.xcor(), t.ycor()) and resolve at runtime
+          if (cmd.isReporter && cmd.reporter) {
+            const normalizedHeading = ((turtle.heading % 360) + 360) % 360;
+            if (cmd.reporter === 'heading') text = String(normalizedHeading);
+            else if (cmd.reporter === 'xcor') text = String(turtle.x);
+            else if (cmd.reporter === 'ycor') text = String(turtle.y);
+          } else if (cmd.isVariable && cmd.varName) {
+            // Check if text is a variable reference (no quotes) and resolve it
             const varValue = variablesRef.current[cmd.varName];
             text = varValue !== undefined ? String(varValue) : cmd.varName;
           }
