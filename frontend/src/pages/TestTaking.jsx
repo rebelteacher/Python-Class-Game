@@ -37,7 +37,7 @@ const BLOCK_TYPES = {
   'dot': { label: 'stamp dot size __', color: '#9966FF' },
   'xposition': { label: 'x position', color: '#5CB1D6' },
   'yposition': { label: 'y position', color: '#5CB1D6' },
-  'direction': { label: 'direction', color: '#5CB1D6' },
+  'direction': { label: 'heading', color: '#5CB1D6' },
   'event_start': { label: 'when program starts', color: '#FFBF00' },
   'event_key': { label: 'when __ key pressed', color: '#FFBF00' },
   'event_clicked': { label: 'when sprite clicked', color: '#FFBF00' },

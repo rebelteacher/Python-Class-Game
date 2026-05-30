@@ -214,7 +214,7 @@ const defineTurtleBlocks = () => {
   Blockly.Blocks['turtle_direction'] = {
     init: function() {
       this.appendDummyInput()
-          .appendField("direction");
+          .appendField("heading");
       this.setOutput(true, "Number");
       this.setColour(180);
       this.setTooltip("Get the turtle's current direction. 0=right, 90=up, 180=left, 270=down.");

@@ -2016,7 +2016,7 @@ export default function AssignmentLibrary({ user }) {
                                       <optgroup label="👁️ Sensing">
                                         <option value="turtle_xposition">X Position</option>
                                         <option value="turtle_yposition">Y Position</option>
-                                        <option value="turtle_direction">Direction</option>
+                                        <option value="turtle_direction">heading</option>
                                       </optgroup>
                                       <optgroup label="Looks">
                                         <option value="turtle_say">Say</option>
@@ -3268,7 +3268,7 @@ export default function AssignmentLibrary({ user }) {
                                     <optgroup label="👁️ Sensing">
                                       <option value="turtle_xposition">X Position</option>
                                       <option value="turtle_yposition">Y Position</option>
-                                      <option value="turtle_direction">Direction</option>
+                                      <option value="turtle_direction">heading</option>
                                     </optgroup>
                                     <optgroup label="💬 Looks">
                                       <option value="turtle_say">Say</option>

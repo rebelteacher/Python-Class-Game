@@ -45,7 +45,7 @@ const BLOCK_TYPES = {
   // Sensing (cyan)
   'xposition': { label: 'x position', color: '#5CB1D6', category: 'Sensing' },
   'yposition': { label: 'y position', color: '#5CB1D6', category: 'Sensing' },
-  'direction': { label: 'direction', color: '#5CB1D6', category: 'Sensing' },
+  'direction': { label: 'heading', color: '#5CB1D6', category: 'Sensing' },
   // Events (yellow)
   'event_start': { label: 'when program starts', color: '#FFBF00', category: 'Events' },
   'event_key': { label: 'when __ key pressed', color: '#FFBF00', category: 'Events' },

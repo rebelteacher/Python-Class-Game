@@ -414,7 +414,7 @@ const defineSpriteBlocks = () => {
   Blockly.Blocks['sensing_direction'] = {
     init: function() {
       this.appendDummyInput()
-          .appendField("direction");
+          .appendField("heading");
       this.setOutput(true, "Number");
       this.setColour(170);
     }
