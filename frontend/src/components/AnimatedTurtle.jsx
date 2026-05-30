@@ -693,23 +693,26 @@ function parseCode(code, parentVars = {}) {
     }
     
     // Parse write command - t.write("text", ...) or t.write(variable, ...) or t.write(t.heading(), ...)
+    // Also detects the "say X for N seconds" marker comment: __SAY_FOR__:N
+    const sayForMatch = trimmed.match(/#\s*__SAY_FOR__:\s*([\d.]+)/);
+    const clearAfter = sayForMatch ? parseFloat(sayForMatch[1]) : null;
     // First try to match quoted string
     match = trimmed.match(new RegExp(`${turtlePrefix}write\\s*\\(\\s*["']([^"']*?)["']`));
     if (match) {
-      commands.push({ type: 'write', args: [match[1]], line: lineNum });
+      commands.push({ type: 'write', args: [match[1]], clearAfter, line: lineNum });
       continue;
     }
     // Try to match turtle reporter calls: t.heading() / heading() / t.xcor() / xcor() / t.ycor() / ycor()
     match = trimmed.match(new RegExp(`${turtlePrefix}write\\s*\\(\\s*(?:t\\.|turtle\\.)?(heading|xcor|ycor)\\s*\\(\\s*\\)`));
     if (match) {
-      commands.push({ type: 'write', args: [''], isReporter: true, reporter: match[1], line: lineNum });
+      commands.push({ type: 'write', args: [''], isReporter: true, reporter: match[1], clearAfter, line: lineNum });
       continue;
     }
     // Then try to match variable reference (unquoted identifier, NOT followed by a dot or paren — avoids matching 't' from t.heading())
     match = trimmed.match(new RegExp(`${turtlePrefix}write\\s*\\(\\s*([a-zA-Z_]\\w*)(?!\\s*[.(])`));
     if (match) {
       const varName = match[1];
-      commands.push({ type: 'write', args: [varName], isVariable: true, varName: varName, line: lineNum });
+      commands.push({ type: 'write', args: [varName], isVariable: true, varName: varName, clearAfter, line: lineNum });
       continue;
     }
     
@@ -1739,13 +1742,26 @@ const AnimatedTurtle = forwardRef(function AnimatedTurtle({
           }
           
           if (!turtle.texts) turtle.texts = [];
-          turtle.texts.push({
+          const textObj = {
             text: text,
             x: turtle.x,
             y: turtle.y,
             color: turtle.penColor
-          });
+          };
+          turtle.texts.push(textObj);
           drawCanvas();
+          // If this is a "say X for N seconds" block, schedule removal
+          if (cmd.clearAfter && cmd.clearAfter > 0) {
+            setTimeout(() => {
+              if (turtle.texts) {
+                const idx = turtle.texts.indexOf(textObj);
+                if (idx !== -1) {
+                  turtle.texts.splice(idx, 1);
+                  drawCanvas();
+                }
+              }
+            }, cmd.clearAfter * 1000);
+          }
           resolve();
           break;
         }

@@ -774,8 +774,7 @@ const generatePythonCode = (workspace) => {
       case 'turtle_say_for': {
         const text = block.getFieldValue('TEXT');
         const seconds = getValueCode(block, 'SECONDS', '2');
-        // In turtle, we just write - duration is visual concept
-        blockCode = `${indent}t.write("${text}", align="center", font=("Arial", 12, "normal"))\n`;
+        blockCode = `${indent}t.write("${text}", align="center", font=("Arial", 12, "normal"))  # __SAY_FOR__:${seconds}\n`;
         break;
       }
       case 'turtle_hide': {
