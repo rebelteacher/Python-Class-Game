@@ -25,7 +25,7 @@ const BLOCK_TYPES = {
   'left': { label: 'turn left __ degrees', color: '#4C97FF', category: 'Motion' },
   'goto': { label: 'go to x: __ y: __', color: '#4C97FF', category: 'Motion' },
   'home': { label: 'go home', color: '#4C97FF', category: 'Motion' },
-  'setheading': { label: 'point in direction __', color: '#4C97FF', category: 'Motion' },
+  'setheading': { label: 'setheading __', color: '#4C97FF', category: 'Motion' },
   // Pen (green)
   'pendown': { label: 'pen down', color: '#0fBD8C', category: 'Pen' },
   'penup': { label: 'pen up', color: '#0fBD8C', category: 'Pen' },

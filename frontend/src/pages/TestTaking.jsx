@@ -20,7 +20,7 @@ const BLOCK_TYPES = {
   'left': { label: 'turn left __ degrees', color: '#4C97FF' },
   'goto': { label: 'go to x: __ y: __', color: '#4C97FF' },
   'home': { label: 'go home', color: '#4C97FF' },
-  'setheading': { label: 'point in direction __', color: '#4C97FF' },
+  'setheading': { label: 'setheading __', color: '#4C97FF' },
   'pendown': { label: 'pen down', color: '#0fBD8C' },
   'penup': { label: 'pen up', color: '#0fBD8C' },
   'pencolor': { label: 'set pen color to __', color: '#0fBD8C' },

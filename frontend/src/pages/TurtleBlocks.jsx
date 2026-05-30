@@ -122,7 +122,7 @@ const defineTurtleBlocks = () => {
     init: function() {
       this.appendValueInput("ANGLE")
           .setCheck("Number")
-          .appendField("point in direction");
+          .appendField("setheading");
       this.appendDummyInput()
           .appendField(new Blockly.FieldDropdown([
             ["(use number)", ""],

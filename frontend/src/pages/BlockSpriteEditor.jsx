@@ -123,7 +123,7 @@ const defineSpriteBlocks = () => {
     init: function() {
       this.appendValueInput("DIRECTION")
           .setCheck("Number")
-          .appendField("point in direction");
+          .appendField("setheading");
       this.setPreviousStatement(true, null);
       this.setNextStatement(true, null);
       this.setColour(230);
