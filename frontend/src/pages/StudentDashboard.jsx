@@ -1042,69 +1042,6 @@ export default function StudentDashboard({ user, setUser, refreshUser }) {
           </div>
         )}
 
-        {/* Available Tests Section */}
-        {availableTests.length > 0 && (
-          <div className="mb-8">
-            <h2 className="text-2xl font-bold text-white mb-4">Available Tests</h2>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-              {availableTests.map((test) => {
-                const now = new Date();
-                const dueDate = test.due_date ? new Date(test.due_date) : null;
-                const isOverdue = dueDate && now > dueDate;
-
-                return (
-                  <Card key={test.id} className="hover:shadow-lg transition-shadow">
-                    <CardHeader>
-                      <div className="flex justify-between items-start">
-                        <CardTitle className="text-lg">{test.title}</CardTitle>
-                        {isOverdue ? (
-                          <span className="px-2 py-1 bg-red-500/20 text-red-400 text-xs rounded">
-                            Overdue
-                          </span>
-                        ) : (
-                          <span className="px-2 py-1 bg-green-500/20 text-green-400 text-xs rounded">
-                            Available
-                          </span>
-                        )}
-                      </div>
-                      <CardDescription>{test.classroom_name}</CardDescription>
-                    </CardHeader>
-                    <CardContent>
-                      <div className="space-y-2 text-sm text-slate-400 mb-4">
-                        <div className="flex items-center gap-2">
-                          <FileQuestion className="w-4 h-4" />
-                          <span>{test.num_questions} questions</span>
-                        </div>
-                        {test.time_limit_minutes > 0 && (
-                          <div className="flex items-center gap-2">
-                            <Calendar className="w-4 h-4" />
-                            <span>{test.time_limit_minutes} minute time limit</span>
-                          </div>
-                        )}
-                        {dueDate && (
-                          <div className="flex items-center gap-2">
-                            <Calendar className="w-4 h-4" />
-                            <span className={isOverdue ? "text-red-600 font-medium" : ""}>
-                              Due: {dueDate.toLocaleDateString()}
-                            </span>
-                          </div>
-                        )}
-                      </div>
-                      <Button 
-                        onClick={() => navigate(`/test/${test.id}`)}
-                        className="w-full bg-cyber-cyan text-cyber-black hover:shadow-[0_0_15px_rgba(0,240,255,0.5)] font-bold"
-                        disabled={isOverdue}
-                      >
-                        {isOverdue ? "Test Closed" : "Start Test"}
-                      </Button>
-                    </CardContent>
-                  </Card>
-                );
-              })}
-            </div>
-          </div>
-        )}
-
         {/* Assignments - Folder View with Tabs */}
         {loading ? (
           <div className="text-center py-20 text-slate-400">Loading assignments...</div>
