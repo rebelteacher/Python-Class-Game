@@ -248,5 +248,8 @@ A coding education platform for K-12 students featuring multiple programming env
   - `GET /api/curriculum/test-placements?assignment_type&chapter&lesson&classroom_id` — student-aware unlock state (per-progress + per-classroom teacher unlock)
   - `POST /api/classrooms/{id}/toggle-test-unlock` (teacher) — toggles `classrooms.unlocked_test_placements`
   - Frontend: AdminLessonManager shows "+ Quiz" per lesson and "Attach Chapter Test" row per chapter; LessonPage banner "Take Lesson Quiz" when all problems passing; `ChapterTestRow` component rendered in BlockCurriculum / TurtleCurriculum / PythonCurriculum; ClassroomPage Lesson Locks tab adds per-test Lock/Unlock toggles per chapter.
+- Teacher Class Progress widget (Feb 2026):
+  - `GET /api/classrooms/{id}/chapter-progress` — returns per-chapter completion stats (students who passed every problem in every lesson) + chapter_test placement + unlock state
+  - ClassroomPage Lesson Locks tab now opens with a magenta "Class Progress" widget listing chapters with chapter tests assigned, each row showing a glow-progress bar, X/Y student readiness, and one-click "Unlock for class" / "Lock for class" CTA
 
 *Last Updated: Feb 28, 2026*

@@ -44,6 +44,7 @@ export default function ClassroomPage({ user }) {
   const [curriculumData, setCurriculumData] = useState([]);
   const [unlockedLessons, setUnlockedLessons] = useState(new Set());
   const [chapterPlacements, setChapterPlacements] = useState({}); // { "{at}|{chapter}": [placements] }
+  const [chapterProgress, setChapterProgress] = useState([]);
   const [expandedCurrChapters, setExpandedCurrChapters] = useState(new Set());
   const [editingLesson, setEditingLesson] = useState(null);
   const [lessonPreview, setLessonPreview] = useState(false);
@@ -65,6 +66,7 @@ export default function ClassroomPage({ user }) {
     fetchCodingTests();
     fetchCurriculumLocks();
     fetchTestAssignments();
+    fetchChapterProgress();
   }, [classroomId]);
 
   const toggleFolder = (folder) => {
@@ -220,6 +222,16 @@ export default function ClassroomPage({ user }) {
     }
   };
 
+  const fetchChapterProgress = async () => {
+    try {
+      const res = await axios.get(`${API}/classrooms/${classroomId}/chapter-progress`, { withCredentials: true });
+      setChapterProgress(res.data?.rows || []);
+    } catch (error) {
+      // Non-teachers will 403 — silently ignore
+      if (error.response?.status !== 403) console.error("Error fetching chapter progress:", error);
+    }
+  };
+
   const handleToggleTestUnlock = async (placement) => {
     try {
       await axios.post(`${API}/classrooms/${classroomId}/toggle-test-unlock`, {
@@ -229,6 +241,8 @@ export default function ClassroomPage({ user }) {
       // Refresh just this chapter
       const unit = curriculumData.find(u => u.chapters.some(c => c.name === placement.chapter));
       if (unit) fetchChapterPlacements(unit.assignment_type, placement.chapter);
+      // Refresh class progress to update unlock badges in the widget
+      fetchChapterProgress();
     } catch (error) {
       console.error("Error toggling test unlock:", error);
       toast.error("Failed to toggle test unlock");
@@ -854,6 +868,67 @@ export default function ClassroomPage({ user }) {
           {isTeacher && (
             <TabsContent value="lessons">
               <div className="space-y-4">
+                {/* Class Progress Widget */}
+                {chapterProgress.filter(r => r.has_chapter_test).length > 0 && (
+                  <div data-testid="class-progress-widget" className="border border-cyber-magenta/30 rounded-none bg-gradient-to-br from-cyber-magenta/10 via-cyber-navy/40 to-cyber-cyan/5 p-4">
+                    <div className="flex items-center justify-between mb-3">
+                      <div>
+                        <h3 className="text-base font-orbitron text-cyber-magenta uppercase tracking-widest">Class Progress</h3>
+                        <p className="text-xs text-slate-500 font-chakra">Chapter-test readiness across this classroom</p>
+                      </div>
+                      <span className="text-xs font-fira text-cyber-magenta">
+                        {chapterProgress.filter(r => r.has_chapter_test).length} chapter tests assigned
+                      </span>
+                    </div>
+                    <div className="space-y-2">
+                      {chapterProgress.filter(r => r.has_chapter_test).map(row => {
+                        const ready = row.readiness_percent;
+                        const barClass = ready >= 80 ? "bg-cyber-lime" : ready >= 40 ? "bg-yellow-400" : "bg-cyber-magenta";
+                        return (
+                          <div key={`${row.assignment_type}|${row.chapter}`} className="border border-cyber-cyan/15 rounded-none bg-cyber-black/40 p-3">
+                            <div className="flex items-center justify-between gap-3 mb-2">
+                              <div className="min-w-0">
+                                <div className="text-sm text-white font-chakra truncate">{row.chapter}</div>
+                                <div className="text-[11px] text-slate-500 font-fira">
+                                  {row.assignment_type.toUpperCase()} · Test: {row.chapter_test_title || "(untitled)"}
+                                </div>
+                              </div>
+                              <Button
+                                data-testid={`progress-unlock-${row.chapter_test_placement_id}`}
+                                size="sm"
+                                onClick={() => handleToggleTestUnlock({
+                                  id: row.chapter_test_placement_id,
+                                  chapter: row.chapter,
+                                  unlocked_by_teacher: row.chapter_test_unlocked,
+                                })}
+                                className={`shrink-0 rounded-none h-7 px-3 text-xs font-orbitron uppercase tracking-wider border ${
+                                  row.chapter_test_unlocked
+                                    ? "bg-cyber-red/10 text-cyber-red border-cyber-red/40 hover:bg-cyber-red/20"
+                                    : "bg-cyber-magenta/10 text-cyber-magenta border-cyber-magenta/40 hover:bg-cyber-magenta/20"
+                                }`}
+                              >
+                                {row.chapter_test_unlocked ? "Lock for class" : "Unlock for class"}
+                              </Button>
+                            </div>
+                            <div className="flex items-center gap-3">
+                              <div className="flex-1 h-2 bg-cyber-navy/80 border border-cyber-cyan/15 overflow-hidden rounded-none">
+                                <div
+                                  className={`h-full ${barClass} shadow-[0_0_8px_currentColor] transition-all`}
+                                  style={{ width: `${ready}%` }}
+                                />
+                              </div>
+                              <span className="text-xs font-fira text-slate-300 shrink-0 min-w-[70px] text-right">
+                                {row.completed_count}/{row.total_students}
+                                <span className="text-slate-500 ml-1">({ready}%)</span>
+                              </span>
+                            </div>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  </div>
+                )}
+
                 <div className="flex items-center justify-between mb-4">
                   <div>
                     <h3 className="text-lg font-orbitron text-white uppercase tracking-wider">Lesson Locks</h3>

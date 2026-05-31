@@ -2770,6 +2770,101 @@ async def list_test_placements(request: Request, assignment_type: str, chapter: 
     return {"placements": out}
 
 
+@api_router.get("/classrooms/{classroom_id}/chapter-progress")
+async def get_classroom_chapter_progress(classroom_id: str, request: Request):
+    """Per-chapter completion stats for a classroom, used by the teacher's Class Progress widget.
+
+    Returns one row per chapter that has either students enrolled or a chapter_test placement, with:
+      - total_students, completed_count (students who passed every problem in every lesson of that chapter)
+      - has_chapter_test, chapter_test_placement_id, chapter_test_unlocked
+      - readiness_percent (completed_count / total_students)
+    """
+    user = await get_current_user(request)
+    classroom = await db.classrooms.find_one({"id": classroom_id}, {"_id": 0})
+    if not classroom:
+        raise HTTPException(status_code=404, detail="Classroom not found")
+    if user["role"] != "teacher" or classroom.get("teacher_id") != user["id"]:
+        raise HTTPException(status_code=403, detail="Only the owning teacher can view class progress")
+
+    student_ids = classroom.get("student_ids", []) or []
+    total_students = len(student_ids)
+    unlocked_set = set(classroom.get("unlocked_test_placements", []) or [])
+
+    # Discover (assignment_type, chapter) tuples present in problems
+    pipeline = [
+        {"$match": {"chapter": {"$nin": ["", None]}, "lesson": {"$nin": ["", None]}, "assignment_type": {"$nin": ["", None]}}},
+        {"$group": {"_id": {"at": "$assignment_type", "ch": "$chapter"}}},
+    ]
+    chapter_buckets = []
+    async for row in db.problems.aggregate(pipeline):
+        gid = row.get("_id") or {}
+        at = gid.get("at")
+        ch = gid.get("ch")
+        if at and ch:
+            chapter_buckets.append((at, ch))
+
+    # Pull all chapter-test placements once
+    placements_cursor = db.curriculum_test_placements.find({"placement_type": "chapter_test"}, {"_id": 0})
+    ct_by_key = {}
+    async for p in placements_cursor:
+        ct_by_key[(p["assignment_type"], p["chapter"])] = p
+
+    rows = []
+    for assignment_type, chapter in chapter_buckets:
+        # Get all problem ids in this chapter
+        problems = await db.problems.find(
+            {"assignment_type": assignment_type, "chapter": chapter, "lesson": {"$ne": ""}},
+            {"_id": 0, "id": 1},
+        ).to_list(2000)
+        problem_ids = [p["id"] for p in problems]
+        if not problem_ids:
+            continue
+
+        completed_count = 0
+        if total_students > 0:
+            # Aggregate passing submissions per student, count students whose unique pass set covers all problem_ids
+            pipeline2 = [
+                {"$match": {"student_id": {"$in": student_ids}, "problem_id": {"$in": problem_ids}, "is_passing": True}},
+                {"$group": {"_id": "$student_id", "passed": {"$addToSet": "$problem_id"}}},
+            ]
+            target = set(problem_ids)
+            async for r in db.submissions.aggregate(pipeline2):
+                if target.issubset(set(r["passed"])):
+                    completed_count += 1
+
+        placement = ct_by_key.get((assignment_type, chapter))
+        if not placement and total_students == 0:
+            continue  # Skip rows that aren't actionable
+
+        rows.append({
+            "assignment_type": assignment_type,
+            "chapter": chapter,
+            "total_students": total_students,
+            "completed_count": completed_count,
+            "readiness_percent": int(round(100 * completed_count / total_students)) if total_students else 0,
+            "has_chapter_test": placement is not None,
+            "chapter_test_placement_id": placement["id"] if placement else None,
+            "chapter_test_title": None,
+            "chapter_test_unlocked": placement["id"] in unlocked_set if placement else False,
+        })
+
+    # Fill in chapter_test_title for rows that have one
+    title_ids = [r["chapter_test_placement_id"] for r in rows if r["chapter_test_placement_id"]]
+    if title_ids:
+        # Fetch underlying test titles
+        placement_to_test = {(p["id"], p["test_type"], p["test_id"]) for p in ct_by_key.values() if p["id"] in title_ids}
+        for pid, ttype, tid in placement_to_test:
+            coll = db.mc_tests if ttype == "mc" else db.coding_tests
+            t = await coll.find_one({"id": tid}, {"_id": 0, "title": 1})
+            for r in rows:
+                if r["chapter_test_placement_id"] == pid:
+                    r["chapter_test_title"] = t.get("title", "") if t else ""
+
+    # Sort: chapters with a chapter_test first, then by readiness desc
+    rows.sort(key=lambda r: (0 if r["has_chapter_test"] else 1, -r["readiness_percent"], r["chapter"]))
+    return {"rows": rows, "total_students": total_students}
+
+
 @api_router.post("/classrooms/{classroom_id}/toggle-test-unlock")
 async def toggle_test_unlock(classroom_id: str, request: Request):
     """Teacher toggles a curriculum test placement unlock for their classroom."""
