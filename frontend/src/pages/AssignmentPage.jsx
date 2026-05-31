@@ -582,7 +582,7 @@ export default function AssignmentPage({ user, lessonData }) {
     try {
       // Build submission payload
       const submissionData = {
-        assignment_id: assignmentId,
+        assignment_id: effectiveAssignmentId,
         problem_id: problemId,
         code: code || "",
       };
@@ -780,7 +780,7 @@ export default function AssignmentPage({ user, lessonData }) {
       const response = await axios.post(
         `${API}/get-hint`,
         {
-          assignment_id: assignmentId,
+          assignment_id: effectiveAssignmentId,
           problem_id: getCurrentProblemId(),
           code: code,
           hint_level: hintLevel
