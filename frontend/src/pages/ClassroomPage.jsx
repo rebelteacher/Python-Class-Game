@@ -43,6 +43,7 @@ export default function ClassroomPage({ user }) {
   const [lessonDialogOpen, setLessonDialogOpen] = useState(false);
   const [curriculumData, setCurriculumData] = useState([]);
   const [unlockedLessons, setUnlockedLessons] = useState(new Set());
+  const [chapterPlacements, setChapterPlacements] = useState({}); // { "{at}|{chapter}": [placements] }
   const [expandedCurrChapters, setExpandedCurrChapters] = useState(new Set());
   const [editingLesson, setEditingLesson] = useState(null);
   const [lessonPreview, setLessonPreview] = useState(false);
@@ -203,6 +204,34 @@ export default function ClassroomPage({ user }) {
     } catch (error) {
       console.error("Error toggling lesson lock:", error);
       toast.error("Failed to update lesson lock");
+    }
+  };
+
+  const fetchChapterPlacements = async (assignmentType, chapter) => {
+    const key = `${assignmentType}|${chapter}`;
+    try {
+      const res = await axios.get(`${API}/curriculum/test-placements`, {
+        params: { assignment_type: assignmentType, chapter, classroom_id: classroomId },
+        withCredentials: true,
+      });
+      setChapterPlacements(prev => ({ ...prev, [key]: res.data.placements || [] }));
+    } catch (error) {
+      console.error("Error fetching chapter placements:", error);
+    }
+  };
+
+  const handleToggleTestUnlock = async (placement) => {
+    try {
+      await axios.post(`${API}/classrooms/${classroomId}/toggle-test-unlock`, {
+        placement_id: placement.id,
+      }, { withCredentials: true });
+      toast.success(placement.unlocked_by_teacher ? "Test locked" : "Test unlocked");
+      // Refresh just this chapter
+      const unit = curriculumData.find(u => u.chapters.some(c => c.name === placement.chapter));
+      if (unit) fetchChapterPlacements(unit.assignment_type, placement.chapter);
+    } catch (error) {
+      console.error("Error toggling test unlock:", error);
+      toast.error("Failed to toggle test unlock");
     }
   };
 
@@ -842,11 +871,14 @@ export default function ClassroomPage({ user }) {
                       {unit.chapters.map(chapter => (
                         <div key={chapter.name}>
                           <button
-                            onClick={() => setExpandedCurrChapters(prev => {
-                              const next = new Set(prev);
-                              next.has(chapter.name) ? next.delete(chapter.name) : next.add(chapter.name);
-                              return next;
-                            })}
+                            onClick={() => {
+                              setExpandedCurrChapters(prev => {
+                                const next = new Set(prev);
+                                next.has(chapter.name) ? next.delete(chapter.name) : next.add(chapter.name);
+                                return next;
+                              });
+                              fetchChapterPlacements(unit.assignment_type, chapter.name);
+                            }}
                             className="w-full flex items-center justify-between px-4 py-2 hover:bg-cyber-navy/30 transition-colors"
                           >
                             <div className="flex items-center gap-2">
@@ -887,6 +919,36 @@ export default function ClassroomPage({ user }) {
                                   </div>
                                 );
                               })}
+                              {(chapterPlacements[`${unit.assignment_type}|${chapter.name}`] || []).map(p => (
+                                <div key={p.id} data-testid={`placement-toggle-${p.id}`} className="flex items-center justify-between py-1.5 border-t border-cyber-magenta/15 mt-1 pt-2">
+                                  <div className="flex items-center gap-2 min-w-0">
+                                    {p.unlocked_by_teacher
+                                      ? <Unlock className="w-3.5 h-3.5 text-cyber-magenta" />
+                                      : <Lock className="w-3.5 h-3.5 text-slate-600" />}
+                                    <span className="text-[10px] font-orbitron uppercase tracking-widest text-cyber-magenta shrink-0">
+                                      {p.placement_type === "lesson_quiz" ? "Quiz" : "Chapter Test"}
+                                    </span>
+                                    <span className={`text-sm font-chakra truncate ${p.unlocked_by_teacher ? 'text-slate-200' : 'text-slate-500'}`}>
+                                      {p.title}
+                                    </span>
+                                    {p.placement_type === "lesson_quiz" && p.lesson && (
+                                      <span className="text-xs text-slate-600 font-fira truncate">→ {p.lesson}</span>
+                                    )}
+                                  </div>
+                                  <Button
+                                    size="sm"
+                                    variant="ghost"
+                                    onClick={() => handleToggleTestUnlock(p)}
+                                    className={`rounded-none h-7 px-3 text-xs font-orbitron uppercase tracking-wider shrink-0 ${
+                                      p.unlocked_by_teacher
+                                        ? 'text-cyber-red hover:bg-cyber-red/10 border border-cyber-red/30'
+                                        : 'text-cyber-magenta hover:bg-cyber-magenta/10 border border-cyber-magenta/30'
+                                    }`}
+                                  >
+                                    {p.unlocked_by_teacher ? 'Lock' : 'Unlock'}
+                                  </Button>
+                                </div>
+                              ))}
                             </div>
                           )}
                         </div>

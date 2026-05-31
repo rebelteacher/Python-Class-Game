@@ -8,6 +8,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, Di
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
+import ChapterTestRow from "../components/ChapterTestRow";
 import { 
   ArrowLeft, 
   BookOpen, 
@@ -857,6 +858,8 @@ export default function PythonCurriculum({ user }) {
                         <p className="text-sm">Add lessons to this chapter</p>
                       </div>
                     )}
+                    {/* Chapter Test */}
+                    <ChapterTestRow assignmentType="code" chapter={unit.title} user={user} />
                   </div>
                 </CardContent>
               )}

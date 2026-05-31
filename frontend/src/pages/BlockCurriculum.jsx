@@ -9,6 +9,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
+import ChapterTestRow from "../components/ChapterTestRow";
 import { 
   ArrowLeft, 
   BookOpen, 
@@ -706,6 +707,9 @@ export default function BlockCurriculum({ user }) {
                         })
                       )}
                       
+                      {/* Chapter Test (admin-placed) */}
+                      <ChapterTestRow assignmentType="block" chapter={chapter} user={user} />
+
                       {/* Add Lesson Button within chapter */}
                       <Button
                         variant="ghost"

@@ -346,6 +346,7 @@ class Classroom(BaseModel):
     students: List[str] = Field(default_factory=list)
     is_archived: bool = False
     unlocked_lessons: List[str] = Field(default_factory=list)  # List of "assignment_type|chapter|lesson" keys
+    unlocked_test_placements: List[str] = Field(default_factory=list)  # CurriculumTestPlacement ids the teacher has unlocked
     created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
 
 class ClassroomCreate(BaseModel):
@@ -2610,6 +2611,190 @@ async def delete_orphan_problems(request: Request):
     return {"success": True, "deleted": result.deleted_count}
 
 
+# ============= Curriculum Test Placements =============
+# Admin attaches MC tests as Lesson Quizzes (per lesson) or Chapter Tests (per chapter).
+# Visibility for students:
+#   - Lesson Quiz: appears once student has passing submissions for every problem in the lesson,
+#     or once the teacher has unlocked the placement on that classroom.
+#   - Chapter Test: appears once student has passing submissions for every problem in every lesson
+#     in the chapter, or once the teacher has unlocked it.
+
+class CurriculumTestPlacement(BaseModel):
+    model_config = ConfigDict(extra="ignore")
+    id: str = Field(default_factory=lambda: str(uuid.uuid4()))
+    test_id: str
+    test_type: str = "mc"  # "mc" or "coding"
+    assignment_type: str
+    chapter: str
+    placement_type: str  # "lesson_quiz" or "chapter_test"
+    lesson: Optional[str] = None
+    created_by: str
+    created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+
+
+@api_router.post("/curriculum/test-placements")
+async def create_test_placement(request: Request):
+    """Admin attaches an MC/coding test to a lesson or chapter slot."""
+    user = await get_current_user(request)
+    if user["role"] != "teacher" or not user.get("is_admin"):
+        raise HTTPException(status_code=403, detail="Only admins can place tests in the curriculum")
+
+    body = await request.json()
+    test_id = body.get("test_id")
+    test_type = body.get("test_type", "mc")
+    assignment_type = body.get("assignment_type")
+    chapter = body.get("chapter")
+    placement_type = body.get("placement_type")
+    lesson = body.get("lesson")
+
+    if not all([test_id, assignment_type, chapter, placement_type]):
+        raise HTTPException(status_code=400, detail="test_id, assignment_type, chapter, placement_type are required")
+    if placement_type not in ("lesson_quiz", "chapter_test"):
+        raise HTTPException(status_code=400, detail="placement_type must be 'lesson_quiz' or 'chapter_test'")
+    if placement_type == "lesson_quiz" and not lesson:
+        raise HTTPException(status_code=400, detail="lesson is required for lesson_quiz placements")
+
+    coll = db.mc_tests if test_type == "mc" else db.coding_tests
+    test = await coll.find_one({"id": test_id})
+    if not test:
+        raise HTTPException(status_code=404, detail="Test not found")
+
+    slot_query = {
+        "assignment_type": assignment_type,
+        "chapter": chapter,
+        "placement_type": placement_type,
+        "lesson": lesson if placement_type == "lesson_quiz" else None,
+    }
+    existing = await db.curriculum_test_placements.find_one(slot_query)
+    if existing:
+        await db.curriculum_test_placements.update_one(
+            {"id": existing["id"]},
+            {"$set": {"test_id": test_id, "test_type": test_type, "created_by": user["id"]}},
+        )
+        return {"id": existing["id"], "updated": True}
+
+    placement = CurriculumTestPlacement(
+        test_id=test_id,
+        test_type=test_type,
+        assignment_type=assignment_type,
+        chapter=chapter,
+        placement_type=placement_type,
+        lesson=lesson if placement_type == "lesson_quiz" else None,
+        created_by=user["id"],
+    )
+    await db.curriculum_test_placements.insert_one(placement.model_dump())
+    return {"id": placement.id, "updated": False}
+
+
+@api_router.delete("/curriculum/test-placements/{placement_id}")
+async def delete_test_placement(placement_id: str, request: Request):
+    """Admin removes a test placement from the curriculum."""
+    user = await get_current_user(request)
+    if user["role"] != "teacher" or not user.get("is_admin"):
+        raise HTTPException(status_code=403, detail="Only admins can remove placements")
+    res = await db.curriculum_test_placements.delete_one({"id": placement_id})
+    if res.deleted_count == 0:
+        raise HTTPException(status_code=404, detail="Placement not found")
+    return {"deleted": True}
+
+
+async def _student_passing_problem_ids(student_id: str, assignment_type: str, chapter: str, lesson: Optional[str] = None):
+    """Return (all_problem_ids, passing_problem_ids) for a student, scoped to a lesson or whole chapter."""
+    query = {"assignment_type": assignment_type, "chapter": chapter}
+    if lesson:
+        query["lesson"] = lesson
+    problems = await db.problems.find(query, {"_id": 0, "id": 1}).to_list(2000)
+    problem_ids = [p["id"] for p in problems]
+    if not problem_ids:
+        return set(), set()
+    passing = await db.submissions.find(
+        {"student_id": student_id, "problem_id": {"$in": problem_ids}, "is_passing": True},
+        {"_id": 0, "problem_id": 1},
+    ).to_list(5000)
+    return set(problem_ids), {s["problem_id"] for s in passing}
+
+
+@api_router.get("/curriculum/test-placements")
+async def list_test_placements(request: Request, assignment_type: str, chapter: str, lesson: Optional[str] = None, classroom_id: Optional[str] = None):
+    """Return placements for a chapter (optionally narrowed to a single lesson) with student/teacher unlock state."""
+    user = await get_current_user(request)
+
+    query = {"assignment_type": assignment_type, "chapter": chapter}
+    if lesson:
+        query["$or"] = [{"placement_type": "lesson_quiz", "lesson": lesson}, {"placement_type": "chapter_test"}]
+    placements = await db.curriculum_test_placements.find(query, {"_id": 0}).to_list(200)
+
+    unlocked_set = set()
+    if classroom_id:
+        classroom = await db.classrooms.find_one({"id": classroom_id}, {"_id": 0, "unlocked_test_placements": 1})
+        if classroom:
+            unlocked_set = set(classroom.get("unlocked_test_placements", []) or [])
+
+    out = []
+    for p in placements:
+        coll = db.mc_tests if p["test_type"] == "mc" else db.coding_tests
+        test = await coll.find_one({"id": p["test_id"]}, {"_id": 0})
+        if not test:
+            continue
+
+        unlocked_by_progress = False
+        if user["role"] == "student":
+            if p["placement_type"] == "lesson_quiz":
+                all_ids, passing_ids = await _student_passing_problem_ids(user["id"], assignment_type, chapter, p.get("lesson"))
+            else:
+                all_ids, passing_ids = await _student_passing_problem_ids(user["id"], assignment_type, chapter, None)
+            unlocked_by_progress = bool(all_ids) and all_ids.issubset(passing_ids)
+        else:
+            unlocked_by_progress = True
+
+        unlocked_by_teacher = p["id"] in unlocked_set
+        is_available = unlocked_by_progress or unlocked_by_teacher
+
+        out.append({
+            "id": p["id"],
+            "test_id": p["test_id"],
+            "test_type": p["test_type"],
+            "placement_type": p["placement_type"],
+            "chapter": p["chapter"],
+            "lesson": p.get("lesson"),
+            "title": test.get("title", ""),
+            "num_questions": test.get("num_questions") if p["test_type"] == "mc" else len(test.get("problem_ids", []) or []),
+            "pool_size": len(test.get("question_pool_ids", []) or []) if p["test_type"] == "mc" else len(test.get("problem_ids", []) or []),
+            "time_limit_minutes": test.get("time_limit_minutes", 0),
+            "unlocked_by_teacher": unlocked_by_teacher,
+            "unlocked_by_progress": unlocked_by_progress,
+            "is_available": is_available,
+        })
+
+    out.sort(key=lambda x: (0 if x["placement_type"] == "lesson_quiz" else 1, x.get("lesson") or ""))
+    return {"placements": out}
+
+
+@api_router.post("/classrooms/{classroom_id}/toggle-test-unlock")
+async def toggle_test_unlock(classroom_id: str, request: Request):
+    """Teacher toggles a curriculum test placement unlock for their classroom."""
+    user = await get_current_user(request)
+    if user["role"] != "teacher":
+        raise HTTPException(status_code=403, detail="Only teachers can manage test unlocks")
+
+    classroom = await db.classrooms.find_one({"id": classroom_id, "teacher_id": user["id"]}, {"_id": 0})
+    if not classroom:
+        raise HTTPException(status_code=404, detail="Classroom not found")
+
+    body = await request.json()
+    placement_id = body.get("placement_id")
+    if not placement_id:
+        raise HTTPException(status_code=400, detail="placement_id is required")
+
+    unlocked = set(classroom.get("unlocked_test_placements", []) or [])
+    if placement_id in unlocked:
+        unlocked.discard(placement_id)
+        action = "locked"
+    else:
+        unlocked.add(placement_id)
+        action = "unlocked"
+    await db.classrooms.update_one({"id": classroom_id}, {"$set": {"unlocked_test_placements": list(unlocked)}})
+    return {"success": True, "action": action, "unlocked_test_placements": list(unlocked)}
 
 
 @api_router.post("/classrooms/{classroom_id}/toggle-lesson-lock")

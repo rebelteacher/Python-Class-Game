@@ -9,7 +9,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import {
   ArrowLeft, ChevronDown, ChevronRight, Pencil, Save, Trash2,
-  Plus, BookOpen, Code, X, GripVertical
+  Plus, BookOpen, Code, X, GripVertical, FileQuestion
 } from "lucide-react";
 
 const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
@@ -57,6 +57,77 @@ export default function AdminLessonManager({ user }) {
   const [renameValue, setRenameValue] = useState("");
   const [addingLesson, setAddingLesson] = useState(null); // chapter name where adding
   const [newLessonName, setNewLessonName] = useState("");
+  // Test placements
+  const [chapterPlacements, setChapterPlacements] = useState({}); // { "{at}|{chapter}": [placements] }
+  const [attachDialog, setAttachDialog] = useState(null); // { assignmentType, chapter, placement_type, lesson }
+  const [attachLibrary, setAttachLibrary] = useState([]);
+  const [attachSearch, setAttachSearch] = useState("");
+  const [attachSubmitting, setAttachSubmitting] = useState(false);
+
+  const fetchChapterPlacements = useCallback(async (assignmentType, chapter) => {
+    const key = `${assignmentType}|${chapter}`;
+    try {
+      const res = await axios.get(`${API}/curriculum/test-placements`, {
+        params: { assignment_type: assignmentType, chapter },
+        withCredentials: true,
+      });
+      setChapterPlacements(prev => ({ ...prev, [key]: res.data.placements || [] }));
+    } catch (error) {
+      console.error("Error fetching placements:", error);
+    }
+  }, []);
+
+  const openAttachDialog = async (assignmentType, chapter, placement_type, lesson = null) => {
+    setAttachDialog({ assignmentType, chapter, placement_type, lesson });
+    setAttachSearch("");
+    try {
+      const res = await axios.get(`${API}/admin-tests/library`, { withCredentials: true });
+      // Only MC for lesson quizzes (per spec), allow both for chapter tests
+      const tests = (res.data.tests || []).filter(t =>
+        placement_type === "lesson_quiz" ? t.test_type === "mc" : true
+      );
+      setAttachLibrary(tests);
+    } catch (error) {
+      console.error("Error loading test library:", error);
+      toast.error("Failed to load admin test library");
+    }
+  };
+
+  const attachTest = async (test) => {
+    if (!attachDialog) return;
+    setAttachSubmitting(true);
+    try {
+      await axios.post(`${API}/curriculum/test-placements`, {
+        test_id: test.id,
+        test_type: test.test_type,
+        assignment_type: attachDialog.assignmentType,
+        chapter: attachDialog.chapter,
+        placement_type: attachDialog.placement_type,
+        lesson: attachDialog.lesson,
+      }, { withCredentials: true });
+      toast.success(`${attachDialog.placement_type === "lesson_quiz" ? "Lesson quiz" : "Chapter test"} attached`);
+      setAttachDialog(null);
+      fetchChapterPlacements(attachDialog.assignmentType, attachDialog.chapter);
+    } catch (error) {
+      console.error("Error attaching placement:", error);
+      toast.error(error.response?.data?.detail || "Failed to attach test");
+    } finally {
+      setAttachSubmitting(false);
+    }
+  };
+
+  const removePlacement = async (placement) => {
+    if (!window.confirm(`Remove this ${placement.placement_type === "lesson_quiz" ? "lesson quiz" : "chapter test"}? Students will lose access immediately.`)) return;
+    try {
+      await axios.delete(`${API}/curriculum/test-placements/${placement.id}`, { withCredentials: true });
+      toast.success("Placement removed");
+      // refresh placements for this chapter
+      fetchChapterPlacements(selectedUnit, placement.chapter);
+    } catch (error) {
+      console.error("Error removing placement:", error);
+      toast.error("Failed to remove placement");
+    }
+  };
 
   const fetchUnits = useCallback(async () => {
     try {
@@ -269,11 +340,17 @@ export default function AdminLessonManager({ user }) {
               <div className="space-y-4">
                 {currentUnit.chapters.map(chapter => {
                   const chapterHasOrphans = chapter.lessons?.some(l => l.is_orphan);
+                  const chapterKey = `${currentUnit.assignment_type}|${chapter.name}`;
+                  const placements = chapterPlacements[chapterKey] || [];
+                  const chapterTestPlacement = placements.find(p => p.placement_type === "chapter_test");
+                  const lessonQuizByLesson = Object.fromEntries(
+                    placements.filter(p => p.placement_type === "lesson_quiz").map(p => [p.lesson, p])
+                  );
                   return (
                   <div key={chapter.name} className="border border-cyber-cyan/20 rounded-none">
                     {/* Chapter Header */}
                     <button
-                      onClick={() => toggleChapter(chapter.name)}
+                      onClick={() => { toggleChapter(chapter.name); fetchChapterPlacements(currentUnit.assignment_type, chapter.name); }}
                       className="w-full flex items-center justify-between p-4 bg-cyber-navy/60 hover:bg-cyber-navy/80 transition-colors"
                     >
                       <div className="flex items-center gap-2">
@@ -364,6 +441,35 @@ export default function AdminLessonManager({ user }) {
                                     className="text-cyber-cyan hover:bg-cyber-cyan/10 rounded-none text-xs h-7 px-2">
                                     Preview
                                   </Button>
+                                  {lessonQuizByLesson[lesson.name] ? (
+                                    <div
+                                      data-testid={`lesson-quiz-attached-${lesson.name}`}
+                                      className="flex items-center gap-1 px-2 h-7 border border-cyber-magenta/40 bg-cyber-magenta/10 rounded-none"
+                                      title={`Quiz: ${lessonQuizByLesson[lesson.name].title}`}
+                                    >
+                                      <FileQuestion className="w-3.5 h-3.5 text-cyber-magenta" />
+                                      <span className="text-[10px] font-orbitron text-cyber-magenta uppercase tracking-widest truncate max-w-[120px]">{lessonQuizByLesson[lesson.name].title}</span>
+                                      <button
+                                        type="button"
+                                        onClick={() => removePlacement(lessonQuizByLesson[lesson.name])}
+                                        className="text-cyber-magenta/70 hover:text-cyber-magenta ml-1"
+                                        title="Remove quiz"
+                                      >
+                                        <X className="w-3 h-3" />
+                                      </button>
+                                    </div>
+                                  ) : (
+                                    <Button
+                                      size="sm" variant="ghost"
+                                      data-testid={`attach-lesson-quiz-${lesson.name}`}
+                                      onClick={() => openAttachDialog(currentUnit.assignment_type, chapter.name, "lesson_quiz", lesson.name)}
+                                      className="text-cyber-magenta/70 hover:text-cyber-magenta hover:bg-cyber-magenta/10 rounded-none text-xs h-7 px-2 gap-1"
+                                      title="Attach a lesson quiz"
+                                    >
+                                      <FileQuestion className="w-3.5 h-3.5" />
+                                      + Quiz
+                                    </Button>
+                                  )}
                                 </div>
                                 </>
                                 )}
@@ -482,6 +588,38 @@ export default function AdminLessonManager({ user }) {
                             </button>
                           )}
                         </div>
+
+                        {/* Chapter Test Row */}
+                        <div className="px-6 py-3 border-t border-dashed border-cyber-magenta/20 bg-cyber-magenta/5">
+                          {chapterTestPlacement ? (
+                            <div className="flex items-center justify-between gap-3" data-testid={`chapter-test-attached-${chapter.name}`}>
+                              <div className="flex items-center gap-2 min-w-0">
+                                <FileQuestion className="w-4 h-4 text-cyber-magenta shrink-0" />
+                                <span className="text-xs font-orbitron text-cyber-magenta uppercase tracking-widest shrink-0">Chapter Test:</span>
+                                <span className="text-sm font-chakra text-slate-300 truncate">{chapterTestPlacement.title}</span>
+                                <span className="text-[10px] text-slate-500 shrink-0">({chapterTestPlacement.num_questions} questions{chapterTestPlacement.test_type === "mc" ? `, pool ${chapterTestPlacement.pool_size}` : ""})</span>
+                              </div>
+                              <Button
+                                size="sm" variant="ghost"
+                                onClick={() => removePlacement(chapterTestPlacement)}
+                                className="text-cyber-red hover:bg-cyber-red/10 rounded-none h-7 px-2 gap-1"
+                                title="Remove chapter test"
+                              >
+                                <Trash2 className="w-3.5 h-3.5" />
+                                <span className="text-xs">Remove</span>
+                              </Button>
+                            </div>
+                          ) : (
+                            <button
+                              data-testid={`attach-chapter-test-${chapter.name}`}
+                              onClick={() => openAttachDialog(currentUnit.assignment_type, chapter.name, "chapter_test")}
+                              className="flex items-center gap-2 text-cyber-magenta/70 hover:text-cyber-magenta text-xs font-chakra transition-colors"
+                            >
+                              <Plus className="w-3.5 h-3.5" />
+                              Attach Chapter Test to {chapter.name}
+                            </button>
+                          )}
+                        </div>
                       </div>
                     )}
                   </div>
@@ -494,6 +632,76 @@ export default function AdminLessonManager({ user }) {
           </div>
         </ScrollArea>
       </div>
+
+      {/* Attach Test Dialog */}
+      {attachDialog && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm p-4" onClick={() => setAttachDialog(null)}>
+          <div onClick={(e) => e.stopPropagation()} className="bg-cyber-navy/95 border border-cyber-magenta/40 rounded-none w-full max-w-2xl max-h-[80vh] flex flex-col">
+            <div className="p-4 border-b border-cyber-magenta/30 flex items-center justify-between">
+              <div>
+                <h3 className="text-white font-orbitron uppercase tracking-widest text-lg">
+                  Attach {attachDialog.placement_type === "lesson_quiz" ? "Lesson Quiz" : "Chapter Test"}
+                </h3>
+                <p className="text-xs text-slate-400 font-chakra mt-1">
+                  {attachDialog.placement_type === "lesson_quiz"
+                    ? `to ${attachDialog.lesson}`
+                    : `to ${attachDialog.chapter}`}
+                </p>
+              </div>
+              <button onClick={() => setAttachDialog(null)} className="text-slate-400 hover:text-white">
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+            <div className="p-4 border-b border-cyber-magenta/20">
+              <Input
+                data-testid="attach-search"
+                placeholder={attachDialog.placement_type === "lesson_quiz" ? "Search MC tests by title…" : "Search tests by title…"}
+                value={attachSearch}
+                onChange={(e) => setAttachSearch(e.target.value)}
+                className="bg-cyber-black/50 border-cyber-magenta/30 rounded-none text-white"
+              />
+            </div>
+            <ScrollArea className="flex-1 max-h-[50vh]">
+              <div className="divide-y divide-cyber-magenta/10">
+                {attachLibrary.length === 0 ? (
+                  <div className="p-8 text-center text-slate-500 text-sm">
+                    No admin-created tests yet. Build one in the Test Builder, then come back.
+                  </div>
+                ) : (
+                  attachLibrary
+                    .filter(t => {
+                      const q = attachSearch.trim().toLowerCase();
+                      if (!q) return true;
+                      return (t.title || "").toLowerCase().includes(q);
+                    })
+                    .map(t => (
+                      <button
+                        key={`${t.test_type}-${t.id}`}
+                        type="button"
+                        data-testid={`attach-test-${t.id}`}
+                        disabled={attachSubmitting}
+                        onClick={() => attachTest(t)}
+                        className="w-full text-left p-4 hover:bg-cyber-magenta/10 transition-colors flex items-center justify-between gap-3"
+                      >
+                        <div className="min-w-0">
+                          <div className="text-sm text-white font-medium truncate">{t.title}</div>
+                          <div className="text-xs text-slate-500 truncate">
+                            {[t.chapter, t.lesson].filter(Boolean).join(" · ")}
+                            {t.num_questions ? ` · ${t.num_questions} questions` : ""}
+                            {t.pool_size && t.test_type === "mc" ? ` · pool ${t.pool_size}` : ""}
+                          </div>
+                        </div>
+                        <span className={`px-2 py-0.5 border text-[10px] font-orbitron uppercase tracking-widest rounded-none shrink-0 ${t.test_type === "coding" ? "border-purple-500/50 text-purple-300 bg-purple-500/10" : "border-cyber-cyan/50 text-cyber-cyan bg-cyber-cyan/10"}`}>
+                          {t.test_type === "coding" ? "Coding" : "MC"}
+                        </span>
+                      </button>
+                    ))
+                )}
+              </div>
+            </ScrollArea>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

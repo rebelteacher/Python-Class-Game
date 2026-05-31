@@ -241,5 +241,12 @@ A coding education platform for K-12 students featuring multiple programming env
   - 21/21 pytest cases passing in `/app/backend/tests/test_test_assignments.py`
 - Removed "View in Library" / "Problems" button completely from BlockCurriculum, PythonCurriculum, TurtleCurriculum (admins included)
 - Surfaced orphan problems (lesson="") as a synthetic "(Unassigned)" lesson in `/api/curriculum/units` so admins can clean them up via the Lesson Manager. New endpoint `POST /api/curriculum/delete-orphan-problems` hard-deletes them.
+- Curriculum Test Placements (Feb 2026):
+  - `CurriculumTestPlacement` model + `curriculum_test_placements` collection
+  - `POST /api/curriculum/test-placements` (admin) — attach MC/coding test as lesson_quiz or chapter_test
+  - `DELETE /api/curriculum/test-placements/{id}` (admin)
+  - `GET /api/curriculum/test-placements?assignment_type&chapter&lesson&classroom_id` — student-aware unlock state (per-progress + per-classroom teacher unlock)
+  - `POST /api/classrooms/{id}/toggle-test-unlock` (teacher) — toggles `classrooms.unlocked_test_placements`
+  - Frontend: AdminLessonManager shows "+ Quiz" per lesson and "Attach Chapter Test" row per chapter; LessonPage banner "Take Lesson Quiz" when all problems passing; `ChapterTestRow` component rendered in BlockCurriculum / TurtleCurriculum / PythonCurriculum; ClassroomPage Lesson Locks tab adds per-test Lock/Unlock toggles per chapter.
 
 *Last Updated: Feb 28, 2026*
