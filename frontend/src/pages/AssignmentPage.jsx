@@ -339,8 +339,8 @@ export default function AssignmentPage({ user, lessonData }) {
     try {
       // If we have a classroom_id from navigation, pass it to filter submissions
       const url = classroomIdFromNav 
-        ? `${API}/submissions/assignment/${assignmentId}?classroom_id=${classroomIdFromNav}`
-        : `${API}/submissions/assignment/${assignmentId}`;
+        ? `${API}/submissions/assignment/${effectiveAssignmentId}?classroom_id=${classroomIdFromNav}`
+        : `${API}/submissions/assignment/${effectiveAssignmentId}`;
       
       const response = await axios.get(url, {
         withCredentials: true,
