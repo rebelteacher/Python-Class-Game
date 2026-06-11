@@ -640,6 +640,18 @@ function parseCode(code, parentVars = {}) {
       commands.push({ type: 'home', line: lineNum });
       continue;
     }
+
+    // Parse stamp() - leaves a turtle-shaped imprint at the current location/heading/color
+    if (trimmed.match(new RegExp(`${turtlePrefix}stamp\\s*\\(\\s*\\)`))) {
+      commands.push({ type: 'stamp', line: lineNum });
+      continue;
+    }
+
+    // Parse clearstamps() - removes all stamps
+    if (trimmed.match(new RegExp(`${turtlePrefix}clearstamps\\s*\\(\\s*\\)`))) {
+      commands.push({ type: 'clearstamps', line: lineNum });
+      continue;
+    }
     
     // Parse setheading/seth with variable support (handles nested parentheses like random.randint())
     // Store expression for runtime evaluation if not a simple number literal
@@ -920,6 +932,7 @@ const getInitialTurtleState = () => ({
   filling: false,
   fillPath: [],
   texts: [],  // Array of {text, x, y, color} for write command
+  stamps: [], // Array of {x, y, heading, color} for stamp() command
   name: 't' // Default name
 });
 
@@ -1391,6 +1404,13 @@ const AnimatedTurtle = forwardRef(function AnimatedTurtle({
       }
     }
     
+    // Draw stamps (persistent turtle imprints) before live turtle
+    if (turtle.stamps && turtle.stamps.length > 0) {
+      for (const s of turtle.stamps) {
+        drawTurtle(ctx, s.x, s.y, s.heading, s.color);
+      }
+    }
+
     // Draw turtle if visible
     if (turtle.visible) {
       drawTurtle(ctx, turtle.x, turtle.y, turtle.heading, turtle.turtleColor);
@@ -1674,6 +1694,25 @@ const AnimatedTurtle = forwardRef(function AnimatedTurtle({
           turtle.heading = 90; // Reset to facing up
           drawCanvas();
           setTimeout(resolve, baseDelay);
+          break;
+
+        case 'stamp':
+          // Record an imprint at the turtle's current position/heading/color
+          if (!turtle.stamps) turtle.stamps = [];
+          turtle.stamps.push({
+            x: turtle.x,
+            y: turtle.y,
+            heading: turtle.heading,
+            color: turtle.turtleColor,
+          });
+          drawCanvas();
+          setTimeout(resolve, baseDelay / 4);
+          break;
+
+        case 'clearstamps':
+          turtle.stamps = [];
+          drawCanvas();
+          resolve();
           break;
           
         case 'setheading': {
