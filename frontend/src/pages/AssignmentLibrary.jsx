@@ -201,27 +201,16 @@ export default function AssignmentLibrary({ user }) {
     }
 
     if (unitFilter && unitFilter !== "all") {
-      // Map standardized unit names to database values
-      const unitMappings = {
-        "Unit 1: Block-Based Coding": ["Unit 1: Block-Based Coding", "Unit 1 Blocks", "Unit 1"],
-        "Unit 2: Turtle Graphics": ["Unit 2: Turtle Graphics", "Unit 2", "Unit 3: Turtle Graphics", "Unit 3"],
-        "Unit 3: Python Text": ["Unit 3: Python Text", "Unit 3", "Unit 2: Python Text", "Unit 2", "Unit 1: Python Text", "Unit 1"],
-        "Unit 4: Micro:bit": ["Unit 4: Micro:bit", "Unit 4", "Unit 4: Microbit"]
+      // Strict filter: each unit corresponds to exactly one assignment_type. assignment_type is the source of truth.
+      const typeByUnit = {
+        "Unit 1: Block-Based Coding": "block",
+        "Unit 2: Turtle Graphics": "turtle",
+        "Unit 3: Python Text": "code",
+        "Unit 4: Micro:bit": "microbit",
       };
-      
-      const matchingUnits = unitMappings[unitFilter] || [unitFilter];
-      
-      // Also filter by assignment_type if it's a specific unit
-      if (unitFilter === "Unit 1: Block-Based Coding") {
-        filtered = filtered.filter(p => p.assignment_type === "block" || matchingUnits.includes(p.unit));
-      } else if (unitFilter === "Unit 2: Turtle Graphics") {
-        filtered = filtered.filter(p => p.assignment_type === "turtle" || matchingUnits.includes(p.unit));
-      } else if (unitFilter === "Unit 3: Python Text") {
-        filtered = filtered.filter(p => p.assignment_type === "code" || matchingUnits.includes(p.unit));
-      } else if (unitFilter === "Unit 4: Micro:bit") {
-        filtered = filtered.filter(p => p.assignment_type === "microbit" || matchingUnits.includes(p.unit));
-      } else {
-        filtered = filtered.filter(p => matchingUnits.includes(p.unit));
+      const targetType = typeByUnit[unitFilter];
+      if (targetType) {
+        filtered = filtered.filter(p => p.assignment_type === targetType);
       }
     }
 

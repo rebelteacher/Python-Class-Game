@@ -12462,6 +12462,34 @@ async def initialize_admin_account():
         logger.error(f"Error initializing admin account: {str(e)}")
 
 @app.on_event("startup")
+async def migrate_problem_unit_fields():
+    """One-time migration: normalize problems.unit to match assignment_type so the
+    Library/Curriculum filters never group turtle problems under Unit 3, etc.
+    Idempotent — only updates documents where unit doesn't already match.
+    """
+    try:
+        fixes = {
+            "block": "Unit 1: Block-Based Coding",
+            "turtle": "Unit 2: Turtle Graphics",
+            "code": "Unit 3: Python Text",
+            "microbit": "Unit 4: Micro:bit",
+        }
+        total = 0
+        for atype, unit in fixes.items():
+            res = await db.problems.update_many(
+                {"assignment_type": atype, "unit": {"$ne": unit}},
+                {"$set": {"unit": unit}},
+            )
+            if res.modified_count:
+                logger.info(f"🔧 Migrated unit for {res.modified_count} {atype} problems → {unit!r}")
+                total += res.modified_count
+        if total == 0:
+            logger.info("✅ Problem.unit fields already normalized")
+    except Exception as e:
+        logger.error(f"Error migrating problem.unit fields: {e}")
+
+
+@app.on_event("startup")
 async def seed_block_problems():
     """Seed block-based curriculum problems if they don't exist"""
     try:
