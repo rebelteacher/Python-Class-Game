@@ -662,7 +662,7 @@ export default function TurtleCurriculum({ user }) {
                   <div className="flex items-center gap-4">
                     <div className="text-right text-sm">
                       <div className="font-medium">{unit.weeks}</div>
-                      <div className="text-white/70">{unit.lessons.length} lessons</div>
+                      <div className="text-white/70">{(dbLessonNames[CHAPTER_MAPPING[unit.id]] || []).length} lessons</div>
                     </div>
                     {expandedUnits.has(unit.id) ? (
                       <ChevronDown className="w-6 h-6" />
@@ -676,57 +676,40 @@ export default function TurtleCurriculum({ user }) {
               {expandedUnits.has(unit.id) && (
                 <CardContent className="p-4 bg-cyber-navy/40">
                   <div className="space-y-3">
-                    {unit.lessons.map((lesson, index) => (
-                      <div
-                        key={lesson.id}
-                        className="bg-cyber-navy/60 p-4 rounded-lg border border-cyber-cyan/10 hover:shadow-md transition-shadow"
-                      >
-                        <div className="flex items-start justify-between">
-                          <div className="flex items-start gap-3">
-                            <div className="flex items-center justify-center w-8 h-8 rounded-full bg-cyber-navy/30 text-slate-400 font-semibold text-sm">
-                              {index + 1}
-                            </div>
-                            <div>
-                              <div className="flex items-center gap-2 mb-1">
-                                <h4 className="font-semibold text-white">{lesson.title}</h4>
-                                <span className={`px-2 py-0.5 rounded text-xs font-medium flex items-center gap-1 ${getTypeColor(lesson.type)}`}>
-                                  {getTypeIcon(lesson.type)}
-                                  {lesson.type}
-                                </span>
-                                {getDOKBadge(lesson.dokLevel)}
+                    {(() => {
+                      const chapterName = CHAPTER_MAPPING[unit.id];
+                      const dbLessons = dbLessonNames[chapterName] || [];
+                      if (dbLessons.length === 0) {
+                        return (
+                          <p className="text-center text-slate-500 text-sm py-6">
+                            No lessons configured for this chapter yet. Add them from the Admin Lesson Manager.
+                          </p>
+                        );
+                      }
+                      return dbLessons.map((lessonName, index) => (
+                        <div
+                          key={lessonName}
+                          className="bg-cyber-navy/60 p-4 rounded-lg border border-cyber-cyan/10 hover:shadow-md transition-shadow"
+                        >
+                          <div className="flex items-center justify-between">
+                            <div className="flex items-center gap-3">
+                              <div className="flex items-center justify-center w-8 h-8 rounded-full bg-cyber-navy/30 text-slate-400 font-semibold text-sm">
+                                {index + 1}
                               </div>
-                              <div className="flex items-center gap-2 text-sm text-slate-500 mb-2">
-                                <Clock className="w-3 h-3" />
-                                <span>{lesson.duration}</span>
-                              </div>
-                              <ul className="text-sm text-slate-400 space-y-1">
-                                {lesson.objectives.map((obj, i) => (
-                                  <li key={i} className="flex items-start gap-2">
-                                    <CheckCircle className="w-3 h-3 text-green-500 mt-1 flex-shrink-0" />
-                                    <span>{obj}</span>
-                                  </li>
-                                ))}
-                              </ul>
+                              <h4 className="font-semibold text-white font-chakra">{lessonName}</h4>
                             </div>
+                            <Button
+                              size="sm"
+                              onClick={() => navigate(`/lesson/turtle/${encodeURIComponent(chapterName)}/${encodeURIComponent(lessonName)}`)}
+                              className="bg-cyber-cyan text-cyber-black font-orbitron text-xs uppercase tracking-widest rounded-none border border-cyber-cyan hover:shadow-[0_0_12px_rgba(0,240,255,0.5)] font-bold gap-1 transition-all"
+                            >
+                              <Play className="w-4 h-4" />
+                              Start Lesson
+                            </Button>
                           </div>
-                        <div className="flex items-center gap-2">
-                          <Button
-                            size="sm"
-                            onClick={() => {
-                              const chapterName = CHAPTER_MAPPING[unit.id];
-                              const dbLessons = dbLessonNames[chapterName] || [];
-                              const dbLessonName = dbLessons[index] || `Lesson ${index + 1}: ${lesson.title}`;
-                              navigate(`/lesson/turtle/${encodeURIComponent(chapterName || "Chapter 1: First Steps")}/${encodeURIComponent(dbLessonName)}`);
-                            }}
-                            className="bg-cyber-cyan text-cyber-black font-orbitron text-xs uppercase tracking-widest rounded-none border border-cyber-cyan hover:shadow-[0_0_12px_rgba(0,240,255,0.5)] font-bold gap-1 transition-all"
-                          >
-                            <Play className="w-4 h-4" />
-                            Start Lesson
-                          </Button>
                         </div>
-                        </div>
-                      </div>
-                    ))}
+                      ));
+                    })()}
                   </div>
                   {/* Chapter Test */}
                   <ChapterTestRow assignmentType="turtle" chapter={CHAPTER_MAPPING[unit.id] || ""} user={user} />
