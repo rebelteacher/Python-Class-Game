@@ -2677,6 +2677,25 @@ export default function AssignmentLibrary({ user }) {
                       </SelectContent>
                     </Select>
                   </div>
+
+                  <div>
+                    <Label htmlFor="edit-assignment-type">Unit Type</Label>
+                    <Select
+                      value={editingProblem.assignment_type || "code"}
+                      onValueChange={(val) => setEditingProblem({ ...editingProblem, assignment_type: val })}
+                    >
+                      <SelectTrigger id="edit-assignment-type" data-testid="edit-assignment-type-select">
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="block">🧩 Blocks (Unit 1)</SelectItem>
+                        <SelectItem value="turtle">🐢 Turtle (Unit 2)</SelectItem>
+                        <SelectItem value="code">🐍 Python (Unit 3)</SelectItem>
+                        <SelectItem value="microbit">🔌 Micro:bit (Unit 4)</SelectItem>
+                      </SelectContent>
+                    </Select>
+                    <p className="text-xs text-slate-500 mt-1">Controls which editor &amp; grading style is used</p>
+                  </div>
                 </div>
 
                 <div className="grid grid-cols-2 gap-4">
