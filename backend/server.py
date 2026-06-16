@@ -2380,8 +2380,19 @@ async def get_lesson_problems(request: Request, assignment_type: str, chapter: s
     if not raw_problems:
         raise HTTPException(status_code=404, detail="No problems found for this lesson")
     
-    # Sort by problem_type order, then by title (respecting numbering)
-    type_order = {"Class Practice": 0, "Paired Programming": 1, "Independent Practice": 2, "Challenge": 3, "Assessment": 4, "Quiz": 5, "Debugging": 6, "Project": 7}
+    # Sort by problem_type order (Class Practice → Paired Programming → Independent Practice → Debugging),
+    # then by title for stable ordering. Unknown/legacy types sink to the bottom.
+    type_order = {
+        "Class Practice": 0,
+        "Paired Programming": 1,
+        "Independent Practice": 2,
+        "Debugging": 3,
+        # Legacy / additional types kept after the core 4
+        "Challenge": 4,
+        "Quiz": 5,
+        "Assessment": 6,
+        "Project": 7,
+    }
     raw_problems.sort(key=lambda p: (type_order.get(p.get("problem_type", ""), 99), p.get("title", "")))
     
     # For students, hide solution code
