@@ -944,6 +944,11 @@ export default function AssignmentPage({ user, lessonData }) {
                       {problemScore !== null && problemScore !== undefined && (
                         <span className="ml-1 text-xs">({problemScore.toFixed(0)}%)</span>
                       )}
+                      {problem.problem_type && (
+                        <span className="block text-[10px] font-normal opacity-70 mt-0.5 normal-case">
+                          {problem.problem_type}
+                        </span>
+                      )}
                     </button>
                     {assignment?.is_lesson && user?.is_admin && user?.email === 'astapp@spanola.net' && (
                       <button
