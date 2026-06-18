@@ -39,6 +39,23 @@ const formatLessonMarkdown = (content) => {
   result = result.replace(/```(\w+)?\n([\s\S]*?)```/g, (_, lang, code) => {
     return `<pre class="bg-[#0A0E17] p-4 rounded border border-[#00F0FF]/20 overflow-x-auto my-4"><code class="text-[#39FF14] font-mono text-sm whitespace-pre-wrap">${escapeHtml(code.trim())}</code></pre>`;
   });
+
+  // Markdown pipe-tables (GFM). Detect a header row followed by a separator row with dashes.
+  // Capture: | col | col | ... \n |---|---|... \n (rows)+
+  result = result.replace(
+    /(^|\n)[ \t]*\|(.+?)\|[ \t]*\n[ \t]*\|[ \t]*[-: ]+\|[ \t]*[-:|]+[ \t]*\|?[ \t]*\n((?:[ \t]*\|.*\|[ \t]*\n?)+)/g,
+    (match, leading, headerInner, bodyRaw) => {
+      const splitRow = (row) => row.replace(/^[ \t]*\|/, '').replace(/\|[ \t]*$/, '').split('|').map(c => c.trim());
+      const headers = splitRow(headerInner);
+      const bodyRows = bodyRaw.trim().split('\n').map(splitRow);
+      const thead = `<thead><tr>${headers.map(h => `<th class="border border-[#00F0FF]/30 px-3 py-2 text-left text-[#00F0FF] font-orbitron text-xs uppercase tracking-wider bg-[#0F172A]">${escapeHtml(h)}</th>`).join('')}</tr></thead>`;
+      const tbody = `<tbody>${bodyRows.map(row =>
+        `<tr>${row.map(cell => `<td class="border border-[#00F0FF]/15 px-3 py-2 text-slate-300 text-sm font-mono">${escapeHtml(cell)}</td>`).join('')}</tr>`
+      ).join('')}</tbody>`;
+      return `${leading}<table class="border-collapse my-4 w-auto">${thead}${tbody}</table>`;
+    }
+  );
+
   // Inline code
   result = result.replace(/`([^`]+)`/g, (_, code) => {
     return `<code class="bg-[#0F172A] px-1.5 py-0.5 rounded text-[#39FF14] font-mono text-sm border border-[#39FF14]/20">${escapeHtml(code)}</code>`;
@@ -53,6 +70,14 @@ const formatLessonMarkdown = (content) => {
     .replace(/^- (.*$)/gim, '<li class="ml-3 text-slate-300 mb-1.5 flex items-start gap-2 text-sm"><span class="text-[#00F0FF] mt-0.5 text-xs">&#9656;</span><span>$1</span></li>')
     .replace(/\n\n/g, '</p><p class="mb-3 text-slate-300 leading-relaxed text-sm">')
     .replace(/\n/g, '<br>');
+
+  // Strip wrapping <p>/<br> that the loose newlines insert immediately around tables
+  result = result
+    .replace(/<p[^>]*>(\s|<br>)*(<table)/g, '$2')
+    .replace(/(<\/table>)(\s|<br>)*<\/p>/g, '$1')
+    .replace(/<br>\s*(<table)/g, '$1')
+    .replace(/(<\/table>)\s*<br>/g, '$1');
+
   return `<p class="mb-3 text-slate-300 leading-relaxed text-sm">${result}</p>`;
 };
 
