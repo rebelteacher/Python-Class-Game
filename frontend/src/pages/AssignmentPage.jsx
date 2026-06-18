@@ -48,11 +48,11 @@ const formatLessonMarkdown = (content) => {
       const splitRow = (row) => row.replace(/^[ \t]*\|/, '').replace(/\|[ \t]*$/, '').split('|').map(c => c.trim());
       const headers = splitRow(headerInner);
       const bodyRows = bodyRaw.trim().split('\n').map(splitRow);
-      const thead = `<thead><tr>${headers.map(h => `<th class="border border-[#00F0FF]/30 px-3 py-2 text-left text-[#00F0FF] font-orbitron text-xs uppercase tracking-wider bg-[#0F172A]">${escapeHtml(h)}</th>`).join('')}</tr></thead>`;
+      const thead = `<thead><tr>${headers.map(h => `<th class="border border-[#00F0FF]/30 px-3 py-2 text-left text-[#00F0FF] font-orbitron text-xs uppercase tracking-wider bg-[#0F172A] whitespace-nowrap">${escapeHtml(h)}</th>`).join('')}</tr></thead>`;
       const tbody = `<tbody>${bodyRows.map(row =>
-        `<tr>${row.map(cell => `<td class="border border-[#00F0FF]/15 px-3 py-2 text-slate-300 text-sm font-mono">${escapeHtml(cell)}</td>`).join('')}</tr>`
+        `<tr>${row.map(cell => `<td class="border border-[#00F0FF]/15 px-3 py-2 text-slate-300 text-sm font-mono whitespace-nowrap">${escapeHtml(cell)}</td>`).join('')}</tr>`
       ).join('')}</tbody>`;
-      return `${leading}<table class="border-collapse my-4 w-auto">${thead}${tbody}</table>`;
+      return `${leading}<div class="overflow-x-auto my-4 border border-[#00F0FF]/20 rounded"><table class="border-collapse min-w-full w-auto">${thead}${tbody}</table></div>`;
     }
   );
 
@@ -1000,7 +1000,7 @@ export default function AssignmentPage({ user, lessonData }) {
         <div style={{ height: 'calc(100vh - 200px)', overflow: 'hidden' }}>
         <PanelGroup direction="horizontal" style={{ height: '100%' }}>
           {/* Left Side: Instructions & Test Cases - Compact for more coding space */}
-          <Panel defaultSize={20} minSize={15} maxSize={35}>
+          <Panel defaultSize={20} minSize={15} maxSize={60}>
             <div className="space-y-4 pr-2 h-full overflow-y-auto pl-0">
               <Card data-testid="assignment-instructions" className="ml-0 rounded-l-none border-l-0">
                 <CardHeader className="pb-2 px-3">
