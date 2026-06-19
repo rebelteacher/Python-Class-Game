@@ -9,6 +9,7 @@ import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, Di
 import { Label } from "@/components/ui/label";
 import { Users, Plus, LogOut, Code2, RefreshCw, BookOpen, FileSpreadsheet, Shield, FileText, FileQuestion, Trophy, Video, Bell, Trash2, Cpu, Archive, ArchiveRestore } from "lucide-react";
 import WhatsNew from "@/components/WhatsNew";
+import WelcomeBanner from "@/components/WelcomeBanner";
 import CyberRain from "@/components/CyberRain";
 
 const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
@@ -299,6 +300,8 @@ export default function TeacherDashboard({ user, setUser }) {
             </div>
           </div>
         </header>
+
+        <WelcomeBanner user={user} />
 
         {/* Curriculum Cards Section */}
         <div className="max-w-6xl mx-auto px-6 py-6">

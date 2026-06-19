@@ -11,6 +11,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { BookOpen, Plus, LogOut, Code2, Trophy, ShoppingBag, Zap, FileText, Folder, FolderOpen, ChevronRight, ChevronDown, FileQuestion, Calendar, Award, Users, TrendingUp, CheckCircle, Video } from "lucide-react";
 import RankBadge from "@/components/RankBadge";
 import Leaderboard from "@/components/Leaderboard";
+import WelcomeBanner from "@/components/WelcomeBanner";
 
 // Animated Pet Component
 const AnimatedPet = ({ petId, shopItems }) => {
@@ -573,6 +574,8 @@ export default function StudentDashboard({ user, setUser, refreshUser }) {
           </div>
         </div>
       </nav>
+
+      <WelcomeBanner user={userProfile} />
 
       <main className="container mx-auto px-6 py-10">
         {/* Stats Dashboard */}
