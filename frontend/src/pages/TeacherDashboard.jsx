@@ -318,40 +318,55 @@ export default function TeacherDashboard({ user, setUser }) {
 
           {/* Unit 2: Turtle */}
           <Card 
-            className="bg-cyber-navy/60 border border-cyber-lime/30 text-white cursor-pointer hover:border-cyber-lime/80 hover:shadow-[0_0_15px_rgba(57,255,20,0.3)] transition-all duration-300 rounded-none"
-            onClick={() => navigate("/turtle-curriculum")}
+            className={`bg-cyber-navy/60 border border-cyber-lime/30 text-white transition-all duration-300 rounded-none relative ${user?.is_admin ? 'cursor-pointer hover:border-cyber-lime/80 hover:shadow-[0_0_15px_rgba(57,255,20,0.3)]' : 'opacity-60 cursor-not-allowed'}`}
+            onClick={user?.is_admin ? () => navigate("/turtle-curriculum") : undefined}
           >
+            {!user?.is_admin && (
+              <span className="absolute top-2 right-2 px-1.5 py-0.5 bg-cyber-magenta/20 border border-cyber-magenta/40 text-cyber-magenta text-[9px] font-orbitron uppercase tracking-widest rounded-none">
+                Soon
+              </span>
+            )}
             <CardContent className="p-6 text-center">
               <div className="text-3xl mb-2">🐢</div>
               <h3 className="font-orbitron font-bold text-sm uppercase tracking-wider">Unit 2</h3>
               <p className="text-cyber-lime/80 text-xs font-chakra mt-1">Turtle Graphics</p>
-              <p className="text-xs text-slate-500 mt-1 font-chakra">Visual Output</p>
+              <p className="text-xs text-slate-500 mt-1 font-chakra">{user?.is_admin ? 'Visual Output' : 'Coming Soon'}</p>
             </CardContent>
           </Card>
 
           {/* Unit 3: Python */}
           <Card 
-            className="bg-cyber-navy/60 border border-blue-500/30 text-white cursor-pointer hover:border-blue-500/80 hover:shadow-[0_0_15px_rgba(59,130,246,0.3)] transition-all duration-300 rounded-none"
-            onClick={() => navigate("/python-curriculum")}
+            className={`bg-cyber-navy/60 border border-blue-500/30 text-white transition-all duration-300 rounded-none relative ${user?.is_admin ? 'cursor-pointer hover:border-blue-500/80 hover:shadow-[0_0_15px_rgba(59,130,246,0.3)]' : 'opacity-60 cursor-not-allowed'}`}
+            onClick={user?.is_admin ? () => navigate("/python-curriculum") : undefined}
           >
+            {!user?.is_admin && (
+              <span className="absolute top-2 right-2 px-1.5 py-0.5 bg-cyber-magenta/20 border border-cyber-magenta/40 text-cyber-magenta text-[9px] font-orbitron uppercase tracking-widest rounded-none">
+                Soon
+              </span>
+            )}
             <CardContent className="p-6 text-center">
               <div className="text-3xl mb-2">🐍</div>
               <h3 className="font-orbitron font-bold text-sm uppercase tracking-wider">Unit 3</h3>
               <p className="text-blue-300 text-xs font-chakra mt-1">Python Text</p>
-              <p className="text-xs text-slate-500 mt-1 font-chakra">Text-Based Programming</p>
+              <p className="text-xs text-slate-500 mt-1 font-chakra">{user?.is_admin ? 'Text-Based Programming' : 'Coming Soon'}</p>
             </CardContent>
           </Card>
 
           {/* Unit 4: Micro:bit */}
           <Card 
-            className="bg-cyber-navy/60 border border-cyber-cyan/30 text-white cursor-pointer hover:border-cyber-cyan/80 hover:shadow-[0_0_15px_rgba(0,240,255,0.3)] transition-all duration-300 rounded-none"
-            onClick={() => navigate("/microbit")}
+            className={`bg-cyber-navy/60 border border-cyber-cyan/30 text-white transition-all duration-300 rounded-none relative ${user?.is_admin ? 'cursor-pointer hover:border-cyber-cyan/80 hover:shadow-[0_0_15px_rgba(0,240,255,0.3)]' : 'opacity-60 cursor-not-allowed'}`}
+            onClick={user?.is_admin ? () => navigate("/microbit") : undefined}
           >
+            {!user?.is_admin && (
+              <span className="absolute top-2 right-2 px-1.5 py-0.5 bg-cyber-magenta/20 border border-cyber-magenta/40 text-cyber-magenta text-[9px] font-orbitron uppercase tracking-widest rounded-none">
+                Soon
+              </span>
+            )}
             <CardContent className="p-6 text-center">
               <div className="text-3xl mb-2">⚡</div>
               <h3 className="font-orbitron font-bold text-sm uppercase tracking-wider">Unit 4</h3>
               <p className="text-cyber-cyan/80 text-xs font-chakra mt-1">Micro:bit</p>
-              <p className="text-xs text-slate-500 mt-1 font-chakra">Physical Computing</p>
+              <p className="text-xs text-slate-500 mt-1 font-chakra">{user?.is_admin ? 'Physical Computing' : 'Coming Soon'}</p>
             </CardContent>
           </Card>
         </div>

@@ -920,6 +920,8 @@ export default function StudentDashboard({ user, setUser, refreshUser }) {
         </div>
 
         {/* Practice Sandbox Card */}
+        {/* Practice Coding Sandbox Card — admin only during Unit 1 pilot */}
+        {userProfile?.is_admin && (
         <div className="mb-8">
           <Card className="border-2 border-purple-500/30 bg-gradient-to-br from-purple-50 to-pink-50">
             <CardContent className="p-6">
@@ -946,8 +948,10 @@ export default function StudentDashboard({ user, setUser, refreshUser }) {
             </CardContent>
           </Card>
         </div>
+        )}
 
-        {/* Turtle Graphics Card */}
+        {/* Turtle Graphics Card — admin only during Unit 1 pilot */}
+        {userProfile?.is_admin && (
         <div className="mb-8">
           <Card className="border-2 border-green-500/30 bg-gradient-to-br from-green-50 to-blue-50">
             <CardContent className="p-6">
@@ -973,6 +977,7 @@ export default function StudentDashboard({ user, setUser, refreshUser }) {
             </CardContent>
           </Card>
         </div>
+        )}
 
         {/* Active Competitions Section */}
         {competitions.length > 0 && (
