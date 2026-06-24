@@ -12470,13 +12470,21 @@ async def generate_microbit_hex(request: Request):
 # Include the router in the main app
 app.include_router(api_router)
 
-app.add_middleware(
-    CORSMiddleware,
-    allow_credentials=True,
-    allow_origins=os.environ.get('CORS_ORIGINS', '*').split(','),
-    allow_methods=["*"],
-    allow_headers=["*"],
-)
+_cors_origins_env = os.environ.get('CORS_ORIGINS', '*')
+_cors_kwargs = {
+    "allow_credentials": True,
+    "allow_methods": ["*"],
+    "allow_headers": ["*"],
+}
+if _cors_origins_env.strip() == "*":
+    # When credentials are sent, wildcard "*" is invalid per CORS spec.
+    # Use a regex matching any origin so credentialed requests succeed from any domain
+    # (bytebattles.org, www.bytebattles.org, emergent.host preview, localhost dev, etc.).
+    _cors_kwargs["allow_origin_regex"] = ".*"
+else:
+    _cors_kwargs["allow_origins"] = [o.strip() for o in _cors_origins_env.split(',') if o.strip()]
+
+app.add_middleware(CORSMiddleware, **_cors_kwargs)
 
 # Configure logging
 logging.basicConfig(
