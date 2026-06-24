@@ -16,6 +16,7 @@ import subprocess
 import tempfile
 import json
 import bcrypt
+import secrets
 from emergentintegrations.llm.chat import LlmChat, UserMessage
 import pytz
 
@@ -1178,6 +1179,45 @@ async def get_me(request: Request):
         "active_pet": user.get("active_pet"),
         "active_profile_frame": user.get("active_profile_frame")
     }
+
+@api_router.post("/admin/reset-user-password")
+async def admin_reset_user_password(request: Request):
+    """Admin-only: set a temporary password for another user (their email) so they can sign back in.
+    Returns the temp password so the admin can share it with the user out-of-band.
+    """
+    user = await get_current_user(request)
+    if not user.get("is_admin"):
+        raise HTTPException(status_code=403, detail="Only admins can reset passwords")
+
+    body = await request.json()
+    target_email = (body.get("email") or "").strip().lower()
+    if not target_email:
+        raise HTTPException(status_code=400, detail="email is required")
+
+    target = await db.users.find_one({"email": target_email}, {"_id": 0, "id": 1, "email": 1, "name": 1})
+    if not target:
+        raise HTTPException(status_code=404, detail="User not found")
+
+    # Generate a friendly temp password: e.g. "Byte-7421-Reset"
+    temp_password = f"Byte-{secrets.randbelow(9000) + 1000}-Reset"
+    hashed = bcrypt.hashpw(temp_password.encode("utf-8"), bcrypt.gensalt()).decode("utf-8")
+
+    await db.users.update_one(
+        {"id": target["id"]},
+        {"$set": {"password": hashed, "must_change_password": True}},
+    )
+    # Invalidate any existing sessions for the user so the old password loses access
+    await db.sessions.delete_many({"user_id": target["id"]})
+
+    logger.info(f"🔐 Admin {user['email']} reset password for {target_email}")
+    return {
+        "success": True,
+        "email": target["email"],
+        "name": target.get("name", ""),
+        "temp_password": temp_password,
+        "message": "Share this temporary password with the user. Ask them to sign in and change it from their profile.",
+    }
+
 
 @api_router.post("/auth/teacher-login")
 async def teacher_login(login_data: TeacherLoginRequest, response: Response):

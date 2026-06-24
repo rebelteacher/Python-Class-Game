@@ -23,7 +23,8 @@ import {
   FileQuestion,
   Code2,
   Cpu,
-  Video
+  Video,
+  KeyRound
 } from "lucide-react";
 
 const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
@@ -293,6 +294,14 @@ export default function AdminDashboard({ user }) {
               >
                 <UserCheck className="w-4 h-4 mr-2" />
                 Approve Admin Requests
+              </Button>
+              <Button
+                onClick={() => navigate("/admin/password-reset")}
+                data-testid="admin-password-reset-link"
+                className="bg-cyber-magenta hover:bg-cyber-magenta/80 text-white"
+              >
+                <KeyRound className="w-4 h-4 mr-2" />
+                Reset User Password
               </Button>
             </div>
           </CardContent>

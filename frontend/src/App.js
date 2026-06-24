@@ -5,6 +5,8 @@ import axios from "axios";
 import { Toaster, toast } from "sonner";
 import LandingPage from "./pages/LandingPage";
 import TeacherLogin from "./pages/TeacherLogin";
+import ForgotPassword from "./pages/ForgotPassword";
+import AdminPasswordReset from "./pages/AdminPasswordReset";
 import TeacherSignup from "./pages/TeacherSignup";
 import AdminAccountFix from "./pages/AdminAccountFix";
 import TeacherDashboard from "./pages/TeacherDashboard";
@@ -566,6 +568,8 @@ function App() {
 
 
               <Route path="/teacher-login" element={<TeacherLogin />} />
+              <Route path="/forgot-password" element={<ForgotPassword />} />
+              <Route path="/admin/password-reset" element={user?.is_admin ? <AdminPasswordReset /> : <Navigate to="/" />} />
               <Route path="/teacher-signup" element={<TeacherSignup />} />
               <Route path="/school-admin-signup" element={<SchoolAdminSignup />} />
               <Route path="/lesson-demo" element={<LessonPageTemplate />} />

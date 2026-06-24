@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { ArrowLeft, Lock, Mail } from "lucide-react";
+import { ArrowLeft, Lock, Mail, Eye, EyeOff } from "lucide-react";
 import CyberRain from "@/components/CyberRain";
 
 const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
@@ -16,6 +16,7 @@ export default function TeacherLogin() {
   const navigate = useNavigate();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
 
   const handleLogin = async (e) => {
@@ -110,13 +111,33 @@ export default function TeacherLogin() {
                 <Lock className="absolute left-3 top-3 h-4 w-4 text-cyber-cyan/50" />
                 <Input
                   id="password"
-                  type="password"
+                  type={showPassword ? "text" : "password"}
                   placeholder="Enter your password"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
-                  className="pl-10 bg-cyber-black/50 border-cyber-cyan/30 text-white placeholder:text-slate-600 focus:border-cyber-cyan focus:ring-1 focus:ring-cyber-cyan rounded-none font-chakra"
+                  className="pl-10 pr-10 bg-cyber-black/50 border-cyber-cyan/30 text-white placeholder:text-slate-600 focus:border-cyber-cyan focus:ring-1 focus:ring-cyber-cyan rounded-none font-chakra"
                   required
                 />
+                <button
+                  type="button"
+                  onClick={() => setShowPassword(s => !s)}
+                  data-testid="toggle-password-visibility"
+                  className="absolute right-3 top-3 text-cyber-cyan/50 hover:text-cyber-cyan transition-colors"
+                  aria-label={showPassword ? "Hide password" : "Show password"}
+                  tabIndex={-1}
+                >
+                  {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                </button>
+              </div>
+              <div className="mt-2 text-right">
+                <button
+                  type="button"
+                  onClick={() => navigate("/forgot-password")}
+                  data-testid="forgot-password-link"
+                  className="text-xs font-chakra text-cyber-cyan/70 hover:text-cyber-cyan underline-offset-2 hover:underline"
+                >
+                  Forgot password?
+                </button>
               </div>
             </div>
 
