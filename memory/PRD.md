@@ -256,9 +256,10 @@ A coding education platform for K-12 students featuring multiple programming env
 - Site Traffic Analytics (Feb 28, 2026):
   - New `site_pageviews` collection storing anonymous page views (visitor_id, session_id, path, referrer_source, device_type, ip_hash)
   - `POST /api/analytics/pageview` — public anonymous tracking; auto-flags admin/teacher views so they can be excluded from stats
-  - `GET /api/admin/analytics/traffic?days=N` — admin-only aggregation: total/unique/sessions, top pages, top referrers (Facebook/Google/Direct/etc.), device breakdown (Mobile/Desktop/Tablet), daily series, live visitor count (last 5min)
+  - `GET /api/admin/analytics/traffic?days=N` — admin-only aggregation: total/unique/sessions, top pages, top referrers (Facebook/Google/Direct/etc.), device breakdown (Mobile/Desktop/Tablet), daily series, live visitor count (last 5min), **new vs returning visitor breakdown for today/7d/30d with return rate**
   - Frontend tracker `utils/siteAnalytics.js` + `PageViewTracker` in `App.js` records on every route change; auto-anonymizes IPs (SHA256 hash, no PII)
-  - AdminAnalytics page restructured with Tabs: **Site Traffic** (new) + **Teacher Activity** (existing). Site Traffic shows live visitor count, KPI grid, daily traffic mini-chart, top sources, device breakdown, and top-pages table
+  - AdminAnalytics page restructured with Tabs: **Site Traffic** (new) + **Teacher Activity** (existing). Site Traffic shows live visitor count, KPI grid, **New vs Returning visitors card** (Today / 7d / 30d, with split-bar visualization + return rate), daily traffic mini-chart, top sources, device breakdown, and top-pages table
+  - "Ignore my browser" toggle (localStorage `bb_analytics_excluded`) — per-device opt-out for admins to keep their own visits out of stats even when logged out
   - Range selector: Last 7d / 30d / 90d
   - Admin views are excluded from all stats so the dashboard reflects real visitor traffic only
 

@@ -7235,6 +7235,45 @@ async def get_site_traffic(request: Request, days: int = 30):
         ]).to_list(1)
         sessions_30d_count = sessions_30d[0]["n"] if sessions_30d else 0
 
+        # New vs Returning visitors per window.
+        # A visitor is "returning" if their first-ever pageview timestamp is < window_start.
+        async def new_vs_returning(window_start):
+            pipeline = [
+                {"$match": base},
+                {"$group": {
+                    "_id": "$visitor_id",
+                    "first_seen": {"$min": "$timestamp"},
+                    "in_window": {"$max": {"$cond": [
+                        {"$gte": ["$timestamp", window_start]}, 1, 0
+                    ]}},
+                }},
+                {"$match": {"in_window": 1}},
+                {"$group": {
+                    "_id": {"$gte": ["$first_seen", window_start]},
+                    "count": {"$sum": 1},
+                }},
+            ]
+            res = await db.site_pageviews.aggregate(pipeline).to_list(2)
+            new_count = 0
+            returning_count = 0
+            for row in res:
+                # _id is True when the visitor's first ever view falls inside the window (= new)
+                if row["_id"]:
+                    new_count = row["count"]
+                else:
+                    returning_count = row["count"]
+            total = new_count + returning_count
+            return {
+                "new": new_count,
+                "returning": returning_count,
+                "total": total,
+                "return_rate": round((returning_count / total) * 100) if total > 0 else 0,
+            }
+
+        nvr_today = await new_vs_returning(today_start)
+        nvr_7d = await new_vs_returning(week_ago)
+        nvr_30d = await new_vs_returning(thirty_ago)
+
         # Top pages (last 30d)
         top_pages_agg = await db.site_pageviews.aggregate([
             {"$match": {**base, "timestamp": {"$gte": thirty_ago}}},
@@ -7309,6 +7348,11 @@ async def get_site_traffic(request: Request, days: int = 30):
                 "unique_all_time": unique_all,
                 "sessions_30d": sessions_30d_count,
                 "live_visitors": live_visitors,
+            },
+            "new_vs_returning": {
+                "today": nvr_today,
+                "last_7d": nvr_7d,
+                "last_30d": nvr_30d,
             },
             "top_pages": top_pages_agg,
             "top_referrers": top_referrers,

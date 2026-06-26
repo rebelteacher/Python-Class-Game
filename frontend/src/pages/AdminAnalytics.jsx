@@ -22,6 +22,9 @@ import {
   RefreshCw,
   EyeOff,
   ShieldCheck,
+  Sparkles,
+  Repeat,
+  UserCheck,
 } from "lucide-react";
 import { isAnalyticsExcluded, setAnalyticsExcluded } from "../utils/siteAnalytics";
 
@@ -433,6 +436,9 @@ function SiteTrafficPanel({ traffic, loading, rangeDays, setRangeDays, onRefresh
         />
       </div>
 
+      {/* New vs Returning Visitors */}
+      <NewVsReturningCard data={traffic.new_vs_returning} />
+
       {/* Daily chart */}
       <Card>
         <CardHeader>
@@ -655,6 +661,94 @@ function ExcludeMyBrowserBanner() {
         >
           {excluded ? "Start counting this browser" : "Ignore my browser"}
         </Button>
+      </CardContent>
+    </Card>
+  );
+}
+
+
+function NvrRow({ label, stats }) {
+  const newCount = stats?.new ?? 0;
+  const returningCount = stats?.returning ?? 0;
+  const total = stats?.total ?? 0;
+  const rate = stats?.return_rate ?? 0;
+  const newPct = total > 0 ? (newCount / total) * 100 : 0;
+  const retPct = total > 0 ? (returningCount / total) * 100 : 0;
+
+  return (
+    <div className="space-y-2">
+      <div className="flex items-center justify-between text-sm">
+        <span className="text-slate-300 font-medium">{label}</span>
+        <span className="text-slate-400">
+          <span className="text-white font-semibold">{total}</span> visitor{total === 1 ? "" : "s"}
+        </span>
+      </div>
+      {total === 0 ? (
+        <div className="bg-cyber-navy/60 rounded h-7 flex items-center justify-center">
+          <span className="text-xs text-slate-500">No visitors in this window yet</span>
+        </div>
+      ) : (
+        <div className="flex bg-cyber-navy/60 rounded h-7 overflow-hidden">
+          <div
+            className="bg-gradient-to-r from-emerald-500 to-emerald-400 flex items-center justify-start px-2 transition-all"
+            style={{ width: `${newPct}%` }}
+            title={`${newCount} new visitor${newCount === 1 ? "" : "s"}`}
+          >
+            {newPct > 12 && (
+              <span className="text-[11px] text-cyber-black font-bold flex items-center gap-1 whitespace-nowrap">
+                <Sparkles className="w-3 h-3" />
+                {newCount} new
+              </span>
+            )}
+          </div>
+          <div
+            className="bg-gradient-to-r from-fuchsia-500 to-cyber-cyan flex items-center justify-end px-2 transition-all"
+            style={{ width: `${retPct}%` }}
+            title={`${returningCount} returning visitor${returningCount === 1 ? "" : "s"}`}
+          >
+            {retPct > 12 && (
+              <span className="text-[11px] text-cyber-black font-bold flex items-center gap-1 whitespace-nowrap">
+                <Repeat className="w-3 h-3" />
+                {returningCount} returning
+              </span>
+            )}
+          </div>
+        </div>
+      )}
+      <div className="flex justify-between text-xs text-slate-500">
+        <span className="flex items-center gap-1">
+          <Sparkles className="w-3 h-3 text-emerald-400" /> {newCount} new
+        </span>
+        <span className={`font-semibold ${rate >= 30 ? "text-cyber-cyan" : "text-slate-400"}`}>
+          {rate}% return rate
+        </span>
+        <span className="flex items-center gap-1">
+          <Repeat className="w-3 h-3 text-fuchsia-400" /> {returningCount} returning
+        </span>
+      </div>
+    </div>
+  );
+}
+
+function NewVsReturningCard({ data }) {
+  if (!data) return null;
+
+  return (
+    <Card data-testid="new-vs-returning-card">
+      <CardHeader>
+        <CardTitle className="text-white flex items-center gap-2">
+          <UserCheck className="w-5 h-5 text-cyber-cyan" />
+          New vs Returning Visitors
+        </CardTitle>
+      </CardHeader>
+      <CardContent className="space-y-5">
+        <NvrRow label="Today" stats={data.today} />
+        <NvrRow label="Last 7 days" stats={data.last_7d} />
+        <NvrRow label="Last 30 days" stats={data.last_30d} />
+        <p className="text-xs text-slate-500 pt-2 border-t border-cyber-cyan/10">
+          A high return rate means visitors are coming back to look again — a strong signal of serious interest.
+          Return visitors are identified by their anonymous browser ID; clearing cookies or switching devices resets that.
+        </p>
       </CardContent>
     </Card>
   );
