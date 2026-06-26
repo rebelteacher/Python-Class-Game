@@ -9,6 +9,7 @@ const API = `${BACKEND_URL}/api`;
 const VISITOR_KEY = "bb_visitor_id";
 const SESSION_KEY = "bb_session_id";
 const SESSION_TS_KEY = "bb_session_ts";
+const EXCLUDE_KEY = "bb_analytics_excluded";
 const SESSION_TIMEOUT_MS = 30 * 60 * 1000; // 30 minutes of inactivity
 
 function uuid() {
@@ -63,8 +64,31 @@ function normalizePath(pathname) {
 
 let lastTrackedKey = null;
 
+export function isAnalyticsExcluded() {
+  try {
+    return localStorage.getItem(EXCLUDE_KEY) === "1";
+  } catch {
+    return false;
+  }
+}
+
+export function setAnalyticsExcluded(excluded) {
+  try {
+    if (excluded) {
+      localStorage.setItem(EXCLUDE_KEY, "1");
+    } else {
+      localStorage.removeItem(EXCLUDE_KEY);
+    }
+  } catch {
+    // ignore
+  }
+}
+
 export async function trackPageView(pathname) {
   try {
+    // Respect the per-browser "Ignore my browser" toggle
+    if (isAnalyticsExcluded()) return;
+
     const path = normalizePath(pathname || window.location.pathname || "/");
     const sid = getSessionId();
     const key = `${sid}::${path}`;

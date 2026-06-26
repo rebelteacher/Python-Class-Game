@@ -20,10 +20,15 @@ import {
   Radio,
   Link as LinkIcon,
   RefreshCw,
+  EyeOff,
+  ShieldCheck,
 } from "lucide-react";
+import { isAnalyticsExcluded, setAnalyticsExcluded } from "../utils/siteAnalytics";
 
 const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
 const API = `${BACKEND_URL}/api`;
+
+
 
 export default function AdminAnalytics({ user }) {
   const navigate = useNavigate();
@@ -335,6 +340,8 @@ function SiteTrafficPanel({ traffic, loading, rangeDays, setRangeDays, onRefresh
 
   return (
     <div data-testid="site-traffic-panel" className="space-y-6">
+      <ExcludeMyBrowserBanner />
+
       {/* Header row with range selector + refresh + live indicator */}
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div className="flex items-center gap-2 text-slate-300">
@@ -587,5 +594,68 @@ function SiteTrafficPanel({ traffic, loading, rangeDays, setRangeDays, onRefresh
         (no personal data collected).
       </p>
     </div>
+  );
+}
+
+
+function ExcludeMyBrowserBanner() {
+  const [excluded, setExcluded] = useState(isAnalyticsExcluded());
+
+  const toggle = () => {
+    const next = !excluded;
+    setAnalyticsExcluded(next);
+    setExcluded(next);
+    if (next) {
+      toast.success("This browser will no longer be counted in your site stats.", {
+        description: "Note: this only applies to this device + browser. Repeat on your phone/other browsers if needed.",
+      });
+    } else {
+      toast.info("This browser will now be counted in site stats again.");
+    }
+  };
+
+  return (
+    <Card
+      className={`border ${
+        excluded
+          ? "border-green-500/40 bg-green-500/5"
+          : "border-cyber-cyan/20 bg-cyber-navy/40"
+      }`}
+    >
+      <CardContent className="py-4 px-5 flex flex-wrap items-center justify-between gap-3">
+        <div className="flex items-center gap-3">
+          {excluded ? (
+            <ShieldCheck className="w-6 h-6 text-green-400 shrink-0" />
+          ) : (
+            <EyeOff className="w-6 h-6 text-slate-400 shrink-0" />
+          )}
+          <div>
+            <p className="text-sm font-semibold text-white">
+              {excluded
+                ? "This browser is excluded from analytics ✓"
+                : "Is this device skewing your stats?"}
+            </p>
+            <p className="text-xs text-slate-400 mt-0.5">
+              {excluded
+                ? "Visits from this browser (logged in or not) will not be counted in your traffic numbers."
+                : "Click below to stop counting your own visits on this device — even when you're logged out."}
+            </p>
+          </div>
+        </div>
+        <Button
+          data-testid="toggle-exclude-browser-btn"
+          onClick={toggle}
+          variant={excluded ? "outline" : "default"}
+          className={
+            excluded
+              ? "border-green-500/40 text-green-400 hover:bg-green-500/10"
+              : "bg-cyber-cyan text-cyber-black hover:shadow-[0_0_15px_rgba(0,240,255,0.5)] font-bold"
+          }
+          size="sm"
+        >
+          {excluded ? "Start counting this browser" : "Ignore my browser"}
+        </Button>
+      </CardContent>
+    </Card>
   );
 }
