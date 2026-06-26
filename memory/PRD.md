@@ -251,6 +251,8 @@ A coding education platform for K-12 students featuring multiple programming env
 - Teacher Class Progress widget (Feb 2026):
   - `GET /api/classrooms/{id}/chapter-progress` — returns per-chapter completion stats (students who passed every problem in every lesson) + chapter_test placement + unlock state
   - ClassroomPage Lesson Locks tab now opens with a magenta "Class Progress" widget listing chapters with chapter tests assigned, each row showing a glow-progress bar, X/Y student readiness, and one-click "Unlock for class" / "Lock for class" CTA
+- **BACKLOG**: UTM campaign tracking — capture `?utm_source=` / `?utm_campaign=` query params on landing, store on the pageview doc, and add a "Top Campaigns" panel + link-builder helper so Alisa can see which Facebook post / email drove each visit. (Deferred Feb 28, 2026 — user wants to hold off.)
+
 - Site Traffic Analytics (Feb 28, 2026):
   - New `site_pageviews` collection storing anonymous page views (visitor_id, session_id, path, referrer_source, device_type, ip_hash)
   - `POST /api/analytics/pageview` — public anonymous tracking; auto-flags admin/teacher views so they can be excluded from stats
