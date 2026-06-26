@@ -7074,6 +7074,255 @@ async def get_admin_stats(request: Request):
         logging.error(f"Error fetching admin stats: {e}")
         raise HTTPException(status_code=500, detail=f"Failed to fetch stats: {str(e)}")
 
+
+# ===================== SITE TRAFFIC ANALYTICS =====================
+
+class PageViewPayload(BaseModel):
+    visitor_id: str
+    session_id: str
+    path: str
+    referrer: Optional[str] = ""
+    screen_width: Optional[int] = None
+
+def _classify_referrer(referrer: str, host: str) -> str:
+    """Classify a referrer URL into a friendly source label."""
+    if not referrer:
+        return "Direct"
+    try:
+        from urllib.parse import urlparse
+        parsed = urlparse(referrer)
+        ref_host = (parsed.netloc or "").lower().replace("www.", "")
+    except Exception:
+        return "Other"
+    if not ref_host or (host and ref_host == host.lower().replace("www.", "")):
+        return "Direct"
+    ref_map = {
+        "facebook.com": "Facebook",
+        "m.facebook.com": "Facebook",
+        "l.facebook.com": "Facebook",
+        "lm.facebook.com": "Facebook",
+        "fb.com": "Facebook",
+        "instagram.com": "Instagram",
+        "l.instagram.com": "Instagram",
+        "twitter.com": "Twitter/X",
+        "x.com": "Twitter/X",
+        "t.co": "Twitter/X",
+        "linkedin.com": "LinkedIn",
+        "lnkd.in": "LinkedIn",
+        "google.com": "Google",
+        "google.co.uk": "Google",
+        "bing.com": "Bing",
+        "duckduckgo.com": "DuckDuckGo",
+        "youtube.com": "YouTube",
+        "reddit.com": "Reddit",
+        "tiktok.com": "TikTok",
+        "pinterest.com": "Pinterest",
+    }
+    return ref_map.get(ref_host, ref_host)
+
+def _classify_device(user_agent: str) -> str:
+    """Classify device from user agent string."""
+    if not user_agent:
+        return "Unknown"
+    ua = user_agent.lower()
+    if "tablet" in ua or "ipad" in ua:
+        return "Tablet"
+    if "mobi" in ua or "iphone" in ua or "android" in ua:
+        return "Mobile"
+    return "Desktop"
+
+@api_router.post("/analytics/pageview")
+async def track_pageview(payload: PageViewPayload, request: Request):
+    """Public endpoint to log a page view. Anonymous and lightweight."""
+    try:
+        # Skip if request has a session token from an admin/teacher (do not count admin views)
+        is_authenticated = False
+        user_role = None
+        is_admin = False
+        try:
+            session_token = request.cookies.get("session_token")
+            if not session_token:
+                auth_header = request.headers.get("Authorization", "")
+                if auth_header.startswith("Bearer "):
+                    session_token = auth_header.replace("Bearer ", "")
+            if session_token:
+                session = await db.sessions.find_one({"session_token": session_token})
+                if session:
+                    u = await db.users.find_one({"id": session["user_id"]})
+                    if u:
+                        is_authenticated = True
+                        user_role = u.get("role")
+                        is_admin = bool(u.get("is_admin"))
+        except Exception:
+            pass
+
+        user_agent = request.headers.get("user-agent", "") or ""
+        host = request.headers.get("host", "") or ""
+        device_type = _classify_device(user_agent)
+        referrer_source = _classify_referrer(payload.referrer or "", host)
+
+        # Hash IP for privacy
+        import hashlib
+        ip = request.client.host if request.client else ""
+        forwarded_for = request.headers.get("x-forwarded-for", "")
+        if forwarded_for:
+            ip = forwarded_for.split(",")[0].strip()
+        ip_hash = hashlib.sha256(f"bytebattles::{ip}".encode()).hexdigest()[:16]
+
+        doc = {
+            "visitor_id": payload.visitor_id[:64],
+            "session_id": payload.session_id[:64],
+            "path": payload.path[:256],
+            "referrer": (payload.referrer or "")[:512],
+            "referrer_source": referrer_source,
+            "user_agent": user_agent[:512],
+            "device_type": device_type,
+            "ip_hash": ip_hash,
+            "is_authenticated": is_authenticated,
+            "user_role": user_role,
+            "is_admin": is_admin,
+            "timestamp": datetime.now(timezone.utc),
+        }
+        await db.site_pageviews.insert_one(doc)
+        return {"ok": True}
+    except Exception as e:
+        logging.error(f"Error tracking pageview: {e}")
+        # Never fail loudly on tracking
+        return {"ok": False}
+
+@api_router.get("/admin/analytics/traffic")
+async def get_site_traffic(request: Request, days: int = 30):
+    """Aggregate site traffic stats (admin only). Excludes admin views."""
+    user = await get_current_user(request)
+    if not user.get("is_admin"):
+        raise HTTPException(status_code=403, detail="Admin access required")
+
+    try:
+        now = datetime.now(timezone.utc)
+        today_start = now.replace(hour=0, minute=0, second=0, microsecond=0)
+        week_ago = now - timedelta(days=7)
+        thirty_ago = now - timedelta(days=30)
+        range_start = now - timedelta(days=max(1, min(days, 365)))
+
+        # Base filter: exclude admin user views
+        base = {"is_admin": {"$ne": True}}
+
+        # Totals
+        total_views = await db.site_pageviews.count_documents(base)
+        views_today = await db.site_pageviews.count_documents({**base, "timestamp": {"$gte": today_start}})
+        views_7d = await db.site_pageviews.count_documents({**base, "timestamp": {"$gte": week_ago}})
+        views_30d = await db.site_pageviews.count_documents({**base, "timestamp": {"$gte": thirty_ago}})
+
+        async def unique_count(match):
+            pipeline = [
+                {"$match": match},
+                {"$group": {"_id": "$visitor_id"}},
+                {"$count": "n"},
+            ]
+            res = await db.site_pageviews.aggregate(pipeline).to_list(1)
+            return res[0]["n"] if res else 0
+
+        unique_today = await unique_count({**base, "timestamp": {"$gte": today_start}})
+        unique_7d = await unique_count({**base, "timestamp": {"$gte": week_ago}})
+        unique_30d = await unique_count({**base, "timestamp": {"$gte": thirty_ago}})
+        unique_all = await unique_count(base)
+
+        # Sessions in last 30 days
+        sessions_30d = await db.site_pageviews.aggregate([
+            {"$match": {**base, "timestamp": {"$gte": thirty_ago}}},
+            {"$group": {"_id": "$session_id"}},
+            {"$count": "n"},
+        ]).to_list(1)
+        sessions_30d_count = sessions_30d[0]["n"] if sessions_30d else 0
+
+        # Top pages (last 30d)
+        top_pages_agg = await db.site_pageviews.aggregate([
+            {"$match": {**base, "timestamp": {"$gte": thirty_ago}}},
+            {"$group": {"_id": "$path", "views": {"$sum": 1}, "visitors": {"$addToSet": "$visitor_id"}}},
+            {"$project": {"path": "$_id", "views": 1, "unique_visitors": {"$size": "$visitors"}, "_id": 0}},
+            {"$sort": {"views": -1}},
+            {"$limit": 15},
+        ]).to_list(15)
+
+        # Top referrers (last 30d)
+        top_referrers = await db.site_pageviews.aggregate([
+            {"$match": {**base, "timestamp": {"$gte": thirty_ago}}},
+            {"$group": {"_id": "$referrer_source", "views": {"$sum": 1}, "visitors": {"$addToSet": "$visitor_id"}}},
+            {"$project": {"source": "$_id", "views": 1, "unique_visitors": {"$size": "$visitors"}, "_id": 0}},
+            {"$sort": {"views": -1}},
+            {"$limit": 10},
+        ]).to_list(10)
+
+        # Device breakdown (last 30d)
+        device_breakdown = await db.site_pageviews.aggregate([
+            {"$match": {**base, "timestamp": {"$gte": thirty_ago}}},
+            {"$group": {"_id": "$device_type", "views": {"$sum": 1}}},
+            {"$project": {"device": "$_id", "views": 1, "_id": 0}},
+            {"$sort": {"views": -1}},
+        ]).to_list(10)
+
+        # Daily series for the requested range
+        daily_agg = await db.site_pageviews.aggregate([
+            {"$match": {**base, "timestamp": {"$gte": range_start}}},
+            {"$group": {
+                "_id": {"$dateToString": {"format": "%Y-%m-%d", "date": "$timestamp"}},
+                "views": {"$sum": 1},
+                "visitors": {"$addToSet": "$visitor_id"},
+            }},
+            {"$project": {"date": "$_id", "views": 1, "unique_visitors": {"$size": "$visitors"}, "_id": 0}},
+            {"$sort": {"date": 1}},
+        ]).to_list(400)
+
+        # Fill missing days with 0
+        days_count = max(1, min(days, 365))
+        series_map = {d["date"]: d for d in daily_agg}
+        daily_series = []
+        for i in range(days_count - 1, -1, -1):
+            d = (now - timedelta(days=i)).strftime("%Y-%m-%d")
+            if d in series_map:
+                daily_series.append({
+                    "date": d,
+                    "views": series_map[d]["views"],
+                    "unique_visitors": series_map[d]["unique_visitors"],
+                })
+            else:
+                daily_series.append({"date": d, "views": 0, "unique_visitors": 0})
+
+        # Live visitors (last 5 minutes)
+        five_min_ago = now - timedelta(minutes=5)
+        live_agg = await db.site_pageviews.aggregate([
+            {"$match": {**base, "timestamp": {"$gte": five_min_ago}}},
+            {"$group": {"_id": "$visitor_id"}},
+            {"$count": "n"},
+        ]).to_list(1)
+        live_visitors = live_agg[0]["n"] if live_agg else 0
+
+        return {
+            "totals": {
+                "all_time_views": total_views,
+                "views_today": views_today,
+                "views_7d": views_7d,
+                "views_30d": views_30d,
+                "unique_today": unique_today,
+                "unique_7d": unique_7d,
+                "unique_30d": unique_30d,
+                "unique_all_time": unique_all,
+                "sessions_30d": sessions_30d_count,
+                "live_visitors": live_visitors,
+            },
+            "top_pages": top_pages_agg,
+            "top_referrers": top_referrers,
+            "device_breakdown": device_breakdown,
+            "daily_series": daily_series,
+            "days": days_count,
+        }
+    except Exception as e:
+        logging.error(f"Error fetching site traffic: {e}")
+        import traceback
+        logging.error(traceback.format_exc())
+        raise HTTPException(status_code=500, detail=f"Failed to fetch traffic stats: {str(e)}")
+
+
 @api_router.get("/admin/teachers")
 async def get_all_teachers(request: Request):
     """Get all teachers with stats (admin only)"""
@@ -12478,11 +12727,23 @@ _cors_kwargs = {
 }
 if _cors_origins_env.strip() == "*":
     # When credentials are sent, wildcard "*" is invalid per CORS spec.
-    # Use a regex matching any origin so credentialed requests succeed from any domain
-    # (bytebattles.org, www.bytebattles.org, emergent.host preview, localhost dev, etc.).
+    # Use a regex matching any origin so credentialed requests succeed from any domain.
     _cors_kwargs["allow_origin_regex"] = ".*"
 else:
-    _cors_kwargs["allow_origins"] = [o.strip() for o in _cors_origins_env.split(',') if o.strip()]
+    # Build the explicit list AND auto-expand www/non-www variants so a user listing
+    # one variant doesn't accidentally block the other.
+    raw = [o.strip() for o in _cors_origins_env.split(',') if o.strip()]
+    expanded = set(raw)
+    for o in raw:
+        # Add www. and non-www. counterparts automatically
+        if "://www." in o:
+            expanded.add(o.replace("://www.", "://"))
+        elif "://" in o:
+            scheme, rest = o.split("://", 1)
+            expanded.add(f"{scheme}://www.{rest}")
+    _cors_kwargs["allow_origins"] = sorted(expanded)
+    # Belt-and-suspenders: also allow any *.bytebattles.org and localhost via regex
+    _cors_kwargs["allow_origin_regex"] = r"https?://(.*\.)?bytebattles\.org|https?://localhost(:\d+)?"
 
 app.add_middleware(CORSMiddleware, **_cors_kwargs)
 

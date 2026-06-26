@@ -63,9 +63,20 @@ import LessonPageTemplate from "./pages/LessonPageTemplate";
 import LessonPage from "./pages/LessonPage";
 import AdminLessonManager from "./pages/AdminLessonManager";
 import StudentCurriculum from "./pages/StudentCurriculum";
+import { trackPageView } from "./utils/siteAnalytics";
 
 const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
 const API = `${BACKEND_URL}/api`;
+
+// Tracks page views on every route change. Anonymous; server-side filters
+// out admin views from the analytics aggregations.
+function PageViewTracker() {
+  const location = useLocation();
+  useEffect(() => {
+    trackPageView(location.pathname);
+  }, [location.pathname]);
+  return null;
+}
 
 // Set up axios interceptor to always include the session token
 axios.interceptors.request.use((config) => {
@@ -214,6 +225,7 @@ function App() {
     <div className="App">
       <Toaster position="top-right" richColors />
       <BrowserRouter>
+        <PageViewTracker />
         <AuthHandler>
           {({ user, setUser, refreshUser }) => (
             <Routes>

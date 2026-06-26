@@ -228,9 +228,10 @@ export default function AdminDashboard({ user }) {
             <CardContent>
               <div className="space-y-3">
                 <p className="text-sm text-slate-300">
-                  Track teacher engagement, login frequency, and get email lists for communication.
+                  Track site traffic (views, visitors, referrers) and teacher engagement with login analytics.
                 </p>
                 <Button
+                  data-testid="admin-view-analytics-btn"
                   onClick={() => navigate("/admin/analytics")}
                   className="bg-purple-600 hover:bg-purple-700 gap-2 w-full"
                 >

@@ -251,5 +251,13 @@ A coding education platform for K-12 students featuring multiple programming env
 - Teacher Class Progress widget (Feb 2026):
   - `GET /api/classrooms/{id}/chapter-progress` — returns per-chapter completion stats (students who passed every problem in every lesson) + chapter_test placement + unlock state
   - ClassroomPage Lesson Locks tab now opens with a magenta "Class Progress" widget listing chapters with chapter tests assigned, each row showing a glow-progress bar, X/Y student readiness, and one-click "Unlock for class" / "Lock for class" CTA
+- Site Traffic Analytics (Feb 28, 2026):
+  - New `site_pageviews` collection storing anonymous page views (visitor_id, session_id, path, referrer_source, device_type, ip_hash)
+  - `POST /api/analytics/pageview` — public anonymous tracking; auto-flags admin/teacher views so they can be excluded from stats
+  - `GET /api/admin/analytics/traffic?days=N` — admin-only aggregation: total/unique/sessions, top pages, top referrers (Facebook/Google/Direct/etc.), device breakdown (Mobile/Desktop/Tablet), daily series, live visitor count (last 5min)
+  - Frontend tracker `utils/siteAnalytics.js` + `PageViewTracker` in `App.js` records on every route change; auto-anonymizes IPs (SHA256 hash, no PII)
+  - AdminAnalytics page restructured with Tabs: **Site Traffic** (new) + **Teacher Activity** (existing). Site Traffic shows live visitor count, KPI grid, daily traffic mini-chart, top sources, device breakdown, and top-pages table
+  - Range selector: Last 7d / 30d / 90d
+  - Admin views are excluded from all stats so the dashboard reflects real visitor traffic only
 
 *Last Updated: Feb 28, 2026*
