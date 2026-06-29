@@ -1,0 +1,34 @@
+{
+  "summary": "Backend-only testing of new /api/curriculum/rename-chapter and /api/curriculum/chapter-audit endpoints. Created /app/backend/tests/test_rename_chapter.py with 10 pytest cases covering auth/role guard, validation, simple rename, MERGE-into-existing, and cross-collection side effects (problems, lesson_instructions, curriculum_test_placements, classrooms.unlocked_lessons). All 10 tests passed. Synthetic data (TEST_CHAPTER_FOR_RENAME / TEST_CHAPTER_RENAMED / TEST_CHAPTER_MERGE_TARGET, TEST_ users, TEST classroom) seeded directly into Mongo and fully cleaned up in teardown — production turtle curriculum data was never mutated.",
+  "backend_issues": {
+    "critical": [],
+    "minor": []
+  },
+  "frontend_issues": {
+    "ui_bugs": [],
+    "integration_issues": [],
+    "design_issues": []
+  },
+  "test_report_links": [
+    "/app/backend/tests/test_rename_chapter.py",
+    "/app/test_reports/pytest/rename_chapter_results.xml"
+  ],
+  "action_items": [],
+  "critical_code_review_comments": [
+    "rename_chapter endpoint correctly handles all four collections (problems, lesson_instructions, curriculum_test_placements, classrooms.unlocked_lessons) and properly detects merge vs simple-rename based on target chapter document count.",
+    "chapter-audit endpoint uses a clean aggregation pipeline with proper $group and returns the documented shape.",
+    "Minor: rename-chapter does not strip the old_name field (only new_name is stripped). Whitespace in old_name could theoretically prevent a match. Low priority since chapter names are read from the DB before being sent back.",
+    "Minor: chapter-audit returns up to 500 rows (to_list(500)). If the dataset ever exceeds 500 unique chapter rows, results will silently truncate. Consider pagination or a higher cap.",
+    "server.py is 15924 lines — well above the recommended 700-line threshold. Refactoring into routers is overdue but out of scope for this fix."
+  ],
+  "updated_files": [
+    "/app/backend/tests/test_rename_chapter.py (new)"
+  ],
+  "success_rate": {"backend": "100%", "frontend": "not tested (per request)"},
+  "test_credentials": "Admin: astapp@spanola.net / AlisaFaith$14 (POST /api/auth/teacher-login) — confirmed working, is_admin=true.",
+  "seed_data_creation": "All seed data created directly in Mongo with TEST_ prefix and torn down in fixtures. Post-run verification: 0 documents remain in problems/lesson_instructions/curriculum_test_placements/users/classrooms matching test sentinels.",
+  "retest_needed": false,
+  "main_agent_can_self_test": true,
+  "context_for_next_testing_agent": "Backend rename-chapter + chapter-audit are working end-to-end. Test file at /app/backend/tests/test_rename_chapter.py uses pymongo directly to seed/cleanup, so it is fully self-contained and idempotent. Reuse it as regression coverage. Frontend Rename button on /admin/lesson-manager was NOT tested (testing_type=backend only) — main agent can self-verify if needed.",
+  "rca of the issue": "Original bug: problems had two spellings of 'Chapter 3' which left the curriculum page and problem library out of sync. Fix verified: POST /api/curriculum/rename-chapter atomically updates problems.chapter, lesson_instructions.chapter, curriculum_test_placements.chapter, and classroom unlocked_lessons keys. MERGE path correctly funnels old chapter's problems into existing target. After rename, /api/curriculum/lesson-problems resolves under the new chapter and returns 404 under the old name, confirming the data-sync issue is resolved."
+}

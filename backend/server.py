@@ -2567,6 +2567,111 @@ async def rename_lesson(request: Request):
     
     return {"success": True, "message": f"Renamed lesson to '{new_name}'", "problems_updated": result.modified_count}
 
+@api_router.post("/curriculum/rename-chapter")
+async def rename_chapter(request: Request):
+    """Rename (or merge into another) a chapter across all collections.
+
+    Updates: problems.chapter, lesson_instructions.chapter,
+    curriculum_test_placements.chapter, classrooms.unlocked_lessons keys.
+
+    If the target chapter name already exists in problems, this acts as a MERGE
+    (everything previously under old_name moves to new_name, deduping nothing).
+    """
+    user = await get_current_user(request)
+    if user["role"] != "teacher" or not user.get("is_admin"):
+        raise HTTPException(status_code=403, detail="Only admins can rename chapters")
+
+    body = await request.json()
+    assignment_type = body.get("assignment_type")
+    old_name = body.get("old_name")
+    new_name = body.get("new_name", "").strip()
+
+    if not all([assignment_type, old_name, new_name]):
+        raise HTTPException(status_code=400, detail="assignment_type, old_name, and new_name are required")
+    if old_name == new_name:
+        raise HTTPException(status_code=400, detail="Old and new names are identical")
+
+    # Detect merge vs. simple rename
+    target_exists = await db.problems.count_documents({"assignment_type": assignment_type, "chapter": new_name})
+    is_merge = target_exists > 0
+
+    # 1. Problems
+    problems_res = await db.problems.update_many(
+        {"assignment_type": assignment_type, "chapter": old_name},
+        {"$set": {"chapter": new_name}},
+    )
+
+    # 2. Lesson instructions
+    instructions_res = await db.lesson_instructions.update_many(
+        {"assignment_type": assignment_type, "chapter": old_name},
+        {"$set": {"chapter": new_name}},
+    )
+
+    # 3. Curriculum test placements
+    placements_res = await db.curriculum_test_placements.update_many(
+        {"assignment_type": assignment_type, "chapter": old_name},
+        {"$set": {"chapter": new_name}},
+    )
+
+    # 4. Classroom unlocked_lessons keys "assignment_type|chapter|lesson"
+    old_prefix = f"{assignment_type}|{old_name}|"
+    new_prefix = f"{assignment_type}|{new_name}|"
+    classrooms_updated = 0
+    async for c in db.classrooms.find({"unlocked_lessons": {"$regex": f"^{re.escape(old_prefix)}"}}, {"id": 1, "unlocked_lessons": 1}):
+        new_keys = [k.replace(old_prefix, new_prefix, 1) if k.startswith(old_prefix) else k for k in c.get("unlocked_lessons", [])]
+        await db.classrooms.update_one({"id": c["id"]}, {"$set": {"unlocked_lessons": new_keys}})
+        classrooms_updated += 1
+
+    msg = (
+        f"Merged '{old_name}' into '{new_name}'"
+        if is_merge
+        else f"Renamed chapter to '{new_name}'"
+    )
+
+    return {
+        "success": True,
+        "message": msg,
+        "merged": is_merge,
+        "problems_updated": problems_res.modified_count,
+        "instructions_updated": instructions_res.modified_count,
+        "placements_updated": placements_res.modified_count,
+        "classrooms_updated": classrooms_updated,
+    }
+
+@api_router.get("/curriculum/chapter-audit")
+async def chapter_audit(request: Request, assignment_type: Optional[str] = None):
+    """List every distinct chapter name in use, with problem counts.
+    Used to spot duplicates/typos like 'Chapter 3: Colors' vs 'Chapter 3: Colors & Style'.
+    Admin only.
+    """
+    user = await get_current_user(request)
+    if user["role"] != "teacher" or not user.get("is_admin"):
+        raise HTTPException(status_code=403, detail="Only admins can audit chapters")
+
+    match = {}
+    if assignment_type:
+        match["assignment_type"] = assignment_type
+
+    pipeline = [
+        {"$match": match} if match else {"$match": {}},
+        {"$group": {
+            "_id": {"assignment_type": "$assignment_type", "chapter": "$chapter"},
+            "problem_count": {"$sum": 1},
+            "lessons": {"$addToSet": "$lesson"},
+        }},
+        {"$sort": {"_id.assignment_type": 1, "_id.chapter": 1}},
+    ]
+    rows = await db.problems.aggregate(pipeline).to_list(500)
+    return [
+        {
+            "assignment_type": r["_id"].get("assignment_type") or "",
+            "chapter": r["_id"].get("chapter") or "",
+            "problem_count": r["problem_count"],
+            "lesson_count": len([le for le in r.get("lessons", []) if le]),
+        }
+        for r in rows
+    ]
+
 @api_router.post("/curriculum/add-lesson")
 async def add_lesson(request: Request):
     """Add a new empty lesson to a chapter"""

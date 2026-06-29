@@ -234,6 +234,40 @@ export default function AdminLessonManager({ user }) {
     }
   };
 
+  const handleRenameChapter = async (assignmentType, oldName) => {
+    const proposed = window.prompt(
+      `Rename or merge chapter "${oldName}".\n\n` +
+      `Enter the NEW chapter name. If a chapter with that exact name already exists, the two will be MERGED (all problems, lessons, instructions, and chapter tests will move under the new name).\n\n` +
+      `Tip: copy/paste an existing chapter name to merge them.`,
+      oldName
+    );
+    if (proposed === null) return; // cancelled
+    const newName = proposed.trim();
+    if (!newName || newName === oldName) return;
+
+    if (!window.confirm(
+      `Rename "${oldName}" → "${newName}"?\n\n` +
+      `This will update every problem, lesson instruction, and chapter test currently under "${oldName}". ` +
+      `Cannot be undone (but you can rename it back).`
+    )) return;
+
+    try {
+      const res = await axios.post(`${API}/curriculum/rename-chapter`, {
+        assignment_type: assignmentType, old_name: oldName, new_name: newName,
+      }, { withCredentials: true });
+      const d = res.data || {};
+      toast.success(
+        d.merged
+          ? `Merged "${oldName}" into "${newName}" (${d.problems_updated} problems moved)`
+          : `Renamed to "${newName}" (${d.problems_updated} problems updated)`
+      );
+      fetchUnits();
+    } catch (error) {
+      console.error("Error renaming chapter:", error);
+      toast.error(error.response?.data?.detail || "Failed to rename chapter");
+    }
+  };
+
   const handleAddLesson = async (assignmentType, chapter) => {
     if (!newLessonName.trim()) return;
     try {
@@ -349,21 +383,34 @@ export default function AdminLessonManager({ user }) {
                   return (
                   <div key={chapter.name} className="border border-cyber-cyan/20 rounded-none">
                     {/* Chapter Header */}
-                    <button
-                      onClick={() => { toggleChapter(chapter.name); fetchChapterPlacements(currentUnit.assignment_type, chapter.name); }}
-                      className="w-full flex items-center justify-between p-4 bg-cyber-navy/60 hover:bg-cyber-navy/80 transition-colors"
-                    >
-                      <div className="flex items-center gap-2">
-                        {expandedChapters.has(chapter.name) ? <ChevronDown className="w-4 h-4 text-cyber-cyan" /> : <ChevronRight className="w-4 h-4 text-slate-500" />}
-                        <span className="font-orbitron text-sm text-white uppercase tracking-wider">{chapter.name}</span>
-                        <span
-                          data-testid={`chapter-health-${chapter.name}`}
-                          title={chapterHasOrphans ? "Chapter has orphan problems — click to expand and clean up" : "All clean"}
-                          className={`w-2 h-2 rounded-full shrink-0 ml-1 ${chapterHasOrphans ? "bg-amber-400 shadow-[0_0_6px_rgba(251,191,36,0.7)] animate-pulse" : "bg-green-500 shadow-[0_0_6px_rgba(34,197,94,0.5)]"}`}
-                        />
-                      </div>
-                      <span className="text-xs text-slate-500 font-chakra">{chapter.problem_count} problems / {chapter.lessons.length} lessons</span>
-                    </button>
+                    <div className="flex items-center bg-cyber-navy/60 hover:bg-cyber-navy/80 transition-colors">
+                      <button
+                        onClick={() => { toggleChapter(chapter.name); fetchChapterPlacements(currentUnit.assignment_type, chapter.name); }}
+                        className="flex-1 flex items-center justify-between p-4 text-left"
+                      >
+                        <div className="flex items-center gap-2">
+                          {expandedChapters.has(chapter.name) ? <ChevronDown className="w-4 h-4 text-cyber-cyan" /> : <ChevronRight className="w-4 h-4 text-slate-500" />}
+                          <span className="font-orbitron text-sm text-white uppercase tracking-wider">{chapter.name}</span>
+                          <span
+                            data-testid={`chapter-health-${chapter.name}`}
+                            title={chapterHasOrphans ? "Chapter has orphan problems — click to expand and clean up" : "All clean"}
+                            className={`w-2 h-2 rounded-full shrink-0 ml-1 ${chapterHasOrphans ? "bg-amber-400 shadow-[0_0_6px_rgba(251,191,36,0.7)] animate-pulse" : "bg-green-500 shadow-[0_0_6px_rgba(34,197,94,0.5)]"}`}
+                          />
+                        </div>
+                        <span className="text-xs text-slate-500 font-chakra">{chapter.problem_count} problems / {chapter.lessons.length} lessons</span>
+                      </button>
+                      <Button
+                        data-testid={`rename-chapter-${currentUnit.assignment_type}-${chapter.name}`}
+                        size="sm"
+                        variant="ghost"
+                        onClick={(e) => { e.stopPropagation(); handleRenameChapter(currentUnit.assignment_type, chapter.name); }}
+                        className="mr-3 text-cyber-cyan/70 hover:text-cyber-cyan hover:bg-cyber-cyan/10 font-orbitron text-[10px] uppercase tracking-widest rounded-none h-7 px-2 gap-1"
+                        title="Rename or merge this chapter"
+                      >
+                        <Pencil className="w-3.5 h-3.5" />
+                        Rename
+                      </Button>
+                    </div>
 
                     {/* Lessons */}
                     {expandedChapters.has(chapter.name) && (
