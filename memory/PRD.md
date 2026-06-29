@@ -251,8 +251,6 @@ A coding education platform for K-12 students featuring multiple programming env
 - Teacher Class Progress widget (Feb 2026):
   - `GET /api/classrooms/{id}/chapter-progress` — returns per-chapter completion stats (students who passed every problem in every lesson) + chapter_test placement + unlock state
   - ClassroomPage Lesson Locks tab now opens with a magenta "Class Progress" widget listing chapters with chapter tests assigned, each row showing a glow-progress bar, X/Y student readiness, and one-click "Unlock for class" / "Lock for class" CTA
-- **BACKLOG**: UTM campaign tracking — capture `?utm_source=` / `?utm_campaign=` query params on landing, store on the pageview doc, and add a "Top Campaigns" panel + link-builder helper so Alisa can see which Facebook post / email drove each visit. (Deferred Feb 28, 2026 — user wants to hold off.)
-
 - Site Traffic Analytics (Feb 28, 2026):
   - New `site_pageviews` collection storing anonymous page views (visitor_id, session_id, path, referrer_source, device_type, ip_hash)
   - `POST /api/analytics/pageview` — public anonymous tracking; auto-flags admin/teacher views so they can be excluded from stats
@@ -263,4 +261,12 @@ A coding education platform for K-12 students featuring multiple programming env
   - Range selector: Last 7d / 30d / 90d
   - Admin views are excluded from all stats so the dashboard reflects real visitor traffic only
 
-*Last Updated: Feb 28, 2026*
+- Rename / Merge Chapter (Feb 29, 2026 — production bug fix):
+  - Root cause: there was previously only a `rename-lesson` endpoint, no rename-chapter. When a user edited a chapter name on individual problems, the curriculum page (built from `db.problems.distinct("chapter", ...)`) ended up showing two separate chapters for what was meant to be one (e.g. "Chapter 3: Colors" + "Chapter 3: Colors & Style"), so newly created problems with one spelling did not appear under the lesson page rendering the other spelling.
+  - `POST /api/curriculum/rename-chapter` — admin-only; updates `problems.chapter`, `lesson_instructions.chapter`, `curriculum_test_placements.chapter`, and `classrooms.unlocked_lessons` keys. If `new_name` already exists in problems, acts as a MERGE.
+  - `GET /api/curriculum/chapter-audit?assignment_type=...` — admin-only diagnostic listing every distinct chapter name with problem/lesson counts (lets admins spot typos/duplicates).
+  - Frontend: new "Rename" button (Pencil icon) on each chapter header row in `AdminLessonManager.jsx`. Opens a browser prompt → confirm dialog → calls the API → refreshes the units list. Toast indicates "Renamed" or "Merged" based on response.
+  - **Backend tests**: 10 pytest cases at `/app/backend/tests/test_rename_chapter.py` covering auth, validation, simple rename, merge-into-existing, and cross-collection side effects. All passing.
+  - **Action required from user**: redeploy + use the new "Rename" button on `/admin/lesson-manager` to merge `Chapter 3: Colors & Style` into `Chapter 3: Colors` (or vice versa).
+
+*Last Updated: Feb 29, 2026*
