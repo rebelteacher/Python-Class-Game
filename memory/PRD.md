@@ -311,4 +311,10 @@ A coding education platform for K-12 students featuring multiple programming env
   - **Verified by testing_agent (iteration_19)**: primary bug fixed (octagon now PURPLE); legitimate `t.color('red')` still sets both pen+fill; pure `t.fillcolor('blue')` still works.
   - **Secondary issue surfaced**: `t.color('red')` + `begin_fill()` outlines red but the fill renders dark — likely a separate pre-existing bug in how the color() command propagates fillColor to the begin_fill path. NOT a regression of this fix; flagged for future investigation.
 
+- Backend turtle color() bug fix (Feb 29, 2026 — iteration_20):
+  - Root cause: `TurtleSim.color()` in `/app/backend/turtle_sim.py` only set pen color when given a single argument, leaving `fill_color` at the default `'black'`. Real CPython turtle's `color('x')` sets BOTH pen and fill when given one argument.
+  - Fix: `TurtleSim.color()` now correctly sets both pen+fill for the 1-arg string/tuple form, both for 3-arg RGB, and separate values for 2-arg and 6-arg forms — matching CPython semantics.
+  - **Verified by testing_agent (iteration_20)**: 4/4 frontend scenarios passing 100% via pixel-sampling the rendered PNG. Includes regression test of iteration_19 purple-octagon (still works).
+  - Minor follow-up flagged: 0-arg `color()` (which in CPython acts as a getter returning `(pen, fill)`) silently no-ops in our sim. Low priority unless a lesson uses it.
+
 *Last Updated: Feb 29, 2026*
