@@ -7135,6 +7135,279 @@ async def get_invite_codes(request: Request):
         logging.error(f"Traceback: {traceback.format_exc()}")
         raise HTTPException(status_code=500, detail=f"Internal server error: {str(e)}")
 
+# ===================== HELP / FAQ =====================
+
+HELP_FAQ_ENTRIES = [
+    # ---- LESSON LOCKS / UNLOCK ----
+    {
+        "id": "lock-lessons",
+        "audience": ["teacher", "admin"],
+        "category": "Classrooms",
+        "question": "Where do I lock or unlock lessons for my class?",
+        "answer": (
+            "Open the classroom you want to manage (Teacher Dashboard → click a classroom). "
+            "Click the **Lesson Locks** tab. Each lesson has a Lock/Unlock toggle, and chapters with "
+            "chapter tests have their own unlock controls. Locks are per-classroom, so one class can "
+            "be on a different lesson than another."
+        ),
+        "link": "/teacher/dashboard",
+        "link_label": "Open my classrooms",
+    },
+    {
+        "id": "chapter-test-unlock",
+        "audience": ["teacher", "admin"],
+        "category": "Classrooms",
+        "question": "How do I unlock a chapter test for students?",
+        "answer": (
+            "Inside a classroom → **Lesson Locks** tab. You'll see a magenta **Class Progress** "
+            "widget at the top listing chapters with chapter tests assigned. Each row shows how many "
+            "students have finished every problem in the chapter, plus a one-click **Unlock for class** "
+            "button. You can also lock it again any time."
+        ),
+        "link": "/teacher/dashboard",
+        "link_label": "Open my classrooms",
+    },
+
+    # ---- CLASSROOMS ----
+    {
+        "id": "create-classroom",
+        "audience": ["teacher", "admin"],
+        "category": "Classrooms",
+        "question": "How do I create a classroom and invite students?",
+        "answer": (
+            "From the Teacher Dashboard click **+ Create Classroom**, give it a name (e.g. '8th Grade "
+            "Coding') and save. The classroom gets a unique **join code** you share with students. "
+            "Students sign up at the landing page, enter the code, and they appear in your roster."
+        ),
+        "link": "/teacher/dashboard",
+        "link_label": "Teacher Dashboard",
+    },
+    {
+        "id": "see-student-progress",
+        "audience": ["teacher", "admin"],
+        "category": "Classrooms",
+        "question": "How do I see how my students are doing?",
+        "answer": (
+            "Two views: (1) Open the classroom → **Lesson Locks** tab shows per-chapter completion "
+            "and a progress bar for the whole class. (2) Click **Teacher Reports** in the nav to drill "
+            "into individual student submissions, code attempts, and scores."
+        ),
+        "link": "/teacher-reports",
+        "link_label": "Open Teacher Reports",
+    },
+
+    # ---- TESTS ----
+    {
+        "id": "assign-test",
+        "audience": ["teacher", "admin"],
+        "category": "Tests",
+        "question": "How do I assign a test to my class?",
+        "answer": (
+            "Open a classroom → **Tests** tab → **Assign Test** button. Search the Admin Test Library, "
+            "pick a test, choose when it becomes available and when it's due, set late penalty rules, "
+            "and click Assign. You can assign one test to multiple classrooms at once from the bulk dialog."
+        ),
+        "link": "/teacher/dashboard",
+        "link_label": "Go to my classrooms",
+    },
+    {
+        "id": "release-results",
+        "audience": ["teacher", "admin"],
+        "category": "Tests",
+        "question": "How do I release test results to students?",
+        "answer": (
+            "Click **Test Reports** in the nav, find the test, and use the **Release Results** toggle "
+            "on each student's row (or release the whole class at once). If you enabled 'auto-release "
+            "results' when you assigned the test, this happens automatically when the due date passes."
+        ),
+        "link": "/test-reports",
+        "link_label": "Open Test Reports",
+    },
+
+    # ---- LIBRARY / ASSIGNMENTS ----
+    {
+        "id": "library-vs-curriculum",
+        "audience": ["teacher", "admin"],
+        "category": "Library",
+        "question": "What's the difference between the Library and the Curriculum page?",
+        "answer": (
+            "**The Library** shows every problem in your account (yours + system seeds), grouped by "
+            "chapter and lesson, so you can edit, move, or delete them. **The Curriculum / Lesson page** "
+            "is the student-facing view — it walks through the same problems one at a time as a guided "
+            "lesson. New problems you add in the Library appear in the Curriculum automatically as long "
+            "as their chapter + lesson names match exactly."
+        ),
+        "link": "/library",
+        "link_label": "Open Library",
+    },
+    {
+        "id": "duplicate-chapter",
+        "audience": ["teacher", "admin"],
+        "category": "Library",
+        "question": "Two of my chapters have similar names and look duplicated. How do I merge them?",
+        "answer": (
+            "Go to **Admin → Lesson Manager**, expand the affected unit. Each chapter row has a "
+            "**Rename** button (pencil icon). Click it on the chapter you want to retire, then type the "
+            "EXACT name of the chapter you want to keep. The system detects the match and merges them "
+            "automatically — all problems, lesson instructions, and chapter tests move under the kept name."
+        ),
+        "link": "/admin/lesson-manager",
+        "link_label": "Open Lesson Manager",
+    },
+
+    # ---- ANALYTICS ----
+    {
+        "id": "site-analytics",
+        "audience": ["admin"],
+        "category": "Analytics",
+        "question": "How can I see who is visiting bytebattles.org?",
+        "answer": (
+            "Admin Dashboard → **View Analytics** → **Site Traffic** tab. You'll see live visitors, "
+            "page views (today / 7d / 30d), unique visitors, where they came from (Facebook, Google, "
+            "Direct, etc.), device breakdown, top pages, and a new-vs-returning breakdown with return "
+            "rate. Use the **Ignore my browser** banner so your own visits don't skew the stats."
+        ),
+        "link": "/admin/analytics",
+        "link_label": "Open Analytics",
+    },
+
+    # ---- ADMIN ----
+    {
+        "id": "reset-password",
+        "audience": ["admin"],
+        "category": "Admin",
+        "question": "A teacher forgot their password. How do I reset it?",
+        "answer": (
+            "Admin Dashboard → **Password Reset** (or visit /admin/password-reset). Enter the teacher's "
+            "email and the new password you want to set. They can log in with that password immediately, "
+            "and should change it after."
+        ),
+        "link": "/admin/password-reset",
+        "link_label": "Open Password Reset",
+    },
+    {
+        "id": "announcements",
+        "audience": ["teacher", "admin"],
+        "category": "Admin",
+        "question": "How do I post an announcement?",
+        "answer": (
+            "Admin Dashboard → **Announcements**. Write your message, target it to All Users / Teachers "
+            "only / Students only, and publish. It will appear in the in-app banner the next time targeted "
+            "users load the dashboard."
+        ),
+        "link": "/admin/announcements",
+        "link_label": "Open Announcements",
+    },
+
+    # ---- TURTLE / EDITORS ----
+    {
+        "id": "turtle-stamp",
+        "audience": ["teacher", "admin"],
+        "category": "Editors",
+        "question": "Does the turtle editor support stamp() and say()?",
+        "answer": (
+            "Yes. `t.stamp()` leaves a copy of the turtle at its current position; `t.clearstamps()` "
+            "removes them. `say(text, seconds)` shows a speech bubble that disappears after the given "
+            "number of seconds. Both work in the live editor and in graded problems."
+        ),
+    },
+
+    # ---- GENERAL ----
+    {
+        "id": "first-time-onboarding",
+        "audience": ["teacher", "admin"],
+        "category": "Getting Started",
+        "question": "I'm brand new — where do I start?",
+        "answer": (
+            "1) Create a classroom from the Teacher Dashboard and share the join code with students. "
+            "2) In **Lesson Locks**, unlock Lesson 1 of the unit you're starting with. 3) Use **Teacher "
+            "Reports** to monitor progress. 4) When students finish a chapter, head back to Lesson Locks "
+            "and unlock the chapter test from the Class Progress widget. That's a complete loop."
+        ),
+        "link": "/teacher/dashboard",
+        "link_label": "Go to Teacher Dashboard",
+    },
+]
+
+@api_router.get("/help/faq")
+async def get_help_faq(request: Request, audience: str = "teacher"):
+    """Return curated Q&A entries for the requested audience.
+    audience: 'teacher' (default), 'admin', or 'student' (reserved for future).
+    """
+    user = await get_current_user(request)
+    role = user.get("role")
+    is_admin = bool(user.get("is_admin"))
+
+    # Normalize requested audience based on caller role
+    if audience == "admin" and not is_admin:
+        audience = "teacher"
+    if audience == "student" and role != "student" and not is_admin:
+        raise HTTPException(status_code=403, detail="Forbidden")
+
+    entries = [e for e in HELP_FAQ_ENTRIES if audience in e.get("audience", [])]
+    # Group categories for nicer rendering on the client
+    categories = []
+    seen = set()
+    for e in entries:
+        if e["category"] not in seen:
+            seen.add(e["category"])
+            categories.append(e["category"])
+
+    return {"entries": entries, "categories": categories, "audience": audience}
+
+@api_router.post("/help/ask")
+async def ask_help_ai(request: Request):
+    """Ask the AI help assistant a free-form question.
+    Restricted to teachers/admins. Uses Emergent LLM key. Cheap model (gpt-4o-mini).
+    """
+    user = await get_current_user(request)
+    role = user.get("role")
+    is_admin = bool(user.get("is_admin"))
+    if role != "teacher" and not is_admin:
+        raise HTTPException(status_code=403, detail="Help AI is only available to teachers and admins for now")
+
+    body = await request.json()
+    question = (body.get("question") or "").strip()
+    if not question:
+        raise HTTPException(status_code=400, detail="Question is required")
+    if len(question) > 1000:
+        raise HTTPException(status_code=400, detail="Question is too long (1000 char max)")
+
+    llm_key = os.environ.get("EMERGENT_LLM_KEY")
+    if not llm_key:
+        raise HTTPException(status_code=503, detail="Help AI is not configured")
+
+    # Build a context-aware system prompt with the FAQ baked in so Claude/GPT
+    # gives accurate answers about THIS product, not a generic LMS.
+    audience_label = "admin" if is_admin else "teacher"
+    faq_context = "\n\n".join(
+        f"Q: {e['question']}\nA: {e['answer']}"
+        + (f"\nDirect link: {e['link']}" if e.get("link") else "")
+        for e in HELP_FAQ_ENTRIES
+        if audience_label in e.get("audience", []) or "teacher" in e.get("audience", [])
+    )
+    system_message = (
+        "You are the in-app help assistant for ByteBattles, a coding-education platform for K-12 "
+        "students. The user asking is a TEACHER or ADMIN. Be concise (3-6 sentences), warm, "
+        "specific, and tell them exactly where to click. When possible, end with a 'Try: /path/here' "
+        "suggestion so the UI can render a deep link. If the question is outside the product's scope, "
+        "say so briefly and suggest they email support.\n\n"
+        "PRODUCT KNOWLEDGE BASE (use this as your source of truth):\n" + faq_context
+    )
+
+    try:
+        chat = LlmChat(
+            api_key=llm_key,
+            session_id=f"help_{user['id']}",
+            system_message=system_message,
+        ).with_model("openai", "gpt-4o-mini")
+        response = await chat.send_message(UserMessage(text=question))
+        return {"answer": response, "model": "gpt-4o-mini"}
+    except Exception as e:
+        logging.error(f"Help AI error: {e}")
+        raise HTTPException(status_code=500, detail="Help AI is temporarily unavailable. Please try again in a moment.")
+
+
 @api_router.get("/admin/stats")
 async def get_admin_stats(request: Request):
     """Get platform statistics (admin only)"""
@@ -7147,7 +7420,6 @@ async def get_admin_stats(request: Request):
         # Count users
         total_teachers = await db.users.count_documents({"role": "teacher"})
         total_students = await db.users.count_documents({"role": "student"})
-        
         # Count classrooms
         total_classrooms = await db.classrooms.count_documents({})
         

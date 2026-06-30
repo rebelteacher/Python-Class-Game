@@ -64,6 +64,7 @@ import LessonPage from "./pages/LessonPage";
 import AdminLessonManager from "./pages/AdminLessonManager";
 import StudentCurriculum from "./pages/StudentCurriculum";
 import { trackPageView } from "./utils/siteAnalytics";
+import HelpButton from "./components/HelpButton";
 
 const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
 const API = `${BACKEND_URL}/api`;
@@ -228,7 +229,9 @@ function App() {
         <PageViewTracker />
         <AuthHandler>
           {({ user, setUser, refreshUser }) => (
-            <Routes>
+            <>
+              <HelpButton user={user} />
+              <Routes>
               <Route path="/" element={user ? <Navigate to={getDashboardRoute(user.role)} replace /> : <LandingPage />} />
               
               <Route
@@ -706,6 +709,7 @@ function App() {
               />
 
             </Routes>
+            </>
           )}
         </AuthHandler>
       </BrowserRouter>

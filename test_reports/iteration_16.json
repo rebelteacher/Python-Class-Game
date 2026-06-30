@@ -1,0 +1,39 @@
+{
+  "summary": "Backend testing of new Help system endpoints (GET /api/help/faq and POST /api/help/ask). Created pytest suite covering audience gating, role downgrade, validation, AI fallback, and unauthenticated/forbidden paths. All 12 tests passed.",
+  "backend_issues": {
+    "critical": [],
+    "minor": [
+      {
+        "endpoint": "GET /api/help/faq",
+        "issue": "When a student calls /api/help/faq (default audience=teacher), the endpoint returns 200 with teacher entries instead of 401/403. No admin-only entries leak, but the role-gating intent is ambiguous: only audience='student' is explicitly blocked. Students currently can read all 'teacher'-audience FAQ content. Confirmed by the request spec that 'students should NOT see the button yet' — server-side enforcement is missing. Consider rejecting student callers entirely until the student experience ships."
+      }
+    ]
+  },
+  "frontend_issues": {
+    "ui_bugs": [],
+    "integration_issues": [],
+    "design_issues": []
+  },
+  "test_report_links": [
+    "/app/backend/tests/test_help_system.py",
+    "/app/test_reports/pytest/help_system_results.xml"
+  ],
+  "action_items": [
+    "OPTIONAL: Add explicit 403 for student callers on /api/help/faq and /api/help/ask to match the 'students should not see it yet' intent, so client compromise can't still pull teacher FAQ data."
+  ],
+  "critical_code_review_comments": [
+    "server.py:7344 — Role gate only triggers when audience=='student'. Students requesting audience=teacher (or omitting it) are silently allowed. If the policy is 'no Help for students yet', tighten the gate to: `if role == 'student' and not is_admin: raise 403`.",
+    "server.py:7387 — When the caller is admin, faq_context still adds entries whose audience contains 'teacher' OR 'admin'. That's fine for context, but note prompt size grows with each FAQ; it's currently small (13 entries) so OK.",
+    "server.py:7407 — Generic 500 returned on any LlmChat exception. Consider distinguishing upstream rate limits / timeouts so the client can show a different message. Low priority."
+  ],
+  "updated_files": [
+    "/app/backend/tests/test_help_system.py (new)"
+  ],
+  "success_rate": {"backend": "100%", "frontend": "n/a (skipped per request)"},
+  "test_credentials": "Admin: astapp@spanola.net / AlisaFaith$14 (used POST /api/auth/teacher-login). Student & extra-teacher accounts were seeded directly in MongoDB with TEST_ email prefix and cleaned up via fixture teardown.",
+  "seed_data_creation": "Two ephemeral users + sessions inserted into Mongo (one role=student, one role=teacher non-admin) for role-gating tests. Both deleted in fixture teardown. No persistent data remains.",
+  "retest_needed": false,
+  "main_agent_can_self_test": true,
+  "context_for_next_testing_agent": "Help system endpoints live at /api/help/faq and /api/help/ask. HELP_FAQ_ENTRIES (13 items) is hard-coded in server.py around line 7140. Pytest file /app/backend/tests/test_help_system.py covers all scenarios; rerunnable with: cd /app/backend && python -m pytest tests/test_help_system.py -v. Tests rely on REACT_APP_BACKEND_URL env var for the public URL and MONGO_URL/DB_NAME for seed/cleanup. AI test currently sends 'Where do I unlock lessons?' to /help/ask and expects the answer to mention 'lesson lock', 'classroom', or 'unlock' — adjust if the FAQ wording is changed.",
+  "rca of the issue": "N/A — no failing tests."
+}
