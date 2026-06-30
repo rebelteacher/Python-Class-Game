@@ -300,6 +300,7 @@ A coding education platform for K-12 students featuring multiple programming env
   - New `/app/frontend/public/llms.txt` — properly formatted per the llms.txt spec (heading, blockquote summary, sectioned link lists). Tells AI crawlers (ChatGPT, Claude) about the product, curriculum, and contact path.
 
 - SEO P2 remaining work (not yet shipped):
+  - **NEXT UP**: SEO Health panel in Admin Analytics. Show "robots.txt accessible ✓", "sitemap.xml reachable ✓", "canonical tag present ✓", "homepage word count: N", "llms.txt valid ✓" + a "Re-check now" button. Lets Alisa verify changes are live without waiting for Semrush re-audit.
   - Bundle size still ~2.3 MB (Semrush warning #133). Recommended follow-ups: code-splitting heavy admin pages with React.lazy/Suspense, lazy-loading Blockly/CodeMirror only on the pages that need them, enabling gzip/brotli at the CDN (likely already on via Cloudflare — worth verifying with `curl -I -H "Accept-Encoding: gzip"`).
   - Minifying `suppress-overlay.js` (Semrush warning #135) — file is tiny, low ROI; can be done at build time if desired.
 
