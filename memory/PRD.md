@@ -277,4 +277,10 @@ A coding education platform for K-12 students featuring multiple programming env
   - 13 initial Q&A entries covering: lesson lock/unlock, chapter test unlock, classroom creation, student progress, test assignment, result release, library vs curriculum, chapter merge, site analytics, password reset, announcements, turtle editor, first-time onboarding.
   - **Backend tests**: 12 pytest cases at `/app/backend/tests/test_help_system.py` covering audience gating, role downgrade, validation, AI fallback, prompt-injection resilience, and unauth/forbidden paths. All passing.
 
+- Unit 2 Turtle Curriculum sync fix (Feb 29, 2026 — production bug fix):
+  - Root cause: `TurtleCurriculum.jsx` rendered chapter card titles from a hardcoded `TURTLE_CURRICULUM` array with pretty names like "Chapter 3: Colors & Style", "Chapter 1: First Steps with Turtle", "Chapter 4: Conditionals - Making Decisions". The Assignment Library always read live names from the DB ("Chapter 3: Colors", etc.), creating a permanent mismatch where new problems added under the DB names would not appear under the curriculum's hardcoded names.
+  - Fix: replaced the hardcoded rendering with a `displayUnits` `useMemo` that builds chapter cards dynamically from `/api/curriculum/units` (turtle assignment_type), using the **live DB chapter name** and **live DB lesson list** while keeping visual styling (gradient color / icon / weeks badge) keyed by chapter number. "Start Lesson" now navigates with the live DB chapter+lesson names URL-encoded so the lesson loader always resolves.
+  - **Backend regression tests**: 5 pytest cases at `/app/backend/tests/test_turtle_curriculum.py`. All passing. Testing agent verified frontend end-to-end: chapter cards now show 'Chapter 3: Colors' (not 'Chapter 3: Colors & Style'), expanded lessons match the library, Start Lesson reaches populated problem set.
+  - Known follow-up: `PythonCurriculum.jsx` may have a similar pattern (merges DEFAULT static curriculum with custom items) — not exhibiting the bug yet but worth watching when admins start customizing Python chapters.
+
 *Last Updated: Feb 29, 2026*
