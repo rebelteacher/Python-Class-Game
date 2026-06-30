@@ -200,12 +200,30 @@ class TurtleSim:
         self.colors_used.add(color)
     
     def color(self, *args):
-        """Set pen color (and fill color if two args)"""
+        """Set pen and fill colors.
+
+        Matches Python's standard turtle module:
+        - color(colorstring) or color((r,g,b)) → sets BOTH pen color AND fill color
+        - color(c1, c2) → pen color = c1, fill color = c2
+        - color(r, g, b) → sets BOTH pen AND fill to that RGB triple
+        - color(r1, g1, b1, r2, g2, b2) → pen = (r1,g1,b1), fill = (r2,g2,b2)
+        """
         if len(args) == 1:
+            # Single color → both pen and fill
             self.pencolor(args[0])
+            self.fillcolor(args[0])
         elif len(args) == 2:
             self.pencolor(args[0])
             self.fillcolor(args[1])
+        elif len(args) == 3:
+            # color(r, g, b) — single RGB triple, sets both
+            rgb = tuple(args)
+            self.pencolor(rgb)
+            self.fillcolor(rgb)
+        elif len(args) == 6:
+            # color(r1, g1, b1, r2, g2, b2) — pen rgb + fill rgb
+            self.pencolor(tuple(args[0:3]))
+            self.fillcolor(tuple(args[3:6]))
     
     def speed(self, speed: int):
         """Set turtle speed (ignored in simulation)"""
