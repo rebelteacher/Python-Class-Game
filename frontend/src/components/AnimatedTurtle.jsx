@@ -428,7 +428,10 @@ function parseCode(code, parentVars = {}) {
     }
     
     // Parse color() - changes both pen and turtle color (with variable support)
-    match = trimmed.match(new RegExp(`${turtlePrefix}color\\s*\\(\\s*([^,)]+)(?:\\s*,\\s*([^)]+))?\\s*\\)`));
+    // IMPORTANT: anchor with ^ so this does NOT misfire on `pencolor(...)` or `fillcolor(...)`
+    // (which contain the substring `color(...)`). Without ^ the regex matches the substring
+    // and silently overrides the pen+fill colors set by pencolor/fillcolor.
+    match = trimmed.match(new RegExp(`^${turtlePrefix}color\\s*\\(\\s*([^,)]+)(?:\\s*,\\s*([^)]+))?\\s*\\)`));
     if (match) {
       const penColor = getColorValue(match[1]);
       const fillColor = match[2] ? getColorValue(match[2]) : penColor;
