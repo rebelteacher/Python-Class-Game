@@ -284,4 +284,23 @@ A coding education platform for K-12 students featuring multiple programming env
   - Admin-only "🛠 ADMIN · UPDATED X ago" badge added beneath each chapter description on `/turtle-curriculum`. `last_updated` field returned by `/api/curriculum/units` (max of `updated_at` / `created_at` across each chapter's problems). `updated_at` is now stamped on problem edits, moves, lesson renames, and chapter renames. Visible only when `user.is_admin === true`; regular teachers never see it. Verified by logging in as both an admin and a non-admin teacher.
   - Known follow-up: `PythonCurriculum.jsx` may have a similar pattern (merges DEFAULT static curriculum with custom items) — not exhibiting the bug yet but worth watching when admins start customizing Python chapters.
 
+- SEO P0 fixes (Feb 29, 2026):
+  - New `/app/frontend/public/robots.txt` — proper text/plain robots file with crawl rules, blocks auth-gated app routes from indexing, blocks CCBot + ClaudeBot scrapers, references sitemap. (Cloudflare prepends its managed AI-scraper block at the top — both sections are honored by crawlers.)
+  - New `/app/frontend/public/sitemap.xml` — single canonical homepage entry + login/signup pages.
+  - Added `<link rel="canonical" href="https://bytebattles.org/" />` to `index.html`.
+  - Added synchronous inline `<script>` redirect at the top of `<head>` that catches `www.bytebattles.org` visits and rewrites the URL to the non-www version. Client-side only — Google treats this as a soft redirect. For full strength, user should add a Cloudflare Page Rule: `www.bytebattles.org/* → https://bytebattles.org/$1 (301)`.
+
+- SEO P1 fix — landing page content (Feb 29, 2026):
+  - Expanded landing page from ~72 words → **787 words** to clear Google's "low word count" + "low text-to-HTML ratio" warnings.
+  - Added two new long-form sections: **"Why ByteBattles"** (curriculum overview, what students learn, CSTA alignment, DOK levels) and **"Frequently asked"** (6 Q&A entries targeting long-tail SEO: ages, install, standards, homeschool co-ops, grading, free trial).
+  - Added `<noscript>` fallback in `index.html` with full product description + email contact so JS-disabled crawlers still see meaningful content.
+  - All new sections use existing cyberpunk styling (gradients, fonts, neon colors); no design regressions.
+
+- SEO P3 fix (Feb 29, 2026):
+  - New `/app/frontend/public/llms.txt` — properly formatted per the llms.txt spec (heading, blockquote summary, sectioned link lists). Tells AI crawlers (ChatGPT, Claude) about the product, curriculum, and contact path.
+
+- SEO P2 remaining work (not yet shipped):
+  - Bundle size still ~2.3 MB (Semrush warning #133). Recommended follow-ups: code-splitting heavy admin pages with React.lazy/Suspense, lazy-loading Blockly/CodeMirror only on the pages that need them, enabling gzip/brotli at the CDN (likely already on via Cloudflare — worth verifying with `curl -I -H "Accept-Encoding: gzip"`).
+  - Minifying `suppress-overlay.js` (Semrush warning #135) — file is tiny, low ROI; can be done at build time if desired.
+
 *Last Updated: Feb 29, 2026*

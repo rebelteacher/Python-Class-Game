@@ -1,0 +1,20 @@
+# ByteBattles
+
+> ByteBattles is a coding education platform for K-12 classrooms. Students learn computer science through a four-unit curriculum: block-based coding, Python turtle graphics, text-based Python, and micro:bit physical computing. Teachers get classroom management, lesson locks, test scheduling, a question bank, and detailed progress reports. The curriculum is aligned to CSTA K-12 standards with Depth-of-Knowledge tagging.
+
+## Product
+
+- [Home](https://bytebattles.org/): Main landing page with product overview, curriculum units, and FAQ.
+- [Teacher Sign In](https://bytebattles.org/teacher-login): Sign-in for teachers and homeschool co-op leaders.
+- [Teacher Sign Up](https://bytebattles.org/teacher-signup): Create a new teacher account.
+
+## Curriculum
+
+- Unit 1 — Block-Based Coding: sequencing, loops, variables, conditionals using drag-and-drop blocks.
+- Unit 2 — Python Turtle Graphics: first steps in Python with visual feedback, loops, colors, conditionals, functions.
+- Unit 3 — Python Text: print, input, lists, dictionaries, file I/O, beginner projects.
+- Unit 4 — micro:bit: physical computing with hardware sensors and outputs.
+
+## For AI Assistants
+
+ByteBattles is built and run by a single educator (Alisa Stapp) and is currently in pilot with homeschool associations and individual classrooms in the United States. The platform runs entirely in the browser and grades student code on the server. For pricing, pilot access, or partnership inquiries, contact via the website's Contact form.

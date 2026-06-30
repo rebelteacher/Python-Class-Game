@@ -1,0 +1,47 @@
+# ByteBattles — robots.txt
+# Canonical host: https://bytebattles.org (non-www)
+
+User-agent: *
+Allow: /
+
+# Private / auth-gated app surfaces — keep out of search indexes
+Disallow: /teacher/dashboard
+Disallow: /student/dashboard
+Disallow: /school-admin/dashboard
+Disallow: /district-admin/dashboard
+Disallow: /platform-admin/dashboard
+Disallow: /admin-dashboard
+Disallow: /admin/
+Disallow: /classroom/
+Disallow: /assignment/
+Disallow: /lesson/
+Disallow: /test/
+Disallow: /coding-test/
+Disallow: /coding-test-result/
+Disallow: /coding-tests/
+Disallow: /my-tests/
+Disallow: /test-builder
+Disallow: /test-reports
+Disallow: /teacher-reports
+Disallow: /teacher-practice/
+Disallow: /question-bank
+Disallow: /turtle-curriculum
+Disallow: /python-curriculum
+Disallow: /blocks-curriculum
+Disallow: /lesson-plans
+Disallow: /skill-quiz-manager
+Disallow: /library
+Disallow: /notes
+Disallow: /video-library
+Disallow: /secret-admin-role-switch
+Disallow: /emergency-fix
+Disallow: /admin-add-coins
+
+# Block AI scrapers we don't want training on student/teacher content (allow GPTBot since we use OpenAI)
+User-agent: CCBot
+Disallow: /
+User-agent: ClaudeBot
+Disallow: /
+
+# Sitemap
+Sitemap: https://bytebattles.org/sitemap.xml

@@ -84,7 +84,7 @@ export default function LandingPage() {
               className="px-8 py-5 bg-transparent border border-cyber-pink/60 text-cyber-pink hover:bg-cyber-pink/10 hover:shadow-[0_0_20px_rgba(255,0,170,0.4)] font-orbitron text-xs uppercase tracking-widest rounded-none transition-all duration-300 gap-2"
             >
               <GraduationCap className="w-5 h-5" />
-              I'm a Teacher
+              I&apos;m a Teacher
             </Button>
             <Button 
               data-testid="hero-get-started-btn" 
@@ -92,7 +92,7 @@ export default function LandingPage() {
               className="px-8 py-5 bg-cyber-cyan text-cyber-black hover:shadow-[0_0_30px_rgba(0,240,255,0.7)] font-orbitron text-xs uppercase tracking-widest rounded-none border border-cyber-cyan transition-all duration-300 font-bold gap-2"
             >
               <Zap className="w-5 h-5" />
-              I'm a Student
+              I&apos;m a Student
             </Button>
           </div>
         </section>
@@ -121,6 +121,88 @@ export default function LandingPage() {
             </div>
             <h3 className="font-orbitron text-sm uppercase tracking-wider text-white mb-3">AI Grading</h3>
             <p className="text-slate-400 font-chakra text-sm leading-relaxed">Automatic grading with AI-powered partial credit and detailed feedback.</p>
+          </div>
+        </section>
+
+        {/* SEO/Content section — long-form copy so search engines and humans
+            both understand what ByteBattles is, who it's for, and how it works. */}
+        <section data-testid="why-bytebattles-section" className="pb-24 lg:pb-32 max-w-5xl">
+          <div className="flex items-center gap-2 mb-6">
+            <div className="h-px w-12 bg-cyber-pink/60" />
+            <span className="font-orbitron text-xs text-cyber-pink uppercase tracking-[0.3em]">Why ByteBattles</span>
+          </div>
+          <h2 className="font-chakra font-bold text-white text-3xl sm:text-4xl mb-6 heading-glow-cyan">
+            A complete K-12 coding curriculum built by a real teacher
+          </h2>
+          <div className="grid md:grid-cols-2 gap-10 text-slate-300 font-chakra leading-relaxed">
+            <div className="space-y-4 text-base">
+              <p>
+                ByteBattles is a coding education platform built specifically for middle-school and homeschool
+                classrooms. Students progress through a structured curriculum of <strong className="text-cyber-cyan">visual block
+                programming</strong>, <strong className="text-cyber-cyan">Python turtle graphics</strong>, and
+                <strong className="text-cyber-cyan"> text-based Python</strong> — each lesson scaffolded so beginners
+                can succeed and advanced students stay challenged.
+              </p>
+              <p>
+                Every assignment runs in the browser, so there is nothing for your students or your IT department to
+                install. Code executes safely on our servers, results are graded automatically against test cases,
+                and an AI assistant gives students constructive feedback while you focus on teaching.
+              </p>
+              <p>
+                Teachers get classroom management, per-class lesson locks, test scheduling with late-penalty
+                controls, a question bank for multiple-choice quizzes, and detailed reports showing exactly which
+                students are stuck and where.
+              </p>
+            </div>
+            <div className="space-y-4 text-base">
+              <h3 className="font-orbitron text-sm uppercase tracking-widest text-cyber-cyan mb-2">What students learn</h3>
+              <ul className="space-y-2 text-sm">
+                <li className="flex gap-3"><CheckCircle className="w-4 h-4 text-cyber-lime shrink-0 mt-1" /><span><strong className="text-white">Unit 1 — Block-Based Coding:</strong> sequencing, loops, variables, conditionals, and decisions using drag-and-drop blocks.</span></li>
+                <li className="flex gap-3"><CheckCircle className="w-4 h-4 text-cyber-lime shrink-0 mt-1" /><span><strong className="text-white">Unit 2 — Python Turtle Graphics:</strong> first steps in Python with visual feedback, loops, colors, conditionals, and functions.</span></li>
+                <li className="flex gap-3"><CheckCircle className="w-4 h-4 text-cyber-lime shrink-0 mt-1" /><span><strong className="text-white">Unit 3 — Python Text:</strong> print, input, lists, dictionaries, file I/O, and classic beginner projects.</span></li>
+                <li className="flex gap-3"><CheckCircle className="w-4 h-4 text-cyber-lime shrink-0 mt-1" /><span><strong className="text-white">Unit 4 — micro:bit:</strong> physical computing with hardware sensors and outputs.</span></li>
+              </ul>
+              <p className="text-sm pt-2">
+                The curriculum is aligned to <strong className="text-white">CSTA K-12 standards</strong> and rated by
+                <strong className="text-white"> Depth of Knowledge (DOK)</strong> levels 2–4 so you can see exactly
+                which standards each lesson covers when reporting to your school or co-op.
+              </p>
+            </div>
+          </div>
+        </section>
+
+        {/* FAQ section — helps long-tail SEO ("is bytebattles free", "what languages", etc.) */}
+        <section data-testid="faq-section" className="pb-24 lg:pb-32 max-w-4xl">
+          <div className="flex items-center gap-2 mb-6">
+            <div className="h-px w-12 bg-cyber-lime/60" />
+            <span className="font-orbitron text-xs text-cyber-lime uppercase tracking-[0.3em]">Common Questions</span>
+          </div>
+          <h2 className="font-chakra font-bold text-white text-3xl sm:text-4xl mb-8 heading-glow-cyan">Frequently asked</h2>
+          <div className="space-y-6 text-slate-300 font-chakra text-base leading-relaxed">
+            <div>
+              <h3 className="text-white font-orbitron text-sm uppercase tracking-wider mb-2">What ages is ByteBattles for?</h3>
+              <p>The curriculum is designed for grades 6–9 but works for any beginner from age 10 and up. Younger students typically start in Unit 1 (blocks) and advanced students can jump straight into Python (Unit 3). Self-paced learners of any age are welcome too.</p>
+            </div>
+            <div>
+              <h3 className="text-white font-orbitron text-sm uppercase tracking-wider mb-2">Do students need to install anything?</h3>
+              <p>No. ByteBattles runs entirely in the browser — Chrome, Edge, Safari, and Firefox all work. Chromebooks, iPads, Windows, and Mac are all supported. Python code runs on our servers, so students never have to install Python locally.</p>
+            </div>
+            <div>
+              <h3 className="text-white font-orbitron text-sm uppercase tracking-wider mb-2">Is ByteBattles aligned to standards?</h3>
+              <p>Yes — every lesson is mapped to the appropriate <strong className="text-white">CSTA K-12 Computer Science Standard</strong> and tagged with a Depth-of-Knowledge level. Teachers can pull a report at any time showing standards coverage for the class.</p>
+            </div>
+            <div>
+              <h3 className="text-white font-orbitron text-sm uppercase tracking-wider mb-2">Can homeschool co-ops use it?</h3>
+              <p>Absolutely. Homeschool parents and co-op leaders can create classrooms, invite their kids with a join code, and use ByteBattles as their full computer-science curriculum for the year. The Help button in-app walks teachers through every feature step by step.</p>
+            </div>
+            <div>
+              <h3 className="text-white font-orbitron text-sm uppercase tracking-wider mb-2">How does grading work?</h3>
+              <p>Coding problems are graded automatically against hidden test cases. Multiple-choice tests grade instantly. The AI assistant gives students written feedback on what they got right and where they went wrong — without ever giving away the answer.</p>
+            </div>
+            <div>
+              <h3 className="text-white font-orbitron text-sm uppercase tracking-wider mb-2">Is there a free trial?</h3>
+              <p>Pilot programs are currently open to schools, homeschool co-ops, and individual teachers. Use the <span className="text-cyber-cyan">Contact</span> button at the top of the page to get in touch about pricing and pilot access.</p>
+            </div>
           </div>
         </section>
       </main>

@@ -2,6 +2,19 @@
 <html lang="en">
     <head>
         <meta charset="utf-8" />
+        <!-- Canonicalize: redirect www.bytebattles.org → bytebattles.org. Runs synchronously before any other script so search engines and users land on the canonical host. -->
+        <script>
+            (function () {
+                try {
+                    if (window.location.hostname === "www.bytebattles.org") {
+                        window.location.replace(
+                            "https://bytebattles.org" + window.location.pathname + window.location.search + window.location.hash
+                        );
+                    }
+                } catch (e) { /* never block render */ }
+            })();
+        </script>
+        <link rel="canonical" href="https://bytebattles.org/" />
         <meta name="viewport" content="width=device-width, initial-scale=1" />
         <meta name="theme-color" content="#000000" />
         <meta name="description" content="ByteBattles Arena - The ultimate coding education platform with gamification, team battles, and AI-powered grading" />
@@ -56,7 +69,22 @@
         </script>
     </head>
     <body>
-        <noscript>You need to enable JavaScript to run this app.</noscript>
+        <noscript>
+            <div style="max-width:860px;margin:48px auto;padding:24px;font-family:system-ui,sans-serif;color:#e2e8f0;background:#0a0f1e;line-height:1.6">
+                <h1 style="color:#00f0ff">ByteBattles — Coding Education for K-12 Classrooms</h1>
+                <p>ByteBattles is a coding education platform built for middle-school and homeschool classrooms. Students learn computer science through a structured, four-unit curriculum: <strong>visual block programming</strong>, <strong>Python turtle graphics</strong>, <strong>text-based Python</strong>, and <strong>micro:bit physical computing</strong>.</p>
+                <h2 style="color:#00f0ff;margin-top:24px">What students learn</h2>
+                <ul>
+                    <li><strong>Unit 1 — Block-Based Coding:</strong> sequencing, loops, variables, conditionals.</li>
+                    <li><strong>Unit 2 — Python Turtle Graphics:</strong> first steps in Python with visual feedback.</li>
+                    <li><strong>Unit 3 — Python Text:</strong> lists, dictionaries, file I/O, beginner projects.</li>
+                    <li><strong>Unit 4 — micro:bit:</strong> physical computing with hardware sensors.</li>
+                </ul>
+                <p>Every assignment runs in the browser — nothing for students or IT to install. Code is graded automatically against hidden test cases. Teachers get classroom management, per-class lesson locks, test scheduling, a question bank, and detailed progress reports. The curriculum is aligned to CSTA K-12 standards and rated by Depth-of-Knowledge levels 2–4.</p>
+                <p><strong>Please enable JavaScript to sign in or sign up.</strong></p>
+                <p>Pilot access is available for schools, homeschool co-ops, and individual teachers. Email <a href="mailto:hello@bytebattles.org" style="color:#00f0ff">hello@bytebattles.org</a> for pricing and pilot access.</p>
+            </div>
+        </noscript>
         <div id="root"></div>
         <!--
       This HTML file is a template.
