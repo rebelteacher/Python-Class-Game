@@ -269,4 +269,12 @@ A coding education platform for K-12 students featuring multiple programming env
   - **Backend tests**: 10 pytest cases at `/app/backend/tests/test_rename_chapter.py` covering auth, validation, simple rename, merge-into-existing, and cross-collection side effects. All passing.
   - **Action required from user**: redeploy + use the new "Rename" button on `/admin/lesson-manager` to merge `Chapter 3: Colors & Style` into `Chapter 3: Colors` (or vice versa).
 
+- In-App Help System (Feb 29, 2026):
+  - Floating Help? button (cyan circle, bottom-right corner) visible only to teachers + admins; will extend to students later when a kid-friendly FAQ is added.
+  - `GET /api/help/faq?audience=teacher|admin` — returns curated Q&A entries grouped by category (Classrooms, Tests, Library, Analytics, Admin, Editors, Getting Started). Students receive 403.
+  - `POST /api/help/ask` — free-form AI fallback using Emergent LLM key with gpt-4o-mini (cheap). System prompt is seeded with the full FAQ context so answers stay product-specific. Students receive 403. 1000 char question limit.
+  - Frontend `HelpButton.jsx` (Sheet slide-in from right): search box, FAQ/Ask AI tab toggle, categorized FAQ list with expand/collapse, "Open this page" deep-link buttons per article, AI answer card with auto-detected `Try: /path` deep links.
+  - 13 initial Q&A entries covering: lesson lock/unlock, chapter test unlock, classroom creation, student progress, test assignment, result release, library vs curriculum, chapter merge, site analytics, password reset, announcements, turtle editor, first-time onboarding.
+  - **Backend tests**: 12 pytest cases at `/app/backend/tests/test_help_system.py` covering audience gating, role downgrade, validation, AI fallback, prompt-injection resilience, and unauth/forbidden paths. All passing.
+
 *Last Updated: Feb 29, 2026*

@@ -7338,10 +7338,14 @@ async def get_help_faq(request: Request, audience: str = "teacher"):
     role = user.get("role")
     is_admin = bool(user.get("is_admin"))
 
+    # Help is teachers/admins only for now — students get 403 until we ship a student-facing FAQ.
+    if role == "student" and not is_admin:
+        raise HTTPException(status_code=403, detail="Help is not available for students yet")
+
     # Normalize requested audience based on caller role
     if audience == "admin" and not is_admin:
         audience = "teacher"
-    if audience == "student" and role != "student" and not is_admin:
+    if audience == "student" and not is_admin:
         raise HTTPException(status_code=403, detail="Forbidden")
 
     entries = [e for e in HELP_FAQ_ENTRIES if audience in e.get("audience", [])]
