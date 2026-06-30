@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import { toast } from "sonner";
@@ -403,6 +403,7 @@ export default function TurtleCurriculum({ user }) {
   const [selectedClassroom, setSelectedClassroom] = useState("");
   const [loading, setLoading] = useState(false);
   const [dbLessonNames, setDbLessonNames] = useState({}); // chapter -> [lesson names]
+  const [dbChapters, setDbChapters] = useState([]); // [{ name, lessons: [{ name, problem_count, is_orphan }], problem_count }]
 
   useEffect(() => {
     fetchClassrooms();
@@ -419,11 +420,75 @@ export default function TurtleCurriculum({ user }) {
           mapping[ch.name] = ch.lessons.map(l => l.name);
         }
         setDbLessonNames(mapping);
+        // Keep the raw chapters so we can render them dynamically (live names from the DB).
+        setDbChapters(
+          (turtleUnit.chapters || []).filter(ch => ch.name && ch.name.trim() !== "")
+        );
       }
     } catch (error) {
       console.error("Error fetching DB lesson names:", error);
     }
   };
+
+  // Build the displayed unit list from LIVE chapter data, falling back to the
+  // hardcoded TURTLE_CURRICULUM presentation styling (color/icon/weeks/description)
+  // when the chapter number matches.
+  const displayUnits = useMemo(() => {
+    if (!dbChapters || dbChapters.length === 0) return [];
+
+    // Index presentation by chapter number parsed from the hardcoded title.
+    const styleByNumber = {};
+    TURTLE_CURRICULUM.units.forEach((u, idx) => {
+      const m = u.title.match(/Chapter\s+(\d+)/i);
+      const num = m ? parseInt(m[1], 10) : idx + 1;
+      styleByNumber[num] = {
+        color: u.color,
+        icon: u.icon,
+        weeks: u.weeks,
+        description: u.description,
+      };
+    });
+
+    const fallbackColors = [
+      "from-cyan-500 to-blue-500",
+      "from-fuchsia-500 to-pink-500",
+      "from-amber-500 to-orange-500",
+      "from-emerald-500 to-teal-500",
+      "from-purple-500 to-violet-500",
+      "from-rose-500 to-red-500",
+    ];
+
+    return dbChapters.map((ch, idx) => {
+      const m = ch.name.match(/Chapter\s+(\d+)/i);
+      const num = m ? parseInt(m[1], 10) : idx + 1;
+      const style = styleByNumber[num] || {
+        color: fallbackColors[idx % fallbackColors.length],
+        icon: "📘",
+        weeks: `Week ${idx + 1}`,
+        description: "",
+      };
+      const cleanLessons = (ch.lessons || []).filter(l => !l.is_orphan && l.name);
+      return {
+        id: `chapter_${num}_${idx}`,
+        chapterName: ch.name,                  // live DB name
+        title: ch.name,                        // use live DB name on the card
+        description: style.description,
+        icon: style.icon,
+        color: style.color,
+        weeks: style.weeks,
+        lessons: cleanLessons.map((l, lidx) => ({
+          id: `lesson_${lidx + 1}`,
+          title: l.name,
+          name: l.name,
+          type: "Lesson",
+          duration: "—",
+          objectives: [],
+          dokLevel: 2,
+          problem_count: l.problem_count,
+        })),
+      };
+    });
+  }, [dbChapters]);
 
   const fetchClassrooms = async () => {
     try {
@@ -645,7 +710,13 @@ export default function TurtleCurriculum({ user }) {
 
         {/* Units */}
         <div className="space-y-4">
-          {TURTLE_CURRICULUM.units.map((unit) => (
+          {displayUnits.length === 0 && (
+            <div className="text-center py-12 border border-cyber-cyan/20 rounded bg-cyber-navy/30">
+              <p className="text-slate-400">Loading curriculum...</p>
+              <p className="text-slate-500 text-xs mt-2">If this persists, no chapters have been added for Unit 2 yet.</p>
+            </div>
+          )}
+          {displayUnits.map((unit) => (
             <Card key={unit.id} className="overflow-hidden">
               <div
                 className={`cursor-pointer bg-gradient-to-r ${unit.color} text-white p-4`}
@@ -656,13 +727,15 @@ export default function TurtleCurriculum({ user }) {
                     <span className="text-2xl">{unit.icon}</span>
                     <div>
                       <h3 className="font-bold text-lg">{unit.title}</h3>
-                      <p className="text-white/80 text-sm">{unit.description}</p>
+                      {unit.description && (
+                        <p className="text-white/80 text-sm">{unit.description}</p>
+                      )}
                     </div>
                   </div>
                   <div className="flex items-center gap-4">
                     <div className="text-right text-sm">
                       <div className="font-medium">{unit.weeks}</div>
-                      <div className="text-white/70">{(dbLessonNames[CHAPTER_MAPPING[unit.id]] || []).length} lessons</div>
+                      <div className="text-white/70">{unit.lessons.length} lessons</div>
                     </div>
                     {expandedUnits.has(unit.id) ? (
                       <ChevronDown className="w-6 h-6" />
@@ -676,19 +749,14 @@ export default function TurtleCurriculum({ user }) {
               {expandedUnits.has(unit.id) && (
                 <CardContent className="p-4 bg-cyber-navy/40">
                   <div className="space-y-3">
-                    {(() => {
-                      const chapterName = CHAPTER_MAPPING[unit.id];
-                      const dbLessons = dbLessonNames[chapterName] || [];
-                      if (dbLessons.length === 0) {
-                        return (
-                          <p className="text-center text-slate-500 text-sm py-6">
-                            No lessons configured for this chapter yet. Add them from the Admin Lesson Manager.
-                          </p>
-                        );
-                      }
-                      return dbLessons.map((lessonName, index) => (
+                    {unit.lessons.length === 0 ? (
+                      <p className="text-center text-slate-500 text-sm py-6">
+                        No lessons configured for this chapter yet. Add them from the Admin Lesson Manager.
+                      </p>
+                    ) : (
+                      unit.lessons.map((lesson, index) => (
                         <div
-                          key={lessonName}
+                          key={lesson.name}
                           className="bg-cyber-navy/60 p-4 rounded-lg border border-cyber-cyan/10 hover:shadow-md transition-shadow"
                         >
                           <div className="flex items-center justify-between">
@@ -696,11 +764,16 @@ export default function TurtleCurriculum({ user }) {
                               <div className="flex items-center justify-center w-8 h-8 rounded-full bg-cyber-navy/30 text-slate-400 font-semibold text-sm">
                                 {index + 1}
                               </div>
-                              <h4 className="font-semibold text-white font-chakra">{lessonName}</h4>
+                              <div>
+                                <h4 className="font-semibold text-white font-chakra">{lesson.name}</h4>
+                                {typeof lesson.problem_count === "number" && (
+                                  <p className="text-xs text-slate-500">{lesson.problem_count} problem{lesson.problem_count === 1 ? "" : "s"}</p>
+                                )}
+                              </div>
                             </div>
                             <Button
                               size="sm"
-                              onClick={() => navigate(`/lesson/turtle/${encodeURIComponent(chapterName)}/${encodeURIComponent(lessonName)}`)}
+                              onClick={() => navigate(`/lesson/turtle/${encodeURIComponent(unit.chapterName)}/${encodeURIComponent(lesson.name)}`)}
                               className="bg-cyber-cyan text-cyber-black font-orbitron text-xs uppercase tracking-widest rounded-none border border-cyber-cyan hover:shadow-[0_0_12px_rgba(0,240,255,0.5)] font-bold gap-1 transition-all"
                             >
                               <Play className="w-4 h-4" />
@@ -708,11 +781,11 @@ export default function TurtleCurriculum({ user }) {
                             </Button>
                           </div>
                         </div>
-                      ));
-                    })()}
+                      ))
+                    )}
                   </div>
                   {/* Chapter Test */}
-                  <ChapterTestRow assignmentType="turtle" chapter={CHAPTER_MAPPING[unit.id] || ""} user={user} />
+                  <ChapterTestRow assignmentType="turtle" chapter={unit.chapterName} user={user} />
                 </CardContent>
               )}
             </Card>
@@ -774,7 +847,7 @@ export default function TurtleCurriculum({ user }) {
             <DialogDescription>
               {selectedLesson && (
                 <span>
-                  Assign "{selectedLesson.title}" from {selectedLesson.unitTitle} to your classroom
+                  Assign &ldquo;{selectedLesson.title}&rdquo; from {selectedLesson.unitTitle} to your classroom
                 </span>
               )}
             </DialogDescription>

@@ -1,0 +1,31 @@
+{
+  "summary": "Verified end-to-end fix for the Turtle Curriculum hardcoded chapter title bug. Backend confirmed serving live DB chapter names ('Chapter 1: First Steps', 'Chapter 2: Loops', 'Chapter 3: Colors', 'Chapter 4: Conditionals', 'Chapter 5: Functions'). Frontend /turtle-curriculum now renders those exact strings and contains none of the old hardcoded titles ('Colors & Style', 'First Steps with Turtle', 'Loops - The Power of Repetition', 'Conditionals - Making Decisions', 'Functions - Reusable Code'). Expanding Chapter 3 shows the live DB lessons (Colors Quiz, Lesson 1: Pen Color, Lesson 2: Fill Shapes, Lesson 3: Rainbow Colors, Lesson 4: Pen Size). Clicking 'Start Lesson' navigates to /lesson/turtle/<encoded-chapter>/<encoded-lesson> using the live names, and the lesson page loads without any 'No problems found' error.",
+  "backend_issues": {
+    "critical": [],
+    "minor": []
+  },
+  "frontend_issues": {
+    "ui_bugs": [],
+    "integration_issues": [],
+    "design_issues": []
+  },
+  "test_report_links": [
+    "/app/backend/tests/test_turtle_curriculum.py",
+    "/app/test_reports/pytest/turtle_curriculum_results.xml"
+  ],
+  "action_items": [],
+  "critical_code_review_comments": [
+    "TurtleCurriculum.jsx still keeps a hardcoded TURTLE_CURRICULUM constant for visual styling (gradient/icon/weeks per chapter number). That works for chapters 1-6 but if/when an admin adds Chapter 7+ from the DB the new chapter will fall through to a default style (or be skipped depending on the lookup). Recommend a graceful fallback for chapter numbers beyond the styling registry (default color/icon) rather than depending only on chapter number.",
+    "Console emits 'Error fetching submissions: AxiosError' (404) on first load of a fresh lesson with no prior submissions. Not regression-related to this fix, but the lesson page should swallow 404s for the empty-submissions case rather than logging an error."
+  ],
+  "updated_files": [
+    "/app/backend/tests/test_turtle_curriculum.py"
+  ],
+  "success_rate": {"backend": "100%", "frontend": "100%"},
+  "test_credentials": "Admin: astapp@spanola.net / AlisaFaith$14 (POST /api/auth/teacher-login). Note: /app/memory/test_credentials.md not present — credentials taken from review_request.",
+  "seed_data_creation": "None. Tests are read-only; no seed data created/modified.",
+  "retest_needed": false,
+  "main_agent_can_self_test": true,
+  "context_for_next_testing_agent": "TurtleCurriculum bug fix verified end-to-end on iteration 17. New regression test file at /app/backend/tests/test_turtle_curriculum.py (5 tests, all passing) covers: (1) turtle unit chapter names, (2) absence of forbidden hardcoded fragments, (3) lessons populated, (4) lesson-problems endpoint resolves for Chapter 3: Colors / Lesson 1: Pen Color, (5) lesson-problems resolves with non-empty problems for the first non-quiz lesson of every expected chapter. Auth endpoint is POST /api/auth/teacher-login -> returns session_token. Lesson loader URL pattern: /lesson/turtle/<encodeURIComponent(chapter)>/<encodeURIComponent(lesson)>.",
+  "rca of the issue": "Original bug RCA: TurtleCurriculum.jsx rendered chapter card titles from a static client-side TURTLE_CURRICULUM array (with names like 'Chapter 3: Colors & Style') instead of the live DB chapter names returned by /api/curriculum/units (which are 'Chapter 3: Colors'). The Assignment Library always read from the DB, producing the mismatch the user reported. Fix introduces a dbChapters state populated from /api/curriculum/units (filtered to assignment_type='turtle') and a displayUnits useMemo that builds the cards using the DB chapter NAME and DB lesson NAMES while keeping the visual style (color/icon/weeks) keyed by chapter NUMBER. Start Lesson now navigates with the live DB names URL-encoded, so the lesson loader resolves to a populated problem set. Verified: all 5 expected DB chapter strings render; all 5 forbidden hardcoded strings are absent; Chapter 3 lessons match DB; Start Lesson click navigated to /lesson/turtle/Chapter%203%3A%20Colors/Colors%20Quiz and the lesson page loaded successfully without 'No problems found'."
+}
