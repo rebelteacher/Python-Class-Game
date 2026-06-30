@@ -304,4 +304,11 @@ A coding education platform for K-12 students featuring multiple programming env
   - Bundle size still ~2.3 MB (Semrush warning #133). Recommended follow-ups: code-splitting heavy admin pages with React.lazy/Suspense, lazy-loading Blockly/CodeMirror only on the pages that need them, enabling gzip/brotli at the CDN (likely already on via Cloudflare — worth verifying with `curl -I -H "Accept-Encoding: gzip"`).
   - Minifying `suppress-overlay.js` (Semrush warning #135) — file is tiny, low ROI; can be done at build time if desired.
 
+- Turtle engine pencolor/fillcolor bug fix (Feb 29, 2026):
+  - Reported by user with concrete repro: an octagon with `fillcolor("purple")` was being filled ORANGE (the last pencolor in the loop) instead of purple.
+  - Root cause: in `/app/frontend/src/components/AnimatedTurtle.jsx` line 431, the regex matching `t.color(...)` was not anchored with `^`. Because `turtlePrefix` is optional, the regex matched the SUBSTRING `color(...)` inside `pencolor(...)` and `fillcolor(...)`, misrouting every pencolor/fillcolor call to the combined-color handler that overwrites BOTH pen and fill.
+  - Fix: added `^` anchor to the color() regex. Now `t.pencolor(...)` and `t.fillcolor(...)` correctly route to their dedicated handlers and do not affect each other.
+  - **Verified by testing_agent (iteration_19)**: primary bug fixed (octagon now PURPLE); legitimate `t.color('red')` still sets both pen+fill; pure `t.fillcolor('blue')` still works.
+  - **Secondary issue surfaced**: `t.color('red')` + `begin_fill()` outlines red but the fill renders dark — likely a separate pre-existing bug in how the color() command propagates fillColor to the begin_fill path. NOT a regression of this fix; flagged for future investigation.
+
 *Last Updated: Feb 29, 2026*
