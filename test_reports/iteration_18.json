@@ -1,0 +1,32 @@
+{
+  "summary": "Verified the admin-only 'last updated' chapter badge feature end-to-end. Backend: GET /api/curriculum/units returns a parseable ISO-8601 'last_updated' on every turtle chapter; PUT /problems/{id}, PUT /problems/{id}/move, POST /curriculum/rename-lesson, and POST /curriculum/rename-chapter all stamp updated_at on affected problems (verified by reading Mongo directly after each mutation). Frontend: Admin (astapp@spanola.net) sees all 6 turtle chapter cards with a 'chapter-last-updated-<unit.id>' badge rendering '🛠 admin · updated 6 mo ago'. Non-admin teacher (test.user.1760736702@example.com) sees 0 such badges and the literal phrase 'admin · updated' is absent from the page — privacy gate confirmed.",
+  "backend_issues": {
+    "critical": [],
+    "minor": []
+  },
+  "frontend_issues": {
+    "ui_bugs": [],
+    "integration_issues": [],
+    "design_issues": []
+  },
+  "test_report_links": [
+    "/app/backend/tests/test_last_updated_badge.py",
+    "/app/test_reports/pytest/last_updated_badge.xml"
+  ],
+  "action_items": [],
+  "critical_code_review_comments": [
+    "Badge text uses lowercase source ('admin · updated') with CSS uppercase transform. Functional & passes the spec, but if any downstream code/test relies on textContent matching the visual uppercase, it will miss. Consider hard-coding the uppercase in JSX so DOM text matches what users see.",
+    "TurtleCurriculum is now rendering 6 chapter cards (chapter_1_0 .. chapter_6_5) rather than the 5 mentioned in the review request. Backend correctly returns 6 turtle chapters (a 6th was added since the spec was written). Not a regression — flagging only because the spec assumed 5.",
+    "/api/curriculum/units (line ~2386–2422) performs N+1 queries: a distinct() + count_documents() + aggregate() per chapter per unit. Acceptable now but will become a hotspot as the curriculum grows; consider a single aggregation pipeline per unit."
+  ],
+  "updated_files": [
+    "/app/backend/tests/test_last_updated_badge.py"
+  ],
+  "success_rate": {"backend": "100%", "frontend": "100%"},
+  "test_credentials": "Admin: astapp@spanola.net / AlisaFaith$14. Non-admin teacher: test.user.1760736702@example.com / Byte-6582-Reset. Both logged in via POST /api/auth/teacher-login.",
+  "seed_data_creation": "test_last_updated_badge.py inserts ONE synthetic doc into the `problems` collection under assignment_type='block' with a TEST_LAST_UPDATED_PROBE_* title/chapter/lesson, exercises PUT/move/rename-lesson/rename-chapter against it, then deletes all docs matching the TEST_LAST_UPDATED_PROBE title regex in teardown. No turtle/block seed data touched.",
+  "retest_needed": false,
+  "main_agent_can_self_test": true,
+  "context_for_next_testing_agent": "Iteration 18 verified the admin-only 'updated X ago' chapter badge. Backend regression suite at /app/backend/tests/test_last_updated_badge.py (5 tests, all pass). Mongo doc field is updated_at (ISO-8601 string); the curriculum endpoint exposes it as chapter.last_updated. Frontend testid pattern: chapter-last-updated-<unit.id> where unit.id is 'chapter_<num>_<idx>'. Badge source text is lowercase ('🛠 admin · updated <relative>') with CSS uppercase. Privacy gate works because the JSX guard is `{user?.is_admin && unit.lastUpdated && ...}` — non-admin user simply does not render the <p> tag at all (verified via querySelectorAll returning 0 and full-body innerText regex /admin\\s*[·•]\\s*updated/i returning false).",
+  "rca of the issue": "N/A — no defects found. Feature behaves exactly as specified in the review request; the privacy gate is enforced client-side via a strict `user?.is_admin && unit.lastUpdated` conditional that prevents the <p data-testid='chapter-last-updated-*'> node from being mounted at all for non-admin teachers."
+}

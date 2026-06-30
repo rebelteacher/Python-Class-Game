@@ -1986,6 +1986,7 @@ async def update_problem(problem_id: str, problem: ProblemCreate, request: Reque
     
     # Update problem
     problem_dict = problem.model_dump()
+    problem_dict["updated_at"] = datetime.now(timezone.utc).isoformat()
     await db.problems.update_one(
         {"id": problem_id},
         {"$set": problem_dict}
@@ -2046,7 +2047,8 @@ async def move_problem(problem_id: str, data: dict, request: Request):
         {"$set": {
             "chapter": new_chapter,
             "lesson": new_lesson,
-            "order": new_order
+            "order": new_order,
+            "updated_at": datetime.now(timezone.utc).isoformat(),
         }}
     )
     
@@ -2399,7 +2401,24 @@ async def get_curriculum_units(request: Request):
                 lessons.append({"name": le, "problem_count": count, "is_orphan": False})
             if orphan_count > 0:
                 lessons.append({"name": "(Unassigned)", "problem_count": orphan_count, "is_orphan": True})
-            chapters.append({"name": ch, "lessons": lessons, "problem_count": sum(le["problem_count"] for le in lessons)})
+            # Compute last_updated for the chapter = max(updated_at, created_at) across its problems.
+            last_updated = None
+            agg = await db.problems.aggregate([
+                {"$match": {"assignment_type": atype, "chapter": ch}},
+                {"$group": {
+                    "_id": None,
+                    "max_updated": {"$max": "$updated_at"},
+                    "max_created": {"$max": "$created_at"},
+                }},
+            ]).to_list(1)
+            if agg:
+                last_updated = agg[0].get("max_updated") or agg[0].get("max_created")
+            chapters.append({
+                "name": ch,
+                "lessons": lessons,
+                "problem_count": sum(le["problem_count"] for le in lessons),
+                "last_updated": last_updated,
+            })
         units.append({"name": unit_name, "assignment_type": atype, "chapters": chapters, "problem_count": sum(c["problem_count"] for c in chapters)})
 
     return units
@@ -2554,9 +2573,10 @@ async def rename_lesson(request: Request):
         raise HTTPException(status_code=400, detail="assignment_type, chapter, old_name, and new_name are required")
     
     # Update all problems with this lesson name
+    now_iso = datetime.now(timezone.utc).isoformat()
     result = await db.problems.update_many(
         {"assignment_type": assignment_type, "chapter": chapter, "lesson": old_name},
-        {"$set": {"lesson": new_name}}
+        {"$set": {"lesson": new_name, "updated_at": now_iso}}
     )
     
     # Update lesson instructions if they exist
@@ -2596,9 +2616,10 @@ async def rename_chapter(request: Request):
     is_merge = target_exists > 0
 
     # 1. Problems
+    now_iso = datetime.now(timezone.utc).isoformat()
     problems_res = await db.problems.update_many(
         {"assignment_type": assignment_type, "chapter": old_name},
-        {"$set": {"chapter": new_name}},
+        {"$set": {"chapter": new_name, "updated_at": now_iso}},
     )
 
     # 2. Lesson instructions

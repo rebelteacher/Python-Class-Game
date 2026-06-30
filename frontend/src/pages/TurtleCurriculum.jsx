@@ -476,6 +476,7 @@ export default function TurtleCurriculum({ user }) {
         icon: style.icon,
         color: style.color,
         weeks: style.weeks,
+        lastUpdated: ch.last_updated || null,  // ISO string from API; admin-only badge
         lessons: cleanLessons.map((l, lidx) => ({
           id: `lesson_${lidx + 1}`,
           title: l.name,
@@ -578,6 +579,30 @@ export default function TurtleCurriculum({ user }) {
         DOK{level}
       </span>
     );
+  };
+
+  // Admin-only "Updated X ago" badge — visible only to is_admin users.
+  const formatRelativeTime = (isoString) => {
+    if (!isoString) return null;
+    try {
+      const then = new Date(isoString);
+      const diffMs = Date.now() - then.getTime();
+      if (isNaN(diffMs) || diffMs < 0) return null;
+      const sec = Math.floor(diffMs / 1000);
+      if (sec < 60) return "just now";
+      const min = Math.floor(sec / 60);
+      if (min < 60) return `${min} min ago`;
+      const hr = Math.floor(min / 60);
+      if (hr < 24) return `${hr} hr ago`;
+      const days = Math.floor(hr / 24);
+      if (days < 30) return `${days} day${days === 1 ? "" : "s"} ago`;
+      const months = Math.floor(days / 30);
+      if (months < 12) return `${months} mo ago`;
+      const years = Math.floor(days / 365);
+      return `${years} yr${years === 1 ? "" : "s"} ago`;
+    } catch {
+      return null;
+    }
   };
 
   return (
@@ -729,6 +754,15 @@ export default function TurtleCurriculum({ user }) {
                       <h3 className="font-bold text-lg">{unit.title}</h3>
                       {unit.description && (
                         <p className="text-white/80 text-sm">{unit.description}</p>
+                      )}
+                      {user?.is_admin && unit.lastUpdated && (
+                        <p
+                          data-testid={`chapter-last-updated-${unit.id}`}
+                          className="text-[10px] text-white/60 mt-1 font-mono uppercase tracking-wider"
+                          title={`Last edit recorded: ${unit.lastUpdated}`}
+                        >
+                          🛠 admin · updated {formatRelativeTime(unit.lastUpdated) || "—"}
+                        </p>
                       )}
                     </div>
                   </div>
