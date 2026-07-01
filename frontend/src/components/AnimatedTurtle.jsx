@@ -963,8 +963,7 @@ const AnimatedTurtle = forwardRef(function AnimatedTurtle({
   const bgCanvasRef = useRef(null);  // Separate canvas for background
   const [isPlaying, setIsPlaying] = useState(false);
   const [currentStep, setCurrentStep] = useState(-1);
-  const [speed, setSpeed] = useState(5);
-  const [collisionCount, setCollisionCount] = useState(0);
+  const [speed, setSpeed] = useState(5);  const [collisionCount, setCollisionCount] = useState(0);
   const [goalsReached, setGoalsReached] = useState(new Set());
   const [pathLength, setPathLength] = useState(0);
   const [showGrid, setShowGrid] = useState(false); // Grid toggle state
@@ -974,6 +973,7 @@ const AnimatedTurtle = forwardRef(function AnimatedTurtle({
   const turtleRef = useRef(getInitialTurtleState());
   const pathsRef = useRef([]);
   const playingRef = useRef(false);
+  const speedRef = useRef(5);  // Synchronous mirror of `speed` state so mid-run t.speed() updates take effect immediately
   const variablesRef = useRef({});  // Track runtime variables for while loop conditions
   const bgColorRef = useRef(backgroundColor);  // Synchronous bg color for loop rendering
   const eventHandlersRef = useRef({ keyHandlers: {}, clickHandler: [], mouseMoveHandler: [], onStartHandler: [] });
@@ -1448,7 +1448,17 @@ const AnimatedTurtle = forwardRef(function AnimatedTurtle({
     const turtle = turtleRef.current;
     
     return new Promise((resolve) => {
-      const baseDelay = animate ? (11 - speed) * 50 : 0;
+      // Match CPython turtle.speed() semantics:
+      //   0        -> instant / no animation
+      //   1        -> slowest (500ms per step)
+      //   2..10    -> progressively faster (450ms down to 50ms per step)
+      // Read from ref so a mid-execution t.speed() takes effect on the very next command.
+      const s = speedRef.current;
+      let baseDelay = 0;
+      if (animate && s !== 0) {
+        const clamped = Math.max(1, Math.min(10, s));
+        baseDelay = (11 - clamped) * 50;
+      }
       
       switch (cmd.type) {
         case 'forward':
@@ -1601,6 +1611,9 @@ const AnimatedTurtle = forwardRef(function AnimatedTurtle({
         }
           
         case 'speed':
+          // Update both the ref (used by executeCommand) and the state (used by UI slider)
+          speedRef.current = cmd.value;
+          setSpeed(cmd.value);
           resolve();
           break;
           
@@ -1992,7 +2005,13 @@ const AnimatedTurtle = forwardRef(function AnimatedTurtle({
           resolve();
       }
     });
-  }, [speed, drawCanvas]);
+  }, [drawCanvas]);
+
+  // Keep speedRef synchronized with the slider-driven `speed` state so
+  // both t.speed() commands AND the UI slider affect animation delay.
+  useEffect(() => {
+    speedRef.current = speed;
+  }, [speed]);
   
   // Play animation
   const play = useCallback(async () => {
