@@ -323,4 +323,11 @@ A coding education platform for K-12 students featuring multiple programming env
   - Uses lucide-react Trash2 icon + "Clear" label. Disabled while running / submitting / problem is finalized.
   - **Verified by testing_agent (iteration_21)**: 100% pass rate on tested flows (3 pages behavioural, 2 pages code-inspection). Confirmed CodingTestTaking Clear does NOT increment submission counter.
 
+- AnimatedTurtle `t.speed()` bug fix (Mar 1, 2026 — iteration_22):
+  - User reported: `t.speed(0)` (which should be "instant" per CPython) actually left the turtle crawling at ~550ms per step.
+  - Two root causes: (1) the `case 'speed':` executor handler was a no-op — it resolved without updating any delay; (2) the delay formula `(11 - speed) * 50` treated `speed=0` as the SLOWEST setting (550ms).
+  - Fix: added a `speedRef` React ref mirroring the `speed` state so mid-run `t.speed(N)` propagates without re-memoizing `executeCommand`. New delay formula: `speed=0 → 0ms`, `speed=1..10 → (11-clamped)*50 ms`. `case 'speed'` handler now updates both `speedRef.current` and `setSpeed()`. A `useEffect` keeps the ref in sync with slider-driven state changes.
+  - **Verified by testing_agent (iteration_22)**: 4/4 timing tests passed. `t.speed(0)` 20-step loop finished in 0.79s (previously ~30s). `t.speed(1)` correctly takes 3+s. Mid-run `t.speed(0)` propagates within one command.
+  - Follow-up flagged (not shipped): add data-testid attributes to AnimatedTurtle Play/Pause/Reset/FastForward toolbar buttons for less brittle timing tests.
+
 *Last Updated: Feb 29, 2026*
