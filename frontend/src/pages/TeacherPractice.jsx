@@ -6,7 +6,8 @@ import Editor from "@monaco-editor/react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Textarea } from "@/components/ui/textarea";
-import { ArrowLeft, Play, Code2, StickyNote } from "lucide-react";
+import { ArrowLeft, Play, Code2, StickyNote, Trash2 } from "lucide-react";
+import { resetCodeWithConfirm } from "../utils/resetCode";
 import { PanelGroup, Panel, PanelResizeHandle } from "react-resizable-panels";
 import InteractiveInputCollector from "@/components/InteractiveInputCollector";
 
@@ -231,6 +232,20 @@ export default function TeacherPractice({ user }) {
                           className="gap-2"
                         >
                           Show Solution
+                        </Button>
+                        <Button
+                          data-testid="clear-code-btn"
+                          onClick={() => {
+                            resetCodeWithConfirm({ starterCode: problem?.starter_code || "", setCode, currentCode: code });
+                          }}
+                          disabled={running}
+                          variant="outline"
+                          size="sm"
+                          className="gap-2"
+                          title="Clear code / reset to starter"
+                        >
+                          <Trash2 className="w-4 h-4" />
+                          Clear
                         </Button>
                         <Button 
                           onClick={() => handleRunCode()} 

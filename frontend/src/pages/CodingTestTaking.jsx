@@ -6,7 +6,8 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { Clock, Play, Send, AlertTriangle, Maximize, Trophy } from "lucide-react";
+import { Clock, Play, Send, AlertTriangle, Maximize, Trophy, Trash2 } from "lucide-react";
+import { resetCodeWithConfirm } from "../utils/resetCode";
 import Editor from "@monaco-editor/react";
 import InteractiveInputCollector from "@/components/InteractiveInputCollector";
 import AnimatedTurtle from "@/components/AnimatedTurtle";
@@ -761,6 +762,19 @@ export default function CodingTestTaking({ user }) {
 
           {/* Action Buttons */}
           <div className="bg-gray-800 p-4 flex gap-4">
+            <Button
+              data-testid="clear-code-btn"
+              onClick={() => {
+                resetCodeWithConfirm({ starterCode: currentProblem?.starter_code || "", setCode, currentCode: code });
+              }}
+              disabled={running || submitting}
+              variant="outline"
+              className="gap-2"
+              title="Clear code / reset to starter"
+            >
+              <Trash2 className="w-4 h-4" />
+              Clear
+            </Button>
             <Button
               onClick={() => handleRunCode()}
               disabled={running}

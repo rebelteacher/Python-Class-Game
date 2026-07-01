@@ -2,6 +2,7 @@ import { useState, useEffect, useRef } from "react";
 import { useParams, useNavigate, useLocation } from "react-router-dom";
 import axios from "axios";
 import { toast } from "sonner";
+import { resetCodeWithConfirm } from "../utils/resetCode";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -1996,6 +1997,21 @@ export default function AssignmentPage({ user, lessonData }) {
                         </div>
                       </div>
                       <div className="flex gap-2">
+                        <Button
+                          data-testid="clear-code-btn"
+                          onClick={() => {
+                            const cp = assignment?.problems?.[currentProblemIndex];
+                            resetCodeWithConfirm({ starterCode: cp?.starter_code || "", setCode, currentCode: code });
+                          }}
+                          disabled={running || problemsFinal[getCurrentProblemId()]}
+                          variant="outline"
+                          size="sm"
+                          className="gap-2"
+                          title="Clear code / reset to starter"
+                        >
+                          <Trash2 className="w-4 h-4" />
+                          Clear
+                        </Button>
                         <Button 
                           data-testid="teacher-run-code-btn" 
                           onClick={() => handleRunCode()} 

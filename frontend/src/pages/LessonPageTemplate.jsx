@@ -183,11 +183,10 @@ export default function LessonPageTemplate() {
   };
 
   const handleReset = () => {
-    if (currentView === "lesson") {
-      setCode(lesson.starter_code);
-    } else {
-      setCode(currentProblem.starter_code);
-    }
+    const target = currentView === "lesson" ? lesson.starter_code : currentProblem.starter_code;
+    if (code === target) return;
+    if (!window.confirm("Reset your code back to the starter code?\n\nThis will erase your current changes and cannot be undone.")) return;
+    setCode(target);
     setOutput("");
     toast.info("Code reset");
   };

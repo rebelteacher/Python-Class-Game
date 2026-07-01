@@ -74,6 +74,7 @@ export default function StudentSandbox({ user }) {
   };
 
   const handleClearCode = () => {
+    if (!window.confirm("Clear all code in the sandbox?\n\nThis will erase everything and cannot be undone.")) return;
     setCode("# Write your Python code here\n");
     setOutput("");
     setTestInput("");
@@ -117,6 +118,7 @@ export default function StudentSandbox({ user }) {
               {darkMode ? "Light" : "Dark"}
             </Button>
             <Button
+              data-testid="clear-code-btn"
               onClick={handleClearCode}
               variant="outline"
               size="sm"

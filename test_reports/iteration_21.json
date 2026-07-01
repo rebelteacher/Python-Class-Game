@@ -1,0 +1,73 @@
+{
+  "summary": "Frontend-only verification of the new 'Clear Code' button (data-testid='clear-code-btn') across all 5 editor pages. Tested behavior end-to-end on AssignmentPage, LessonPageTemplate (existing Reset button), and TeacherPractice using admin credentials — all 3 pages show the confirm dialog with the correct message, dismissing keeps the user's edits, accepting resets to the problem's starter_code (or the fallback '# Write your code here\\n' if none). StudentSandbox and CodingTestTaking were verified via code inspection only (see notes) because they require a student session; both are correctly wired to window.confirm + setCode and CodingTestTaking's Clear does NOT touch the submission counter. Run Code button is still present alongside Clear on every page.",
+  "backend_issues": { "critical": [], "minor": [] },
+  "frontend_issues": {
+    "ui_bugs": [],
+    "integration_issues": [],
+    "design_issues": []
+  },
+  "detailed_flow_results": {
+    "AssignmentPage (/lesson/turtle/Chapter%203%3A%20Colors/Colors%20Quiz)": {
+      "clear_btn_visible": true,
+      "confirm_dialog_message": "Reset your code back to the starter code?\\n\\nThis will erase your current changes and cannot be undone.",
+      "dismiss_preserves_edits": true,
+      "accept_resets_to_starter": true,
+      "starter_code_snapshot": "import turtle\\n\\nt = turtle.Turtle()\\n\\n# Your code here:\\n",
+      "run_code_button_still_present (teacher-run-code-btn)": true,
+      "note": "The Clear button is injected into the Teacher Mode 'Live Demo / Sandbox' pane next to teacher-run-code-btn. There is a second editor for the student flow (data-testid='run-code-btn' at line ~1588) that DOES NOT have its own Clear button — the review request scope was the admin-facing Live Demo/Sandbox, which is correctly wired."
+    },
+    "StudentSandbox (route is /student/sandbox, not /sandbox)": {
+      "clear_btn_visible_in_code": true,
+      "handler_wired": "handleClearCode -> window.confirm -> setCode('# Write your Python code here\\n') + setOutput('') + setTestInput('') + toast.success('Sandbox cleared!')",
+      "behavioral_test": "SKIPPED — route requires ProtectedRoute requiredRole='student'; admin (teacher role) is redirected. Code inspection matches the expected behavior in the request.",
+      "note": "Route in App.js is /student/sandbox (line 256), NOT /sandbox. The review request mentioned /sandbox which does not exist — main agent may want to add an alias or update the doc."
+    },
+    "TeacherPractice (/teacher-practice/{problemId})": {
+      "clear_btn_visible": true,
+      "confirm_dialog_message_no_starter": "Clear all code in the editor?\\n\\nThis will erase everything and cannot be undone.",
+      "dismiss_preserves_edits": true,
+      "accept_resets_to_starter_or_fallback": true,
+      "run_code_button_still_present": true,
+      "show_solution_button_still_present": true,
+      "tested_problem_id": "aea123cf-670a-4dc8-8544-9ebd7755fb8d (has_starter=false, so fallback path was exercised)"
+    },
+    "CodingTestTaking (/coding-test/{testId})": {
+      "clear_btn_visible_in_code": true,
+      "handler_wired": "onClick -> resetCodeWithConfirm({ starterCode: currentProblem?.starter_code || '', setCode, currentCode: code })",
+      "does_not_increment_submission_counter": true,
+      "reason": "handler only calls setCode(); handleSubmit is a completely separate onClick on the Submit button (line 787). No state mutation of submissionCounts happens in the Clear path.",
+      "disabled_while_running_or_submitting": true,
+      "run_code_and_submit_buttons_still_present": true,
+      "behavioral_test": "SKIPPED per main-agent note (requires active student coding-test session)."
+    },
+    "LessonPageTemplate (/lesson-demo)": {
+      "reset_btn_visible": true,
+      "confirm_dialog_added": true,
+      "confirm_dialog_message": "Reset your code back to the starter code?\\n\\nThis will erase your current changes and cannot be undone.",
+      "dismiss_preserves_edits": true,
+      "accept_resets_to_starter": true,
+      "run_and_submit_buttons_still_present": true
+    },
+    "REGRESSION - Run Code button intact on all 5 pages": true
+  },
+  "test_report_links": [],
+  "action_items": [
+    "Minor doc mismatch: review request refers to '/sandbox' but the real route is '/student/sandbox' (App.js line 256). Consider adding a redirect alias or updating the internal note. Not a bug — behaviour is correct.",
+    "OPTIONAL: On AssignmentPage the Clear button was only added to the teacher-mode Live Demo editor (near teacher-run-code-btn). The student-side editor (run-code-btn, line ~1588) still has no Clear button. If the intent was truly 'EVERY code editor in the app', main agent should decide whether to add it to the student pane as well."
+  ],
+  "critical_code_review_comments": [
+    "resetCode.js helper is clean, single-purpose, ~30 lines — good.",
+    "No hardcoded URLs, uses window.confirm which is standard cross-browser.",
+    "The helper returns false when currentCode already equals target — nice UX (silent no-op).",
+    "All 4 injected buttons use consistent styling (Trash2 icon + 'Clear' label + variant='outline' + size='sm') and correctly disable while running/submitting/finalized. Good consistency.",
+    "AssignmentPage.jsx is 2335 lines — flagged in prior iterations, still not split. Not blocking for this feature.",
+    "In StudentSandbox.jsx line 77 the confirm() is inlined instead of using the shared resetCodeWithConfirm helper. Slight DRY violation — the sandbox also resets output+testInput and shows a toast, which is why it wasn't refactored. Acceptable, but consider extending the helper with an optional afterReset callback for future consistency."
+  ],
+  "updated_files": [],
+  "success_rate": { "backend": "N/A (skipped)", "frontend": "100% for tested flows (3/5 behaviourally, 2/5 via code inspection per main-agent guidance)" },
+  "test_credentials": "Admin astapp@spanola.net / AlisaFaith$14 (from /app/memory/test_credentials.md)",
+  "seed_data_creation": "None. Used existing problem id aea123cf-670a-4dc8-8544-9ebd7755fb8d for TeacherPractice test.",
+  "retest_needed": false,
+  "main_agent_can_self_test": true,
+  "context_for_next_testing_agent": "Clear button feature (data-testid='clear-code-btn') is fully working on AssignmentPage (teacher demo), TeacherPractice, LessonPageTemplate. StudentSandbox and CodingTestTaking wiring verified via code only — a student login would be needed to behaviourally test those two. Prior iteration 20 covered turtle color() backend fix (passing)."
+}
