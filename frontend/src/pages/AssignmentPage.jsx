@@ -1584,6 +1584,21 @@ export default function AssignmentPage({ user, lessonData }) {
                         </div>
                       </div>
                       <div className="flex gap-2">
+                        <Button
+                          data-testid="student-clear-code-btn"
+                          onClick={() => {
+                            const cp = assignment?.problems?.[currentProblemIndex];
+                            resetCodeWithConfirm({ starterCode: cp?.starter_code || "", setCode, currentCode: code });
+                          }}
+                          disabled={running || submitting || problemsFinal[getCurrentProblemId()]}
+                          variant="outline"
+                          size="sm"
+                          className="gap-2"
+                          title="Clear code / reset to starter"
+                        >
+                          <Trash2 className="w-4 h-4" />
+                          Clear
+                        </Button>
                         <Button 
                           data-testid="run-code-btn" 
                           onClick={() => handleRunCode()} 

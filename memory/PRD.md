@@ -317,4 +317,10 @@ A coding education platform for K-12 students featuring multiple programming env
   - **Verified by testing_agent (iteration_20)**: 4/4 frontend scenarios passing 100% via pixel-sampling the rendered PNG. Includes regression test of iteration_19 purple-octagon (still works).
   - Minor follow-up flagged: 0-arg `color()` (which in CPython acts as a getter returning `(pen, fill)`) silently no-ops in our sim. Low priority unless a lesson uses it.
 
+- Clear Code button on all editors (Mar 1, 2026):
+  - New shared helper `/app/frontend/src/utils/resetCode.js` (`resetCodeWithConfirm`) — pops a browser confirm dialog, then resets the editor to the problem's `starter_code` (or a `# Write your code here` fallback if none). No-ops if the current code already equals the target.
+  - Added `data-testid="clear-code-btn"` next to Run Code on: AssignmentPage teacher-mode Live Demo, AssignmentPage student editor (`student-clear-code-btn`), StudentSandbox, TeacherPractice, CodingTestTaking, and LessonPageTemplate.
+  - Uses lucide-react Trash2 icon + "Clear" label. Disabled while running / submitting / problem is finalized.
+  - **Verified by testing_agent (iteration_21)**: 100% pass rate on tested flows (3 pages behavioural, 2 pages code-inspection). Confirmed CodingTestTaking Clear does NOT increment submission counter.
+
 *Last Updated: Feb 29, 2026*
