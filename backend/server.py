@@ -7159,6 +7159,31 @@ async def get_invite_codes(request: Request):
 # ===================== HELP / FAQ =====================
 
 HELP_FAQ_ENTRIES = [
+    # ---- TURTLE TROUBLESHOOTING (teacher-facing, so you can answer common student questions) ----
+    {
+        "id": "turtle-colors-not-showing",
+        "audience": ["teacher", "admin"],
+        "category": "Turtle Troubleshooting",
+        "question": "Why aren't my student's turtle colors showing up (or why does it look dashed)?",
+        "answer": (
+            "Nine times out of ten this is a GEOMETRY bug, not a color bug. Two common culprits:\n\n"
+            "1) The turtle is drawing a tiny circle. If the code is something like `t.forward(8)` + "
+            "`t.right(15)` in a loop, the resulting circle has a radius of only about 30 pixels — so "
+            "`t.xcor()` never gets big enough to trigger conditions like `if t.xcor() > 80`. Only the "
+            "middle branch ever runs, and the other color lists are never used. Fix: either make the "
+            "turtle travel farther (bigger `forward()`, smaller `right()`) OR lower the thresholds "
+            "(e.g. `> 15` instead of `> 80`).\n\n"
+            "2) One of the colors is 'white' (or matches the background). White strokes on a white "
+            "canvas are invisible, which makes the drawing look 'dashed' or 'broken.' Fix: swap the "
+            "white for something like 'pink' or change the background with "
+            "`t.getscreen().bgcolor('black')`.\n\n"
+            "Quick debugging tip students can try: add `print(t.xcor())` inside the loop to see the "
+            "actual x-values the turtle is hitting."
+        ),
+        "link": "/turtle-curriculum",
+        "link_label": "Open Curriculum",
+    },
+
     # ---- ANSWER KEY / SOLUTIONS ----
     {
         "id": "view-solution-code",
