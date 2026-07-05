@@ -327,6 +327,15 @@ function FaqItem({ entry, onNavigate }) {
       {open && (
         <div className="px-4 pb-4 pt-1 space-y-3 border-t border-cyber-cyan/10 bg-cyber-navy/20">
           <p className="text-sm text-slate-300 leading-relaxed whitespace-pre-wrap">{entry.answer}</p>
+          {entry.image && (
+            <img
+              data-testid={`faq-image-${entry.id}`}
+              src={entry.image}
+              alt={entry.image_alt || entry.question}
+              className="rounded-md border border-cyber-cyan/20 max-w-full h-auto"
+              loading="lazy"
+            />
+          )}
           {entry.link && (
             <Button
               data-testid={`faq-link-${entry.id}`}

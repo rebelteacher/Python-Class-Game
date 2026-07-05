@@ -7159,6 +7159,43 @@ async def get_invite_codes(request: Request):
 # ===================== HELP / FAQ =====================
 
 HELP_FAQ_ENTRIES = [
+    # ---- ANSWER KEY / SOLUTIONS ----
+    {
+        "id": "view-solution-code",
+        "audience": ["teacher", "admin"],
+        "category": "Answer Keys",
+        "question": "Where do I find the answer key / solution code for a problem?",
+        "answer": (
+            "Open any problem from the Curriculum or the Library (while logged in as a teacher or admin). "
+            "On the LEFT side of the problem page, under the problem instructions and any 'Review Lesson "
+            "Materials' button, you'll see a green outlined **Show Solution Code** button (it has a </> icon). "
+            "Click it to load the correct solution into the code editor. Click it again to hide the solution "
+            "and restore the starter code. Students never see this button — it's teacher-only.\n\n"
+            "If a problem doesn't have a solution saved, you'll get a message saying 'No solution code "
+            "available for this problem' — in that case, open the problem in the Library and add one in the "
+            "Solution Code field."
+        ),
+        "image": "https://customer-assets.emergentagent.com/job_f43c0099-e35d-4bfe-b750-f37c29689b18/artifacts/vn1m81h4_image.png",
+        "image_alt": "Screenshot of the green 'Show Solution Code' button teachers see on the left side of the problem page",
+        "link": "/turtle-curriculum",
+        "link_label": "Open Curriculum",
+    },
+    {
+        "id": "add-edit-solution-code",
+        "audience": ["teacher", "admin"],
+        "category": "Answer Keys",
+        "question": "How do I add or edit the solution code for a problem?",
+        "answer": (
+            "Open the **Library** (Assignment Library) → find the problem → click the pencil/Edit icon on "
+            "its card. In the edit dialog, scroll to the **Solution Code** field and paste or type the "
+            "correct working solution, then click **Save**. For turtle problems, click the green "
+            "**🐢 Preview Turtle Output** button next to the Solution Code label — this runs your solution "
+            "on the backend and shows you exactly what students will see as the 'expected output.'"
+        ),
+        "link": "/assignments",
+        "link_label": "Open the Library",
+    },
+
     # ---- LESSON LOCKS / UNLOCK ----
     {
         "id": "lock-lessons",
