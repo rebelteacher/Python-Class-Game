@@ -1,0 +1,22 @@
+{
+  "summary": "Verified the AssignmentLibrary Live Preview swap from AnimatedTurtle -> backend PNG in BOTH Create and Edit dialogs. All 6 requested test cases pass. Login via astapp@spanola.net succeeded. Create dialog: before clicking Preview Turtle Output, panel shows 'No preview yet' + 'Click 🐢 Preview Turtle Output' placeholder; lib-live-preview-img NOT present; 0 <canvas> inside Live Preview panel. After clicking the green Preview Turtle Output button, backend responded, panel now contains <img data-testid='lib-live-preview-img' src='data:image/png;base64,...' /> and 0 canvas / 1 img. The existing Turtle preview modal dialog (setTurtlePreviewOpen) also opened alongside — regression preserved. Edit dialog (opened via edit-<id> for a real turtle problem 'Draw a Square (Step by Step)'): the new edit-preview-turtle-btn is present next to the Solution Code label; empty-state placeholder shows correctly ('No preview yet' + 'Click 🐢 Preview Turtle Output'); clicking the button produces lib-edit-live-preview-img with data:image/png;base64 src (len 3350), 0 canvas, 1 img. Non-turtle regression: switched to '💻 Code' assignment type — the Live Preview panel is NOT rendered (text absent, no lib-live-preview-img), confirming the assignment_type==='turtle' render guard is intact. No console errors related to the change; the only console noise was an unrelated 401 on a landing-page resource before login.",
+  "backend_issues": {"critical": [], "minor": []},
+  "frontend_issues": {
+    "ui_bugs": [],
+    "integration_issues": [],
+    "design_issues": []
+  },
+  "test_report_links": [],
+  "action_items": [],
+  "critical_code_review_comments": [
+    "AssignmentLibrary.jsx is 4310 lines — well past the 700-line guideline. Consider splitting Create dialog, Edit dialog, and Tree browser into separate components/files. Not blocking, but continued growth in this file makes future preview/render-mismatch bugs like this one hard to spot."
+  ],
+  "updated_files": [],
+  "success_rate": {"backend": "n/a (skipped)", "frontend": "100% (6/6 test cases)"},
+  "test_credentials": "Admin astapp@spanola.net / AlisaFaith$14 (from /app/memory/test_credentials.md)",
+  "seed_data_creation": "None. Existing turtle problem 'Draw a Square (Step by Step)' (Chapter 1: First Steps > Lesson 5 > Challenge) was opened read-only to test the Edit dialog. No DB writes made (dialog closed via Escape without Save).",
+  "retest_needed": false,
+  "should_main_agent_self_test": false,
+  "context_for_next_testing_agent": "Live Preview panel in AssignmentLibrary now uses backend PNG (base64) via <img data-testid='lib-live-preview-img'> in create dialog and <img data-testid='lib-edit-live-preview-img'> in edit dialog. Populated by hitting POST /api/code/execute-turtle. Trigger buttons: green '🐢 Preview Turtle Output' inline button in create dialog (existing) and new [data-testid='edit-preview-turtle-btn'] in edit dialog. Empty-state placeholder shows 'No preview yet' + 'Click 🐢 Preview Turtle Output'. AnimatedTurtle (canvas) is no longer rendered in these two panels — verified 0 <canvas> in the Live Preview container. Non-turtle types don't show the panel at all. If any regression appears, first check newProblem.expected_turtle_image / editingProblem.expected_turtle_image state and the assignment_type==='turtle' render guard around lines 2103 and 3417 of /app/frontend/src/pages/AssignmentLibrary.jsx.",
+  "rca of the issue": "Original bug: teacher Live Preview used JS-based <AnimatedTurtle /> (approximate canvas animation) while student saw backend-rendered Python turtle PNG, causing preview mismatch. Fix: replaced the AnimatedTurtle in both Create (~L2103) and Edit (~L3417) Live Preview panels with an <img> that reads the backend-returned base64 PNG (expected_turtle_image state, populated by POST /api/code/execute-turtle). Added a new Preview Turtle Output button to the Edit dialog. Confirmed by end-to-end UI test that both panels now render the PNG and no <canvas> is present. Regression verified: existing turtle preview modal still opens; non-turtle types still don't render the panel."
+}
