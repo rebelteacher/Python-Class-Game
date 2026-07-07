@@ -344,4 +344,10 @@ A coding education platform for K-12 students featuring multiple programming env
     - **Classrooms → "How do I lock or unlock lessons for my class?"** — rewritten as numbered step-by-step from Teacher Dashboard through Lesson Locks toggle + Class Progress widget tip.
   - Because the AI `/api/help/ask` endpoint builds its system prompt from `HELP_FAQ_ENTRIES` dynamically, all four new entries are automatically part of the AI's grounded knowledge — no separate prompt update needed. Verified via curl.
 
+- Curriculum lesson natural sort fix (Mar 2, 2026):
+  - User reported: chapters with more than 9 lessons showed them in alphabetical order — "Lesson 1, Lesson 10, Lesson 11, Lesson 12, Lesson 2, Lesson 3..." instead of numeric order.
+  - Root cause: both `/api/curriculum/units` (teacher/admin) and `/api/student/curriculum` (student) used plain string `sorted()` on chapter + lesson names. String comparison puts "10" before "2" because "1" < "2" character-wise.
+  - Fix: added module-scope helper `_natural_key()` in `server.py` that splits strings on digit boundaries and casts numeric chunks to int (e.g. "Lesson 10 end" → `["lesson ", 10, " end"]`). Applied to both chapter and lesson sorts in both endpoints. This single fix covers Block, Turtle, Python, and Micro:bit curriculum pages for both teachers and students.
+  - Verified via curl on preview: `Lesson 1 → Lesson 2 → Lesson 10` (previously `Lesson 1 → Lesson 10 → Lesson 2`).
+
 *Last Updated: Mar 2, 2026*
