@@ -5258,7 +5258,20 @@ Be encouraging but fair. Give partial credit for good attempts."""
     chat = LlmChat(
         api_key=llm_key,
         session_id=f"submission_{submission.assignment_id}_{user['id']}",
-        system_message="You are a helpful coding instructor. Provide constructive feedback to help students improve. Do NOT assign scores - only give guidance."
+        system_message=(
+            "You are a helpful coding instructor. Provide constructive feedback to help students "
+            "improve. Do NOT assign scores - only give guidance.\n\n"
+            "IMPORTANT — WILDCARD TOKENS IN EXPECTED OUTPUT:\n"
+            "This platform's autograder recognizes uppercase-brace tokens like {NAME}, {AGE}, or "
+            "{ANY} in the Expected Output as WILDCARDS that match any non-empty text. Tokens are a "
+            "TEACHER-SIDE grader feature only — they are NEVER something a student should type into "
+            "their code. If you see a token in the Solution Code or Expected Output, treat it as a "
+            "placeholder for 'the student's own value' (their real name, age, etc.). NEVER tell the "
+            "student to add {NAME} (or any curly-brace token) to their print() string, f-string, or "
+            "variables — doing so would make Python literally print '{NAME}' on the screen, which "
+            "is wrong. Instead, when relevant, praise the student for personalizing their output "
+            "with their own name/value."
+        ),
     ).with_model("openai", "gpt-4o")
     
     if total_tests > 0 and len(assignment.get("test_cases", [])) > 0:
@@ -5988,13 +6001,17 @@ async def get_hint(hint_request: HintRequest, request: Request):
 1. Pointing out what they should think about
 2. Asking guiding questions
 3. Reminding them to check their feedback
-Keep it under 100 words."""
+Keep it under 100 words.
+
+IMPORTANT — WILDCARD TOKENS: This platform recognizes uppercase-brace tokens like {NAME}, {AGE}, or {ANY} in the Expected Output as GRADER wildcards that match any non-empty text. Tokens are teacher-side only — NEVER tell a student to type {NAME} (or any curly-brace token) into their print(), f-string, or variables. Doing so would make Python literally print '{NAME}' on screen, which is wrong."""
         else:
             system_message = """You are a helpful coding tutor. Provide a more detailed hint that helps the student understand their mistake. You can:
 1. Point out specific issues in their code
 2. Explain concepts they might be missing
 3. Give a partial example (but not the full solution)
-Keep it under 150 words."""
+Keep it under 150 words.
+
+IMPORTANT — WILDCARD TOKENS: This platform recognizes uppercase-brace tokens like {NAME}, {AGE}, or {ANY} in the Expected Output as GRADER wildcards that match any non-empty text. Tokens are teacher-side only — NEVER tell a student to type {NAME} (or any curly-brace token) into their print(), f-string, or variables. Doing so would make Python literally print '{NAME}' on screen, which is wrong."""
         
         chat = LlmChat(
             api_key=api_key,
@@ -11306,7 +11323,16 @@ async def submit_coding_test(test_id: str, submission: CodingTestSubmit, request
     chat = LlmChat(
         api_key=llm_key,
         session_id=f"coding_test_{test_id}_{user['id']}_{submission.problem_id}",
-        system_message="You are a helpful coding instructor. Provide brief, encouraging feedback based on test results. Do NOT assign scores."
+        system_message=(
+            "You are a helpful coding instructor. Provide brief, encouraging feedback based on "
+            "test results. Do NOT assign scores.\n\n"
+            "IMPORTANT — WILDCARD TOKENS IN EXPECTED OUTPUT:\n"
+            "This platform's autograder recognizes uppercase-brace tokens like {NAME}, {AGE}, or "
+            "{ANY} in the Expected Output as WILDCARDS that match any non-empty text. Tokens are a "
+            "TEACHER-SIDE grader feature only — they are NEVER something a student should type into "
+            "their code. NEVER tell a student to add {NAME} (or any curly-brace token) to their "
+            "print() string, f-string, or variables."
+        ),
     ).with_model("openai", "gpt-4o")
     
     prompt = f"""
