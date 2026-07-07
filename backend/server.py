@@ -5122,31 +5122,55 @@ Be encouraging but fair. Give partial credit for good attempts."""
         
             base_score = (passed_tests / total_tests) * 100
         else:
-            # No test cases - compare outputs directly
-            solution_result = run_python_code(problem.get("solution_code", ""), "")
+            # No test cases - prefer the problem's Expected Output field (which may contain
+            # {NAME} wildcards) as the ground truth. Only fall back to running the solution
+            # code if no Expected Output was provided.
+            problem_expected = normalize_output(problem.get("expected_output", ""))
             student_result = run_python_code(submission.code, "")
-            
-            solution_output = normalize_output(solution_result["output"]) if solution_result["success"] else ""
             student_output = normalize_output(student_result["output"]) if student_result["success"] else ""
-            
-            # Basic comparison
-            if student_result["success"] and outputs_match(solution_output, student_output):
-                base_score = 100
-                passed_tests = 1
-                total_tests = 1
+
+            if problem_expected:
+                # Compare student output directly to the teacher-authored Expected Output
+                # (supports {NAME}-style wildcards via outputs_match).
+                if student_result["success"] and outputs_match(problem_expected, student_output):
+                    base_score = 100
+                    passed_tests = 1
+                    total_tests = 1
+                else:
+                    base_score = 50 if student_result["success"] else 0
+                    passed_tests = 0
+                    total_tests = 1
+
+                test_results.append({
+                    "test_id": "output_comparison",
+                    "description": "Compare output to expected",
+                    "passed": student_result["success"] and outputs_match(problem_expected, student_output),
+                    "expected": problem_expected,
+                    "actual": student_output,
+                    "error": student_result.get("error"),
+                })
             else:
-                base_score = 50 if student_result["success"] else 0
-                passed_tests = 0
-                total_tests = 1
-            
-            test_results.append({
-                "test_id": "output_comparison",
-                "description": "Compare output to solution",
-                "passed": outputs_match(solution_output, student_output),
-                "expected": solution_output,
-                "actual": student_output,
-                "error": student_result.get("error")
-            })
+                # No Expected Output authored — fall back to running the solution and comparing.
+                solution_result = run_python_code(problem.get("solution_code", ""), "")
+                solution_output = normalize_output(solution_result["output"]) if solution_result["success"] else ""
+
+                if student_result["success"] and outputs_match(solution_output, student_output):
+                    base_score = 100
+                    passed_tests = 1
+                    total_tests = 1
+                else:
+                    base_score = 50 if student_result["success"] else 0
+                    passed_tests = 0
+                    total_tests = 1
+
+                test_results.append({
+                    "test_id": "output_comparison",
+                    "description": "Compare output to solution",
+                    "passed": outputs_match(solution_output, student_output),
+                    "expected": solution_output,
+                    "actual": student_output,
+                    "error": student_result.get("error"),
+                })
     except Exception as e:
         logging.error(f"Error during test evaluation: {str(e)}")
         # Fallback: give partial credit and basic feedback
@@ -11283,26 +11307,36 @@ async def submit_coding_test(test_id: str, submission: CodingTestSubmit, request
                     "error": str(e)
                 })
     else:
-        # Fallback to simple comparison with solution
+        # Fallback comparison — prefer the problem's Expected Output field (which may
+        # contain {NAME}-style wildcards) as ground truth. Only run the solution code
+        # if no Expected Output was authored.
         try:
-            solution_result = run_python_code(problem.get("solution_code", ""), "")
+            problem_expected = normalize_output(problem.get("expected_output", ""))
             student_result = run_python_code(submission.code, "")
-            
-            solution_output = normalize_output(solution_result["output"]) if solution_result["success"] else ""
             student_output = normalize_output(student_result["output"]) if student_result["success"] else ""
-            
-            passed = student_result["success"] and outputs_match(solution_output, student_output)
+
+            if problem_expected:
+                passed = student_result["success"] and outputs_match(problem_expected, student_output)
+                expected_for_result = problem_expected
+                description = "Compare output to expected"
+            else:
+                solution_result = run_python_code(problem.get("solution_code", ""), "")
+                solution_output = normalize_output(solution_result["output"]) if solution_result["success"] else ""
+                passed = student_result["success"] and outputs_match(solution_output, student_output)
+                expected_for_result = solution_output
+                description = "Compare output to solution"
+
             if passed:
                 passed_tests = 1
-            
+
             total_tests = 1
             test_results.append({
                 "test_id": "output_comparison",
-                "description": "Compare output to solution",
+                "description": description,
                 "passed": passed,
-                "expected": solution_output,
+                "expected": expected_for_result,
                 "actual": student_output,
-                "error": student_result.get("error")
+                "error": student_result.get("error"),
             })
         except Exception as e:
             logging.error(f"Error during test evaluation: {str(e)}")
