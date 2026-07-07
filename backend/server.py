@@ -3232,6 +3232,43 @@ def normalize_output(output: str) -> str:
     return '\n'.join(lines)
 
 
+# Wildcard token used in expected outputs to match any non-empty text.
+# Teachers put e.g. `Hello, {NAME}!` in the Expected Output, and the grader
+# treats `{NAME}` as ".+" (one-or-more of any character except newline) when
+# comparing. Backwards compatible: any expected output that does not contain a
+# `{TOKEN}` falls back to exact string equality — no change for existing
+# problems.
+_OUTPUT_TOKEN_RE = re.compile(r"\{[A-Z_][A-Z0-9_]*\}")
+
+
+def outputs_match(expected: str, actual: str) -> bool:
+    """Return True if `actual` matches `expected` where {TOKEN} placeholders
+    (e.g. {NAME}, {AGE}) match any non-empty single-line text.
+
+    Both inputs should already be passed through normalize_output.
+    """
+    expected = expected or ""
+    actual = actual or ""
+
+    # Fast path — no tokens → strict equality (preserves original behaviour).
+    if not _OUTPUT_TOKEN_RE.search(expected):
+        return actual == expected
+
+    # Build a regex from `expected`: escape literal chars, replace tokens with .+
+    parts = []
+    last = 0
+    for m in _OUTPUT_TOKEN_RE.finditer(expected):
+        parts.append(re.escape(expected[last:m.start()]))
+        parts.append(r".+")  # one-or-more of anything except newline
+        last = m.end()
+    parts.append(re.escape(expected[last:]))
+    pattern = "".join(parts)
+
+    # DOTALL is intentionally NOT used — a token should not swallow a newline
+    # (that would let a student put a whole extra print in the middle).
+    return re.fullmatch(pattern, actual) is not None
+
+
 
 def run_python_code(code: str, test_input: str = "", timeout: int = 5) -> dict:
     """Execute Python code safely with test input, separating prompts from output"""
@@ -5070,7 +5107,7 @@ Be encouraging but fair. Give partial credit for good attempts."""
                 if result.get("error"):
                     logging.info(f"📊 TEST CASE ERROR: {result.get('error')}")
                 
-                passed = result["success"] and actual == expected
+                passed = result["success"] and outputs_match(expected, actual)
                 if passed:
                     passed_tests += 1
             
@@ -5093,7 +5130,7 @@ Be encouraging but fair. Give partial credit for good attempts."""
             student_output = normalize_output(student_result["output"]) if student_result["success"] else ""
             
             # Basic comparison
-            if student_result["success"] and student_output == solution_output:
+            if student_result["success"] and outputs_match(solution_output, student_output):
                 base_score = 100
                 passed_tests = 1
                 total_tests = 1
@@ -5105,7 +5142,7 @@ Be encouraging but fair. Give partial credit for good attempts."""
             test_results.append({
                 "test_id": "output_comparison",
                 "description": "Compare output to solution",
-                "passed": student_output == solution_output,
+                "passed": outputs_match(solution_output, student_output),
                 "expected": solution_output,
                 "actual": student_output,
                 "error": student_result.get("error")
@@ -7169,6 +7206,31 @@ async def get_invite_codes(request: Request):
 # ===================== HELP / FAQ =====================
 
 HELP_FAQ_ENTRIES = [
+    # ---- GRADING / AUTOGRADER ----
+    {
+        "id": "personalized-output-wildcard",
+        "audience": ["teacher", "admin"],
+        "category": "Grading",
+        "question": "Students want to put their own name in the output — how do I make the grader accept any name?",
+        "answer": (
+            "Use a **wildcard token** in the Expected Output. Anywhere you'd normally write a "
+            "placeholder name like 'Ada' or '[YourName]', write `{NAME}` instead. The grader "
+            "treats `{TOKEN}` (any uppercase word inside curly braces) as 'any non-empty text.'\n\n"
+            "Examples:\n"
+            "• Expected Output:  `Hello, {NAME}!`\n"
+            "   – 'Hello, Ada!' ✓, 'Hello, Marcus!' ✓, 'Hi, Ada!' ✗ (wrong greeting), 'Hello, !' ✗ (empty)\n"
+            "• Expected Output:  `My name is {NAME} and I am {AGE} years old.`\n"
+            "   – Any name AND any age will pass.\n\n"
+            "Notes:\n"
+            "• Tokens must be UPPERCASE — `{NAME}` works, `{name}` does not (that keeps it visually distinct "
+            "from Python variables so students don't confuse the two).\n"
+            "• The token only matches within a single line — students can't sneak an extra print in the middle.\n"
+            "• If your problem has no token, grading is unchanged (still strict equality)."
+        ),
+        "link": "/assignments",
+        "link_label": "Open the Library",
+    },
+
     # ---- TURTLE TROUBLESHOOTING (teacher-facing, so you can answer common student questions) ----
     {
         "id": "turtle-colors-not-showing",
@@ -11181,7 +11243,7 @@ async def submit_coding_test(test_id: str, submission: CodingTestSubmit, request
             try:
                 result = run_python_code(submission.code, test_input)
                 actual_output = normalize_output(result.get("output", ""))
-                passed = result.get("success") and actual_output == expected_output
+                passed = result.get("success") and outputs_match(expected_output, actual_output)
                 
                 if passed:
                     passed_tests += 1
@@ -11212,7 +11274,7 @@ async def submit_coding_test(test_id: str, submission: CodingTestSubmit, request
             solution_output = normalize_output(solution_result["output"]) if solution_result["success"] else ""
             student_output = normalize_output(student_result["output"]) if student_result["success"] else ""
             
-            passed = student_result["success"] and student_output == solution_output
+            passed = student_result["success"] and outputs_match(solution_output, student_output)
             if passed:
                 passed_tests = 1
             
@@ -11713,7 +11775,7 @@ async def submit_challenge(challenge_id: str, submission_data: dict, request: Re
         result = run_python_code(code, test_input)
         expected = normalize_output(test_case.get("expected_output", ""))
         actual = normalize_output(result.get("output", ""))
-        passed = expected == actual and result.get("error") is None
+        passed = outputs_match(expected, actual) and result.get("error") is None
         
         if passed:
             passed_tests += 1

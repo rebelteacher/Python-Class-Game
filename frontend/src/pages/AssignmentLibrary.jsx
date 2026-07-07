@@ -1574,13 +1574,16 @@ export default function AssignmentLibrary({ user }) {
                       <Textarea
                         data-testid="lib-expected-output-input"
                         id="expectedOutput"
-                        placeholder="e.g., 60"
+                        placeholder="e.g., 60  —or—  Hello, {NAME}!"
                         value={newProblem.expected_output}
                         onChange={(e) => setNewProblem({ ...newProblem, expected_output: e.target.value })}
                         className="mt-1 font-mono text-sm"
                         rows={3}
                       />
                       <p className="text-xs text-slate-500 mt-1">What the program should output when run</p>
+                      <p className="text-xs text-cyber-cyan/80 mt-1">
+                        <span className="font-semibold">Tip:</span> Use <code className="text-cyber-cyan bg-cyber-navy/40 px-1 rounded">{"{NAME}"}</code> (or any <code className="text-cyber-cyan bg-cyber-navy/40 px-1 rounded">{"{TOKEN}"}</code>) as a wildcard — matches any non-empty text so students can personalize outputs (e.g. <code className="text-slate-400">Hello, {"{NAME}"}!</code> accepts any name).
+                      </p>
                     </div>
                   )}
                   
@@ -2902,13 +2905,16 @@ export default function AssignmentLibrary({ user }) {
                     <Label htmlFor="edit-expectedOutput">Expected Output (Optional)</Label>
                     <Textarea
                       id="edit-expectedOutput"
-                      placeholder="e.g., 60"
+                      placeholder="e.g., 60  —or—  Hello, {NAME}!"
                       value={editingProblem.expected_output}
                       onChange={(e) => setEditingProblem({ ...editingProblem, expected_output: e.target.value })}
                       className="mt-1 font-mono text-sm"
                       rows={3}
                     />
                     <p className="text-xs text-slate-500 mt-1">What the program should output when run</p>
+                    <p className="text-xs text-cyber-cyan/80 mt-1">
+                      <span className="font-semibold">Tip:</span> Use <code className="text-cyber-cyan bg-cyber-navy/40 px-1 rounded">{"{NAME}"}</code> (or any <code className="text-cyber-cyan bg-cyber-navy/40 px-1 rounded">{"{TOKEN}"}</code>) as a wildcard — matches any non-empty text so students can personalize outputs.
+                    </p>
                   </div>
                 )}
 
