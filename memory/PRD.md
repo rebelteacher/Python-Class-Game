@@ -330,4 +330,18 @@ A coding education platform for K-12 students featuring multiple programming env
   - **Verified by testing_agent (iteration_22)**: 4/4 timing tests passed. `t.speed(0)` 20-step loop finished in 0.79s (previously ~30s). `t.speed(1)` correctly takes 3+s. Mid-run `t.speed(0)` propagates within one command.
   - Follow-up flagged (not shipped): add data-testid attributes to AnimatedTurtle Play/Pause/Reset/FastForward toolbar buttons for less brittle timing tests.
 
-*Last Updated: Feb 29, 2026*
+- Teacher Live Preview → Python PNG swap (Mar 1, 2026 — iteration_23):
+  - Root cause: `AssignmentLibrary.jsx` used `<AnimatedTurtle>` (JS canvas approximation) in the Live Preview panel while students saw the backend-rendered Python turtle PNG — causing preview vs. expected-output mismatch.
+  - Fix: replaced `<AnimatedTurtle>` with an `<img>` reading the base64 `expected_turtle_image` returned by `POST /api/code/execute-turtle` in both the **Create** dialog (~L2103) and the new **Edit** dialog Preview (~L3417). Added `edit-preview-turtle-btn` to the edit dialog.
+  - **Verified by testing_agent (iteration_23)**: 6/6 frontend cases passed, 0 `<canvas>` in Live Preview containers, regression guard preserved for non-turtle assignment types.
+
+- Help System FAQ expansion (Mar 2, 2026):
+  - Extended `HelpButton.jsx` `FaqItem` component to render an optional `image` field (with `image_alt`) — image displays under the answer text, lazy-loaded, testid `faq-image-<id>`.
+  - Added new FAQ entries:
+    - **Answer Keys → "Where do I find the answer key / solution code for a problem?"** — describes the green LEFT-side "Show Solution Code" button, with an embedded screenshot.
+    - **Answer Keys → "How do I add or edit the solution code for a problem?"** — Library edit flow + Preview Turtle Output tip.
+    - **Turtle Troubleshooting → "Why aren't my student's turtle colors showing up?"** — covers geometry bug (tiny circle → position thresholds never trigger) + white-on-white invisibility. Includes `print(t.xcor())` debug tip.
+    - **Classrooms → "How do I lock or unlock lessons for my class?"** — rewritten as numbered step-by-step from Teacher Dashboard through Lesson Locks toggle + Class Progress widget tip.
+  - Because the AI `/api/help/ask` endpoint builds its system prompt from `HELP_FAQ_ENTRIES` dynamically, all four new entries are automatically part of the AI's grounded knowledge — no separate prompt update needed. Verified via curl.
+
+*Last Updated: Mar 2, 2026*
