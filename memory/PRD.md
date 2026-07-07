@@ -350,4 +350,12 @@ A coding education platform for K-12 students featuring multiple programming env
   - Fix: added module-scope helper `_natural_key()` in `server.py` that splits strings on digit boundaries and casts numeric chunks to int (e.g. "Lesson 10 end" → `["lesson ", 10, " end"]`). Applied to both chapter and lesson sorts in both endpoints. This single fix covers Block, Turtle, Python, and Micro:bit curriculum pages for both teachers and students.
   - Verified via curl on preview: `Lesson 1 → Lesson 2 → Lesson 10` (previously `Lesson 1 → Lesson 10 → Lesson 2`).
 
+- Wildcard tokens in autograder expected output (Mar 2, 2026):
+  - User pain point: students personalizing outputs (replacing "Ada" or "[YourName]" with their real name) failed the autograder because it did strict `actual == expected` string equality.
+  - Design: chose `{NAME}` (single-brace uppercase token) convention because it mirrors Python's own f-string / `.format()` syntax — free pedagogical transfer. Also standard in API docs and template engines.
+  - Backend: added `outputs_match(expected, actual)` helper in `server.py`. Regex `_OUTPUT_TOKEN_RE = re.compile(r"\{[A-Z_][A-Z0-9_]*\}")` finds tokens; those get replaced with `.+` (one-or-more of any char except newline — token can't swallow an entire extra print). If expected output has NO tokens, falls back to strict equality (zero-risk regression). Replaced 6 direct equality checks across all grader paths (submission grader, test-case grader, solution-comparison fallback, challenge grader).
+  - Frontend (`AssignmentLibrary.jsx`): updated Expected Output placeholder in both Create and Edit dialogs to include `Hello, {NAME}!` example. Added cyan tip line explaining the wildcard convention.
+  - Help System: new **Grading** FAQ category → "Students want to put their own name in the output — how do I make the grader accept any name?" with examples and gotchas. AI `/api/help/ask` auto-discovers via `HELP_FAQ_ENTRIES`.
+  - Verified: 11/11 outputs_match unit tests pass, including basic substitution, multi-word names, multiple tokens per output, multiline with token, empty-name rejection, no-newline-swallow, and lowercase-token rejection.
+
 *Last Updated: Mar 2, 2026*
