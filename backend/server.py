@@ -2375,6 +2375,13 @@ async def get_curriculum_units(request: Request):
     """
     user = await get_current_user(request)  # noqa: F841
 
+    # Natural sort so "Lesson 2" comes before "Lesson 10" (not the other way around).
+    # Splits the string on digit boundaries and casts numeric chunks to int,
+    # e.g. "Lesson 10 end" -> ["lesson ", 10, " end"].
+    def _natural_key(s):
+        s = s or ""
+        return [int(t) if t.isdigit() else t.lower() for t in re.split(r"(\d+)", s)]
+
     # Define unit-to-assignment_type mapping
     unit_map = {
         "Unit 1: Block-Based Coding": "block",
@@ -2387,13 +2394,13 @@ async def get_curriculum_units(request: Request):
     for unit_name, atype in unit_map.items():
         chapters_raw = await db.problems.distinct("chapter", {"assignment_type": atype})
         chapters = []
-        for ch in sorted(chapters_raw):
+        for ch in sorted(chapters_raw, key=_natural_key):
             if not ch:
                 continue
             lessons_raw = await db.problems.distinct("lesson", {"assignment_type": atype, "chapter": ch})
             lessons = []
             orphan_count = 0
-            for le in sorted(lessons_raw, key=lambda x: x or ""):
+            for le in sorted(lessons_raw, key=_natural_key):
                 count = await db.problems.count_documents({"assignment_type": atype, "chapter": ch, "lesson": le})
                 if not le:
                     orphan_count = count
