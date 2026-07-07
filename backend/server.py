@@ -7226,15 +7226,24 @@ HELP_FAQ_ENTRIES = [
         "id": "lock-lessons",
         "audience": ["teacher", "admin"],
         "category": "Classrooms",
-        "question": "Where do I lock or unlock lessons for my class?",
+        "question": "How do I lock or unlock lessons for my class?",
         "answer": (
-            "Open the classroom you want to manage (Teacher Dashboard → click a classroom). "
-            "Click the **Lesson Locks** tab. Each lesson has a Lock/Unlock toggle, and chapters with "
-            "chapter tests have their own unlock controls. Locks are per-classroom, so one class can "
-            "be on a different lesson than another."
+            "Step-by-step, starting from your dashboard:\n\n"
+            "1. From the top nav, click **Teacher Dashboard**.\n"
+            "2. In the **My Classrooms** section, click the classroom you want to manage.\n"
+            "3. On the classroom page, click the **Lesson Locks** tab.\n"
+            "4. Find the lesson (or chapter test) you want to unlock — each row has a "
+            "**Lock / Unlock** toggle on the right.\n"
+            "5. Click the toggle. It turns green when unlocked. Students in *only that classroom* "
+            "will now see the lesson.\n"
+            "6. To re-lock, just click the toggle again.\n\n"
+            "Tip: The magenta **Class Progress** widget at the top of the tab shows how many "
+            "students have finished each chapter and includes a one-click **Unlock for class** "
+            "button for chapter tests. Locks are per-classroom, so one class can be on a "
+            "different lesson than another."
         ),
         "link": "/teacher/dashboard",
-        "link_label": "Open my classrooms",
+        "link_label": "Open Teacher Dashboard",
     },
     {
         "id": "chapter-test-unlock",
