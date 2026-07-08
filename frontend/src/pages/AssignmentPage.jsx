@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Textarea } from "@/components/ui/textarea";
-import { ArrowLeft, Play, Send, CheckCircle, XCircle, Code2, Lightbulb, X, BookOpen, Cpu, RotateCcw, ExternalLink, Blocks, Pencil, Save, Trash2 } from "lucide-react";
+import { ArrowLeft, Play, Send, CheckCircle, XCircle, Code2, Lightbulb, X, BookOpen, Cpu, RotateCcw, ExternalLink, Blocks, Pencil, Save, Trash2, ChevronDown, ChevronRight } from "lucide-react";
 import Editor from "@monaco-editor/react";
 import { Panel, PanelGroup, PanelResizeHandle } from "react-resizable-panels";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
@@ -112,6 +112,13 @@ export default function AssignmentPage({ user, lessonData }) {
   const [instructionsDraft, setInstructionsDraft] = useState("");
   const [savingInstructions, setSavingInstructions] = useState(false);
   const [lessonView, setLessonView] = useState("instruction"); // "instruction" | "practice"
+  // Collapsed state for the lesson intro card. Auto-expanded on Problem 1,
+  // auto-collapsed on Problem 2+, and the student can toggle any time.
+  const [lessonIntroExpanded, setLessonIntroExpanded] = useState(true);
+  useEffect(() => {
+    // Reset expand/collapse when the student moves between problems.
+    setLessonIntroExpanded(currentProblemIndex === 0);
+  }, [currentProblemIndex]);
   const [testInput, setTestInput] = useState(""); // For input() functions
   const [showInteractiveDialog, setShowInteractiveDialog] = useState(false); // Interactive input mode
   
@@ -1042,20 +1049,53 @@ export default function AssignmentPage({ user, lessonData }) {
                         </Button>
                       </div>
                     </div>
-                  ) : assignment?.is_lesson && lessonInstructions ? (
-                    /* Rendered lesson instructions */
-                    <div
-                      className="text-sm leading-relaxed font-chakra lesson-instructions-content"
-                      dangerouslySetInnerHTML={{ __html: formatLessonMarkdown(lessonInstructions) }}
-                    />
                   ) : (
-                    /* Default: show problem description with markdown formatting */
-                    <div
-                      className="text-sm leading-relaxed font-chakra lesson-instructions-content"
-                      dangerouslySetInnerHTML={{ __html: formatLessonMarkdown(
-                        (assignment.problems && assignment.problems[currentProblemIndex]?.description) || assignment.description || "No description provided."
-                      ) }}
-                    />
+                    <>
+                      {/* Lesson Instructions — shared context, collapsible.
+                          Auto-expanded on Problem 1, collapsed on Problem 2+.
+                          Student can toggle any time. Only appears when both
+                          the assignment is a lesson AND instructions exist. */}
+                      {assignment?.is_lesson && lessonInstructions && (
+                        <div
+                          data-testid="lesson-intro-collapsible"
+                          className={`mb-4 border border-cyber-cyan/30 bg-cyber-navy/20 rounded-none ${lessonIntroExpanded ? '' : 'pb-0'}`}
+                        >
+                          <button
+                            type="button"
+                            data-testid="lesson-intro-toggle"
+                            onClick={() => setLessonIntroExpanded((v) => !v)}
+                            className="w-full flex items-center gap-2 px-3 py-2 text-left hover:bg-cyber-navy/40 transition-colors"
+                          >
+                            {lessonIntroExpanded ? (
+                              <ChevronDown className="w-4 h-4 text-cyber-cyan shrink-0" />
+                            ) : (
+                              <ChevronRight className="w-4 h-4 text-cyber-cyan shrink-0" />
+                            )}
+                            <BookOpen className="w-4 h-4 text-cyber-cyan shrink-0" />
+                            <span className="text-xs font-orbitron text-cyber-cyan uppercase tracking-widest">
+                              Lesson Intro
+                            </span>
+                            {!lessonIntroExpanded && (
+                              <span className="text-xs text-slate-400 ml-auto italic">click to expand</span>
+                            )}
+                          </button>
+                          {lessonIntroExpanded && (
+                            <div
+                              className="px-4 pb-4 pt-1 text-sm leading-relaxed font-chakra lesson-instructions-content border-t border-cyber-cyan/10"
+                              dangerouslySetInnerHTML={{ __html: formatLessonMarkdown(lessonInstructions) }}
+                            />
+                          )}
+                        </div>
+                      )}
+
+                      {/* Problem-specific description — always visible */}
+                      <div
+                        className="text-sm leading-relaxed font-chakra lesson-instructions-content"
+                        dangerouslySetInnerHTML={{ __html: formatLessonMarkdown(
+                          (assignment.problems && assignment.problems[currentProblemIndex]?.description) || assignment.description || "No description provided."
+                        ) }}
+                      />
+                    </>
                   )}
                   
                   {/* Resources Link - Show for students and teachers */}
