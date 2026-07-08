@@ -11,7 +11,7 @@ import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Checkbox } from "@/components/ui/checkbox";
-import { ArrowLeft, Plus, Edit, Trash2, FileQuestion, Folder, FolderOpen, ChevronRight, ChevronDown, Upload, FolderInput, Search, Filter, X, CheckSquare, Square, ToggleLeft, ToggleRight } from "lucide-react";
+import { ArrowLeft, Plus, Edit, Trash2, FileQuestion, Folder, FolderOpen, ChevronRight, ChevronDown, Upload, FolderInput, Search, Filter, X, CheckSquare, Square, ToggleLeft, ToggleRight, Eye, CheckCircle } from "lucide-react";
 
 const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
 const API = `${BACKEND_URL}/api`;
@@ -234,6 +234,11 @@ export default function QuestionBank({ user }) {
   const [movingQuestion, setMovingQuestion] = useState(null);
   const [moveToChapter, setMoveToChapter] = useState("");
   const [moveToLesson, setMoveToLesson] = useState("");
+
+  // Student-view preview
+  const [previewQuestion, setPreviewQuestion] = useState(null);
+  const [previewSelected, setPreviewSelected] = useState("");
+  const [previewShowAnswer, setPreviewShowAnswer] = useState(false);
   
   // Filters
   const [searchTerm, setSearchTerm] = useState("");
@@ -1266,6 +1271,21 @@ What is 2+2?,3,4,5,6,B,code,Unit 3: Python Text,Chapter 1,Lesson 1,Easy</pre>
                                         {!selectionMode && (
                                           <div className="flex gap-2">
                                             <Button
+                                              data-testid={`qb-preview-btn-${question.id}`}
+                                              onClick={() => {
+                                                setPreviewQuestion(question);
+                                                setPreviewSelected("");
+                                                setPreviewShowAnswer(false);
+                                              }}
+                                              variant="outline"
+                                              size="sm"
+                                              className="flex-1"
+                                              title="Preview how this question looks to students"
+                                            >
+                                              <Eye className="w-4 h-4 mr-1" />
+                                              Preview
+                                            </Button>
+                                            <Button
                                               onClick={() => {
                                                 setMovingQuestion(question);
                                                 setMoveToChapter(question.chapter || "");
@@ -1514,6 +1534,111 @@ What is 2+2?,3,4,5,6,B,code,Unit 3: Python Text,Chapter 1,Lesson 1,Easy</pre>
                 Update Question
               </Button>
             </form>
+          </DialogContent>
+        </Dialog>
+      )}
+
+      {/* Student-View Preview Dialog */}
+      {previewQuestion && (
+        <Dialog
+          open={!!previewQuestion}
+          onOpenChange={(open) => {
+            if (!open) {
+              setPreviewQuestion(null);
+              setPreviewSelected("");
+              setPreviewShowAnswer(false);
+            }
+          }}
+        >
+          <DialogContent className="max-w-3xl" data-testid="qb-preview-dialog">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Eye className="w-5 h-5 text-cyber-cyan" />
+                Student Preview
+              </DialogTitle>
+              <DialogDescription>
+                This is exactly how this question will appear to students during a test.
+              </DialogDescription>
+            </DialogHeader>
+
+            {/* Matches TestTaking.jsx question card styling */}
+            <Card className="mb-2">
+              <CardHeader>
+                <CardTitle className="text-lg flex items-center justify-between">
+                  <span>Question 1</span>
+                  {previewSelected !== "" && (
+                    <span className="text-sm font-normal text-green-600 flex items-center gap-1">
+                      <CheckCircle className="w-4 h-4" />
+                      Answered
+                    </span>
+                  )}
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="text-white mb-6 text-base font-medium whitespace-pre-line">
+                  {renderTextWithLineBreaks(previewQuestion.question_text)}
+                </div>
+
+                <RadioGroup value={previewSelected} onValueChange={setPreviewSelected}>
+                  {[
+                    { letter: "A", text: previewQuestion.choice_a },
+                    { letter: "B", text: previewQuestion.choice_b },
+                    { letter: "C", text: previewQuestion.choice_c },
+                    { letter: "D", text: previewQuestion.choice_d },
+                  ].map((c) => {
+                    const isSelected = previewSelected === c.letter;
+                    const isCorrect = previewShowAnswer && c.letter === previewQuestion.correct_answer;
+                    const isWrongPick = previewShowAnswer && isSelected && !isCorrect;
+                    return (
+                      <div
+                        key={c.letter}
+                        className={`flex items-center space-x-3 p-4 rounded-lg transition-colors border-2 cursor-pointer
+                          ${isCorrect ? 'border-green-500 bg-green-500/10' :
+                            isWrongPick ? 'border-red-500 bg-red-500/10' :
+                            isSelected ? 'border-indigo-500 bg-indigo-500/10' :
+                            'border-cyber-cyan/10 hover:bg-cyber-navy/40 hover:border-cyber-cyan/15'}`}
+                      >
+                        <RadioGroupItem value={c.letter} id={`preview-choice-${c.letter}`} />
+                        <Label
+                          htmlFor={`preview-choice-${c.letter}`}
+                          className="flex-1 cursor-pointer text-base whitespace-pre-line"
+                        >
+                          <span className="mr-2 font-semibold">{c.letter}.</span>
+                          {renderChoice(c.text)}
+                        </Label>
+                        {isCorrect && (
+                          <CheckCircle className="w-5 h-5 text-green-500 shrink-0" />
+                        )}
+                      </div>
+                    );
+                  })}
+                </RadioGroup>
+              </CardContent>
+            </Card>
+
+            <DialogFooter className="flex-col sm:flex-row gap-2">
+              <div className="text-xs text-slate-400 mr-auto">
+                Chapter: <span className="text-slate-300">{previewQuestion.chapter || "(none)"}</span>
+                {" · "}Lesson: <span className="text-slate-300">{previewQuestion.lesson || "(none)"}</span>
+                {" · "}Difficulty: <span className="text-slate-300">{previewQuestion.difficulty || "medium"}</span>
+              </div>
+              <Button
+                variant="outline"
+                onClick={() => {
+                  setPreviewSelected("");
+                  setPreviewShowAnswer(false);
+                }}
+                data-testid="qb-preview-reset-btn"
+              >
+                Reset
+              </Button>
+              <Button
+                onClick={() => setPreviewShowAnswer((v) => !v)}
+                data-testid="qb-preview-toggle-answer-btn"
+              >
+                {previewShowAnswer ? "Hide Answer" : "Show Correct Answer"}
+              </Button>
+            </DialogFooter>
           </DialogContent>
         </Dialog>
       )}
