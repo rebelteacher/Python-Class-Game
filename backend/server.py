@@ -7247,6 +7247,46 @@ async def get_invite_codes(request: Request):
 # ===================== HELP / FAQ =====================
 
 HELP_FAQ_ENTRIES = [
+    # ---- LESSON INSTRUCTIONS ----
+    {
+        "id": "lesson-instructions-shared",
+        "audience": ["teacher", "admin"],
+        "category": "Lesson Design",
+        "question": "How do I add lesson-wide teaching content that shows on every problem?",
+        "answer": (
+            "Every lesson has a **Lesson Instructions** field that lets you write shared teaching "
+            "content once and have it appear at the top of the left panel on EVERY problem in that "
+            "lesson.\n\n"
+            "**Where to edit it:**\n"
+            "1. Admin → **Lesson Manager**\n"
+            "2. Expand a Unit → Chapter → Lesson\n"
+            "3. Under the lesson row you'll see a **Lesson Instructions** section with an **Edit** "
+            "button — click it, write your intro (supports markdown: `#` headings, `**bold**`, "
+            "`` `code` ``, bullet lists, ```python fenced code blocks```), then **Save**.\n\n"
+            "**How students see it:**\n"
+            "• A collapsible **Lesson Intro** card appears at the top of the Instructions panel.\n"
+            "• On **Problem 1** it's auto-expanded (students see the full intro first thing).\n"
+            "• On **Problem 2 onward** it's auto-collapsed to just a ~40px header — students can "
+            "click it any time to re-read the intro without leaving the problem.\n"
+            "• The problem-specific **Description** shows directly below the Lesson Intro, always "
+            "visible.\n\n"
+            "**Why this is better than putting the intro in Problem 1's description:**\n"
+            "• Students who jump to Problem 5 or 12 still see the shared context.\n"
+            "• Every problem becomes a real coding exercise (no half-tutorial problem eating a "
+            "grade slot).\n"
+            "• You edit the intro in ONE place instead of copy-pasting into every problem.\n\n"
+            "**Where to put problem-specific instructions:**\n"
+            "Each problem's own **Description** field — that's what shows directly below the "
+            "Lesson Intro card. Keep it short and task-focused, e.g. 'Print a 4-line number "
+            "tower using separate print() calls.'\n\n"
+            "**Related change:** The old blue 'Learn This Concept (FREE)' button on the student "
+            "code page has been removed — the Lesson Intro card replaces it and is always right "
+            "there next to the problem, one click to expand."
+        ),
+        "link": "/admin/lesson-manager",
+        "link_label": "Open Lesson Manager",
+    },
+
     # ---- GRADING / AUTOGRADER ----
     {
         "id": "personalized-output-wildcard",
