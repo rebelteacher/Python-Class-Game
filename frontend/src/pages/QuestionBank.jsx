@@ -882,25 +882,33 @@ What is 2+2?,3,4,5,6,B,code,Unit 3: Python Text,Chapter 1,Lesson 1,Easy</pre>
                       </div>
                     ) : (
                     <div className="space-y-2">
-                      <Input
-                        placeholder="A. First choice"
+                      <Textarea
+                        placeholder="A. First choice (drag corner to resize — supports multi-line)"
                         value={newQuestion.choice_a}
                         onChange={(e) => setNewQuestion({ ...newQuestion, choice_a: e.target.value })}
+                        rows={2}
+                        className="resize-y min-h-[44px] font-mono text-sm"
                       />
-                      <Input
+                      <Textarea
                         placeholder="B. Second choice"
                         value={newQuestion.choice_b}
                         onChange={(e) => setNewQuestion({ ...newQuestion, choice_b: e.target.value })}
+                        rows={2}
+                        className="resize-y min-h-[44px] font-mono text-sm"
                       />
-                      <Input
+                      <Textarea
                         placeholder="C. Third choice"
                         value={newQuestion.choice_c}
                         onChange={(e) => setNewQuestion({ ...newQuestion, choice_c: e.target.value })}
+                        rows={2}
+                        className="resize-y min-h-[44px] font-mono text-sm"
                       />
-                      <Input
+                      <Textarea
                         placeholder="D. Fourth choice"
                         value={newQuestion.choice_d}
                         onChange={(e) => setNewQuestion({ ...newQuestion, choice_d: e.target.value })}
+                        rows={2}
+                        className="resize-y min-h-[44px] font-mono text-sm"
                       />
                     </div>
                     )}
@@ -1429,25 +1437,33 @@ What is 2+2?,3,4,5,6,B,code,Unit 3: Python Text,Chapter 1,Lesson 1,Easy</pre>
                   </div>
                 ) : (
                 <div className="space-y-2">
-                <Input
-                  placeholder="A."
+                <Textarea
+                  placeholder="A. (drag corner to resize — supports multi-line)"
                   value={editingQuestion.choice_a}
                   onChange={(e) => setEditingQuestion({ ...editingQuestion, choice_a: e.target.value })}
+                  rows={2}
+                  className="resize-y min-h-[44px] font-mono text-sm"
                 />
-                <Input
+                <Textarea
                   placeholder="B."
                   value={editingQuestion.choice_b}
                   onChange={(e) => setEditingQuestion({ ...editingQuestion, choice_b: e.target.value })}
+                  rows={2}
+                  className="resize-y min-h-[44px] font-mono text-sm"
                 />
-                <Input
+                <Textarea
                   placeholder="C."
                   value={editingQuestion.choice_c}
                   onChange={(e) => setEditingQuestion({ ...editingQuestion, choice_c: e.target.value })}
+                  rows={2}
+                  className="resize-y min-h-[44px] font-mono text-sm"
                 />
-                <Input
+                <Textarea
                   placeholder="D."
                   value={editingQuestion.choice_d}
                   onChange={(e) => setEditingQuestion({ ...editingQuestion, choice_d: e.target.value })}
+                  rows={2}
+                  className="resize-y min-h-[44px] font-mono text-sm"
                 />
                 </div>
                 )}
