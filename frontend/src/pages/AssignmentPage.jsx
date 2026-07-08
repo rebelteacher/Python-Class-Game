@@ -1664,22 +1664,6 @@ export default function AssignmentPage({ user, lessonData }) {
                       {!hasRun && !problemsFinal[getCurrentProblemId()] && (
                         <p className="text-xs text-amber-600">⚠️ You must run your code before submitting</p>
                       )}
-                      
-                      {/* Learn Button - Visible for both students and teachers */}
-                      <div className="mt-4 pt-4 border-t">
-                        <Button
-                          onClick={handleViewLesson}
-                          disabled={loadingLesson}
-                          className="w-full bg-blue-600 hover:bg-blue-700 text-white"
-                          size="sm"
-                        >
-                          <BookOpen className="w-4 h-4 mr-2" />
-                          {loadingLesson ? "Loading..." : "📚 Learn This Concept (FREE)"}
-                        </Button>
-                        <p className="text-xs text-center text-slate-500 mt-2">
-                          💡 Review the lesson anytime - no coins needed!
-                        </p>
-                      </div>
 
                       {/* Hint and Mark as Done Buttons Row */}
                       {user.role === "student" && !problemsFinal[getCurrentProblemId()] && submissions.filter(s => s.problem_id === getCurrentProblemId()).length > 0 && (
