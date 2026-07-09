@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Textarea } from "@/components/ui/textarea";
-import { ArrowLeft, Play, Send, CheckCircle, XCircle, Code2, Lightbulb, X, BookOpen, Cpu, RotateCcw, ExternalLink, Blocks, Pencil, Save, Trash2, ChevronDown, ChevronRight } from "lucide-react";
+import { ArrowLeft, Play, Send, CheckCircle, XCircle, Code2, Lightbulb, X, BookOpen, Cpu, RotateCcw, ExternalLink, Blocks, Pencil, Save, Trash2, ChevronDown, ChevronRight, ChevronLeft } from "lucide-react";
 import Editor from "@monaco-editor/react";
 import { Panel, PanelGroup, PanelResizeHandle } from "react-resizable-panels";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
@@ -119,6 +119,9 @@ export default function AssignmentPage({ user, lessonData }) {
     // Reset expand/collapse when the student moves between problems.
     setLessonIntroExpanded(currentProblemIndex === 0);
   }, [currentProblemIndex]);
+  // Whole-panel show/hide toggle so teachers (or students) can maximize
+  // the code editor when they don't need to re-read the instructions.
+  const [showInstructionsPanel, setShowInstructionsPanel] = useState(true);
   const [testInput, setTestInput] = useState(""); // For input() functions
   const [showInteractiveDialog, setShowInteractiveDialog] = useState(false); // Interactive input mode
   
@@ -1007,13 +1010,41 @@ export default function AssignmentPage({ user, lessonData }) {
       <main className="container mx-auto px-6 py-6">
         <div style={{ height: 'calc(100vh - 200px)', overflow: 'hidden' }}>
         <PanelGroup direction="horizontal" style={{ height: '100%' }}>
+          {/* Collapsed strip — click to re-open the Instructions panel */}
+          {!showInstructionsPanel && (
+            <button
+              type="button"
+              data-testid="show-instructions-panel-btn"
+              onClick={() => setShowInstructionsPanel(true)}
+              className="h-full w-8 shrink-0 flex flex-col items-center justify-center gap-3 border-r border-cyber-cyan/20 bg-cyber-navy/40 hover:bg-cyber-navy/70 transition-colors group"
+              title="Show Instructions"
+            >
+              <ChevronRight className="w-4 h-4 text-cyber-cyan group-hover:translate-x-0.5 transition-transform" />
+              <span
+                className="text-[10px] font-orbitron uppercase tracking-widest text-cyber-cyan"
+                style={{ writingMode: 'vertical-rl', transform: 'rotate(180deg)' }}
+              >
+                Instructions
+              </span>
+            </button>
+          )}
           {/* Left Side: Instructions & Test Cases - Compact for more coding space */}
+          {showInstructionsPanel && (
           <Panel defaultSize={20} minSize={15} maxSize={60}>
             <div className="space-y-4 pr-2 h-full overflow-y-auto pl-0">
               <Card data-testid="assignment-instructions" className="ml-0 rounded-l-none border-l-0">
                 <CardHeader className="pb-2 px-3">
                   <div className="flex items-center justify-between">
                     <CardTitle className="text-base">Instructions</CardTitle>
+                    <button
+                      type="button"
+                      data-testid="hide-instructions-panel-btn"
+                      onClick={() => setShowInstructionsPanel(false)}
+                      className="p-1 rounded hover:bg-cyber-navy/60 text-slate-400 hover:text-cyber-cyan transition-colors"
+                      title="Hide Instructions panel (click the strip on the left to re-open)"
+                    >
+                      <ChevronLeft className="w-4 h-4" />
+                    </button>
                     {/* Edit instructions - only accessible from Admin Lesson Manager */}
                   </div>
                 </CardHeader>
@@ -1458,9 +1489,12 @@ export default function AssignmentPage({ user, lessonData }) {
               )}
             </div>
           </Panel>
+          )}
 
-          {/* Resize Handle */}
-          <PanelResizeHandle className="w-2 bg-gray-300 hover:bg-cyber-cyan/100 transition-colors cursor-col-resize mx-2" />
+          {/* Resize Handle — only render when the panel is showing */}
+          {showInstructionsPanel && (
+            <PanelResizeHandle className="w-2 bg-gray-300 hover:bg-cyber-cyan/100 transition-colors cursor-col-resize mx-2" />
+          )}
 
           {/* Right Side: Code Editor & Output */}
           <Panel defaultSize={80} minSize={60}>
