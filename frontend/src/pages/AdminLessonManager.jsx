@@ -9,7 +9,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import {
   ArrowLeft, ChevronDown, ChevronRight, Pencil, Save, Trash2,
-  Plus, BookOpen, Code, X, GripVertical, FileQuestion
+  Plus, BookOpen, Code, X, GripVertical, FileQuestion, ArrowUp, ArrowDown
 } from "lucide-react";
 
 const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
@@ -194,6 +194,34 @@ export default function AdminLessonManager({ user }) {
     } catch (error) {
       console.error("Error removing problem:", error);
       toast.error("Failed to remove problem");
+    }
+  };
+
+  // Move a problem up or down within its lesson. Optimistically updates the local
+  // list then persists the full new order to the backend.
+  const handleMoveProblem = async (lessonKey, assignmentType, chapter, lesson, currentIdx, direction) => {
+    const current = lessonProblems[lessonKey] || [];
+    const targetIdx = currentIdx + direction;
+    if (targetIdx < 0 || targetIdx >= current.length) return;
+
+    const reordered = [...current];
+    [reordered[currentIdx], reordered[targetIdx]] = [reordered[targetIdx], reordered[currentIdx]];
+
+    // Optimistic UI update
+    setLessonProblems(prev => ({ ...prev, [lessonKey]: reordered }));
+
+    try {
+      await axios.post(`${API}/curriculum/reorder-lesson-problems`, {
+        assignment_type: assignmentType,
+        chapter,
+        lesson,
+        ordered_problem_ids: reordered.map(p => p.id),
+      }, { withCredentials: true });
+    } catch (error) {
+      console.error("Error reordering problems:", error);
+      toast.error("Failed to save new order");
+      // Roll back on failure
+      setLessonProblems(prev => ({ ...prev, [lessonKey]: current }));
     }
   };
 
@@ -584,6 +612,29 @@ export default function AdminLessonManager({ user }) {
                                             }`}>
                                               {problem.problem_type || "Unknown"}
                                             </span>
+                                          </div>
+                                          {/* Reorder controls — up/down arrows */}
+                                          <div className="flex flex-col opacity-40 group-hover:opacity-100 transition-opacity">
+                                            <button
+                                              type="button"
+                                              data-testid={`move-up-${problem.id}`}
+                                              onClick={() => handleMoveProblem(lessonKey, currentUnit.assignment_type, chapter.name, lesson.name, idx, -1)}
+                                              disabled={idx === 0}
+                                              title="Move up"
+                                              className="p-0.5 text-cyber-cyan hover:bg-cyber-cyan/10 disabled:opacity-20 disabled:cursor-not-allowed rounded-none"
+                                            >
+                                              <ArrowUp className="w-3.5 h-3.5" />
+                                            </button>
+                                            <button
+                                              type="button"
+                                              data-testid={`move-down-${problem.id}`}
+                                              onClick={() => handleMoveProblem(lessonKey, currentUnit.assignment_type, chapter.name, lesson.name, idx, 1)}
+                                              disabled={idx === problems.length - 1}
+                                              title="Move down"
+                                              className="p-0.5 text-cyber-cyan hover:bg-cyber-cyan/10 disabled:opacity-20 disabled:cursor-not-allowed rounded-none"
+                                            >
+                                              <ArrowDown className="w-3.5 h-3.5" />
+                                            </button>
                                           </div>
                                           <Button
                                             size="sm"

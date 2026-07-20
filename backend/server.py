@@ -2449,8 +2449,9 @@ async def get_lesson_problems(request: Request, assignment_type: str, chapter: s
     if not raw_problems:
         raise HTTPException(status_code=404, detail="No problems found for this lesson")
     
-    # Sort by problem_type order (Class Practice → Paired Programming → Independent Practice → Debugging),
-    # then by title for stable ordering. Unknown/legacy types sink to the bottom.
+    # Sort: manual `order` field first (admin-set via Lesson Manager reorder buttons —
+    # unset problems fall back to type_order → title as before). This lets admins
+    # arrange problems in a specific teaching sequence.
     type_order = {
         "Class Practice": 0,
         "Paired Programming": 1,
@@ -2462,7 +2463,11 @@ async def get_lesson_problems(request: Request, assignment_type: str, chapter: s
         "Assessment": 6,
         "Project": 7,
     }
-    raw_problems.sort(key=lambda p: (type_order.get(p.get("problem_type", ""), 99), p.get("title", "")))
+    raw_problems.sort(key=lambda p: (
+        p.get("order") if isinstance(p.get("order"), int) else 9999,
+        type_order.get(p.get("problem_type", ""), 99),
+        p.get("title", ""),
+    ))
     
     # For students, hide solution code
     if user.get("role") == "student":
@@ -2537,6 +2542,40 @@ async def save_lesson_instructions(request: Request):
     )
     
     return {"success": True, "message": "Instructions saved"}
+
+
+@api_router.post("/curriculum/reorder-lesson-problems")
+async def reorder_lesson_problems(request: Request):
+    """Persist a new problem order for a lesson (admin only).
+    Body: {assignment_type, chapter, lesson, ordered_problem_ids: [...]}.
+    Each problem gets its `order` field set to its index in ordered_problem_ids so the
+    lesson-problems endpoint returns them in the same sequence for students and teachers.
+    """
+    user = await get_current_user(request)
+    if user["role"] != "teacher" or not user.get("is_admin"):
+        raise HTTPException(status_code=403, detail="Only admins can reorder lesson problems")
+
+    body = await request.json()
+    assignment_type = body.get("assignment_type")
+    chapter = body.get("chapter")
+    lesson = body.get("lesson")
+    ordered_ids = body.get("ordered_problem_ids") or []
+
+    if not assignment_type or not chapter or not lesson or not ordered_ids:
+        raise HTTPException(status_code=400, detail="assignment_type, chapter, lesson, and ordered_problem_ids are required")
+
+    # Update each problem's `order` field. Scope by chapter+lesson so we can't clobber
+    # a problem that got moved to another lesson between fetch and reorder.
+    updated = 0
+    for idx, pid in enumerate(ordered_ids):
+        result = await db.problems.update_one(
+            {"id": pid, "assignment_type": assignment_type, "chapter": chapter, "lesson": lesson},
+            {"$set": {"order": idx}},
+        )
+        if result.matched_count:
+            updated += 1
+
+    return {"success": True, "updated": updated, "total": len(ordered_ids)}
 
 
 @api_router.post("/curriculum/remove-problem-from-lesson")
