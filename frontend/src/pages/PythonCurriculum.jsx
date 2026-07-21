@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import { toast } from "sonner";
@@ -557,6 +557,10 @@ export default function PythonCurriculum({ user }) {
   const [classrooms, setClassrooms] = useState([]);
   const [problemCounts, setProblemCounts] = useState({});
   const [dbLessonNames, setDbLessonNames] = useState({});
+  // Live DB chapters (with lessons) — this is the source of truth for the
+  // teacher curriculum display. Falls back to DEFAULT_PYTHON_CURRICULUM only
+  // for the pretty per-chapter styling (icon/color/weeks/description).
+  const [dbChapters, setDbChapters] = useState([]);
 
   const loadCustomCurriculum = async () => {
     // Load any custom chapters from localStorage or API
@@ -616,11 +620,79 @@ export default function PythonCurriculum({ user }) {
           mapping[ch.name] = ch.lessons.map(l => l.name);
         }
         setDbLessonNames(mapping);
+        // Keep the raw chapters so we can render them dynamically (live names from DB).
+        setDbChapters(
+          (pyUnit.chapters || []).filter(ch => ch.name && ch.name.trim() !== "")
+        );
       }
     } catch (error) {
       console.error("Error fetching DB lesson names:", error);
     }
   };
+
+  // Build the displayed unit list from LIVE chapter data. Presentation styling
+  // (color/icon/weeks/description) comes from the hardcoded DEFAULT curriculum
+  // when the chapter number matches; otherwise falls back to a generic look.
+  // Any custom chapters saved to localStorage are appended at the end.
+  const displayUnits = useMemo(() => {
+    if (!dbChapters || dbChapters.length === 0) return curriculum.units;
+
+    const styleByNumber = {};
+    DEFAULT_PYTHON_CURRICULUM.units.forEach((u, idx) => {
+      const m = u.title.match(/Chapter\s+(\d+)/i);
+      const num = m ? parseInt(m[1], 10) : idx + 1;
+      styleByNumber[num] = {
+        color: u.color,
+        icon: u.icon,
+        weeks: u.weeks,
+        description: u.description,
+      };
+    });
+
+    const fallbackColors = [
+      "from-cyan-500 to-blue-500",
+      "from-fuchsia-500 to-pink-500",
+      "from-amber-500 to-orange-500",
+      "from-emerald-500 to-teal-500",
+      "from-purple-500 to-violet-500",
+      "from-rose-500 to-red-500",
+    ];
+
+    const dynamicUnits = dbChapters.map((ch, idx) => {
+      const m = ch.name.match(/Chapter\s+(\d+)/i);
+      const num = m ? parseInt(m[1], 10) : idx + 1;
+      const style = styleByNumber[num] || {
+        color: fallbackColors[idx % fallbackColors.length],
+        icon: "📘",
+        weeks: `Week ${idx + 1}`,
+        description: "",
+      };
+      const cleanLessons = (ch.lessons || []).filter(l => !l.is_orphan && l.name);
+      return {
+        id: `chapter_${num}_${idx}`,
+        chapterName: ch.name,
+        title: ch.name,
+        description: style.description,
+        icon: style.icon,
+        color: style.color,
+        weeks: style.weeks,
+        lessons: cleanLessons.map((l, lidx) => ({
+          id: `lesson_${lidx + 1}`,
+          title: l.name,
+          name: l.name,
+          type: "Code",
+          duration: "—",
+          objectives: [],
+          dokLevel: 2,
+          problem_count: l.problem_count,
+        })),
+      };
+    });
+
+    // Preserve any user-added custom chapters from localStorage
+    const customUnits = (curriculum.units || []).filter(u => u.isCustom);
+    return [...dynamicUnits, ...customUnits];
+  }, [dbChapters, curriculum.units]);
 
   const toggleUnit = (unitId) => {
     setExpandedUnits(prev => ({
@@ -761,7 +833,7 @@ export default function PythonCurriculum({ user }) {
         </div>
 
         <div className="space-y-4">
-          {curriculum.units.map((unit, unitIndex) => (
+          {displayUnits.map((unit, unitIndex) => (
             <Card key={unit.id} className="overflow-hidden">
               <div 
                 className={`bg-gradient-to-r ${unit.color} p-4 cursor-pointer`}
