@@ -1624,7 +1624,23 @@ export default function AssignmentLibrary({ user }) {
                       </div>
 
                       {newProblem.test_cases.length === 0 ? (
-                        <p className="text-sm text-slate-500 text-center py-4">No test cases added yet. Click "Add Test Case" to create one.</p>
+                        <>
+                          {/input\s*\(/.test(newProblem.solution_code || "") && (
+                            <div
+                              data-testid="new-input-no-testcase-warning"
+                              className="mb-2 p-3 rounded border border-amber-500/60 bg-amber-500/10 text-sm text-amber-200 flex gap-2 items-start"
+                            >
+                              <span className="text-amber-400 text-lg leading-none">⚠️</span>
+                              <div>
+                                <div className="font-semibold text-amber-300">Your solution uses <code className="text-amber-100 bg-amber-900/40 px-1 rounded">input(</code>&#8203;<code className="text-amber-100 bg-amber-900/40 px-1 rounded">)</code> but you have no test cases.</div>
+                                <div className="mt-1 text-amber-200/90">
+                                  Without a test case, the autograder can't provide input to the student's code — every submission will score <b>0%</b>. Click <b>+ Add Test Case</b> above and provide an <b>Input</b> value (e.g. <code>24</code>) plus the <b>Expected Output</b> (use <code>{"{NAME}"}</code>/<code>{"{NUM}"}</code> wildcards for any user-typed values).
+                                </div>
+                              </div>
+                            </div>
+                          )}
+                          <p className="text-sm text-slate-500 text-center py-4">No test cases added yet. Click "Add Test Case" to create one.</p>
+                        </>
                       ) : (
                         <div className="space-y-3">
                           {newProblem.test_cases.map((testCase, index) => (
@@ -2942,7 +2958,23 @@ export default function AssignmentLibrary({ user }) {
                     </div>
 
                     {(!editingProblem.test_cases || editingProblem.test_cases.length === 0) ? (
-                      <p className="text-sm text-slate-500 text-center py-4">No test cases added yet. Click "Add Test Case" to create one.</p>
+                      <>
+                        {/input\s*\(/.test(editingProblem.solution_code || "") && (
+                          <div
+                            data-testid="edit-input-no-testcase-warning"
+                            className="mb-2 p-3 rounded border border-amber-500/60 bg-amber-500/10 text-sm text-amber-200 flex gap-2 items-start"
+                          >
+                            <span className="text-amber-400 text-lg leading-none">⚠️</span>
+                            <div>
+                              <div className="font-semibold text-amber-300">Your solution uses <code className="text-amber-100 bg-amber-900/40 px-1 rounded">input(</code>&#8203;<code className="text-amber-100 bg-amber-900/40 px-1 rounded">)</code> but you have no test cases.</div>
+                              <div className="mt-1 text-amber-200/90">
+                                Without a test case, the autograder can't provide input to the student's code — every submission will score <b>0%</b>. Click <b>+ Add Test Case</b> above and provide an <b>Input</b> value (e.g. <code>24</code>) plus the <b>Expected Output</b> (use <code>{"{NAME}"}</code>/<code>{"{NUM}"}</code> wildcards for any user-typed values).
+                              </div>
+                            </div>
+                          </div>
+                        )}
+                        <p className="text-sm text-slate-500 text-center py-4">No test cases added yet. Click "Add Test Case" to create one.</p>
+                      </>
                     ) : (
                       <div className="space-y-3">
                         {editingProblem.test_cases.map((testCase, index) => (
