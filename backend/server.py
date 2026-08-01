@@ -13627,19 +13627,21 @@ async def shutdown_db_client():
 
 @app.on_event("startup")
 async def seed_microbit_problems():
-    """Seed Micro:bit curriculum problems - 5 per lesson, 12 lessons = 60 total"""
+    """Seed Micro:bit curriculum problems on FIRST BOOT ONLY.
+
+    Safety: never deletes existing microbit problems. If ANY microbit problems
+    exist in the DB (even one), this function skips entirely. Prevents the exact
+    'silent data wipe' bug that happened with the turtle seeder.
+    """
     try:
-        # Check current count - we want exactly 60 problems
         existing_count = await db.problems.count_documents({"assignment_type": "microbit"})
-        if existing_count >= 60:
-            logger.info(f"✅ Micro:bit problems already exist: {existing_count}")
+        if existing_count > 0:
+            logger.info(f"✅ Micro:bit problems exist ({existing_count}) — skipping seed (non-destructive).")
             return
-        
-        logger.info("🔄 Seeding Micro:bit problems...")
-        
-        # First, clear existing microbit problems to reorganize
-        await db.problems.delete_many({"assignment_type": "microbit"})
-        
+
+        logger.info("🔄 First-boot seeding Micro:bit problems (DB is empty for this type)...")
+        # NOTE: No delete_many here. We only insert on a fresh DB.
+
         microbit_problems = [
             # ==================== UNIT 1: GETTING STARTED ====================
             
@@ -14707,20 +14709,22 @@ async def seed_microbit_problems():
 
 @app.on_event("startup")
 async def seed_turtle_problems():
-    """Seed Turtle curriculum problems - 5 per topic + quiz = ~30 total"""
+    """Seed Turtle curriculum problems on FIRST BOOT ONLY.
+
+    Safety: never deletes existing turtle problems. If ANY turtle problems exist
+    in the DB (even one), this function skips entirely. This prevents accidental
+    data loss if an admin renames chapters, deletes seeded problems, or otherwise
+    changes the initial curriculum shape.
+    """
     try:
-        # Check if FULL curriculum structure exists (all 6 chapters)
-        chapter6_exists = await db.problems.find_one({"assignment_type": "turtle", "chapter": "Chapter 6: Projects"})
-        if chapter6_exists:
-            existing_count = await db.problems.count_documents({"assignment_type": "turtle", "chapter": {"$regex": "^Chapter"}})
-            logger.info(f"✅ Turtle curriculum already seeded: {existing_count} problems")
+        existing_count = await db.problems.count_documents({"assignment_type": "turtle"})
+        if existing_count > 0:
+            logger.info(f"✅ Turtle problems exist ({existing_count}) — skipping seed (non-destructive).")
             return
-        
-        logger.info("🔄 Seeding Turtle curriculum problems...")
-        
-        # Clear ALL existing turtle problems to replace with new curriculum
-        await db.problems.delete_many({"assignment_type": "turtle"})
-        
+
+        logger.info("🔄 First-boot seeding Turtle curriculum problems (DB is empty for this type)...")
+        # NOTE: No delete_many here. We only insert on a fresh DB.
+
         turtle_problems = [
             # ==================== TOPIC 1: BASICS - FIRST STEPS ====================
             
