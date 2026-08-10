@@ -15,7 +15,7 @@ import {
   ArrowLeft, Save, Sparkles, Printer, FileText, Calendar, Clock, 
   GraduationCap, BookOpen, Target, Users, CheckCircle, Loader2,
   ChevronDown, ChevronUp, Edit3, Trash2, Plus, Download, 
-  ListChecks, ExternalLink, Copy
+  ListChecks, ExternalLink, Copy, Upload, X
 } from "lucide-react";
 
 const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
@@ -54,8 +54,20 @@ export default function LessonPlanCreator({ user }) {
     nextMajorAssessment: "",
     // Standards and objectives that the AI should use
     standards: "",
-    objectives: ""
+    objectives: "",
+    // Toggle: let AI auto-generate these fields per-lesson instead of using the text above
+    aiGenerateStandards: false,
+    aiGenerateObjectives: false,
   });
+
+  // Lesson plan templates uploaded by the teacher (.docx / .pdf)
+  const [templates, setTemplates] = useState([]);
+  const [selectedTemplateId, setSelectedTemplateId] = useState("");
+  const [uploadingTemplate, setUploadingTemplate] = useState(false);
+
+  // Weekly schedule — each row: {day_label, unit, chapter, lesson, span_days}
+  const [weeklySchedule, setWeeklySchedule] = useState([]);
+  const [generatingSchedule, setGeneratingSchedule] = useState(false);
 
   // Lesson plan generation inputs
   const [lessonInput, setLessonInput] = useState({
@@ -86,11 +98,136 @@ export default function LessonPlanCreator({ user }) {
   useEffect(() => {
     const savedHeader = localStorage.getItem('lessonPlanHeader');
     if (savedHeader) {
-      setHeaderFields(JSON.parse(savedHeader));
+      setHeaderFields(prev => ({ ...prev, ...JSON.parse(savedHeader) }));
     }
     fetchSavedPlans();
     fetchCurriculumStructure();
+    fetchTemplates();
   }, []);
+
+  const fetchTemplates = async () => {
+    try {
+      const r = await axios.get(`${API}/lesson-plans/templates`, { withCredentials: true });
+      setTemplates(r.data || []);
+      if (r.data && r.data.length && !selectedTemplateId) {
+        setSelectedTemplateId(r.data[0].id);
+      }
+    } catch (e) {
+      console.error("Error fetching templates:", e);
+    }
+  };
+
+  const handleTemplateUpload = async (e) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    const fd = new FormData();
+    fd.append("file", file);
+    fd.append("name", file.name.replace(/\.(docx|pdf)$/i, ""));
+    setUploadingTemplate(true);
+    try {
+      const r = await axios.post(`${API}/lesson-plans/templates`, fd, {
+        withCredentials: true,
+        headers: { "Content-Type": "multipart/form-data" },
+      });
+      toast.success(`Template "${r.data.name}" uploaded!`);
+      setSelectedTemplateId(r.data.id);
+      fetchTemplates();
+    } catch (err) {
+      console.error(err);
+      toast.error(err.response?.data?.detail || "Upload failed");
+    } finally {
+      setUploadingTemplate(false);
+      e.target.value = "";
+    }
+  };
+
+  const handleDeleteTemplate = async (id) => {
+    if (!window.confirm("Delete this template?")) return;
+    try {
+      await axios.delete(`${API}/lesson-plans/templates/${id}`, { withCredentials: true });
+      toast.success("Template deleted");
+      if (selectedTemplateId === id) setSelectedTemplateId("");
+      fetchTemplates();
+    } catch (e) {
+      toast.error("Failed to delete");
+    }
+  };
+
+  // Weekly schedule helpers
+  const addScheduleRow = () => {
+    const dayNames = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"];
+    const nextIdx = weeklySchedule.length;
+    setWeeklySchedule([
+      ...weeklySchedule,
+      {
+        day_label: dayNames[nextIdx % 5],
+        unit: "",
+        chapter: "",
+        lesson: "",
+        span_days: 1,
+      },
+    ]);
+  };
+
+  const updateScheduleRow = (idx, patch) => {
+    setWeeklySchedule(prev => prev.map((r, i) => (i === idx ? { ...r, ...patch } : r)));
+  };
+
+  const removeScheduleRow = (idx) => {
+    setWeeklySchedule(prev => prev.filter((_, i) => i !== idx));
+  };
+
+  const generateFromWeeklySchedule = async () => {
+    if (weeklySchedule.length === 0) {
+      toast.error("Add at least one day to your schedule");
+      return;
+    }
+    const invalid = weeklySchedule.find(r => !r.unit || !r.chapter || !r.lesson);
+    if (invalid) {
+      toast.error("Every day needs Unit, Chapter, and Lesson selected");
+      return;
+    }
+    // Expand multi-day spans into individual day entries so the AI generates
+    // Day-1-of-N and Day-2-of-N variants for each spanning lesson.
+    const expanded = [];
+    let dayIdx = 0;
+    for (const row of weeklySchedule) {
+      const span = Math.max(1, parseInt(row.span_days || 1, 10));
+      for (let d = 1; d <= span; d++) {
+        expanded.push({
+          day_label: span === 1 ? row.day_label : `${row.day_label} (Day ${d} of ${span})`,
+          day_index: dayIdx++,
+          unit: row.unit,
+          chapter: row.chapter,
+          lesson: row.lesson,
+          span_days: span,
+          day_within_span: d,
+        });
+      }
+    }
+    setGeneratingSchedule(true);
+    try {
+      const r = await axios.post(
+        `${API}/lesson-plans/generate-from-schedule`,
+        {
+          template_id: selectedTemplateId || null,
+          schedule: expanded,
+          header_fields: headerFields,
+          ai_generate_standards: !!headerFields.aiGenerateStandards,
+          ai_generate_objectives: !!headerFields.aiGenerateObjectives,
+        },
+        { withCredentials: true }
+      );
+      toast.success(`Generated ${r.data.plans.length} day(s) of lesson plans!`);
+      setGeneratedPlans(r.data.plans);
+      fetchSavedPlans();
+    } catch (err) {
+      console.error(err);
+      toast.error(err.response?.data?.detail || "Generation failed");
+    } finally {
+      setGeneratingSchedule(false);
+    }
+  };
 
   // Save header fields to localStorage when changed
   useEffect(() => {
@@ -522,40 +659,237 @@ export default function LessonPlanCreator({ user }) {
               </CardHeader>
               <CardContent className="space-y-4">
                 <div>
-                  <Label htmlFor="standards">Standards (for AI to use)</Label>
+                  <div className="flex items-center justify-between">
+                    <Label htmlFor="standards">Standards</Label>
+                    <label className="flex items-center gap-2 text-xs cursor-pointer">
+                      <input
+                        type="checkbox"
+                        data-testid="lp-ai-generate-standards"
+                        checked={!!headerFields.aiGenerateStandards}
+                        onChange={(e) => setHeaderFields({ ...headerFields, aiGenerateStandards: e.target.checked })}
+                      />
+                      <span>Let AI generate standards</span>
+                    </label>
+                  </div>
                   <Textarea
                     id="standards"
                     value={headerFields.standards}
                     onChange={(e) => setHeaderFields({ ...headerFields, standards: e.target.value })}
+                    disabled={!!headerFields.aiGenerateStandards}
                     placeholder="Paste your state/district standards here, e.g.:
 CCSS.MATH.CONTENT.7.NS.A.1
 ISTE 1.1.c - Students use technology to seek feedback..."
-                    className="mt-1 text-sm"
+                    className={`mt-1 text-sm ${headerFields.aiGenerateStandards ? 'opacity-50' : ''}`}
                     rows={4}
                   />
                   <p className="text-xs text-slate-500 mt-1">
-                    These standards will be incorporated into generated lessons
+                    {headerFields.aiGenerateStandards
+                      ? "AI will generate relevant CS standards for each lesson."
+                      : "These standards will be incorporated into generated lessons."}
                   </p>
                 </div>
                 <div>
-                  <Label htmlFor="objectives">Learning Objectives (for AI to use)</Label>
+                  <div className="flex items-center justify-between">
+                    <Label htmlFor="objectives">Learning Objectives</Label>
+                    <label className="flex items-center gap-2 text-xs cursor-pointer">
+                      <input
+                        type="checkbox"
+                        data-testid="lp-ai-generate-objectives"
+                        checked={!!headerFields.aiGenerateObjectives}
+                        onChange={(e) => setHeaderFields({ ...headerFields, aiGenerateObjectives: e.target.checked })}
+                      />
+                      <span>Let AI generate objectives</span>
+                    </label>
+                  </div>
                   <Textarea
                     id="objectives"
                     value={headerFields.objectives}
                     onChange={(e) => setHeaderFields({ ...headerFields, objectives: e.target.value })}
+                    disabled={!!headerFields.aiGenerateObjectives}
                     placeholder="Enter specific learning objectives, e.g.:
 - Students will understand variables and data types
 - Students will be able to write basic loops
 - Students will debug simple programs"
-                    className="mt-1 text-sm"
+                    className={`mt-1 text-sm ${headerFields.aiGenerateObjectives ? 'opacity-50' : ''}`}
                     rows={4}
                   />
                   <p className="text-xs text-slate-500 mt-1">
-                    These objectives will guide the AI's lesson content
+                    {headerFields.aiGenerateObjectives
+                      ? "AI will write SWBAT-style objectives from the lesson content."
+                      : "These objectives will guide the AI's lesson content."}
                   </p>
                 </div>
               </CardContent>
             </Card>
+
+            {/* Template Library Card */}
+            <Card className="border-cyan-500/30" data-testid="lp-template-card">
+              <CardHeader className="pb-3">
+                <CardTitle className="text-lg flex items-center gap-2">
+                  <BookOpen className="w-5 h-5 text-cyan-500" />
+                  Lesson Plan Template
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-3">
+                <p className="text-xs text-slate-500">
+                  Upload a .docx or .pdf of your school's template. The AI will use its structure
+                  (section headings, order, and level of detail) when generating your lesson plans.
+                </p>
+                <label className="inline-flex items-center gap-2 px-3 py-2 rounded border border-cyan-500/40 bg-cyber-navy/40 hover:bg-cyber-navy/60 cursor-pointer text-sm">
+                  <Upload className="w-4 h-4 text-cyan-400" />
+                  {uploadingTemplate ? "Uploading…" : "Upload .docx or .pdf"}
+                  <input
+                    type="file"
+                    accept=".docx,.pdf"
+                    onChange={handleTemplateUpload}
+                    disabled={uploadingTemplate}
+                    className="hidden"
+                    data-testid="lp-upload-template"
+                  />
+                </label>
+                {templates.length === 0 ? (
+                  <p className="text-xs text-slate-500 italic">No templates uploaded yet.</p>
+                ) : (
+                  <div className="space-y-1 max-h-48 overflow-y-auto pr-1" data-testid="lp-template-list">
+                    {templates.map(t => (
+                      <div
+                        key={t.id}
+                        className={`flex items-center gap-2 p-2 rounded border cursor-pointer ${selectedTemplateId === t.id ? 'border-cyan-400 bg-cyan-500/10' : 'border-slate-700 hover:border-cyan-500/40'}`}
+                        onClick={() => setSelectedTemplateId(t.id)}
+                      >
+                        <input
+                          type="radio"
+                          name="lp-template"
+                          checked={selectedTemplateId === t.id}
+                          onChange={() => setSelectedTemplateId(t.id)}
+                        />
+                        <div className="flex-1 min-w-0">
+                          <div className="text-sm font-medium truncate">{t.name}</div>
+                          <div className="text-[10px] text-slate-500 uppercase">{t.format} · {t.uploaded_at?.slice(0, 10)}</div>
+                        </div>
+                        <button
+                          type="button"
+                          data-testid={`lp-del-template-${t.id}`}
+                          onClick={(e) => { e.stopPropagation(); handleDeleteTemplate(t.id); }}
+                          className="text-slate-500 hover:text-red-400 p-1"
+                          title="Delete template"
+                        >
+                          <Trash2 className="w-3.5 h-3.5" />
+                        </button>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+
+            {/* Weekly Schedule Card */}
+            <Card className="border-emerald-500/30" data-testid="lp-weekly-schedule-card">
+              <CardHeader className="pb-3">
+                <CardTitle className="text-lg flex items-center gap-2">
+                  <Calendar className="w-5 h-5 text-emerald-500" />
+                  Weekly Schedule
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-3">
+                <p className="text-xs text-slate-500">
+                  Map each school day to a ByteBattles lesson. Use <b>Spans</b> if you're spreading
+                  one lesson across multiple days — the AI will split Day 1 (intro + modeling +
+                  guided practice) from Day 2+ (independent practice + reteach + closure).
+                </p>
+                {weeklySchedule.map((row, idx) => {
+                  const unitObj = curriculumStructure.units?.find(u => u.name === row.unit);
+                  const chapterOptions = unitObj?.chapters || [];
+                  const chapterObj = chapterOptions.find(c => c.name === row.chapter);
+                  const lessonOptions = chapterObj?.lessons || [];
+                  return (
+                    <div key={idx} className="border border-emerald-500/20 rounded p-2 space-y-2" data-testid={`lp-schedule-row-${idx}`}>
+                      <div className="flex items-center gap-2">
+                        <Input
+                          value={row.day_label}
+                          onChange={(e) => updateScheduleRow(idx, { day_label: e.target.value })}
+                          placeholder="e.g., Monday"
+                          className="w-32 text-sm"
+                        />
+                        <select
+                          value={row.unit}
+                          onChange={(e) => updateScheduleRow(idx, { unit: e.target.value, chapter: "", lesson: "" })}
+                          className="flex-1 text-sm bg-cyber-navy/40 border border-slate-700 rounded p-1.5"
+                        >
+                          <option value="">-- Unit --</option>
+                          {(curriculumStructure.units || []).map(u => (
+                            <option key={u.name} value={u.name}>{u.name}</option>
+                          ))}
+                        </select>
+                        <button
+                          type="button"
+                          onClick={() => removeScheduleRow(idx)}
+                          className="text-slate-500 hover:text-red-400 p-1"
+                          title="Remove row"
+                        >
+                          <X className="w-4 h-4" />
+                        </button>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <select
+                          value={row.chapter}
+                          onChange={(e) => updateScheduleRow(idx, { chapter: e.target.value, lesson: "" })}
+                          disabled={!row.unit}
+                          className="flex-1 text-sm bg-cyber-navy/40 border border-slate-700 rounded p-1.5"
+                        >
+                          <option value="">-- Chapter --</option>
+                          {chapterOptions.map(c => (
+                            <option key={c.name} value={c.name}>{c.name}</option>
+                          ))}
+                        </select>
+                        <select
+                          value={row.lesson}
+                          onChange={(e) => updateScheduleRow(idx, { lesson: e.target.value })}
+                          disabled={!row.chapter}
+                          className="flex-1 text-sm bg-cyber-navy/40 border border-slate-700 rounded p-1.5"
+                        >
+                          <option value="">-- Lesson --</option>
+                          {lessonOptions.map(l => (
+                            <option key={l.name} value={l.name}>{l.name}</option>
+                          ))}
+                        </select>
+                        <select
+                          value={row.span_days}
+                          onChange={(e) => updateScheduleRow(idx, { span_days: parseInt(e.target.value, 10) })}
+                          className="w-24 text-sm bg-cyber-navy/40 border border-slate-700 rounded p-1.5"
+                          title="Number of days this lesson spans"
+                        >
+                          <option value={1}>1 day</option>
+                          <option value={2}>2 days</option>
+                          <option value={3}>3 days</option>
+                        </select>
+                      </div>
+                    </div>
+                  );
+                })}
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  onClick={addScheduleRow}
+                  data-testid="lp-add-schedule-row"
+                  className="w-full"
+                >
+                  <Plus className="w-4 h-4 mr-1" /> Add day
+                </Button>
+                <Button
+                  type="button"
+                  onClick={generateFromWeeklySchedule}
+                  disabled={generatingSchedule || weeklySchedule.length === 0}
+                  className="w-full bg-emerald-600 hover:bg-emerald-700 text-white"
+                  data-testid="lp-generate-schedule"
+                >
+                  <Sparkles className="w-4 h-4 mr-1" />
+                  {generatingSchedule ? "Generating…" : `Generate ${weeklySchedule.length} day(s) of plans`}
+                </Button>
+              </CardContent>
+            </Card>
+
 
             {/* Generate Card */}
             <Card className="border-indigo-200 bg-indigo-500/10">

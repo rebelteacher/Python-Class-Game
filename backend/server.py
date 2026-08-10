@@ -7,7 +7,7 @@ import logging
 import re
 from pathlib import Path
 from pydantic import BaseModel, Field, ConfigDict
-from typing import List, Optional
+from typing import List, Optional, Dict, Any
 import uuid
 from datetime import datetime, timezone, timedelta
 import string
@@ -9182,6 +9182,292 @@ async def delete_note(note_id: str, request: Request):
 
 
 # ----- Teacher Lesson Plan Generator Routes -----
+
+
+# ---------- Lesson Plan Templates (upload + reuse) ----------
+
+def _extract_text_from_docx(data: bytes) -> str:
+    """Extract plain text from a .docx blob for use as an AI format guide."""
+    from docx import Document
+    from io import BytesIO
+    doc = Document(BytesIO(data))
+    parts = []
+    for para in doc.paragraphs:
+        if para.text.strip():
+            parts.append(para.text)
+    for table in doc.tables:
+        for row in table.rows:
+            cells = [cell.text.strip() for cell in row.cells if cell.text.strip()]
+            if cells:
+                parts.append(" | ".join(cells))
+    return "\n".join(parts)
+
+
+def _extract_text_from_pdf(data: bytes) -> str:
+    """Extract plain text from a PDF blob."""
+    import pypdf
+    from io import BytesIO
+    reader = pypdf.PdfReader(BytesIO(data))
+    parts = []
+    for page in reader.pages:
+        try:
+            text = page.extract_text() or ""
+            if text.strip():
+                parts.append(text)
+        except Exception:
+            continue
+    return "\n".join(parts)
+
+
+@api_router.post("/lesson-plans/templates")
+async def upload_lesson_plan_template(
+    request: Request,
+    file: UploadFile = File(...),
+    name: Optional[str] = Form(None),
+):
+    """Upload a .docx or .pdf lesson plan template. The AI will use its structure
+    as the output format when generating plans. Templates are saved per-teacher
+    for reuse."""
+    user = await get_current_user(request)
+    if user["role"] != "teacher":
+        raise HTTPException(status_code=403, detail="Only teachers can upload lesson plan templates")
+
+    filename = file.filename or ""
+    ext = filename.rsplit(".", 1)[-1].lower() if "." in filename else ""
+    if ext not in ("docx", "pdf"):
+        raise HTTPException(status_code=400, detail="Only .docx and .pdf files are supported")
+
+    data = await file.read()
+    if len(data) > 10 * 1024 * 1024:  # 10 MB cap
+        raise HTTPException(status_code=400, detail="File must be under 10 MB")
+
+    try:
+        if ext == "docx":
+            extracted_text = _extract_text_from_docx(data)
+        else:
+            extracted_text = _extract_text_from_pdf(data)
+    except Exception as e:
+        raise HTTPException(status_code=400, detail=f"Failed to read {ext.upper()} file: {e}")
+
+    if not extracted_text.strip():
+        raise HTTPException(status_code=400, detail="No readable text found in the uploaded file")
+
+    import base64
+    template_doc = {
+        "id": str(uuid.uuid4()),
+        "user_id": user["id"],
+        "name": (name or filename or "Untitled template").strip(),
+        "filename": filename,
+        "format": ext,
+        "file_b64": base64.b64encode(data).decode("ascii"),
+        "extracted_text": extracted_text[:20000],  # cap for prompt safety
+        "uploaded_at": datetime.now(timezone.utc).isoformat(),
+    }
+    await db.lesson_plan_templates.insert_one(template_doc)
+    return {
+        "id": template_doc["id"],
+        "name": template_doc["name"],
+        "format": ext,
+        "uploaded_at": template_doc["uploaded_at"],
+        "preview": extracted_text[:400],
+    }
+
+
+@api_router.get("/lesson-plans/templates")
+async def list_lesson_plan_templates(request: Request):
+    """List all lesson plan templates saved by the current teacher."""
+    user = await get_current_user(request)
+    if user["role"] != "teacher":
+        raise HTTPException(status_code=403, detail="Only teachers")
+    cursor = db.lesson_plan_templates.find({"user_id": user["id"]}).sort("uploaded_at", -1)
+    out = []
+    async for t in cursor:
+        out.append({
+            "id": t["id"],
+            "name": t.get("name"),
+            "format": t.get("format"),
+            "uploaded_at": t.get("uploaded_at"),
+            "preview": (t.get("extracted_text") or "")[:400],
+        })
+    return out
+
+
+@api_router.delete("/lesson-plans/templates/{template_id}")
+async def delete_lesson_plan_template(template_id: str, request: Request):
+    user = await get_current_user(request)
+    tpl = await db.lesson_plan_templates.find_one({"id": template_id, "user_id": user["id"]})
+    if not tpl:
+        raise HTTPException(status_code=404, detail="Template not found")
+    await db.lesson_plan_templates.delete_one({"id": template_id})
+    return {"success": True}
+
+
+# ---------- Generate Lesson Plans from Weekly Schedule ----------
+
+
+class ScheduleEntry(BaseModel):
+    day_label: str  # e.g. "Monday, Sep 8"
+    day_index: int  # 0-based day index within the week; used to detect same-lesson runs
+    unit: str
+    chapter: str
+    lesson: str
+    span_days: int = 1  # 1 = single-day; 2+ = multi-day (this row is day 1 of span)
+    day_within_span: int = 1  # 1 for first day, 2 for second day, etc.
+
+
+class GenerateFromScheduleRequest(BaseModel):
+    template_id: Optional[str] = None
+    schedule: List[ScheduleEntry]
+    header_fields: Dict[str, Any]
+    ai_generate_standards: bool = False
+    ai_generate_objectives: bool = False
+
+
+@api_router.post("/lesson-plans/generate-from-schedule")
+async def generate_lesson_plans_from_schedule(req: GenerateFromScheduleRequest, request: Request):
+    """Generate one filled-in lesson plan per day in the teacher's weekly schedule.
+
+    The AI is grounded in:
+      1) The teacher's uploaded template structure (if any)
+      2) The actual ByteBattles problems and lesson instructions for the chosen lesson
+    It will NEVER invent content outside the ByteBattles curriculum.
+
+    Multi-day lessons: when span_days >= 2, Day 1 focuses on intro + modeling + guided
+    practice and Day 2 focuses on independent practice + reteach + closure.
+    """
+    user = await get_current_user(request)
+    if user["role"] != "teacher":
+        raise HTTPException(status_code=403, detail="Only teachers can generate lesson plans")
+
+    llm_key = os.environ.get("EMERGENT_LLM_KEY")
+    if not llm_key:
+        raise HTTPException(status_code=500, detail="LLM key not configured")
+
+    # Load template text once (if any)
+    template_text = ""
+    template_name = ""
+    if req.template_id:
+        tpl = await db.lesson_plan_templates.find_one({"id": req.template_id, "user_id": user["id"]})
+        if tpl:
+            template_text = tpl.get("extracted_text", "")
+            template_name = tpl.get("name", "")
+
+    plans_out = []
+
+    # Pre-fetch ByteBattles content for each unique lesson referenced in the schedule
+    lesson_cache: Dict[str, Dict[str, Any]] = {}
+
+    async def _load_lesson_context(chapter: str, lesson: str) -> Dict[str, Any]:
+        cache_key = f"{chapter}|{lesson}"
+        if cache_key in lesson_cache:
+            return lesson_cache[cache_key]
+        # Fetch problems in this chapter+lesson
+        cursor = db.problems.find({"chapter": chapter, "lesson": lesson})
+        probs = []
+        async for p in cursor:
+            probs.append({
+                "title": p.get("title", ""),
+                "type": p.get("problem_type", ""),
+                "description": (p.get("description") or "")[:400],
+                "difficulty": p.get("difficulty", "medium"),
+            })
+        # Fetch lesson instructions
+        li_doc = await db.lesson_instructions.find_one({"chapter": chapter, "lesson": lesson})
+        instructions = (li_doc.get("instructions", "") if li_doc else "")[:3000]
+        ctx = {"problems": probs, "instructions": instructions}
+        lesson_cache[cache_key] = ctx
+        return ctx
+
+    system_prompt = (
+        "You are an expert curriculum designer helping a middle-school computer science teacher "
+        "fill in a lesson plan template. You will produce a lesson plan for ONE school day. "
+        "Ground every section in the ByteBattles curriculum data provided — never invent problems, "
+        "chapters, or lessons that aren't in the context. Keep language grade-appropriate and "
+        "actionable. Follow the structure of the teacher's uploaded template (section names, order, "
+        "and level of detail). If the template uses labels like 'Anticipatory Set', 'Modeling', "
+        "'Guided Practice', 'Independent Practice', 'Closure' — use those exact labels in your output."
+    )
+
+    for entry in req.schedule:
+        ctx = await _load_lesson_context(entry.chapter, entry.lesson)
+        problem_lines = [
+            f"- [{p['type']}] {p['title']} (difficulty: {p['difficulty']}) — {p['description']}"
+            for p in ctx["problems"][:12]
+        ]
+
+        # Split guidance for multi-day lessons
+        if entry.span_days >= 2 and entry.day_within_span == 1:
+            span_note = (
+                f"THIS IS DAY 1 OF {entry.span_days}. Focus on intro + direct instruction + "
+                f"modeling + early guided practice. Do NOT assign independent practice today — "
+                f"save it for day {entry.day_within_span + 1}."
+            )
+        elif entry.span_days >= 2 and entry.day_within_span >= 2:
+            span_note = (
+                f"THIS IS DAY {entry.day_within_span} OF {entry.span_days}. Focus on independent "
+                f"practice, reteach for anyone struggling, checks for understanding, and closure. "
+                f"Anticipatory Set should recall yesterday's learning."
+            )
+        else:
+            span_note = "This is a single-day lesson — cover the full arc from intro to closure."
+
+        user_prompt = (
+            f"TEACHER'S UPLOADED TEMPLATE (structure to mirror):\n"
+            f"---BEGIN TEMPLATE---\n{template_text or '(no template uploaded; use standard sections: Objectives, Standards, Materials, Anticipatory Set, Modeling, Instructional Strategies, Check for Understanding, Guided Practice, Independent Practice, Closure)'}\n---END TEMPLATE---\n\n"
+            f"LESSON CONTEXT (ByteBattles):\n"
+            f"- Unit: {entry.unit}\n- Chapter: {entry.chapter}\n- Lesson: {entry.lesson}\n"
+            f"- Date/Day: {entry.day_label}\n\n"
+            f"LESSON INSTRUCTIONS FROM BYTEBATTLES:\n{ctx['instructions'] or '(none authored yet)'}\n\n"
+            f"PROBLEMS AVAILABLE IN THIS LESSON:\n" + ("\n".join(problem_lines) if problem_lines else "(none)") + "\n\n"
+            f"PACING (minutes): Intro {req.header_fields.get('pacingIntro','5')} | Direct Instruction {req.header_fields.get('pacingDirectInstruction','15')} | Guided {req.header_fields.get('pacingGuidedPractice','15')} | Independent {req.header_fields.get('pacingIndependentPractice','10')} | Closure {req.header_fields.get('pacingClosure','5')}\n\n"
+            f"STANDARDS: {'(AI: generate 2-3 relevant CS standards for middle school, e.g., DoK, ISTE, CSTA)' if req.ai_generate_standards else (req.header_fields.get('standards','') or '(none provided)')}\n"
+            f"OBJECTIVES: {'(AI: generate 2-3 SWBAT-style objectives grounded in the lesson content)' if req.ai_generate_objectives else (req.header_fields.get('objectives','') or '(none provided)')}\n\n"
+            f"SPAN GUIDANCE: {span_note}\n\n"
+            f"Return the filled-in lesson plan following the template structure. Use plain markdown "
+            f"headings for each section. Reference specific ByteBattles problem titles by name where "
+            f"appropriate."
+        )
+
+        try:
+            chat = LlmChat(
+                api_key=llm_key,
+                session_id=f"lesson_plan_{user['id']}_{entry.day_index}",
+                system_message=system_prompt,
+            ).with_model("openai", "gpt-4o")
+            response = await chat.send_message(UserMessage(text=user_prompt))
+            filled_text = str(response).strip()
+        except Exception as e:
+            filled_text = f"(AI generation failed: {e})"
+
+        plans_out.append({
+            "day_label": entry.day_label,
+            "unit": entry.unit,
+            "chapter": entry.chapter,
+            "lesson": entry.lesson,
+            "span_days": entry.span_days,
+            "day_within_span": entry.day_within_span,
+            "content": filled_text,
+        })
+
+    # Persist as a single "week" plan in lesson_plans for the folder view
+    week_plan = {
+        "id": str(uuid.uuid4()),
+        "created_by": user["id"],
+        "created_at": datetime.now(timezone.utc).isoformat(),
+        "title": f"Week of {req.schedule[0].day_label if req.schedule else 'Untitled'}",
+        "template_id": req.template_id,
+        "template_name": template_name,
+        "header_fields": req.header_fields,
+        "plans": plans_out,
+    }
+    await db.lesson_plans.insert_one(week_plan)
+
+    return {
+        "id": week_plan["id"],
+        "title": week_plan["title"],
+        "plans": plans_out,
+    }
+
 
 @api_router.get("/lesson-plans")
 async def get_lesson_plans(request: Request):
