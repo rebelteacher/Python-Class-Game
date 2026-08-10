@@ -93,6 +93,9 @@ export default function LessonPlanCreator({ user }) {
   
   // Curriculum structure for dropdowns
   const [curriculumStructure, setCurriculumStructure] = useState({ units: [], chapters: [] });
+  // Nested curriculum for the Weekly Schedule dropdowns:
+  //   [{name: "Unit 1: ...", chapters: [{name, lessons: [{name}]}]}]
+  const [curriculumUnits, setCurriculumUnits] = useState([]);
 
   // Load saved header fields from localStorage and fetch curriculum structure
   useEffect(() => {
@@ -242,6 +245,14 @@ export default function LessonPlanCreator({ user }) {
       setCurriculumStructure(response.data);
     } catch (error) {
       console.error("Error fetching curriculum structure:", error);
+    }
+    try {
+      // Also fetch the nested version (chapters -> lessons) for the Weekly Schedule dropdowns
+      const nested = await axios.get(`${API}/curriculum/units`, { withCredentials: true });
+      // /api/curriculum/units returns an array of {name, assignment_type, chapters: [{name, lessons: [{name, ...}]}]}
+      setCurriculumUnits(Array.isArray(nested.data) ? nested.data : []);
+    } catch (error) {
+      console.error("Error fetching nested curriculum units:", error);
     }
   };
 
@@ -557,14 +568,15 @@ export default function LessonPlanCreator({ user }) {
                   />
                 </div>
                 <div>
-                  <Label htmlFor="lessonRange">Lesson Range</Label>
+                  <Label htmlFor="lessonRange">Week Date Range</Label>
                   <Input
                     id="lessonRange"
                     value={headerFields.lessonRange}
                     onChange={(e) => setHeaderFields({ ...headerFields, lessonRange: e.target.value })}
-                    placeholder="e.g., Chapter 2/Lessons 1-6"
+                    placeholder="e.g., 8/10/2026 - 8/14/2026"
                     className="mt-1"
                   />
+                  <p className="text-xs text-slate-500 mt-1">The dates covered by this weekly lesson plan</p>
                 </div>
                 <div>
                   <Label htmlFor="nextMajorAssessment">Next Major Assessment</Label>
@@ -798,10 +810,10 @@ ISTE 1.1.c - Students use technology to seek feedback..."
                   guided practice) from Day 2+ (independent practice + reteach + closure).
                 </p>
                 {weeklySchedule.map((row, idx) => {
-                  const unitObj = curriculumStructure.units?.find(u => u.name === row.unit);
+                  const unitObj = curriculumUnits.find(u => u.name === row.unit);
                   const chapterOptions = unitObj?.chapters || [];
                   const chapterObj = chapterOptions.find(c => c.name === row.chapter);
-                  const lessonOptions = chapterObj?.lessons || [];
+                  const lessonOptions = (chapterObj?.lessons || []).filter(l => l.name && !l.is_orphan);
                   return (
                     <div key={idx} className="border border-emerald-500/20 rounded p-2 space-y-2" data-testid={`lp-schedule-row-${idx}`}>
                       <div className="flex items-center gap-2">
@@ -817,7 +829,7 @@ ISTE 1.1.c - Students use technology to seek feedback..."
                           className="flex-1 text-sm bg-cyber-navy/40 border border-slate-700 rounded p-1.5"
                         >
                           <option value="">-- Unit --</option>
-                          {(curriculumStructure.units || []).map(u => (
+                          {curriculumUnits.map(u => (
                             <option key={u.name} value={u.name}>{u.name}</option>
                           ))}
                         </select>
