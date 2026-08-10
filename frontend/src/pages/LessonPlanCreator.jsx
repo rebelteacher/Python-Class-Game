@@ -826,7 +826,7 @@ ISTE 1.1.c - Students use technology to seek feedback..."
                         <select
                           value={row.unit}
                           onChange={(e) => updateScheduleRow(idx, { unit: e.target.value, chapter: "", lesson: "" })}
-                          className="flex-1 text-sm bg-cyber-navy/40 border border-slate-700 rounded p-1.5"
+                          className="flex-1 text-sm bg-slate-900 text-slate-100 border border-slate-700 rounded p-1.5 focus:border-emerald-500 focus:outline-none [&>option]:bg-slate-900 [&>option]:text-slate-100"
                         >
                           <option value="">-- Unit --</option>
                           {curriculumUnits.map(u => (
@@ -847,7 +847,7 @@ ISTE 1.1.c - Students use technology to seek feedback..."
                           value={row.chapter}
                           onChange={(e) => updateScheduleRow(idx, { chapter: e.target.value, lesson: "" })}
                           disabled={!row.unit}
-                          className="flex-1 text-sm bg-cyber-navy/40 border border-slate-700 rounded p-1.5"
+                          className="flex-1 text-sm bg-slate-900 text-slate-100 border border-slate-700 rounded p-1.5 focus:border-emerald-500 focus:outline-none disabled:opacity-50 [&>option]:bg-slate-900 [&>option]:text-slate-100"
                         >
                           <option value="">-- Chapter --</option>
                           {chapterOptions.map(c => (
@@ -858,7 +858,7 @@ ISTE 1.1.c - Students use technology to seek feedback..."
                           value={row.lesson}
                           onChange={(e) => updateScheduleRow(idx, { lesson: e.target.value })}
                           disabled={!row.chapter}
-                          className="flex-1 text-sm bg-cyber-navy/40 border border-slate-700 rounded p-1.5"
+                          className="flex-1 text-sm bg-slate-900 text-slate-100 border border-slate-700 rounded p-1.5 focus:border-emerald-500 focus:outline-none disabled:opacity-50 [&>option]:bg-slate-900 [&>option]:text-slate-100"
                         >
                           <option value="">-- Lesson --</option>
                           {lessonOptions.map(l => (
@@ -868,7 +868,7 @@ ISTE 1.1.c - Students use technology to seek feedback..."
                         <select
                           value={row.span_days}
                           onChange={(e) => updateScheduleRow(idx, { span_days: parseInt(e.target.value, 10) })}
-                          className="w-24 text-sm bg-cyber-navy/40 border border-slate-700 rounded p-1.5"
+                          className="w-24 text-sm bg-slate-900 text-slate-100 border border-slate-700 rounded p-1.5 focus:border-emerald-500 focus:outline-none [&>option]:bg-slate-900 [&>option]:text-slate-100"
                           title="Number of days this lesson spans"
                         >
                           <option value={1}>1 day</option>
