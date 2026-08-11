@@ -9589,6 +9589,111 @@ async def download_lesson_plan_docx(plan_id: str, day_index: int, request: Reque
     )
 
 
+@api_router.get("/lesson-plans/{plan_id}/download-week")
+async def download_lesson_plan_week_docx(plan_id: str, request: Request):
+    """Download ALL days of a week's lesson plans combined into ONE .docx.
+
+    The teacher's uploaded single-day template is duplicated for each day, filled
+    with that day's AI content, and joined with page breaks between days. Result:
+    one file, one page per day, each page is the template filled in.
+    """
+    user = await get_current_user(request)
+    plan = await db.lesson_plans.find_one({"id": plan_id, "created_by": user["id"]})
+    if not plan:
+        raise HTTPException(status_code=404, detail="Lesson plan not found")
+
+    plans_list = plan.get("plans") or []
+    if not plans_list:
+        raise HTTPException(status_code=400, detail="This plan has no days to combine.")
+
+    template_id = plan.get("template_id")
+    if not template_id:
+        raise HTTPException(status_code=400, detail="This plan was generated without a template — combined download is only available for template-based plans.")
+
+    tpl = await db.lesson_plan_templates.find_one({"id": template_id, "user_id": user["id"]})
+    if not tpl:
+        raise HTTPException(status_code=404, detail="Template not found (was it deleted?)")
+
+    if tpl.get("format") != "docx" or not tpl.get("fillable"):
+        raise HTTPException(status_code=400, detail="Only .docx templates with detectable section labels support combined download.")
+
+    import base64
+    from copy import deepcopy
+    from io import BytesIO
+    from docx import Document
+    from docx.oxml.ns import qn
+    from docx.oxml import OxmlElement
+
+    template_bytes = base64.b64decode(tpl["file_b64"])
+
+    # First day: fill and use as the base document (preserves headers/footers/sectPr)
+    header_fields = plan.get("header_fields") or {}
+    def _hf(day_plan):
+        return {
+            "[Title]": f"{day_plan.get('unit','')} — {day_plan.get('lesson','')}",
+            "[Date Range]": header_fields.get('lessonRange', ''),
+            "[Teacher Name]": header_fields.get('teacherName', ''),
+            "[Class]": header_fields.get('className', ''),
+            "[School]": header_fields.get('schoolName', ''),
+            "[Date]": day_plan.get('day_label', ''),
+        }
+
+    first = plans_list[0]
+    first_sections = first.get("sections") or {}
+    if not first_sections:
+        raise HTTPException(status_code=400, detail="No structured sections found in the first day — regenerate the plan to enable download.")
+
+    filled_first = _fill_docx_template(template_bytes, first_sections, _hf(first))
+    base_doc = Document(BytesIO(filled_first))
+    base_body = base_doc.element.body
+
+    # For each subsequent day, fill a fresh copy of the template and append its
+    # body children (minus sectPr) after a page break.
+    for i, day_plan in enumerate(plans_list[1:], start=1):
+        day_sections = day_plan.get("sections") or {}
+        if not day_sections:
+            # Skip days without structured sections rather than erroring the whole download
+            continue
+        filled_day = _fill_docx_template(template_bytes, day_sections, _hf(day_plan))
+        day_doc = Document(BytesIO(filled_day))
+        day_body = day_doc.element.body
+
+        # Add a page break paragraph to the base doc before appending this day
+        pb_para = OxmlElement("w:p")
+        pb_r = OxmlElement("w:r")
+        pb_br = OxmlElement("w:br")
+        pb_br.set(qn("w:type"), "page")
+        pb_r.append(pb_br)
+        pb_para.append(pb_r)
+        # Insert BEFORE the trailing sectPr of the base doc
+        sectPr = base_body.find(qn("w:sectPr"))
+        if sectPr is not None:
+            sectPr.addprevious(pb_para)
+        else:
+            base_body.append(pb_para)
+
+        # Copy every body child of day_doc (except its own sectPr) into base doc
+        for child in list(day_body):
+            if child.tag == qn("w:sectPr"):
+                continue
+            new_child = deepcopy(child)
+            if sectPr is not None:
+                sectPr.addprevious(new_child)
+            else:
+                base_body.append(new_child)
+
+    out = BytesIO()
+    base_doc.save(out)
+
+    from fastapi.responses import Response as FastAPIResponse
+    week_label = re.sub(r"[^A-Za-z0-9_\-]+", "_", plan.get("title", "week")).strip("_") or "week"
+    return FastAPIResponse(
+        content=out.getvalue(),
+        media_type="application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+        headers={"Content-Disposition": f'attachment; filename="{week_label}.docx"'},
+    )
+
+
 # ---------- Lesson Plan Templates: end ----------
 
 

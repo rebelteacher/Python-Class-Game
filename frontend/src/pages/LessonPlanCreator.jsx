@@ -180,6 +180,42 @@ export default function LessonPlanCreator({ user }) {
     setWeeklySchedule(prev => prev.filter((_, i) => i !== idx));
   };
 
+  // Download all days combined into one .docx (uses the teacher's uploaded template repeated per day).
+  const downloadWeekAsDocx = async () => {
+    if (!generatedPlans.length || !generatedPlans[0]?._plan_id) {
+      toast.error("Nothing to download yet — generate a plan first.");
+      return;
+    }
+    const planId = generatedPlans[0]._plan_id;
+    try {
+      const r = await axios.get(`${API}/lesson-plans/${planId}/download-week`, {
+        withCredentials: true,
+        responseType: "blob",
+      });
+      const blob = new Blob([r.data], {
+        type: "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+      });
+      const dlUrl = window.URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = dlUrl;
+      a.download = `Week-of-${generatedPlans[0].day_label || 'Plan'}.docx`.replace(/[^A-Za-z0-9_\-\.]+/g, "_");
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      window.URL.revokeObjectURL(dlUrl);
+      toast.success("Full week downloaded!");
+    } catch (err) {
+      console.error(err);
+      let msg = "Download failed";
+      if (err.response?.data instanceof Blob) {
+        try { msg = JSON.parse(await err.response.data.text()).detail || msg; } catch (_) { /* ignore */ }
+      } else if (err.response?.data?.detail) {
+        msg = err.response.data.detail;
+      }
+      toast.error(msg);
+    }
+  };
+
   // Download one generated day as a .docx that matches the teacher's uploaded template.
   const downloadDayAsDocx = async (planId, dayIndex, dayLabel) => {
     try {
@@ -1322,6 +1358,29 @@ ISTE 1.1.c - Students use technology to seek feedback..."
                     <strong>Pacing:</strong> Intro ({headerFields.pacingIntro}m) → Direct Instruction ({headerFields.pacingDirectInstruction}m) → Guided Practice ({headerFields.pacingGuidedPractice}m) → Independent Practice ({headerFields.pacingIndependentPractice}m) → Closure ({headerFields.pacingClosure}m)
                   </div>
                 </div>
+
+                {/* Combined Week Download - one .docx with all days */}
+                {generatedPlans.length > 1 && generatedPlans[0]?._plan_id && generatedPlans[0]?.sections && Object.keys(generatedPlans[0].sections).length > 0 && (
+                  <Card className="border-cyan-500/30 bg-cyan-500/5 no-print" data-testid="lp-download-week-card">
+                    <CardContent className="p-4 flex items-center justify-between">
+                      <div className="flex items-center gap-3">
+                        <FileText className="w-6 h-6 text-cyan-400" />
+                        <div>
+                          <div className="text-sm font-semibold text-cyan-300">Full Week — All Days in One File</div>
+                          <div className="text-xs text-slate-400">Downloads a single .docx using your uploaded template repeated for each day, with page breaks between days.</div>
+                        </div>
+                      </div>
+                      <Button
+                        onClick={downloadWeekAsDocx}
+                        className="bg-cyan-600 hover:bg-cyan-700 text-white"
+                        data-testid="lp-download-week-btn"
+                      >
+                        <Download className="w-4 h-4 mr-1" />
+                        Download Full Week (.docx)
+                      </Button>
+                    </CardContent>
+                  </Card>
+                )}
 
                 {/* Daily Plans */}
                 {generatedPlans.map((day, dayIndex) => (
