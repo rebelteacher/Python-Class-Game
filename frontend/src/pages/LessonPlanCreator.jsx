@@ -927,115 +927,10 @@ ISTE 1.1.c - Students use technology to seek feedback..."
               </CardContent>
             </Card>
 
-            {/* Weekly Schedule Card */}
-            <Card className="border-emerald-500/30" data-testid="lp-weekly-schedule-card">
-              <CardHeader className="pb-3">
-                <CardTitle className="text-lg flex items-center gap-2">
-                  <Calendar className="w-5 h-5 text-emerald-500" />
-                  Weekly Schedule
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-3">
-                <p className="text-xs text-slate-500">
-                  Map each school day to a ByteBattles lesson. Use <b>Spans</b> if you're spreading
-                  one lesson across multiple days — the AI will split Day 1 (intro + modeling +
-                  guided practice) from Day 2+ (independent practice + reteach + closure).
-                </p>
-                {weeklySchedule.map((row, idx) => {
-                  const unitObj = curriculumUnits.find(u => u.name === row.unit);
-                  const chapterOptions = unitObj?.chapters || [];
-                  const chapterObj = chapterOptions.find(c => c.name === row.chapter);
-                  const lessonOptions = (chapterObj?.lessons || []).filter(l => l.name && !l.is_orphan);
-                  return (
-                    <div key={idx} className="border border-emerald-500/20 rounded p-2 space-y-2" data-testid={`lp-schedule-row-${idx}`}>
-                      <div className="flex items-center gap-2">
-                        <Input
-                          value={row.day_label}
-                          onChange={(e) => updateScheduleRow(idx, { day_label: e.target.value })}
-                          placeholder="e.g., Monday"
-                          className="w-32 text-sm"
-                        />
-                        <select
-                          value={row.unit}
-                          onChange={(e) => updateScheduleRow(idx, { unit: e.target.value, chapter: "", lesson: "" })}
-                          className="flex-1 text-sm bg-slate-900 text-slate-100 border border-slate-700 rounded p-1.5 focus:border-emerald-500 focus:outline-none [&>option]:bg-slate-900 [&>option]:text-slate-100"
-                        >
-                          <option value="">-- Unit --</option>
-                          {curriculumUnits.map(u => (
-                            <option key={u.name} value={u.name}>{u.name}</option>
-                          ))}
-                        </select>
-                        <button
-                          type="button"
-                          onClick={() => removeScheduleRow(idx)}
-                          className="text-slate-500 hover:text-red-400 p-1"
-                          title="Remove row"
-                        >
-                          <X className="w-4 h-4" />
-                        </button>
-                      </div>
-                      <div className="flex items-center gap-2">
-                        <select
-                          value={row.chapter}
-                          onChange={(e) => updateScheduleRow(idx, { chapter: e.target.value, lesson: "" })}
-                          disabled={!row.unit}
-                          className="flex-1 min-w-0 text-sm bg-slate-900 text-slate-100 border border-slate-700 rounded p-1.5 focus:border-emerald-500 focus:outline-none disabled:opacity-50 [&>option]:bg-slate-900 [&>option]:text-slate-100"
-                        >
-                          <option value="">-- Chapter --</option>
-                          {chapterOptions.map(c => (
-                            <option key={c.name} value={c.name}>{c.name}</option>
-                          ))}
-                        </select>
-                        <select
-                          value={row.lesson}
-                          onChange={(e) => updateScheduleRow(idx, { lesson: e.target.value })}
-                          disabled={!row.chapter}
-                          className="flex-1 min-w-0 text-sm bg-slate-900 text-slate-100 border border-slate-700 rounded p-1.5 focus:border-emerald-500 focus:outline-none disabled:opacity-50 [&>option]:bg-slate-900 [&>option]:text-slate-100"
-                        >
-                          <option value="">-- Lesson --</option>
-                          {lessonOptions.map(l => (
-                            <option key={l.name} value={l.name}>{l.name}</option>
-                          ))}
-                        </select>
-                      </div>
-                      <div className="flex items-center gap-2">
-                        <span className="text-xs text-slate-400">This lesson spans:</span>
-                        <select
-                          value={row.span_days}
-                          onChange={(e) => updateScheduleRow(idx, { span_days: parseInt(e.target.value, 10) })}
-                          className="text-sm bg-slate-900 text-slate-100 border border-slate-700 rounded p-1.5 focus:border-emerald-500 focus:outline-none [&>option]:bg-slate-900 [&>option]:text-slate-100"
-                          title="Number of days this lesson spans"
-                        >
-                          <option value={1}>1 day</option>
-                          <option value={2}>2 days</option>
-                          <option value={3}>3 days</option>
-                        </select>
-                      </div>
-                    </div>
-                  );
-                })}
-                <Button
-                  type="button"
-                  variant="outline"
-                  size="sm"
-                  onClick={addScheduleRow}
-                  data-testid="lp-add-schedule-row"
-                  className="w-full"
-                >
-                  <Plus className="w-4 h-4 mr-1" /> Add day
-                </Button>
-                <Button
-                  type="button"
-                  onClick={generateFromWeeklySchedule}
-                  disabled={generatingSchedule || weeklySchedule.length === 0}
-                  className="w-full bg-emerald-600 hover:bg-emerald-700 text-white"
-                  data-testid="lp-generate-schedule"
-                >
-                  <Sparkles className="w-4 h-4 mr-1" />
-                  {generatingSchedule ? "Generating…" : `Generate ${weeklySchedule.length} day(s) of plans`}
-                </Button>
-              </CardContent>
-            </Card>
+            {/* Weekly Schedule Card — removed to consolidate on a single Generate Plan
+                flow. The old Generate Plan button (blue) now uses the template-aware
+                endpoint under the hood, so there's no functional loss. */}
+
 
 
             {/* Generate Card */}
@@ -1433,10 +1328,24 @@ ISTE 1.1.c - Students use technology to seek feedback..."
 
                     {(expandedDays[dayIndex] || true) && (
                       <CardContent className={`space-y-4 ${!expandedDays[dayIndex] ? 'no-print hidden' : ''}`}>
-                        {lessonSections.map((section) => {
+                        {(() => {
+                          // Prefer the template-derived sections dict from the new endpoint.
+                          // If it's populated, render those exact labels (matches the teacher's
+                          // template). Otherwise, fall back to the legacy hardcoded lessonSections.
+                          const sectionsDict = day.sections || null;
+                          const useSections = sectionsDict && Object.keys(sectionsDict).length > 0;
+                          const rendered = useSections
+                            ? Object.entries(sectionsDict).map(([label, content]) => ({
+                                key: label, label, icon: FileText, value: content,
+                              }))
+                            : lessonSections.map(s => ({
+                                key: s.key, label: s.label, icon: s.icon, description: s.description,
+                                showProblems: s.showProblems, value: day[s.key],
+                              }));
+                          return rendered.map((section) => {
                           const Icon = section.icon;
                           const isEditing = editingSection === `${dayIndex}-${section.key}`;
-                          
+                          const value = section.value;
                           return (
                             <div key={section.key} className="border-b border-cyber-cyan/10 pb-4 last:border-0">
                               <div className="flex items-start gap-2 mb-2">
@@ -1460,27 +1369,27 @@ ISTE 1.1.c - Students use technology to seek feedback..."
                                       <Edit3 className="w-3 h-3" />
                                     </Button>
                                   </div>
-                                  
+
                                   {isEditing ? (
                                     <Textarea
-                                      value={day[section.key] || ''}
+                                      value={value || ''}
                                       onChange={(e) => updateDayContent(dayIndex, section.key, e.target.value)}
                                       className="mt-2 min-h-[100px]"
                                       onBlur={() => setEditingSection(null)}
                                       autoFocus
                                     />
                                   ) : (
-                                    <div 
+                                    <div
                                       className="text-slate-400 mt-1 whitespace-pre-wrap"
-                                      dangerouslySetInnerHTML={{ 
-                                        __html: toDisplayString(day[section.key]).replace(
-                                          /\*\*(.*?)\*\*/g, 
+                                      dangerouslySetInnerHTML={{
+                                        __html: toDisplayString(value).replace(
+                                          /\*\*(.*?)\*\*/g,
                                           '<strong class="text-white">$1</strong>'
                                         )
                                       }}
                                     />
                                   )}
-                                  
+
                                   {/* Show suggested problems for practice sections */}
                                   {section.showProblems && day.suggestedProblems?.length > 0 && (
                                     <div className="mt-3 p-3 bg-green-500/10 border border-green-500/30 rounded-lg no-print">
@@ -1525,7 +1434,8 @@ ISTE 1.1.c - Students use technology to seek feedback..."
                               </div>
                             </div>
                           );
-                        })}
+                          });
+                        })()}
                       </CardContent>
                     )}
                   </Card>
