@@ -180,8 +180,42 @@ export default function LessonPlanCreator({ user }) {
     setWeeklySchedule(prev => prev.filter((_, i) => i !== idx));
   };
 
-  const generateFromWeeklySchedule = async () => {
-    if (weeklySchedule.length === 0) {
+  // Download one generated day as a .docx that matches the teacher's uploaded template.
+  const downloadDayAsDocx = async (planId, dayIndex, dayLabel) => {
+    try {
+      const url = `${API}/lesson-plans/${planId}/download/${dayIndex}`;
+      const r = await axios.get(url, { withCredentials: true, responseType: "blob" });
+      const blob = new Blob([r.data], {
+        type: "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+      });
+      const dlUrl = window.URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = dlUrl;
+      const safe = (dayLabel || `Day-${dayIndex + 1}`).replace(/[^A-Za-z0-9_\-]+/g, "_");
+      a.download = `${safe}.docx`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      window.URL.revokeObjectURL(dlUrl);
+      toast.success("Downloaded!");
+    } catch (err) {
+      console.error(err);
+      let msg = "Download failed";
+      // axios turns 4xx responses into blobs when responseType is blob — try to parse the JSON
+      if (err.response?.data instanceof Blob) {
+        try {
+          const text = await err.response.data.text();
+          const parsed = JSON.parse(text);
+          msg = parsed.detail || msg;
+        } catch (_) { /* ignore */ }
+      } else if (err.response?.data?.detail) {
+        msg = err.response.data.detail;
+      }
+      toast.error(msg);
+    }
+  };
+
+  const generateFromWeeklySchedule = async () => {    if (weeklySchedule.length === 0) {
       toast.error("Add at least one day to your schedule");
       return;
     }
@@ -227,7 +261,13 @@ export default function LessonPlanCreator({ user }) {
         { withCredentials: true }
       );
       toast.success(`Generated ${r.data.plans.length} day(s) of lesson plans!`);
-      setGeneratedPlans(r.data.plans);
+      // Tag each plan with the parent plan id + day index so we can wire download buttons.
+      const tagged = (r.data.plans || []).map((p, idx) => ({
+        ...p,
+        _plan_id: r.data.id,
+        _day_index: idx,
+      }));
+      setGeneratedPlans(tagged);
       fetchSavedPlans();
     } catch (err) {
       console.error(err);
@@ -782,7 +822,16 @@ ISTE 1.1.c - Students use technology to seek feedback..."
                         />
                         <div className="flex-1 min-w-0">
                           <div className="text-sm font-medium truncate">{t.name}</div>
-                          <div className="text-[10px] text-slate-500 uppercase">{t.format} · {t.uploaded_at?.slice(0, 10)}</div>
+                          <div className="text-[10px] text-slate-500 uppercase flex items-center gap-2">
+                            <span>{t.format} · {t.uploaded_at?.slice(0, 10)}</span>
+                            {t.fillable ? (
+                              <span className="text-emerald-400 normal-case">✓ fillable</span>
+                            ) : (
+                              <span className="text-amber-400 normal-case" title="PDF templates are used only as a style guide — the AI can't fill them. Upload a .docx to enable downloads that match your template exactly.">
+                                ⚠ style-guide only
+                              </span>
+                            )}
+                          </div>
                         </div>
                         <button
                           type="button"
@@ -1244,15 +1293,32 @@ ISTE 1.1.c - Students use technology to seek feedback..."
                           <div>
                             <h3 className="text-lg font-semibold">Day {dayIndex + 1}</h3>
                             <p className="text-sm text-slate-500 font-normal">
-                              {formatDate(lessonInput.startDate, dayIndex)}
+                              {day.day_label || formatDate(lessonInput.startDate, dayIndex)}
                             </p>
                           </div>
                         </div>
-                        {expandedDays[dayIndex] ? (
-                          <ChevronUp className="w-5 h-5 text-slate-500" />
-                        ) : (
-                          <ChevronDown className="w-5 h-5 text-slate-500" />
-                        )}
+                        <div className="flex items-center gap-2">
+                          {day._plan_id && day.sections && Object.keys(day.sections).length > 0 && (
+                            <Button
+                              size="sm"
+                              variant="outline"
+                              className="text-cyan-400 hover:bg-cyan-500/10"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                downloadDayAsDocx(day._plan_id, day._day_index, day.day_label);
+                              }}
+                              data-testid={`lp-download-day-${dayIndex}`}
+                            >
+                              <Download className="w-4 h-4 mr-1" />
+                              Download .docx
+                            </Button>
+                          )}
+                          {expandedDays[dayIndex] ? (
+                            <ChevronUp className="w-5 h-5 text-slate-500" />
+                          ) : (
+                            <ChevronDown className="w-5 h-5 text-slate-500" />
+                          )}
+                        </div>
                       </CardTitle>
                     </CardHeader>
 

@@ -9203,6 +9203,59 @@ def _extract_text_from_docx(data: bytes) -> str:
     return "\n".join(parts)
 
 
+def _extract_section_labels_from_docx(data: bytes) -> List[str]:
+    """Walk a docx and pull out the ordered list of section labels (table-cell
+    labels + heading paragraphs). These labels drive the AI's structured output
+    and the download-time fill logic. Duplicates are de-duplicated preserving
+    first-seen order."""
+    from docx import Document
+    from io import BytesIO
+    doc = Document(BytesIO(data))
+    labels: List[str] = []
+    seen = set()
+
+    def add(txt: str):
+        t = (txt or "").strip()
+        # Strip common placeholder markers to reduce noise
+        t = t.rstrip(":").strip()
+        if not t:
+            return
+        low = t.lower()
+        # Reject typical fill-target values (dates, empty cells, and blank markers)
+        if low in seen:
+            return
+        # Skip obviously non-label junk (long paragraphs are content, not labels)
+        if len(t) > 90 or "\n" in t:
+            return
+        # Skip placeholder patterns like [Title], [Date Range]
+        if t.startswith("[") and t.endswith("]"):
+            return
+        seen.add(low)
+        labels.append(t)
+
+    # Table cell labels — take the FIRST non-empty cell in each row (typical left-col-label layout)
+    for table in doc.tables:
+        for row in table.rows:
+            for cell in row.cells:
+                cell_text = (cell.text or "").strip()
+                if cell_text:
+                    add(cell_text)
+                    break  # only first non-empty cell per row = the label
+
+    # Bold / heading paragraphs — often used above blank paragraphs for labels
+    for para in doc.paragraphs:
+        text = (para.text or "").strip()
+        if not text:
+            continue
+        style = (para.style.name or "").lower() if para.style else ""
+        is_heading = "heading" in style
+        is_all_bold = any(run.bold for run in para.runs) and len(text) < 60
+        if is_heading or is_all_bold:
+            add(text)
+
+    return labels
+
+
 def _extract_text_from_pdf(data: bytes) -> str:
     """Extract plain text from a PDF blob."""
     import pypdf
@@ -9244,8 +9297,10 @@ async def upload_lesson_plan_template(
     try:
         if ext == "docx":
             extracted_text = _extract_text_from_docx(data)
+            section_labels = _extract_section_labels_from_docx(data)
         else:
             extracted_text = _extract_text_from_pdf(data)
+            section_labels = []  # PDFs aren't fillable; only usable as style guide
     except Exception as e:
         raise HTTPException(status_code=400, detail=f"Failed to read {ext.upper()} file: {e}")
 
@@ -9261,6 +9316,8 @@ async def upload_lesson_plan_template(
         "format": ext,
         "file_b64": base64.b64encode(data).decode("ascii"),
         "extracted_text": extracted_text[:20000],  # cap for prompt safety
+        "section_labels": section_labels,
+        "fillable": ext == "docx" and len(section_labels) > 0,
         "uploaded_at": datetime.now(timezone.utc).isoformat(),
     }
     await db.lesson_plan_templates.insert_one(template_doc)
@@ -9269,6 +9326,8 @@ async def upload_lesson_plan_template(
         "name": template_doc["name"],
         "format": ext,
         "uploaded_at": template_doc["uploaded_at"],
+        "section_labels": section_labels,
+        "fillable": template_doc["fillable"],
         "preview": extracted_text[:400],
     }
 
@@ -9287,6 +9346,8 @@ async def list_lesson_plan_templates(request: Request):
             "name": t.get("name"),
             "format": t.get("format"),
             "uploaded_at": t.get("uploaded_at"),
+            "section_labels": t.get("section_labels") or [],
+            "fillable": bool(t.get("fillable")),
             "preview": (t.get("extracted_text") or "")[:400],
         })
     return out
@@ -9302,7 +9363,233 @@ async def delete_lesson_plan_template(template_id: str, request: Request):
     return {"success": True}
 
 
-# ---------- Generate Lesson Plans from Weekly Schedule ----------
+# ---------- Download filled lesson plan as .docx ----------
+
+
+def _match_label_to_key(label: str, keys: List[str]) -> Optional[str]:
+    """Find the section key from `keys` that best matches a label text from a
+    template's docx (case-insensitive, tolerates trailing colons, and matches
+    stripped-of-parenthetical descriptions like 'Modeling – how will you...')."""
+    if not label or not keys:
+        return None
+    ln = label.strip().rstrip(":").strip().lower()
+    # Direct match first
+    for k in keys:
+        if k.strip().rstrip(":").strip().lower() == ln:
+            return k
+    # Match on the first-line / label portion (before any em-dash description)
+    ln_short = re.split(r"[\u2013\u2014\-–—]", ln, maxsplit=1)[0].strip()
+    if ln_short:
+        for k in keys:
+            if k.strip().rstrip(":").strip().lower() == ln_short:
+                return k
+    # Contains match (helper text templates like "Objectives (Write on the board...)" -> "Objectives")
+    for k in keys:
+        k_low = k.strip().rstrip(":").strip().lower()
+        if k_low and (k_low in ln or ln.startswith(k_low)):
+            return k
+    return None
+
+
+def _fill_docx_template(template_bytes: bytes, sections: Dict[str, str],
+                        header_fills: Optional[Dict[str, str]] = None) -> bytes:
+    """Open the teacher's original template .docx and fill in the right-column
+    cells (or below-heading paragraphs) with `sections`. Preserves ALL of the
+    original formatting: fonts, colors, table borders, cell shading, headers,
+    footers, page setup.
+
+    Args:
+        template_bytes: original .docx file blob.
+        sections: {label_string_from_template: content_string}.
+        header_fills: optional {placeholder_text: replacement}, e.g.
+            {"[Title]": "Unit 2 – Lesson 1: Naming and Moving",
+             "[Date Range]": "8/10 – 8/14"}.
+    Returns:
+        Bytes of the filled .docx.
+    """
+    from docx import Document
+    from io import BytesIO
+
+    doc = Document(BytesIO(template_bytes))
+
+    # Handy: the section labels we already know about
+    section_keys = list(sections.keys())
+
+    def _write_content_to_cell(cell, content: str):
+        """Replace the cell's paragraphs with the AI content, preserving the
+        first paragraph's style so table borders / fonts stay intact."""
+        # Snapshot the style / first run's font formatting from the first paragraph
+        first_para = cell.paragraphs[0] if cell.paragraphs else cell.add_paragraph()
+        first_style = first_para.style
+
+        # Clear all paragraphs' text
+        for p in cell.paragraphs:
+            # remove all runs
+            for run in list(p.runs):
+                run.text = ""
+        # Write content lines
+        lines = content.split("\n")
+        # Fill the first paragraph
+        if cell.paragraphs:
+            cell.paragraphs[0].text = lines[0] if lines else ""
+            try:
+                cell.paragraphs[0].style = first_style
+            except Exception:
+                pass
+        # Append the rest as new paragraphs
+        for extra in lines[1:]:
+            p = cell.add_paragraph(extra)
+            try:
+                p.style = first_style
+            except Exception:
+                pass
+
+    def _replace_placeholder_in_text(text: str, fills: Dict[str, str]) -> str:
+        for k, v in fills.items():
+            text = text.replace(k, v)
+        return text
+
+    header_fills = header_fills or {}
+
+    # Fill header/body paragraphs that contain placeholder patterns (e.g., [Title])
+    if header_fills:
+        for para in doc.paragraphs:
+            if any(k in para.text for k in header_fills):
+                new_text = _replace_placeholder_in_text(para.text, header_fills)
+                # Preserve the paragraph but rewrite as one run so formatting sticks
+                if para.runs:
+                    para.runs[0].text = new_text
+                    for r in para.runs[1:]:
+                        r.text = ""
+                else:
+                    para.add_run(new_text)
+
+    # Walk each table row. Find the label cell (leftmost non-empty) and write
+    # the AI content into the FIRST empty adjacent cell in the same row.
+    for table in doc.tables:
+        for row in table.rows:
+            cells = row.cells
+            # Detect the label cell = first non-empty
+            label_cell = None
+            label_cell_idx = None
+            for i, c in enumerate(cells):
+                if (c.text or "").strip():
+                    label_cell = c
+                    label_cell_idx = i
+                    break
+            if label_cell is None or label_cell_idx is None:
+                continue
+
+            # Also fill placeholders inside the label cell itself (e.g. "Date: [Date Range]")
+            if header_fills and any(k in label_cell.text for k in header_fills):
+                for para in label_cell.paragraphs:
+                    if any(k in para.text for k in header_fills):
+                        new_text = _replace_placeholder_in_text(para.text, header_fills)
+                        if para.runs:
+                            para.runs[0].text = new_text
+                            for r in para.runs[1:]:
+                                r.text = ""
+                        else:
+                            para.add_run(new_text)
+
+            key = _match_label_to_key(label_cell.text, section_keys)
+            if not key:
+                continue
+
+            content = sections.get(key)
+            if not content:
+                continue
+
+            # Prefer writing to the next empty cell after the label
+            fill_cell = None
+            for j in range(label_cell_idx + 1, len(cells)):
+                if not (cells[j].text or "").strip():
+                    fill_cell = cells[j]
+                    break
+            # If none are empty, fill the LAST cell in the row (typical two-col layout)
+            if fill_cell is None and len(cells) > label_cell_idx + 1:
+                fill_cell = cells[-1]
+                # If that cell has stub instructional text, clear it first
+                fill_cell.text = ""
+
+            if fill_cell is not None:
+                _write_content_to_cell(fill_cell, content)
+
+    # For NON-table templates: fill the paragraph directly below any heading paragraph
+    # whose text matches a section key.
+    paragraphs = list(doc.paragraphs)
+    for i, para in enumerate(paragraphs):
+        text = (para.text or "").strip()
+        if not text:
+            continue
+        key = _match_label_to_key(text, section_keys)
+        if not key:
+            continue
+        # Only auto-fill when the very next paragraph is empty (a natural fill slot)
+        if i + 1 < len(paragraphs) and not (paragraphs[i + 1].text or "").strip():
+            content = sections.get(key)
+            if content:
+                paragraphs[i + 1].add_run(content)
+
+    buf = BytesIO()
+    doc.save(buf)
+    return buf.getvalue()
+
+
+@api_router.get("/lesson-plans/{plan_id}/download/{day_index}")
+async def download_lesson_plan_docx(plan_id: str, day_index: int, request: Request):
+    """Download one day's lesson plan as a .docx that matches the teacher's
+    original uploaded template — same fonts, colors, tables, header/footer."""
+    user = await get_current_user(request)
+    plan = await db.lesson_plans.find_one({"id": plan_id, "created_by": user["id"]})
+    if not plan:
+        raise HTTPException(status_code=404, detail="Lesson plan not found")
+
+    plans_list = plan.get("plans") or []
+    if day_index < 0 or day_index >= len(plans_list):
+        raise HTTPException(status_code=404, detail="Day index out of range")
+
+    day_plan = plans_list[day_index]
+    template_id = plan.get("template_id")
+    if not template_id:
+        raise HTTPException(status_code=400, detail="This plan was generated without a template — download is only available for template-based plans.")
+
+    tpl = await db.lesson_plan_templates.find_one({"id": template_id, "user_id": user["id"]})
+    if not tpl:
+        raise HTTPException(status_code=404, detail="Template not found (was it deleted?)")
+
+    if tpl.get("format") != "docx" or not tpl.get("fillable"):
+        raise HTTPException(status_code=400, detail="Only .docx templates with detectable section labels are fillable. PDF templates can only be used as a style guide.")
+
+    import base64
+    template_bytes = base64.b64decode(tpl["file_b64"])
+
+    sections = day_plan.get("sections") or {}
+    if not sections:
+        raise HTTPException(status_code=400, detail="This plan doesn't have structured sections (was it generated before the template-fill feature? Regenerate it).")
+
+    # Standard header placeholders
+    header_fills = {
+        "[Title]": f"{day_plan.get('unit','')} — {day_plan.get('lesson','')}",
+        "[Date Range]": (plan.get('header_fields') or {}).get('lessonRange', ''),
+        "[Teacher Name]": (plan.get('header_fields') or {}).get('teacherName', ''),
+        "[Class]": (plan.get('header_fields') or {}).get('className', ''),
+        "[School]": (plan.get('header_fields') or {}).get('schoolName', ''),
+    }
+    filled = _fill_docx_template(template_bytes, sections, header_fills)
+
+    from fastapi.responses import Response as FastAPIResponse
+    safe_name = re.sub(r"[^A-Za-z0-9_\-]+", "_", (day_plan.get('day_label') or 'plan')).strip("_") or "plan"
+    return FastAPIResponse(
+        content=filled,
+        media_type="application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+        headers={
+            "Content-Disposition": f'attachment; filename="{safe_name}.docx"'
+        }
+    )
+
+
+# ---------- Lesson Plan Templates: end ----------
 
 
 class ScheduleEntry(BaseModel):
@@ -9344,14 +9631,16 @@ async def generate_lesson_plans_from_schedule(req: GenerateFromScheduleRequest, 
     if not llm_key:
         raise HTTPException(status_code=500, detail="LLM key not configured")
 
-    # Load template text once (if any)
+    # Load template text + labels once (if any)
     template_text = ""
     template_name = ""
+    template_labels: List[str] = []
     if req.template_id:
         tpl = await db.lesson_plan_templates.find_one({"id": req.template_id, "user_id": user["id"]})
         if tpl:
             template_text = tpl.get("extracted_text", "")
             template_name = tpl.get("name", "")
+            template_labels = tpl.get("section_labels") or []
 
     plans_out = []
 
@@ -9409,7 +9698,12 @@ async def generate_lesson_plans_from_schedule(req: GenerateFromScheduleRequest, 
         "Keep language grade-appropriate and actionable. Follow the structure of the teacher's "
         "uploaded template (section names, order, and level of detail). If the template uses labels "
         "like 'Anticipatory Set', 'Modeling', 'Guided Practice', 'Independent Practice', 'Closure' "
-        "— use those exact labels in your output."
+        "— use those exact labels in your output.\n\n"
+        "OUTPUT FORMAT (STRICT): Respond with a single JSON object mapping each section label to its "
+        "content. Do NOT wrap in markdown code fences. Do NOT add prose outside the JSON. Every value "
+        "must be a plain string (multi-paragraph is fine — use \\n\\n between paragraphs). Only "
+        "include keys for sections the teacher's template actually has. Keep answers concise but "
+        "actionable — 2-6 sentences per section unless a section clearly needs a bulleted list."
     )
 
     for entry in req.schedule:
@@ -9465,6 +9759,18 @@ async def generate_lesson_plans_from_schedule(req: GenerateFromScheduleRequest, 
         else:
             span_note = "This is a single-day lesson — cover the full arc from intro to closure."
 
+        # If the teacher uploaded a fillable template, include the exact section
+        # labels the AI must respond with as keys.
+        labels_directive = ""
+        if template_labels:
+            labels_directive = (
+                f"\n\nREQUIRED OUTPUT KEYS (use these EXACT strings as JSON keys — case- and "
+                f"punctuation-sensitive): {json.dumps(template_labels)}\n"
+                f"Only include a key if you have real content for it grounded in the ByteBattles "
+                f"context. Skip labels that are purely structural (e.g. 'Teaching the Lesson' as a "
+                f"parent heading with no direct content of its own)."
+            )
+
         user_prompt = (
             f"TEACHER'S UPLOADED TEMPLATE (structure to mirror):\n"
             f"---BEGIN TEMPLATE---\n{template_text or '(no template uploaded; use standard sections: Objectives, Standards, Materials, Anticipatory Set, Modeling, Instructional Strategies, Check for Understanding, Guided Practice, Independent Practice, Closure)'}\n---END TEMPLATE---\n\n"
@@ -9482,10 +9788,8 @@ async def generate_lesson_plans_from_schedule(req: GenerateFromScheduleRequest, 
             f"PACING (minutes): Intro {req.header_fields.get('pacingIntro','5')} | Direct Instruction {req.header_fields.get('pacingDirectInstruction','15')} | Guided {req.header_fields.get('pacingGuidedPractice','15')} | Independent {req.header_fields.get('pacingIndependentPractice','10')} | Closure {req.header_fields.get('pacingClosure','5')}\n\n"
             f"STANDARDS: {'(AI: generate 2-3 relevant CS standards for middle school, e.g., DoK, ISTE, CSTA)' if req.ai_generate_standards else (req.header_fields.get('standards','') or '(none provided)')}\n"
             f"OBJECTIVES: {'(AI: generate 2-3 SWBAT-style objectives grounded in the lesson content — objectives MUST match the Unit Type)' if req.ai_generate_objectives else (req.header_fields.get('objectives','') or '(none provided)')}\n\n"
-            f"SPAN GUIDANCE: {span_note}\n\n"
-            f"Return the filled-in lesson plan following the template structure. Use plain markdown "
-            f"headings for each section. Reference specific ByteBattles problem titles by name where "
-            f"appropriate."
+            f"SPAN GUIDANCE: {span_note}"
+            + labels_directive
         )
 
         try:
@@ -9499,6 +9803,22 @@ async def generate_lesson_plans_from_schedule(req: GenerateFromScheduleRequest, 
         except Exception as e:
             filled_text = f"(AI generation failed: {e})"
 
+        # Try to parse structured JSON. Fall back to storing raw text if parsing fails.
+        sections: Dict[str, str] = {}
+        try:
+            # Strip common markdown code-fence wrapping just in case
+            raw = filled_text.strip()
+            if raw.startswith("```"):
+                # remove leading ```json or ``` and trailing ```
+                raw = re.sub(r"^```(json)?\s*", "", raw)
+                raw = re.sub(r"\s*```\s*$", "", raw)
+            parsed = json.loads(raw)
+            if isinstance(parsed, dict):
+                sections = {str(k): str(v) for k, v in parsed.items() if v}
+        except Exception:
+            # Non-JSON response — keep as freeform content only
+            sections = {}
+
         plans_out.append({
             "day_label": entry.day_label,
             "unit": entry.unit,
@@ -9506,7 +9826,8 @@ async def generate_lesson_plans_from_schedule(req: GenerateFromScheduleRequest, 
             "lesson": entry.lesson,
             "span_days": entry.span_days,
             "day_within_span": entry.day_within_span,
-            "content": filled_text,
+            "content": filled_text,   # kept for legacy/preview
+            "sections": sections,     # structured — powers docx fill on download
         })
 
     # Persist as a single "week" plan in lesson_plans for the folder view
