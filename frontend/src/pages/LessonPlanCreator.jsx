@@ -196,6 +196,10 @@ export default function LessonPlanCreator({ user }) {
     let dayIdx = 0;
     for (const row of weeklySchedule) {
       const span = Math.max(1, parseInt(row.span_days || 1, 10));
+      // Find the assignment_type from the selected Unit — pass it directly to the
+      // backend so grounding works regardless of unit-name changes.
+      const unitObj = curriculumUnits.find(u => u.name === row.unit);
+      const atype = unitObj?.assignment_type || null;
       for (let d = 1; d <= span; d++) {
         expanded.push({
           day_label: span === 1 ? row.day_label : `${row.day_label} (Day ${d} of ${span})`,
@@ -203,6 +207,7 @@ export default function LessonPlanCreator({ user }) {
           unit: row.unit,
           chapter: row.chapter,
           lesson: row.lesson,
+          assignment_type: atype,
           span_days: span,
           day_within_span: d,
         });
@@ -847,7 +852,7 @@ ISTE 1.1.c - Students use technology to seek feedback..."
                           value={row.chapter}
                           onChange={(e) => updateScheduleRow(idx, { chapter: e.target.value, lesson: "" })}
                           disabled={!row.unit}
-                          className="flex-1 text-sm bg-slate-900 text-slate-100 border border-slate-700 rounded p-1.5 focus:border-emerald-500 focus:outline-none disabled:opacity-50 [&>option]:bg-slate-900 [&>option]:text-slate-100"
+                          className="flex-1 min-w-0 text-sm bg-slate-900 text-slate-100 border border-slate-700 rounded p-1.5 focus:border-emerald-500 focus:outline-none disabled:opacity-50 [&>option]:bg-slate-900 [&>option]:text-slate-100"
                         >
                           <option value="">-- Chapter --</option>
                           {chapterOptions.map(c => (
@@ -858,17 +863,20 @@ ISTE 1.1.c - Students use technology to seek feedback..."
                           value={row.lesson}
                           onChange={(e) => updateScheduleRow(idx, { lesson: e.target.value })}
                           disabled={!row.chapter}
-                          className="flex-1 text-sm bg-slate-900 text-slate-100 border border-slate-700 rounded p-1.5 focus:border-emerald-500 focus:outline-none disabled:opacity-50 [&>option]:bg-slate-900 [&>option]:text-slate-100"
+                          className="flex-1 min-w-0 text-sm bg-slate-900 text-slate-100 border border-slate-700 rounded p-1.5 focus:border-emerald-500 focus:outline-none disabled:opacity-50 [&>option]:bg-slate-900 [&>option]:text-slate-100"
                         >
                           <option value="">-- Lesson --</option>
                           {lessonOptions.map(l => (
                             <option key={l.name} value={l.name}>{l.name}</option>
                           ))}
                         </select>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <span className="text-xs text-slate-400">This lesson spans:</span>
                         <select
                           value={row.span_days}
                           onChange={(e) => updateScheduleRow(idx, { span_days: parseInt(e.target.value, 10) })}
-                          className="w-24 text-sm bg-slate-900 text-slate-100 border border-slate-700 rounded p-1.5 focus:border-emerald-500 focus:outline-none [&>option]:bg-slate-900 [&>option]:text-slate-100"
+                          className="text-sm bg-slate-900 text-slate-100 border border-slate-700 rounded p-1.5 focus:border-emerald-500 focus:outline-none [&>option]:bg-slate-900 [&>option]:text-slate-100"
                           title="Number of days this lesson spans"
                         >
                           <option value={1}>1 day</option>

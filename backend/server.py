@@ -9313,6 +9313,7 @@ class ScheduleEntry(BaseModel):
     lesson: str
     span_days: int = 1  # 1 = single-day; 2+ = multi-day (this row is day 1 of span)
     day_within_span: int = 1  # 1 for first day, 2 for second day, etc.
+    assignment_type: Optional[str] = None  # "block" | "turtle" | "code" | "microbit" — passed from frontend for exact scoping
 
 
 class GenerateFromScheduleRequest(BaseModel):
@@ -9357,9 +9358,9 @@ async def generate_lesson_plans_from_schedule(req: GenerateFromScheduleRequest, 
     # Pre-fetch ByteBattles content for each unique lesson referenced in the schedule
     lesson_cache: Dict[str, Dict[str, Any]] = {}
 
-    # Map the human-readable Unit name to the DB assignment_type. This is critical
-    # for correct grounding — without it, a "Chapter 1" query could match problems
-    # across multiple units.
+    # Map the human-readable Unit name to the DB assignment_type. This is a fallback
+    # only — the frontend now sends assignment_type explicitly, which is more robust
+    # against unit renames.
     unit_to_type = {
         "Unit 1: Block-Based Coding": "block",
         "Unit 2: Turtle Graphics": "turtle",
@@ -9367,11 +9368,12 @@ async def generate_lesson_plans_from_schedule(req: GenerateFromScheduleRequest, 
         "Unit 4: Micro:bit": "microbit",
     }
 
-    async def _load_lesson_context(unit: str, chapter: str, lesson: str) -> Dict[str, Any]:
-        cache_key = f"{unit}|{chapter}|{lesson}"
+    async def _load_lesson_context(unit: str, chapter: str, lesson: str, assignment_type: Optional[str] = None) -> Dict[str, Any]:
+        cache_key = f"{unit}|{chapter}|{lesson}|{assignment_type or ''}"
         if cache_key in lesson_cache:
             return lesson_cache[cache_key]
-        atype = unit_to_type.get(unit)
+        # Prefer the explicit assignment_type sent by the frontend; fall back to name lookup.
+        atype = assignment_type or unit_to_type.get(unit)
         query = {"chapter": chapter, "lesson": lesson}
         if atype:
             query["assignment_type"] = atype
@@ -9411,7 +9413,7 @@ async def generate_lesson_plans_from_schedule(req: GenerateFromScheduleRequest, 
     )
 
     for entry in req.schedule:
-        ctx = await _load_lesson_context(entry.unit, entry.chapter, entry.lesson)
+        ctx = await _load_lesson_context(entry.unit, entry.chapter, entry.lesson, entry.assignment_type)
         problem_lines = [
             f"- [{p['type']}] {p['title']} (difficulty: {p['difficulty']}) — {p['description']}"
             for p in ctx["problems"][:12]

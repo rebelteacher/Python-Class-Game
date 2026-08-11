@@ -1,0 +1,24 @@
+{
+  "summary": "Verified both bug fixes on LessonPlanCreator: (1) Weekly Schedule span-days dropdown now renders on its own second row inside the schedule row and is fully visible (not clipped); (2) generate-from-schedule now correctly returns turtle-focused content for a turtle unit lesson (previously defaulted to Python print()). Backend: 5/5 pytest cases pass in /app/backend/tests/test_lesson_plan_schedule.py — covers turtle content generation, No-Content ⚠️ refusal, non-destructive seeds, and template upload/list/delete. Frontend: end-to-end Playwright test on /lesson-plans with admin login confirmed data-testid='lp-add-schedule-row' adds a row with data-testid='lp-schedule-row-0', Unit→Chapter→Lesson cascade populates (turtle unit lists 'Chapter 1: First Steps' → 'Lesson 1: Name Your Turtle' etc.), the 'This lesson spans:' label + span-days <select> are both visible on the third row inside the schedule row (bounding box within viewport at x=360, y=618), value can be changed to '2 days', and dropdown text is readable (computed bg rgb(15,23,42) = slate-900, color rgb(241,245,249) = slate-100).",
+  "backend_issues": {"critical": [], "minor": []},
+  "frontend_issues": {"ui_bugs": [], "integration_issues": [], "design_issues": []},
+  "test_report_links": [
+    "/app/backend/tests/test_lesson_plan_schedule.py",
+    "/app/test_reports/pytest/lesson_plan_schedule.xml"
+  ],
+  "action_items": [],
+  "critical_code_review_comments": [
+    "LessonPlanCreator.jsx is 1371 lines — still within limits, but Weekly Schedule row rendering is complex enough that extracting <ScheduleRow /> would make the span-dropdown / cascading-dropdown logic easier to unit-test.",
+    "server.py is 16853 lines — well past the 700-line guideline. The lesson-plan / seed / templates handlers should be moved into their own routers/modules. Not blocking these fixes, but continued growth is a maintainability risk."
+  ],
+  "updated_files": [
+    "/app/backend/tests/test_lesson_plan_schedule.py (new)"
+  ],
+  "success_rate": {"backend": "100% (5/5)", "frontend": "100% (all UI assertions passed)"},
+  "test_credentials": "Admin astapp@spanola.net / AlisaFaith$14 (from /app/memory/test_credentials.md)",
+  "seed_data_creation": "None. A test template document was uploaded and deleted in the same test (name TEST_template_schedule).",
+  "retest_needed": false,
+  "should_main_agent_self_test": false,
+  "context_for_next_testing_agent": "Backend test file /app/backend/tests/test_lesson_plan_schedule.py is a good regression file for future work on the lesson-plan schedule generator. It (a) auto-discovers a real turtle lesson from /api/curriculum/units, (b) asserts turtle commands appear in the generated content and 'print(' does not dominate, (c) asserts the ⚠️ refusal marker when no problems+instructions exist, (d) asserts seed_turtle_problems and seed_microbit_problems have no active delete_many in their function bodies (docstring/comment mentions are stripped before checking), and (e) covers docx template upload/list/delete. Frontend route is /lesson-plans (not /lesson-plan-creator). Test IDs: lp-add-schedule-row, lp-schedule-row-{idx}, lp-generate-schedule. Row contains 4 <select> elements in order: unit, chapter, lesson, span-days.",
+  "rca of the issue": "Bug A (cut-off dropdown): The span-days dropdown was previously on the same row as chapter+lesson selects and got squeezed off-screen. Fix: moved it into its own flex row inside the row container (LessonPlanCreator.jsx L874-886). Confirmed visible in Playwright test at x=360 within a 1920px viewport. Bug B (Python instead of turtle): generate-from-schedule was guessing assignment_type from unit name string on the backend, which drifted whenever names were renamed. Fix: ScheduleEntry now includes an explicit assignment_type field forwarded from the frontend (LessonPlanCreator L200-212, server.py L9316, L9376-9394), and the DB query filters problems + lesson_instructions by assignment_type directly. Verified by generating a plan for 'Unit 2: Turtle Graphics / Chapter 1: First Steps / Basics Quiz' — response begins 'Students will understand and apply basic turtle graphics commands in Python such as forward, backward, left, right, penup, pendown, color, and circle.'"
+}
