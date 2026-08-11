@@ -317,33 +317,75 @@ export default function LessonPlanCreator({ user }) {
       toast.error("Please enter both subject and topic");
       return;
     }
+    if (!lessonInput.problemChapter || !lessonInput.problemUnit) {
+      toast.error("Please select a Chapter and a Lesson in 'Pull Problems From' — required so the AI knows which ByteBattles unit to use.");
+      return;
+    }
+
+    // Find the parent unit (assignment_type) from the selected chapter name
+    let unitObj = null;
+    let chapterObj = null;
+    for (const u of curriculumUnits) {
+      const c = (u.chapters || []).find(c => c.name === lessonInput.problemChapter);
+      if (c) { unitObj = u; chapterObj = c; break; }
+    }
+    if (!unitObj || !chapterObj) {
+      toast.error("Couldn't find the selected chapter in the curriculum. Please pick again.");
+      return;
+    }
+
+    // Convert the OLD generator's single-topic + N-days shape into the schedule
+    // shape used by the new template-aware endpoint. Treat this as ONE lesson
+    // spanning `numberOfDays` days (Day 1 = intro/modeling; Day 2+ = independent/reteach).
+    const dayNames = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"];
+    const nDays = Math.max(1, parseInt(lessonInput.numberOfDays || "1", 10));
+    const startDate = lessonInput.startDate ? new Date(lessonInput.startDate) : null;
+    const expanded = [];
+    for (let d = 0; d < nDays; d++) {
+      let label = dayNames[d % 7];
+      if (startDate) {
+        const dt = new Date(startDate);
+        dt.setDate(dt.getDate() + d);
+        label = `${dayNames[dt.getDay() === 0 ? 6 : dt.getDay() - 1]}, ${(dt.getMonth() + 1)}/${dt.getDate()}`;
+      }
+      expanded.push({
+        day_label: label,
+        day_index: d,
+        unit: unitObj.name,
+        chapter: chapterObj.name,
+        lesson: lessonInput.problemUnit,  // Legacy: OLD form calls the LESSON field "problemUnit"
+        assignment_type: unitObj.assignment_type,
+        span_days: nDays,
+        day_within_span: d + 1,
+      });
+    }
 
     setIsGenerating(true);
     try {
       const response = await axios.post(
-        `${API}/generate-lesson-plan`,
+        `${API}/lesson-plans/generate-from-schedule`,
         {
-          ...headerFields,
-          ...lessonInput
+          template_id: selectedTemplateId || null,
+          schedule: expanded,
+          header_fields: { ...headerFields, ...lessonInput },
+          ai_generate_standards: !!headerFields.aiGenerateStandards,
+          ai_generate_objectives: !!headerFields.aiGenerateObjectives,
         },
         { withCredentials: true }
       );
-      
-      setGeneratedPlans(response.data.dailyPlans);
-      setAvailableProblems(response.data.availableProblems || []);
-      
-      // Expand all days by default
-      const expanded = {};
-      response.data.dailyPlans.forEach((_, index) => {
-        expanded[index] = true;
-      });
-      setExpandedDays(expanded);
-      
-      // Show problems panel if we have problems
-      if (response.data.availableProblems?.length > 0) {
-        setShowProblemsPanel(true);
-      }
-      
+
+      const tagged = (response.data.plans || []).map((p, idx) => ({
+        ...p,
+        _plan_id: response.data.id,
+        _day_index: idx,
+      }));
+      setGeneratedPlans(tagged);
+      setAvailableProblems([]);
+
+      const expandedState = {};
+      tagged.forEach((_, index) => { expandedState[index] = true; });
+      setExpandedDays(expandedState);
+
       toast.success("Lesson plan generated successfully!");
     } catch (error) {
       console.error("Error generating lesson plan:", error);
@@ -1029,8 +1071,11 @@ ISTE 1.1.c - Students use technology to seek feedback..."
                 <div className="bg-green-500/10 border border-green-500/30 rounded-lg p-3">
                   <Label className="text-green-400 font-semibold text-sm flex items-center gap-2 mb-2">
                     <ListChecks className="w-4 h-4" />
-                    Pull Problems From (Optional)
+                    Pull Problems From <span className="text-red-400">*required</span>
                   </Label>
+                  <p className="text-xs text-slate-400 mb-2">
+                    Required — tells the AI which ByteBattles unit/chapter/lesson to use so it doesn't guess.
+                  </p>
                   
                   {curriculumStructure.chapters.length > 0 ? (
                     <div className="space-y-2">
@@ -1060,7 +1105,7 @@ ISTE 1.1.c - Students use technology to seek feedback..."
                       {/* Show lessons dropdown if a chapter is selected */}
                       {lessonInput.problemChapter && (
                         <div>
-                          <Label className="text-xs text-green-400">Lesson (Optional)</Label>
+                          <Label className="text-xs text-green-400">Lesson <span className="text-red-400">*required</span></Label>
                           <Select
                             value={lessonInput.problemUnit}
                             onValueChange={(value) => setLessonInput({ 
