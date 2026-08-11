@@ -9357,12 +9357,26 @@ async def generate_lesson_plans_from_schedule(req: GenerateFromScheduleRequest, 
     # Pre-fetch ByteBattles content for each unique lesson referenced in the schedule
     lesson_cache: Dict[str, Dict[str, Any]] = {}
 
-    async def _load_lesson_context(chapter: str, lesson: str) -> Dict[str, Any]:
-        cache_key = f"{chapter}|{lesson}"
+    # Map the human-readable Unit name to the DB assignment_type. This is critical
+    # for correct grounding — without it, a "Chapter 1" query could match problems
+    # across multiple units.
+    unit_to_type = {
+        "Unit 1: Block-Based Coding": "block",
+        "Unit 2: Turtle Graphics": "turtle",
+        "Unit 3: Python Text": "code",
+        "Unit 4: Micro:bit": "microbit",
+    }
+
+    async def _load_lesson_context(unit: str, chapter: str, lesson: str) -> Dict[str, Any]:
+        cache_key = f"{unit}|{chapter}|{lesson}"
         if cache_key in lesson_cache:
             return lesson_cache[cache_key]
-        # Fetch problems in this chapter+lesson
-        cursor = db.problems.find({"chapter": chapter, "lesson": lesson})
+        atype = unit_to_type.get(unit)
+        query = {"chapter": chapter, "lesson": lesson}
+        if atype:
+            query["assignment_type"] = atype
+        # Fetch problems in this unit+chapter+lesson
+        cursor = db.problems.find(query)
         probs = []
         async for p in cursor:
             probs.append({
@@ -9371,29 +9385,67 @@ async def generate_lesson_plans_from_schedule(req: GenerateFromScheduleRequest, 
                 "description": (p.get("description") or "")[:400],
                 "difficulty": p.get("difficulty", "medium"),
             })
-        # Fetch lesson instructions
-        li_doc = await db.lesson_instructions.find_one({"chapter": chapter, "lesson": lesson})
+        # Fetch lesson instructions (also scoped by assignment_type when possible)
+        li_query = {"chapter": chapter, "lesson": lesson}
+        if atype:
+            li_query["assignment_type"] = atype
+        li_doc = await db.lesson_instructions.find_one(li_query) or await db.lesson_instructions.find_one({"chapter": chapter, "lesson": lesson})
         instructions = (li_doc.get("instructions", "") if li_doc else "")[:3000]
-        ctx = {"problems": probs, "instructions": instructions}
+        logger.info(f"[lesson_plan] Loaded context: unit={unit!r} chapter={chapter!r} lesson={lesson!r} -> {len(probs)} problems, has_instructions={bool(instructions)}")
+        ctx = {"problems": probs, "instructions": instructions, "assignment_type": atype}
         lesson_cache[cache_key] = ctx
         return ctx
 
     system_prompt = (
         "You are an expert curriculum designer helping a middle-school computer science teacher "
         "fill in a lesson plan template. You will produce a lesson plan for ONE school day. "
-        "Ground every section in the ByteBattles curriculum data provided — never invent problems, "
-        "chapters, or lessons that aren't in the context. Keep language grade-appropriate and "
-        "actionable. Follow the structure of the teacher's uploaded template (section names, order, "
-        "and level of detail). If the template uses labels like 'Anticipatory Set', 'Modeling', "
-        "'Guided Practice', 'Independent Practice', 'Closure' — use those exact labels in your output."
+        "Ground every section STRICTLY in the ByteBattles curriculum context provided — DO NOT "
+        "invent problems, chapters, lessons, or topics that are not in the context. If the lesson "
+        "is about Turtle Graphics, focus on turtle commands and drawing. If it's Micro:bit, focus "
+        "on the micro:bit board. If it's Block-Based, focus on Scratch-style blocks. NEVER default "
+        "to generic Python `print()` content unless the lesson is explicitly a Python text lesson. "
+        "Keep language grade-appropriate and actionable. Follow the structure of the teacher's "
+        "uploaded template (section names, order, and level of detail). If the template uses labels "
+        "like 'Anticipatory Set', 'Modeling', 'Guided Practice', 'Independent Practice', 'Closure' "
+        "— use those exact labels in your output."
     )
 
     for entry in req.schedule:
-        ctx = await _load_lesson_context(entry.chapter, entry.lesson)
+        ctx = await _load_lesson_context(entry.unit, entry.chapter, entry.lesson)
         problem_lines = [
             f"- [{p['type']}] {p['title']} (difficulty: {p['difficulty']}) — {p['description']}"
             for p in ctx["problems"][:12]
         ]
+
+        # If we have no grounding data at all, refuse rather than hallucinate
+        if not problem_lines and not ctx["instructions"]:
+            plans_out.append({
+                "day_label": entry.day_label,
+                "unit": entry.unit,
+                "chapter": entry.chapter,
+                "lesson": entry.lesson,
+                "span_days": entry.span_days,
+                "day_within_span": entry.day_within_span,
+                "content": (
+                    f"⚠️ **No content found** for this lesson.\n\n"
+                    f"I couldn't find any problems or lesson instructions for:\n"
+                    f"- **Unit:** {entry.unit}\n"
+                    f"- **Chapter:** {entry.chapter}\n"
+                    f"- **Lesson:** {entry.lesson}\n\n"
+                    f"This usually means either (a) no problems have been assigned to this lesson yet "
+                    f"in the Library, or (b) the chapter/lesson name doesn't match what's in the database. "
+                    f"Open Lesson Manager, verify the lesson has problems in it, and try again."
+                ),
+            })
+            continue
+
+        # Include the ByteBattles unit type explicitly so the AI can't default to generic Python
+        unit_type_label = {
+            "block": "Block-Based (Scratch-style) coding — focus on drag-and-drop blocks, motion, looks, control, sensing",
+            "turtle": "Turtle Graphics in Python — focus on turtle commands: forward, backward, left, right, penup, pendown, color, circle, and drawing shapes",
+            "code": "Python Text Coding — focus on writing Python code: print, variables, input, if/else, loops, functions, strings",
+            "microbit": "BBC Micro:bit — focus on the physical micro:bit board: display, buttons, sensors, radio",
+        }.get(ctx.get("assignment_type"), "General computer science")
 
         # Split guidance for multi-day lessons
         if entry.span_days >= 2 and entry.day_within_span == 1:
@@ -9415,13 +9467,19 @@ async def generate_lesson_plans_from_schedule(req: GenerateFromScheduleRequest, 
             f"TEACHER'S UPLOADED TEMPLATE (structure to mirror):\n"
             f"---BEGIN TEMPLATE---\n{template_text or '(no template uploaded; use standard sections: Objectives, Standards, Materials, Anticipatory Set, Modeling, Instructional Strategies, Check for Understanding, Guided Practice, Independent Practice, Closure)'}\n---END TEMPLATE---\n\n"
             f"LESSON CONTEXT (ByteBattles):\n"
-            f"- Unit: {entry.unit}\n- Chapter: {entry.chapter}\n- Lesson: {entry.lesson}\n"
+            f"- Unit: {entry.unit}\n"
+            f"- Unit Type: {unit_type_label}\n"
+            f"- Chapter: {entry.chapter}\n"
+            f"- Lesson: {entry.lesson}\n"
             f"- Date/Day: {entry.day_label}\n\n"
+            f"⚠️ CRITICAL: The lesson content MUST be about the Unit Type above. "
+            f"Do NOT write a Python `print()` lesson if this is a Turtle Graphics or Micro:bit or Block-Based lesson.\n\n"
             f"LESSON INSTRUCTIONS FROM BYTEBATTLES:\n{ctx['instructions'] or '(none authored yet)'}\n\n"
-            f"PROBLEMS AVAILABLE IN THIS LESSON:\n" + ("\n".join(problem_lines) if problem_lines else "(none)") + "\n\n"
+            f"PROBLEMS AVAILABLE IN THIS LESSON (use these problem titles by name in Guided/Independent Practice):\n"
+            + ("\n".join(problem_lines) if problem_lines else "(none)") + "\n\n"
             f"PACING (minutes): Intro {req.header_fields.get('pacingIntro','5')} | Direct Instruction {req.header_fields.get('pacingDirectInstruction','15')} | Guided {req.header_fields.get('pacingGuidedPractice','15')} | Independent {req.header_fields.get('pacingIndependentPractice','10')} | Closure {req.header_fields.get('pacingClosure','5')}\n\n"
             f"STANDARDS: {'(AI: generate 2-3 relevant CS standards for middle school, e.g., DoK, ISTE, CSTA)' if req.ai_generate_standards else (req.header_fields.get('standards','') or '(none provided)')}\n"
-            f"OBJECTIVES: {'(AI: generate 2-3 SWBAT-style objectives grounded in the lesson content)' if req.ai_generate_objectives else (req.header_fields.get('objectives','') or '(none provided)')}\n\n"
+            f"OBJECTIVES: {'(AI: generate 2-3 SWBAT-style objectives grounded in the lesson content — objectives MUST match the Unit Type)' if req.ai_generate_objectives else (req.header_fields.get('objectives','') or '(none provided)')}\n\n"
             f"SPAN GUIDANCE: {span_note}\n\n"
             f"Return the filled-in lesson plan following the template structure. Use plain markdown "
             f"headings for each section. Reference specific ByteBattles problem titles by name where "
