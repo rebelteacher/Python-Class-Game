@@ -1,0 +1,31 @@
+{
+  "summary": "Verified fix: top-nav 'Download' button on LessonPlanCreator now uses the teacher's uploaded template instead of the legacy hardcoded Batesville 3-col layout. Backend: ran /app/backend/tests/test_lesson_plan_download.py (3 tests, 32s, ALL PASS) — covers generate-from-schedule producing template-keyed sections dict, /download/{day_index} filling the template properly, and /download-week producing multi-table docx with page breaks. Frontend Playwright: logged in as astapp@spanola.net → /lesson-plans → uploaded 2-col template (Objectives/Standards/Anticipatory Set/Modeling/Closure) → added 2 rows → row 0: Unit 2 Turtle / Ch 1 First Steps / Lesson 1 Name Your Turtle; row 1: same unit/chapter / Lesson 2 Moving Forward → clicked emerald 'Generate 2 day(s) of plans' → both Day cards appeared. Intercepted network requests during the top-nav 'Download' click: hit GET /api/lesson-plans/{plan_id}/download-week (HIT_NEW_ENDPOINT=True). Legacy /api/export-lesson-plan was NOT called (HIT_LEGACY_ENDPOINT=False). Downloaded file 'Week-of-Monday.docx' verified with python-docx: (a) exactly 2 tables (one per day), (b) exactly 1 page break between them, (c) each table's first-col labels EXACTLY match the uploaded template ['Objectives','Standards','Anticipatory Set','Modeling','Closure'] — NOT the legacy Teacher/Class/Grade hardcoded layout, (d) second-col cells contain real turtle-relevant AI content (22× 'turtle', 11× 'forward'; 0× 'Not specified'). Fix is confirmed working.",
+  "backend_issues": {"critical": [], "minor": []},
+  "frontend_issues": {
+    "ui_bugs": [],
+    "integration_issues": [],
+    "design_issues": [
+      {"screen": "LessonPlanCreator top-nav Download button", "issues": ["The top-nav 'Download' button has no data-testid attribute (LessonPlanCreator.jsx L633-645). It works but selectors have to rely on nav text. Recommend adding data-testid='lp-topnav-download-btn' for stable automated testing."]}
+    ]
+  },
+  "test_report_links": [
+    "/app/backend/tests/test_lesson_plan_download.py",
+    "/app/test_reports/pytest/lesson_plan_download_iter27.xml"
+  ],
+  "action_items": [
+    "OPTIONAL: Add data-testid='lp-topnav-download-btn' to the top-nav Download button in LessonPlanCreator.jsx (~L633) for stable UI test selectors.",
+    "OPTIONAL (from iteration_26 — still open): update stale empty-state copy (L1158) and print-only header (L1165-1181) which still reference removed lessonInput.subject/topic/gradeLevel fields."
+  ],
+  "critical_code_review_comments": [
+    "exportAsDocument() correctly branches: generatedPlans.length > 1 → /download-week, else → /download/0. Good. Uses withCredentials + responseType blob. Error path decodes blob JSON detail. Looks solid.",
+    "server.py monolith warning from prior iterations still stands (17k+ LOC) — lesson-plans routes belong in their own router module."
+  ],
+  "updated_files": [],
+  "success_rate": {"backend": "100% (3/3 tests in test_lesson_plan_download.py pass)", "frontend": "100% — top-nav Download hits new template-fill endpoint, downloaded docx matches template labels with real AI content"},
+  "test_credentials": "Admin astapp@spanola.net / AlisaFaith$14 (from /app/memory/test_credentials.md). Login URL is /teacher-login.",
+  "seed_data_creation": "During test: 1 template ('template.docx') and 2 lesson_plan documents were added to admin's account (from Playwright run) — safe residue.",
+  "retest_needed": false,
+  "should_main_agent_self_test": false,
+  "context_for_next_testing_agent": "Top-nav Download button in LessonPlanCreator selects via `page.locator('nav button:has-text(\"Download\")').first` (no data-testid). Interception pattern via page.on('request') catching URLs containing 'lesson-plan' works reliably. Downloaded template-filled .docx has table[0].cells[0].text matching each uploaded template label — this is the strongest assertion that the fix is in place. The download-week endpoint DOES leave blank cells when the header field is empty and ai_generate flag isn't set (observed empty 'Standards' on Day 2 because ai_generate_standards defaults to False and headerFields.standards was blank) — this is by design, not a bug.",
+  "rca of the issue": "Original bug: top-nav 'Download' button POSTed to legacy /api/export-lesson-plan which builds its own hardcoded 3-col Batesville table (Teacher/Class/Grade) ignoring the uploaded template. Fix in LessonPlanCreator.jsx exportAsDocument() at L521-567: now GETs /api/lesson-plans/{plan_id}/download-week when >1 day, else /download/0 — both endpoints use the template-fill logic. Verified via network intercept + docx introspection."
+}

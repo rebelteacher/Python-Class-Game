@@ -515,43 +515,52 @@ export default function LessonPlanCreator({ user }) {
     });
   };
 
-  // Export lesson plan as Word document
+  // Export lesson plan as Word document — uses the teacher's uploaded template
+  // via the new template-fill endpoint. If more than one day was generated, all
+  // days come in one combined .docx (page-break-separated).
   const exportAsDocument = async () => {
     if (generatedPlans.length === 0) {
       toast.error("No lesson plan to export");
       return;
     }
-
+    const planId = generatedPlans[0]._plan_id;
+    if (!planId) {
+      toast.error("This plan wasn't generated with a template — regenerate to enable template-matched download.");
+      return;
+    }
     setIsExporting(true);
     try {
-      const response = await axios.post(
-        `${API}/export-lesson-plan`,
-        {
-          headerFields,
-          lessonInput,
-          dailyPlans: generatedPlans
-        },
-        { 
-          withCredentials: true,
-          responseType: 'blob'
-        }
-      );
-      
-      // Create download link
-      const url = window.URL.createObjectURL(new Blob([response.data]));
+      const url = generatedPlans.length > 1
+        ? `${API}/lesson-plans/${planId}/download-week`
+        : `${API}/lesson-plans/${planId}/download/0`;
+      const response = await axios.get(url, {
+        withCredentials: true,
+        responseType: 'blob',
+      });
+      const blob = new Blob([response.data], {
+        type: "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+      });
+      const dlUrl = window.URL.createObjectURL(blob);
       const link = document.createElement('a');
-      link.href = url;
-      const filename = `Lesson_Plan_${lessonInput.topic.replace(/\s+/g, '_')}_${lessonInput.startDate}.docx`;
-      link.setAttribute('download', filename);
+      link.href = dlUrl;
+      const nameHint = generatedPlans.length > 1
+        ? `Week-of-${generatedPlans[0].day_label || 'Plan'}`
+        : (generatedPlans[0].day_label || 'Lesson-Plan');
+      link.setAttribute('download', `${nameHint}.docx`.replace(/[^A-Za-z0-9_\-\.]+/g, "_"));
       document.body.appendChild(link);
       link.click();
       link.remove();
-      window.URL.revokeObjectURL(url);
-      
+      window.URL.revokeObjectURL(dlUrl);
       toast.success("Lesson plan downloaded!");
     } catch (error) {
       console.error("Error exporting lesson plan:", error);
-      toast.error("Failed to export lesson plan");
+      let msg = "Failed to export lesson plan";
+      if (error.response?.data instanceof Blob) {
+        try { msg = JSON.parse(await error.response.data.text()).detail || msg; } catch (_) { /* ignore */ }
+      } else if (error.response?.data?.detail) {
+        msg = error.response.data.detail;
+      }
+      toast.error(msg);
     } finally {
       setIsExporting(false);
     }
