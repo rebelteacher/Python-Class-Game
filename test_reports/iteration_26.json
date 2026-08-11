@@ -1,0 +1,31 @@
+{
+  "summary": "Verified LessonPlanCreator Weekly Schedule restoration and legacy-form removal. Backend: new test /app/backend/tests/test_multi_day_schedule.py posts /api/lesson-plans/generate-from-schedule with a 3-day schedule of DIFFERENT turtle lessons (Basics Quiz, Lesson 1: Name Your Turtle, Lesson 2: Moving Forward). All 3 plans returned, each with a populated sections dict (Objectives / Standards / Materials / Anticipatory Set / Modeling / …), each grounded in its own lesson (Day 1 objectives reference forward/backward/left/right/penup/pendown; Day 2 objectives reference naming a turtle + forward; Day 3 objectives reference moving forward with the turtle). Contents are pairwise distinct. Test passed in 21s. Also re-ran previous test_lesson_plan_schedule.py sanity — endpoint shape unchanged. Frontend: Playwright login (astapp@spanola.net / AlisaFaith$14) via /teacher-login → /lesson-plans. Assertions: (a) NONE of {Topic/Unit, Number of Days, Pull Problems From, Start Date} appear as labels; no inputs with subject/topic/grade level/number of days/start date in placeholder/name/id/aria-label. (b) data-testid=generate-plan-btn count = 0 (correctly gone). (c) data-testid=lp-weekly-schedule-card = 1. (d) data-testid=lp-add-schedule-row = 1. (e) data-testid=lp-generate-schedule = 1; button text = 'Generate 3 day(s) of plans' after adding 3 rows. Clicked 'Add day' 3× → data-testid=lp-schedule-row-0/-1/-2 all present. Filled each row cascadingly (Unit 2: Turtle Graphics → Chapter 1: First Steps → different Lessons per row). Row values confirmed via DOM: ['Unit 2: Turtle Graphics','Chapter 1: First Steps','Lesson 1: Name Your Turtle','1'] etc. Dropdown readability: computed style color=rgb(241,245,249) light on bg=rgb(15,23,42) dark — great contrast. Clicked emerald Generate → toast 'Generated 3 day(s) of lesson plans!' after ~12s → 3 day cards rendered (Day 1 Monday, Day 2 Tuesday, Day 3 Wednesday) each with a data-testid=lp-download-day-{0,1,2} button. lp-download-week-card 'Full Week — All Days in One File' visible above day cards. 0 occurrences of 'Not specified' anywhere on the page. Each selected lesson name occurs 3× in the visible body (once in the sidebar select, once in the day card, once in AI content). Download-flow: page.expect_download() on lp-download-day-0 successfully captured a .docx download (suggested filename 'Monday.docx').",
+  "backend_issues": {"critical": [], "minor": []},
+  "frontend_issues": {
+    "ui_bugs": [],
+    "integration_issues": [],
+    "design_issues": [
+      {"screen": "/lesson-plans right-panel empty state", "issues": ["Placeholder copy at LessonPlanCreator.jsx L1158 still reads: 'Fill in the subject and topic on the left, then click \"Generate Plan\" to create a comprehensive multi-day lesson plan with AI.' This references the removed Subject/Topic fields and the removed 'Generate Plan' button. Update to reference the Weekly Schedule flow instead."]},
+      {"screen": "/lesson-plans print-only header (L1165-1181)", "issues": ["Print header still binds to lessonInput.subject / lessonInput.topic / lessonInput.gradeLevel — fields that the user can no longer edit now that the old form is removed. Printed output will show 'undefined - undefined' for subject-topic and a hard-coded '7th Grade' default. Repoint print header to derived data from the schedule (e.g. unit/chapter/lesson list) or remove the stale fields."]}
+    ]
+  },
+  "test_report_links": [
+    "/app/backend/tests/test_multi_day_schedule.py",
+    "/app/test_reports/pytest/multi_day_schedule.xml"
+  ],
+  "action_items": [
+    "Update the empty-state copy at LessonPlanCreator.jsx line 1158 to reference the Weekly Schedule / 'Generate N day(s) of plans' flow instead of the removed Subject/Topic form.",
+    "Fix the print-only header (LessonPlanCreator.jsx L1165-1181) to derive title / grade-level from the schedule (or header_fields) instead of the now-unreachable lessonInput.subject / topic / gradeLevel state."
+  ],
+  "critical_code_review_comments": [
+    "LessonPlanCreator.jsx still keeps lessonInput state (subject/topic/gradeLevel/numberOfDays/startDate/problemUnit/problemChapter) even though there is no UI to set it any more. It is only used by (a) the stale empty-state message, (b) the print header, (c) savedPlans preview strings. Consider deleting the state entirely and driving those display strings from weeklySchedule + headerFields to prevent drift bugs like this again.",
+    "server.py monolith warning from iteration_25 still stands (17k+ LOC) — lesson-plans routes belong in their own router module."
+  ],
+  "updated_files": ["/app/backend/tests/test_multi_day_schedule.py (new)"],
+  "success_rate": {"backend": "100% (1/1 new test, previous regression still green)", "frontend": "100% on functional requirements; 2 minor stale-copy issues found"},
+  "test_credentials": "Admin astapp@spanola.net / AlisaFaith$14 (from /app/memory/test_credentials.md). Login URL is /teacher-login (NOT /login — /login has no email/password form).",
+  "seed_data_creation": "None persistent. The backend test creates 3 lesson_plan documents in the admin's saved plans list — safe to ignore or delete.",
+  "retest_needed": false,
+  "should_main_agent_self_test": true,
+  "context_for_next_testing_agent": "Weekly Schedule is back at LessonPlanCreator.jsx L931-1039 with native <select> elements (NOT shadcn combobox as in iteration_25). Selectors: data-testid=lp-weekly-schedule-card, lp-add-schedule-row, lp-generate-schedule, lp-schedule-row-{idx}. Use page.locator('[data-testid=lp-schedule-row-{idx}] select').nth(0/1/2) with .select_option(label=...) — Unit/Chapter/Lesson cascade in that order. Initial weeklySchedule state = [] (empty), so 'Add day' click count == desired days. Generate button label dynamic: 'Generate N day(s) of plans'. Backend endpoint /api/lesson-plans/generate-from-schedule already handled multi-day properly — the fix was purely in the UI wiring. Two stale UI copy issues remain (empty-state text and print header) — main agent should self-fix and can visually verify."
+}

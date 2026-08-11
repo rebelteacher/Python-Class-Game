@@ -927,187 +927,113 @@ ISTE 1.1.c - Students use technology to seek feedback..."
               </CardContent>
             </Card>
 
-            {/* Weekly Schedule Card — removed to consolidate on a single Generate Plan
-                flow. The old Generate Plan button (blue) now uses the template-aware
-                endpoint under the hood, so there's no functional loss. */}
 
-
-
-            {/* Generate Card */}
-            <Card className="border-indigo-200 bg-indigo-500/10">
+            {/* Weekly Schedule Card — one Generate button, per-day lesson picker */}
+            <Card className="border-emerald-500/30" data-testid="lp-weekly-schedule-card">
               <CardHeader className="pb-3">
                 <CardTitle className="text-lg flex items-center gap-2">
-                  <Sparkles className="w-5 h-5 text-cyber-cyan" />
-                  Generate Lesson Plan
+                  <Calendar className="w-5 h-5 text-emerald-500" />
+                  Weekly Schedule
                 </CardTitle>
               </CardHeader>
-              <CardContent className="space-y-4">
-                <div>
-                  <Label htmlFor="subject">Subject *</Label>
-                  <Input
-                    id="subject"
-                    value={lessonInput.subject}
-                    onChange={(e) => setLessonInput({ ...lessonInput, subject: e.target.value })}
-                    placeholder="e.g., Mathematics, English, Science"
-                    className="mt-1 bg-cyber-navy/60"
-                  />
-                </div>
-                <div>
-                  <Label htmlFor="topic">Topic/Unit *</Label>
-                  <Input
-                    id="topic"
-                    value={lessonInput.topic}
-                    onChange={(e) => setLessonInput({ ...lessonInput, topic: e.target.value })}
-                    placeholder="e.g., Fractions and Decimals"
-                    className="mt-1 bg-cyber-navy/60"
-                  />
-                </div>
-                <div>
-                  <Label htmlFor="gradeLevel">Grade Level</Label>
-                  <Input
-                    id="gradeLevel"
-                    value={lessonInput.gradeLevel}
-                    onChange={(e) => setLessonInput({ ...lessonInput, gradeLevel: e.target.value })}
-                    placeholder="e.g., 7th Grade"
-                    className="mt-1 bg-cyber-navy/60"
-                  />
-                </div>
-                <div className="grid grid-cols-2 gap-3">
-                  <div>
-                    <Label htmlFor="startDate">Start Date</Label>
-                    <Input
-                      id="startDate"
-                      type="date"
-                      value={lessonInput.startDate}
-                      onChange={(e) => setLessonInput({ ...lessonInput, startDate: e.target.value })}
-                      className="mt-1 bg-cyber-navy/60"
-                    />
-                  </div>
-                  <div>
-                    <Label htmlFor="numberOfDays">Number of Days</Label>
-                    <Input
-                      id="numberOfDays"
-                      type="number"
-                      min="1"
-                      max="10"
-                      value={lessonInput.numberOfDays}
-                      onChange={(e) => setLessonInput({ ...lessonInput, numberOfDays: parseInt(e.target.value) || 1 })}
-                      className="mt-1 bg-cyber-navy/60"
-                    />
-                  </div>
-                </div>
-                
-                {/* Problem Source Filter - Dropdowns */}
-                <Separator className="my-2" />
-                <div className="bg-green-500/10 border border-green-500/30 rounded-lg p-3">
-                  <Label className="text-green-400 font-semibold text-sm flex items-center gap-2 mb-2">
-                    <ListChecks className="w-4 h-4" />
-                    Pull Problems From <span className="text-red-400">*required</span>
-                  </Label>
-                  <p className="text-xs text-slate-400 mb-2">
-                    Required — tells the AI which ByteBattles unit/chapter/lesson to use so it doesn't guess.
-                  </p>
-                  
-                  {curriculumStructure.chapters.length > 0 ? (
-                    <div className="space-y-2">
-                      <div>
-                        <Label className="text-xs text-green-400">Unit / Chapter</Label>
-                        <Select
-                          value={lessonInput.problemChapter}
-                          onValueChange={(value) => setLessonInput({ 
-                            ...lessonInput, 
-                            problemChapter: value === "none" ? "" : value 
-                          })}
+              <CardContent className="space-y-3">
+                <p className="text-xs text-slate-500">
+                  Map each school day to a ByteBattles lesson. Use <b>Spans</b> if you're spreading
+                  one lesson across multiple days — the AI will split Day 1 (intro + modeling +
+                  guided practice) from Day 2+ (independent practice + reteach + closure).
+                </p>
+                {weeklySchedule.map((row, idx) => {
+                  const unitObj = curriculumUnits.find(u => u.name === row.unit);
+                  const chapterOptions = unitObj?.chapters || [];
+                  const chapterObj = chapterOptions.find(c => c.name === row.chapter);
+                  const lessonOptions = (chapterObj?.lessons || []).filter(l => l.name && !l.is_orphan);
+                  return (
+                    <div key={idx} className="border border-emerald-500/20 rounded p-2 space-y-2" data-testid={`lp-schedule-row-${idx}`}>
+                      <div className="flex items-center gap-2">
+                        <Input
+                          value={row.day_label}
+                          onChange={(e) => updateScheduleRow(idx, { day_label: e.target.value })}
+                          placeholder="e.g., Monday"
+                          className="w-32 text-sm"
+                        />
+                        <select
+                          value={row.unit}
+                          onChange={(e) => updateScheduleRow(idx, { unit: e.target.value, chapter: "", lesson: "" })}
+                          className="flex-1 min-w-0 text-sm bg-slate-900 text-slate-100 border border-slate-700 rounded p-1.5 focus:border-emerald-500 focus:outline-none [&>option]:bg-slate-900 [&>option]:text-slate-100"
                         >
-                          <SelectTrigger className="mt-1 bg-cyber-navy/60">
-                            <SelectValue placeholder="Select a unit/chapter..." />
-                          </SelectTrigger>
-                          <SelectContent>
-                            <SelectItem value="none">-- All Chapters --</SelectItem>
-                            {curriculumStructure.chapters.map((ch) => (
-                              <SelectItem key={ch.name} value={ch.name}>
-                                {ch.displayName || ch.name}
-                              </SelectItem>
-                            ))}
-                          </SelectContent>
-                        </Select>
+                          <option value="">-- Unit --</option>
+                          {curriculumUnits.map(u => (
+                            <option key={u.name} value={u.name}>{u.name}</option>
+                          ))}
+                        </select>
+                        <button
+                          type="button"
+                          onClick={() => removeScheduleRow(idx)}
+                          className="text-slate-500 hover:text-red-400 p-1"
+                          title="Remove row"
+                        >
+                          <X className="w-4 h-4" />
+                        </button>
                       </div>
-                      
-                      {/* Show lessons dropdown if a chapter is selected */}
-                      {lessonInput.problemChapter && (
-                        <div>
-                          <Label className="text-xs text-green-400">Lesson <span className="text-red-400">*required</span></Label>
-                          <Select
-                            value={lessonInput.problemUnit}
-                            onValueChange={(value) => setLessonInput({ 
-                              ...lessonInput, 
-                              problemUnit: value === "none" ? "" : value 
-                            })}
-                          >
-                            <SelectTrigger className="mt-1 bg-cyber-navy/60">
-                              <SelectValue placeholder="Select a lesson..." />
-                            </SelectTrigger>
-                            <SelectContent>
-                              <SelectItem value="none">-- All Lessons --</SelectItem>
-                              {curriculumStructure.chapters
-                                .find(ch => ch.name === lessonInput.problemChapter)
-                                ?.lessons.map((lesson) => (
-                                  <SelectItem key={lesson} value={lesson}>
-                                    {lesson}
-                                  </SelectItem>
-                                ))}
-                            </SelectContent>
-                          </Select>
-                        </div>
-                      )}
-                    </div>
-                  ) : (
-                    <div className="grid grid-cols-2 gap-2">
-                      <div>
-                        <Label htmlFor="problemUnit" className="text-xs text-green-400">Unit</Label>
-                        <Input
-                          id="problemUnit"
-                          value={lessonInput.problemUnit}
-                          onChange={(e) => setLessonInput({ ...lessonInput, problemUnit: e.target.value })}
-                          placeholder="e.g., Unit 2: Turtle Graphics"
-                          className="mt-1 bg-cyber-navy/60 text-sm"
-                        />
+                      <div className="flex items-center gap-2">
+                        <select
+                          value={row.chapter}
+                          onChange={(e) => updateScheduleRow(idx, { chapter: e.target.value, lesson: "" })}
+                          disabled={!row.unit}
+                          className="flex-1 min-w-0 text-sm bg-slate-900 text-slate-100 border border-slate-700 rounded p-1.5 focus:border-emerald-500 focus:outline-none disabled:opacity-50 [&>option]:bg-slate-900 [&>option]:text-slate-100"
+                        >
+                          <option value="">-- Chapter --</option>
+                          {chapterOptions.map(c => (
+                            <option key={c.name} value={c.name}>{c.name}</option>
+                          ))}
+                        </select>
+                        <select
+                          value={row.lesson}
+                          onChange={(e) => updateScheduleRow(idx, { lesson: e.target.value })}
+                          disabled={!row.chapter}
+                          className="flex-1 min-w-0 text-sm bg-slate-900 text-slate-100 border border-slate-700 rounded p-1.5 focus:border-emerald-500 focus:outline-none disabled:opacity-50 [&>option]:bg-slate-900 [&>option]:text-slate-100"
+                        >
+                          <option value="">-- Lesson --</option>
+                          {lessonOptions.map(l => (
+                            <option key={l.name} value={l.name}>{l.name}</option>
+                          ))}
+                        </select>
                       </div>
-                      <div>
-                        <Label htmlFor="problemChapter" className="text-xs text-green-400">Chapter</Label>
-                        <Input
-                          id="problemChapter"
-                          value={lessonInput.problemChapter}
-                          onChange={(e) => setLessonInput({ ...lessonInput, problemChapter: e.target.value })}
-                          placeholder="e.g., Chapter 3: Colors"
-                          className="mt-1 bg-cyber-navy/60 text-sm"
-                        />
+                      <div className="flex items-center gap-2">
+                        <span className="text-xs text-slate-400">This lesson spans:</span>
+                        <select
+                          value={row.span_days}
+                          onChange={(e) => updateScheduleRow(idx, { span_days: parseInt(e.target.value, 10) })}
+                          className="text-sm bg-slate-900 text-slate-100 border border-slate-700 rounded p-1.5 focus:border-emerald-500 focus:outline-none [&>option]:bg-slate-900 [&>option]:text-slate-100"
+                          title="Number of days this lesson spans"
+                        >
+                          <option value={1}>1 day</option>
+                          <option value={2}>2 days</option>
+                          <option value={3}>3 days</option>
+                        </select>
                       </div>
                     </div>
-                  )}
-                  
-                  <p className="text-xs text-green-600 mt-2">
-                    Only pull practice problems from this specific chapter/lesson
-                  </p>
-                </div>
-                
-                <Button 
-                  onClick={generateLessonPlan} 
-                  disabled={isGenerating}
-                  className="w-full bg-cyber-cyan text-cyber-black hover:shadow-[0_0_15px_rgba(0,240,255,0.5)] font-bold gap-2"
-                  data-testid="generate-plan-btn"
+                  );
+                })}
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  onClick={addScheduleRow}
+                  data-testid="lp-add-schedule-row"
+                  className="w-full"
                 >
-                  {isGenerating ? (
-                    <>
-                      <Loader2 className="w-4 h-4 animate-spin" />
-                      Generating...
-                    </>
-                  ) : (
-                    <>
-                      <Sparkles className="w-4 h-4" />
-                      Generate Plan
-                    </>
-                  )}
+                  <Plus className="w-4 h-4 mr-1" /> Add day
+                </Button>
+                <Button
+                  type="button"
+                  onClick={generateFromWeeklySchedule}
+                  disabled={generatingSchedule || weeklySchedule.length === 0}
+                  className="w-full bg-emerald-600 hover:bg-emerald-700 text-white"
+                  data-testid="lp-generate-schedule"
+                >
+                  <Sparkles className="w-4 h-4 mr-1" />
+                  {generatingSchedule ? "Generating…" : `Generate ${weeklySchedule.length} day(s) of plans`}
                 </Button>
               </CardContent>
             </Card>
@@ -1229,7 +1155,7 @@ ISTE 1.1.c - Students use technology to seek feedback..."
                   <GraduationCap className="w-16 h-16 mx-auto text-gray-300 mb-4" />
                   <h3 className="text-xl font-semibold text-slate-400 mb-2">No Lesson Plan Generated</h3>
                   <p className="text-slate-500 max-w-md">
-                    Fill in the subject and topic on the left, then click "Generate Plan" to create a comprehensive multi-day lesson plan with AI.
+                    Add days to the Weekly Schedule on the left (pick a Unit → Chapter → Lesson for each day), then click "Generate day(s) of plans" to create your week with AI.
                   </p>
                 </CardContent>
               </Card>
@@ -1239,13 +1165,15 @@ ISTE 1.1.c - Students use technology to seek feedback..."
                 <div className="print-only bg-cyber-navy/60 p-6 rounded-lg">
                   <div className="text-center mb-4">
                     <h1 className="text-2xl font-bold">{headerFields.schoolName}</h1>
-                    <h2 className="text-lg">{lessonInput.subject} - {lessonInput.topic}</h2>
+                    <h2 className="text-lg">
+                      {generatedPlans[0]?.unit || ''}{generatedPlans[0]?.chapter ? ` — ${generatedPlans[0].chapter}` : ''}
+                    </h2>
                   </div>
                   <div className="grid grid-cols-2 gap-4 text-sm">
                     <p><strong>Teacher:</strong> {headerFields.teacherName}</p>
                     <p><strong>Class:</strong> {headerFields.className}</p>
-                    <p><strong>Lesson Range:</strong> {headerFields.lessonRange}</p>
-                    <p><strong>Grade Level:</strong> {lessonInput.gradeLevel}</p>
+                    <p><strong>Week Dates:</strong> {headerFields.lessonRange}</p>
+                    <p><strong>Days:</strong> {generatedPlans.length}</p>
                     <p><strong>Time per Period:</strong> {headerFields.timePerPeriod} minutes</p>
                     <p><strong>Next Assessment:</strong> {headerFields.nextMajorAssessment}</p>
                   </div>
