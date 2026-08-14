@@ -387,6 +387,10 @@ class Problem(BaseModel):
     # Turtle graphics fields
     assignment_type: str = "code"  # "code" or "turtle"
     turtle_grading_criteria: Optional[dict] = None  # {"min_lines": 6, "min_circles": 1, etc}
+    # NEW: Ordered execution grading — when scoring_method == "ordered_execution",
+    # compare the runtime sequence of turtle method calls against target_sequence.
+    scoring_method: Optional[str] = "text_match"  # "text_match" | "ordered_execution"
+    target_sequence: Optional[List[str]] = None  # e.g. ["forward","right","forward","left"]
     expected_turtle_image: str = ""  # Base64 encoded image for turtle assignments
     # Partial credit rules (deterministic grading)
     partial_credit_rules: Optional[dict] = None  # {"syntax_error_penalty": 30, "logic_error_penalty": 20, etc}
