@@ -2175,23 +2175,19 @@ export default function AssignmentPage({ user, lessonData }) {
                         </div>
                       ) : assignment.problems?.[currentProblemIndex]?.assignment_type === "turtle" ? (
                         <div className="h-full flex flex-col gap-3">
-                          {turtleImage ? (
-                            <div className="flex justify-center items-center bg-cyber-navy/60 p-4 rounded border-2 border-cyber-cyan/10">
-                              <img 
-                                src={`data:image/png;base64,${turtleImage}`}
-                                alt="Turtle output"
-                                className="max-w-full h-auto"
-                                style={{ maxHeight: "500px" }}
-                              />
-                            </div>
-                          ) : (
-                            <div className="flex items-center justify-center h-64 bg-cyber-navy/40 rounded border-2 border-dashed border-cyber-cyan/15 text-slate-500">
-                              <div className="text-center">
-                                <div className="text-4xl mb-2">🐢</div>
-                                <div>Run your turtle code to see the output here...</div>
-                              </div>
-                            </div>
-                          )}
+                          {/* Live turtle canvas — teacher demo mode. Same component
+                              students use, so Play / Step / Reset / speed all work
+                              here and let the teacher walk the class through the
+                              code one command at a time. */}
+                          <div className="bg-cyber-navy/60 rounded-lg shadow p-2">
+                            <AnimatedTurtle
+                              code={code}
+                              width={600}
+                              height={600}
+                              backgroundColor={assignment.problems?.[currentProblemIndex]?.background_color || "#ffffff"}
+                              onLineHighlight={(lineNum) => setHighlightedLine(lineNum)}
+                            />
+                          </div>
                           {output && (
                             <div className="mt-2">
                               <div className="text-sm font-semibold text-slate-300 mb-1">Console Output:</div>
