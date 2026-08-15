@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef, useCallback, useMemo, forwardRef, useImperativeHandle } from "react";
 import { Button } from "@/components/ui/button";
-import { Play, Pause, RotateCcw, FastForward, Grid } from "lucide-react";
+import { Play, Pause, RotateCcw, FastForward, Grid, StepForward } from "lucide-react";
 
 // Helper function to extract content within parentheses, handling nested parens
 function extractParenthesesContent(str, startIdx) {
@@ -963,6 +963,9 @@ const AnimatedTurtle = forwardRef(function AnimatedTurtle({
   const bgCanvasRef = useRef(null);  // Separate canvas for background
   const [isPlaying, setIsPlaying] = useState(false);
   const [currentStep, setCurrentStep] = useState(-1);
+  // Manual step-through state (used by the Step button)
+  const stepIdxRef = useRef(-1);
+  const [manualStepIdx, setManualStepIdx] = useState(-1);
   const [speed, setSpeed] = useState(5);  const [collisionCount, setCollisionCount] = useState(0);
   const [goalsReached, setGoalsReached] = useState(new Set());
   const [pathLength, setPathLength] = useState(0);
@@ -1425,6 +1428,9 @@ const AnimatedTurtle = forwardRef(function AnimatedTurtle({
     playingRef.current = false;
     setIsPlaying(false);
     setCurrentStep(-1);
+    // Reset manual step state too so next Step click starts from the beginning
+    stepIdxRef.current = -1;
+    setManualStepIdx(-1);
     setGoalsReached(new Set());
     setCollisionCount(0);
     setPathLength(0);
@@ -2165,6 +2171,49 @@ const AnimatedTurtle = forwardRef(function AnimatedTurtle({
     if (onRun) onRun();
   }, [commands, executeCommand, resetTurtle, onRun, eventHandlers]);
   
+  // Manual step-through: execute exactly ONE next command per click so students
+  // can pause on intermediate states (e.g. "day sun" before "night moon").
+  // First click resets + runs on_start + executes command[0]. Subsequent clicks
+  // advance one command at a time until the end.
+  const stepForward = useCallback(async () => {
+    if (!commands || commands.length === 0) return;
+    if (playingRef.current) return;  // don't step while auto-playing
+
+    let idx = stepIdxRef.current;
+    if (idx < 0) {
+      // First step click: reset the canvas + run on_start handler once
+      resetTurtle();
+      await new Promise((r) => setTimeout(r, 50));
+      if (eventHandlers.onStartHandler && eventHandlers.onStartHandler.length > 0) {
+        for (const cmd of eventHandlers.onStartHandler) {
+          await executeCommand(cmd, false);  // instant so we land ON command[0]
+        }
+      }
+      idx = 0;
+    } else {
+      idx = idx + 1;
+      if (idx >= commands.length) {
+        // Nothing left — student can hit Reset to start over
+        return;
+      }
+    }
+    const cmd = commands[idx];
+    setCurrentStep(idx);
+    setManualStepIdx(idx);
+    stepIdxRef.current = idx;
+    if (onLineHighlight) onLineHighlight(cmd.line);
+    // Animate each individual step so the drawing motion is visible
+    await executeCommand(cmd, true);
+  }, [commands, executeCommand, resetTurtle, onLineHighlight, eventHandlers]);
+
+  // Keep the manual step index in sync when resetTurtle / play runs
+  useEffect(() => {
+    if (isPlaying) {
+      stepIdxRef.current = -1;
+      setManualStepIdx(-1);
+    }
+  }, [isPlaying]);
+  
   // Keyboard event handler
   useEffect(() => {
     console.log("⌨️ Keyboard effect - enableEvents:", enableEvents, "eventModeActive:", eventModeActive);
@@ -2334,6 +2383,24 @@ const AnimatedTurtle = forwardRef(function AnimatedTurtle({
         >
           {isPlaying ? <Pause className="w-4 h-4" /> : <Play className="w-4 h-4" />}
         </Button>
+
+        {/* Manual step-through: advances one command per click so students can
+            see intermediate states (e.g. a "day" frame before switching to "night") */}
+        <Button
+          type="button"
+          size="sm"
+          variant="outline"
+          onClick={(e) => {
+            e.stopPropagation();
+            stepForward();
+          }}
+          disabled={isPlaying || commands.length === 0}
+          className="bg-cyan-700 border-cyan-500 hover:bg-cyan-600 disabled:opacity-40"
+          title="Step through one command at a time"
+          data-testid="turtle-step-forward-btn"
+        >
+          <StepForward className="w-4 h-4" />
+        </Button>
         
         <Button
           type="button"
@@ -2374,7 +2441,8 @@ const AnimatedTurtle = forwardRef(function AnimatedTurtle({
           🐢 {turtleName}
         </span>
         <span>
-          {isPlaying ? `Running step ${currentStep + 1}/${commands.length}` : 
+          {isPlaying ? `Running step ${currentStep + 1}/${commands.length}` :
+           manualStepIdx >= 0 ? `Step ${manualStepIdx + 1}/${commands.length}${manualStepIdx + 1 === commands.length ? " • done (click Reset)" : " • click ⏭ for next"}` :
            commands.length > 0 ? `${commands.length} commands ready` : 'No commands parsed'}
         </span>
       </div>
