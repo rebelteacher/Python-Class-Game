@@ -3520,7 +3520,8 @@ try:
     
     turtle = MockTurtleModule(turtle_sim)
     sys.modules['turtle'] = turtle
-    
+    import inspect as _line_insp
+    turtle_sim._student_line_offset = _line_insp.currentframe().f_lineno  # student code begins on the very next line
 {chr(10).join("    " + line for line in code.split(chr(10)))}
     
     sys.stdout = original_stdout
@@ -3628,11 +3629,15 @@ except Exception as e:
                 return s
 
             raw_commands = tracking_data.get("commands_used", []) or []
+            raw_lines = tracking_data.get("command_lines", []) or []
             # Strip args + alias resolve on student side; DO NOT strip cosmetic —
             # teacher explicitly controls whether pencolor/penup/etc. are checked
             # by including or omitting them from the Target Sequence.
             student_methods = [str(c).split("(")[0].strip() for c in raw_commands if c]
             student_methods = [METHOD_ALIASES.get(m, m) for m in student_methods]
+            # Pad line list to same length in case of desync
+            while len(raw_lines) < len(student_methods):
+                raw_lines.append(None)
 
             expected = []
             for entry in target_sequence:
@@ -3652,20 +3657,25 @@ except Exception as e:
             # Compare step-by-step, stop at first mismatch
             mismatch_step = None
             student_wrong_method = None
+            mismatch_line = None
             for i, exp_method in enumerate(expected):
                 if i >= len(student_methods):
                     mismatch_step = i + 1
                     student_wrong_method = "(nothing)"
+                    mismatch_line = None
                     break
                 if student_methods[i] != exp_method:
                     mismatch_step = i + 1
                     student_wrong_method = student_methods[i]
+                    mismatch_line = raw_lines[i] if i < len(raw_lines) else None
                     break
 
             # If student ran MORE commands than expected but matched so far, that's also wrong
             if mismatch_step is None and len(student_methods) > len(expected):
-                mismatch_step = len(expected) + 1
-                student_wrong_method = student_methods[len(expected)]
+                idx = len(expected)
+                mismatch_step = idx + 1
+                student_wrong_method = student_methods[idx]
+                mismatch_line = raw_lines[idx] if idx < len(raw_lines) else None
 
             if mismatch_step is None:
                 return {
@@ -3675,9 +3685,10 @@ except Exception as e:
                     "image_data": image_data or ""
                 }
             else:
+                line_hint = f" (line {mismatch_line})" if isinstance(mismatch_line, int) and mismatch_line >= 1 else ""
                 return {
                     "score": 0,
-                    "feedback": f"Step {mismatch_step} was `{student_wrong_method}`, try that again and resubmit.",
+                    "feedback": f"Step {mismatch_step}{line_hint} was `{student_wrong_method}`, try that again and resubmit.",
                     "tracking_data": tracking_data,
                     "image_data": image_data or ""
                 }

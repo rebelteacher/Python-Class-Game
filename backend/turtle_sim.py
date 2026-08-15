@@ -9,6 +9,8 @@ import math
 from typing import List, Tuple, Optional, Dict, Any
 import io
 import base64
+import inspect
+import os
 
 
 class TurtleSim:
@@ -36,6 +38,11 @@ class TurtleSim:
         
         # Tracking data for auto-grading
         self.commands_used = []
+        self.command_lines = []  # Parallel list: student's source line for each command
+        # When executed via the server wrapper, the wrapper sets this to the number
+        # of prefix lines before the student's code so we can map back to the
+        # student's original line numbers. 0 = raw execution (line == wrapper line).
+        self._student_line_offset = 0
         self.positions_visited = [(self.x, self.y)]
         self.path_history = [{"x": 0, "y": 0}]  # Track turtle coordinates for maze goal checking
         self.lines_drawn = 0
@@ -46,6 +53,41 @@ class TurtleSim:
         # Fill tracking
         self.is_filling = False
         self.fill_points = []
+
+    def _get_student_line(self) -> Optional[int]:
+        """Walk the call stack to find the student's source line for the current turtle call.
+        Returns the student's line number (1-indexed) or None if not resolvable."""
+        try:
+            frame = inspect.currentframe()
+            if frame is None:
+                return None
+            frame = frame.f_back  # caller of _get_student_line (usually _record)
+            # Skip frames inside turtle_sim.py (this file)
+            this_file = os.path.abspath(__file__)
+            wrapper_frame = None
+            while frame is not None:
+                fname = os.path.abspath(frame.f_code.co_filename or "")
+                if fname != this_file:
+                    # Not turtle_sim — this is either MockTurtleModule delegate or student code
+                    self_obj = frame.f_locals.get("self")
+                    is_mock = (self_obj is not None
+                               and type(self_obj).__name__ == "MockTurtleModule")
+                    if not is_mock:
+                        wrapper_frame = frame
+                        break
+                frame = frame.f_back
+            if wrapper_frame is None:
+                return None
+            wrapper_line = wrapper_frame.f_lineno
+            student_line = wrapper_line - int(self._student_line_offset or 0)
+            return student_line if student_line >= 1 else None
+        except Exception:
+            return None
+
+    def _record(self, cmd_str: str) -> None:
+        """Record a turtle command with its student source line."""
+        self.commands_used.append(cmd_str)
+        self.command_lines.append(self._get_student_line())
         
     def _to_canvas_coords(self, x: float, y: float) -> Tuple[int, int]:
         """Convert turtle coordinates to canvas coordinates"""
@@ -57,7 +99,7 @@ class TurtleSim:
     
     def forward(self, distance: float):
         """Move turtle forward by distance"""
-        self.commands_used.append(f"forward({distance})")
+        self._record(f"forward({distance})")
         
         # Calculate new position
         rad = math.radians(self.heading)
@@ -87,22 +129,22 @@ class TurtleSim:
     
     def backward(self, distance: float):
         """Move turtle backward by distance"""
-        self.commands_used.append(f"backward({distance})")
+        self._record(f"backward({distance})")
         self.forward(-distance)
     
     def right(self, angle: float):
         """Turn turtle right by angle degrees"""
-        self.commands_used.append(f"right({angle})")
+        self._record(f"right({angle})")
         self.heading = (self.heading - angle) % 360
     
     def left(self, angle: float):
         """Turn turtle left by angle degrees"""
-        self.commands_used.append(f"left({angle})")
+        self._record(f"left({angle})")
         self.heading = (self.heading + angle) % 360
     
     def goto(self, x: float, y: float):
         """Move turtle to absolute position"""
-        self.commands_used.append(f"goto({x}, {y})")
+        self._record(f"goto({x}, {y})")
         
         # Draw line if pen is down
         if self.pen_down:
@@ -131,16 +173,16 @@ class TurtleSim:
     
     def setheading(self, angle: float):
         """Set turtle's heading to angle degrees"""
-        self.commands_used.append(f"setheading({angle})")
+        self._record(f"setheading({angle})")
         self.heading = angle % 360
     
     def circle(self, radius: float, extent: Optional[float] = None, steps: Optional[int] = None):
         """Draw a circle with given radius"""
         # Log the command with all provided arguments
         if extent is not None:
-            self.commands_used.append(f"circle({radius}, {extent})")
+            self._record(f"circle({radius}, {extent})")
         else:
-            self.commands_used.append(f"circle({radius})")
+            self._record(f"circle({radius})")
         self.circles_drawn += 1
         
         if extent is None:
@@ -159,7 +201,7 @@ class TurtleSim:
     
     def dot(self, size: Optional[int] = None, color: Optional[str] = None):
         """Draw a dot at current position"""
-        self.commands_used.append(f"dot({size})")
+        self._record(f"dot({size})")
         
         if size is None:
             size = max(self.pen_width + 4, 2 * self.pen_width)
@@ -174,28 +216,28 @@ class TurtleSim:
     
     def penup(self):
         """Lift pen - stop drawing"""
-        self.commands_used.append("penup()")
+        self._record("penup()")
         self.pen_down = False
     
     def pendown(self):
         """Put pen down - start drawing"""
-        self.commands_used.append("pendown()")
+        self._record("pendown()")
         self.pen_down = True
     
     def pensize(self, width: int):
         """Set pen width"""
-        self.commands_used.append(f"pensize({width})")
+        self._record(f"pensize({width})")
         self.pen_width = max(1, int(width))
     
     def pencolor(self, color: str):
         """Set pen color"""
-        self.commands_used.append(f"pencolor('{color}')")
+        self._record(f"pencolor('{color}')")
         self.pen_color = color
         self.colors_used.add(color)
     
     def fillcolor(self, color: str):
         """Set fill color"""
-        self.commands_used.append(f"fillcolor('{color}')")
+        self._record(f"fillcolor('{color}')")
         self.fill_color = color
         self.colors_used.add(color)
     
@@ -227,28 +269,28 @@ class TurtleSim:
     
     def speed(self, speed: int):
         """Set turtle speed (ignored in simulation)"""
-        self.commands_used.append(f"speed({speed})")
+        self._record(f"speed({speed})")
         self._speed = speed
     
     def hideturtle(self):
         """Hide the turtle"""
-        self.commands_used.append("hideturtle()")
+        self._record("hideturtle()")
         self.is_visible = False
     
     def showturtle(self):
         """Show the turtle"""
-        self.commands_used.append("showturtle()")
+        self._record("showturtle()")
         self.is_visible = True
     
     def begin_fill(self):
         """Begin filling shape"""
-        self.commands_used.append("begin_fill()")
+        self._record("begin_fill()")
         self.is_filling = True
         self.fill_points = [self._to_canvas_coords(self.x, self.y)]
     
     def end_fill(self):
         """End filling shape and draw the filled polygon"""
-        self.commands_used.append("end_fill()")
+        self._record("end_fill()")
         if self.is_filling and len(self.fill_points) >= 3:
             # Draw filled polygon with nonzero winding rule support
             # Pillow's default polygon fill uses even-odd rule which leaves centers of 
@@ -355,7 +397,7 @@ class TurtleSim:
     
     def home(self):
         """Move turtle to origin (0, 0) and set heading to 0"""
-        self.commands_used.append("home()")
+        self._record("home()")
         
         # Draw line if pen is down
         if self.pen_down:
@@ -373,7 +415,7 @@ class TurtleSim:
     
     def clear(self):
         """Clear the drawing but keep turtle position"""
-        self.commands_used.append("clear()")
+        self._record("clear()")
         # Redraw background
         self.draw.rectangle([0, 0, self.width, self.height], fill=self.bg_color)
         self.lines_drawn = 0
@@ -381,7 +423,7 @@ class TurtleSim:
     
     def clearscreen(self):
         """Clear screen and reset turtle to home"""
-        self.commands_used.append("clearscreen()")
+        self._record("clearscreen()")
         self.clear()
         self.home()
     
@@ -391,7 +433,7 @@ class TurtleSim:
     
     def stamp(self) -> int:
         """Stamp a copy of the turtle shape at current position, return stamp_id"""
-        self.commands_used.append("stamp()")
+        self._record("stamp()")
         
         # Draw turtle shape at current position
         pos = self._to_canvas_coords(self.x, self.y)
@@ -421,19 +463,19 @@ class TurtleSim:
     
     def clearstamp(self, stamp_id: int = None):
         """Clear a stamp (not fully implemented - would need to track stamps)"""
-        self.commands_used.append(f"clearstamp({stamp_id})")
+        self._record(f"clearstamp({stamp_id})")
         # Note: Full implementation would require tracking individual stamps
         pass
     
     def clearstamps(self, n: int = None):
         """Clear all or n stamps"""
-        self.commands_used.append(f"clearstamps({n})")
+        self._record(f"clearstamps({n})")
         # Note: Full implementation would require tracking individual stamps
         pass
     
     def write(self, text: str, move: bool = False, align: str = "left", font: tuple = ("Arial", 8, "normal")):
         """Write text at current turtle position"""
-        self.commands_used.append(f"write('{text}')")
+        self._record(f"write('{text}')")
         
         # Get canvas position
         pos = self._to_canvas_coords(self.x, self.y)
@@ -519,6 +561,7 @@ class TurtleSim:
             "total_commands": len(self.commands_used),
             "unique_commands": len(set(cmd.split('(')[0] for cmd in self.commands_used)),
             "commands_used": list(self.commands_used),  # Raw sequence e.g. ["forward(10)","right(90)"]
+            "command_lines": list(self.command_lines),  # Parallel: student's source line per command (may be None)
             "lines_drawn": self.lines_drawn,
             "circles_drawn": self.circles_drawn,
             "total_distance": round(self.total_distance, 2),

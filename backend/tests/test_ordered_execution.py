@@ -207,7 +207,7 @@ class TestOrderedExecutionSubmissions:
         data = r.json()
         assert data["score"] == 0, f"Expected 0, got {data['score']}. Feedback: {data.get('feedback')}"
         fb = data["feedback"]
-        assert fb.startswith("Step 2 was "), f"Feedback pattern wrong: {fb}"
+        assert fb.startswith("Step 2 "), f"Feedback pattern wrong: {fb}"
         assert "left" in fb, f"Feedback missing 'left': {fb}"
         assert "try that again and resubmit" in fb, f"Feedback missing 'try that again and resubmit': {fb}"
 
@@ -225,7 +225,7 @@ class TestOrderedExecutionSubmissions:
         data = r.json()
         assert data["score"] == 0
         fb = data["feedback"]
-        assert fb.startswith("Step 4 was "), f"Expected Step 4 prefix, got: {fb}"
+        assert fb.startswith("Step 4 "), f"Expected Step 4 prefix, got: {fb}"
         assert "(nothing)" in fb, f"Expected (nothing) placeholder, got: {fb}"
 
     def test_extra_commands_beyond_target(self, student_headers, oe_problem_id_mod):
@@ -245,7 +245,7 @@ class TestOrderedExecutionSubmissions:
         data = r.json()
         assert data["score"] == 0, f"Expected 0, got {data['score']}. Feedback: {data.get('feedback')}"
         fb = data["feedback"]
-        assert fb.startswith("Step 6 was "), f"Expected Step 6 prefix, got: {fb}"
+        assert fb.startswith("Step 6 "), f"Expected Step 6 prefix, got: {fb}"
         assert "right" in fb
 
 
