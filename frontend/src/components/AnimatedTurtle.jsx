@@ -957,7 +957,9 @@ const AnimatedTurtle = forwardRef(function AnimatedTurtle({
   onGoalReached = null,
   onCollision = null,
   onComplete = null,
-  enableEvents = true  // Enable keyboard/mouse event listeners
+  enableEvents = true,  // Enable keyboard/mouse event listeners
+  renderControls = true,  // If false, parent renders its own control bar (via ref methods)
+  onStateChange = null  // Fires when playback state changes: { isPlaying, currentStep, manualStepIdx, totalCommands, showGrid }
 }, ref) {
   const canvasRef = useRef(null);
   const bgCanvasRef = useRef(null);  // Separate canvas for background
@@ -2326,14 +2328,25 @@ const AnimatedTurtle = forwardRef(function AnimatedTurtle({
     stop,
     reset: resetTurtle,
     runInstant,
+    stepForward,
+    toggleGrid: () => { setShowGrid((g) => !g); setTimeout(() => drawCanvas(), 50); },
     startEventMode,
-    isEventModeActive: () => eventModeActive
-  }), [play, stop, resetTurtle, runInstant, startEventMode, eventModeActive]);
+    isEventModeActive: () => eventModeActive,
+    // Read state (parent can call these anytime; use onStateChange for reactive updates)
+    getState: () => ({ isPlaying, currentStep, manualStepIdx, totalCommands: commands.length, showGrid }),
+  }), [play, stop, resetTurtle, runInstant, stepForward, startEventMode, eventModeActive, isPlaying, currentStep, manualStepIdx, commands.length, showGrid, drawCanvas]);
+
+  // Fire onStateChange whenever the observable playback state changes
+  useEffect(() => {
+    if (onStateChange) {
+      onStateChange({ isPlaying, currentStep, manualStepIdx, totalCommands: commands.length, showGrid });
+    }
+  }, [isPlaying, currentStep, manualStepIdx, commands.length, showGrid, onStateChange]);
   
   return (
     <div className="flex flex-col items-center gap-3">
-      {/* Playback controls — placed at TOP so teachers/students can reach them
-          before scrolling; the drawing itself sits below. */}
+      {/* Playback controls — hidden when parent renders its own via renderControls={false} */}
+      {renderControls !== false && (
       <div className="flex items-center gap-3 w-full max-w-md">
         <Button
           type="button"
@@ -2408,6 +2421,7 @@ const AnimatedTurtle = forwardRef(function AnimatedTurtle({
           <Grid className="w-4 h-4" />
         </Button>
       </div>
+      )}
 
       <div className="bg-white rounded-lg shadow-lg p-2 relative">
         <canvas

@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Textarea } from "@/components/ui/textarea";
-import { ArrowLeft, Play, Send, CheckCircle, XCircle, Code2, Lightbulb, X, BookOpen, Cpu, RotateCcw, ExternalLink, Blocks, Pencil, Save, Trash2, ChevronDown, ChevronRight, ChevronLeft } from "lucide-react";
+import { ArrowLeft, Play, Send, CheckCircle, XCircle, Code2, Lightbulb, X, BookOpen, Cpu, RotateCcw, ExternalLink, Blocks, Pencil, Save, Trash2, ChevronDown, ChevronRight, ChevronLeft, Pause, StepForward, FastForward, Grid } from "lucide-react";
 import Editor from "@monaco-editor/react";
 import { Panel, PanelGroup, PanelResizeHandle } from "react-resizable-panels";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
@@ -145,6 +145,8 @@ export default function AssignmentPage({ user, lessonData }) {
   const codeEditorRef = useRef(null); // Reference to Monaco editor instance
   const decorationsRef = useRef([]); // Store decoration IDs for removal
   const turtleRef = useRef(null); // Reference to AnimatedTurtle for block assignments
+  const demoTurtleRef = useRef(null); // Ref for teacher demo AnimatedTurtle (Play/Step/Reset in header)
+  const [demoTurtleState, setDemoTurtleState] = useState({ isPlaying: false, currentStep: -1, manualStepIdx: -1, totalCommands: 0, showGrid: false });
   
   // Block-based programming state
   const blockEditorRef = useRef(null);
@@ -2131,7 +2133,7 @@ export default function AssignmentPage({ user, lessonData }) {
                 <Panel defaultSize={50} minSize={30}>
                   <Card className="h-full flex flex-col">
                     <CardHeader className="pb-2 pt-3 flex-shrink-0">
-                      <CardTitle className="flex justify-between items-center">
+                      <CardTitle className="flex justify-between items-center gap-2 flex-wrap">
                         <span>
                           {assignment.problems?.[currentProblemIndex]?.assignment_type === "turtle" 
                             ? "🐢 Turtle Output" 
@@ -2139,6 +2141,74 @@ export default function AssignmentPage({ user, lessonData }) {
                               ? "⚡ Virtual Micro:bit"
                               : "Output"}
                         </span>
+
+                        {/* Playback controls beside the title so they stay visible
+                            when the canvas scrolls. Only shown for turtle demos. */}
+                        {assignment.problems?.[currentProblemIndex]?.assignment_type === "turtle" && (
+                          <div className="flex items-center gap-1.5">
+                            <Button
+                              type="button"
+                              size="sm"
+                              variant="outline"
+                              onClick={() => demoTurtleRef.current?.reset()}
+                              className="bg-gray-700 border-gray-600 hover:bg-gray-600 h-8 px-2"
+                              title="Reset"
+                              data-testid="demo-turtle-reset-btn"
+                            >
+                              <RotateCcw className="w-4 h-4" />
+                            </Button>
+                            <Button
+                              type="button"
+                              size="sm"
+                              onClick={() => demoTurtleState.isPlaying ? demoTurtleRef.current?.stop() : demoTurtleRef.current?.play()}
+                              className={`h-8 px-2 ${demoTurtleState.isPlaying ? "bg-yellow-600 hover:bg-yellow-700" : "bg-green-600 hover:bg-green-700"}`}
+                              title={demoTurtleState.isPlaying ? "Pause" : "Play"}
+                              data-testid="demo-turtle-play-btn"
+                            >
+                              {demoTurtleState.isPlaying ? <Pause className="w-4 h-4" /> : <Play className="w-4 h-4" />}
+                            </Button>
+                            <Button
+                              type="button"
+                              size="sm"
+                              variant="outline"
+                              onClick={() => demoTurtleRef.current?.stepForward()}
+                              disabled={demoTurtleState.isPlaying || demoTurtleState.totalCommands === 0}
+                              className="bg-cyan-700 border-cyan-500 hover:bg-cyan-600 disabled:opacity-40 h-8 px-2"
+                              title="Step through one command at a time"
+                              data-testid="demo-turtle-step-btn"
+                            >
+                              <StepForward className="w-4 h-4" />
+                            </Button>
+                            <Button
+                              type="button"
+                              size="sm"
+                              variant="outline"
+                              onClick={() => demoTurtleRef.current?.runInstant()}
+                              className="bg-gray-700 border-gray-600 hover:bg-gray-600 h-8 px-2"
+                              title="Run instantly"
+                              data-testid="demo-turtle-fast-btn"
+                            >
+                              <FastForward className="w-4 h-4" />
+                            </Button>
+                            <Button
+                              type="button"
+                              size="sm"
+                              variant="outline"
+                              onClick={() => demoTurtleRef.current?.toggleGrid()}
+                              className={`h-8 px-2 ${demoTurtleState.showGrid ? 'bg-blue-600 border-blue-500' : 'bg-gray-700 border-gray-600'} hover:bg-gray-600`}
+                              title={demoTurtleState.showGrid ? "Hide grid" : "Show grid"}
+                              data-testid="demo-turtle-grid-btn"
+                            >
+                              <Grid className="w-4 h-4" />
+                            </Button>
+                            {demoTurtleState.manualStepIdx >= 0 && !demoTurtleState.isPlaying && (
+                              <span className="text-xs text-cyan-300 font-mono ml-2">
+                                Step {demoTurtleState.manualStepIdx + 1}/{demoTurtleState.totalCommands}
+                              </span>
+                            )}
+                          </div>
+                        )}
+
                         <span className="text-xs text-slate-500 font-normal">Demo mode - not graded</span>
                       </CardTitle>
                       <CardDescription className="text-xs">
@@ -2184,11 +2254,14 @@ export default function AssignmentPage({ user, lessonData }) {
                               code one command at a time. */}
                           <div className="bg-cyber-navy/60 rounded-lg shadow p-2">
                             <AnimatedTurtle
+                              ref={demoTurtleRef}
                               code={code}
                               width={600}
                               height={600}
                               backgroundColor={assignment.problems?.[currentProblemIndex]?.background_color || "#ffffff"}
                               onLineHighlight={(lineNum) => setHighlightedLine(lineNum)}
+                              renderControls={false}
+                              onStateChange={setDemoTurtleState}
                             />
                           </div>
                           {output && (
