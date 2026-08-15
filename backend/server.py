@@ -3588,11 +3588,79 @@ except Exception as e:
                 "hideturtle", "showturtle", "ht", "st",
                 "begin_fill", "end_fill",
             }
+            # Aliases → canonical method (fd -> forward etc.) so teachers/students can
+            # write either form.
+            METHOD_ALIASES = {
+                "fd": "forward", "bk": "backward", "back": "backward",
+                "rt": "right", "lt": "left",
+                "seth": "setheading", "setpos": "goto", "setposition": "goto",
+            }
+            # Only accept known turtle drawing/motion methods in target sequences —
+            # anything else (Turtle, Screen, imports, arbitrary variables) is dropped.
+            VALID_TURTLE_METHODS = {
+                "forward", "backward", "right", "left", "goto", "setx", "sety",
+                "setheading", "home", "circle", "dot", "stamp", "write",
+                # cosmetic (still recognized so teacher can list them, but they'll be
+                # filtered out by COSMETIC_METHODS below)
+                "pencolor", "fillcolor", "color", "pensize", "speed", "bgcolor",
+                "penup", "pendown", "hideturtle", "showturtle",
+                "begin_fill", "end_fill",
+            }
+
+            def _normalize_target_entry(raw: str) -> Optional[str]:
+                """Turn any teacher input line into a canonical turtle method name,
+                or None if the line clearly isn't a method call.
+                Handles: 'forward', 'forward()', 'forward(100)', 't.forward(100)',
+                'turtle.forward', '  # comment', 'import turtle', 't = turtle.Turtle()'
+                """
+                s = (raw or "").strip()
+                if not s:
+                    return None
+                # Drop comments / imports / assignments / obvious noise
+                if s.startswith("#") or s.startswith("import ") or s.startswith("from "):
+                    return None
+                if "=" in s and "==" not in s:
+                    return None
+                # Strip leading "t." or "turtle." prefixes
+                if s.startswith("turtle."):
+                    s = s[len("turtle."):]
+                elif s.startswith("t."):
+                    s = s[len("t."):]
+                # Strip "()" / "(args)"
+                if "(" in s:
+                    s = s.split("(", 1)[0]
+                s = s.strip()
+                if not s or not s.replace("_", "").isalnum():
+                    return None
+                # Alias resolution
+                s = METHOD_ALIASES.get(s, s)
+                # Only accept known turtle methods; anything else (Turtle, Screen,
+                # variable names, etc.) is dropped.
+                if s not in VALID_TURTLE_METHODS:
+                    return None
+                return s
+
             raw_commands = tracking_data.get("commands_used", []) or []
             # Strip args: "forward(10)" -> "forward"
             student_methods_all = [str(c).split("(")[0].strip() for c in raw_commands if c]
+            student_methods_all = [METHOD_ALIASES.get(m, m) for m in student_methods_all]
             student_methods = [m for m in student_methods_all if m not in COSMETIC_METHODS]
-            expected = [str(s).strip() for s in target_sequence if str(s).strip() and str(s).strip() not in COSMETIC_METHODS]
+
+            expected_all = []
+            for entry in target_sequence:
+                norm = _normalize_target_entry(str(entry))
+                if norm and norm not in COSMETIC_METHODS:
+                    expected_all.append(norm)
+            expected = expected_all
+
+            # If normalization dropped everything, tell the teacher (via feedback)
+            if not expected:
+                return {
+                    "score": 0,
+                    "feedback": "Ordered Execution Check is enabled but the Target Sequence has no valid turtle method names. Ask your teacher to list drawing commands like `forward`, `right`, `left`.",
+                    "tracking_data": tracking_data,
+                    "image_data": image_data or ""
+                }
 
             # Compare step-by-step, stop at first mismatch
             mismatch_step = None
