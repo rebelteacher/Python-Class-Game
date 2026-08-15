@@ -2149,14 +2149,20 @@ export default function AssignmentLibrary({ user }) {
                           <Label className="font-semibold">Target Sequence</Label>
                           <p className="text-xs text-slate-400 mt-1 mb-2">
                             Enter one turtle method name per line, in the exact order students must call them.
-                            Only method names — no arguments. Example:
+                            Example:
+                            <code className="ml-1 text-purple-200 bg-purple-900/40 px-1 rounded">pencolor</code>,
                             <code className="ml-1 text-purple-200 bg-purple-900/40 px-1 rounded">forward</code>,
-                            <code className="ml-1 text-purple-200 bg-purple-900/40 px-1 rounded">right</code>,
-                            <code className="ml-1 text-purple-200 bg-purple-900/40 px-1 rounded">forward</code>
+                            <code className="ml-1 text-purple-200 bg-purple-900/40 px-1 rounded">right</code>
                             <br />
-                            <span className="text-slate-500">Cosmetic setup calls are auto-ignored:</span>{" "}
-                            <code className="text-slate-500">pencolor, pensize, penup, pendown, speed, hideturtle, begin_fill, end_fill</code>{" "}
-                            <span className="text-slate-500">— just list drawing commands.</span>
+                            <span className="text-slate-500">Every method you list is graded — include <code className="text-slate-400">pencolor</code>/<code className="text-slate-400">penup</code>/etc. if their order matters for this problem.</span>
+                            <br />
+                            <span className="text-slate-500">You can paste code snippets like</span>{" "}
+                            <code className="text-slate-400">t.forward(100)</code>{" "}
+                            <span className="text-slate-500">— we&apos;ll normalize to just the method name. Lines like</span>{" "}
+                            <code className="text-slate-400">import turtle</code>{" "}
+                            <span className="text-slate-500">or</span>{" "}
+                            <code className="text-slate-400">t = turtle.Turtle()</code>{" "}
+                            <span className="text-slate-500">are ignored.</span>
                           </p>
                           <Textarea
                             data-testid="lib-new-target-sequence"
@@ -2165,7 +2171,7 @@ export default function AssignmentLibrary({ user }) {
                               ...newProblem,
                               target_sequence: e.target.value.split("\n").map(s => s.trim()).filter(Boolean)
                             })}
-                            placeholder={"forward\nright\nforward\nleft\nforward"}
+                            placeholder={"pencolor\nforward\nright"}
                             className="mt-1 font-mono text-sm bg-cyber-navy/60 border-purple-500/40"
                             rows={6}
                           />
@@ -3537,14 +3543,20 @@ export default function AssignmentLibrary({ user }) {
                         <Label className="font-semibold">Target Sequence</Label>
                         <p className="text-xs text-slate-400 mt-1 mb-2">
                           Enter one turtle method name per line, in the exact order students must call them.
-                          Only method names — no arguments. Example:
+                          Example:
+                          <code className="ml-1 text-purple-200 bg-purple-900/40 px-1 rounded">pencolor</code>,
                           <code className="ml-1 text-purple-200 bg-purple-900/40 px-1 rounded">forward</code>,
-                          <code className="ml-1 text-purple-200 bg-purple-900/40 px-1 rounded">right</code>,
-                          <code className="ml-1 text-purple-200 bg-purple-900/40 px-1 rounded">forward</code>
+                          <code className="ml-1 text-purple-200 bg-purple-900/40 px-1 rounded">right</code>
                           <br />
-                          <span className="text-slate-500">Cosmetic setup calls are auto-ignored:</span>{" "}
-                          <code className="text-slate-500">pencolor, pensize, penup, pendown, speed, hideturtle, begin_fill, end_fill</code>{" "}
-                          <span className="text-slate-500">— just list drawing commands.</span>
+                          <span className="text-slate-500">Every method you list is graded — include <code className="text-slate-400">pencolor</code>/<code className="text-slate-400">penup</code>/etc. if their order matters for this problem.</span>
+                          <br />
+                          <span className="text-slate-500">You can paste code snippets like</span>{" "}
+                          <code className="text-slate-400">t.forward(100)</code>{" "}
+                          <span className="text-slate-500">— we&apos;ll normalize to just the method name. Lines like</span>{" "}
+                          <code className="text-slate-400">import turtle</code>{" "}
+                          <span className="text-slate-500">or</span>{" "}
+                          <code className="text-slate-400">t = turtle.Turtle()</code>{" "}
+                          <span className="text-slate-500">are ignored.</span>
                         </p>
                         <Textarea
                           data-testid="lib-edit-target-sequence"
