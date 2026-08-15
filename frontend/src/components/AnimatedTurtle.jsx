@@ -2332,31 +2332,8 @@ const AnimatedTurtle = forwardRef(function AnimatedTurtle({
   
   return (
     <div className="flex flex-col items-center gap-3">
-      <div className="bg-white rounded-lg shadow-lg p-2 relative">
-        <canvas
-          ref={canvasRef}
-          width={width}
-          height={height}
-          className="border border-gray-300 rounded cursor-crosshair"
-          onMouseMove={handleMouseMove}
-          onMouseLeave={handleMouseLeave}
-          onClick={handleCanvasClick}
-          tabIndex={0}
-        />
-        {/* Coordinate display overlay */}
-        {mouseCoords && (
-          <div className="absolute top-2 right-2 bg-black/70 text-white text-xs px-2 py-1 rounded font-mono">
-            ({mouseCoords.x}, {mouseCoords.y})
-          </div>
-        )}
-        {/* Event mode indicator */}
-        {eventModeActive && (
-          <div className="absolute top-2 left-2 bg-green-500/100 text-white text-xs px-2 py-1 rounded font-bold animate-pulse">
-            ⌨️ Events Active
-          </div>
-        )}
-      </div>
-      
+      {/* Playback controls — placed at TOP so teachers/students can reach them
+          before scrolling; the drawing itself sits below. */}
       <div className="flex items-center gap-3 w-full max-w-md">
         <Button
           type="button"
@@ -2423,7 +2400,6 @@ const AnimatedTurtle = forwardRef(function AnimatedTurtle({
           onClick={(e) => {
             e.stopPropagation();
             setShowGrid(!showGrid);
-            // Trigger redraw
             setTimeout(() => drawCanvas(), 50);
           }}
           className={`${showGrid ? 'bg-blue-600 border-blue-500' : 'bg-gray-700 border-gray-600'} hover:bg-gray-600`}
@@ -2431,6 +2407,31 @@ const AnimatedTurtle = forwardRef(function AnimatedTurtle({
         >
           <Grid className="w-4 h-4" />
         </Button>
+      </div>
+
+      <div className="bg-white rounded-lg shadow-lg p-2 relative">
+        <canvas
+          ref={canvasRef}
+          width={width}
+          height={height}
+          className="border border-gray-300 rounded cursor-crosshair"
+          onMouseMove={handleMouseMove}
+          onMouseLeave={handleMouseLeave}
+          onClick={handleCanvasClick}
+          tabIndex={0}
+        />
+        {/* Coordinate display overlay */}
+        {mouseCoords && (
+          <div className="absolute top-2 right-2 bg-black/70 text-white text-xs px-2 py-1 rounded font-mono">
+            ({mouseCoords.x}, {mouseCoords.y})
+          </div>
+        )}
+        {/* Event mode indicator */}
+        {eventModeActive && (
+          <div className="absolute top-2 left-2 bg-green-500/100 text-white text-xs px-2 py-1 rounded font-bold animate-pulse">
+            ⌨️ Events Active
+          </div>
+        )}
       </div>
       
       <div className="flex items-center gap-2 text-xs text-gray-500">
