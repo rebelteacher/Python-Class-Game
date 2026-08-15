@@ -38,6 +38,8 @@ A coding education platform for K-12 students featuring multiple programming env
 - Live AnimatedTurtle component with play controls
 - Pattern-based test case grading with count support
 - Grid toggle and coordinate hover display
+- **Ordered Execution Check** scoring method (Feb 2026) — teachers can grade turtle/block problems by comparing the **order** of executed turtle commands against a `target_sequence` instead of visual output. On mismatch, students see: `Step [X] was ``[method]``, try that again and resubmit.` — perfect for debugging tasks. Backward-compatible: existing problems default to `text_match` scoring. Fields added: `Problem.scoring_method`, `Problem.target_sequence`. Turtle simulator now exposes `commands_used` in tracking_data.
+
 - Code line highlighting during animation
 - **List variable support** (Feb 2025)
 - **Multi-line list support** (Feb 2025)

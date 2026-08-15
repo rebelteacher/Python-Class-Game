@@ -518,6 +518,7 @@ class TurtleSim:
         return {
             "total_commands": len(self.commands_used),
             "unique_commands": len(set(cmd.split('(')[0] for cmd in self.commands_used)),
+            "commands_used": list(self.commands_used),  # Raw sequence e.g. ["forward(10)","right(90)"]
             "lines_drawn": self.lines_drawn,
             "circles_drawn": self.circles_drawn,
             "total_distance": round(self.total_distance, 2),

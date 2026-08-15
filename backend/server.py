@@ -436,6 +436,10 @@ class ProblemCreate(BaseModel):
     # Turtle graphics fields
     assignment_type: str = "code"  # "code", "turtle", or "microbit"
     turtle_grading_criteria: Optional[dict] = None
+    # NEW: Ordered execution grading — when scoring_method == "ordered_execution",
+    # compare the runtime sequence of turtle method calls against target_sequence.
+    scoring_method: Optional[str] = "text_match"  # "text_match" | "ordered_execution"
+    target_sequence: Optional[List[str]] = None  # e.g. ["forward","right","forward","left"]
     expected_turtle_image: str = ""
     # Partial credit rules
     partial_credit_rules: Optional[dict] = None
@@ -3414,7 +3418,7 @@ async def execute_code(execute_req: CodeExecuteRequest, request: Request):
         )
 
 
-async def grade_turtle_submission(code: str, grading_criteria: dict, expected_image: str = "", maze_config: dict = None) -> dict:
+async def grade_turtle_submission(code: str, grading_criteria: dict, expected_image: str = "", maze_config: dict = None, scoring_method: str = "text_match", target_sequence: Optional[List[str]] = None) -> dict:
     """Grade a turtle graphics submission based on criteria
     
     Args:
@@ -3422,6 +3426,9 @@ async def grade_turtle_submission(code: str, grading_criteria: dict, expected_im
         grading_criteria: Dict with min_lines, min_circles, required_colors, min_distance
         expected_image: Optional expected output image for comparison
         maze_config: Dict with goals, collision_enabled, challenge_mode for maze grading
+        scoring_method: "text_match" (default, image/criteria based) | "ordered_execution"
+        target_sequence: When scoring_method == "ordered_execution", the required ordered
+            list of turtle method names (e.g. ["forward","right","forward","left"]).
     
     Returns: {
         "score": float,
@@ -3565,6 +3572,61 @@ except Exception as e:
                 "tracking_data": {},
                 "image_data": ""
             }
+        
+        # ── NEW: Ordered Execution Check ─────────────────────────────────────────
+        # When the teacher chose scoring_method == "ordered_execution", grade purely
+        # on whether the student's executed command order matches target_sequence.
+        # Falls back to default grading if target_sequence is missing/empty.
+        if scoring_method == "ordered_execution" and target_sequence:
+            # Cosmetic / setup commands don't change the DRAWING order — ignore them
+            # in both the student's executed list AND the target sequence so teachers
+            # can define pure drawing sequences (e.g. ["forward","right","forward"])
+            # without having to list every t.pencolor / t.penup the student may add.
+            COSMETIC_METHODS = {
+                "pencolor", "fillcolor", "color", "pensize", "speed", "bgcolor",
+                "penup", "pendown", "pu", "pd", "up", "down",
+                "hideturtle", "showturtle", "ht", "st",
+                "begin_fill", "end_fill",
+            }
+            raw_commands = tracking_data.get("commands_used", []) or []
+            # Strip args: "forward(10)" -> "forward"
+            student_methods_all = [str(c).split("(")[0].strip() for c in raw_commands if c]
+            student_methods = [m for m in student_methods_all if m not in COSMETIC_METHODS]
+            expected = [str(s).strip() for s in target_sequence if str(s).strip() and str(s).strip() not in COSMETIC_METHODS]
+
+            # Compare step-by-step, stop at first mismatch
+            mismatch_step = None
+            student_wrong_method = None
+            for i, exp_method in enumerate(expected):
+                if i >= len(student_methods):
+                    mismatch_step = i + 1
+                    student_wrong_method = "(nothing)"
+                    break
+                if student_methods[i] != exp_method:
+                    mismatch_step = i + 1
+                    student_wrong_method = student_methods[i]
+                    break
+
+            # If student ran MORE commands than expected but matched so far, that's also wrong
+            if mismatch_step is None and len(student_methods) > len(expected):
+                mismatch_step = len(expected) + 1
+                student_wrong_method = student_methods[len(expected)]
+
+            if mismatch_step is None:
+                return {
+                    "score": 100,
+                    "feedback": f"✅ Perfect! Your execution order matches the target sequence ({len(expected)} steps).",
+                    "tracking_data": tracking_data,
+                    "image_data": image_data or ""
+                }
+            else:
+                return {
+                    "score": 0,
+                    "feedback": f"Step {mismatch_step} was `{student_wrong_method}`, try that again and resubmit.",
+                    "tracking_data": tracking_data,
+                    "image_data": image_data or ""
+                }
+        # ── END Ordered Execution Check ──────────────────────────────────────────
         
         # Grade based on criteria
         score = 0  # Start at 0 instead of 100 - must earn the score
@@ -4126,7 +4188,9 @@ async def submit_assignment(submission: SubmissionCreate, request: Request):
             submission.code,
             grading_criteria,
             expected_image,
-            maze_config
+            maze_config,
+            scoring_method=problem.get("scoring_method") or "text_match",
+            target_sequence=problem.get("target_sequence") or None,
         )
         logging.info(f"Turtle grading result: score={turtle_result['score']}, feedback={turtle_result['feedback']}")
         
@@ -4556,6 +4620,67 @@ async def submit_assignment(submission: SubmissionCreate, request: Request):
         logger.info(f"is_blockly_turtle: {is_blockly_turtle}")
         
         if is_blockly_turtle:
+            # ── Ordered Execution Check short-circuit (block turtle problems) ──
+            # If teacher configured scoring_method == "ordered_execution", grade purely
+            # by running the generated Python turtle code and comparing method order.
+            if (problem.get("scoring_method") == "ordered_execution"
+                    and problem.get("target_sequence")):
+                oe_result = await grade_turtle_submission(
+                    code,
+                    {},
+                    "",
+                    None,
+                    scoring_method="ordered_execution",
+                    target_sequence=problem.get("target_sequence") or [],
+                )
+                base_score = oe_result.get("score", 0)
+                feedback = oe_result.get("feedback", "")
+                turtle_image = oe_result.get("image_data", "")
+                tracking_data = oe_result.get("tracking_data", {})
+                test_results = [{
+                    "test_id": "ordered_execution",
+                    "description": "Ordered Execution Check",
+                    "passed": base_score >= 100,
+                    "expected": " -> ".join(problem.get("target_sequence") or []),
+                    "actual": " -> ".join([str(c).split("(")[0] for c in (tracking_data.get("commands_used") or [])]),
+                }]
+                is_passing = base_score >= 70
+
+                # Check if late
+                is_late = False
+                try:
+                    due_date = datetime.fromisoformat(assignment["due_date"]) if assignment.get("due_date") else None
+                    if due_date and datetime.now(timezone.utc) > due_date:
+                        is_late = True
+                        if assignment.get("late_penalty_percent", 0) > 0:
+                            base_score *= (1 - assignment["late_penalty_percent"] / 100)
+                except (ValueError, TypeError):
+                    pass
+
+                new_submission = {
+                    "id": str(uuid.uuid4()),
+                    "assignment_id": submission.assignment_id,
+                    "problem_id": submission.problem_id,
+                    "student_id": user["id"],
+                    "code": code,
+                    "score": base_score,
+                    "feedback": feedback,
+                    "test_results": test_results,
+                    "submitted_at": datetime.now(timezone.utc).isoformat(),
+                    "is_passing": is_passing,
+                    "is_late": is_late,
+                    "is_final": False,
+                    "xp_earned": 0,
+                    "coins_earned": 0,
+                    "turtle_image": turtle_image,
+                    "turtle_tracking_data": tracking_data,
+                    "submission_type": "blockly_turtle_ordered"
+                }
+                await db.submissions.insert_one(new_submission)
+                new_submission.pop("_id", None)
+                return new_submission
+            # ── END Ordered Execution short-circuit ──
+
             # Grade by comparing student code to solution code
             logger.info(f"Block assignment detected with turtle code, using code comparison grading")
             

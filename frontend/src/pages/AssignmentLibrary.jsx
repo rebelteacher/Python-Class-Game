@@ -88,6 +88,8 @@ export default function AssignmentLibrary({ user }) {
       required_colors: [],
       min_distance: 0
     },
+    scoring_method: "text_match",
+    target_sequence: [],
     expected_turtle_image: "",
     partial_credit_rules: {
       syntax_error_penalty: 30,
@@ -279,6 +281,8 @@ export default function AssignmentLibrary({ user }) {
           required_colors: [],
           min_distance: 0
         },
+        scoring_method: "text_match",
+        target_sequence: [],
         expected_turtle_image: "",
         partial_credit_rules: {
           syntax_error_penalty: 30,
@@ -345,6 +349,8 @@ export default function AssignmentLibrary({ user }) {
           assignment_type: editingProblem.assignment_type || "code",
           expected_turtle_image: editingProblem.expected_turtle_image || "",
           turtle_grading_criteria: editingProblem.turtle_grading_criteria || null,
+          scoring_method: editingProblem.scoring_method || "text_match",
+          target_sequence: editingProblem.target_sequence || [],
           background_type: editingProblem.background_type || "none",
           background_color: editingProblem.background_color || "#ffffff",
           background_image: editingProblem.background_image || "",
@@ -2118,6 +2124,60 @@ export default function AssignmentLibrary({ user }) {
                     </div>
                   )}
 
+                  {/* Scoring Method (Turtle & Block) — teacher picks default text match vs Ordered Execution Check */}
+                  {(newProblem.assignment_type === "turtle" || newProblem.assignment_type === "block") && (
+                    <div className="border-2 border-purple-500/30 bg-purple-500/10 rounded-lg p-4">
+                      <Label className="text-lg font-semibold text-purple-200">Scoring Method</Label>
+                      <p className="text-xs text-slate-400 mt-1 mb-3">
+                        How should this turtle problem be graded?
+                      </p>
+                      <Select
+                        value={newProblem.scoring_method || "text_match"}
+                        onValueChange={(val) => setNewProblem({ ...newProblem, scoring_method: val })}
+                      >
+                        <SelectTrigger data-testid="lib-new-scoring-method" className="bg-cyber-navy/60 border-purple-500/40">
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="text_match">Text Match (default) — compare final output/image</SelectItem>
+                          <SelectItem value="ordered_execution">Ordered Execution Check — compare command sequence</SelectItem>
+                        </SelectContent>
+                      </Select>
+
+                      {newProblem.scoring_method === "ordered_execution" && (
+                        <div className="mt-4">
+                          <Label className="font-semibold">Target Sequence</Label>
+                          <p className="text-xs text-slate-400 mt-1 mb-2">
+                            Enter one turtle method name per line, in the exact order students must call them.
+                            Only method names — no arguments. Example:
+                            <code className="ml-1 text-purple-200 bg-purple-900/40 px-1 rounded">forward</code>,
+                            <code className="ml-1 text-purple-200 bg-purple-900/40 px-1 rounded">right</code>,
+                            <code className="ml-1 text-purple-200 bg-purple-900/40 px-1 rounded">forward</code>
+                            <br />
+                            <span className="text-slate-500">Cosmetic setup calls are auto-ignored:</span>{" "}
+                            <code className="text-slate-500">pencolor, pensize, penup, pendown, speed, hideturtle, begin_fill, end_fill</code>{" "}
+                            <span className="text-slate-500">— just list drawing commands.</span>
+                          </p>
+                          <Textarea
+                            data-testid="lib-new-target-sequence"
+                            value={(newProblem.target_sequence || []).join("\n")}
+                            onChange={(e) => setNewProblem({
+                              ...newProblem,
+                              target_sequence: e.target.value.split("\n").map(s => s.trim()).filter(Boolean)
+                            })}
+                            placeholder={"forward\nright\nforward\nleft\nforward"}
+                            className="mt-1 font-mono text-sm bg-cyber-navy/60 border-purple-500/40"
+                            rows={6}
+                          />
+                          <p className="text-xs text-slate-500 mt-2">
+                            {(newProblem.target_sequence || []).length} step(s) defined. On mismatch the student sees:
+                            <span className="text-purple-200"> Step [X] was `[Student Method]`, try that again and resubmit.</span>
+                          </p>
+                        </div>
+                      )}
+                    </div>
+                  )}
+
                   {/* Turtle Live Preview for Create — shows the EXACT PNG students will see (rendered by backend Python turtle). Click "🐢 Preview Turtle Output" above to refresh after code changes. */}
                   {newProblem.assignment_type === "turtle" && newProblem.solution_code && (
                     <div className="border-2 border-green-500/30 bg-green-500/10 rounded-lg p-4">
@@ -3447,6 +3507,60 @@ export default function AssignmentLibrary({ user }) {
                             ))}
                           </tbody>
                         </table>
+                      </div>
+                    )}
+                  </div>
+                )}
+
+                {/* Scoring Method (Turtle & Block) — teacher picks default text match vs Ordered Execution Check */}
+                {(editingProblem.assignment_type === "turtle" || editingProblem.assignment_type === "block") && (
+                  <div className="border-2 border-purple-500/30 bg-purple-500/10 rounded-lg p-4">
+                    <Label className="text-lg font-semibold text-purple-200">Scoring Method</Label>
+                    <p className="text-xs text-slate-400 mt-1 mb-3">
+                      How should this turtle problem be graded?
+                    </p>
+                    <Select
+                      value={editingProblem.scoring_method || "text_match"}
+                      onValueChange={(val) => setEditingProblem({ ...editingProblem, scoring_method: val })}
+                    >
+                      <SelectTrigger data-testid="lib-edit-scoring-method" className="bg-cyber-navy/60 border-purple-500/40">
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="text_match">Text Match (default) — compare final output/image</SelectItem>
+                        <SelectItem value="ordered_execution">Ordered Execution Check — compare command sequence</SelectItem>
+                      </SelectContent>
+                    </Select>
+
+                    {editingProblem.scoring_method === "ordered_execution" && (
+                      <div className="mt-4">
+                        <Label className="font-semibold">Target Sequence</Label>
+                        <p className="text-xs text-slate-400 mt-1 mb-2">
+                          Enter one turtle method name per line, in the exact order students must call them.
+                          Only method names — no arguments. Example:
+                          <code className="ml-1 text-purple-200 bg-purple-900/40 px-1 rounded">forward</code>,
+                          <code className="ml-1 text-purple-200 bg-purple-900/40 px-1 rounded">right</code>,
+                          <code className="ml-1 text-purple-200 bg-purple-900/40 px-1 rounded">forward</code>
+                          <br />
+                          <span className="text-slate-500">Cosmetic setup calls are auto-ignored:</span>{" "}
+                          <code className="text-slate-500">pencolor, pensize, penup, pendown, speed, hideturtle, begin_fill, end_fill</code>{" "}
+                          <span className="text-slate-500">— just list drawing commands.</span>
+                        </p>
+                        <Textarea
+                          data-testid="lib-edit-target-sequence"
+                          value={(editingProblem.target_sequence || []).join("\n")}
+                          onChange={(e) => setEditingProblem({
+                            ...editingProblem,
+                            target_sequence: e.target.value.split("\n").map(s => s.trim()).filter(Boolean)
+                          })}
+                          placeholder={"forward\nright\nforward\nleft\nforward"}
+                          className="mt-1 font-mono text-sm bg-cyber-navy/60 border-purple-500/40"
+                          rows={6}
+                        />
+                        <p className="text-xs text-slate-500 mt-2">
+                          {(editingProblem.target_sequence || []).length} step(s) defined. On mismatch the student sees:
+                          <span className="text-purple-200"> Step [X] was `[Student Method]`, try that again and resubmit.</span>
+                        </p>
                       </div>
                     )}
                   </div>
