@@ -5,6 +5,7 @@ aiosignal==1.4.0
 annotated-types==0.7.0
 anyio==4.11.0
 appdirs==1.4.4
+APScheduler==3.11.3
 attrs==25.4.0
 bcrypt==4.1.3
 black==25.9.0
@@ -116,6 +117,7 @@ referencing==0.37.0
 regex==2025.9.18
 requests==2.32.5
 requests-oauthlib==2.0.0
+resend==2.36.0
 rich==14.2.0
 rpds-py==0.27.1
 rsa==4.9.1
@@ -135,6 +137,7 @@ typer==0.19.2
 typing-inspection==0.4.2
 typing_extensions==4.15.0
 tzdata==2025.2
+tzlocal==5.4.4
 ubittool==0.8.0
 uflash==1.2.0
 ufs==0.1.0

@@ -25,6 +25,7 @@ import {
   Sparkles,
   Repeat,
   UserCheck,
+  Unlock,
 } from "lucide-react";
 import { isAnalyticsExcluded, setAnalyticsExcluded } from "../utils/siteAnalytics";
 
@@ -586,6 +587,77 @@ function SiteTrafficPanel({ traffic, loading, rangeDays, setRangeDays, onRefresh
                       <td className="px-6 py-3 text-sm text-white font-mono">{p.path}</td>
                       <td className="px-6 py-3 text-sm text-cyber-cyan font-semibold">{p.views}</td>
                       <td className="px-6 py-3 text-sm text-green-400 font-semibold">{p.unique_visitors}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          )}
+        </CardContent>
+      </Card>
+
+      {/* Free Curriculum Preview breakdown — which chapters/lessons anonymous
+          visitors click most so we know what's driving conversion. */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="text-white flex items-center gap-2">
+            <Unlock className="w-5 h-5 text-cyber-lime" />
+            Free Curriculum Preview (30d)
+          </CardTitle>
+        </CardHeader>
+        <CardContent className="p-0">
+          {/* Summary strip */}
+          {traffic.preview_totals && (
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-3 px-6 pt-4 pb-2">
+              <div className="bg-cyber-navy/40 border border-cyber-lime/20 px-4 py-3 rounded-none">
+                <div className="text-[10px] font-orbitron uppercase tracking-widest text-slate-400">Total Preview Views</div>
+                <div className="text-2xl font-orbitron text-cyber-lime mt-1">{traffic.preview_totals.total_views}</div>
+              </div>
+              <div className="bg-cyber-navy/40 border border-cyber-cyan/20 px-4 py-3 rounded-none">
+                <div className="text-[10px] font-orbitron uppercase tracking-widest text-slate-400">Unique Visitors</div>
+                <div className="text-2xl font-orbitron text-cyber-cyan mt-1">{traffic.preview_totals.unique_visitors}</div>
+              </div>
+              <div className="bg-cyber-navy/40 border border-purple-500/20 px-4 py-3 rounded-none">
+                <div className="text-[10px] font-orbitron uppercase tracking-widest text-slate-400">Overview Page</div>
+                <div className="text-2xl font-orbitron text-purple-300 mt-1">{traffic.preview_totals.overview_views}</div>
+                <div className="text-[10px] text-slate-500">/preview visits</div>
+              </div>
+              <div className="bg-cyber-navy/40 border border-cyber-pink/20 px-4 py-3 rounded-none">
+                <div className="text-[10px] font-orbitron uppercase tracking-widest text-slate-400">Lesson Deep-Dives</div>
+                <div className="text-2xl font-orbitron text-cyber-pink mt-1">{traffic.preview_totals.lesson_views}</div>
+                <div className="text-[10px] text-slate-500">lesson opens</div>
+              </div>
+            </div>
+          )}
+
+          {(traffic.preview_pages || []).length === 0 ? (
+            <p className="text-slate-500 text-center py-8 px-6">
+              No preview traffic yet. Share bytebattles.org/preview to start collecting stats.
+            </p>
+          ) : (
+            <div className="overflow-x-auto">
+              <table data-testid="preview-pages-table" className="w-full">
+                <thead className="bg-cyber-navy/40 border-b border-cyber-cyan/10">
+                  <tr>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">Page</th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">Kind</th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">Views</th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">Unique</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {traffic.preview_pages.map((p, idx) => (
+                    <tr key={p.path} className={idx % 2 === 0 ? "bg-cyber-navy/60" : "bg-cyber-navy/40"}>
+                      <td className="px-6 py-3 text-sm text-white">{p.label}</td>
+                      <td className="px-6 py-3 text-xs">
+                        <span className={`px-2 py-0.5 rounded-full font-orbitron uppercase tracking-widest ${
+                          p.kind === "lesson" ? "bg-cyber-pink/20 text-cyber-pink" : "bg-purple-500/20 text-purple-300"
+                        }`}>
+                          {p.kind}
+                        </span>
+                      </td>
+                      <td className="px-6 py-3 text-sm text-cyber-cyan font-semibold">{p.views}</td>
+                      <td className="px-6 py-3 text-sm text-cyber-lime font-semibold">{p.unique_visitors}</td>
                     </tr>
                   ))}
                 </tbody>

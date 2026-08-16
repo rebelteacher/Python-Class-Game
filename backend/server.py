@@ -15,10 +15,14 @@ import random
 import subprocess
 import tempfile
 import json
+import asyncio
 import bcrypt
 import secrets
 from emergentintegrations.llm.chat import LlmChat, UserMessage
 import pytz
+
+# Admin alert email integration (Resend)
+import emails as emails_module
 
 ROOT_DIR = Path(__file__).parent
 load_dotenv(ROOT_DIR / '.env')
@@ -6961,6 +6965,22 @@ async def submit_feedback(feedback: FeedbackCreate):
     
     await db.feedback_messages.insert_one(message_dict)
     
+    # Fire instant email alert to admin, but only if she hasn't loaded the
+    # dashboard in the last ALERT_THROTTLE_HOURS hours (avoid inbox flooding).
+    try:
+        meta = await db.admin_meta.find_one({"key": "last_admin_dashboard_load"}, {"_id": 0})
+        last_seen = meta.get("value") if meta else None
+        if emails_module.hours_since(last_seen) >= emails_module.ALERT_THROTTLE_HOURS:
+            # Build the dict the email template expects
+            asyncio.create_task(emails_module.send_new_message_alert({
+                "name": feedback.name,
+                "email": feedback.email,
+                "subject": getattr(feedback, "subject", None) or feedback.category,
+                "message": feedback.message,
+            }))
+    except Exception as e:
+        logger.warning(f"Instant alert email failed: {e}")
+
     return {"success": True, "message": "Thank you! Your message has been received."}
 
 
@@ -7005,6 +7025,17 @@ async def get_dashboard_alerts(request: Request):
         raise HTTPException(status_code=403, detail="Admin access required")
 
     now = datetime.now(timezone.utc)
+
+    # Record that admin loaded the dashboard — throttles instant-alert emails.
+    try:
+        await db.admin_meta.update_one(
+            {"key": "last_admin_dashboard_load"},
+            {"$set": {"key": "last_admin_dashboard_load", "value": now.isoformat()}},
+            upsert=True,
+        )
+    except Exception:
+        pass
+
     week_ago = now - timedelta(days=7)
     day_ago = now - timedelta(days=1)
 
@@ -7053,6 +7084,32 @@ async def get_dashboard_alerts(request: Request):
         "total_views_24h": total_views_24h,
         "as_of": now.isoformat(),
     }
+
+
+# Admin-only manual trigger to test the alert email jobs without waiting for cron.
+# The actual job functions (_run_daily_digest_job, _run_weekly_summary_job) are
+# defined later in the file — Python resolves them at call time, so this works.
+@api_router.post("/admin/alerts/test-email")
+async def test_admin_alert_email(request: Request, kind: str = "digest"):
+    user = await get_current_user(request)
+    if not user.get("is_admin"):
+        raise HTTPException(status_code=403, detail="Admin access required")
+    if kind == "digest":
+        await db.admin_meta.delete_one({"key": "last_daily_digest_sent"})
+        await _run_daily_digest_job()
+    elif kind == "weekly":
+        await db.admin_meta.delete_one({"key": "last_weekly_summary_sent"})
+        await _run_weekly_summary_job()
+    elif kind == "message":
+        await emails_module.send_new_message_alert({
+            "name": "Test User",
+            "email": "test@example.com",
+            "subject": "Testing the alert email",
+            "message": "If you can read this, your Resend integration is working end-to-end. Woo!",
+        })
+    else:
+        raise HTTPException(status_code=400, detail="kind must be one of: digest, weekly, message")
+    return {"ok": True, "kind": kind, "recipient": os.environ.get("ALERT_RECIPIENT_EMAIL")}
 
 
 @api_router.put("/admin/feedback/{message_id}/status")
@@ -8387,6 +8444,81 @@ async def get_site_traffic(request: Request, days: int = 30):
         ]).to_list(1)
         live_visitors = live_agg[0]["n"] if live_agg else 0
 
+        # ── Preview breakdown ──────────────────────────────────────────────
+        # Show which /preview and /preview/lesson pages anonymous visitors
+        # click most in the last 30 days so we can see if e.g. Unit 2 Ch 1 is
+        # more popular than Unit 3 Ch 3 and adjust marketing.
+        preview_rows_raw = await db.site_pageviews.aggregate([
+            {"$match": {
+                **base,
+                "path": {"$regex": r"^/preview"},
+                "timestamp": {"$gte": thirty_ago},
+            }},
+            {"$group": {
+                "_id": "$path",
+                "views": {"$sum": 1},
+                "visitors": {"$addToSet": "$visitor_id"},
+            }},
+            {"$project": {
+                "path": "$_id",
+                "views": 1,
+                "unique_visitors": {"$size": "$visitors"},
+                "_id": 0,
+            }},
+            {"$sort": {"views": -1}},
+        ]).to_list(200)
+
+        # Human-readable labels: /preview → "Curriculum Overview",
+        # /preview/lesson/block/Chapter%201%3A%20Block%20Basics/Lesson%201...
+        #   → "Unit 1 (Blocks) · Chapter 1: Block Basics · Lesson 1..."
+        from urllib.parse import unquote
+        UNIT_LABELS = {
+            "block": "Unit 1 (Blocks)",
+            "turtle": "Unit 2 (Turtle)",
+            "code": "Unit 3 (Python)",
+            "microbit": "Unit 4 (Micro:bit)",
+        }
+        preview_pages = []
+        preview_totals = {"overview_views": 0, "lesson_views": 0, "unique_visitors": 0}
+        overview_visitors = set()
+        lesson_visitors = set()
+        for row in preview_rows_raw:
+            path = row["path"] or ""
+            label = path
+            kind = "overview"
+            if path.rstrip("/") == "/preview":
+                label = "Curriculum Overview"
+                preview_totals["overview_views"] += row["views"]
+            elif path.startswith("/preview/lesson/"):
+                parts = path[len("/preview/lesson/"):].split("/")
+                if len(parts) >= 3:
+                    atype = unquote(parts[0])
+                    chapter = unquote(parts[1])
+                    lesson = unquote(parts[2])
+                    label = f"{UNIT_LABELS.get(atype, atype)} · {chapter} · {lesson}"
+                    kind = "lesson"
+                    preview_totals["lesson_views"] += row["views"]
+            preview_pages.append({
+                "path": path,
+                "label": label,
+                "kind": kind,
+                "views": row["views"],
+                "unique_visitors": row["unique_visitors"],
+            })
+
+        # Aggregate unique preview visitors overall
+        preview_unique_agg = await db.site_pageviews.aggregate([
+            {"$match": {
+                **base,
+                "path": {"$regex": r"^/preview"},
+                "timestamp": {"$gte": thirty_ago},
+            }},
+            {"$group": {"_id": "$visitor_id"}},
+            {"$count": "n"},
+        ]).to_list(1)
+        preview_totals["unique_visitors"] = preview_unique_agg[0]["n"] if preview_unique_agg else 0
+        preview_totals["total_views"] = preview_totals["overview_views"] + preview_totals["lesson_views"]
+
         return {
             "totals": {
                 "all_time_views": total_views,
@@ -8409,6 +8541,8 @@ async def get_site_traffic(request: Request, days: int = 30):
             "top_referrers": top_referrers,
             "device_breakdown": device_breakdown,
             "daily_series": daily_series,
+            "preview_pages": preview_pages,
+            "preview_totals": preview_totals,
             "days": days_count,
         }
     except Exception as e:
@@ -14782,6 +14916,153 @@ async def seed_block_problems():
 @app.on_event("shutdown")
 async def shutdown_db_client():
     client.close()
+
+
+# ── Admin alert scheduler (daily digest + weekly summary) ───────────────────
+# Runs at 08:00 Central every day (digest) and Monday 08:00 Central (weekly).
+# Idempotent: last-sent dates are persisted in admin_meta so a restart won't
+# double-send. Emails go to ALERT_RECIPIENT_EMAIL via Resend.
+from apscheduler.schedulers.asyncio import AsyncIOScheduler  # noqa: E402
+from apscheduler.triggers.cron import CronTrigger  # noqa: E402
+
+_alert_scheduler: Optional[AsyncIOScheduler] = None
+
+
+async def _run_daily_digest_job() -> None:
+    """Compile the daily digest payload and email it. Idempotent per date."""
+    try:
+        today_key = datetime.now(timezone.utc).strftime("%Y-%m-%d")
+        meta = await db.admin_meta.find_one({"key": "last_daily_digest_sent"}, {"_id": 0})
+        if meta and meta.get("value") == today_key:
+            logger.info("Daily digest already sent for %s — skipping", today_key)
+            return
+
+        now = datetime.now(timezone.utc)
+        day_ago = now - timedelta(days=1)
+
+        # Unread messages
+        unread = await db.feedback_messages.find(
+            {"status": "unread"},
+            {"_id": 0, "id": 1, "name": 1, "email": 1, "subject": 1, "message": 1, "created_at": 1},
+        ).sort("created_at", -1).to_list(20)
+
+        # New teachers in the last 24h
+        new_teachers_24h = await db.users.count_documents({
+            "role": "teacher",
+            "created_at": {"$gte": day_ago.isoformat()},
+        })
+
+        # Traffic in the last 24h
+        views_yday = await db.site_pageviews.count_documents({
+            "timestamp": {"$gte": day_ago},
+            "is_admin": {"$ne": True},
+        })
+        preview_views_yday = await db.site_pageviews.count_documents({
+            "path": {"$regex": r"^/preview"},
+            "timestamp": {"$gte": day_ago},
+            "is_admin": {"$ne": True},
+        })
+
+        await emails_module.send_daily_digest({
+            "unread_messages": unread,
+            "new_teachers_24h": new_teachers_24h,
+            "views_yesterday": views_yday,
+            "preview_views_yesterday": preview_views_yday,
+        })
+
+        await db.admin_meta.update_one(
+            {"key": "last_daily_digest_sent"},
+            {"$set": {"key": "last_daily_digest_sent", "value": today_key}},
+            upsert=True,
+        )
+    except Exception as e:
+        logger.error(f"Daily digest job failed: {e}")
+
+
+async def _run_weekly_summary_job() -> None:
+    """Compile the weekly traffic summary and email it. Idempotent per ISO week."""
+    try:
+        iso_year, iso_week, _ = datetime.now(timezone.utc).isocalendar()
+        week_key = f"{iso_year}-W{iso_week:02d}"
+        meta = await db.admin_meta.find_one({"key": "last_weekly_summary_sent"}, {"_id": 0})
+        if meta and meta.get("value") == week_key:
+            logger.info("Weekly summary already sent for %s — skipping", week_key)
+            return
+
+        now = datetime.now(timezone.utc)
+        week_ago = now - timedelta(days=7)
+
+        base = {"is_admin": {"$ne": True}}
+        views_7d = await db.site_pageviews.count_documents({**base, "timestamp": {"$gte": week_ago}})
+        unique_agg = await db.site_pageviews.aggregate([
+            {"$match": {**base, "timestamp": {"$gte": week_ago}}},
+            {"$group": {"_id": "$visitor_id"}},
+            {"$count": "n"},
+        ]).to_list(1)
+        unique_7d = unique_agg[0]["n"] if unique_agg else 0
+
+        new_teachers_7d = await db.users.count_documents({
+            "role": "teacher",
+            "created_at": {"$gte": week_ago.isoformat()},
+        })
+        preview_views_7d = await db.site_pageviews.count_documents({
+            "path": {"$regex": r"^/preview"},
+            "timestamp": {"$gte": week_ago},
+            "is_admin": {"$ne": True},
+        })
+        top_pages = await db.site_pageviews.aggregate([
+            {"$match": {**base, "timestamp": {"$gte": week_ago}}},
+            {"$group": {"_id": "$path", "views": {"$sum": 1}}},
+            {"$project": {"path": "$_id", "views": 1, "_id": 0}},
+            {"$sort": {"views": -1}},
+            {"$limit": 5},
+        ]).to_list(5)
+
+        await emails_module.send_weekly_summary({
+            "views_7d": views_7d,
+            "unique_7d": unique_7d,
+            "new_teachers_7d": new_teachers_7d,
+            "preview_views_7d": preview_views_7d,
+            "top_pages": top_pages,
+        })
+
+        await db.admin_meta.update_one(
+            {"key": "last_weekly_summary_sent"},
+            {"$set": {"key": "last_weekly_summary_sent", "value": week_key}},
+            upsert=True,
+        )
+    except Exception as e:
+        logger.error(f"Weekly summary job failed: {e}")
+
+
+@app.on_event("startup")
+async def _start_alert_scheduler():
+    global _alert_scheduler
+    try:
+        tz_name = os.environ.get("ALERT_TIMEZONE", "America/Chicago")
+        _alert_scheduler = AsyncIOScheduler(timezone=pytz.timezone(tz_name))
+        # Daily digest — every day at 08:00 local
+        _alert_scheduler.add_job(_run_daily_digest_job, CronTrigger(hour=8, minute=0), id="daily_digest", replace_existing=True)
+        # Weekly summary — Monday at 08:00 local
+        _alert_scheduler.add_job(_run_weekly_summary_job, CronTrigger(day_of_week="mon", hour=8, minute=0), id="weekly_summary", replace_existing=True)
+        _alert_scheduler.start()
+        logger.info(f"Admin alert scheduler started (tz={tz_name})")
+    except Exception as e:
+        logger.error(f"Failed to start alert scheduler: {e}")
+
+
+@app.on_event("shutdown")
+async def _stop_alert_scheduler():
+    if _alert_scheduler:
+        try:
+            _alert_scheduler.shutdown(wait=False)
+        except Exception:
+            pass
+
+
+# ── END Admin alert scheduler ───────────────────────────────────────────────
+
+
 
 @app.on_event("startup")
 async def seed_microbit_problems():
