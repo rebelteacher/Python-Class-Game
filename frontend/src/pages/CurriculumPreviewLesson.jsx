@@ -1,12 +1,13 @@
 import { useState, useEffect } from "react";
 import { useParams, useNavigate, Link } from "react-router-dom";
 import axios from "axios";
-import { ArrowLeft, Lock, GraduationCap, Sparkles, Zap, Mail } from "lucide-react";
+import { ArrowLeft, Lock, GraduationCap, Sparkles, Zap, Mail, Play, Send, Loader2, CheckCircle, XCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import ContactForm from "@/components/ContactForm";
 import Editor from "@monaco-editor/react";
+import { toast } from "sonner";
 
 const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
 const API = `${BACKEND_URL}/api`;
@@ -38,6 +39,12 @@ export default function CurriculumPreviewLesson() {
   const [loading, setLoading] = useState(true);
   const [selectedProblemIdx, setSelectedProblemIdx] = useState(0);
   const [inviteModalOpen, setInviteModalOpen] = useState(false);
+  // Trial-mode state: student can edit code, run it, and check their work
+  const [codeByProblem, setCodeByProblem] = useState({}); // {problemId: code}
+  const [runOutput, setRunOutput] = useState(null); // {output, error, image_data} for current problem
+  const [runBusy, setRunBusy] = useState(false);
+  const [gradeResult, setGradeResult] = useState(null); // {score, feedback, image_data}
+  const [gradeBusy, setGradeBusy] = useState(false);
 
   useEffect(() => {
     axios.get(`${API}/preview/lesson`, {
@@ -56,6 +63,82 @@ export default function CurriculumPreviewLesson() {
   }, [assignmentType, chapter, lesson]);
 
   const currentProblem = data?.problems?.[selectedProblemIdx];
+
+  // Reset run/grade panels when switching problems
+  useEffect(() => {
+    setRunOutput(null);
+    setGradeResult(null);
+  }, [selectedProblemIdx]);
+
+  // Seed editable code with starter_code when the problem list loads
+  useEffect(() => {
+    if (data?.problems) {
+      const seed = {};
+      for (const p of data.problems) {
+        if (p.id && !(p.id in codeByProblem)) {
+          seed[p.id] = p.starter_code || "";
+        }
+      }
+      if (Object.keys(seed).length) {
+        setCodeByProblem((prev) => ({ ...seed, ...prev }));
+      }
+    }
+    // Depend only on data changes to seed once per load
+  }, [data]);
+
+  const currentCode = currentProblem?.id ? (codeByProblem[currentProblem.id] ?? currentProblem.starter_code ?? "") : "";
+
+  const handleRun = async () => {
+    if (!currentProblem) return;
+    setRunBusy(true);
+    setRunOutput(null);
+    try {
+      const isTurtle = currentProblem.assignment_type === "turtle" || currentProblem.assignment_type === "block";
+      if (isTurtle) {
+        const res = await axios.post(`${API}/preview/execute-turtle`, { code: currentCode });
+        setRunOutput(res.data);
+      } else {
+        // For python/other: hit grade endpoint (it runs tests) but display as "run"
+        const res = await axios.post(`${API}/preview/grade`, {
+          assignment_type: currentProblem.assignment_type,
+          chapter: decodeURIComponent(chapter),
+          lesson: decodeURIComponent(lesson),
+          problem_id: currentProblem.id,
+          code: currentCode,
+        });
+        setRunOutput({ output: res.data.feedback, error: null, success: true });
+      }
+    } catch (err) {
+      const msg = err?.response?.data?.detail || "Something went wrong.";
+      if (err?.response?.status === 429) toast.error(msg);
+      setRunOutput({ output: "", error: msg, success: false });
+    } finally {
+      setRunBusy(false);
+    }
+  };
+
+  const handleCheck = async () => {
+    if (!currentProblem) return;
+    setGradeBusy(true);
+    setGradeResult(null);
+    try {
+      const res = await axios.post(`${API}/preview/grade`, {
+        assignment_type: currentProblem.assignment_type,
+        chapter: decodeURIComponent(chapter),
+        lesson: decodeURIComponent(lesson),
+        problem_id: currentProblem.id,
+        code: currentCode,
+      });
+      setGradeResult(res.data);
+      if (res.data.score >= 70) toast.success(`Nice — ${res.data.score}%!`);
+    } catch (err) {
+      const msg = err?.response?.data?.detail || "Grading failed.";
+      if (err?.response?.status === 429) toast.error(msg);
+      setGradeResult({ score: 0, feedback: msg });
+    } finally {
+      setGradeBusy(false);
+    }
+  };
 
   return (
     <div data-testid="preview-lesson-page" className="min-h-screen bg-cyber-black cyber-grid-bg text-slate-100">
@@ -112,7 +195,7 @@ export default function CurriculumPreviewLesson() {
             {decodeURIComponent(lesson)}
           </h1>
           <div className="mt-2 inline-flex items-center gap-2 px-3 py-1 rounded-full bg-cyber-lime/10 border border-cyber-lime/30 text-cyber-lime text-xs font-orbitron uppercase tracking-widest">
-            Read-only preview
+            Free Trial — run & grade real code
           </div>
         </div>
 
@@ -189,7 +272,12 @@ export default function CurriculumPreviewLesson() {
                   {currentProblem && (
                     <Card className="bg-cyber-navy/60 border-cyber-cyan/20">
                       <CardHeader className="pb-2">
-                        <CardTitle className="text-white font-chakra">{currentProblem.title}</CardTitle>
+                        <CardTitle className="text-white font-chakra flex items-center justify-between gap-2 flex-wrap">
+                          <span>{currentProblem.title}</span>
+                          <span className="text-xs font-orbitron uppercase tracking-widest px-2 py-1 rounded-full bg-cyber-lime/10 text-cyber-lime border border-cyber-lime/30">
+                            Trial Mode — no save
+                          </span>
+                        </CardTitle>
                       </CardHeader>
                       <CardContent className="space-y-4">
                         {currentProblem.description && (
@@ -199,36 +287,100 @@ export default function CurriculumPreviewLesson() {
                           />
                         )}
 
-                        {currentProblem.starter_code && (
-                          <div>
-                            <div className="text-xs font-orbitron uppercase tracking-widest text-cyber-cyan mb-2">
-                              Starter Code
+                        {/* Editable code area */}
+                        <div>
+                          <div className="flex items-center justify-between mb-2 flex-wrap gap-2">
+                            <div className="text-xs font-orbitron uppercase tracking-widest text-cyber-cyan">
+                              Your Code
                             </div>
-                            <div className="border border-cyber-cyan/20 rounded overflow-hidden">
-                              <Editor
-                                height="260px"
-                                defaultLanguage={
-                                  currentProblem.assignment_type === "block" ? "javascript" : "python"
-                                }
-                                value={currentProblem.starter_code}
-                                theme="vs-dark"
-                                options={{
-                                  minimap: { enabled: false },
-                                  fontSize: 13,
-                                  readOnly: true,
-                                  scrollBeyondLastLine: false,
-                                  lineNumbers: "on",
-                                  wordWrap: "on",
-                                }}
-                              />
+                            <div className="flex items-center gap-2">
+                              <Button
+                                size="sm"
+                                onClick={handleRun}
+                                disabled={runBusy || gradeBusy}
+                                className="bg-cyber-cyan/20 border border-cyber-cyan text-cyber-cyan hover:bg-cyber-cyan/30 font-orbitron text-xs uppercase tracking-widest rounded-none"
+                                data-testid="preview-run-btn"
+                              >
+                                {runBusy ? <Loader2 className="w-4 h-4 animate-spin" /> : <Play className="w-4 h-4 mr-1.5" />}
+                                Run Code
+                              </Button>
+                              <Button
+                                size="sm"
+                                onClick={handleCheck}
+                                disabled={runBusy || gradeBusy}
+                                className="bg-cyber-lime/20 border border-cyber-lime text-cyber-lime hover:bg-cyber-lime/30 font-orbitron text-xs uppercase tracking-widest rounded-none"
+                                data-testid="preview-check-btn"
+                              >
+                                {gradeBusy ? <Loader2 className="w-4 h-4 animate-spin" /> : <Send className="w-4 h-4 mr-1.5" />}
+                                Check My Work
+                              </Button>
                             </div>
+                          </div>
+                          <div className="border border-cyber-cyan/20 rounded overflow-hidden">
+                            <Editor
+                              height="260px"
+                              defaultLanguage="python"
+                              value={currentCode}
+                              onChange={(v) => setCodeByProblem((prev) => ({ ...prev, [currentProblem.id]: v || "" }))}
+                              theme="vs-dark"
+                              options={{
+                                minimap: { enabled: false },
+                                fontSize: 13,
+                                readOnly: false,
+                                scrollBeyondLastLine: false,
+                                lineNumbers: "on",
+                                wordWrap: "on",
+                              }}
+                            />
+                          </div>
+                        </div>
+
+                        {/* Run output */}
+                        {runOutput && (
+                          <div data-testid="preview-run-output" className={`border rounded p-3 ${runOutput.error ? "border-red-500/40 bg-red-500/10" : "border-cyber-cyan/30 bg-cyber-cyan/5"}`}>
+                            <div className="text-xs font-orbitron uppercase tracking-widest text-cyber-cyan mb-2">Output</div>
+                            {runOutput.error ? (
+                              <pre className="text-red-300 text-xs whitespace-pre-wrap">{runOutput.error}</pre>
+                            ) : (
+                              <>
+                                {runOutput.image_data && (
+                                  <div className="flex justify-center bg-black/40 p-3 rounded mb-2">
+                                    <img src={`data:image/png;base64,${runOutput.image_data}`} alt="Turtle output" className="max-h-64" />
+                                  </div>
+                                )}
+                                {runOutput.output && (
+                                  <pre className="text-slate-200 text-xs whitespace-pre-wrap">{runOutput.output}</pre>
+                                )}
+                              </>
+                            )}
+                          </div>
+                        )}
+
+                        {/* Grade result */}
+                        {gradeResult && (
+                          <div data-testid="preview-grade-result" className={`border rounded p-3 ${gradeResult.score >= 70 ? "border-cyber-lime/40 bg-cyber-lime/5" : "border-amber-500/40 bg-amber-500/5"}`}>
+                            <div className="flex items-center justify-between mb-2">
+                              <div className="text-xs font-orbitron uppercase tracking-widest text-cyber-lime flex items-center gap-2">
+                                {gradeResult.score >= 70 ? <CheckCircle className="w-4 h-4" /> : <XCircle className="w-4 h-4 text-amber-400" />}
+                                Grader Feedback
+                              </div>
+                              <span className={`text-lg font-orbitron ${gradeResult.score >= 70 ? "text-cyber-lime" : "text-amber-300"}`}>
+                                {gradeResult.score}%
+                              </span>
+                            </div>
+                            <pre className="text-slate-200 text-xs whitespace-pre-wrap">{gradeResult.feedback}</pre>
+                            {gradeResult.image_data && (
+                              <div className="flex justify-center bg-black/40 p-3 rounded mt-2">
+                                <img src={`data:image/png;base64,${gradeResult.image_data}`} alt="Your submission" className="max-h-48" />
+                              </div>
+                            )}
                           </div>
                         )}
 
                         {/* Signup nudge on every problem */}
                         <div className="border-t border-cyber-cyan/10 pt-4 mt-4 flex items-center justify-between gap-3 flex-wrap">
                           <p className="text-slate-400 text-xs">
-                            Want to run this code and see how the autograder responds?
+                            👀 Enjoying the trial? Sign up to save progress, track a class, and unlock all units.
                           </p>
                           <Button
                             data-testid="preview-problem-signup-btn"

@@ -2650,6 +2650,137 @@ async def get_preview_lesson(assignment_type: str, chapter: str, lesson: str):
         "problems": raw_problems,
         "is_preview": True,
     }
+
+
+# ── PREVIEW TRIAL: Rate-limited public code execution ──────────────────────
+# Anonymous visitors can actually RUN and CHECK-WORK on unlocked chapters so
+# they experience grading before requesting an invite code. Persistence off;
+# 60 code runs + 30 grade attempts per IP per hour, tracked in preview_ratelimit.
+
+PREVIEW_RUN_LIMIT_PER_HOUR = 60
+PREVIEW_GRADE_LIMIT_PER_HOUR = 30
+
+
+async def _check_preview_rate_limit(request: Request, kind: str, cap: int) -> None:
+    """Raise 429 if this IP has exceeded `cap` requests of `kind` in the last hour."""
+    ip = (request.client.host if request.client else "unknown") or "unknown"
+    # X-Forwarded-For if behind proxy
+    xff = request.headers.get("x-forwarded-for")
+    if xff:
+        ip = xff.split(",")[0].strip()
+    hour_ago = datetime.now(timezone.utc) - timedelta(hours=1)
+    count = await db.preview_ratelimit.count_documents({
+        "ip": ip, "kind": kind, "at": {"$gte": hour_ago}
+    })
+    if count >= cap:
+        raise HTTPException(
+            status_code=429,
+            detail=f"Trial limit reached ({cap}/hour). Request an invite code to continue without limits.",
+        )
+    await db.preview_ratelimit.insert_one({
+        "ip": ip, "kind": kind, "at": datetime.now(timezone.utc)
+    })
+
+
+class PreviewExecuteTurtleRequest(BaseModel):
+    code: str
+
+
+@api_router.post("/preview/execute-turtle")
+async def preview_execute_turtle(payload: PreviewExecuteTurtleRequest, request: Request):
+    """Run turtle code for anonymous trial users — same sandbox as authed endpoint."""
+    await _check_preview_rate_limit(request, "run", PREVIEW_RUN_LIMIT_PER_HOUR)
+    # Reuse the same wrapper approach as execute_turtle_code by delegating to
+    # grade_turtle_submission with default (text_match) scoring; we only need
+    # the rendered image + stdout, not the score.
+    result = await grade_turtle_submission(payload.code, {}, "", None)
+    return {
+        "output": result.get("tracking_data", {}).get("stdout", "") or "Turtle graphics executed successfully!",
+        "error": None,
+        "success": True,
+        "image_data": result.get("image_data", ""),
+        "tracking_data": result.get("tracking_data", {}),
+    }
+
+
+class PreviewGradeRequest(BaseModel):
+    assignment_type: str
+    chapter: str
+    lesson: str
+    problem_id: str
+    code: str
+
+
+@api_router.post("/preview/grade")
+async def preview_grade(payload: PreviewGradeRequest, request: Request):
+    """Grade a submission for the anonymous trial — no persistence, no gradebook.
+    Only allowed on chapters listed in PREVIEW_UNLOCKED, so a URL can't be guessed."""
+    if not _is_chapter_previewable(payload.assignment_type, payload.chapter):
+        raise HTTPException(status_code=403, detail="This chapter isn't part of the free trial. Request an invite code for full access.")
+    await _check_preview_rate_limit(request, "grade", PREVIEW_GRADE_LIMIT_PER_HOUR)
+
+    problem = await db.problems.find_one({"id": payload.problem_id}, {"_id": 0})
+    if not problem:
+        raise HTTPException(status_code=404, detail="Problem not found")
+
+    atype = problem.get("assignment_type", payload.assignment_type)
+    # Route to the same grader used for authed submissions
+    if atype in ("turtle", "block"):
+        grading_criteria = problem.get("turtle_grading_criteria") or {}
+        result = await grade_turtle_submission(
+            payload.code,
+            grading_criteria,
+            problem.get("expected_turtle_image", "") or "",
+            None,
+            scoring_method=problem.get("scoring_method") or "text_match",
+            target_sequence=problem.get("target_sequence") or None,
+        )
+        return {
+            "score": result.get("score", 0),
+            "feedback": result.get("feedback", ""),
+            "image_data": result.get("image_data", ""),
+            "is_preview": True,
+        }
+    # Python / code problems: run against test cases (in-memory only)
+    test_cases = problem.get("test_cases") or []
+    if not test_cases:
+        return {
+            "score": 0,
+            "feedback": "This problem has no test cases yet — the teacher will grade it manually. Request an invite code to submit for real.",
+            "is_preview": True,
+        }
+    results = []
+    passed_count = 0
+    for tc in test_cases:
+        test_input = tc.get("input", "") or ""
+        expected = (tc.get("expected_output") or tc.get("expected") or "").strip()
+        try:
+            exec_result = run_python_code(payload.code, test_input, timeout=5)
+            actual = (exec_result.get("output", "") or "").strip()
+            ok = (exec_result.get("success", False)
+                  and not exec_result.get("error")
+                  and actual == expected)
+            if ok:
+                passed_count += 1
+            results.append({
+                "input": test_input, "expected": expected,
+                "actual": actual, "passed": ok,
+                "error": exec_result.get("error") if not ok else None,
+            })
+        except Exception as e:
+            results.append({"input": test_input, "expected": expected, "actual": "", "passed": False, "error": str(e)[:200]})
+    total = len(test_cases) or 1
+    score = round((passed_count / total) * 100, 1)
+    feedback = f"{passed_count}/{total} test case(s) passed."
+    if passed_count < total:
+        first_fail = next((r for r in results if not r.get("passed")), None)
+        if first_fail:
+            if first_fail.get("error"):
+                feedback += f"\n\nFirst failure: {first_fail['error']}"
+            else:
+                feedback += f"\n\nFirst failure: expected {first_fail.get('expected')!r}, got {first_fail.get('actual')!r}"
+    return {"score": score, "feedback": feedback, "test_results": results, "is_preview": True}
+# ── END PREVIEW TRIAL ───────────────────────────────────────────────────────
 # ── END PUBLIC PREVIEW ENDPOINTS ────────────────────────────────────────────
 
 @api_router.put("/curriculum/lesson-instructions")
