@@ -6993,6 +6993,68 @@ async def get_unread_count(request: Request):
     return {"unread_count": count}
 
 
+@api_router.get("/admin/dashboard-alerts")
+async def get_dashboard_alerts(request: Request):
+    """Aggregated alerts for the teacher dashboard so the admin sees at a glance:
+      • unread contact messages
+      • recent teacher signups (last 7 days)
+      • recent anonymous /preview traffic (last 24h)
+    So they don't have to open the Admin Analytics page every day."""
+    user = await get_current_user(request)
+    if not user.get("is_admin"):
+        raise HTTPException(status_code=403, detail="Admin access required")
+
+    now = datetime.now(timezone.utc)
+    week_ago = now - timedelta(days=7)
+    day_ago = now - timedelta(days=1)
+
+    # 1. Unread contact / feedback messages
+    unread_messages = await db.feedback_messages.count_documents({"status": "unread"})
+
+    # 2. Latest 5 messages (for the preview list)
+    latest_messages_raw = await db.feedback_messages.find(
+        {},
+        {"_id": 0, "id": 1, "name": 1, "email": 1, "subject": 1, "message": 1, "status": 1, "created_at": 1},
+    ).sort("created_at", -1).to_list(5)
+
+    # 3. New teacher signups in the last 7 days
+    new_teachers = await db.users.count_documents({
+        "role": "teacher",
+        "created_at": {"$gte": week_ago.isoformat()},
+    })
+
+    # 4. Preview / anonymous traffic in the last 24h — page views whose path
+    # starts with '/preview' logged via /api/analytics/pageview. Exclude admin.
+    preview_views_24h = 0
+    try:
+        preview_views_24h = await db.site_pageviews.count_documents({
+            "path": {"$regex": r"^/preview"},
+            "timestamp": {"$gte": day_ago},
+            "is_admin": {"$ne": True},
+        })
+    except Exception:
+        preview_views_24h = 0
+
+    # 5. Total site views in the last 24h (all pages, includes signed-in students)
+    total_views_24h = 0
+    try:
+        total_views_24h = await db.site_pageviews.count_documents({
+            "timestamp": {"$gte": day_ago},
+            "is_admin": {"$ne": True},
+        })
+    except Exception:
+        total_views_24h = 0
+
+    return {
+        "unread_messages": unread_messages,
+        "latest_messages": latest_messages_raw,
+        "new_teachers_7d": new_teachers,
+        "preview_views_24h": preview_views_24h,
+        "total_views_24h": total_views_24h,
+        "as_of": now.isoformat(),
+    }
+
+
 @api_router.put("/admin/feedback/{message_id}/status")
 async def update_message_status(message_id: str, status: str, request: Request):
     """Update message status (Admin only)"""

@@ -7,7 +7,7 @@ import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
-import { Users, Plus, LogOut, Code2, RefreshCw, BookOpen, FileSpreadsheet, Shield, FileText, FileQuestion, Trophy, Video, Bell, Trash2, Cpu, Archive, ArchiveRestore } from "lucide-react";
+import { Users, Plus, LogOut, Code2, RefreshCw, BookOpen, FileSpreadsheet, Shield, FileText, FileQuestion, Trophy, Video, Bell, Trash2, Cpu, Archive, ArchiveRestore, Mail, TrendingUp, UserPlus, Eye } from "lucide-react";
 import WhatsNew from "@/components/WhatsNew";
 import WelcomeBanner from "@/components/WelcomeBanner";
 import CyberRain from "@/components/CyberRain";
@@ -22,6 +22,9 @@ export default function TeacherDashboard({ user, setUser }) {
   const [newClassName, setNewClassName] = useState("");
   const [unreadCount, setUnreadCount] = useState(0);
   const [showArchived, setShowArchived] = useState(false);
+  // Consolidated admin alerts surfaced on the dashboard so admins don't have
+  // to open /admin/analytics or /admin/messages daily.
+  const [alerts, setAlerts] = useState(null);
   const navigate = useNavigate();
 
   // Fun classroom name suggestions
@@ -46,8 +49,18 @@ export default function TeacherDashboard({ user, setUser }) {
     fetchClassrooms();
     if (user?.is_admin) {
       fetchUnreadCount();
+      fetchDashboardAlerts();
     }
   }, [user]);
+
+  const fetchDashboardAlerts = async () => {
+    try {
+      const response = await axios.get(`${API}/admin/dashboard-alerts`, { withCredentials: true });
+      setAlerts(response.data);
+    } catch (error) {
+      console.error("Error fetching dashboard alerts:", error);
+    }
+  };
 
   const fetchUnreadCount = async () => {
     try {
@@ -302,6 +315,136 @@ export default function TeacherDashboard({ user, setUser }) {
         </header>
 
         <WelcomeBanner user={user} />
+
+        {/* Admin Notifications strip — surfaces unread contact messages,
+            recent teacher signups, and preview / total traffic in the last 24h
+            so the admin doesn't have to open /admin/analytics daily. */}
+        {user?.is_admin && alerts && (
+          <div data-testid="admin-alerts-strip" className="max-w-6xl mx-auto px-6 pt-4">
+            <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
+              {/* Contact / unread messages */}
+              <button
+                onClick={() => navigate("/admin/messages")}
+                data-testid="alert-messages"
+                className={`text-left bg-cyber-navy/60 border rounded-none px-4 py-3 transition-all duration-300 ${
+                  alerts.unread_messages > 0
+                    ? "border-cyber-pink/60 hover:border-cyber-pink hover:shadow-[0_0_18px_rgba(255,0,170,0.35)] animate-pulse"
+                    : "border-cyber-cyan/20 hover:border-cyber-cyan/60"
+                }`}
+              >
+                <div className="flex items-center gap-2 mb-1">
+                  <Mail className={`w-4 h-4 ${alerts.unread_messages > 0 ? "text-cyber-pink" : "text-slate-400"}`} />
+                  <span className="text-xs font-orbitron uppercase tracking-widest text-slate-400">
+                    Contact Msgs
+                  </span>
+                </div>
+                <div className={`text-2xl font-orbitron ${alerts.unread_messages > 0 ? "text-cyber-pink" : "text-slate-300"}`}>
+                  {alerts.unread_messages}
+                </div>
+                <div className="text-[10px] text-slate-500 mt-1 font-chakra">
+                  {alerts.unread_messages > 0 ? "click to open →" : "no unread"}
+                </div>
+              </button>
+
+              {/* New teacher signups (7d) */}
+              <button
+                onClick={() => navigate("/admin-dashboard")}
+                data-testid="alert-teachers"
+                className="text-left bg-cyber-navy/60 border border-cyber-lime/20 hover:border-cyber-lime/60 hover:shadow-[0_0_18px_rgba(163,230,53,0.25)] rounded-none px-4 py-3 transition-all duration-300"
+              >
+                <div className="flex items-center gap-2 mb-1">
+                  <UserPlus className="w-4 h-4 text-cyber-lime" />
+                  <span className="text-xs font-orbitron uppercase tracking-widest text-slate-400">
+                    New Teachers 7d
+                  </span>
+                </div>
+                <div className="text-2xl font-orbitron text-cyber-lime">
+                  {alerts.new_teachers_7d}
+                </div>
+                <div className="text-[10px] text-slate-500 mt-1 font-chakra">via invite code</div>
+              </button>
+
+              {/* Free-preview traffic (last 24h) */}
+              <button
+                onClick={() => navigate("/admin/analytics")}
+                data-testid="alert-preview"
+                className="text-left bg-cyber-navy/60 border border-cyber-cyan/20 hover:border-cyber-cyan/60 hover:shadow-[0_0_18px_rgba(0,240,255,0.25)] rounded-none px-4 py-3 transition-all duration-300"
+              >
+                <div className="flex items-center gap-2 mb-1">
+                  <Eye className="w-4 h-4 text-cyber-cyan" />
+                  <span className="text-xs font-orbitron uppercase tracking-widest text-slate-400">
+                    Preview Views 24h
+                  </span>
+                </div>
+                <div className="text-2xl font-orbitron text-cyber-cyan">
+                  {alerts.preview_views_24h}
+                </div>
+                <div className="text-[10px] text-slate-500 mt-1 font-chakra">anonymous /preview visits</div>
+              </button>
+
+              {/* Total site traffic (last 24h) */}
+              <button
+                onClick={() => navigate("/admin/analytics")}
+                data-testid="alert-total-views"
+                className="text-left bg-cyber-navy/60 border border-purple-500/20 hover:border-purple-400/70 hover:shadow-[0_0_18px_rgba(168,85,247,0.25)] rounded-none px-4 py-3 transition-all duration-300"
+              >
+                <div className="flex items-center gap-2 mb-1">
+                  <TrendingUp className="w-4 h-4 text-purple-300" />
+                  <span className="text-xs font-orbitron uppercase tracking-widest text-slate-400">
+                    Total Views 24h
+                  </span>
+                </div>
+                <div className="text-2xl font-orbitron text-purple-300">
+                  {alerts.total_views_24h}
+                </div>
+                <div className="text-[10px] text-slate-500 mt-1 font-chakra">excl. your admin views</div>
+              </button>
+            </div>
+
+            {/* Latest contact-message preview cards — only if there's mail */}
+            {alerts.latest_messages && alerts.latest_messages.length > 0 && (
+              <div className="mt-3 bg-cyber-navy/60 border border-cyber-cyan/20 rounded-none">
+                <div className="flex items-center justify-between px-4 py-2 border-b border-cyber-cyan/10">
+                  <div className="text-xs font-orbitron uppercase tracking-widest text-slate-400">
+                    Latest Contact Messages
+                  </div>
+                  <button
+                    onClick={() => navigate("/admin/messages")}
+                    className="text-[11px] text-cyber-cyan hover:underline font-chakra"
+                    data-testid="alert-messages-view-all"
+                  >
+                    View all →
+                  </button>
+                </div>
+                <div className="divide-y divide-cyber-cyan/10">
+                  {alerts.latest_messages.slice(0, 3).map((m) => (
+                    <button
+                      key={m.id}
+                      onClick={() => navigate("/admin/messages")}
+                      className="w-full text-left px-4 py-2 hover:bg-cyber-cyan/5 flex items-center gap-3 group"
+                      data-testid={`alert-message-${m.id}`}
+                    >
+                      {m.status === "unread" ? (
+                        <span className="w-2 h-2 rounded-full bg-cyber-pink shadow-[0_0_8px_rgba(255,0,170,0.7)] shrink-0" />
+                      ) : (
+                        <span className="w-2 h-2 rounded-full bg-slate-600 shrink-0" />
+                      )}
+                      <div className="min-w-0 flex-1">
+                        <div className="text-xs text-slate-200 font-chakra truncate">
+                          <span className="text-cyber-cyan font-semibold">{m.name || m.email || "Anonymous"}</span>
+                          {m.subject ? <span className="text-slate-400"> — {m.subject}</span> : null}
+                        </div>
+                        <div className="text-[11px] text-slate-500 truncate">
+                          {m.message || ""}
+                        </div>
+                      </div>
+                    </button>
+                  ))}
+                </div>
+              </div>
+            )}
+          </div>
+        )}
 
         {/* Curriculum Cards Section */}
         <div className="max-w-6xl mx-auto px-6 py-6">
