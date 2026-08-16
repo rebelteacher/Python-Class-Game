@@ -25,7 +25,7 @@ const API = `${BACKEND_URL}/api`;
 // Public-facing production URL — used for the QR so attendees scanning it
 // hit the live app, not the preview.
 const PRODUCTION_URL = "https://byte-dashboard.emergent.host";
-const TRIAL_LAUNCH_PATH = "/preview";
+const TRIAL_LAUNCH_PATH = "/start-trial";
 const TRIAL_QR_URL = `${PRODUCTION_URL}${TRIAL_LAUNCH_PATH}`;
 
 const FEATURE_BULLETS = [
@@ -99,11 +99,11 @@ export default function StateMeetingLanding() {
             <div className="flex gap-3 flex-wrap">
               <Button
                 data-testid="nov-trial-btn"
-                onClick={() => navigate(TRIAL_LAUNCH_PATH)}
+                onClick={() => navigate("/start-trial")}
                 className="px-8 py-6 bg-cyber-cyan text-cyber-black hover:shadow-[0_0_40px_rgba(0,240,255,0.7)] font-orbitron text-sm uppercase tracking-widest rounded-none border border-cyber-cyan transition-all duration-300 font-bold gap-2"
               >
                 <Play className="w-5 h-5" />
-                Launch Free Trial
+                Start 14-Day Free Trial
               </Button>
               <Button
                 data-testid="nov-hero-signup"
@@ -172,11 +172,11 @@ export default function StateMeetingLanding() {
           </p>
           <Button
             data-testid="nov-second-trial-btn"
-            onClick={() => navigate(TRIAL_LAUNCH_PATH)}
+            onClick={() => navigate("/start-trial")}
             className="px-10 py-6 bg-cyber-lime text-cyber-black hover:shadow-[0_0_40px_rgba(163,230,53,0.6)] font-orbitron text-sm uppercase tracking-widest rounded-none border border-cyber-lime font-bold gap-2"
           >
             <Play className="w-5 h-5" />
-            Launch Trial
+            Start Free Trial
             <ChevronRight className="w-4 h-4" />
           </Button>
         </div>

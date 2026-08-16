@@ -7,6 +7,7 @@ import LandingPage from "./pages/LandingPage";
 import CurriculumPreview from "./pages/CurriculumPreview";
 import CurriculumPreviewLesson from "./pages/CurriculumPreviewLesson";
 import StateMeetingLanding from "./pages/StateMeetingLanding";
+import TrialSignup from "./pages/TrialSignup";
 import TeacherLogin from "./pages/TeacherLogin";
 import ForgotPassword from "./pages/ForgotPassword";
 import AdminPasswordReset from "./pages/AdminPasswordReset";
@@ -594,6 +595,7 @@ function App() {
               <Route path="/preview" element={<CurriculumPreview />} />
               <Route path="/preview/lesson/:assignmentType/:chapter/:lesson" element={<CurriculumPreviewLesson />} />
               <Route path="/nov" element={<StateMeetingLanding />} />
+              <Route path="/start-trial" element={<TrialSignup />} />
               <Route
                 path="/student/curriculum"
                 element={user ? <StudentCurriculum user={user} /> : <Navigate to="/" />}

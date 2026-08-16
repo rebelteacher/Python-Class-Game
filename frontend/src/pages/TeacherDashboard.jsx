@@ -25,6 +25,9 @@ export default function TeacherDashboard({ user, setUser }) {
   // Consolidated admin alerts surfaced on the dashboard so admins don't have
   // to open /admin/analytics or /admin/messages daily.
   const [alerts, setAlerts] = useState(null);
+  const [trialStatus, setTrialStatus] = useState(null);
+  const [wipeConfirmText, setWipeConfirmText] = useState("");
+  const [showWipeModal, setShowWipeModal] = useState(false);
   const navigate = useNavigate();
 
   // Fun classroom name suggestions
@@ -47,11 +50,30 @@ export default function TeacherDashboard({ user, setUser }) {
 
   useEffect(() => {
     fetchClassrooms();
+    fetchTrialStatus();
     if (user?.is_admin) {
       fetchUnreadCount();
       fetchDashboardAlerts();
     }
   }, [user]);
+
+  const fetchTrialStatus = async () => {
+    try {
+      const res = await axios.get(`${API}/trial/status`, { withCredentials: true });
+      setTrialStatus(res.data);
+    } catch (e) { /* non-trial users get non-trial back — safe to ignore errors */ }
+  };
+
+  const handleWipeAccount = async () => {
+    if (wipeConfirmText !== "DELETE") return;
+    try {
+      await axios.delete(`${API}/account/wipe`, { withCredentials: true });
+      localStorage.clear();
+      window.location.href = "/";
+    } catch (e) {
+      alert("Wipe failed: " + (e?.response?.data?.detail || e.message));
+    }
+  };
 
   const fetchDashboardAlerts = async () => {
     try {
@@ -315,6 +337,87 @@ export default function TeacherDashboard({ user, setUser }) {
         </header>
 
         <WelcomeBanner user={user} />
+
+        {/* Trial banner — shows days remaining or read-only notice */}
+        {trialStatus?.is_trial && (
+          <div data-testid="trial-banner" className={`max-w-6xl mx-auto px-6 pt-4`}>
+            <div className={`flex items-center justify-between gap-4 flex-wrap p-4 rounded-none border ${
+              trialStatus.expired
+                ? "bg-red-500/10 border-red-500/40"
+                : trialStatus.days_remaining <= 3
+                  ? "bg-amber-500/10 border-amber-500/50 animate-pulse"
+                  : "bg-cyber-lime/10 border-cyber-lime/40"
+            }`}>
+              <div className="flex-1 min-w-0">
+                <div className={`text-sm font-orbitron uppercase tracking-widest ${
+                  trialStatus.expired ? "text-red-300" :
+                  trialStatus.days_remaining <= 3 ? "text-amber-300" : "text-cyber-lime"
+                }`}>
+                  {trialStatus.expired
+                    ? "🔒 Trial ended — account is read-only"
+                    : `⏳ ${trialStatus.days_remaining} day${trialStatus.days_remaining !== 1 ? 's' : ''} left in your free trial`}
+                </div>
+                <p className="text-slate-300 text-xs mt-1 font-chakra">
+                  {trialStatus.expired
+                    ? "Your data is safe for 30 days. Subscribe to reactivate everything with one click."
+                    : "Keep going for $5/month per teacher — cancel anytime, no card required until you decide."}
+                </p>
+              </div>
+              <div className="flex items-center gap-2">
+                <a
+                  href={`mailto:amyastapp@gmail.com?subject=Ready%20to%20subscribe%20-%20ByteBattles&body=Hi%20Amy%2C%20I%27d%20like%20to%20keep%20my%20account%20going%20past%20the%20trial.%20Please%20send%20me%20a%20subscription%20link.`}
+                  data-testid="trial-subscribe-btn"
+                  className="inline-block px-4 py-2 bg-cyber-cyan text-cyber-black hover:shadow-[0_0_20px_rgba(0,240,255,0.5)] font-orbitron text-xs uppercase tracking-widest rounded-none font-bold"
+                >
+                  Keep My Account · $5/mo
+                </a>
+                <button
+                  data-testid="trial-wipe-btn"
+                  onClick={() => setShowWipeModal(true)}
+                  className="px-3 py-2 border border-red-500/40 text-red-400 hover:bg-red-500/10 font-orbitron text-xs uppercase tracking-widest"
+                >
+                  Delete Everything
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Wipe confirmation modal */}
+        {showWipeModal && (
+          <div data-testid="wipe-modal" className="fixed inset-0 bg-black/80 z-50 flex items-center justify-center p-6">
+            <div className="bg-cyber-navy border-2 border-red-500/50 rounded p-6 max-w-md w-full">
+              <h3 className="text-xl font-orbitron text-red-300 mb-3">⚠️ Delete Everything?</h3>
+              <p className="text-slate-300 text-sm mb-4">
+                This permanently deletes your account, every classroom you created, all students, and every submission. This cannot be undone.
+              </p>
+              <p className="text-slate-400 text-xs mb-3">Type <strong className="text-red-300">DELETE</strong> to confirm:</p>
+              <input
+                data-testid="wipe-confirm-input"
+                value={wipeConfirmText}
+                onChange={(e) => setWipeConfirmText(e.target.value)}
+                className="w-full bg-cyber-black border border-red-500/40 text-white px-3 py-2 mb-4 font-mono"
+                placeholder="DELETE"
+              />
+              <div className="flex gap-2 justify-end">
+                <button
+                  onClick={() => { setShowWipeModal(false); setWipeConfirmText(""); }}
+                  className="px-4 py-2 border border-slate-600 text-slate-300 hover:bg-slate-800 font-orbitron text-xs uppercase tracking-widest"
+                >
+                  Cancel
+                </button>
+                <button
+                  data-testid="wipe-confirm-btn"
+                  onClick={handleWipeAccount}
+                  disabled={wipeConfirmText !== "DELETE"}
+                  className="px-4 py-2 bg-red-600 text-white hover:bg-red-700 disabled:opacity-40 disabled:cursor-not-allowed font-orbitron text-xs uppercase tracking-widest font-bold"
+                >
+                  Delete Forever
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
 
         {/* Admin Notifications strip — surfaces unread contact messages,
             recent teacher signups, and preview / total traffic in the last 24h

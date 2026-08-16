@@ -102,6 +102,14 @@ export default function LandingPage() {
               <Sparkles className="w-5 h-5" />
               Preview Curriculum Free
             </Button>
+            <Button
+              data-testid="hero-trial-btn"
+              onClick={() => navigate("/start-trial")}
+              className="px-8 py-5 bg-cyber-lime text-cyber-black hover:shadow-[0_0_30px_rgba(163,230,53,0.6)] font-orbitron text-xs uppercase tracking-widest rounded-none border border-cyber-lime transition-all duration-300 font-bold gap-2"
+            >
+              <Zap className="w-5 h-5" />
+              Start 14-Day Trial
+            </Button>
           </div>
         </section>
 

@@ -1517,6 +1517,149 @@ async def teacher_signup(signup_data: TeacherSignupRequest):
         raise HTTPException(status_code=500, detail="Signup failed")
 
 
+# ── SELF-SERVE 14-DAY TRIAL ─────────────────────────────────────────────────
+# Public signup that does NOT require an invite code. Creates a teacher account
+# with trial_ends_at = now + 14 days. After expiry the account flips to
+# read-only for 30 days, then is archived. No payment required upfront.
+class TrialSignupRequest(BaseModel):
+    name: str
+    email: str
+    password: str
+    school: Optional[str] = None
+    grade_level: Optional[str] = None
+
+TRIAL_DAYS = 14
+
+
+@api_router.post("/trial/signup")
+async def trial_signup(payload: TrialSignupRequest):
+    """Create a 14-day trial teacher account. No invite code required."""
+    existing = await db.users.find_one({"email": payload.email})
+    if existing:
+        raise HTTPException(status_code=400, detail="Email already registered. Try signing in.")
+    hashed = bcrypt.hashpw(payload.password.encode("utf-8"), bcrypt.gensalt()).decode("utf-8")
+    user_id = str(uuid.uuid4())
+    now = datetime.now(timezone.utc)
+    trial_ends = now + timedelta(days=TRIAL_DAYS)
+    new_user = {
+        "id": user_id,
+        "email": payload.email,
+        "name": payload.name,
+        "picture": None,
+        "role": "teacher",
+        "password": hashed,
+        "is_admin": False,
+        "district": None,
+        "school": payload.school,
+        "grade_level": payload.grade_level,
+        "xp": 0, "coins": 0, "rank": "Rookie", "rank_level": 1,
+        "problems_solved": 0, "perfect_scores": 0,
+        "current_streak": 0, "best_streak": 0,
+        "owned_themes": ["default"], "owned_badges": [],
+        "active_theme": "default", "active_badges": [],
+        "created_at": now,
+        # Trial-specific fields
+        "is_trial": True,
+        "trial_started_at": now,
+        "trial_ends_at": trial_ends,
+        "subscription_active": False,
+    }
+    await db.users.insert_one(new_user)
+    if payload.school:
+        try:
+            await update_school_record(user_id, payload.school, None, "teacher")
+        except Exception:
+            pass
+
+    session_token = str(uuid.uuid4())
+    expires_at = now + timedelta(days=TRIAL_DAYS + 30)  # cookie outlives trial by 30d
+    await db.sessions.insert_one({
+        "user_id": user_id,
+        "session_token": session_token,
+        "expires_at": expires_at,
+        "created_at": now,
+    })
+
+    # Fire "welcome + trial started" email to Amy so she knows a new lead came in
+    try:
+        asyncio.create_task(emails_module.send_new_message_alert({
+            "name": payload.name,
+            "email": payload.email,
+            "subject": "🎉 New 14-day trial signup",
+            "message": f"{payload.name} ({payload.email}) just started a 14-day trial.\nSchool: {payload.school or 'not provided'}\nGrade: {payload.grade_level or 'not provided'}\nTrial ends: {trial_ends.strftime('%Y-%m-%d')}",
+        }))
+    except Exception:
+        pass
+
+    return {
+        "id": user_id,
+        "email": payload.email,
+        "name": payload.name,
+        "session_token": session_token,
+        "role": "teacher",
+        "is_admin": False,
+        "is_trial": True,
+        "trial_ends_at": trial_ends.isoformat(),
+        "days_remaining": TRIAL_DAYS,
+    }
+
+
+@api_router.get("/trial/status")
+async def trial_status(request: Request):
+    """Current user's trial state — days remaining, read-only flag, etc."""
+    user = await get_current_user(request)
+    if not user.get("is_trial"):
+        return {"is_trial": False, "subscription_active": user.get("subscription_active", False)}
+    ends = user.get("trial_ends_at")
+    if isinstance(ends, str):
+        ends = datetime.fromisoformat(ends.replace("Z", "+00:00"))
+    if ends and ends.tzinfo is None:
+        ends = ends.replace(tzinfo=timezone.utc)
+    now = datetime.now(timezone.utc)
+    delta = (ends - now) if ends else timedelta(0)
+    days_remaining = max(0, delta.days + (1 if delta.total_seconds() % 86400 > 0 else 0))
+    expired = ends is not None and now > ends
+    read_only = expired and not user.get("subscription_active", False)
+    return {
+        "is_trial": True,
+        "trial_ends_at": ends.isoformat() if ends else None,
+        "days_remaining": days_remaining,
+        "expired": expired,
+        "read_only": read_only,
+        "subscription_active": user.get("subscription_active", False),
+    }
+
+
+@api_router.delete("/account/wipe")
+async def wipe_account(request: Request):
+    """DELETE all data for the current teacher (and their classrooms/students/submissions).
+    Requires the client to confirm — validated by the frontend modal."""
+    user = await get_current_user(request)
+    if user.get("is_admin"):
+        raise HTTPException(status_code=400, detail="Admin accounts can't self-wipe. Contact support.")
+    uid = user["id"]
+    # 1. Their classrooms
+    classrooms = await db.classrooms.find({"teacher_id": uid}, {"_id": 0, "id": 1}).to_list(200)
+    class_ids = [c["id"] for c in classrooms]
+    # 2. Students belonging only to those classrooms
+    if class_ids:
+        await db.users.delete_many({"role": "student", "classroom_id": {"$in": class_ids}})
+    # 3. Submissions to their assignments
+    assignments = await db.assignments.find({"teacher_id": uid}, {"_id": 0, "id": 1}).to_list(500)
+    ass_ids = [a["id"] for a in assignments]
+    if ass_ids:
+        await db.submissions.delete_many({"assignment_id": {"$in": ass_ids}})
+    # 4. Assignments + classrooms themselves
+    await db.assignments.delete_many({"teacher_id": uid})
+    await db.classrooms.delete_many({"teacher_id": uid})
+    # 5. Teacher's own data
+    await db.sessions.delete_many({"user_id": uid})
+    await db.users.delete_one({"id": uid})
+    return {"ok": True, "deleted_user_id": uid}
+# ── END TRIAL ───────────────────────────────────────────────────────────────
+
+
+
 @api_router.post("/auth/switch-role")
 async def switch_role(request: Request):
     """Switch between teacher and student roles"""
