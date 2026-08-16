@@ -6,6 +6,7 @@ import { Toaster, toast } from "sonner";
 import LandingPage from "./pages/LandingPage";
 import CurriculumPreview from "./pages/CurriculumPreview";
 import CurriculumPreviewLesson from "./pages/CurriculumPreviewLesson";
+import StateMeetingLanding from "./pages/StateMeetingLanding";
 import TeacherLogin from "./pages/TeacherLogin";
 import ForgotPassword from "./pages/ForgotPassword";
 import AdminPasswordReset from "./pages/AdminPasswordReset";
@@ -592,6 +593,7 @@ function App() {
               <Route path="/lesson-demo" element={<LessonPageTemplate />} />
               <Route path="/preview" element={<CurriculumPreview />} />
               <Route path="/preview/lesson/:assignmentType/:chapter/:lesson" element={<CurriculumPreviewLesson />} />
+              <Route path="/nov" element={<StateMeetingLanding />} />
               <Route
                 path="/student/curriculum"
                 element={user ? <StudentCurriculum user={user} /> : <Navigate to="/" />}
