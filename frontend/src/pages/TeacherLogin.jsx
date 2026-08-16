@@ -150,15 +150,15 @@ export default function TeacherLogin() {
             </Button>
 
             <div className="text-center pt-4 border-t border-cyber-cyan/10">
-              <p className="text-sm text-slate-500 mb-2 font-chakra">
-                Don't have an account?
+              <p className="text-sm text-slate-300 mb-3 font-chakra font-semibold">
+                Have an invite code? Sign up here:
               </p>
               <div className="flex flex-col gap-2">
                 <Button
                   type="button"
-                  variant="link"
                   onClick={() => navigate("/teacher-signup")}
-                  className="text-cyber-cyan hover:text-cyber-cyan/80 font-chakra"
+                  className="w-full bg-cyber-navy border border-cyber-cyan/60 text-cyber-cyan hover:bg-cyber-cyan/10 hover:shadow-[0_0_15px_rgba(0,240,255,0.35)] font-orbitron text-xs uppercase tracking-widest rounded-none"
+                  data-testid="teacher-signup-btn"
                 >
                   Teacher Sign Up (with invite code)
                 </Button>
@@ -166,7 +166,7 @@ export default function TeacherLogin() {
                   type="button"
                   variant="link"
                   onClick={() => navigate("/signup/school-admin")}
-                  className="text-cyber-lime hover:text-cyber-lime/80 font-chakra"
+                  className="text-cyber-lime hover:text-cyber-lime/80 font-chakra text-xs"
                 >
                   School Admin Sign Up (requires approval)
                 </Button>
@@ -174,11 +174,22 @@ export default function TeacherLogin() {
                   type="button"
                   variant="link"
                   onClick={() => navigate("/signup/district-admin")}
-                  className="text-cyber-pink hover:text-cyber-pink/80 font-chakra"
+                  className="text-cyber-pink hover:text-cyber-pink/80 font-chakra text-xs"
                 >
                   District Admin Sign Up (requires approval)
                 </Button>
               </div>
+              <p className="text-xs text-slate-500 mt-4 font-chakra">
+                No invite code yet?{" "}
+                <button
+                  type="button"
+                  onClick={() => navigate("/preview")}
+                  className="text-cyber-cyan hover:underline"
+                  data-testid="teacher-login-request-invite-link"
+                >
+                  Preview the curriculum &amp; request one →
+                </button>
+              </p>
             </div>
           </form>
         </CardContent>

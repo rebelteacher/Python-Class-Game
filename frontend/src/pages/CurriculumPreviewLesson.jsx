@@ -1,10 +1,11 @@
 import { useState, useEffect } from "react";
 import { useParams, useNavigate, Link } from "react-router-dom";
 import axios from "axios";
-import { ArrowLeft, Lock, GraduationCap, Sparkles, Zap } from "lucide-react";
+import { ArrowLeft, Lock, GraduationCap, Sparkles, Zap, Mail } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
+import ContactForm from "@/components/ContactForm";
 import Editor from "@monaco-editor/react";
 
 const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
@@ -36,6 +37,7 @@ export default function CurriculumPreviewLesson() {
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(true);
   const [selectedProblemIdx, setSelectedProblemIdx] = useState(0);
+  const [inviteModalOpen, setInviteModalOpen] = useState(false);
 
   useEffect(() => {
     axios.get(`${API}/preview/lesson`, {
@@ -77,15 +79,26 @@ export default function CurriculumPreviewLesson() {
               Back to Curriculum
             </Button>
           </div>
-          <Button
-            data-testid="preview-lesson-signup-btn"
-            onClick={() => navigate("/teacher-login")}
-            size="sm"
-            className="bg-cyber-cyan text-cyber-black hover:shadow-[0_0_20px_rgba(0,240,255,0.5)] font-orbitron text-xs uppercase tracking-widest rounded-none font-bold"
-          >
-            <GraduationCap className="w-4 h-4 mr-2" />
-            Sign In / Sign Up
-          </Button>
+          <div className="flex items-center gap-2">
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => navigate("/teacher-login")}
+              className="text-slate-400 hover:text-cyber-cyan font-chakra text-sm hidden sm:inline-flex"
+              data-testid="preview-lesson-signin-btn"
+            >
+              Already have a code? Sign In
+            </Button>
+            <Button
+              data-testid="preview-lesson-invite-btn"
+              onClick={() => setInviteModalOpen(true)}
+              size="sm"
+              className="bg-cyber-cyan text-cyber-black hover:shadow-[0_0_20px_rgba(0,240,255,0.5)] font-orbitron text-xs uppercase tracking-widest rounded-none font-bold"
+            >
+              <Mail className="w-4 h-4 mr-2" />
+              Request Invite Code
+            </Button>
+          </div>
         </div>
       </header>
 
@@ -219,12 +232,12 @@ export default function CurriculumPreviewLesson() {
                           </p>
                           <Button
                             data-testid="preview-problem-signup-btn"
-                            onClick={() => navigate("/teacher-login")}
+                            onClick={() => setInviteModalOpen(true)}
                             size="sm"
                             className="bg-cyber-cyan text-cyber-black hover:shadow-[0_0_20px_rgba(0,240,255,0.5)] font-orbitron text-xs uppercase tracking-widest rounded-none font-bold"
                           >
-                            <Zap className="w-4 h-4 mr-2" />
-                            Sign Up To Try It
+                            <Mail className="w-4 h-4 mr-2" />
+                            Request Invite Code
                           </Button>
                         </div>
                       </CardContent>
@@ -244,6 +257,15 @@ export default function CurriculumPreviewLesson() {
           </>
         )}
       </main>
+
+      <ContactForm
+        isOpen={inviteModalOpen}
+        onClose={() => setInviteModalOpen(false)}
+        defaultCategory="invite_request"
+        title="Request an Invite Code"
+        subtitle="Tell us about you and your class — we'll send you a teacher invite code so you can sign up."
+        defaultMessage={`Hi Amy,\nI just looked at "${decodeURIComponent(lesson)}" in the preview and I'd love an invite code to try ByteBattles with my students.\n\nMy school:\nMy grade level:\nWhat I'd like to teach:\n`}
+      />
     </div>
   );
 }

@@ -1,9 +1,10 @@
 import { useState, useEffect } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import axios from "axios";
-import { ChevronDown, ChevronRight, Lock, Unlock, GraduationCap, Zap, Sparkles } from "lucide-react";
+import { ChevronDown, ChevronRight, Lock, Unlock, GraduationCap, Zap, Sparkles, Mail } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
+import ContactForm from "@/components/ContactForm";
 
 const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
 const API = `${BACKEND_URL}/api`;
@@ -40,6 +41,7 @@ export default function CurriculumPreview() {
   const [units, setUnits] = useState([]);
   const [loading, setLoading] = useState(true);
   const [expanded, setExpanded] = useState(new Set());
+  const [inviteModalOpen, setInviteModalOpen] = useState(false);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -75,13 +77,22 @@ export default function CurriculumPreview() {
           </Link>
           <div className="flex items-center gap-2">
             <Button
-              data-testid="preview-signup-btn"
+              data-testid="preview-signin-btn"
               onClick={() => navigate("/teacher-login")}
               size="sm"
-              className="bg-transparent border border-cyber-pink/60 text-cyber-pink hover:bg-cyber-pink/10 font-orbitron text-xs uppercase tracking-widest rounded-none"
+              variant="ghost"
+              className="text-slate-400 hover:text-cyber-cyan font-chakra text-sm"
             >
-              <GraduationCap className="w-4 h-4 mr-2" />
-              Sign In / Sign Up
+              Already have a code? Sign In
+            </Button>
+            <Button
+              data-testid="preview-invite-request-btn"
+              onClick={() => setInviteModalOpen(true)}
+              size="sm"
+              className="bg-cyber-cyan text-cyber-black hover:shadow-[0_0_20px_rgba(0,240,255,0.5)] font-orbitron text-xs uppercase tracking-widest rounded-none font-bold"
+            >
+              <Mail className="w-4 h-4 mr-2" />
+              Request Invite Code
             </Button>
           </div>
         </div>
@@ -163,28 +174,38 @@ export default function CurriculumPreview() {
         <div className="bg-cyber-navy/60 border border-cyber-pink/30 rounded p-8">
           <h3 className="font-chakra text-white text-2xl mb-3">Ready to use ByteBattles with your students?</h3>
           <p className="text-slate-300 mb-6">
-            Full access to every unit, live grading, classroom management, and AI-powered feedback — request your teacher invite code today.
+            Full access to every unit, live grading, classroom management, and AI-powered feedback. Request your teacher invite code — Amy replies personally.
           </p>
           <div className="flex gap-3 justify-center flex-wrap">
             <Button
-              data-testid="preview-cta-signup-btn"
-              onClick={() => navigate("/teacher-login")}
+              data-testid="preview-cta-invite-btn"
+              onClick={() => setInviteModalOpen(true)}
               className="px-8 py-5 bg-cyber-cyan text-cyber-black hover:shadow-[0_0_30px_rgba(0,240,255,0.7)] font-orbitron text-xs uppercase tracking-widest rounded-none border border-cyber-cyan font-bold"
             >
-              <Zap className="w-4 h-4 mr-2" />
-              Teacher Sign In / Sign Up
+              <Mail className="w-4 h-4 mr-2" />
+              Request Invite Code
             </Button>
             <Button
-              data-testid="preview-cta-contact-btn"
-              onClick={() => navigate("/")}
+              data-testid="preview-cta-signin-btn"
+              onClick={() => navigate("/teacher-login")}
               variant="outline"
               className="px-8 py-5 bg-transparent border border-cyber-pink/60 text-cyber-pink hover:bg-cyber-pink/10 font-orbitron text-xs uppercase tracking-widest rounded-none"
             >
-              Back to Home
+              <GraduationCap className="w-4 h-4 mr-2" />
+              Already Have a Code? Sign In
             </Button>
           </div>
         </div>
       </section>
+
+      <ContactForm
+        isOpen={inviteModalOpen}
+        onClose={() => setInviteModalOpen(false)}
+        defaultCategory="invite_request"
+        title="Request an Invite Code"
+        subtitle="Tell us a bit about you and your class — we'll send you a teacher invite code so you can sign up."
+        defaultMessage={"Hi Amy,\nI'd love an invite code so I can use ByteBattles with my students.\n\nMy school:\nMy grade level:\nWhat I'd like to teach:\n"}
+      />
     </div>
   );
 }

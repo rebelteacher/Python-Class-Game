@@ -6971,11 +6971,18 @@ async def submit_feedback(feedback: FeedbackCreate):
         meta = await db.admin_meta.find_one({"key": "last_admin_dashboard_load"}, {"_id": 0})
         last_seen = meta.get("value") if meta else None
         if emails_module.hours_since(last_seen) >= emails_module.ALERT_THROTTLE_HOURS:
-            # Build the dict the email template expects
+            # Friendly subject lines by category
+            category_labels = {
+                "invite_request": "🎯 Invite code request",
+                "question": "Question",
+                "bug": "Bug report",
+                "feedback": "Feedback",
+            }
+            subject = category_labels.get(feedback.category, feedback.category or "Contact")
             asyncio.create_task(emails_module.send_new_message_alert({
                 "name": feedback.name,
                 "email": feedback.email,
-                "subject": getattr(feedback, "subject", None) or feedback.category,
+                "subject": subject,
                 "message": feedback.message,
             }))
     except Exception as e:

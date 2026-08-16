@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import axios from "axios";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
@@ -11,15 +11,27 @@ import { MessageCircle, Send } from "lucide-react";
 const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
 const API = `${BACKEND_URL}/api`;
 
-export default function ContactForm({ isOpen, onClose }) {
+export default function ContactForm({ isOpen, onClose, defaultCategory, defaultMessage, title, subtitle }) {
   const [submitting, setSubmitting] = useState(false);
   const [formData, setFormData] = useState({
     name: "",
     email: "",
     user_type: "prospective",
-    category: "question",
-    message: ""
+    category: defaultCategory || "question",
+    message: defaultMessage || ""
   });
+
+  // Refresh defaults when the modal is re-opened with new context (e.g. clicking
+  // "Request Invite Code" from a specific lesson should pre-fill lesson info).
+  useEffect(() => {
+    if (isOpen) {
+      setFormData((prev) => ({
+        ...prev,
+        category: defaultCategory || prev.category || "question",
+        message: defaultMessage || prev.message || "",
+      }));
+    }
+  }, [isOpen, defaultCategory, defaultMessage]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -55,10 +67,10 @@ export default function ContactForm({ isOpen, onClose }) {
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
             <MessageCircle className="w-5 h-5 text-blue-600" />
-            Contact Us
+            {title || "Contact Us"}
           </DialogTitle>
           <DialogDescription>
-            Have questions about ByteBattles Arena? We'd love to hear from you!
+            {subtitle || "Have questions about ByteBattles Arena? We'd love to hear from you!"}
           </DialogDescription>
         </DialogHeader>
 
