@@ -2519,6 +2519,135 @@ async def get_lesson_problems(request: Request, assignment_type: str, chapter: s
         "instructions": instructions,
     }
 
+# ── PUBLIC PREVIEW ENDPOINTS ─────────────────────────────────────────────────
+# Anonymous (unauthenticated) visitors can view a limited slice of the curriculum
+# so they can evaluate ByteBattles before requesting an invite code. Which
+# chapters are open for preview is controlled entirely by PREVIEW_UNLOCKED below
+# so it's easy to open/close chapters as marketing decisions evolve.
+PREVIEW_UNLOCKED = {
+    # assignment_type -> "*" (all chapters open) or set of chapter-name prefixes
+    "block": "*",                             # Unit 1 — everything open
+    "turtle": {"Chapter 1"},                  # Unit 2 — Chapter 1 open
+    "code": {"Chapter 3"},                    # Unit 3 — Chapter 3 open
+    "microbit": set(),                        # Unit 4 — nothing open yet
+}
+
+def _is_chapter_previewable(assignment_type: str, chapter_name: str) -> bool:
+    """True if this chapter is one of the ones opened for anonymous preview."""
+    rule = PREVIEW_UNLOCKED.get(assignment_type, set())
+    if rule == "*":
+        return True
+    if not isinstance(rule, set):
+        return False
+    ch = (chapter_name or "").strip()
+    # Match by prefix so "Chapter 1: Whatever" opens with rule "Chapter 1"
+    return any(ch.startswith(prefix) for prefix in rule)
+
+
+@api_router.get("/preview/units")
+async def get_preview_curriculum_units():
+    """Public: return the curriculum tree with is_locked flags for anonymous
+    visitors. Locked chapters still surface their name (so visitors know what's
+    coming) but ship no lesson-count / last_updated details."""
+    unit_map = {
+        "Unit 1: Block-Based Coding": "block",
+        "Unit 2: Turtle Graphics": "turtle",
+        "Unit 3: Python Text": "code",
+        "Unit 4: Micro:bit": "microbit",
+    }
+    units = []
+    for unit_name, atype in unit_map.items():
+        chapters_raw = await db.problems.distinct("chapter", {"assignment_type": atype})
+        chapters = []
+        for ch in sorted(chapters_raw, key=_natural_key):
+            if not ch:
+                continue
+            unlocked = _is_chapter_previewable(atype, ch)
+            if unlocked:
+                lessons_raw = await db.problems.distinct("lesson", {"assignment_type": atype, "chapter": ch})
+                lessons = []
+                for le in sorted(lessons_raw, key=_natural_key):
+                    if not le:
+                        continue
+                    count = await db.problems.count_documents({"assignment_type": atype, "chapter": ch, "lesson": le})
+                    lessons.append({"name": le, "problem_count": count})
+                chapters.append({
+                    "name": ch,
+                    "is_locked": False,
+                    "lessons": lessons,
+                    "problem_count": sum(le["problem_count"] for le in lessons),
+                })
+            else:
+                # Locked: expose the name only so visitors can see what's coming
+                chapters.append({
+                    "name": ch,
+                    "is_locked": True,
+                    "lessons": [],
+                    "problem_count": 0,
+                })
+        units.append({
+            "name": unit_name,
+            "assignment_type": atype,
+            "chapters": chapters,
+        })
+    return units
+
+
+@api_router.get("/preview/lesson")
+async def get_preview_lesson(assignment_type: str, chapter: str, lesson: str):
+    """Public: return read-only lesson content (instructions + problems' starter
+    code and descriptions) for an unlocked preview chapter. Solution code is
+    stripped. Locked chapters return 403 so the URL can't be guessed."""
+    if not _is_chapter_previewable(assignment_type, chapter):
+        raise HTTPException(status_code=403, detail="This chapter is not available in the free preview. Sign up with an invite code for full access.")
+
+    cursor = db.problems.find(
+        {"assignment_type": assignment_type, "chapter": chapter, "lesson": lesson},
+        {"_id": 0}
+    )
+    raw_problems = await cursor.to_list(200)
+    if not raw_problems:
+        raise HTTPException(status_code=404, detail="No problems found for this lesson")
+
+    type_order = {
+        "Class Practice": 0,
+        "Paired Programming": 1,
+        "Independent Practice": 2,
+        "Debugging": 3,
+        "Challenge": 4,
+        "Quiz": 5,
+        "Assessment": 6,
+        "Project": 7,
+    }
+    raw_problems.sort(key=lambda p: (
+        p.get("order") if isinstance(p.get("order"), int) else 9999,
+        type_order.get(p.get("problem_type", ""), 99),
+        p.get("title", ""),
+    ))
+
+    # Redact anything students shouldn't see in a public preview
+    for p in raw_problems:
+        p["solution_code"] = "[Hidden — sign up to view]"
+        # Also hide test cases from preview (teachers use these to grade)
+        if "test_cases" in p:
+            p["test_cases"] = []
+
+    lesson_doc = await db.lesson_instructions.find_one(
+        {"assignment_type": assignment_type, "chapter": chapter, "lesson": lesson},
+        {"_id": 0}
+    )
+    instructions = lesson_doc.get("instructions", "") if lesson_doc else ""
+
+    return {
+        "chapter": chapter,
+        "lesson": lesson,
+        "assignment_type": assignment_type,
+        "instructions": instructions,
+        "problems": raw_problems,
+        "is_preview": True,
+    }
+# ── END PUBLIC PREVIEW ENDPOINTS ────────────────────────────────────────────
+
 @api_router.put("/curriculum/lesson-instructions")
 async def save_lesson_instructions(request: Request):
     """Save/update lesson instructions (admin only)"""

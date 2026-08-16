@@ -4,6 +4,8 @@ import { BrowserRouter, Routes, Route, Navigate, useNavigate, useLocation } from
 import axios from "axios";
 import { Toaster, toast } from "sonner";
 import LandingPage from "./pages/LandingPage";
+import CurriculumPreview from "./pages/CurriculumPreview";
+import CurriculumPreviewLesson from "./pages/CurriculumPreviewLesson";
 import TeacherLogin from "./pages/TeacherLogin";
 import ForgotPassword from "./pages/ForgotPassword";
 import AdminPasswordReset from "./pages/AdminPasswordReset";
@@ -588,6 +590,8 @@ function App() {
               <Route path="/teacher-signup" element={<TeacherSignup />} />
               <Route path="/school-admin-signup" element={<SchoolAdminSignup />} />
               <Route path="/lesson-demo" element={<LessonPageTemplate />} />
+              <Route path="/preview" element={<CurriculumPreview />} />
+              <Route path="/preview/lesson/:assignmentType/:chapter/:lesson" element={<CurriculumPreviewLesson />} />
               <Route
                 path="/student/curriculum"
                 element={user ? <StudentCurriculum user={user} /> : <Navigate to="/" />}

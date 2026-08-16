@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { Code2, Users, BookOpen, CheckCircle, GraduationCap, UserCircle, MessageCircle, Zap, Terminal, Cpu } from "lucide-react";
+import { Code2, Users, BookOpen, CheckCircle, GraduationCap, UserCircle, MessageCircle, Zap, Terminal, Cpu, Sparkles } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import ContactForm from "@/components/ContactForm";
 import CyberRain from "@/components/CyberRain";
@@ -93,6 +93,14 @@ export default function LandingPage() {
             >
               <Zap className="w-5 h-5" />
               I&apos;m a Student
+            </Button>
+            <Button
+              data-testid="hero-preview-btn"
+              onClick={() => navigate("/preview")}
+              className="px-8 py-5 bg-transparent border border-cyber-lime/60 text-cyber-lime hover:bg-cyber-lime/10 hover:shadow-[0_0_20px_rgba(163,230,53,0.4)] font-orbitron text-xs uppercase tracking-widest rounded-none transition-all duration-300 gap-2"
+            >
+              <Sparkles className="w-5 h-5" />
+              Preview Curriculum Free
             </Button>
           </div>
         </section>
