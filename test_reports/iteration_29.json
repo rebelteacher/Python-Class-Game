@@ -1,0 +1,45 @@
+{
+  "summary": "Backend-only verification of the AI Lesson Plan Generator blank-field bug fix (POST /api/lesson-plans/generate-from-schedule). Inserted a TEST_ fillable docx template with 11 section_labels ['Learner Outcomes','Standards','Anticipatory Set','Modeling','Instructional Strategies','Check for Understanding','Guided Practice','Independent Practice','Closure','Differentiation','Assessment'] for the admin teacher, then ran generation against real turtle lessons. 9/9 pytest tests passed. Across 4 independent generations (single-day + multi-day day-1/day-2 spans, 3 different turtle chapters) the AI returned ALL 11 keys with non-empty strings every time and no extra/renamed keys — 'Learner Outcomes' and 'Standards' were populated in 4/4 runs (Standards cited real CSTA codes 1B-AP-10 / 2-AP-13). Verified persistence via GET /api/lesson-plans (sections intact, no _id leak), end-to-end docx fill via GET /api/lesson-plans/{id}/download/0 (parsed the returned .docx with python-docx and confirmed the generated Learner Outcomes/Standards/Closure text is actually written into the document), backward-compat without template_id (freeform `content` returned, no crash), the no-grounding-data guard, and role gating (unauthenticated 401, bad token 401, student session 403 on both generate and list). Fixtures cleaned up.",
+  "backend_issues": {
+    "critical": [],
+    "minor": [
+      {"endpoint": "POST /api/lesson-plans/generate-from-schedule", "issue": "No server-side backstop: the guarantee that every template label is populated rests entirely on LLM prompt compliance (non-deterministic). If gpt-4o omits a label on some future call, sections silently lacks that key and the docx section is left blank again — reproducing the original user-reported bug. Recommend a deterministic post-parse fill: for every label in template_labels missing/blank in `sections`, set a fallback (e.g. 'See attached activities')."},
+      {"endpoint": "POST /api/lesson-plans/generate-from-schedule", "issue": "If the LLM ever responds with non-JSON, the except branch sets sections = {} (server.py ~L10755), so the docx fill gets nothing at all and every section is blank. No logging is emitted on that parse failure either — add logger.warning plus a 'Label:'-heading regex fallback parse of filled_text."},
+      {"endpoint": "POST /api/lesson-plans/generate-from-schedule", "issue": "system_prompt (server.py ~L10611) still instructs 'Only include keys for sections the teacher's template actually has.' — mild tension with the new labels_directive that demands all keys. Not observed to cause failures, but worth aligning the two prompts."}
+    ]
+  },
+  "frontend_issues": {"ui_bugs": [], "integration_issues": [], "design_issues": []},
+  "test_report_links": [
+    "/app/backend/tests/test_lesson_plan_ai_sections.py",
+    "/app/backend/tests/setup_lesson_plan_fixture.py",
+    "/app/backend/tests/repeat_lesson_plan_check.py",
+    "/app/backend/tests/verify_docx_and_gating.py",
+    "/app/backend/tests/verify_student_gate.py",
+    "/app/backend/tests/cleanup_lesson_plan_fixture.py",
+    "/app/test_reports/pytest/lesson_plan_ai_sections.xml"
+  ],
+  "action_items": [
+    "Optional hardening (no functional bug found): add a deterministic post-parse backfill so any template_label missing or blank in `sections` gets a placeholder string instead of silently disappearing.",
+    "Add logger.warning + a heading-regex fallback parse in the JSON-parse except branch so a non-JSON LLM response does not produce an entirely empty sections dict."
+  ],
+  "critical_code_review_comments": [
+    "server.py is 18,258 lines — far past the maintainability threshold; the lesson-plan endpoints (~L10076-10880) are a clean candidate for extraction into a router module.",
+    "The blank-field fix is prompt-only. Prompt engineering is not a contract; pair it with a server-side completeness check over template_labels before persisting.",
+    "sections values are cast with str(v) — if the model returns a list or dict for a section, the docx gets a stringified Python literal (e.g. \"['a', 'b']\"). Consider joining lists into newline-separated text."
+  ],
+  "updated_files": [
+    "/app/backend/tests/test_lesson_plan_ai_sections.py",
+    "/app/backend/tests/setup_lesson_plan_fixture.py",
+    "/app/backend/tests/repeat_lesson_plan_check.py",
+    "/app/backend/tests/verify_docx_and_gating.py",
+    "/app/backend/tests/verify_student_gate.py",
+    "/app/backend/tests/cleanup_lesson_plan_fixture.py"
+  ],
+  "success_rate": {"backend": "100% (9/9 pytest tests, 4/4 generation runs fully populated)", "frontend": "not tested (backend-only request)"},
+  "seed_data_creation": "Inserted lesson_plan_templates doc 'TEST_Fillable_Template.docx' (real python-docx bytes, fillable=True, 11 section_labels) for admin teacher astapp@spanola.net; generated 9 TEST_ lesson_plans; temporary TEST_student_* session for the 403 gate. ALL cleaned up via /app/backend/tests/cleanup_lesson_plan_fixture.py.",
+  "should_call_test_agent_after_fix": false,
+  "should_main_agent_self_test": true,
+  "test_credentials": "astapp@spanola.net / AlisaFaith$14 via POST /api/auth/teacher-login (returns session_token)",
+  "context_for_next_testing_agent": "BUG FIX IS VERIFIED WORKING — Learner Outcomes and Standards are now always populated. To re-run: `cd /app/backend && python tests/setup_lesson_plan_fixture.py` (creates the TEST_ template and writes tests/.lesson_plan_fixture.json, and auto-discovers turtle chapter/lesson combos that actually have problems), then `python -m pytest tests/test_lesson_plan_ai_sections.py -v -p no:randomly`, then `python tests/cleanup_lesson_plan_fixture.py`. The setup step is mandatory because cleanup deletes the template. Turtle lessons with problems: 'Chapter 3: Colors'/'Lesson 3: Rainbow Colors', 'Chapter 5: Functions'/'Lesson 2: Parameters', 'Chapter 6: Projects'/'Lesson 1: Geometric Art'. Student auth is Emergent OAuth-only, so the student 403 test injects a session row into Mongo directly. Generation is fast (~6-8s per day) despite the LLM call.",
+  "rca_of_the_issue": "Original root cause (already fixed by previous agent): the prompt told the model 'Only include a key if you have real content for it... Skip labels that are purely structural', so gpt-4o silently dropped keys like 'Learner Outcomes' and 'Standards' it considered structural, and the docx-fill then left those sections blank. The new labels_directive (server.py L10670-10703) enumerates the exact required JSON keys with per-section guidance and an explicit 'NEVER return an empty string' rule; the defensive change at L10751 also keeps empty-string values so the docx placeholder is still replaced. Verified: 4/4 generations returned all 11 labels non-empty, and the filled docx contains that text. Residual risk is non-determinism — see minor issues for the recommended server-side backstop."
+}

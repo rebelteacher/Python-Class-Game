@@ -1,0 +1,31 @@
+{
+  "template_id": "TEST_tpl_53f89e3c",
+  "user_id": "8ebbb939-8837-4370-bb8f-3c9e72c3db66",
+  "combos": [
+    {
+      "chapter": "Chapter 5: Functions",
+      "lesson": "Lesson 2: Parameters",
+      "n": 2
+    },
+    {
+      "chapter": "",
+      "lesson": "",
+      "n": 2
+    },
+    {
+      "chapter": "Chapter 3: Colors",
+      "lesson": "Lesson 3: Rainbow Colors",
+      "n": 2
+    },
+    {
+      "chapter": "Chapter 4: Conditionals",
+      "lesson": "Lesson 4: Alternating with %",
+      "n": 2
+    },
+    {
+      "chapter": "Chapter 2: Loops",
+      "lesson": "Lesson 3: Any Polygon",
+      "n": 2
+    }
+  ]
+}

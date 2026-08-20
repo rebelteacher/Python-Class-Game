@@ -10607,8 +10607,9 @@ async def generate_lesson_plans_from_schedule(req: GenerateFromScheduleRequest, 
         "— use those exact labels in your output.\n\n"
         "OUTPUT FORMAT (STRICT): Respond with a single JSON object mapping each section label to its "
         "content. Do NOT wrap in markdown code fences. Do NOT add prose outside the JSON. Every value "
-        "must be a plain string (multi-paragraph is fine — use \\n\\n between paragraphs). Only "
-        "include keys for sections the teacher's template actually has. Keep answers concise but "
+        "must be a plain string (multi-paragraph is fine — use \\n\\n between paragraphs). When the "
+        "user message lists REQUIRED OUTPUT KEYS, you MUST return every one of those keys with real, "
+        "non-empty content — never omit a key and never leave a value blank. Keep answers concise but "
         "actionable — 2-6 sentences per section unless a section clearly needs a bulleted list."
     )
 
@@ -10672,9 +10673,34 @@ async def generate_lesson_plans_from_schedule(req: GenerateFromScheduleRequest, 
             labels_directive = (
                 f"\n\nREQUIRED OUTPUT KEYS (use these EXACT strings as JSON keys — case- and "
                 f"punctuation-sensitive): {json.dumps(template_labels)}\n"
-                f"Only include a key if you have real content for it grounded in the ByteBattles "
-                f"context. Skip labels that are purely structural (e.g. 'Teaching the Lesson' as a "
-                f"parent heading with no direct content of its own)."
+                f"You MUST return every one of these keys. Do NOT leave any blank. "
+                f"For each section, infer thoughtful content from the ByteBattles context above:\n"
+                f"  - **Learner Outcomes / Objectives**: 2-3 concrete 'Students will be able to…' statements "
+                f"grounded in the specific coding skills of this lesson.\n"
+                f"  - **Standards**: cite plausible CSTA K-12 CS standards that fit the lesson topic "
+                f"(e.g. 1B-AP-10, 2-AP-13) — pick real standard codes appropriate to the grade band.\n"
+                f"  - **Anticipatory Set / Hook**: propose a specific opener (a question, a demo, a "
+                f"real-world connection) that primes today's coding concept.\n"
+                f"  - **Modeling**: describe exactly how the teacher demonstrates the skill live in "
+                f"class using ByteBattles — reference the actual problems in the lesson if helpful.\n"
+                f"  - **Instructional Strategies**: name 3-4 teaching moves (I do / We do / You do, "
+                f"pair-programming, think-alouds, live-code, etc.) tailored to this concept.\n"
+                f"  - **Check for Understanding**: give 2-3 formative checks (thumbs up, exit ticket "
+                f"question, one-minute paper, quick partner share, code-trace question).\n"
+                f"  - **Guided Practice / Monitoring**: describe the class activity the teacher walks "
+                f"around during — reference ByteBattles problems by name where possible.\n"
+                f"  - **Independent Practice**: name which ByteBattles problems students complete "
+                f"independently after guided practice.\n"
+                f"  - **Closure**: propose an exit ticket or reflection question that surfaces what "
+                f"students learned.\n"
+                f"  - **Differentiation**: 1-2 supports for struggling learners AND 1-2 extensions "
+                f"for early finishers.\n"
+                f"  - **Assessment**: how you know if students met the objectives (which problem "
+                f"scores, which observations).\n"
+                f"For any section whose label isn't in this list, use your best judgment to fill it "
+                f"with grade-appropriate, ByteBattles-grounded content. NEVER return an empty string "
+                f"for a key. If you truly have no info for a niche label, write 'See attached "
+                f"activities' rather than leaving it blank."
             )
 
         user_prompt = (
@@ -10720,10 +10746,34 @@ async def generate_lesson_plans_from_schedule(req: GenerateFromScheduleRequest, 
                 raw = re.sub(r"\s*```\s*$", "", raw)
             parsed = json.loads(raw)
             if isinstance(parsed, dict):
-                sections = {str(k): str(v) for k, v in parsed.items() if v}
-        except Exception:
+                # Keep every key returned by the AI even if empty — the prompt tells
+                # the AI to never return empty strings, but if it slips we still want
+                # the docx placeholder replaced (rather than leaving raw {{label}} text).
+                # Lists/dicts are joined into readable text so the docx doesn't render
+                # a Python literal like "['a', 'b']".
+                def _to_text(v):
+                    if v is None:
+                        return ""
+                    if isinstance(v, list):
+                        return "\n".join(str(item) for item in v)
+                    if isinstance(v, dict):
+                        return "\n".join(f"{k}: {vv}" for k, vv in v.items())
+                    return str(v)
+                sections = {str(k): _to_text(v) for k, v in parsed.items()}
+        except Exception as parse_err:
             # Non-JSON response — keep as freeform content only
+            logger.warning(f"[lesson_plan] LLM returned non-JSON, sections will be empty: {parse_err}")
             sections = {}
+
+        # Server-side backstop: guarantee every requested template label has a value.
+        # If the LLM ever slips and omits a label (or returns empty), we backfill with
+        # a friendly placeholder so the downloaded .docx never has a blank section —
+        # this is what caused the original user-reported bug (Learner Outcomes/Standards
+        # showing blank).
+        if template_labels:
+            for label in template_labels:
+                if not sections.get(label, "").strip():
+                    sections[label] = "See attached activities"
 
         plans_out.append({
             "day_label": entry.day_label,

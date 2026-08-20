@@ -360,4 +360,11 @@ A coding education platform for K-12 students featuring multiple programming env
   - Help System: new **Grading** FAQ category → "Students want to put their own name in the output — how do I make the grader accept any name?" with examples and gotchas. AI `/api/help/ask` auto-discovers via `HELP_FAQ_ENTRIES`.
   - Verified: 11/11 outputs_match unit tests pass, including basic substitution, multi-word names, multiple tokens per output, multiline with token, empty-name rejection, no-newline-swallow, and lowercase-token rejection.
 
-*Last Updated: Mar 2, 2026*
+- AI Lesson Plan Generator blank-fields bug fix (Feb 2026 — iteration_29):
+  - User (production) reported: downloaded lesson-plan .docx had **Learner Outcomes** and **Standards** sections left blank.
+  - Root cause: the LLM prompt in `POST /api/lesson-plans/generate-from-schedule` (`/app/backend/server.py` ~L10670 `labels_directive`) told gpt-4o "Only include a key if you have real content for it… Skip labels that are purely structural." — the model silently dropped keys it considered structural, so the docx-fill left those sections blank.
+  - Fix: rewrote `labels_directive` to (a) enumerate the required JSON keys explicitly, (b) give per-section guidance for every common label (Learner Outcomes → "Students will be able to…", Standards → "cite real CSTA codes like 1B-AP-10", etc.), (c) instruct the model to NEVER return an empty string. Aligned the `system_prompt` accordingly (removed the conflicting "only include keys" clause).
+  - Server-side backstop added: after JSON parse, any `template_labels` that are missing or empty in the returned `sections` dict are backfilled with "See attached activities" so the downloaded docx **never** has a blank section again — even if the LLM misbehaves. Non-JSON responses now log a warning instead of silently dropping everything. List/dict values from the LLM get joined into readable text instead of being stringified as Python literals.
+  - **Verified by testing_agent (iteration_29)**: 9/9 pytest tests pass. 4/4 independent generation runs (single-day + multi-day day-1/day-2, 3 different turtle chapters) returned ALL 11 requested labels with non-empty strings. Standards cited real CSTA codes. End-to-end docx download verified by parsing the returned .docx and confirming the generated Learner Outcomes/Standards text is present. Regressions checked: no-template freeform path still works, no-grounding-data guard still fires, auth gating (401/403) still correct.
+
+*Last Updated: Feb, 2026*
