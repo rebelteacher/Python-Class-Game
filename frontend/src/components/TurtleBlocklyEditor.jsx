@@ -69,6 +69,16 @@ const blocklyStyles = `
   .blocklyFlyoutBackground {
     fill: #e2e8f0 !important;
   }
+  /* Highlight the currently-executing line during step-through */
+  .turtle-blocks-step-line {
+    background: rgba(250, 204, 21, 0.25) !important;
+    border-left: 2px solid #facc15 !important;
+  }
+  .turtle-blocks-step-gutter {
+    background: #facc15 !important;
+    width: 3px !important;
+    margin-left: 2px !important;
+  }
 `;
 
 // Define turtle-specific blocks
@@ -1119,6 +1129,7 @@ const TurtleBlocklyEditor = forwardRef(({
   onCodeChange,
   onXmlChange,
   onRun,
+  onLineHighlight,
   readOnly = false,
   showPreview = true,
   showCodeToggle = true,
@@ -1129,11 +1140,18 @@ const TurtleBlocklyEditor = forwardRef(({
   const blocklyDivRef = useRef(null);
   const workspaceRef = useRef(null);
   const turtleRef = useRef(null);
+  const monacoEditorRef = useRef(null);
+  const monacoDecorationsRef = useRef([]);
   const [generatedCode, setGeneratedCode] = useState("");
   const [manualCode, setManualCode] = useState(null); // null = use generatedCode
   const [showCode, setShowCode] = useState(false);
   const [isRunning, setIsRunning] = useState(false);
+  const [highlightedLine, setHighlightedLine] = useState(-1);
   const blocksDefinedRef = useRef(false);
+  // Cache the last code we emitted so Blockly UI events (block selected,
+  // workspace scrolled, etc.) don't spam onCodeChange with unchanged code —
+  // that used to reset hasRun in the parent, silently breaking Submit.
+  const lastEmittedCodeRef = useRef("");
 
   // The active code is manual edits if present, otherwise block-generated
   const activeCode = manualCode !== null ? manualCode : generatedCode;
@@ -1284,11 +1302,16 @@ const TurtleBlocklyEditor = forwardRef(({
     const handleChange = () => {
       const code = generatePythonCode(workspace);
       setGeneratedCode(code);
-      
-      if (onCodeChange) {
+
+      // Only notify the parent when the generated code TEXT changed. Blockly
+      // fires change events for pure-UI actions too (block clicked, workspace
+      // scrolled) and firing onCodeChange there would reset the parent's
+      // hasRun flag and silently break Submit.
+      if (onCodeChange && code !== lastEmittedCodeRef.current) {
+        lastEmittedCodeRef.current = code;
         onCodeChange(code);
       }
-      
+
       if (onXmlChange) {
         const xml = Blockly.Xml.workspaceToDom(workspace);
         onXmlChange(Blockly.Xml.domToText(xml));
@@ -1366,6 +1389,42 @@ const TurtleBlocklyEditor = forwardRef(({
       turtleRef.current.reset();
     }
   }, []);
+
+  // Apply / clear Monaco line highlight decoration when the editable Code view
+  // is active (Chapter 5+ problems). For the read-only <pre> preview we drive
+  // highlighting via the `highlightedLine` state directly in the JSX below.
+  useEffect(() => {
+    const editor = monacoEditorRef.current;
+    if (!editor) return;
+    try {
+      if (highlightedLine >= 0) {
+        monacoDecorationsRef.current = editor.deltaDecorations(
+          monacoDecorationsRef.current,
+          [{
+            range: {
+              startLineNumber: highlightedLine + 1,
+              startColumn: 1,
+              endLineNumber: highlightedLine + 1,
+              endColumn: 1,
+            },
+            options: {
+              isWholeLine: true,
+              className: 'turtle-blocks-step-line',
+              linesDecorationsClassName: 'turtle-blocks-step-gutter',
+            },
+          }]
+        );
+        editor.revealLineInCenterIfOutsideViewport(highlightedLine + 1);
+      } else {
+        monacoDecorationsRef.current = editor.deltaDecorations(
+          monacoDecorationsRef.current,
+          []
+        );
+      }
+    } catch (e) {
+      // ignore — editor may not be fully mounted yet
+    }
+  }, [highlightedLine]);
 
   return (
     <div className="flex flex-col h-full">
@@ -1462,6 +1521,7 @@ const TurtleBlocklyEditor = forwardRef(({
                     if (onCodeChange) onCodeChange(value || "");
                   }}
                   theme="vs-dark"
+                  onMount={(editor) => { monacoEditorRef.current = editor; }}
                   options={{
                     minimap: { enabled: false },
                     fontSize: 13,
@@ -1477,10 +1537,28 @@ const TurtleBlocklyEditor = forwardRef(({
               </div>
             </div>
           ) : (
-            <div className="flex-1 bg-gray-900 p-2 overflow-auto">
-              <pre className="text-green-400 font-mono text-xs whitespace-pre-wrap">
-                {generatedCode || "# No blocks yet - drag blocks to generate code"}
-              </pre>
+            <div className="flex-1 bg-gray-900 p-2 overflow-auto font-mono text-xs" data-testid="turtle-blocks-code-preview">
+              {generatedCode ? (
+                generatedCode.split('\n').map((line, i) => {
+                  const isActive = highlightedLine === i;
+                  return (
+                    <div
+                      key={i}
+                      data-testid={`code-line-${i}`}
+                      className={`whitespace-pre px-2 py-0.5 ${
+                        isActive
+                          ? 'bg-yellow-400/30 text-yellow-100 border-l-2 border-yellow-400'
+                          : 'text-green-400 border-l-2 border-transparent'
+                      }`}
+                    >
+                      <span className="text-gray-500 select-none mr-3">{String(i + 1).padStart(3, ' ')}</span>
+                      {line || ' '}
+                    </div>
+                  );
+                })
+              ) : (
+                <pre className="text-green-400 whitespace-pre-wrap">{"# No blocks yet - drag blocks to generate code"}</pre>
+              )}
             </div>
           )
         )}
@@ -1493,6 +1571,10 @@ const TurtleBlocklyEditor = forwardRef(({
               code={activeCode}
               width={compact ? 300 : 400}
               height={compact ? 300 : 400}
+              onLineHighlight={(lineNum) => {
+                setHighlightedLine(typeof lineNum === 'number' ? lineNum : -1);
+                if (onLineHighlight) onLineHighlight(lineNum);
+              }}
               onRun={() => {
                 console.log("AnimatedTurtle onRun callback triggered");
                 if (onRun) onRun(generatedCode);

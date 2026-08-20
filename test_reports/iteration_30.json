@@ -1,0 +1,26 @@
+{
+  "summary": "Frontend-only verification of 3 reported bugs in the STUDENT block-editor view (/lesson/block/Chapter 1: Block Basics/Lesson 1: What are Blocks?). Logged in as admin teacher via /teacher-login, switched to student via POST /api/auth/switch-role, placed real blocks by dragging from the Blockly flyout (window.Blockly is not exposed, so real drag-and-drop was used). ALL 4 scenarios PASS: BUG3 grid persistence, BUG1 Submit unlocks after one Step (POST /api/submissions -> 200 + score toast), BUG1b Blockly UI click does not reset hasRun, BUG2 step-through line highlighting in Code view. No console errors during any flow.",
+  "backend_issues": {"critical": [], "minor": []},
+  "frontend_issues": {
+    "ui_bugs": [],
+    "integration_issues": [],
+    "design_issues": [
+      {"screen": "AnimatedTurtle control row (student block editor)", "issues": ["The 5 icon-only control buttons (Reset/Play/Step/FastForward/Grid) have no data-testid; tests must rely on title attributes. Recommend adding data-testid (e.g. turtle-step-btn, turtle-grid-btn)."]}
+    ]
+  },
+  "test_report_links": [],
+  "action_items": [
+    "Optional: add data-testid to AnimatedTurtle control-row buttons (Reset/Play/Step/FastForward/Grid) for stable automation."
+  ],
+  "critical_code_review_comments": [
+    "AnimatedTurtle.jsx (~2400+ lines) and TurtleBlocklyEditor.jsx (~1600+ lines) exceed the 700-line guideline; consider splitting parser / block definitions / rendering into modules.",
+    "handleSubmit leaves verbose console.log of hasRun/hasRunPerProblem/code length in production path — remove debug logging."
+  ],
+  "updated_files": [],
+  "success_rate": {"backend": "N/A (frontend-only request; POST /api/submissions returned 200)", "frontend": "100% (4/4 scenarios)"},
+  "seed_data_creation": "Two submissions were created for problem d0d016fc-dc30-4c76-a660-1f4501412f37 of the block lesson (scores ~15%) as a side-effect of testing Submit.",
+  "should_call_test_agent_after_fix": false,
+  "should_main_agent_self_test": false,
+  "context_for_next_testing_agent": "Verified details: (1) BUG3 — clicking button[title='Show grid'] draws grid; canvas non-white pixel count went 1010 -> 3896 and stayed 3896 after moving the pointer onto the canvas and elsewhere (waited 1.5s); clicking button[title='Hide grid'] returned it to 1010. (2) BUG1 — with blocks placed, Submit before running shows 'Please run your code first before submitting!'; after ONE click of button[title*='Step'], Submit fires POST /api/submissions -> 200 and toast 'Score: 15.0% - Keep trying!'. Console shows AnimatedTurtle onRun -> AssignmentPage hasRun=true on first step. (3) BUG1b — after green Run then clicking an existing block in the workspace, Submit still POSTed successfully (onCodeChange correctly skipped since code text unchanged). (4) BUG2 — in Code view, data-testid='turtle-blocks-code-preview' present, code-line-5/6/7 highlighted with bg-yellow-400/30 in sequence across 4 Step clicks (last step stayed on final line, as expected at end of program). Technique notes for future agents: window.Blockly is NOT usable (only Msg exposed) — drag blocks from '.blocklyFlyout g.blocklyDraggable' after clicking a '.blocklyTreeRow' category via page.mouse.click on its bounding box; clicking the tree label span is intercepted by the row div.",
+  "rca_of_the_issue": "Fixes confirmed at source: AnimatedTurtle.stepForward now calls onRun on the first step (unlocks Submit); the Grid button no longer calls drawCanvas() in a stale-closure setTimeout (the showGrid useEffect redraws); TurtleBlocklyEditor.handleChange only emits onCodeChange when the generated code text changes (so Blockly UI-only events no longer reset hasRun); onLineHighlight(cmd.line) drives per-line highlighting in the code preview."
+}

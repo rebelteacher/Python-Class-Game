@@ -2182,7 +2182,8 @@ const AnimatedTurtle = forwardRef(function AnimatedTurtle({
     if (playingRef.current) return;  // don't step while auto-playing
 
     let idx = stepIdxRef.current;
-    if (idx < 0) {
+    const firstStep = idx < 0;
+    if (firstStep) {
       // First step click: reset the canvas + run on_start handler once
       resetTurtle();
       await new Promise((r) => setTimeout(r, 50));
@@ -2206,7 +2207,10 @@ const AnimatedTurtle = forwardRef(function AnimatedTurtle({
     if (onLineHighlight) onLineHighlight(cmd.line);
     // Animate each individual step so the drawing motion is visible
     await executeCommand(cmd, true);
-  }, [commands, executeCommand, resetTurtle, onLineHighlight, eventHandlers]);
+    // Notify parent on the FIRST step so the student's Submit button unlocks —
+    // stepping through IS running the code, just one command at a time.
+    if (firstStep && onRun) onRun();
+  }, [commands, executeCommand, resetTurtle, onLineHighlight, onRun, eventHandlers]);
 
   // Keep the manual step index in sync when resetTurtle / play runs
   useEffect(() => {
@@ -2329,7 +2333,7 @@ const AnimatedTurtle = forwardRef(function AnimatedTurtle({
     reset: resetTurtle,
     runInstant,
     stepForward,
-    toggleGrid: () => { setShowGrid((g) => !g); setTimeout(() => drawCanvas(), 50); },
+    toggleGrid: () => { setShowGrid((g) => !g); },
     startEventMode,
     isEventModeActive: () => eventModeActive,
     // Read state (parent can call these anytime; use onStateChange for reactive updates)
@@ -2412,8 +2416,12 @@ const AnimatedTurtle = forwardRef(function AnimatedTurtle({
           variant="outline"
           onClick={(e) => {
             e.stopPropagation();
-            setShowGrid(!showGrid);
-            setTimeout(() => drawCanvas(), 50);
+            // Don't call drawCanvas() here — the useEffect at line ~1450 already
+            // fires whenever showGrid changes (because drawCanvas depends on it),
+            // and doing it here uses a stale closure that ERASES the newly-drawn
+            // grid ~50ms after the click. Was reported as "grid disappears when
+            // pointer leaves the grid button".
+            setShowGrid((g) => !g);
           }}
           className={`${showGrid ? 'bg-blue-600 border-blue-500' : 'bg-gray-700 border-gray-600'} hover:bg-gray-600`}
           title={showGrid ? "Hide grid" : "Show grid"}

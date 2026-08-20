@@ -587,13 +587,7 @@ export default function AssignmentPage({ user, lessonData }) {
     // Get current problem
     const currentProblem = assignment.problems?.[currentProblemIndex];
     const isBlockType = currentProblem?.assignment_type === "block";
-    
-    console.log("handleSubmit called");
-    console.log("hasRun:", hasRun);
-    console.log("hasRunPerProblem:", hasRunPerProblem);
-    console.log("getCurrentProblemId():", getCurrentProblemId());
-    console.log("code length:", code?.length);
-    
+
     // Block assignments now use code (like turtle), so require run and code
     if (!hasRun) {
       toast.error("Please run your code first before submitting!");
@@ -1595,6 +1589,7 @@ export default function AssignmentPage({ user, lessonData }) {
                       readOnly={problemsFinal[getCurrentProblemId()]}
                       showPreview={true}
                       showCodeToggle={true}
+                      onLineHighlight={(lineNum) => setHighlightedLine(typeof lineNum === 'number' ? lineNum : -1)}
                       editableCode={/chapter\s*5/i.test(assignment.problems?.[currentProblemIndex]?.chapter || '')}
                       height="100%"
                     />
@@ -2037,6 +2032,7 @@ export default function AssignmentPage({ user, lessonData }) {
                         }
                       }}
                       initialXml={savedXmlPerProblem[getCurrentProblemId()] || ""}
+                      onLineHighlight={(lineNum) => setHighlightedLine(typeof lineNum === 'number' ? lineNum : -1)}
                       showMonacoEditor={false}
                     />
                   </div>
