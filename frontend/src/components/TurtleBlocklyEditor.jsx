@@ -1432,7 +1432,7 @@ const TurtleBlocklyEditor = forwardRef(({
       <style>{blocklyStyles}</style>
       
       {/* Toolbar - Compact */}
-      <div className="flex items-center justify-between bg-gradient-to-r from-purple-600 to-indigo-600 text-white px-2 py-1.5 flex-shrink-0">
+      <div className="relative z-10 flex items-center justify-between bg-gradient-to-r from-purple-600 to-indigo-600 text-white px-2 py-1.5 flex-shrink-0">
         <div className="flex items-center gap-1.5">
           <Blocks className="w-4 h-4" />
           <span className="font-bold text-sm">Turtle Blocks</span>
@@ -1565,7 +1565,7 @@ const TurtleBlocklyEditor = forwardRef(({
 
         {/* Turtle preview - only when enabled */}
         {showPreview && (
-          <div className="w-[420px] border-l bg-white flex items-center justify-center p-2 flex-shrink-0">
+          <div className="w-[420px] border-l bg-white flex items-start justify-center p-2 flex-shrink-0 overflow-hidden">
             <AnimatedTurtle
               ref={turtleRef}
               code={activeCode}

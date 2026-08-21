@@ -1522,20 +1522,22 @@ export default function AssignmentPage({ user, lessonData }) {
                       <Button
                         data-testid="submit-code-btn"
                         onClick={() => handleSubmit()}
-                        disabled={submitting || problemsFinal[getCurrentProblemId()]}
+                        disabled={submitting || !hasRun || problemsFinal[getCurrentProblemId()]}
                         size="sm"
-                        className="bg-cyber-cyan text-cyber-black hover:shadow-[0_0_15px_rgba(0,240,255,0.5)] font-bold"
+                        className="bg-cyber-cyan text-cyber-black hover:shadow-[0_0_15px_rgba(0,240,255,0.5)] font-bold disabled:opacity-60 disabled:cursor-not-allowed"
+                        title={!hasRun ? "Click Run in the purple bar above (or press ▶ / Step ⏭) before you can Submit" : ""}
                       >
-                        {submitting ? "Submitting..." : problemsFinal[getCurrentProblemId()] ? "✓ Submitted" : "Submit"}
+                        {submitting ? "Submitting..." : problemsFinal[getCurrentProblemId()] ? "✓ Submitted" : !hasRun ? "Run First" : "Submit"}
                       </Button>
                       {!problemsFinal[getCurrentProblemId()] && (
                         <Button
                           data-testid="done-btn"
                           onClick={() => handleMarkFinal()}
-                          disabled={submitting}
+                          disabled={submitting || !hasRun}
                           size="sm"
                           variant="outline"
-                          className="border-green-600 text-green-400 hover:bg-green-500/10"
+                          className="border-green-600 text-green-400 hover:bg-green-500/10 disabled:opacity-60 disabled:cursor-not-allowed"
+                          title={!hasRun ? "Run your code and Submit at least once before marking Done" : ""}
                         >
                           Done
                         </Button>

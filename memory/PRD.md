@@ -374,4 +374,9 @@ A coding education platform for K-12 students featuring multiple programming env
   - **Grid disappeared ~50ms after clicking Grid button**: the Grid button had `setTimeout(() => drawCanvas(), 50)` that fired from a stale closure (with `showGrid: false`), erasing the newly-drawn grid. Removed the setTimeout — the existing `useEffect([drawCanvas])` already redraws when `showGrid` state flips. Same fix applied to the `toggleGrid` imperative ref method. (`/app/frontend/src/components/AnimatedTurtle.jsx` ~L2409, L2332)
   - Cleanup: removed 5 verbose `console.log` lines from `handleSubmit`.
 
+- Student block-editor UX + layout follow-ups (Feb 2026 — from user report "Submit does not work + no line highlight"):
+  - **Submit button now disables + relabels to "Run First"** when the student hasn't run yet — matches the non-block path. Same for Done. Users no longer think Submit is broken when it's really just showing a toast error that they missed. (`/app/frontend/src/pages/AssignmentPage.jsx` L1521-1546)
+  - **Fixed layout overlap** where the AnimatedTurtle control row was rendering INSIDE the purple "Turtle Blocks" header bar (because the 420-px turtle column was `flex items-center` with content taller than the container, causing overflow upward). Changed to `items-start justify-center overflow-hidden`, and added `relative z-10` on the purple header so its Code/Reset/Run buttons are always on top and clickable. (`/app/frontend/src/components/TurtleBlocklyEditor.jsx` L1435, L1568)
+  - Verified end-to-end on preview: student places blocks → clicks Step ⏭ once → Submit switches from grey "Run First" to cyan "Submit" and the corresponding Python line gets a yellow highlight in the Code preview. Layout is clean, no overlaps.
+
 *Last Updated: Feb, 2026*
