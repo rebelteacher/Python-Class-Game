@@ -79,6 +79,14 @@ const blocklyStyles = `
     width: 3px !important;
     margin-left: 2px !important;
   }
+  /* Make the currently-executing Blockly block GLOW during step-through so
+     students can see which block just ran. Applied via a custom class we
+     toggle ourselves so it doesn't collide with the built-in click-select. */
+  .blocklyWorkspace g.blocklyDraggable.bytebattles-step-glow > .blocklyPath {
+    filter: drop-shadow(0 0 6px #facc15) drop-shadow(0 0 12px #facc15);
+    stroke: #facc15 !important;
+    stroke-width: 3px !important;
+  }
 `;
 
 // Define turtle-specific blocks
@@ -826,6 +834,23 @@ const generatePythonCode = (workspace) => {
     }
   };
   
+    // Annotate ONLY the first line of a block's own generated code with `# BID:<id>`
+    // so parseCode in AnimatedTurtle can later associate each Python command with the
+    // Blockly block that generated it — used to glow the block during step-through.
+    // We skip control-flow headers (lines ending with `:`) because parseCode's regex
+    // anchors on `:$` and inline comments would break it. Body statements are
+    // annotated by their own recursive processBlock calls (with the CHILD block's id).
+    const annotateWithBlockId = (code, block) => {
+      if (!code || !block?.id) return code;
+      const firstNewline = code.indexOf('\n');
+      if (firstNewline === -1) return code;
+      const firstLine = code.slice(0, firstNewline);
+      const rest = code.slice(firstNewline);
+      if (/:\s*$/.test(firstLine)) return code; // control-flow header
+      if (/#\s*BID:/.test(firstLine)) return code; // already annotated
+      return `${firstLine}  # BID:${block.id}${rest}`;
+    };
+
   const processBlock = (block, indent = '') => {
     if (!block) return "";
     let blockCode = "";
@@ -1009,7 +1034,7 @@ const generatePythonCode = (workspace) => {
         break;
     }
     
-    return blockCode;
+    return annotateWithBlockId(blockCode, block);
   };
   
   const processBlockChain = (block, indent = '') => {
@@ -1142,6 +1167,9 @@ const TurtleBlocklyEditor = forwardRef(({
   const turtleRef = useRef(null);
   const monacoEditorRef = useRef(null);
   const monacoDecorationsRef = useRef([]);
+  // Track the currently-glowing Blockly block during step-through so we can
+  // clean the glow class off it before adding it to the next block.
+  const glowingBlockIdRef = useRef(null);
   const [generatedCode, setGeneratedCode] = useState("");
   const [manualCode, setManualCode] = useState(null); // null = use generatedCode
   const [showCode, setShowCode] = useState(false);
@@ -1571,9 +1599,37 @@ const TurtleBlocklyEditor = forwardRef(({
               code={activeCode}
               width={compact ? 300 : 400}
               height={compact ? 300 : 400}
-              onLineHighlight={(lineNum) => {
+              onLineHighlight={(lineNum, blockId) => {
                 setHighlightedLine(typeof lineNum === 'number' ? lineNum : -1);
-                if (onLineHighlight) onLineHighlight(lineNum);
+                // Glow the currently-executing block in the Blockly workspace so
+                // students can see which block the turtle is running. We use our
+                // OWN class (bytebattles-step-glow) instead of Blockly's built-in
+                // highlightBlock/blocklySelected so it doesn't collide with a
+                // student clicking a block to select it.
+                const ws = workspaceRef.current;
+                if (ws) {
+                  try {
+                    const prevId = glowingBlockIdRef.current;
+                    if (prevId && prevId !== blockId) {
+                      const prev = ws.getBlockById?.(prevId);
+                      if (prev?.getSvgRoot) {
+                        prev.getSvgRoot().classList.remove('bytebattles-step-glow');
+                      }
+                    }
+                    if (blockId) {
+                      const next = ws.getBlockById?.(blockId);
+                      if (next?.getSvgRoot) {
+                        next.getSvgRoot().classList.add('bytebattles-step-glow');
+                      }
+                      glowingBlockIdRef.current = blockId;
+                    } else {
+                      glowingBlockIdRef.current = null;
+                    }
+                  } catch (e) {
+                    // workspace may be disposed; ignore
+                  }
+                }
+                if (onLineHighlight) onLineHighlight(lineNum, blockId);
               }}
               onRun={() => {
                 console.log("AnimatedTurtle onRun callback triggered");

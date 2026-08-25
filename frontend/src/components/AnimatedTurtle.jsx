@@ -918,6 +918,28 @@ function parseCode(code, parentVars = {}) {
     }
   }
   
+  // Attach block IDs from `# BID:<id>` inline comments — used to glow the block
+  // in the Blockly workspace during step-through. Walks nested command bodies too.
+  // Blockly IDs use a base64-ish alphabet (letters, digits, and punctuation like
+  // `;` `!` `-` `_`), so we match "any non-whitespace" instead of just \w.
+  const lineBlockIds = {};
+  for (let i = 0; i < lines.length; i++) {
+    const m = lines[i].match(/#\s*BID:(\S+)/);
+    if (m) lineBlockIds[i] = m[1];
+  }
+  const attachBlockIds = (cmds) => {
+    if (!Array.isArray(cmds)) return;
+    for (const c of cmds) {
+      if (typeof c.line === 'number' && lineBlockIds[c.line]) {
+        c.blockId = lineBlockIds[c.line];
+      }
+      ['bodyCommands', 'ifCommands', 'elseCommands', 'whileBodyCommands', 'commands'].forEach((k) => {
+        if (Array.isArray(c[k])) attachBlockIds(c[k]);
+      });
+    }
+  };
+  attachBlockIds(commands);
+
   return commands;
 }
 
@@ -1443,7 +1465,7 @@ const AnimatedTurtle = forwardRef(function AnimatedTurtle({
     pathsRef.current = [];
     variablesRef.current = {}; // Reset runtime variables
     drawCanvas();
-    if (onLineHighlight) onLineHighlight(-1);
+    if (onLineHighlight) onLineHighlight(-1, null);
   }, [drawCanvas, onLineHighlight, backgroundColor]);
   
   // Initial draw
@@ -2044,14 +2066,14 @@ const AnimatedTurtle = forwardRef(function AnimatedTurtle({
       
       const cmd = commands[i];
       setCurrentStep(i);
-      if (onLineHighlight) onLineHighlight(cmd.line);
+      if (onLineHighlight) onLineHighlight(cmd.line, cmd.blockId);
       
       await executeCommand(cmd, true);
     }
     
     playingRef.current = false;
     setIsPlaying(false);
-    if (onLineHighlight) onLineHighlight(-1);
+    if (onLineHighlight) onLineHighlight(-1, null);
     
     // After playing, check if there are event handlers and activate event mode
     const hasEventHandlers = 
@@ -2113,7 +2135,7 @@ const AnimatedTurtle = forwardRef(function AnimatedTurtle({
     playingRef.current = false;
     setIsPlaying(false);
     setEventModeActive(false);
-    if (onLineHighlight) onLineHighlight(-1);
+    if (onLineHighlight) onLineHighlight(-1, null);
   }, [onLineHighlight]);
   
   // Execute event handler commands (for key/click events)
@@ -2204,7 +2226,7 @@ const AnimatedTurtle = forwardRef(function AnimatedTurtle({
     setCurrentStep(idx);
     setManualStepIdx(idx);
     stepIdxRef.current = idx;
-    if (onLineHighlight) onLineHighlight(cmd.line);
+    if (onLineHighlight) onLineHighlight(cmd.line, cmd.blockId);
     // Animate each individual step so the drawing motion is visible
     await executeCommand(cmd, true);
     // Notify parent on the FIRST step so the student's Submit button unlocks —

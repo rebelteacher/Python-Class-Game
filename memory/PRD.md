@@ -387,4 +387,11 @@ A coding education platform for K-12 students featuring multiple programming env
   - Also fixed AssignmentPage passing the wrong id to the panel — was `assignmentId` (undefined on `/lesson/*` routes since useParams gives `chapter/lesson` there), now `effectiveAssignmentId` (uses `lessonData.id` on lesson pages).
   - Verified in preview: dropdown lists all 30+ teacher classrooms, "2nd Period (2)" shows both students with "0/2" progress badges and "Done:0 Started:2 None:0" summary footer.
 
+- Block-workspace glow during step-through (Feb 2026):
+  - Extended `generatePythonCode` in `TurtleBlocklyEditor.jsx` to append `# BID:<block.id>` inline comments to every terminal Python statement (skips control-flow headers ending in `:` so `parseCode`'s regex isn't broken). `annotateWithBlockId` helper.
+  - `parseCode` in `AnimatedTurtle.jsx` now post-processes commands to attach `blockId` from `# BID:` inline comments. Regex uses `\S+` (not `[\w-]+`) because Blockly IDs contain punctuation like `;` `!` `-` `_`.
+  - `stepForward` and `play` pass `(line, blockId)` to `onLineHighlight`. `TurtleBlocklyEditor` uses `workspace.getBlockById(blockId).getSvgRoot().classList.add('bytebattles-step-glow')` and tracks the previously-glowing block in a ref so it swaps cleanly on each step. Custom class (not Blockly's `.blocklySelected`) so it doesn't collide with the student clicking a block to select it.
+  - CSS: `.bytebattles-step-glow > .blocklyPath` gets a bright yellow drop-shadow (`0 0 6px + 0 0 12px #facc15`) with 3px yellow stroke.
+  - Verified in preview: single Motion block → click Step ⏭ → block gets `bytebattles-step-glow` class + visible yellow glow; turtle draws forward; code line 6 highlights yellow simultaneously. Both features live together.
+
 *Last Updated: Feb, 2026*
