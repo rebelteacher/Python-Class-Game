@@ -2342,7 +2342,7 @@ export default function AssignmentPage({ user, lessonData }) {
       {/* Teacher Panel - Only show for teachers */}
       {isTeacher && assignment?.problems && (
         <TeacherPanel
-          assignmentId={assignmentId}
+          assignmentId={effectiveAssignmentId}
           classroomId={classroomIdFromNav}
           currentProblemIndex={currentProblemIndex}
           problems={assignment.problems}

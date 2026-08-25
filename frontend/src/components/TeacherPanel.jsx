@@ -24,21 +24,53 @@ export default function TeacherPanel({
   const [studentCode, setStudentCode] = useState(null);
   const [loadingCode, setLoadingCode] = useState(false);
   const [showCodeDialog, setShowCodeDialog] = useState(false);
+  // Class picker: teacher's classrooms + the one currently selected (defaults to prop)
+  const [classrooms, setClassrooms] = useState([]);
+  const [selectedClassroomId, setSelectedClassroomId] = useState(classroomId || "");
+  const [loadingClassrooms, setLoadingClassrooms] = useState(false);
 
-  // Fetch student progress when assignment/classroom/problem changes
+  // Fetch the teacher's classrooms once when the panel mounts
+  useEffect(() => {
+    let cancelled = false;
+    const fetchClassrooms = async () => {
+      setLoadingClassrooms(true);
+      try {
+        const response = await axios.get(`${API}/classrooms`, { withCredentials: true });
+        if (cancelled) return;
+        const list = Array.isArray(response.data) ? response.data : [];
+        setClassrooms(list);
+        // If no class was pre-selected via navigation state, default to the first one so
+        // the panel is immediately useful (previously showed "No students enrolled" forever).
+        if (!classroomId && list.length > 0) {
+          setSelectedClassroomId(list[0].id);
+        }
+      } catch (error) {
+        console.error("Error fetching classrooms:", error);
+      } finally {
+        if (!cancelled) setLoadingClassrooms(false);
+      }
+    };
+    fetchClassrooms();
+    return () => { cancelled = true; };
+  }, [classroomId]);
+
+  // Fetch student progress when assignment or the selected classroom changes
   useEffect(() => {
     if (assignmentId) {
       fetchStudentProgress();
     }
-  }, [assignmentId, classroomId]);
+  }, [assignmentId, selectedClassroomId]);
 
   const fetchStudentProgress = async () => {
     setLoading(true);
     try {
-      const url = classroomId 
-        ? `${API}/assignments/${assignmentId}/student-progress?classroom_id=${classroomId}`
-        : `${API}/assignments/${assignmentId}/student-progress`;
-      
+      // encodeURIComponent so lesson ids like `lesson_..._blocks?` (yes, with a `?`)
+      // don't break the URL by being treated as the query-string delimiter.
+      const encodedId = encodeURIComponent(assignmentId);
+      const url = selectedClassroomId
+        ? `${API}/assignments/${encodedId}/student-progress?classroom_id=${selectedClassroomId}`
+        : `${API}/assignments/${encodedId}/student-progress`;
+
       const response = await axios.get(url, { withCredentials: true });
       setProgressData(response.data);
     } catch (error) {
@@ -58,8 +90,9 @@ export default function TeacherPanel({
     setShowCodeDialog(true);
     
     try {
+      const encodedId = encodeURIComponent(assignmentId);
       const response = await axios.get(
-        `${API}/assignments/${assignmentId}/student-code/${student.id}/${problemId}`,
+        `${API}/assignments/${encodedId}/student-code/${student.id}/${problemId}`,
         { withCredentials: true }
       );
       setStudentCode(response.data);
@@ -224,15 +257,33 @@ export default function TeacherPanel({
           </Button>
         </div>
 
-        {/* Classroom Filter */}
-        {classroomId && (
-          <div className="px-4 py-2 border-b border-cyan-200 bg-cyber-navy/80">
-            <div className="text-xs text-slate-500">Viewing section:</div>
-            <div className="text-sm font-medium text-slate-200 truncate">
-              {classroomId ? "Current Class" : "All Classes"}
-            </div>
-          </div>
-        )}
+        {/* Class Picker Dropdown */}
+        <div className="px-4 py-2 border-b border-cyan-200 bg-cyber-navy/80">
+          <label htmlFor="teacher-panel-class-select" className="text-xs text-slate-400 block mb-1">
+            Class:
+          </label>
+          <select
+            id="teacher-panel-class-select"
+            data-testid="teacher-panel-class-select"
+            value={selectedClassroomId}
+            onChange={(e) => setSelectedClassroomId(e.target.value)}
+            className="w-full text-sm text-slate-200 bg-cyber-navy border border-cyan-500/40 rounded px-2 py-1.5 focus:outline-none focus:ring-1 focus:ring-cyan-500"
+            disabled={loadingClassrooms}
+          >
+            {loadingClassrooms && <option value="">Loading classes…</option>}
+            {!loadingClassrooms && classrooms.length === 0 && (
+              <option value="">No classes yet — create one first</option>
+            )}
+            {!loadingClassrooms && classrooms.length > 0 && (
+              <option value="">All classes</option>
+            )}
+            {classrooms.map((c) => (
+              <option key={c.id} value={c.id}>
+                {c.name}{typeof c.students?.length === "number" ? ` (${c.students.length})` : ""}
+              </option>
+            ))}
+          </select>
+        </div>
 
         {/* Sort Options */}
         <div className="px-4 py-2 border-b border-cyan-200 bg-cyber-navy/80 flex items-center justify-between">
@@ -275,8 +326,23 @@ export default function TeacherPanel({
                   
                   {/* Student Name */}
                   <div className="flex-1 min-w-0">
-                    <div className="font-medium text-slate-200 truncate text-sm">
-                      {student.name}
+                    <div className="font-medium text-slate-200 truncate text-sm flex items-center gap-2">
+                      <span className="truncate">{student.name}</span>
+                      {typeof student.problems_solved === "number" && typeof student.problems_total === "number" && (
+                        <span
+                          data-testid={`student-progress-${student.id}`}
+                          className={`shrink-0 text-[10px] font-mono px-1.5 py-0.5 rounded ${
+                            student.problems_solved === student.problems_total && student.problems_total > 0
+                              ? 'bg-green-600/30 text-green-300'
+                              : student.problems_solved > 0
+                              ? 'bg-yellow-500/25 text-yellow-200'
+                              : 'bg-slate-700/60 text-slate-400'
+                          }`}
+                          title={`${student.problems_solved} of ${student.problems_total} problems solved in this assignment`}
+                        >
+                          {student.problems_solved}/{student.problems_total}
+                        </span>
+                      )}
                     </div>
                     {student.status === 'completed' && (
                       <div className="text-xs text-green-600">

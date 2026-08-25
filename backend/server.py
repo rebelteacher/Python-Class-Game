@@ -6186,21 +6186,55 @@ async def get_submissions(assignment_id: str, request: Request, classroom_id: st
 
 @api_router.get("/assignments/{assignment_id}/student-progress")
 async def get_student_progress(assignment_id: str, request: Request, classroom_id: str = None):
-    """Get student progress summary for each problem in an assignment"""
+    """Get student progress summary for each problem in an assignment.
+
+    Also supports LESSON pages: if assignment_id starts with `lesson_`, we build a
+    virtual assignment out of the problems that share that lesson's metadata so the
+    Teacher Panel works on lesson pages too. In lesson mode, classroom_id MUST be
+    provided (there's no classroom-membership implied by a lesson itself)."""
     user = await get_current_user(request)
-    
+
     if user["role"] != "teacher":
         raise HTTPException(status_code=403, detail="Only teachers can view student progress")
-    
-    # Get assignment
+
+    # Real-assignment lookup first
     assignment = await db.assignments.find_one({"id": assignment_id}, {"_id": 0})
+    is_lesson = False
+
+    if not assignment and assignment_id.startswith("lesson_"):
+        # Synthesize a virtual assignment from the lesson's problems by matching against
+        # every problem's (assignment_type, chapter, lesson) tuple. The lesson_id shape is
+        # `lesson_<assignment_type>_<chapter>_<lesson>` lowercased, spaces→_, `:` removed.
+        # We match by scanning all problems and rebuilding the same id — no need for the
+        # caller to pass structured chapter/lesson strings.
+        all_problems = await db.problems.find({}, {"_id": 0}).to_list(5000)
+        matching = []
+        for p in all_problems:
+            atype = p.get("assignment_type", "")
+            chap = p.get("chapter", "")
+            less = p.get("lesson", "")
+            probe_id = f"lesson_{atype}_{chap}_{less}".replace(" ", "_").replace(":", "").lower()
+            if probe_id == assignment_id:
+                matching.append(p)
+        if not matching:
+            raise HTTPException(status_code=404, detail="Lesson has no problems")
+        assignment = {
+            "id": assignment_id,
+            "title": matching[0].get("lesson", "Lesson"),
+            "problems": matching,
+            "teacher_id": user["id"],  # Any teacher can see progress on lesson pages for their own classes
+            "classroom_ids": [classroom_id] if classroom_id else [],
+        }
+        is_lesson = True
+
     if not assignment:
         raise HTTPException(status_code=404, detail="Assignment not found")
-    
-    # Verify teacher owns this assignment
-    teacher_id = assignment.get("teacher_id")
-    if teacher_id and teacher_id != user["id"]:
-        raise HTTPException(status_code=403, detail="Access denied")
+
+    # Verify teacher owns this assignment (skipped for synthesized lessons)
+    if not is_lesson:
+        teacher_id = assignment.get("teacher_id")
+        if teacher_id and teacher_id != user["id"]:
+            raise HTTPException(status_code=403, detail="Access denied")
     
     # Get problem IDs from the assignment
     # Handle both cases: problems array with full objects OR problem_ids array with just IDs
@@ -6272,6 +6306,25 @@ async def get_student_progress(assignment_id: str, request: Request, classroom_i
             existing = student_submissions[sid].get(pid)
             if not existing or (sub.get("is_passing") and not existing.get("is_passing")):
                 student_submissions[sid][pid] = sub
+    
+    # Per-student aggregate: how many problems has each student completed (passing or is_final)?
+    # Attached to each student in `all_students` so the panel can render "X/Y" next to each name.
+    total_problems = len(problem_ids)
+    for student in all_students:
+        sid = student["id"]
+        solved = 0
+        attempted = 0
+        for pid in problem_ids:
+            sub = student_submissions.get(sid, {}).get(pid)
+            student_subs_for_problem = [s for s in submissions if s.get("student_id") == sid and s.get("problem_id") == pid]
+            is_final = any(s.get("is_final") for s in student_subs_for_problem)
+            if sub:
+                attempted += 1
+                if sub.get("is_passing") or is_final:
+                    solved += 1
+        student["problems_solved"] = solved
+        student["problems_attempted"] = attempted
+        student["problems_total"] = total_problems
     
     # Categorize students for each problem
     # Also check for is_final status (student clicked "Done")
