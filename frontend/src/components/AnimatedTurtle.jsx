@@ -49,6 +49,17 @@ function evaluateExpression(expr, variables) {
   // Handle boolean values
   if (expr === 'True' || expr === 'true') return true;
   if (expr === 'False' || expr === 'false') return false;
+
+  // Handle len(<var>) — inline replace with the numeric length so downstream
+  // math evaluation (e.g., `i % len(colors)`) works without breaking the
+  // numbers-only guard.
+  if (expr.includes('len(')) {
+    expr = expr.replace(/len\s*\(\s*(\w+)\s*\)/g, (_m, name) => {
+      const v = variables[name];
+      if (Array.isArray(v) || typeof v === 'string') return String(v.length);
+      return '0';
+    });
+  }
   
   // Check for list indexing: varName[index] (e.g., colors[i], colors[0])
   const listIndexMatch = expr.match(/^(\w+)\[([^\]]+)\]$/);
@@ -513,24 +524,38 @@ function parseCode(code, parentVars = {}) {
       continue;
     }
     
-    // Parse pencolor with variable support (e.g., pencolor("red"), pencolor(colors[i]), pencolor(myColor))
-    match = trimmed.match(new RegExp(`${turtlePrefix}pencolor\\s*\\(\\s*([^)]+)\\s*\\)`));
-    if (match) {
-      const colorValue = getColorValue(match[1]);
-      if (colorValue) {
-        commands.push({ type: 'pencolor', value: colorValue, line: lineNum });
+    // Parse pencolor with variable support (e.g., pencolor("red"), pencolor(colors[i]),
+    // pencolor(myColor), pencolor(colors[i % len(colors)])). Uses balanced-paren extraction
+    // so nested calls like `len(colors)` don't get truncated by a lazy `[^)]+` regex.
+    if (trimmed.match(new RegExp(`${turtlePrefix}pencolor\\s*\\(`))) {
+      const startIdx = trimmed.indexOf('(');
+      const content = extractParenthesesContent(trimmed, startIdx);
+      if (content !== null) {
+        const colorValue = getColorValue(content);
+        if (colorValue) {
+          commands.push({ type: 'pencolor', value: colorValue, line: lineNum });
+        } else {
+          // Preserve the expression so runtime evaluation can resolve dynamic colors
+          // like colors[i % len(colors)] once loop variables are bound.
+          commands.push({ type: 'pencolor', expression: content, line: lineNum });
+        }
+        continue;
       }
-      continue;
     }
-    
-    // Parse fillcolor with variable support
-    match = trimmed.match(new RegExp(`${turtlePrefix}fillcolor\\s*\\(\\s*([^)]+)\\s*\\)`));
-    if (match) {
-      const colorValue = getColorValue(match[1]);
-      if (colorValue) {
-        commands.push({ type: 'fillcolor', value: colorValue, line: lineNum });
+
+    // Parse fillcolor with variable support (same nested-paren fix as pencolor)
+    if (trimmed.match(new RegExp(`${turtlePrefix}fillcolor\\s*\\(`))) {
+      const startIdx = trimmed.indexOf('(');
+      const content = extractParenthesesContent(trimmed, startIdx);
+      if (content !== null) {
+        const colorValue = getColorValue(content);
+        if (colorValue) {
+          commands.push({ type: 'fillcolor', value: colorValue, line: lineNum });
+        } else {
+          commands.push({ type: 'fillcolor', expression: content, line: lineNum });
+        }
+        continue;
       }
-      continue;
     }
     
     // Parse begin_fill
@@ -1589,17 +1614,35 @@ const AnimatedTurtle = forwardRef(function AnimatedTurtle({
           resolve();
           break;
           
-        case 'pencolor':
-          turtle.penColor = cmd.value;
-          turtle.turtleColor = cmd.value; // Also change turtle color
-          drawCanvas();
+        case 'pencolor': {
+          // If parseCode couldn't resolve the color statically (e.g. `pencolor(colors[i % len(colors)])`),
+          // evaluate at runtime once loop vars are bound.
+          let colorVal = cmd.value;
+          if (!colorVal && cmd.expression) {
+            const resolved = evaluateExpression(cmd.expression, variablesRef.current);
+            if (typeof resolved === 'string') colorVal = resolved;
+          }
+          if (colorVal) {
+            turtle.penColor = colorVal;
+            turtle.turtleColor = colorVal; // Also change turtle color
+            drawCanvas();
+          }
           resolve();
           break;
+        }
           
-        case 'fillcolor':
-          turtle.fillColor = cmd.value;
+        case 'fillcolor': {
+          let colorVal = cmd.value;
+          if (!colorVal && cmd.expression) {
+            const resolved = evaluateExpression(cmd.expression, variablesRef.current);
+            if (typeof resolved === 'string') colorVal = resolved;
+          }
+          if (colorVal) {
+            turtle.fillColor = colorVal;
+          }
           resolve();
           break;
+        }
           
         case 'color':
           turtle.penColor = cmd.penColor;

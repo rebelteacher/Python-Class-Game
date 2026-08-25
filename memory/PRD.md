@@ -402,4 +402,9 @@ A coding education platform for K-12 students featuring multiple programming env
   - **Problem Library isolation**: non-admin teachers now only see problems that are (a) seeded / no creator, (b) authored by any `is_admin=True` user, or (c) authored by themselves. Problems other teachers create stay in those teachers' libraries — no cross-contamination. Admin/platform teachers still see everything. (`/app/backend/server.py` L2064-2119)
   - Verified in preview: dashboard shows Problem Library button; classroom page opens on Lesson Locks tab; migration marker + 83/83 unlock confirmed via direct DB query.
 
+- Turtle sim: dynamic pencolor/fillcolor + `len()` (Feb 2026):
+  - Bug (user report): `t.pencolor(colors[i % len(colors)])` drew nothing. Three stacked issues — pencolor/fillcolor parser used lazy `[^)]+` regex that truncated at `len(colors`'s inner `)`; runtime `case 'pencolor'` only read `cmd.value` and ignored `cmd.expression`; `evaluateExpression` didn't understand `len(...)`.
+  - Fix: both pencolor and fillcolor parsers now use `extractParenthesesContent` (balanced-paren) and fall back to storing `cmd.expression` when the color can't be resolved statically. Runtime cases evaluate that expression against `variablesRef.current`. `evaluateExpression` now inlines `len(<var>)` → numeric length before the math-only guard runs. Files: `/app/frontend/src/components/AnimatedTurtle.jsx`.
+  - Verified via lint clean + code trace: for `colors = ["red",...,"purple"]`, `i=0` resolves `colors[0 % len(colors)]` → `colors[0]` → `"red"`; subsequent i values cycle through the palette.
+
 *Last Updated: Feb, 2026*
