@@ -258,16 +258,16 @@ export default function TeacherPanel({
         </div>
 
         {/* Class Picker Dropdown */}
-        <div className="px-4 py-2 border-b border-cyan-200 bg-cyber-navy/80">
-          <label htmlFor="teacher-panel-class-select" className="text-xs text-slate-400 block mb-1">
-            Class:
+        <div className="px-4 py-3 border-b border-cyan-200 bg-cyan-50">
+          <label htmlFor="teacher-panel-class-select" className="text-xs font-semibold text-cyan-700 uppercase tracking-wide block mb-1.5">
+            📚 Viewing Class
           </label>
           <select
             id="teacher-panel-class-select"
             data-testid="teacher-panel-class-select"
             value={selectedClassroomId}
             onChange={(e) => setSelectedClassroomId(e.target.value)}
-            className="w-full text-sm text-slate-200 bg-cyber-navy border border-cyan-500/40 rounded px-2 py-1.5 focus:outline-none focus:ring-1 focus:ring-cyan-500"
+            className="w-full text-sm font-medium text-slate-900 bg-white border-2 border-cyan-500 rounded-md px-3 py-2 shadow-sm focus:outline-none focus:ring-2 focus:ring-cyan-500 focus:border-cyan-600 cursor-pointer hover:border-cyan-600"
             disabled={loadingClassrooms}
           >
             {loadingClassrooms && <option value="">Loading classes…</option>}

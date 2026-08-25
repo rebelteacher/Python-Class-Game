@@ -665,8 +665,14 @@ export default function ClassroomPage({ user }) {
       </nav>
 
       <main className="container mx-auto px-6 py-10">
-        <Tabs defaultValue="tests" className="w-full">
+        <Tabs defaultValue={isTeacher ? "lessons" : "tests"} className="w-full">
           <TabsList className="mb-8">
+            {isTeacher && (
+              <TabsTrigger data-testid="lessons-tab" value="lessons" className="gap-2">
+                <Lock className="w-4 h-4" />
+                Lesson Locks
+              </TabsTrigger>
+            )}
             <TabsTrigger data-testid="tests-tab" value="tests" className="gap-2">
               <FileQuestion className="w-4 h-4" />
               Tests
@@ -683,12 +689,6 @@ export default function ClassroomPage({ user }) {
               <TabsTrigger data-testid="students-tab" value="students" className="gap-2">
                 <Users className="w-4 h-4" />
                 Students
-              </TabsTrigger>
-            )}
-            {isTeacher && (
-              <TabsTrigger data-testid="lessons-tab" value="lessons" className="gap-2">
-                <Lock className="w-4 h-4" />
-                Lesson Locks
               </TabsTrigger>
             )}
           </TabsList>

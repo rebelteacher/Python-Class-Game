@@ -394,4 +394,12 @@ A coding education platform for K-12 students featuring multiple programming env
   - CSS: `.bytebattles-step-glow > .blocklyPath` gets a bright yellow drop-shadow (`0 0 6px + 0 0 12px #facc15`) with 3px yellow stroke.
   - Verified in preview: single Motion block → click Step ⏭ → block gets `bytebattles-step-glow` class + visible yellow glow; turtle draws forward; code line 6 highlights yellow simultaneously. Both features live together.
 
+- Teacher Dashboard / Panel / Locks / Library fixes (Feb 2026 — from user report on production, batch of 4):
+  - **Teacher Panel class dropdown made highly visible**: white background, 2px cyan-500 border, cyan-700 "📚 VIEWING CLASS" label, 12px padding + shadow. Was previously low-contrast dark-on-dark and getting missed by teachers. (`/app/frontend/src/components/TeacherPanel.jsx` L245-268)
+  - **Problem Library shortcut** added to the Teacher Dashboard between "My Classrooms" heading and "Show Archived"/"Create Classroom" buttons. `data-testid=problem-library-link`, navigates to `/library`. (`/app/frontend/src/pages/TeacherDashboard.jsx` L664-673)
+  - **Lesson Locks tab moved to first position** in the classroom page tab list (was buried after Students → teachers couldn't find it). Also flipped default tab to `lessons` for teachers so they land on locks immediately. (`/app/frontend/src/pages/ClassroomPage.jsx` L668-694)
+  - **Lesson locks flipped to UNLOCKED-by-default** — one-time migration `unlock_all_lessons_feb2026` retroactively populated `unlocked_lessons` on every classroom with every lesson key currently in the problems collection. 83/83 classrooms now have all 92 lesson keys unlocked. `create_classroom` also pre-populates the same list so any new class starts fully unlocked. Idempotent via `db.migrations` marker. Teachers can still click "Lock" to gate individual lessons. (`/app/backend/server.py` L15216-15252 migration, L1689-1721 create endpoint)
+  - **Problem Library isolation**: non-admin teachers now only see problems that are (a) seeded / no creator, (b) authored by any `is_admin=True` user, or (c) authored by themselves. Problems other teachers create stay in those teachers' libraries — no cross-contamination. Admin/platform teachers still see everything. (`/app/backend/server.py` L2064-2119)
+  - Verified in preview: dashboard shows Problem Library button; classroom page opens on Lesson Locks tab; migration marker + 83/83 unlock confirmed via direct DB query.
+
 *Last Updated: Feb, 2026*

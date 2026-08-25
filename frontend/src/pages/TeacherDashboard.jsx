@@ -662,6 +662,16 @@ export default function TeacherDashboard({ user, setUser }) {
             <Dialog open={createDialogOpen} onOpenChange={setCreateDialogOpen}>
               <div className="flex gap-2">
                 <Button
+                  data-testid="problem-library-link"
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => navigate("/library")}
+                  className="gap-2 font-chakra text-xs rounded-none text-cyan-300 border border-cyan-500/40 bg-cyan-500/5 hover:bg-cyan-500/10 hover:text-cyan-200"
+                >
+                  <BookOpen className="w-4 h-4" />
+                  Problem Library
+                </Button>
+                <Button
                   variant="ghost"
                   size="sm"
                   onClick={toggleShowArchived}

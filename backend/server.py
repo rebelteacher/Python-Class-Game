@@ -1699,16 +1699,26 @@ async def create_classroom(classroom: ClassroomCreate, request: Request):
     while await db.classrooms.find_one({"class_code": class_code}):
         class_code = generate_class_code()
     
+    # Pre-populate unlocked_lessons with every existing lesson key so new
+    # classrooms default to "everything unlocked" (per Feb 2026 UX change —
+    # teachers can still lock individual lessons if they need to).
+    all_keys = set()
+    async for p in db.problems.find({}, {"_id": 0, "assignment_type": 1, "chapter": 1, "lesson": 1}):
+        atype, chap, less = p.get("assignment_type", ""), p.get("chapter", ""), p.get("lesson", "")
+        if atype and chap and less:
+            all_keys.add(f"{atype}|{chap}|{less}")
+
     new_classroom = Classroom(
         teacher_id=user["id"],
         name=classroom.name,
-        class_code=class_code
+        class_code=class_code,
+        unlocked_lessons=sorted(all_keys),
     )
-    
+
     classroom_dict = new_classroom.model_dump()
     classroom_dict["created_at"] = classroom_dict["created_at"].isoformat()
     await db.classrooms.insert_one(classroom_dict)
-    
+
     return new_classroom
 
 @api_router.get("/classrooms")
@@ -2062,9 +2072,16 @@ async def get_problems(
     search: Optional[str] = None,
     assignment_type: Optional[str] = None
 ):
-    """Get all problems with optional filters"""
-    await get_current_user(request)
-    
+    """Get all problems with optional filters.
+
+    Library isolation (Feb 2026): teachers only see problems that are (a) seeded
+    (no creator_id), (b) created by an admin/platform user (`users.is_admin=True`),
+    or (c) created by THEMSELVES. Problems other teachers create stay in those
+    teachers' own libraries — no cross-contamination. Admins/students see
+    everything (admins own the canonical curriculum; students go through their
+    teacher's assignments, not the raw library)."""
+    user = await get_current_user(request)
+
     query = {}
     if category:
         query["category"] = category
@@ -2078,12 +2095,31 @@ async def get_problems(
         query["csta_standard"] = {"$regex": csta_standard, "$options": "i"}
     if assignment_type:
         query["assignment_type"] = assignment_type
-    if search:
-        query["$or"] = [
-            {"title": {"$regex": search, "$options": "i"}},
-            {"description": {"$regex": search, "$options": "i"}}
+
+    # Teacher-scoped library visibility
+    creator_clauses = None
+    if user["role"] == "teacher" and not user.get("is_admin"):
+        admin_ids = [u["id"] async for u in db.users.find({"is_admin": True}, {"_id": 0, "id": 1})]
+        creator_clauses = [
+            {"creator_id": {"$exists": False}},
+            {"creator_id": None},
+            {"creator_id": ""},
+            {"creator_id": user["id"]},
+            {"creator_id": {"$in": admin_ids}},
         ]
-    
+
+    # Build the final $and (search OR-list + creator OR-list must both apply)
+    and_clauses = []
+    if search:
+        and_clauses.append({"$or": [
+            {"title": {"$regex": search, "$options": "i"}},
+            {"description": {"$regex": search, "$options": "i"}},
+        ]})
+    if creator_clauses:
+        and_clauses.append({"$or": creator_clauses})
+    if and_clauses:
+        query["$and"] = and_clauses
+
     problems = await db.problems.find(query, {"_id": 0}).to_list(10000)
     return problems
 
@@ -15211,6 +15247,41 @@ async def migrate_problem_unit_fields():
             logger.info("✅ Problem.unit fields already normalized")
     except Exception as e:
         logger.error(f"Error migrating problem.unit fields: {e}")
+
+
+@app.on_event("startup")
+async def migrate_unlock_all_lessons_feb2026():
+    """One-time migration (Feb 2026): flip lesson-lock default to UNLOCKED.
+    Retroactively adds every existing lesson key to every classroom's
+    `unlocked_lessons` list so all lessons appear unlocked to students.
+    Teachers can still lock individual lessons — the toggle just starts from
+    the "unlocked" side now.
+    Idempotent via db.migrations flag.
+    """
+    try:
+        marker = await db.migrations.find_one({"name": "unlock_all_lessons_feb2026"})
+        if marker and marker.get("applied"):
+            logger.info("✅ Lesson unlock migration already applied")
+            return
+        # Collect every (assignment_type, chapter, lesson) tuple from problems
+        all_keys = set()
+        async for p in db.problems.find({}, {"_id": 0, "assignment_type": 1, "chapter": 1, "lesson": 1}):
+            atype, chap, less = p.get("assignment_type", ""), p.get("chapter", ""), p.get("lesson", "")
+            if atype and chap and less:
+                all_keys.add(f"{atype}|{chap}|{less}")
+        if not all_keys:
+            logger.info("⏭  No lessons found — skipping unlock-all migration")
+            return
+        sorted_keys = sorted(all_keys)
+        res = await db.classrooms.update_many({}, {"$set": {"unlocked_lessons": sorted_keys}})
+        await db.migrations.update_one(
+            {"name": "unlock_all_lessons_feb2026"},
+            {"$set": {"applied": True, "applied_at": datetime.now(timezone.utc).isoformat(), "lesson_count": len(sorted_keys)}},
+            upsert=True,
+        )
+        logger.info(f"🔓 Unlocked all lessons for {res.modified_count} classrooms ({len(sorted_keys)} lesson keys each)")
+    except Exception as e:
+        logger.error(f"Error in unlock-all-lessons migration: {e}")
 
 
 @app.on_event("startup")
