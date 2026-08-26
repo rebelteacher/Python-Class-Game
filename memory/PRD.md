@@ -425,4 +425,8 @@ A coding education platform for K-12 students featuring multiple programming env
   - Fix (`/app/frontend/src/pages/TestTaking.jsx`): lifted `renderTextWithLineBreaks` to module scope right above `renderChoice`, removed the inner duplicate, and added a defensive `(currentQuestion.choices || [])` guard so a question with malformed data can no longer crash the whole quiz.
   - Result: Unit 1 Lesson 1 quiz (and every other quiz) will now paginate cleanly regardless of choice-type mix.
 
+- Quiz scores now visible on the Tests tab (Feb 2026 — user report "I can't find where their quiz scores are"):
+  - Backend: `GET /api/classrooms/{id}/test-assignments` now folds in per-test class-wide stats for teachers only — `{total_students, attempts_done, avg_score}`. Queries `mc_test_attempts` or `coding_test_attempts` depending on `test_type`, keeps the BEST attempt per student, and normalizes legacy raw-score records against `num_questions`. Students see no stats field. `/app/backend/server.py` L11858-11914.
+  - Frontend: Every test card in the Tests tab now shows two prominent at-a-glance stat blocks (`data-testid=test-stats-<id>`): "Completed X/Y" and "Class Avg XX%" (color-coded green ≥80, yellow ≥60, red <60, "—" when no attempts yet). The "Results" button was renamed to "**View Scores**" and promoted to the primary cyan style so it doesn't look like a secondary/outline action anymore. `/app/frontend/src/pages/ClassroomPage.jsx` L783-830.
+
 *Last Updated: Feb, 2026*

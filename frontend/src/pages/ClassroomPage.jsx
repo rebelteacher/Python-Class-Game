@@ -791,6 +791,30 @@ export default function ClassroomPage({ user }) {
                             <span className="px-2 py-1 bg-green-500/10 border border-green-500/40 text-green-400 text-xs rounded-none font-orbitron uppercase tracking-widest">Available</span>
                           )}
                         </div>
+                        {isTeacher && a.stats && (
+                          <div
+                            data-testid={`test-stats-${a.assignment_id}`}
+                            className="flex items-center gap-3 px-3 py-2 bg-cyber-cyan/5 border border-cyber-cyan/30 rounded-none text-xs font-chakra"
+                          >
+                            <div className="flex-1">
+                              <div className="text-slate-400 uppercase text-[10px] tracking-widest">Completed</div>
+                              <div className="text-white font-orbitron">
+                                {a.stats.attempts_done}/{a.stats.total_students}
+                              </div>
+                            </div>
+                            <div className="flex-1">
+                              <div className="text-slate-400 uppercase text-[10px] tracking-widest">Class Avg</div>
+                              <div className={`font-orbitron ${
+                                a.stats.avg_score === null ? 'text-slate-500'
+                                : a.stats.avg_score >= 80 ? 'text-green-400'
+                                : a.stats.avg_score >= 60 ? 'text-yellow-400'
+                                : 'text-red-400'
+                              }`}>
+                                {a.stats.avg_score === null ? '—' : `${a.stats.avg_score}%`}
+                              </div>
+                            </div>
+                          </div>
+                        )}
                         <div className="pt-3 flex gap-2">
                           {!isTeacher && isAvailable && (
                             <Button
@@ -805,12 +829,12 @@ export default function ClassroomPage({ user }) {
                           {isTeacher && (
                             <>
                               <Button
+                                data-testid={`view-scores-${a.assignment_id}`}
                                 size="sm"
-                                variant="outline"
-                                className="flex-1 rounded-none"
+                                className="flex-1 bg-cyber-cyan text-cyber-black hover:shadow-[0_0_15px_rgba(0,240,255,0.5)] font-orbitron uppercase tracking-widest text-xs rounded-none"
                                 onClick={() => navigate(a.test_type === "coding" ? `/coding-tests/${a.test_id}/submissions` : `/test/${a.test_id}/results`)}
                               >
-                                Results
+                                View Scores
                               </Button>
                               <Button
                                 size="sm"

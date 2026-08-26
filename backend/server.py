@@ -11855,7 +11855,7 @@ async def list_classroom_test_assignments(classroom_id: str, request: Request):
         if user["role"] == "student" and a["test_type"] == "coding":
             test.pop("problem_ids", None)  # they get problems via the start endpoint
 
-        enriched.append({
+        assignment_row = {
             "assignment_id": a["id"],
             "test_id": a["test_id"],
             "test_type": a["test_type"],
@@ -11871,7 +11871,45 @@ async def list_classroom_test_assignments(classroom_id: str, request: Request):
             "late_penalty_percent": a.get("late_penalty_percent", 0),
             "auto_release_results": a.get("auto_release_results", True),
             "assigned_at": assigned.isoformat() if assigned else None,
-        })
+        }
+
+        # Teacher-only summary: fold in class-wide attempt stats so scores are
+        # visible right on the Tests tab card (no need to click through to the
+        # Results page). Students see nothing here.
+        if is_teacher:
+            enrolled_ids = classroom.get("student_ids", []) or []
+            total_students = len(enrolled_ids)
+            avg_score = None
+            attempts_done = 0
+            if enrolled_ids:
+                coll_attempts = db.mc_test_attempts if a["test_type"] == "mc" else db.coding_test_attempts
+                attempt_docs = await coll_attempts.find(
+                    {"test_id": a["test_id"], "student_id": {"$in": enrolled_ids}, "submitted_at": {"$ne": None}},
+                    {"_id": 0, "student_id": 1, "score": 1, "percentage": 1},
+                ).to_list(1000)
+                # Keep the BEST attempt per student
+                best_pct = {}
+                for at in attempt_docs:
+                    sid = at.get("student_id")
+                    pct = at.get("percentage")
+                    if pct is None and at.get("score") is not None:
+                        # Older docs stored raw score — normalize using num_questions when possible
+                        nq = assignment_row["num_questions"] or 0
+                        pct = (at["score"] / nq * 100) if nq else None
+                    if pct is None:
+                        continue
+                    if sid not in best_pct or pct > best_pct[sid]:
+                        best_pct[sid] = pct
+                attempts_done = len(best_pct)
+                if best_pct:
+                    avg_score = sum(best_pct.values()) / len(best_pct)
+            assignment_row["stats"] = {
+                "total_students": total_students,
+                "attempts_done": attempts_done,
+                "avg_score": round(avg_score, 1) if avg_score is not None else None,
+            }
+
+        enriched.append(assignment_row)
 
     enriched.sort(key=lambda x: x.get("available_from") or x.get("assigned_at") or "")
     return {"assignments": enriched}
