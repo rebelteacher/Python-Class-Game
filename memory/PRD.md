@@ -407,4 +407,11 @@ A coding education platform for K-12 students featuring multiple programming env
   - Fix: both pencolor and fillcolor parsers now use `extractParenthesesContent` (balanced-paren) and fall back to storing `cmd.expression` when the color can't be resolved statically. Runtime cases evaluate that expression against `variablesRef.current`. `evaluateExpression` now inlines `len(<var>)` → numeric length before the math-only guard runs. Files: `/app/frontend/src/components/AnimatedTurtle.jsx`.
   - Verified via lint clean + code trace: for `colors = ["red",...,"purple"]`, `i=0` resolves `colors[0 % len(colors)]` → `colors[0]` → `"red"`; subsequent i values cycle through the palette.
 
+- Unit 1 block-workspace persistence across devices (Feb 2026 — user report "Unit 1 not saving code"):
+  - Root cause: block XML was only persisted to `localStorage[saved_xml_<id>]` which is per-browser, per-device. Students switching devices, using Chrome vs Safari, or having cache cleared lost all their placed blocks.
+  - New backend: `POST /api/drafts` (upsert-by-{student,assignment,problem}) and `GET /api/drafts?assignment_id=` — separate `block_drafts` collection so we can write cheaply on every workspace change without polluting Submission history. `/app/backend/server.py` L2062-2095.
+  - Frontend: `AssignmentPage` now (a) fetches server drafts on mount and merges them into `savedXmlPerProblem` after the localStorage seed, and (b) POSTs to `/api/drafts` with a 1.5s debounce on every `onXmlChange` so Blockly's rapid-fire events don't spam the API. Timers are keyed per-problem so navigating problems doesn't lose an in-flight save. `/app/frontend/src/pages/AssignmentPage.jsx`.
+  - Result: students can leave a Unit 1 lesson (any device), come back later (same or different device), and their placed blocks are exactly where they left them. localStorage remains as offline fallback.
+  - Verified: `POST /api/drafts` + `GET /api/drafts` round-trip works via curl (auth-gated).
+
 *Last Updated: Feb, 2026*

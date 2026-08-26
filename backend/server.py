@@ -2061,6 +2061,44 @@ async def create_problem(problem: ProblemCreate, request: Request):
     
     return new_problem
 
+
+# ─────────────────────────── Block-XML drafts ───────────────────────────
+# Per-student, per-problem draft storage so Unit 1 students can leave a lesson,
+# come back later (or from another device), and pick up their block workspace
+# exactly where they left it. Kept separate from Submission history so we can
+# write cheaply on every workspace change (debounced client-side).
+
+class DraftUpsert(BaseModel):
+    assignment_id: str
+    problem_id: str
+    xml: str = ""
+
+
+@api_router.post("/drafts")
+async def upsert_draft(payload: DraftUpsert, request: Request):
+    user = await get_current_user(request)
+    key = {"student_id": user["id"], "assignment_id": payload.assignment_id, "problem_id": payload.problem_id}
+    await db.block_drafts.update_one(
+        key,
+        {"$set": {**key, "xml": payload.xml, "updated_at": datetime.now(timezone.utc).isoformat()}},
+        upsert=True,
+    )
+    return {"success": True}
+
+
+@api_router.get("/drafts")
+async def get_drafts(assignment_id: str, request: Request):
+    user = await get_current_user(request)
+    docs = await db.block_drafts.find(
+        {"student_id": user["id"], "assignment_id": assignment_id},
+        {"_id": 0, "problem_id": 1, "xml": 1, "updated_at": 1},
+    ).to_list(500)
+    # Return as {problem_id -> xml} for easy client merge
+    return {d["problem_id"]: d.get("xml", "") for d in docs}
+
+
+
+
 @api_router.get("/problems")
 async def get_problems(
     request: Request,

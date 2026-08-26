@@ -145,6 +145,10 @@ export default function AssignmentPage({ user, lessonData }) {
   const codeEditorRef = useRef(null); // Reference to Monaco editor instance
   const decorationsRef = useRef([]); // Store decoration IDs for removal
   const turtleRef = useRef(null); // Reference to AnimatedTurtle for block assignments
+  // Debounced server-side draft saver so we don't POST on every Blockly event.
+  // Keyed by problemId → latest pending {timer, xml} so navigating problems
+  // doesn't lose an in-flight save.
+  const draftSaveTimersRef = useRef({});
   const demoTurtleRef = useRef(null); // Ref for teacher demo AnimatedTurtle (Play/Step/Reset in header)
   const [demoTurtleState, setDemoTurtleState] = useState({ isPlaying: false, currentStep: -1, manualStepIdx: -1, totalCommands: 0, showGrid: false });
   
@@ -207,6 +211,23 @@ export default function AssignmentPage({ user, lessonData }) {
       } catch (e) {
         console.error("Error loading saved block XML:", e);
       }
+    }
+
+    // Also hydrate block XML from server-side drafts so students can resume
+    // their Unit 1 workspace from any device (localStorage is per-browser).
+    // Server data wins over stale local cache when both exist for a problem.
+    if (effectiveAssignmentId) {
+      axios
+        .get(`${API}/drafts`, { params: { assignment_id: effectiveAssignmentId }, withCredentials: true })
+        .then((r) => {
+          const remote = r.data || {};
+          if (Object.keys(remote).length > 0) {
+            setSavedXmlPerProblem((prev) => ({ ...prev, ...remote }));
+          }
+        })
+        .catch(() => {
+          // Non-fatal — offline fallback is localStorage
+        });
     }
   }, [effectiveAssignmentId]);
   
@@ -1575,6 +1596,20 @@ export default function AssignmentPage({ user, lessonData }) {
                           localStorage.setItem(`saved_xml_${effectiveAssignmentId}`, JSON.stringify(newState));
                           return newState;
                         });
+                        // Also debounce-persist to the backend so a student on a
+                        // different browser/device can pick their Unit 1 blocks
+                        // back up (localStorage is per-browser only).
+                        const timers = draftSaveTimersRef.current;
+                        if (timers[problemId]) clearTimeout(timers[problemId]);
+                        timers[problemId] = setTimeout(() => {
+                          axios.post(`${API}/drafts`, {
+                            assignment_id: effectiveAssignmentId,
+                            problem_id: problemId,
+                            xml: newXml || "",
+                          }, { withCredentials: true }).catch(() => {
+                            // Non-fatal — localStorage still has it
+                          });
+                        }, 1500);
                       }}
                       onRun={() => {
                         console.log("onRun callback received in AssignmentPage");
