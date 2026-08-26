@@ -3512,7 +3512,7 @@ async def get_classroom_chapter_progress(classroom_id: str, request: Request):
     if user["role"] != "teacher" or classroom.get("teacher_id") != user["id"]:
         raise HTTPException(status_code=403, detail="Only the owning teacher can view class progress")
 
-    student_ids = classroom.get("student_ids", []) or []
+    student_ids = classroom.get("students", []) or []
     total_students = len(student_ids)
     unlocked_set = set(classroom.get("unlocked_test_placements", []) or [])
 
@@ -11822,7 +11822,7 @@ async def list_classroom_test_assignments(classroom_id: str, request: Request):
         raise HTTPException(status_code=404, detail="Classroom not found")
 
     is_teacher = user["role"] == "teacher" and classroom.get("teacher_id") == user["id"]
-    is_enrolled_student = user["role"] == "student" and user["id"] in (classroom.get("student_ids", []) or [])
+    is_enrolled_student = user["role"] == "student" and user["id"] in (classroom.get("students", []) or [])
     if not (is_teacher or is_enrolled_student or user.get("is_admin")):
         raise HTTPException(status_code=403, detail="Access denied")
 
@@ -11877,7 +11877,7 @@ async def list_classroom_test_assignments(classroom_id: str, request: Request):
         # visible right on the Tests tab card (no need to click through to the
         # Results page). Students see nothing here.
         if is_teacher:
-            enrolled_ids = classroom.get("student_ids", []) or []
+            enrolled_ids = classroom.get("students", []) or []
             total_students = len(enrolled_ids)
             avg_score = None
             attempts_done = 0
@@ -12011,7 +12011,11 @@ async def get_all_mc_tests(request: Request):
 
 @api_router.get("/mc-tests/classroom/{classroom_id}")
 async def get_classroom_tests(classroom_id: str, request: Request):
-    """Get all tests for a classroom"""
+    """Get all tests for a classroom — resolves BOTH the legacy `mc_tests.classroom_ids`
+    field AND the newer `test_assignments` collection so tests assigned via either path
+    show up in reports. Previously only the legacy field was checked, which is why the
+    Test Reports page showed 0 results when a teacher picked a specific class but showed
+    everything when they picked "All"."""
     user = await get_current_user(request)
     
     # Verify classroom access
@@ -12022,31 +12026,45 @@ async def get_classroom_tests(classroom_id: str, request: Request):
     if user["role"] == "teacher":
         if classroom["teacher_id"] != user["id"]:
             raise HTTPException(status_code=403, detail="Access denied")
-        # Teachers see all tests
-        tests = await db.mc_tests.find(
-            {"classroom_ids": classroom_id},
-            {"_id": 0}
-        ).to_list(length=None)
     else:
         if user["id"] not in classroom.get("students", []):
             raise HTTPException(status_code=403, detail="Access denied")
-        # Students only see available tests (based on available_date)
+
+    # Union of test IDs from BOTH assignment paths
+    legacy = await db.mc_tests.find(
+        {"classroom_ids": classroom_id},
+        {"_id": 0}
+    ).to_list(length=None)
+    assigned_docs = await db.test_assignments.find(
+        {"classroom_id": classroom_id, "test_type": "mc"},
+        {"_id": 0, "test_id": 1},
+    ).to_list(length=None)
+    assigned_ids = [d["test_id"] for d in assigned_docs]
+    extra = []
+    if assigned_ids:
+        # Skip ones already in `legacy` to avoid duplicates
+        legacy_ids = {t.get("id") for t in legacy}
+        extra_ids = [tid for tid in assigned_ids if tid not in legacy_ids]
+        if extra_ids:
+            extra = await db.mc_tests.find({"id": {"$in": extra_ids}}, {"_id": 0}).to_list(length=None)
+    tests = legacy + extra
+
+    if user["role"] == "student":
+        # Students only see tests past their available_date
         now_utc = datetime.now(timezone.utc)
-        all_tests = await db.mc_tests.find(
-            {"classroom_ids": classroom_id},
-            {"_id": 0}
-        ).to_list(length=None)
-        
-        tests = []
-        for test in all_tests:
-            # Include test if no available_date or if it's past the available_date
+        filtered = []
+        for test in tests:
             if not test.get("available_date"):
-                tests.append(test)
+                filtered.append(test)
             else:
-                available_dt = datetime.fromisoformat(test["available_date"])
-                if now_utc >= available_dt:
-                    tests.append(test)
-    
+                try:
+                    available_dt = datetime.fromisoformat(test["available_date"])
+                    if now_utc >= available_dt:
+                        filtered.append(test)
+                except Exception:
+                    filtered.append(test)
+        tests = filtered
+
     return tests
 
 

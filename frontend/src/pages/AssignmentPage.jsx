@@ -428,8 +428,11 @@ export default function AssignmentPage({ user, lessonData }) {
             statusMap[problemId] = newScore;
           }
           
-          // Track if marked as final
-          if (submission.is_final) {
+          // Track if marked as final OR successfully passed — either counts as
+          // "done" in the top-right progress counter so it moves as students
+          // complete problems (previously it only moved when they clicked the
+          // separate "Done" button, which most students never noticed).
+          if (submission.is_final || submission.is_passing) {
             finalMap[problemId] = true;
           }
         });
