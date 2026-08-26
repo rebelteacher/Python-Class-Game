@@ -30,6 +30,12 @@ export default function TeacherDashboard({ user, setUser }) {
   const [showWipeModal, setShowWipeModal] = useState(false);
   const navigate = useNavigate();
 
+  // Units 2/3/4 are locked for self-serve trial accounts only. Everyone else
+  // (admins + invite-code teachers + active subscribers) gets full access.
+  // Server returns `full_access: true` on /auth/me for these users. We fall
+  // back to `is_admin` for older clients that predate the field.
+  const hasFullAccess = Boolean(user?.full_access || user?.is_admin);
+
   // Fun classroom name suggestions
   const classroomNameSuggestions = [
     "Python Pandemonium",
@@ -567,10 +573,10 @@ export default function TeacherDashboard({ user, setUser }) {
 
           {/* Unit 2: Turtle */}
           <Card 
-            className={`bg-cyber-navy/60 border border-cyber-lime/30 text-white transition-all duration-300 rounded-none relative ${user?.is_admin ? 'cursor-pointer hover:border-cyber-lime/80 hover:shadow-[0_0_15px_rgba(57,255,20,0.3)]' : 'opacity-60 cursor-not-allowed'}`}
-            onClick={user?.is_admin ? () => navigate("/turtle-curriculum") : undefined}
+            className={`bg-cyber-navy/60 border border-cyber-lime/30 text-white transition-all duration-300 rounded-none relative ${hasFullAccess ? 'cursor-pointer hover:border-cyber-lime/80 hover:shadow-[0_0_15px_rgba(57,255,20,0.3)]' : 'opacity-60 cursor-not-allowed'}`}
+            onClick={hasFullAccess ? () => navigate("/turtle-curriculum") : undefined}
           >
-            {!user?.is_admin && (
+            {!hasFullAccess && (
               <span className="absolute top-2 right-2 px-1.5 py-0.5 bg-cyber-magenta/20 border border-cyber-magenta/40 text-cyber-magenta text-[9px] font-orbitron uppercase tracking-widest rounded-none">
                 Soon
               </span>
@@ -579,16 +585,16 @@ export default function TeacherDashboard({ user, setUser }) {
               <div className="text-3xl mb-2">🐢</div>
               <h3 className="font-orbitron font-bold text-sm uppercase tracking-wider">Unit 2</h3>
               <p className="text-cyber-lime/80 text-xs font-chakra mt-1">Turtle Graphics</p>
-              <p className="text-xs text-slate-500 mt-1 font-chakra">{user?.is_admin ? 'Visual Output' : 'Coming Soon'}</p>
+              <p className="text-xs text-slate-500 mt-1 font-chakra">{hasFullAccess ? 'Visual Output' : 'Coming Soon'}</p>
             </CardContent>
           </Card>
 
           {/* Unit 3: Python */}
           <Card 
-            className={`bg-cyber-navy/60 border border-blue-500/30 text-white transition-all duration-300 rounded-none relative ${user?.is_admin ? 'cursor-pointer hover:border-blue-500/80 hover:shadow-[0_0_15px_rgba(59,130,246,0.3)]' : 'opacity-60 cursor-not-allowed'}`}
-            onClick={user?.is_admin ? () => navigate("/python-curriculum") : undefined}
+            className={`bg-cyber-navy/60 border border-blue-500/30 text-white transition-all duration-300 rounded-none relative ${hasFullAccess ? 'cursor-pointer hover:border-blue-500/80 hover:shadow-[0_0_15px_rgba(59,130,246,0.3)]' : 'opacity-60 cursor-not-allowed'}`}
+            onClick={hasFullAccess ? () => navigate("/python-curriculum") : undefined}
           >
-            {!user?.is_admin && (
+            {!hasFullAccess && (
               <span className="absolute top-2 right-2 px-1.5 py-0.5 bg-cyber-magenta/20 border border-cyber-magenta/40 text-cyber-magenta text-[9px] font-orbitron uppercase tracking-widest rounded-none">
                 Soon
               </span>
@@ -597,16 +603,16 @@ export default function TeacherDashboard({ user, setUser }) {
               <div className="text-3xl mb-2">🐍</div>
               <h3 className="font-orbitron font-bold text-sm uppercase tracking-wider">Unit 3</h3>
               <p className="text-blue-300 text-xs font-chakra mt-1">Python Text</p>
-              <p className="text-xs text-slate-500 mt-1 font-chakra">{user?.is_admin ? 'Text-Based Programming' : 'Coming Soon'}</p>
+              <p className="text-xs text-slate-500 mt-1 font-chakra">{hasFullAccess ? 'Text-Based Programming' : 'Coming Soon'}</p>
             </CardContent>
           </Card>
 
           {/* Unit 4: Micro:bit */}
           <Card 
-            className={`bg-cyber-navy/60 border border-cyber-cyan/30 text-white transition-all duration-300 rounded-none relative ${user?.is_admin ? 'cursor-pointer hover:border-cyber-cyan/80 hover:shadow-[0_0_15px_rgba(0,240,255,0.3)]' : 'opacity-60 cursor-not-allowed'}`}
-            onClick={user?.is_admin ? () => navigate("/microbit") : undefined}
+            className={`bg-cyber-navy/60 border border-cyber-cyan/30 text-white transition-all duration-300 rounded-none relative ${hasFullAccess ? 'cursor-pointer hover:border-cyber-cyan/80 hover:shadow-[0_0_15px_rgba(0,240,255,0.3)]' : 'opacity-60 cursor-not-allowed'}`}
+            onClick={hasFullAccess ? () => navigate("/microbit") : undefined}
           >
-            {!user?.is_admin && (
+            {!hasFullAccess && (
               <span className="absolute top-2 right-2 px-1.5 py-0.5 bg-cyber-magenta/20 border border-cyber-magenta/40 text-cyber-magenta text-[9px] font-orbitron uppercase tracking-widest rounded-none">
                 Soon
               </span>
@@ -615,7 +621,7 @@ export default function TeacherDashboard({ user, setUser }) {
               <div className="text-3xl mb-2">⚡</div>
               <h3 className="font-orbitron font-bold text-sm uppercase tracking-wider">Unit 4</h3>
               <p className="text-cyber-cyan/80 text-xs font-chakra mt-1">Micro:bit</p>
-              <p className="text-xs text-slate-500 mt-1 font-chakra">{user?.is_admin ? 'Physical Computing' : 'Coming Soon'}</p>
+              <p className="text-xs text-slate-500 mt-1 font-chakra">{hasFullAccess ? 'Physical Computing' : 'Coming Soon'}</p>
             </CardContent>
           </Card>
         </div>

@@ -414,4 +414,10 @@ A coding education platform for K-12 students featuring multiple programming env
   - Result: students can leave a Unit 1 lesson (any device), come back later (same or different device), and their placed blocks are exactly where they left them. localStorage remains as offline fallback.
   - Verified: `POST /api/drafts` + `GET /api/drafts` round-trip works via curl (auth-gated).
 
+- Full-access unlock for invite-code teachers (Feb 2026 — user report):
+  - Bug: A teacher who signed up with an invite code saw units 2/3/4 grayed out with "Soon" badges and a not-allowed cursor. Dashboard was gating on `user?.is_admin`, which is False for any non-platform teacher — including invite-code teachers.
+  - Fix (backend): `/auth/me` now returns `full_access: true` for admins + any teacher who is NOT on a self-serve trial (i.e., `trial_ends_at` is unset or the account has an active subscription). Trial accounts (`/start-trial`) still return `full_access: false` and stay gated to Unit 1. Also exposes `trial_ends_at` + `subscription_active` for future UI use. `/app/backend/server.py` L1162-1200.
+  - Fix (frontend): `TeacherDashboard.jsx` now computes `hasFullAccess = user?.full_access || user?.is_admin` and gates Units 2/3/4 on that instead of the old `is_admin`-only check. Falls back to `is_admin` for older cached clients that predate the new field.
+  - Result: any teacher you invite via invite code gets the full app immediately after they log in — no admin flag needed. Trial signups still see the Unit 1 preview.
+
 *Last Updated: Feb, 2026*

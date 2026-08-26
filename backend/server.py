@@ -1164,6 +1164,14 @@ async def get_me(request: Request):
     """Get current user info with fresh stats from database"""
     user = await get_current_user(request)
     
+    # `full_access` is True for anyone who is NOT on a self-serve trial account —
+    # so admins + teachers who signed up via an invite code get every unit
+    # unlocked, while `/start-trial` accounts stay gated to Unit 1 until they
+    # subscribe. This is what makes the "send an invite link → full app" flow work.
+    trial_ends_at = user.get("trial_ends_at")
+    is_trial = bool(trial_ends_at) and not user.get("subscription_active")
+    full_access = bool(user.get("is_admin")) or (user.get("role") == "teacher" and not is_trial)
+
     # Return full user profile including stats (always fresh from database)
     return {
         "id": user["id"],
@@ -1172,6 +1180,9 @@ async def get_me(request: Request):
         "picture": user.get("picture"),
         "role": user["role"],
         "is_admin": user.get("is_admin", False),
+        "full_access": full_access,
+        "trial_ends_at": trial_ends_at.isoformat() if hasattr(trial_ends_at, "isoformat") else trial_ends_at,
+        "subscription_active": user.get("subscription_active", False),
         "xp": user.get("xp", 0),
         "coins": user.get("coins", 0),
         "rank": user.get("rank", "Rookie"),
