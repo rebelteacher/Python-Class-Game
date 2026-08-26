@@ -420,4 +420,9 @@ A coding education platform for K-12 students featuring multiple programming env
   - Fix (frontend): `TeacherDashboard.jsx` now computes `hasFullAccess = user?.full_access || user?.is_admin` and gates Units 2/3/4 on that instead of the old `is_admin`-only check. Falls back to `is_admin` for older cached clients that predate the new field.
   - Result: any teacher you invite via invite code gets the full app immediately after they log in — no admin flag needed. Trial signups still see the Unit 1 preview.
 
+- Quiz "Something went wrong please refresh to continue" crash (Feb 2026 — production report):
+  - Root cause: `TestTaking.jsx` defined a module-level `renderChoice` that fell through to `renderTextWithLineBreaks(asStr)` for any non-block choice — but `renderTextWithLineBreaks` was only defined INSIDE the component. `const` isn't hoisted, so at module scope it was `undefined` → `ReferenceError` on every text choice → ErrorBoundary caught it and showed the "please refresh" screen. Any quiz that mixed block-style Question 1 with text-style Question 2 crashed the moment the student clicked Next (Question 1's block path skipped the throw).
+  - Fix (`/app/frontend/src/pages/TestTaking.jsx`): lifted `renderTextWithLineBreaks` to module scope right above `renderChoice`, removed the inner duplicate, and added a defensive `(currentQuestion.choices || [])` guard so a question with malformed data can no longer crash the whole quiz.
+  - Result: Unit 1 Lesson 1 quiz (and every other quiz) will now paginate cleanly regardless of choice-type mix.
+
 *Last Updated: Feb, 2026*

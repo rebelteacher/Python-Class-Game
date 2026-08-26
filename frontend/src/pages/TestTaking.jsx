@@ -137,13 +137,36 @@ const BlockRenderer = ({ blockType, customText }) => {
   );
 };
 
+// Helper function to render text with line breaks — module-scoped so both the
+// module-level `renderChoice` above and the component below can use it. If this
+// lives INSIDE the component, `renderChoice` (defined outside) hits a
+// ReferenceError the moment a non-block choice needs to be rendered. That
+// exact bug caused the "Something went wrong please refresh to continue"
+// error on Question 2 of the Unit 1 Lesson 1 quiz.
+const renderTextWithLineBreaks = (text) => {
+  if (!text && text !== 0) return null;
+  const asStr = String(text);
+  const lines = asStr.split('\n');
+  return lines.map((line, index) => (
+    <span key={index}>
+      {line}
+      {index < lines.length - 1 && <br />}
+    </span>
+  ));
+};
+
 const renderChoice = (text) => {
-  if (!text) return null;
-  const blockMatch = text.match(/^\[block:(\w+)\](.*)$/);
-  if (blockMatch) {
-    return <BlockRenderer blockType={blockMatch[1]} customText={blockMatch[2].trim() || undefined} />;
+  if (!text && text !== 0) return null;
+  const asStr = String(text);
+  try {
+    const blockMatch = asStr.match(/^\[block:(\w+)\](.*)$/);
+    if (blockMatch) {
+      return <BlockRenderer blockType={blockMatch[1]} customText={blockMatch[2].trim() || undefined} />;
+    }
+  } catch {
+    // fall through to text rendering
   }
-  return renderTextWithLineBreaks(text);
+  return renderTextWithLineBreaks(asStr);
 };
 
 export default function TestTaking({ user }) {
@@ -165,17 +188,6 @@ export default function TestTaking({ user }) {
   const [totalQuestions, setTotalQuestions] = useState(0);
   const [correctCount, setCorrectCount] = useState(0);
   const timerRef = useRef(null);
-
-  // Helper function to render text with line breaks - MUST be defined before any early returns
-  const renderTextWithLineBreaks = (text) => {
-    if (!text) return null;
-    return text.split('\n').map((line, index) => (
-      <span key={index}>
-        {line}
-        {index < text.split('\n').length - 1 && <br />}
-      </span>
-    ));
-  };
 
   useEffect(() => {
     startTest();
@@ -566,7 +578,7 @@ export default function TestTaking({ user }) {
                   value={answers[currentQuestion.id]} 
                   onValueChange={(value) => setAnswers({ ...answers, [currentQuestion.id]: value })}
                 >
-                  {currentQuestion.choices.map((choiceText, idx) => (
+                  {(currentQuestion.choices || []).map((choiceText, idx) => (
                     <div 
                       key={idx} 
                       className={`flex items-center space-x-3 p-4 rounded-lg transition-colors border-2 cursor-pointer
