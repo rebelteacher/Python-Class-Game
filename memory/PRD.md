@@ -434,4 +434,8 @@ A coding education platform for K-12 students featuring multiple programming env
   - **`/mc-tests/classroom/{id}` only checked the legacy `mc_tests.classroom_ids` field** — but tests assigned via the newer `test_assignments` collection weren't returned. That's why picking a specific class in Test Reports showed 0 tests but "All" showed everything. Fixed: endpoint now unions BOTH assignment paths and dedupes on test id. `/app/backend/server.py` L12012-12068.
   - **Top-right "Progress: 0/6 done" counter never moved** because it counted only `is_final=true` submissions — students who clicked Submit and got a passing grade weren't counted since they hadn't clicked the separate "Done" button. Now counts `is_final || is_passing` so successful submissions bump the counter immediately. `/app/frontend/src/pages/AssignmentPage.jsx` L432-436.
 
+- Regression fix: Submit no longer locks the workspace (Feb 2026 — user "This was working before, what happened?"):
+  - Root cause: My previous fix to make the "Progress: 0/6 done" counter move on passing submissions overloaded the existing `problemsFinal` state — but `problemsFinal` also drives `readOnly={problemsFinal[...]}` on the block/code editor. So a passing Submit → problemsFinal=true → editor locked → student couldn't retry to see what they did wrong. That behavior should ONLY happen when they explicitly click **Done**.
+  - Fix: split into two states in `AssignmentPage.jsx` — `problemsFinal` (only flips on `is_final`, still drives the read-only lock) and a new `problemsSolved` (flips on `is_final || is_passing`, drives ONLY the top-right progress counter). The counter still moves as students succeed, but the editor stays fully editable until they hit Done.
+
 *Last Updated: Feb, 2026*

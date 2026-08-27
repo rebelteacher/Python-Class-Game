@@ -102,6 +102,11 @@ export default function AssignmentPage({ user, lessonData }) {
   const [hasRunPerProblem, setHasRunPerProblem] = useState({}); // Track run status per problem
   const [problemStatuses, setProblemStatuses] = useState({}); // Track completion status (score) per problem
   const [problemsFinal, setProblemsFinal] = useState({}); // Track which problems are marked as done/final
+  // Separate state that ALSO counts passing submissions — drives the top-right
+  // "Progress: X/6 done" counter so it moves as students successfully solve
+  // problems, WITHOUT locking the editor (that stays gated on `problemsFinal`
+  // which only flips when they click the explicit Done button).
+  const [problemsSolved, setProblemsSolved] = useState({});
   const [currentProblemIndex, setCurrentProblemIndex] = useState(0);
   const [darkMode, setDarkMode] = useState(false); // Dark mode toggle
   const [markingFinal, setMarkingFinal] = useState(false);
@@ -410,11 +415,13 @@ export default function AssignmentPage({ user, lessonData }) {
       if (user.role === "student" && assignment && assignment.problems) {
         const statusMap = {};
         const finalMap = {};
+        const solvedMap = {};
         
         // Initialize all problems with no status
         assignment.problems.forEach(problem => {
           statusMap[problem.id] = null; // null = not attempted
           finalMap[problem.id] = false;
+          solvedMap[problem.id] = false;
         });
         
         // Update based on submissions
@@ -428,17 +435,22 @@ export default function AssignmentPage({ user, lessonData }) {
             statusMap[problemId] = newScore;
           }
           
-          // Track if marked as final OR successfully passed — either counts as
-          // "done" in the top-right progress counter so it moves as students
-          // complete problems (previously it only moved when they clicked the
-          // separate "Done" button, which most students never noticed).
-          if (submission.is_final || submission.is_passing) {
+          // problemsFinal drives the read-only lock on the editor — ONLY flip
+          // to true when the student clicked the Done button (is_final). A
+          // passing Submit must NOT lock them out; they can keep experimenting.
+          if (submission.is_final) {
             finalMap[problemId] = true;
+          }
+          // problemsSolved is what the top-right counter reads — it moves as
+          // soon as a student has a passing submission OR clicked Done.
+          if (submission.is_final || submission.is_passing) {
+            solvedMap[problemId] = true;
           }
         });
         
         setProblemStatuses(statusMap);
         setProblemsFinal(finalMap);
+        setProblemsSolved(solvedMap);
       }
     } catch (error) {
       console.error("Error fetching submissions:", error);
@@ -940,7 +952,7 @@ export default function AssignmentPage({ user, lessonData }) {
               </h3>
               <div className="flex items-center gap-4">
                 <div className="text-sm text-slate-400">
-                  Progress: {Object.values(problemsFinal).filter(isDone => isDone).length}/{assignment.problems.length} done
+                  Progress: {Object.values(problemsSolved).filter(isDone => isDone).length}/{assignment.problems.length} done
                 </div>
                 {user.role === "student" && (
                   <div className="text-sm font-semibold">
