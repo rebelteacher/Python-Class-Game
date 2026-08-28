@@ -169,6 +169,53 @@ def calculate_xp_and_coins(score: float, is_first_try: bool, current_streak: int
     
     return {"xp": xp, "coins": coins}
 
+async def award_test_xp(user: dict, test_id: str, score: float, problem_id: str = None) -> int:
+    """Award XP/coins for completing a lesson quiz or chapter test.
+
+    Points are earned on the FIRST attempt ONLY — persisted in the retake-safe
+    `test_xp_awards` collection (attempts get deleted on retake, awards do not).
+    Uses the same reward formula as regular problems. Also bumps the student's
+    total XP/coins so it reflects on their dashboard rank/level. Returns the XP
+    awarded (0 if this student already had an award for this test/problem).
+    """
+    student_id = user["id"]
+    key = {"student_id": student_id, "test_id": test_id}
+    if problem_id is not None:
+        key["problem_id"] = problem_id
+    else:
+        key["problem_id"] = None
+    existing = await db.test_xp_awards.find_one(key)
+    if existing:
+        return 0  # only the very first attempt ever earns points
+
+    placement = await db.curriculum_test_placements.find_one(
+        {"test_id": test_id}, {"_id": 0, "placement_type": 1}
+    )
+    placement_type = placement.get("placement_type") if placement else "quiz"
+
+    rewards = calculate_xp_and_coins(score, True, user.get("current_streak", 0))
+    xp = rewards["xp"]
+    coins = rewards["coins"]
+    now_iso = datetime.now(timezone.utc).isoformat()
+
+    await db.test_xp_awards.insert_one({
+        "id": str(uuid.uuid4()),
+        "student_id": student_id,
+        "test_id": test_id,
+        "problem_id": problem_id,
+        "placement_type": placement_type,
+        "score": score,
+        "xp_earned": xp,
+        "coins_earned": coins,
+        "submitted_at": now_iso,
+    })
+
+    if xp or coins:
+        await db.users.update_one(
+            {"id": student_id}, {"$inc": {"xp": xp, "coins": coins}}
+        )
+    return xp
+
 def generate_class_code():
     """Generate a unique 6-character class code"""
     return ''.join(random.choices(string.ascii_uppercase + string.digits, k=6))
@@ -9871,7 +9918,7 @@ async def get_student_ranks(student_id: str, request: Request):
             "xp_earned": {"$exists": True, "$ne": None, "$gt": 0},
             "submitted_at": {"$gte": cutoff_iso},
         }
-        for coll in (db.submissions, db.mc_test_attempts, db.coding_test_attempts):
+        for coll in (db.submissions, db.mc_test_attempts, db.coding_test_attempts, db.test_xp_awards):
             cursor = coll.find(base_filter, {"_id": 0, "student_id": 1, "xp_earned": 1})
             async for doc in cursor:
                 sid = doc.get("student_id")
@@ -10066,7 +10113,7 @@ async def get_reigning_beast(request: Request):
         "xp_earned": {"$exists": True, "$ne": None, "$gt": 0},
         "submitted_at": {"$gte": cutoff_iso},
     }
-    for coll in (db.submissions, db.mc_test_attempts, db.coding_test_attempts):
+    for coll in (db.submissions, db.mc_test_attempts, db.coding_test_attempts, db.test_xp_awards):
         cursor = coll.find(base_filter, {"_id": 0, "student_id": 1, "xp_earned": 1})
         async for doc in cursor:
             sid = doc.get("student_id")
@@ -12790,11 +12837,15 @@ async def submit_mc_test(test_id: str, submission: MCTestSubmission, request: Re
             }
         }
     )
-    
+
+    # Award XP/coins — first attempt only (lesson quiz / chapter test)
+    xp_awarded = await award_test_xp(user, test_id, score)
+
     return {
         "score": round(score, 1),
         "correct_count": correct_count,
         "total_questions": total_questions,
+        "xp_earned": xp_awarded,
         "question_results": question_results if show_answers else [],
         "show_answers": show_answers,
         "results_released": results_released,
@@ -13782,6 +13833,11 @@ Provide 1-2 sentences of encouraging feedback based on the test results. Focus o
     
     await db.coding_test_submissions.insert_one(submission_dict)
     
+    # Award XP/coins — first attempt only, per problem (chapter test / quiz)
+    xp_awarded = 0
+    if attempt_number == 1:
+        xp_awarded = await award_test_xp(user, test_id, final_score, problem_id=submission.problem_id)
+    
     # Calculate which score will count (best of all attempts)
     all_attempts = existing_submissions + [submission_dict]
     best_score = max(attempt["score"] for attempt in all_attempts)
@@ -13797,6 +13853,7 @@ Provide 1-2 sentences of encouraging feedback based on the test results. Focus o
         "submits_remaining": submits_remaining,
         "best_score": best_score,
         "is_best_attempt": is_best,
+        "xp_earned": xp_awarded,
         "message": f"Attempt {attempt_number}/2 submitted. {'This is your best score!' if is_best else f'Your best score is {best_score:.1f}%'}"
     }
 

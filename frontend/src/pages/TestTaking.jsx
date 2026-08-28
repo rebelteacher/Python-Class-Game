@@ -7,7 +7,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Label } from "@/components/ui/label";
 import { Progress } from "@/components/ui/progress";
-import { ArrowLeft, ArrowRight, Clock, CheckCircle, AlertCircle, Lock } from "lucide-react";
+import { ArrowLeft, ArrowRight, Clock, CheckCircle, AlertCircle, Lock, Zap } from "lucide-react";
 
 const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
 const API = `${BACKEND_URL}/api`;
@@ -179,7 +179,7 @@ export default function TestTaking({ user }) {
   const [submitting, setSubmitting] = useState(false);
   const [submitted, setSubmitted] = useState(false);
   const [score, setScore] = useState(null);
-  const [questionResults, setQuestionResults] = useState([]);
+  const [xpEarned, setXpEarned] = useState(0);  const [questionResults, setQuestionResults] = useState([]);
   const [showAnswers, setShowAnswers] = useState(true);
   const [resultsReleased, setResultsReleased] = useState(false);
   const [timeRemaining, setTimeRemaining] = useState(null);
@@ -299,6 +299,7 @@ export default function TestTaking({ user }) {
       setResultsReleased(data.results_released !== false);
       setTotalQuestions(data.total_questions || questions.length);
       setCorrectCount(data.correct_count || 0);
+      setXpEarned(typeof data.xp_earned === 'number' ? data.xp_earned : 0);
       setSubmitted(true);
       
       if (timerRef.current) {
@@ -396,6 +397,16 @@ export default function TestTaking({ user }) {
                   {correctCount} correct out of {totalQuestions || questions.length} questions
                 </p>
               </div>
+
+              {xpEarned > 0 && (
+                <div
+                  data-testid="quiz-xp-earned"
+                  className="inline-flex items-center gap-2 px-5 py-2.5 rounded-full bg-cyber-lime/10 border border-cyber-lime/40 text-cyber-lime font-orbitron font-bold shadow-[0_0_18px_rgba(57,255,20,0.25)]"
+                >
+                  <Zap className="w-5 h-5" />
+                  +{xpEarned} XP earned!
+                </div>
+              )}
               
               <div className="pt-6 border-t">
                 <p className="text-slate-400 mb-4">

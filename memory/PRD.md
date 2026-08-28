@@ -493,3 +493,12 @@ A coding education platform for K-12 students featuring multiple programming env
 
 ## Deferred backlog (user-parked)
 - **Missing-School Teacher Report (Mar 2, 2026)**: On `/admin-dashboard`, add a small "Teachers still missing a school" panel that lists every teacher account whose `users.school` is empty. Shows count + names + a quick action to open Reset-User-Password or email them so admins can chase down stragglers after running "Bind Existing Schools". Saved for later per user.
+
+## Quiz & Chapter Test XP (Mar 2026)
+- Lesson quizzes and chapter tests now award XP/coins on the **FIRST attempt only** (per user decision). Uses the same reward formula as problems (`calculate_xp_and_coins`: 100 XP pass ≥70%, 200 perfect, +50 first-try, +25 streak).
+- New retake-safe `test_xp_awards` collection (`student_id`, `test_id`, `problem_id`, `placement_type`, `score`, `xp_earned`, `coins_earned`, `submitted_at`). Keyed per (student, test[, problem]) so retakes never re-award — attempts get deleted on retake but awards persist.
+- `award_test_xp(user, test_id, score, problem_id=None)` helper in `server.py` (~L171). Called from `POST /mc-tests/{id}/submit` (MC quizzes/chapter tests) and `POST /coding-tests/{id}/submit` (coding, only when `attempt_number==1`). Bumps `users.xp`/`coins` too (counts toward dashboard rank/level).
+- Both leaderboard aggregations (`_year_xp_map` ~L9906 and `/leaderboard/beast` ~L10113) now include `db.test_xp_awards` so quiz/test XP counts toward school-year rankings.
+- Submit responses now return `xp_earned`. `TestTaking.jsx` shows a lime "+N XP earned!" badge (`data-testid=quiz-xp-earned`) on the results screen.
+- **Verified** via curl end-to-end: first attempt (100%) → +250 XP + award row + user xp bumped; retake (50%) → xp_earned=0, user xp unchanged, award count stays 1; `/leaderboard/beast` reflects the 250 year-XP. Test artifacts cleaned up afterward.
+
