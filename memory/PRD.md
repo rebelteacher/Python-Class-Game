@@ -545,3 +545,13 @@ A coding education platform for K-12 students featuring multiple programming env
 - ⚠️ CAVEAT for production: this treats "legacy" = students only in **archived** classes (the only active/legacy marker in the schema). If a teacher's previous-year classes are NOT archived, their students still count — the teacher must **archive old classes** (or remove those students from the active roster) to drop them. A student still sitting in an *active* class roster is, by definition, "currently enrolled" and will show.
 - NOTE: in **Preview** — redeploy to push to production.
 
+
+
+## Block/Turtle lessons award XP + backfill (Mar 2026)
+- **Live fix**: in `submit_assignment`, the `blockly_turtle` and `blockly_turtle_ordered` branches hardcoded `xp_earned: 0` and never touched `users.xp`. Both now, on `is_passing`, compute `calculate_xp_and_coins(base_score, attempt_number==1, streak)`, store it on the submission, AND `$inc users.xp/coins/problems_solved` — exactly like the code/coding-test paths.
+- **Backfill** (`POST /api/admin/backfill-turtle-xp`, admin-only, idempotent): awards XP for historical passing turtle lessons saved with 0 XP.
+  - SCOPED to `submission_type in [blockly_turtle, blockly_turtle_ordered]` ONLY — regular/coding submissions already incremented `users.xp` at submit time, so including them would double-count.
+  - Awards ONCE per (student, problem) using the best passing submission (avoids resubmission inflation); flags every processed submission `xp_backfilled: True` so re-runs are safe. Bumps each student's `users.xp`/`coins`.
+  - Admin UI button "Backfill Block/Turtle XP" added to `AdminDashboard.jsx` (`data-testid=admin-backfill-xp-btn`), next to Bind Existing Schools.
+- **Verified** on seeded preview data: run → 550 XP / 3 lessons / 2 students, correct per-student totals (s1 0→400, s2 100→250), duplicate 80-score submission NOT double-awarded; re-run → all zeros (idempotent). Test data cleaned up. Frontend compiles clean.
+- ⚠️ Run the backfill on **production** via the Admin Dashboard button (I can only run it on preview — separate DBs). Redeploy first.

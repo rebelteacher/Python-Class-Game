@@ -25,7 +25,8 @@ import {
   Cpu,
   Video,
   KeyRound,
-  School
+  School,
+  Zap
 } from "lucide-react";
 
 const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
@@ -40,6 +41,26 @@ export default function AdminDashboard({ user }) {
   const [generatingCode, setGeneratingCode] = useState(false);
   const [unreadCount, setUnreadCount] = useState(0);
   const [bindingSchools, setBindingSchools] = useState(false);
+  const [backfillingXp, setBackfillingXp] = useState(false);
+
+  const handleBackfillTurtleXp = async () => {
+    if (!window.confirm("Award XP for passing block/turtle lessons that were saved with 0 XP? Only block/turtle submissions are touched (regular & coding-test XP already counted). Idempotent — safe to run once.")) {
+      return;
+    }
+    setBackfillingXp(true);
+    try {
+      const res = await axios.post(`${API}/admin/backfill-turtle-xp`, {}, { withCredentials: true });
+      const d = res.data || {};
+      toast.success(
+        `Backfilled ${d.total_xp_awarded || 0} XP across ${d.lessons_awarded || 0} lesson(s) for ${d.students_updated || 0} student(s)`
+      );
+    } catch (error) {
+      console.error("Backfill turtle XP failed:", error);
+      toast.error(error.response?.data?.detail || "Backfill failed");
+    } finally {
+      setBackfillingXp(false);
+    }
+  };
 
   const handleBindSchools = async () => {
     if (!window.confirm("Backfill `school`/`district` on every teacher who has a matching entry in the schools collection? Idempotent — only fills empty fields.")) {
@@ -333,6 +354,15 @@ export default function AdminDashboard({ user }) {
               >
                 <School className="w-4 h-4 mr-2" />
                 {bindingSchools ? "Binding…" : "Bind Existing Schools"}
+              </Button>
+              <Button
+                onClick={handleBackfillTurtleXp}
+                disabled={backfillingXp}
+                data-testid="admin-backfill-xp-btn"
+                className="bg-cyber-lime hover:bg-cyber-lime/80 text-black font-semibold"
+              >
+                <Zap className="w-4 h-4 mr-2" />
+                {backfillingXp ? "Backfilling…" : "Backfill Block/Turtle XP"}
               </Button>
             </div>
           </CardContent>

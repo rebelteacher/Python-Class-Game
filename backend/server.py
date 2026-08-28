@@ -5320,6 +5320,10 @@ async def submit_assignment(submission: SubmissionCreate, request: Request):
                 except (ValueError, TypeError):
                     pass
 
+                turtle_rewards = (
+                    calculate_xp_and_coins(base_score, attempt_number == 1, user.get("current_streak", 0))
+                    if is_passing else {"xp": 0, "coins": 0}
+                )
                 new_submission = {
                     "id": str(uuid.uuid4()),
                     "assignment_id": submission.assignment_id,
@@ -5333,13 +5337,22 @@ async def submit_assignment(submission: SubmissionCreate, request: Request):
                     "is_passing": is_passing,
                     "is_late": is_late,
                     "is_final": False,
-                    "xp_earned": 0,
-                    "coins_earned": 0,
+                    "xp_earned": turtle_rewards["xp"],
+                    "coins_earned": turtle_rewards["coins"],
                     "turtle_image": turtle_image,
                     "turtle_tracking_data": tracking_data,
                     "submission_type": "blockly_turtle_ordered"
                 }
                 await db.submissions.insert_one(new_submission)
+                if is_passing:
+                    await db.users.update_one(
+                        {"id": user["id"]},
+                        {"$inc": {
+                            "xp": turtle_rewards["xp"],
+                            "coins": turtle_rewards["coins"],
+                            "problems_solved": 1
+                        }}
+                    )
                 new_submission.pop("_id", None)
                 return new_submission
             # ── END Ordered Execution short-circuit ──
@@ -5680,6 +5693,10 @@ async def submit_assignment(submission: SubmissionCreate, request: Request):
                 pass
             
             # Create submission with turtle data
+            turtle_rewards = (
+                calculate_xp_and_coins(base_score, attempt_number == 1, user.get("current_streak", 0))
+                if is_passing else {"xp": 0, "coins": 0}
+            )
             new_submission = {
                 "id": str(uuid.uuid4()),
                 "assignment_id": submission.assignment_id,
@@ -5693,14 +5710,23 @@ async def submit_assignment(submission: SubmissionCreate, request: Request):
                 "is_passing": is_passing,
                 "is_late": is_late,
                 "is_final": False,
-                "xp_earned": 0,
-                "coins_earned": 0,
+                "xp_earned": turtle_rewards["xp"],
+                "coins_earned": turtle_rewards["coins"],
                 "turtle_image": turtle_image,
                 "turtle_tracking_data": tracking_data,
                 "submission_type": "blockly_turtle"
             }
             
             await db.submissions.insert_one(new_submission)
+            if is_passing:
+                await db.users.update_one(
+                    {"id": user["id"]},
+                    {"$inc": {
+                        "xp": turtle_rewards["xp"],
+                        "coins": turtle_rewards["coins"],
+                        "problems_solved": 1
+                    }}
+                )
             new_submission.pop("_id", None)
             return new_submission
         
@@ -10571,6 +10597,85 @@ async def admin_bind_existing_schools(request: Request):
         "teachers_school_backfilled": teachers_updated,
         "teachers_district_backfilled": districts_updated,
     }
+
+
+@api_router.post("/admin/backfill-turtle-xp")
+async def admin_backfill_turtle_xp(request: Request):
+    """Admin-only, idempotent: award XP for passing block/turtle lessons that were
+    historically saved with `xp_earned: 0` (the turtle branches used to skip XP).
+
+    IMPORTANT — scope: ONLY block/turtle submissions are touched. Regular code and
+    coding-test submissions already incremented `users.xp` at submit time, so
+    including them would double-count. To avoid inflating XP from resubmissions,
+    XP is awarded ONCE per (student, problem) — the best passing turtle submission —
+    and every processed submission is flagged `xp_backfilled: True` so re-running
+    is safe. Each student's `users.xp`/`coins` is bumped so they show on the board.
+    """
+    user = await get_current_user(request)
+    if not user.get("is_admin"):
+        raise HTTPException(status_code=403, detail="Admin only")
+
+    query = {
+        "submission_type": {"$in": ["blockly_turtle", "blockly_turtle_ordered"]},
+        "is_passing": True,
+        "xp_backfilled": {"$ne": True},
+        "$or": [{"xp_earned": {"$in": [0, None]}}, {"xp_earned": {"$exists": False}}],
+    }
+
+    # Best passing submission per (student, problem)
+    best_by_key: dict = {}
+    all_ids_by_key: dict = {}
+    cursor = db.submissions.find(
+        query, {"_id": 0, "id": 1, "student_id": 1, "problem_id": 1, "score": 1}
+    )
+    async for s in cursor:
+        sid = s.get("student_id")
+        pid = s.get("problem_id")
+        if not sid:
+            continue
+        key = (sid, pid)
+        all_ids_by_key.setdefault(key, []).append(s["id"])
+        score = s.get("score") or 0
+        if key not in best_by_key or score > best_by_key[key]["score"]:
+            best_by_key[key] = {"id": s["id"], "score": score}
+
+    xp_by_student: dict = {}
+    coins_by_student: dict = {}
+    lessons_awarded = 0
+
+    for (sid, pid), best in best_by_key.items():
+        rewards = calculate_xp_and_coins(best["score"], True, 0)
+        xp = rewards["xp"]
+        coins = rewards["coins"]
+        # Stamp the winning submission with the real earned values
+        await db.submissions.update_one(
+            {"id": best["id"]},
+            {"$set": {"xp_earned": xp, "coins_earned": coins, "xp_backfilled": True}},
+        )
+        # Flag the rest of this (student, problem)'s passing turtle submissions as processed
+        other_ids = [i for i in all_ids_by_key[(sid, pid)] if i != best["id"]]
+        if other_ids:
+            await db.submissions.update_many(
+                {"id": {"$in": other_ids}}, {"$set": {"xp_backfilled": True}}
+            )
+        xp_by_student[sid] = xp_by_student.get(sid, 0) + xp
+        coins_by_student[sid] = coins_by_student.get(sid, 0) + coins
+        lessons_awarded += 1
+
+    students_updated = 0
+    for sid, xp in xp_by_student.items():
+        await db.users.update_one(
+            {"id": sid},
+            {"$inc": {"xp": xp, "coins": coins_by_student.get(sid, 0)}},
+        )
+        students_updated += 1
+
+    return {
+        "students_updated": students_updated,
+        "lessons_awarded": lessons_awarded,
+        "total_xp_awarded": sum(xp_by_student.values()),
+    }
+
 
 
 @api_router.get("/admin/config/school-year-start")
