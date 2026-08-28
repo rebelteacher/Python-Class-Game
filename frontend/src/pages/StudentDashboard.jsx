@@ -12,6 +12,7 @@ import { BookOpen, Plus, LogOut, Code2, Trophy, ShoppingBag, Zap, FileText, Fold
 import RankBadge from "@/components/RankBadge";
 import Leaderboard from "@/components/Leaderboard";
 import WelcomeBanner from "@/components/WelcomeBanner";
+import BeastRibbon from "@/components/BeastRibbon";
 
 // Animated Pet Component
 const AnimatedPet = ({ petId, shopItems }) => {
@@ -576,6 +577,8 @@ export default function StudentDashboard({ user, setUser, refreshUser }) {
       </nav>
 
       <WelcomeBanner user={userProfile} />
+
+      <BeastRibbon studentId={userProfile.id} />
 
       <main className="container mx-auto px-6 py-10">
         {/* Stats Dashboard */}

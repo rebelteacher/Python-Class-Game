@@ -39,6 +39,22 @@ async function fetchBeast() {
 }
 
 /**
+ * useBeast() — hook that returns {id, name} of the current reigning beast.
+ * Uses the shared module cache so every consumer reads from a single fetch.
+ */
+export function useBeast() {
+  const [beast, setBeast] = useState({ id: cachedBeastId, name: cachedBeastName });
+  useEffect(() => {
+    let alive = true;
+    fetchBeast().then((r) => {
+      if (alive) setBeast(r);
+    });
+    return () => { alive = false; };
+  }, []);
+  return beast;
+}
+
+/**
  * <BeastBadge studentId="uuid" [size="sm"|"md"] />
  * Renders a small "Reigning Beast" pill next to the student's name if that
  * student is currently ranked #1 across the platform by year-scoped XP.

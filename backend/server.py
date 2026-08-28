@@ -2649,6 +2649,32 @@ def _natural_key(s):
     return [int(t) if t.isdigit() else t.lower() for t in re.split(r"(\d+)", s)]
 
 
+async def _get_school_year_start() -> datetime:
+    """Return the current school-year cutoff datetime. Precedence:
+    1. `settings.school_year_start` in Mongo (admin-editable, no redeploy needed)
+    2. `SCHOOL_YEAR_START` env var
+    3. Hard fallback: 2025-08-01 00:00 UTC
+    Always returns tz-aware UTC.
+    """
+    iso = None
+    try:
+        doc = await db.settings.find_one({"key": "school_year_start"}, {"_id": 0, "value": 1})
+        if doc and doc.get("value"):
+            iso = doc["value"]
+    except Exception as e:
+        logging.warning(f"settings.school_year_start read failed: {e}")
+    if not iso:
+        iso = os.environ.get("SCHOOL_YEAR_START", "2025-08-01T00:00:00+00:00")
+    try:
+        dt = datetime.fromisoformat(iso)
+    except ValueError:
+        dt = datetime(2025, 8, 1, tzinfo=timezone.utc)
+    if dt.tzinfo is None:
+        dt = dt.replace(tzinfo=timezone.utc)
+    return dt
+
+
+
 @api_router.get("/curriculum/units")
 async def get_curriculum_units(request: Request):
     """Get all units with their chapters and lesson counts.
@@ -9813,13 +9839,7 @@ async def get_student_ranks(student_id: str, request: Request):
         raise HTTPException(status_code=404, detail="Student not found")
 
     # ── School year cutoff ────────────────────────────────────────────────
-    school_year_start_iso = os.environ.get("SCHOOL_YEAR_START", "2025-08-01T00:00:00+00:00")
-    try:
-        school_year_start = datetime.fromisoformat(school_year_start_iso)
-    except ValueError:
-        school_year_start = datetime(2025, 8, 1, tzinfo=timezone.utc)
-    if school_year_start.tzinfo is None:
-        school_year_start = school_year_start.replace(tzinfo=timezone.utc)
+    school_year_start = await _get_school_year_start()
     cutoff_iso = school_year_start.isoformat()
 
     student_name = student.get("name", "Unknown")
@@ -10007,14 +10027,8 @@ async def get_reigning_beast(request: Request):
     """
     await get_current_user(request)  # any signed-in user can look up the beast
 
-    school_year_start_iso = os.environ.get("SCHOOL_YEAR_START", "2025-08-01T00:00:00+00:00")
-    try:
-        cutoff = datetime.fromisoformat(school_year_start_iso)
-    except ValueError:
-        cutoff = datetime(2025, 8, 1, tzinfo=timezone.utc)
-    if cutoff.tzinfo is None:
-        cutoff = cutoff.replace(tzinfo=timezone.utc)
-    cutoff_iso = cutoff.isoformat()
+    school_year_start = await _get_school_year_start()
+    cutoff_iso = school_year_start.isoformat()
 
     # Aggregate xp_earned across all three attempt collections since cutoff
     xp_by_student: dict = {}
@@ -10093,6 +10107,62 @@ async def admin_bind_existing_schools(request: Request):
         "teachers_school_backfilled": teachers_updated,
         "teachers_district_backfilled": districts_updated,
     }
+
+
+@api_router.get("/admin/config/school-year-start")
+async def get_school_year_start(request: Request):
+    """Admin/teacher: read the current school-year cutoff date used by the
+    leaderboard ranks + Beast badge. Teachers can read so the classroom UI
+    can render "Ranked on XP earned since <date>" without a separate call.
+    """
+    await get_current_user(request)
+    dt = await _get_school_year_start()
+    doc = await db.settings.find_one({"key": "school_year_start"}, {"_id": 0, "value": 1, "updated_at": 1, "updated_by": 1})
+    return {
+        "school_year_start": dt.isoformat(),
+        "is_custom": bool(doc and doc.get("value")),
+        "updated_at": (doc or {}).get("updated_at"),
+        "updated_by": (doc or {}).get("updated_by"),
+    }
+
+
+@api_router.post("/admin/config/school-year-start")
+async def set_school_year_start(request: Request):
+    """Admin-only: flip the school-year cutoff without a redeploy. Accepts
+    either a full ISO datetime or a YYYY-MM-DD date (interpreted as midnight
+    UTC). Every leaderboard/beast lookup immediately picks up the new value.
+    """
+    user = await get_current_user(request)
+    if not user.get("is_admin"):
+        raise HTTPException(status_code=403, detail="Admin only")
+
+    body = await request.json()
+    raw = (body.get("school_year_start") or "").strip()
+    if not raw:
+        raise HTTPException(status_code=400, detail="school_year_start is required")
+
+    # Accept YYYY-MM-DD (date only) too — treat as midnight UTC
+    try:
+        if len(raw) == 10 and raw[4] == "-" and raw[7] == "-":
+            dt = datetime.fromisoformat(raw + "T00:00:00+00:00")
+        else:
+            dt = datetime.fromisoformat(raw)
+    except ValueError:
+        raise HTTPException(status_code=400, detail="Invalid date. Use YYYY-MM-DD or full ISO datetime.")
+    if dt.tzinfo is None:
+        dt = dt.replace(tzinfo=timezone.utc)
+
+    iso = dt.isoformat()
+    await db.settings.update_one(
+        {"key": "school_year_start"},
+        {"$set": {
+            "value": iso,
+            "updated_at": datetime.now(timezone.utc).isoformat(),
+            "updated_by": user["id"],
+        }},
+        upsert=True,
+    )
+    return {"school_year_start": iso, "success": True}
 
 
 @api_router.get("/shop")

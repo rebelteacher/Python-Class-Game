@@ -26,6 +26,7 @@ import {
   Repeat,
   UserCheck,
   Unlock,
+  CalendarClock,
 } from "lucide-react";
 import { isAnalyticsExcluded, setAnalyticsExcluded } from "../utils/siteAnalytics";
 
@@ -132,6 +133,7 @@ export default function AdminAnalytics({ user }) {
       </nav>
 
       <main className="container mx-auto px-6 py-10">
+        <SchoolYearCard />
         <Tabs defaultValue="traffic" className="w-full">
           <TabsList
             data-testid="analytics-tabs"
@@ -825,3 +827,110 @@ function NewVsReturningCard({ data }) {
     </Card>
   );
 }
+
+
+// ─────────────── School Year Start (admin config) ───────────────
+function SchoolYearCard() {
+  const [current, setCurrent] = useState(null); // {school_year_start, is_custom, updated_at, updated_by}
+  const [draft, setDraft] = useState("");
+  const [saving, setSaving] = useState(false);
+  const [loading, setLoading] = useState(true);
+
+  const load = async () => {
+    try {
+      const res = await axios.get(`${API}/admin/config/school-year-start`, { withCredentials: true });
+      setCurrent(res.data);
+      // Pre-fill the date input with today's year-month-day
+      const iso = res.data?.school_year_start;
+      if (iso) setDraft(iso.slice(0, 10));
+    } catch (e) {
+      toast.error("Could not load school year start");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    load();
+  }, []);
+
+  const save = async () => {
+    if (!draft) {
+      toast.error("Pick a date first");
+      return;
+    }
+    if (!window.confirm(`Set the new school year to start on ${draft}? Every leaderboard rank + ByteBattles Beast will immediately recompute from that date forward.`)) {
+      return;
+    }
+    setSaving(true);
+    try {
+      const res = await axios.post(
+        `${API}/admin/config/school-year-start`,
+        { school_year_start: draft },
+        { withCredentials: true }
+      );
+      toast.success(`New school year starts ${res.data.school_year_start.slice(0, 10)}`);
+      await load();
+    } catch (e) {
+      toast.error(e.response?.data?.detail || "Save failed");
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const readable = current?.school_year_start
+    ? new Date(current.school_year_start).toLocaleDateString(undefined, { year: "numeric", month: "long", day: "numeric" })
+    : "";
+
+  return (
+    <Card className="mb-6 border-amber-500/40 bg-cyber-navy/60" data-testid="school-year-card">
+      <CardHeader>
+        <CardTitle className="flex items-center gap-2 text-amber-400">
+          <CalendarClock className="w-5 h-5" />
+          School Year Start
+        </CardTitle>
+      </CardHeader>
+      <CardContent>
+        {loading ? (
+          <p className="text-sm text-slate-500">Loading…</p>
+        ) : (
+          <div className="flex flex-wrap items-end gap-4">
+            <div className="flex-1 min-w-[220px]">
+              <p className="text-xs uppercase tracking-wider text-slate-400 mb-1">Currently in effect</p>
+              <p className="text-lg font-orbitron text-amber-300" data-testid="school-year-current">
+                {readable}
+              </p>
+              <p className="text-[11px] text-slate-500 mt-1">
+                {current?.is_custom
+                  ? `Last set ${current.updated_at ? new Date(current.updated_at).toLocaleString() : ""}`
+                  : "Default value (no override in database yet)."}
+              </p>
+            </div>
+            <div>
+              <label className="text-xs uppercase tracking-wider text-slate-400 mb-1 block">New start date</label>
+              <input
+                type="date"
+                value={draft}
+                onChange={(e) => setDraft(e.target.value)}
+                data-testid="school-year-input"
+                className="bg-cyber-black border border-cyber-cyan/30 text-white px-3 py-2 rounded-none font-fira focus:outline-none focus:border-amber-500"
+              />
+            </div>
+            <Button
+              onClick={save}
+              disabled={saving || !draft}
+              data-testid="school-year-save-btn"
+              className="bg-amber-500 hover:bg-amber-600 text-black font-semibold"
+            >
+              {saving ? "Saving…" : "Start New School Year"}
+            </Button>
+          </div>
+        )}
+        <p className="text-xs text-slate-500 mt-3">
+          Every leaderboard rank (Class · Teacher · School · ByteBattles Beasts) and the Reigning Beast badge count only XP earned on or after this date. Bumping it forward is how you "reset" the leaderboard for a new year without touching student XP history.
+        </p>
+      </CardContent>
+    </Card>
+  );
+}
+
