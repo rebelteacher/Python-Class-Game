@@ -1,0 +1,41 @@
+{
+  "summary": "Tested new Curriculum Gradebook Grid (GET /api/reports/gradebook) + frontend grid in /teacher-reports. Backend: 12/12 pytest tests pass (happy path shape, column ordering rules, per-column cell completeness, empty classroom rows=[], 404 unknown classroom, 404 for classroom owned by another teacher, 401/403 unauthenticated, 422 missing param, no _id leak, manual lesson-avg math verification against MongoDB, regression of legacy POST /reports/gradebook and POST /reports/missing). Frontend: logged in as admin teacher, default report type is 'Curriculum Gradebook (grid view)', classroom select + Load Gradebook render a 92-column x 2/5-row grid; sticky first column verified (x unchanged after scrollLeft=18022) and sticky header row verified (y unchanged with forced vertical overflow); all data-testids present; Excel download works (Gradebook_Test Classroom_2026-08-28.xlsx); switching to Grade Report mode cleanly hides the grid (no regression). One real visual defect found: the sticky student-name column has a semi-transparent background so scrolled score cells bleed through behind student names.",
+  "backend_issues": {
+    "critical": [],
+    "minor": [
+      {"endpoint": "GET /api/reports/gradebook", "issue": "Columns are derived from EVERY document in db.problems globally (no teacher/curriculum-ownership filter), producing 92 columns including near-duplicate chapter names ('Chapter 1: Block Basics' vs 'Chapter 1: First Steps') and lesson-like entries such as 'Basics Quiz'. Consider scoping problems to the curriculum/chapters actually assigned to the classroom or owned by the teacher."},
+      {"endpoint": "GET /api/reports/gradebook", "issue": "lesson_avg treats every problem with no submission as 0, so a student who never opened a lesson shows a red '0' instead of blank/not-attempted (whole grid was 0 for the test classes). Only lesson quiz / chapter test cells use null. Confirm this is the intended semantic; if not, return null when the student has zero submissions in the lesson."},
+      {"endpoint": "GET /api/reports/gradebook", "issue": "Role-403 branch (student token) was NOT exercised — no student credentials available in /app/memory/test_credentials.md. Code path exists (user['role'] != 'teacher' -> 403) but is untested."}
+    ]
+  },
+  "frontend_issues": {
+    "ui_bugs": [
+      {"component": "TeacherReports curriculum grid — sticky student column", "issue": "Sticky <td> uses `bg-inherit` which resolves to the row's semi-transparent bg (computed rgba(15,23,42,0.4)). Scrolled score cells show through the frozen column, rendering e.g. 'Amy Stapp0' / stray '0' glyphs inside the student-name column while scrolling horizontally. Fix: give the sticky cell an opaque background (e.g. bg-[#0f172a] / bg-cyber-navy, alternating opaque shades) instead of bg-inherit.", "selector": "[data-testid^=\"gradebook-student-\"]", "priority": "HIGH"}
+    ],
+    "integration_issues": [],
+    "design_issues": [
+      {"screen": "/teacher-reports info callout", "issues": ["'Curriculum Gradebook will show:' heading and its bullet list render in a dim blue on dark navy — low contrast, hard to read (same issue in the Grade Report callout)."]},
+      {"screen": "/teacher-reports gradebook grid", "issues": ["Column headers repeat the full chapter name on every column ('CHAPTER 1: FIRST STEPS' x N); a grouped/colspan chapter band would reduce noise across 92 columns.", "Grid can only ever be as wide as the container, but at 1400px width only ~6 of 92 columns are visible with no visible horizontal scrollbar hint / 'scroll' affordance beyond the helper text."]}
+    ]
+  },
+  "test_report_links": ["/app/backend/tests/test_curriculum_gradebook.py", "/app/test_reports/pytest/gradebook_results.xml"],
+  "action_items": [
+    "Replace `bg-inherit` on the sticky student-name <td> with an opaque background so scrolled cells don't bleed through the frozen column.",
+    "Decide/confirm lesson_avg semantics for students with zero submissions (currently 0, shown red) vs blank.",
+    "Consider scoping the column set to the classroom's/teacher's curriculum instead of all db.problems (92 columns with duplicated chapter titles).",
+    "Improve contrast of the blue-on-navy info callout text."
+  ],
+  "critical_code_review_comments": [
+    "get_gradebook_report queries db.problems with an empty filter and .to_list(20000) — unbounded full-collection scan on every request; scope by chapter/curriculum and/or project only needed fields with an index-backed filter.",
+    "submissions fetch uses .to_list(100000) and attempts .to_list(50000); with larger classes this can be memory heavy. Consider an aggregation pipeline ($group best score per student/problem) in Mongo.",
+    "/app/backend/server.py is 18k+ lines — the reports endpoints should be extracted into a router module."
+  ],
+  "updated_files": ["/app/backend/tests/test_curriculum_gradebook.py"],
+  "success_rate": {"backend": "100% (12/12 pytest)", "frontend": "90% (all functional checks pass; 1 sticky-column rendering defect)"},
+  "seed_data_creation": "None — used existing classrooms ('2nd Period', 'Test Classroom') and existing submission/attempt data.",
+  "should_call_test_agent_after_fix": false,
+  "should_main_agent_self_test": true,
+  "test_credentials": "astapp@spanola.net / AlisaFaith$14 (admin teacher), test.user.1760736702@example.com / Byte-6582-Reset (non-admin teacher, used for the cross-teacher 404 check). No student account available -> role-403 path untested.",
+  "context_for_next_testing_agent": "Backend regression suite for this feature: /app/backend/tests/test_curriculum_gradebook.py (12 tests, all pass, includes a direct-Mongo lesson-avg math check and legacy POST /reports/gradebook + /reports/missing regressions; POST /reports/gradebook requires assignment_ids or it 400s). Frontend flow: login at /teacher-login (#email/#password, button[type=submit]) -> /teacher-reports -> [data-testid=curriculum-classroom-select] -> [data-testid=generate-report-btn]. Only classrooms with <=5 students exist, so vertical sticky header must be tested by forcing container maxHeight via JS. Sticky positioning itself works; the open issue is the transparent background of the frozen column.",
+  "rca_of_the_issue": "Frozen-column bleed-through: the sticky <td> in TeacherReports.jsx line ~592 uses Tailwind `bg-inherit`, inheriting the <tr> background `bg-cyber-navy/40` (40% alpha). Because sticky elements paint above the scrolling content but with a translucent background, the underlying score cells remain visible through the frozen column. Repro: load gradebook for '2nd Period', scroll container horizontally, observe digits overlapping student names."
+}

@@ -2415,7 +2415,7 @@ async def update_assignment(assignment_id: str, update_data: dict, request: Requ
                 # Parse date if provided
                 try:
                     update_dict[field] = datetime.fromisoformat(update_data[field]).isoformat()
-                except:
+                except Exception:
                     update_dict[field] = update_data[field]
             else:
                 update_dict[field] = update_data[field]
@@ -3283,7 +3283,7 @@ async def add_lesson(request: Request):
     return {"success": True, "message": f"Lesson '{lesson_name}' created", "problem_id": placeholder["id"]}
 
 @api_router.post("/curriculum/delete-lesson")
-async def delete_lesson(request: Request):
+async def delete_lesson_curriculum(request: Request):
     """Delete a lesson by clearing the lesson field from all its problems"""
     user = await get_current_user(request)
     if user["role"] != "teacher" or not user.get("is_admin"):
@@ -4052,7 +4052,7 @@ except Exception as e:
             elif line.startswith('TRACKING_DATA:'):
                 try:
                     tracking_data = json.loads(line.replace('TRACKING_DATA:', '').strip())
-                except:
+                except Exception:
                     pass
         
         if result.stderr and 'ERROR:' in result.stderr:
@@ -4334,7 +4334,7 @@ except Exception as e:
         if temp_file:
             try:
                 os.unlink(temp_file)
-            except:
+            except Exception:
                 pass
 
 
@@ -4494,7 +4494,7 @@ try:
         if handler in dir():
             try:
                 eval(handler + "()")
-            except:
+            except Exception:
                 pass
     
     # Restore stdout/stderr
@@ -4551,7 +4551,7 @@ except Exception as e:
                 elif line.startswith('TRACKING_DATA:'):
                     try:
                         tracking_data = json.loads(line.replace('TRACKING_DATA:', '').strip())
-                    except:
+                    except Exception:
                         pass
             
             if stderr and 'ERROR:' in stderr:
@@ -4580,7 +4580,7 @@ except Exception as e:
             # Clean up temp file
             try:
                 os.unlink(temp_file)
-            except:
+            except Exception:
                 pass
                     
     except subprocess.TimeoutExpired:
@@ -7042,40 +7042,14 @@ async def upload_lesson_video(lesson_id: str, request: Request, video: UploadFil
     allowed_types = ["video/mp4", "video/webm", "video/quicktime", "video/x-msvideo"]
     if video.content_type not in allowed_types:
         raise HTTPException(status_code=400, detail="Invalid video format. Supported: MP4, WEBM, MOV, AVI")
-    
-    # Create uploads directory if it doesn't exist
-    upload_dir = "/app/backend/uploads/videos"
-    os.makedirs(upload_dir, exist_ok=True)
-    
-    # Generate unique filename
-    file_extension = video.filename.split(".")[-1]
-    unique_filename = f"{lesson_id}_{uuid.uuid4()}.{file_extension}"
-    file_path = f"{upload_dir}/{unique_filename}"
-    
-    # Delete old video if exists
-    if lesson.get("video_filename"):
-        old_video_path = f"{upload_dir}/{lesson['video_filename']}"
-        if os.path.exists(old_video_path):
-            os.remove(old_video_path)
-    
-    # Save video file in chunks (handles large files)
-    try:
-        with open(file_path, "wb") as f:
-            while chunk := await video.read(1024 * 1024):  # Read 1MB at a time
-                f.write(chunk)
-    except Exception as e:
-        logger.error(f"Error saving video: {str(e)}")
-        if os.path.exists(file_path):
-            os.remove(file_path)
-        raise HTTPException(status_code=500, detail="Failed to save video")
-    
-    # Update lesson with video filename
-    await db.lessons.update_one(
-        {"id": lesson_id},
-        {"$set": {"video_filename": unique_filename, "updated_at": datetime.now(timezone.utc)}}
+
+    # MOCKED — video upload is currently not persisted. Pending migration to
+    # Emergent object storage. Return 501 so the frontend can show a clean
+    # "coming soon" message instead of silently 200'ing with a broken filename.
+    raise HTTPException(
+        status_code=501,
+        detail="Video upload is temporarily disabled while we migrate to durable object storage.",
     )
-    
-    return {"success": True, "video_filename": unique_filename}
 
 
 @api_router.get("/lessons/{lesson_id}/video")
@@ -7167,64 +7141,14 @@ async def create_library_video(
     allowed_types = ["video/mp4", "video/webm", "video/quicktime", "video/x-msvideo"]
     if video.content_type not in allowed_types:
         raise HTTPException(status_code=400, detail="Invalid video format. Supported: MP4, WEBM, MOV, AVI")
-    
-    # Create uploads directory if it doesn't exist
-    upload_dir = "/app/backend/uploads/library_videos"
-    os.makedirs(upload_dir, exist_ok=True)
-    
-    # Generate unique filename
-    file_extension = video.filename.split(".")[-1]
-    video_id = str(uuid.uuid4())
-    unique_filename = f"{video_id}.{file_extension}"
-    file_path = f"{upload_dir}/{unique_filename}"
-    
-    # Save video file in chunks (handles large files)
-    bytes_written = 0
-    try:
-        with open(file_path, "wb") as f:
-            while chunk := await video.read(1024 * 1024):  # Read 1MB at a time
-                f.write(chunk)
-                bytes_written += len(chunk)
-    except Exception as e:
-        logger.error(f"Error saving library video: {str(e)}")
-        if os.path.exists(file_path):
-            os.remove(file_path)
-        raise HTTPException(status_code=500, detail="Failed to save video")
-    
-    # Validate uploaded file size
-    if bytes_written < 1000:  # Less than 1KB indicates corruption
-        if os.path.exists(file_path):
-            os.remove(file_path)
-        raise HTTPException(status_code=400, detail="Video file appears to be corrupted or empty. Please try uploading again.")
-    
-    # Verify file was written correctly
-    if not os.path.exists(file_path):
-        raise HTTPException(status_code=500, detail="Video file was not saved properly")
-    
-    actual_size = os.path.getsize(file_path)
-    if actual_size < 1000:
-        os.remove(file_path)
-        raise HTTPException(status_code=400, detail=f"Video file too small ({actual_size} bytes). Upload may have been interrupted.")
-    
-    logger.info(f"Successfully uploaded video: {unique_filename} ({actual_size} bytes)")
-    
-    # Create video record
-    new_video = LibraryVideo(
-        id=video_id,
-        title=title,
-        chapter=chapter,
-        description=description,
-        filename=unique_filename,
-        uploaded_by=user["id"]
+
+    # MOCKED — video upload is currently not persisted. Pending migration to
+    # Emergent object storage. Return 501 so the admin sees a clean
+    # "coming soon" message instead of a broken filename.
+    raise HTTPException(
+        status_code=501,
+        detail="Library video upload is temporarily disabled while we migrate to durable object storage.",
     )
-    
-    video_dict = new_video.model_dump()
-    video_dict["created_at"] = video_dict["created_at"].isoformat()
-    video_dict["updated_at"] = video_dict["updated_at"].isoformat()
-    
-    await db.library_videos.insert_one(video_dict)
-    
-    return {"success": True, "video_id": video_id, "filename": unique_filename}
 
 
 @api_router.put("/video-library/{video_id}")
@@ -7782,6 +7706,177 @@ async def get_student_lesson_scores(student_id: str, classroom_id: str, request:
     assignment_scores.sort(key=lambda x: x["assignment_title"])
     
     return assignment_scores
+
+@api_router.get("/reports/gradebook")
+async def get_gradebook_report(classroom_id: str, request: Request):
+    """Build a wide gradebook grid for a classroom: rows = students, columns =
+    (Lesson Avg | Lesson Quiz | ... | Chapter Test) ordered by chapter then lesson.
+
+    Lesson Avg = mean of best-per-problem score across every problem in the lesson.
+    Lesson Quiz score = best MC test attempt where the test's `lesson` field matches.
+    Chapter Test score = best MC test attempt where the test's `lesson` is empty/None
+    (i.e. attached to the chapter itself, not a specific lesson).
+    """
+    user = await get_current_user(request)
+    if user["role"] != "teacher":
+        raise HTTPException(status_code=403, detail="Only teachers can view reports")
+
+    classroom = await db.classrooms.find_one({"id": classroom_id})
+    if not classroom or classroom.get("teacher_id") != user["id"]:
+        raise HTTPException(status_code=404, detail="Classroom not found")
+
+    student_ids = classroom.get("students", []) or []
+    students = await db.users.find(
+        {"id": {"$in": student_ids}}, {"_id": 0, "id": 1, "name": 1, "email": 1}
+    ).to_list(1000)
+
+    # Sort students by last name then first name (like the other gradebook endpoint)
+    def _student_sort_key(s):
+        name = s.get("name") or s.get("email") or ""
+        parts = name.split()
+        if len(parts) >= 2:
+            return (parts[-1].lower(), " ".join(parts[:-1]).lower())
+        return (name.lower(), "")
+    students.sort(key=_student_sort_key)
+
+    # Discover every (chapter, lesson) combo — use natural sort so Lesson 2 < Lesson 10
+    problems = await db.problems.find(
+        {}, {"_id": 0, "id": 1, "chapter": 1, "lesson": 1, "assignment_type": 1}
+    ).to_list(20000)
+    chapters_set = set()
+    lessons_by_chapter: dict[str, set] = {}
+    problems_by_lesson: dict[tuple, list] = {}
+    for p in problems:
+        chap = (p.get("chapter") or "").strip()
+        less = (p.get("lesson") or "").strip()
+        if not chap:
+            continue
+        chapters_set.add(chap)
+        lessons_by_chapter.setdefault(chap, set())
+        if less:
+            lessons_by_chapter[chap].add(less)
+            problems_by_lesson.setdefault((chap, less), []).append(p["id"])
+
+    ordered_chapters = sorted(chapters_set, key=_natural_key)
+
+    # All MC tests we own — sorted into lesson quizzes vs chapter tests
+    tests = await db.mc_tests.find(
+        {"creator_id": user["id"]},
+        {"_id": 0, "id": 1, "chapter": 1, "lesson": 1, "num_questions": 1, "title": 1},
+    ).to_list(2000)
+    lesson_test = {}
+    chapter_test = {}
+    for t in tests:
+        chap = (t.get("chapter") or "").strip()
+        less = (t.get("lesson") or "").strip()
+        if not chap:
+            continue
+        if less:
+            lesson_test[(chap, less)] = t
+        else:
+            chapter_test[chap] = t
+
+    # Build ordered columns
+    columns = []
+    for chap in ordered_chapters:
+        lesson_list = sorted(lessons_by_chapter.get(chap, set()), key=_natural_key)
+        for less in lesson_list:
+            columns.append({
+                "key": f"lavg::{chap}::{less}",
+                "type": "lesson_avg",
+                "chapter": chap,
+                "lesson": less,
+                "label": f"{less} Avg",
+            })
+            lq = lesson_test.get((chap, less))
+            if lq:
+                columns.append({
+                    "key": f"lquiz::{lq['id']}",
+                    "type": "lesson_quiz",
+                    "chapter": chap,
+                    "lesson": less,
+                    "test_id": lq["id"],
+                    "label": f"{less} Quiz",
+                })
+        ct = chapter_test.get(chap)
+        if ct:
+            columns.append({
+                "key": f"ctest::{ct['id']}",
+                "type": "chapter_test",
+                "chapter": chap,
+                "test_id": ct["id"],
+                "label": f"{chap} Test",
+            })
+
+    # Fetch all submissions + all mc test attempts for these students in bulk
+    subs = []
+    if student_ids:
+        subs = await db.submissions.find(
+            {"student_id": {"$in": student_ids}},
+            {"_id": 0, "student_id": 1, "problem_id": 1, "score": 1},
+        ).to_list(100000)
+    # Best score per (student, problem)
+    best_problem = {}
+    for s in subs:
+        k = (s["student_id"], s.get("problem_id"))
+        if not k[1]:
+            continue
+        sc = s.get("score") or 0
+        if k not in best_problem or sc > best_problem[k]:
+            best_problem[k] = sc
+
+    all_test_ids = [c["test_id"] for c in columns if c["type"] in ("lesson_quiz", "chapter_test")]
+    attempts = []
+    if all_test_ids and student_ids:
+        attempts = await db.mc_test_attempts.find(
+            {
+                "student_id": {"$in": student_ids},
+                "test_id": {"$in": all_test_ids},
+                "submitted_at": {"$ne": None},
+            },
+            {"_id": 0, "student_id": 1, "test_id": 1, "score": 1, "percentage": 1},
+        ).to_list(50000)
+    test_nq = {t["id"]: t.get("num_questions") or 0 for t in tests}
+    best_attempt = {}
+    for a in attempts:
+        k = (a["student_id"], a["test_id"])
+        pct = a.get("percentage")
+        if pct is None and a.get("score") is not None and test_nq.get(a["test_id"]):
+            pct = (a["score"] / test_nq[a["test_id"]]) * 100
+        if pct is None:
+            continue
+        if k not in best_attempt or pct > best_attempt[k]:
+            best_attempt[k] = pct
+
+    # Assemble rows
+    rows = []
+    for stu in students:
+        cells = {}
+        for col in columns:
+            v = None
+            if col["type"] == "lesson_avg":
+                pids = problems_by_lesson.get((col["chapter"], col["lesson"]), [])
+                if pids:
+                    # If the student has literally zero submissions across every problem in
+                    # this lesson, treat the cell as "not attempted" (null) — otherwise
+                    # average across all problems (unattempted problems contribute 0).
+                    has_any = any((stu["id"], pid) in best_problem for pid in pids)
+                    if has_any:
+                        scores = [best_problem.get((stu["id"], pid), 0) for pid in pids]
+                        v = round(sum(scores) / len(scores), 1)
+            else:
+                v = best_attempt.get((stu["id"], col["test_id"]))
+                if v is not None:
+                    v = round(v, 1)
+            cells[col["key"]] = v
+        rows.append({
+            "student_id": stu["id"],
+            "student_name": stu.get("name") or stu.get("email") or "Unknown",
+            "cells": cells,
+        })
+
+    return {"columns": columns, "rows": rows}
+
 
 @api_router.post("/reports/gradebook")
 async def generate_gradebook_report(report_data: dict, request: Request):
@@ -9339,8 +9434,16 @@ async def reject_school_admin(user_id: str, request: Request):
 # ----- School Admin & District Admin Routes -----
 
 @api_router.get("/school-admin/dashboard")
-async def get_school_admin_dashboard(request: Request):
-    """Get dashboard data for school admin (view teachers in their school)"""
+async def get_school_admin_dashboard_alt(request: Request):
+    """Get dashboard data for school admin (view teachers in their school).
+    NOTE: this is the second copy of `/school-admin/dashboard` in the file — FastAPI
+    routes are order-first, so the earlier registration at line ~9141 is the one that
+    actually serves requests. Kept here (renamed to prevent an F811 warning) in case
+    it's referenced elsewhere before we consolidate."""
+    return await _get_school_admin_dashboard_v2(request)
+
+
+async def _get_school_admin_dashboard_v2(request: Request):
     user = await get_current_user(request)
     
     if user.get("role") != "school_admin":
@@ -9383,8 +9486,10 @@ async def get_school_admin_dashboard(request: Request):
     }
 
 @api_router.get("/district-admin/dashboard")
-async def get_district_admin_dashboard(request: Request):
-    """Get dashboard data for district admin (view schools and teachers in district)"""
+async def get_district_admin_dashboard_alt(request: Request):
+    """Get dashboard data for district admin (view schools and teachers in district).
+    NOTE: duplicate of the earlier registration at ~L9101. FastAPI routes are
+    order-first so the first one wins; renamed to silence F811 without deleting."""
     user = await get_current_user(request)
     
     if user.get("role") != "district_admin":
@@ -11533,6 +11638,58 @@ async def get_mc_questions(
     return questions
 
 
+@api_router.put("/mc-questions/bulk-update")
+async def bulk_update_mc_questions(data: dict, request: Request):
+    """Bulk update multiple MC questions' unit_type, unit, chapter, and/or lesson.
+    NOTE: this literal route MUST stay above `/mc-questions/{question_id}` or
+    FastAPI will match `bulk-update` as a question id."""
+    user = await get_current_user(request)
+
+    if user["role"] != "teacher":
+        raise HTTPException(status_code=403, detail="Only teachers can update questions")
+
+    question_ids = data.get("question_ids", [])
+    if not question_ids:
+        raise HTTPException(status_code=400, detail="No questions selected")
+
+    update_fields = {}
+    if data.get("unit_type") and data["unit_type"] != "keep":
+        update_fields["unit_type"] = data["unit_type"]
+    if data.get("unit"):
+        update_fields["unit"] = data["unit"]
+    if data.get("chapter"):
+        update_fields["chapter"] = data["chapter"]
+    if data.get("lesson"):
+        update_fields["lesson"] = data["lesson"]
+
+    if not update_fields:
+        raise HTTPException(status_code=400, detail="No fields to update")
+
+    result = await db.mc_questions.update_many(
+        {"id": {"$in": question_ids}, "creator_id": user["id"]},
+        {"$set": update_fields}
+    )
+    return {"updated": result.modified_count, "message": f"Updated {result.modified_count} questions"}
+
+
+@api_router.delete("/mc-questions/bulk-delete")
+async def bulk_delete_mc_questions(data: dict, request: Request):
+    """Bulk delete multiple MC questions. Same literal-before-param rule as bulk-update."""
+    user = await get_current_user(request)
+
+    if user["role"] != "teacher":
+        raise HTTPException(status_code=403, detail="Only teachers can delete questions")
+
+    question_ids = data.get("question_ids", [])
+    if not question_ids:
+        raise HTTPException(status_code=400, detail="No questions selected")
+
+    result = await db.mc_questions.delete_many(
+        {"id": {"$in": question_ids}, "creator_id": user["id"]}
+    )
+    return {"deleted": result.deleted_count, "message": f"Deleted {result.deleted_count} questions"}
+
+
 @api_router.put("/mc-questions/{question_id}")
 async def update_mc_question(question_id: str, question: MCQuestionCreate, request: Request):
     """Update an MC question"""
@@ -11608,68 +11765,6 @@ async def move_mc_question(question_id: str, data: dict, request: Request):
     )
     
     return {"success": True, "message": "Question moved successfully"}
-
-
-@api_router.put("/mc-questions/bulk-update")
-async def bulk_update_mc_questions(data: dict, request: Request):
-    """Bulk update multiple MC questions' unit_type, unit, chapter, and/or lesson"""
-    user = await get_current_user(request)
-    
-    if user["role"] != "teacher":
-        raise HTTPException(status_code=403, detail="Only teachers can update questions")
-    
-    question_ids = data.get("question_ids", [])
-    if not question_ids:
-        raise HTTPException(status_code=400, detail="No questions selected")
-    
-    update_fields = {}
-    
-    # Only update fields that are provided and not empty
-    if data.get("unit_type") and data["unit_type"] != "keep":
-        update_fields["unit_type"] = data["unit_type"]
-    if data.get("unit"):
-        update_fields["unit"] = data["unit"]
-    if data.get("chapter"):
-        update_fields["chapter"] = data["chapter"]
-    if data.get("lesson"):
-        update_fields["lesson"] = data["lesson"]
-    
-    if not update_fields:
-        raise HTTPException(status_code=400, detail="No fields to update")
-    
-    # Update only questions owned by this teacher
-    result = await db.mc_questions.update_many(
-        {"id": {"$in": question_ids}, "creator_id": user["id"]},
-        {"$set": update_fields}
-    )
-    
-    return {
-        "updated": result.modified_count,
-        "message": f"Updated {result.modified_count} questions"
-    }
-
-
-@api_router.delete("/mc-questions/bulk-delete")
-async def bulk_delete_mc_questions(data: dict, request: Request):
-    """Bulk delete multiple MC questions"""
-    user = await get_current_user(request)
-    
-    if user["role"] != "teacher":
-        raise HTTPException(status_code=403, detail="Only teachers can delete questions")
-    
-    question_ids = data.get("question_ids", [])
-    if not question_ids:
-        raise HTTPException(status_code=400, detail="No questions selected")
-    
-    # Delete only questions owned by this teacher
-    result = await db.mc_questions.delete_many(
-        {"id": {"$in": question_ids}, "creator_id": user["id"]}
-    )
-    
-    return {
-        "deleted": result.deleted_count,
-        "message": f"Deleted {result.deleted_count} questions"
-    }
 
 
 @api_router.get("/admin-tests/library")
@@ -12687,6 +12782,38 @@ async def get_skill_quiz_questions(request: Request, skill_category: str = None)
     
     return {"questions": questions, "by_category": by_category}
 
+
+# NOTE: literal /skill-quiz/... routes MUST stay above the parameterized
+# /skill-quiz/{skill_category} route below or FastAPI matches them as a category.
+@api_router.get("/skill-quiz/student-history")
+async def get_student_quiz_history(request: Request):
+    """Get quiz history for current student"""
+    user = await get_current_user(request)
+    attempts = await db.skill_quiz_attempts.find(
+        {"student_id": user["id"]},
+        {"_id": 0}
+    ).sort("submitted_at", -1).to_list(100)
+    return {"attempts": attempts}
+
+
+@api_router.get("/skill-quiz/assignments")
+async def get_quiz_assignments_literal(request: Request, classroom_id: str = None):
+    """Get skill quiz assignments for a student or teacher. Literal-before-param."""
+    user = await get_current_user(request)
+    if user["role"] == "teacher":
+        query = {"teacher_id": user["id"]}
+        if classroom_id:
+            query["classroom_id"] = classroom_id
+        assignments = await db.quiz_assignments.find(query, {"_id": 0}).sort("created_at", -1).to_list(200)
+    else:
+        classrooms = await db.classrooms.find({"students": user["id"]}, {"_id": 0, "id": 1}).to_list(200)
+        classroom_ids = [c["id"] for c in classrooms]
+        assignments = await db.quiz_assignments.find(
+            {"classroom_id": {"$in": classroom_ids}}, {"_id": 0}
+        ).sort("created_at", -1).to_list(200)
+    return {"assignments": assignments}
+
+
 @api_router.get("/skill-quiz/{skill_category}")
 async def get_skill_quiz(skill_category: str, assignment_id: str, request: Request):
     """Get quiz questions for a specific skill (for students taking quiz)"""
@@ -12840,18 +12967,6 @@ async def get_skill_quiz_results(skill_category: str, classroom_id: str = None, 
     
     return {"attempts": attempts, "stats": stats}
 
-@api_router.get("/skill-quiz/student-history")
-async def get_student_quiz_history(request: Request):
-    """Get quiz history for current student"""
-    user = await get_current_user(request)
-    
-    attempts = await db.skill_quiz_attempts.find(
-        {"student_id": user["id"]},
-        {"_id": 0}
-    ).sort("submitted_at", -1).to_list(100)
-    
-    return {"attempts": attempts}
-
 @api_router.delete("/skill-quiz/questions/{question_id}")
 async def delete_skill_quiz_question(question_id: str, request: Request):
     """Delete a skill quiz question (teacher only)"""
@@ -12927,37 +13042,6 @@ async def assign_skill_quiz(request: Request):
         "message": f"Quiz assigned with {len(questions)} questions",
         "assignment_id": quiz_assignment["id"]
     }
-
-
-@api_router.get("/skill-quiz/assignments")
-async def get_quiz_assignments(request: Request, classroom_id: str = None):
-    """Get skill quiz assignments for a student or teacher"""
-    user = await get_current_user(request)
-    
-    if user["role"] == "teacher":
-        # Teachers see all their quiz assignments
-        query = {"teacher_id": user["id"]}
-        if classroom_id:
-            query["classroom_id"] = classroom_id
-    else:
-        # Students see assignments for their classrooms
-        student_classrooms = await db.classroom_students.find(
-            {"student_id": user["id"]}
-        ).to_list(100)
-        classroom_ids = [sc["classroom_id"] for sc in student_classrooms]
-        query = {"classroom_id": {"$in": classroom_ids}, "status": "active"}
-    
-    assignments = await db.quiz_assignments.find(query).sort("created_at", -1).to_list(100)
-    
-    # Convert dates for JSON
-    for a in assignments:
-        a.pop("_id", None)
-        if a.get("due_date"):
-            a["due_date"] = a["due_date"].isoformat()
-        if a.get("created_at"):
-            a["created_at"] = a["created_at"].isoformat()
-    
-    return {"assignments": assignments}
 
 
 # ==================== CODING TESTS ====================

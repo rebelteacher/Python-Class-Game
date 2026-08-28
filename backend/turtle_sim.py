@@ -487,12 +487,12 @@ class TurtleSim:
             actual_size = max(16, font_size * 2)  # Scale up for visibility
             try:
                 pil_font = ImageFont.truetype("/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf", actual_size)
-            except:
+            except Exception:
                 try:
                     pil_font = ImageFont.truetype("arial.ttf", actual_size)
-                except:
+                except Exception:
                     pil_font = ImageFont.load_default()
-        except:
+        except Exception:
             pil_font = None
         
         # Draw the text above the turtle position

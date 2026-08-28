@@ -26,7 +26,7 @@ class TestLessonPlanAPIs:
         for plan_id in self.created_plan_ids:
             try:
                 requests.delete(f"{BASE_URL}/api/lesson-plans/{plan_id}", headers=self.headers)
-            except:
+            except Exception:
                 pass
     
     def test_01_api_health_check(self):
