@@ -507,3 +507,11 @@ A coding education platform for K-12 students featuring multiple programming env
 - New `frontend/src/components/TopQuizScorers.jsx` — compact horizontal strip on the Student Dashboard (above the Leaderboard card). Medals for top 3 (crown/silver/bronze), avatar/initials, "+N XP", highlights the viewer as "You". Empty-state nudge when no one has scored this week. `data-testid=top-quiz-scorers`, `quiz-scorer-<rank>`.
 - Verified endpoint via curl (returns ranked scorers). Component compiles clean; visual confirm blocked only by the synthetic preview student having no full dashboard render.
 
+## Weekly reset + Champion streak flames (Mar 2026)
+- Top Quiz Scorers strip is now anchored to the **calendar week** (Monday 00:00 UTC → next Monday) so it genuinely "resets every Monday". Endpoint returns `week_start` + `resets_at`; the strip shows a "Resets every Monday" note + a live countdown pill (`quiz-scorers-countdown`) that ticks each minute.
+- New `weekly_quiz_champions` collection (one doc per completed week, keyed by Monday `week_start` ISO): `{champion_id, xp, recorded_at}`. Weeks with no quiz XP recorded with `champion_id=None` so they aren't recomputed and correctly break streaks.
+- `_finalize_past_quiz_weeks()` lazily records every completed-but-unrecorded week from the earliest award forward (idempotent, upsert, concurrency-safe). Called on the scorers + stats endpoints. `_champion_stats_map()` computes per-student `total_weeks` (all-time #1 count) and `streak_weeks` (consecutive most-recent completed weeks won — only the latest week's champion has a live streak).
+- New `GET /api/leaderboard/quiz-champion-stats/{student_id}` → `{champion_weeks, champion_streak}`. Scorers in `/top-quiz-scorers` also carry `champion_weeks` + `champion_streak`.
+- Frontend strip stamps two badges under each scorer: 🔥 **Flame** (orange, shown when `champion_streak >= 2`) for weeks-in-a-row, and 👑 **Crown "N×"** (gold, shown when `champion_weeks >= 1`) for total weeks as champion. testids `quiz-flame-<rank>`, `quiz-champ-<rank>`.
+- **Verified** via curl with seeded 3-week history: champions Aug3→A, Aug10→A, Aug17→B ⇒ A `{weeks:2, streak:0}`, B `{weeks:1, streak:1}`; current-week scorers correctly carried their champion stats. Seed data cleaned up.
+

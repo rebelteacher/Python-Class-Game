@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import axios from "axios";
-import { Trophy, Crown, Medal, Zap, Clock } from "lucide-react";
+import { Trophy, Crown, Medal, Zap, Clock, Flame } from "lucide-react";
 
 const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
 const API = `${BACKEND_URL}/api`;
@@ -133,6 +133,30 @@ export const TopQuizScorers = ({ currentUserId }) => {
                     {isMe ? "You" : s.name}
                   </p>
                   <p className="text-xs text-cyber-lime font-orbitron">{s.xp} XP</p>
+                  {(s.champion_streak >= 2 || s.champion_weeks >= 1) && (
+                    <div className="flex items-center gap-1.5 mt-1">
+                      {s.champion_streak >= 2 && (
+                        <span
+                          data-testid={`quiz-flame-${s.rank}`}
+                          title={`${s.champion_streak} weeks as champion in a row`}
+                          className="inline-flex items-center gap-0.5 rounded-full bg-orange-500/15 border border-orange-400/40 px-1.5 py-0.5 text-[10px] font-orbitron font-bold text-orange-300"
+                        >
+                          <Flame className="w-3 h-3" />
+                          {s.champion_streak}
+                        </span>
+                      )}
+                      {s.champion_weeks >= 1 && (
+                        <span
+                          data-testid={`quiz-champ-${s.rank}`}
+                          title={`Weekly champion ${s.champion_weeks}× all-time`}
+                          className="inline-flex items-center gap-0.5 rounded-full bg-yellow-400/10 border border-yellow-400/40 px-1.5 py-0.5 text-[10px] font-orbitron font-bold text-yellow-300"
+                        >
+                          <Crown className="w-3 h-3" />
+                          {s.champion_weeks}×
+                        </span>
+                      )}
+                    </div>
+                  )}
                 </div>
               </div>
             );

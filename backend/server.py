@@ -10141,6 +10141,109 @@ async def get_reigning_beast(request: Request):
     }
 
 
+def _monday_week_start(dt: datetime) -> datetime:
+    """Return Monday 00:00 UTC of the week containing dt."""
+    if dt.tzinfo is None:
+        dt = dt.replace(tzinfo=timezone.utc)
+    return (dt - timedelta(days=dt.weekday())).replace(
+        hour=0, minute=0, second=0, microsecond=0
+    )
+
+
+async def _finalize_past_quiz_weeks():
+    """Record the weekly quiz champion for every COMPLETED week that hasn't been
+    recorded yet, into `weekly_quiz_champions` (one doc per week, keyed by the
+    Monday `week_start` ISO string). Idempotent + concurrency-safe via upsert.
+
+    A week with no quiz XP is still recorded with `champion_id=None` so it's not
+    recomputed on every call and so it correctly breaks streaks.
+    """
+    now = datetime.now(timezone.utc)
+    current_ws = _monday_week_start(now)
+
+    earliest = await db.test_xp_awards.find_one(
+        {"xp_earned": {"$gt": 0}}, sort=[("submitted_at", 1)],
+        projection={"_id": 0, "submitted_at": 1},
+    )
+    if not earliest or not earliest.get("submitted_at"):
+        return
+    try:
+        first_dt = datetime.fromisoformat(earliest["submitted_at"])
+    except (ValueError, TypeError):
+        return
+    ws = _monday_week_start(first_dt)
+
+    while ws < current_ws:
+        we = ws + timedelta(days=7)
+        ws_iso = ws.isoformat()
+        exists = await db.weekly_quiz_champions.find_one(
+            {"week_start": ws_iso}, {"_id": 0, "week_start": 1}
+        )
+        if not exists:
+            xp_by: dict = {}
+            cur = db.test_xp_awards.find(
+                {"xp_earned": {"$gt": 0},
+                 "submitted_at": {"$gte": ws_iso, "$lt": we.isoformat()}},
+                {"_id": 0, "student_id": 1, "xp_earned": 1},
+            )
+            async for d in cur:
+                sid = d.get("student_id")
+                if sid:
+                    xp_by[sid] = xp_by.get(sid, 0) + (d.get("xp_earned") or 0)
+            champ_id = max(xp_by, key=xp_by.get) if xp_by else None
+            champ_xp = xp_by[champ_id] if champ_id else 0
+            await db.weekly_quiz_champions.update_one(
+                {"week_start": ws_iso},
+                {"$setOnInsert": {
+                    "id": str(uuid.uuid4()),
+                    "week_start": ws_iso,
+                    "champion_id": champ_id,
+                    "xp": champ_xp,
+                    "recorded_at": now.isoformat(),
+                }},
+                upsert=True,
+            )
+        ws = we
+
+
+async def _champion_stats_map() -> dict:
+    """Return {student_id: {"total_weeks", "streak_weeks"}} computed from the
+    recorded `weekly_quiz_champions` history.
+
+    - total_weeks: all-time count of weeks this student was #1.
+    - streak_weeks: consecutive most-recent completed weeks won (0 unless they
+      won the latest completed week).
+    """
+    docs = await db.weekly_quiz_champions.find(
+        {}, {"_id": 0, "week_start": 1, "champion_id": 1}
+    ).to_list(10000)
+    if not docs:
+        return {}
+    docs.sort(key=lambda d: d["week_start"])  # ascending (oldest → newest)
+
+    totals: dict = {}
+    for d in docs:
+        cid = d.get("champion_id")
+        if cid:
+            totals[cid] = totals.get(cid, 0) + 1
+
+    stats = {cid: {"total_weeks": n, "streak_weeks": 0} for cid, n in totals.items()}
+
+    # Current streak only applies to the champion of the most recent week.
+    latest_champ = docs[-1].get("champion_id")
+    if latest_champ:
+        run = 0
+        for d in reversed(docs):
+            if d.get("champion_id") == latest_champ:
+                run += 1
+            else:
+                break
+        stats[latest_champ]["streak_weeks"] = run
+
+    return stats
+
+
+
 @api_router.get("/leaderboard/top-quiz-scorers")
 async def get_top_quiz_scorers(request: Request, limit: int = 5):
     """Top students by quiz + chapter-test XP earned this calendar week.
@@ -10150,9 +10253,16 @@ async def get_top_quiz_scorers(request: Request, limit: int = 5):
     so it genuinely "resets every Monday". Sources XP strictly from
     `test_xp_awards` (first-attempt quiz/chapter-test points) so it reflects
     recent quiz effort, not cumulative problem XP.
+
+    Each returned scorer also carries their historical weekly-champion stats
+    (`champion_weeks` = total weeks won all-time, `champion_streak` = current
+    consecutive weeks won) so the UI can stamp 🔥 streak flames + a "N×" badge.
     """
     await get_current_user(request)  # any signed-in user
     limit = max(1, min(limit, 20))
+
+    await _finalize_past_quiz_weeks()  # lazily record any completed weeks
+    stats = await _champion_stats_map()
 
     now = datetime.now(timezone.utc)
     week_start = (now - timedelta(days=now.weekday())).replace(
@@ -10189,15 +10299,36 @@ async def get_top_quiz_scorers(request: Request, limit: int = 5):
         u = user_map.get(sid)
         if not u:
             continue
+        st = stats.get(sid, {})
         scorers.append({
             "rank": rank,
             "id": sid,
             "name": u.get("name", "Student"),
             "picture": u.get("picture"),
             "xp": xp,
+            "champion_weeks": st.get("total_weeks", 0),
+            "champion_streak": st.get("streak_weeks", 0),
         })
 
     return {**meta, "scorers": scorers}
+
+
+@api_router.get("/leaderboard/quiz-champion-stats/{student_id}")
+async def get_quiz_champion_stats(student_id: str, request: Request):
+    """Weekly quiz-champion stats for a single student — total weeks won
+    all-time and current consecutive-week streak. Used to stamp the flame /
+    champion badge next to a student anywhere (dashboard, leaderboard)."""
+    await get_current_user(request)
+    await _finalize_past_quiz_weeks()
+    stats = await _champion_stats_map()
+    st = stats.get(student_id, {})
+    return {
+        "student_id": student_id,
+        "champion_weeks": st.get("total_weeks", 0),
+        "champion_streak": st.get("streak_weeks", 0),
+    }
+
+
 
 
 @api_router.post("/admin/bind-schools")
