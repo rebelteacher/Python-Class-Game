@@ -12,7 +12,7 @@ const BADGE_STYLES = [
   { bg: "bg-orange-600/20", border: "border-orange-600/50", text: "text-orange-400", glow: "shadow-[0_0_10px_rgba(234,88,12,0.3)]", icon: Award, label: "3rd" },
 ];
 
-function RankColumn({ title, top3, color, subtitle }) {
+function RankColumn({ title, top3, color, subtitle, secondaryTitle }) {
   const colorMap = {
     cyan: { header: "bg-cyber-cyan/10 border-cyber-cyan/30 text-cyber-cyan", headerGlow: "shadow-[0_0_10px_rgba(0,240,255,0.2)]" },
     pink: { header: "bg-cyber-pink/10 border-cyber-pink/30 text-cyber-pink", headerGlow: "shadow-[0_0_10px_rgba(255,0,170,0.2)]" },
@@ -24,7 +24,10 @@ function RankColumn({ title, top3, color, subtitle }) {
   return (
     <div className="flex-1 min-w-0">
       <div className={`text-center py-2 px-3 border rounded-none font-orbitron text-xs uppercase tracking-widest mb-3 ${c.header} ${c.headerGlow}`}>
-        {title}
+        <div className="leading-tight">{title}</div>
+        {secondaryTitle && (
+          <div className="text-[9px] opacity-60 tracking-widest mt-0.5">{secondaryTitle}</div>
+        )}
         {subtitle && (
           <div className="text-[10px] normal-case font-chakra tracking-normal opacity-70 mt-0.5 truncate">
             {subtitle}
@@ -164,7 +167,10 @@ export default function Leaderboard({ classroomId, currentUserId }) {
             )}
           </div>
           <div>
-            <p className="text-xs text-cyber-lime font-orbitron uppercase tracking-wider mb-1">Overall Rank</p>
+            <p className="text-xs text-cyber-lime font-orbitron uppercase tracking-wider mb-1 leading-tight">
+              ByteBattles Beasts
+              <span className="block text-[9px] text-cyber-lime/60 tracking-widest mt-0.5">Overall</span>
+            </p>
             <p className="text-lg font-orbitron text-cyber-lime heading-glow-lime font-bold" data-testid="my-overall-rank">{data.overall_rank}</p>
             <p className="text-[10px] text-slate-500 font-chakra mt-0.5">of {data.total_students} active</p>
           </div>
@@ -176,7 +182,7 @@ export default function Leaderboard({ classroomId, currentUserId }) {
         <RankColumn title="Class Rank" subtitle={data.class_name} top3={data.class_top3} color="cyan" />
         <RankColumn title="Teacher Rank" subtitle={data.teacher_name} top3={data.teacher_top3} color="pink" />
         <RankColumn title="School Rank" subtitle={data.school_name || "School not set"} top3={data.school_top3} color="amber" />
-        <RankColumn title="Overall Rank" subtitle="Platform-wide" top3={data.overall_top3} color="lime" />
+        <RankColumn title="ByteBattles Beasts" secondaryTitle="Overall" subtitle="Platform-wide" top3={data.overall_top3} color="lime" />
       </div>
     </div>
   );
