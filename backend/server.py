@@ -7958,15 +7958,28 @@ async def get_gradebook_report(classroom_id: str, request: Request, assignment_t
                 "test_id": {"$in": mc_col_test_ids},
                 "submitted_at": {"$ne": None},
             },
-            {"_id": 0, "student_id": 1, "test_id": 1, "score": 1, "percentage": 1},
+            {"_id": 0, "student_id": 1, "test_id": 1, "score": 1, "percentage": 1, "is_complete": 1},
         ).to_list(50000)
         for a in mc_attempts:
+            # Only count completed attempts (partial ones may have score=0)
+            if a.get("is_complete") is False:
+                continue
             k = (a["student_id"], a["test_id"])
-            pct = a.get("percentage")
-            if pct is None and a.get("score") is not None and mc_test_nq.get(a["test_id"]):
-                pct = (a["score"] / mc_test_nq[a["test_id"]]) * 100
+            # `mc_test_attempts.score` is stored as a 0-100 percentage (see MCTestAttempt
+            # model + `/mc-tests/{id}/submit`). Prefer an explicit `percentage` field
+            # only when it looks like a real percentage (0-100); otherwise trust `score`.
+            raw_pct = a.get("percentage")
+            if raw_pct is not None and 0 <= raw_pct <= 100:
+                pct = raw_pct
+            else:
+                pct = a.get("score")
             if pct is None:
                 continue
+            # Clamp to [0, 100] to defend against legacy rows with raw counts
+            if pct > 100:
+                pct = 100
+            if pct < 0:
+                pct = 0
             if k not in best_attempt or pct > best_attempt[k]:
                 best_attempt[k] = pct
 
@@ -9892,9 +9905,26 @@ async def get_student_ranks(student_id: str, request: Request):
         name_by_id = {u["id"]: u.get("name", "Student") for u in users_docs}
         return [{"id": i, "name": name_by_id.get(i, "Student"), "xp": xp} for i, xp in id_xp_pairs]
 
+    def _extract_ids(students_field):
+        """Return a flat list of student id strings from a classroom's `students`
+        field which may be either [id_str, ...] or [{id, name, email}, ...]."""
+        if not students_field:
+            return []
+        out = []
+        for s in students_field:
+            if isinstance(s, str):
+                out.append(s)
+            elif isinstance(s, dict):
+                sid = s.get("id") or s.get("student_id")
+                if sid:
+                    out.append(sid)
+        return out
+
     # ── Class Rank ────────────────────────────────────────────────────────
+    # Production classrooms may store `students` as an array of id strings OR as
+    # array of expanded {id,name,email} objects. Query both shapes.
     classrooms = await db.classrooms.find(
-        {"students": student_id},
+        {"$or": [{"students": student_id}, {"students.id": student_id}]},
         {"_id": 0, "id": 1, "students": 1, "teacher_id": 1, "name": 1},
     ).to_list(100)
 
@@ -9908,7 +9938,7 @@ async def get_student_ranks(student_id: str, request: Request):
         classroom = classrooms[0]
         class_name = classroom.get("name", "")
         teacher_id = classroom.get("teacher_id")
-        class_student_ids = classroom.get("students", []) or []
+        class_student_ids = _extract_ids(classroom.get("students"))
         class_xp = await _year_xp_map(class_student_ids)
         student_year_xp = class_xp.get(student_id, 0)
         class_rank, class_top3_pairs, _ = _rank_of(student_id, class_xp)
@@ -9933,7 +9963,7 @@ async def get_student_ranks(student_id: str, request: Request):
 
         all_teacher_student_ids = set()
         for tc in teacher_classrooms:
-            all_teacher_student_ids.update(tc.get("students", []) or [])
+            all_teacher_student_ids.update(_extract_ids(tc.get("students")))
 
         teacher_xp = await _year_xp_map(list(all_teacher_student_ids))
         if student_id in teacher_xp:
@@ -9962,7 +9992,7 @@ async def get_student_ranks(student_id: str, request: Request):
         ).to_list(2000)
         all_school_student_ids = set()
         for sc in school_classrooms:
-            all_school_student_ids.update(sc.get("students", []) or [])
+            all_school_student_ids.update(_extract_ids(sc.get("students")))
         school_xp = await _year_xp_map(list(all_school_student_ids))
         school_rank, school_top3_pairs, _ = _rank_of(student_id, school_xp)
         school_top3 = await _names_for(school_top3_pairs)

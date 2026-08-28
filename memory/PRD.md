@@ -484,6 +484,11 @@ A coding education platform for K-12 students featuring multiple programming env
   - **Admin UI card** — new `<SchoolYearCard>` on `/admin/analytics` above the Traffic/Teacher-Activity tabs. Shows "Currently in effect" date + "Last set …" hint, a `<input type="date">` for the new cutoff, and an amber "Start New School Year" button that fires a confirm dialog and posts to the endpoint. Data-testids: `school-year-card`, `school-year-current`, `school-year-input`, `school-year-save-btn`.
   - Verified in preview end-to-end: opened Analytics → card showed "August 1, 2025" default → set to 2026-08-15 → toast "New school year starts 2026-08-15" → card refreshed showing "August 15, 2026" + "Last set 8/28/2026, 11:24:30 AM" → reset back to 2025-08-01. Backend cleanup: `db.settings.school_year_start` doc is created on first save, deleted on cleanup.
 
+- Leaderboard "No data yet" + gradebook quiz values (Mar 2, 2026 — production hotfix):
+  - **Bug A (gradebook quiz cells showing 1600 / 2000 / 800)**: `/reports/gradebook` was dividing `mc_test_attempts.score` (already stored as a 0-100 percentage per the `MCTestAttempt` model + `/mc-tests/{id}/submit` handler) by `num_questions` and re-multiplying by 100 — turning 100% into 100 ÷ 5 × 100 = 2000. Fixed to trust `score` directly (or `percentage` only when it looks like a 0-100 value), clamp to [0, 100], and skip incomplete attempts.
+  - **Bug B (leaderboard "No data yet" everywhere)**: production classrooms store `students` as expanded `[{id, name, email}, ...]` for some records and `[id_str, ...]` for others. My `/leaderboard/ranks/{id}` was doing `db.classrooms.find({"students": student_id})` which only matched the id-string shape, so any student in an object-shape classroom got zero classrooms back → all top-3 lists returned empty → "No data yet" rendered in every panel. Fixed the classroom query to `$or` both shapes and added a `_extract_ids()` helper that normalizes either shape into a flat list of id strings; applied to class, teacher, and school aggregations.
+  - Verified in preview: Amy Stapp's endpoint now returns `class_top3 length=2, teacher_top3 length=3, class_rank="1st", teacher_rank="6th"` where previously all were empty/N/A. Inserted a fake mc_test_attempt(score=100) → quiz cell rendered "100", not "5000".
+
 *Last Updated: Mar, 2026*
 
 ## Deferred backlog (user-parked)
