@@ -536,3 +536,12 @@ A coding education platform for K-12 students featuring multiple programming env
 - **Verified** via curl on real preview data: beast → Amy Stapp 7100 XP; class board shows ranked names (7100, 1500); personal ranks → 1st of 19 active. Frontend compiles clean; test session cleaned up.
 - NOTE: in **Preview** — redeploy to push to production.
 
+## Leaderboard: active classes + enrolled students only (Mar 2026, "last year's students")
+- Problem: last year's students (e.g. Trenton Willingham) still appeared. Root cause: pools aggregated **all** classrooms (incl. archived/previous-year) and Overall/Beast ranked **all** `role:student` users (incl. legacy students no longer in any active class).
+- Added `_lb_enrolled_student_ids()` = union of students across **non-archived** classrooms (this year's roster).
+- `get_student_ranks` + `/leaderboard/classroom/{id}/ranks`: class/teacher/school classroom queries now filter `is_archived != True`; the Overall pool now uses `_lb_enrolled_student_ids()` (currently-enrolled) instead of all `role:student` users.
+- `/leaderboard/beast`: now picks the top `users.xp` among currently-enrolled students only (legacy students ignored).
+- **Verified** on preview: enrolled(active)=76 vs 111 total role:student users, so 35 legacy/orphan students are now excluded from Overall/Beast. Beast + ranks return correctly (Amy Stapp 7100, overall total 19 active-with-XP).
+- ⚠️ CAVEAT for production: this treats "legacy" = students only in **archived** classes (the only active/legacy marker in the schema). If a teacher's previous-year classes are NOT archived, their students still count — the teacher must **archive old classes** (or remove those students from the active roster) to drop them. A student still sitting in an *active* class roster is, by definition, "currently enrolled" and will show.
+- NOTE: in **Preview** — redeploy to push to production.
+

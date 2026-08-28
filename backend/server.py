@@ -9951,6 +9951,20 @@ async def _lb_names_for(id_xp_pairs):
     return [{"id": i, "name": name_by_id.get(i, "Student"), "xp": xp} for i, xp in id_xp_pairs]
 
 
+async def _lb_enrolled_student_ids():
+    """Student ids currently enrolled in at least one ACTIVE (non-archived)
+    classroom — i.e. this school year's roster. Excludes legacy students who
+    only exist in archived/previous-year classes."""
+    ids = set()
+    cursor = db.classrooms.find(
+        {"is_archived": {"$ne": True}}, {"_id": 0, "students": 1}
+    )
+    async for c in cursor:
+        ids.update(_lb_extract_ids(c.get("students")))
+    return ids
+
+
+
 @api_router.get("/leaderboard/ranks/{student_id}")
 async def get_student_ranks(student_id: str, request: Request):
     """Get a student's rank across Class, Teacher, School, and Overall categories +
@@ -10029,7 +10043,7 @@ async def get_student_ranks(student_id: str, request: Request):
     # Production classrooms may store `students` as an array of id strings OR as
     # array of expanded {id,name,email} objects. Query both shapes.
     classrooms = await db.classrooms.find(
-        {"$or": [{"students": student_id}, {"students.id": student_id}]},
+        {"is_archived": {"$ne": True}, "$or": [{"students": student_id}, {"students.id": student_id}]},
         {"_id": 0, "id": 1, "students": 1, "teacher_id": 1, "name": 1},
     ).to_list(100)
 
@@ -10062,7 +10076,7 @@ async def get_student_ranks(student_id: str, request: Request):
         teacher_name = teacher_doc.get("name", "") if teacher_doc else ""
 
         teacher_classrooms = await db.classrooms.find(
-            {"teacher_id": teacher_id},
+            {"teacher_id": teacher_id, "is_archived": {"$ne": True}},
             {"_id": 0, "students": 1},
         ).to_list(100)
 
@@ -10092,7 +10106,7 @@ async def get_student_ranks(student_id: str, request: Request):
         school_teacher_ids = [t["id"] for t in school_teachers]
         # Aggregate all their students
         school_classrooms = await db.classrooms.find(
-            {"teacher_id": {"$in": school_teacher_ids}},
+            {"teacher_id": {"$in": school_teacher_ids}, "is_archived": {"$ne": True}},
             {"_id": 0, "students": 1},
         ).to_list(2000)
         all_school_student_ids = set()
@@ -10102,12 +10116,9 @@ async def get_student_ranks(student_id: str, request: Request):
         school_rank, school_top3_pairs, _ = _rank_of(student_id, school_xp, min_activity=True)
         school_top3 = await _names_for(school_top3_pairs)
 
-    # ── Overall Rank (whole platform, active-this-year only) ──────────────
-    all_students_docs = await db.users.find(
-        {"role": "student"}, {"_id": 0, "id": 1}
-    ).to_list(20000)
-    all_student_ids = [s["id"] for s in all_students_docs]
-    overall_xp = await _year_xp_map(all_student_ids)
+    # ── Overall Rank (currently-enrolled students platform-wide) ──────────
+    enrolled_ids = await _lb_enrolled_student_ids()
+    overall_xp = await _year_xp_map(list(enrolled_ids))
     if student_id in overall_xp and overall_xp[student_id] > student_year_xp:
         student_year_xp = overall_xp[student_id]
     overall_rank, overall_top3_pairs, total_active = _rank_of(
@@ -10194,7 +10205,7 @@ async def get_classroom_ranks(classroom_id: str, request: Request):
             teacher_name = teacher_doc.get("name", "")
             school_val = teacher_doc.get("school")
         teacher_classrooms = await db.classrooms.find(
-            {"teacher_id": teacher_id}, {"_id": 0, "students": 1}
+            {"teacher_id": teacher_id, "is_archived": {"$ne": True}}, {"_id": 0, "students": 1}
         ).to_list(100)
         all_teacher_ids = set()
         for tc in teacher_classrooms:
@@ -10213,7 +10224,7 @@ async def get_classroom_ranks(classroom_id: str, request: Request):
         ).to_list(500)
         school_teacher_ids = [t["id"] for t in school_teachers]
         school_classrooms = await db.classrooms.find(
-            {"teacher_id": {"$in": school_teacher_ids}}, {"_id": 0, "students": 1}
+            {"teacher_id": {"$in": school_teacher_ids}, "is_archived": {"$ne": True}}, {"_id": 0, "students": 1}
         ).to_list(2000)
         all_school_ids = set()
         for sc in school_classrooms:
@@ -10222,12 +10233,9 @@ async def get_classroom_ranks(classroom_id: str, request: Request):
         _, school_top3_pairs, _ = _lb_rank_of(None, school_xp, min_activity=True)
         school_top3 = await _lb_names_for(school_top3_pairs)
 
-    # ── Overall (whole platform, active-this-year only) ──
-    all_students_docs = await db.users.find(
-        {"role": "student"}, {"_id": 0, "id": 1}
-    ).to_list(20000)
-    all_student_ids = [s["id"] for s in all_students_docs]
-    overall_xp = await _lb_year_xp_map(all_student_ids, cutoff_iso)
+    # ── Overall (currently-enrolled students platform-wide) ──
+    enrolled_ids = await _lb_enrolled_student_ids()
+    overall_xp = await _lb_year_xp_map(list(enrolled_ids), cutoff_iso)
     _, overall_top3_pairs, total_active = _lb_rank_of(None, overall_xp, min_activity=True)
     overall_top3 = await _lb_names_for(overall_top3_pairs)
 
@@ -10252,12 +10260,17 @@ async def get_reigning_beast(request: Request):
     """Return the current #1 student across the platform by total XP —
     the "Reigning ByteBattles Beast". Used by the frontend `<BeastBadge>` to
     stamp a permanent badge on that student's card everywhere they appear.
-    Ranks by the stored `users.xp` total (cumulative lifetime).
+    Ranks by the stored `users.xp` total among students currently enrolled in
+    an active (non-archived) class — legacy/previous-year students are ignored.
     """
     await get_current_user(request)  # any signed-in user can look up the beast
 
+    enrolled_ids = await _lb_enrolled_student_ids()
+    if not enrolled_ids:
+        return {"beast": None}
+
     top_user = await db.users.find_one(
-        {"role": "student", "xp": {"$gt": 0}},
+        {"id": {"$in": list(enrolled_ids)}, "role": "student", "xp": {"$gt": 0}},
         {"_id": 0, "id": 1, "name": 1, "picture": 1, "xp": 1},
         sort=[("xp", -1)],
     )
