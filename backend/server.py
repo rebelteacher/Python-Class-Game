@@ -1183,6 +1183,8 @@ async def get_me(request: Request):
         "full_access": full_access,
         "trial_ends_at": trial_ends_at.isoformat() if hasattr(trial_ends_at, "isoformat") else trial_ends_at,
         "subscription_active": user.get("subscription_active", False),
+        "school": user.get("school", ""),
+        "district": user.get("district", ""),
         "xp": user.get("xp", 0),
         "coins": user.get("coins", 0),
         "rank": user.get("rank", "Rookie"),
@@ -1202,6 +1204,36 @@ async def get_me(request: Request):
         "active_pet": user.get("active_pet"),
         "active_profile_frame": user.get("active_profile_frame")
     }
+
+@api_router.post("/auth/update-school")
+async def update_my_school(request: Request):
+    """Teacher self-service: set/update the school (and optionally district) on their
+    own account. Used to bind their students into the School Rank leaderboard.
+    """
+    user = await get_current_user(request)
+    if user["role"] != "teacher":
+        raise HTTPException(status_code=403, detail="Teachers only")
+
+    body = await request.json()
+    school = (body.get("school") or "").strip()
+    district = (body.get("district") or user.get("district") or "").strip()
+
+    if len(school) > 200 or len(district) > 200:
+        raise HTTPException(status_code=400, detail="School or district name is too long")
+
+    updates = {"school": school}
+    if district:
+        updates["district"] = district
+    await db.users.update_one({"id": user["id"]}, {"$set": updates})
+
+    if school and district:
+        try:
+            await update_school_record(user["id"], school, district, "teacher")
+        except Exception as e:
+            logging.warning(f"update_school_record failed for {user['id']}: {e}")
+
+    return {"success": True, "school": school, "district": district}
+
 
 @api_router.post("/admin/reset-user-password")
 async def admin_reset_user_password(request: Request):
@@ -9769,94 +9801,165 @@ async def get_classroom_leaderboard(classroom_id: str, request: Request):
 
 @api_router.get("/leaderboard/ranks/{student_id}")
 async def get_student_ranks(student_id: str, request: Request):
-    """Get a student's rank across Class, Teacher, and Overall categories + top 3 per category"""
+    """Get a student's rank across Class, Teacher, School, and Overall categories +
+    top 3 per category. Rank is computed on XP EARNED SINCE THE CURRENT SCHOOL YEAR
+    STARTED (env `SCHOOL_YEAR_START`, default 2025-08-01) so last year's students'
+    all-time XP does not dominate the current year.
+    """
     user = await get_current_user(request)
-    
+
     student = await db.users.find_one({"id": student_id}, {"_id": 0})
     if not student:
         raise HTTPException(status_code=404, detail="Student not found")
-    
-    student_xp = student.get("xp", 0)
+
+    # ── School year cutoff ────────────────────────────────────────────────
+    school_year_start_iso = os.environ.get("SCHOOL_YEAR_START", "2025-08-01T00:00:00+00:00")
+    try:
+        school_year_start = datetime.fromisoformat(school_year_start_iso)
+    except ValueError:
+        school_year_start = datetime(2025, 8, 1, tzinfo=timezone.utc)
+    if school_year_start.tzinfo is None:
+        school_year_start = school_year_start.replace(tzinfo=timezone.utc)
+    cutoff_iso = school_year_start.isoformat()
+
     student_name = student.get("name", "Unknown")
-    
-    # --- Class Rank ---
-    # Find classrooms this student is in
+
+    # ── Helper: aggregate year-scoped XP for a set of student ids ─────────
+    async def _year_xp_map(sids):
+        """Return {student_id: total XP earned since school year start}.
+        Sums xp_earned from submissions, mc_test_attempts, and coding_test_attempts
+        where submitted_at is on or after the school year cutoff.
+        """
+        if not sids:
+            return {}
+        xp_map = {sid: 0 for sid in sids}
+        base_filter = {
+            "student_id": {"$in": sids},
+            "xp_earned": {"$exists": True, "$ne": None, "$gt": 0},
+            "submitted_at": {"$gte": cutoff_iso},
+        }
+        for coll in (db.submissions, db.mc_test_attempts, db.coding_test_attempts):
+            cursor = coll.find(base_filter, {"_id": 0, "student_id": 1, "xp_earned": 1})
+            async for doc in cursor:
+                sid = doc.get("student_id")
+                xp = doc.get("xp_earned") or 0
+                if sid in xp_map:
+                    xp_map[sid] += xp
+        return xp_map
+
+    def _rank_of(sid, xp_map, min_activity=False):
+        """Rank a single student in the provided xp_map. Returns (rank, top3, total_active).
+        When min_activity=True students with 0 year-XP are excluded from the pool
+        (used for the "Overall" pool = anyone presently using the app)."""
+        entries = list(xp_map.items())
+        if min_activity:
+            entries = [(k, v) for k, v in entries if v > 0]
+        entries.sort(key=lambda kv: kv[1], reverse=True)
+        rank_val = None
+        for i, (peer_id, _) in enumerate(entries):
+            if peer_id == sid:
+                rank_val = i + 1
+                break
+        return rank_val, entries[:3], len(entries)
+
+    async def _names_for(id_xp_pairs):
+        ids = [i for i, _ in id_xp_pairs]
+        if not ids:
+            return []
+        users_docs = await db.users.find(
+            {"id": {"$in": ids}}, {"_id": 0, "id": 1, "name": 1}
+        ).to_list(len(ids))
+        name_by_id = {u["id"]: u.get("name", "Student") for u in users_docs}
+        return [{"name": name_by_id.get(i, "Student"), "xp": xp} for i, xp in id_xp_pairs]
+
+    # ── Class Rank ────────────────────────────────────────────────────────
     classrooms = await db.classrooms.find(
         {"students": student_id},
-        {"_id": 0, "id": 1, "students": 1, "teacher_id": 1, "name": 1}
+        {"_id": 0, "id": 1, "students": 1, "teacher_id": 1, "name": 1},
     ).to_list(100)
-    
+
     class_rank = None
     class_top3 = []
     class_name = ""
     teacher_id = None
-    
+    student_year_xp = 0
+
     if classrooms:
-        # Use the first classroom for class rank
         classroom = classrooms[0]
         class_name = classroom.get("name", "")
         teacher_id = classroom.get("teacher_id")
-        class_student_ids = classroom.get("students", [])
-        class_students = await db.users.find(
-            {"id": {"$in": class_student_ids}, "role": "student"},
-            {"_id": 0, "id": 1, "name": 1, "xp": 1}
-        ).to_list(1000)
-        class_students.sort(key=lambda x: x.get("xp", 0), reverse=True)
-        
-        for i, s in enumerate(class_students):
-            if s["id"] == student_id:
-                class_rank = i + 1
-                break
-        
-        class_top3 = [{"name": s["name"], "xp": s.get("xp", 0)} for s in class_students[:3]]
-    
-    # --- Teacher Rank ---
+        class_student_ids = classroom.get("students", []) or []
+        class_xp = await _year_xp_map(class_student_ids)
+        student_year_xp = class_xp.get(student_id, 0)
+        class_rank, class_top3_pairs, _ = _rank_of(student_id, class_xp)
+        class_top3 = await _names_for(class_top3_pairs)
+
+    # ── Teacher Rank ──────────────────────────────────────────────────────
     teacher_rank = None
     teacher_top3 = []
     teacher_name = ""
-    
+    teacher_doc = None
+
     if teacher_id:
-        teacher = await db.users.find_one({"id": teacher_id}, {"_id": 0, "name": 1})
-        teacher_name = teacher.get("name", "") if teacher else ""
-        
-        # Get all classrooms for this teacher
+        teacher_doc = await db.users.find_one(
+            {"id": teacher_id}, {"_id": 0, "name": 1, "school": 1}
+        )
+        teacher_name = teacher_doc.get("name", "") if teacher_doc else ""
+
         teacher_classrooms = await db.classrooms.find(
             {"teacher_id": teacher_id},
-            {"_id": 0, "students": 1}
+            {"_id": 0, "students": 1},
         ).to_list(100)
-        
+
         all_teacher_student_ids = set()
         for tc in teacher_classrooms:
-            all_teacher_student_ids.update(tc.get("students", []))
-        
-        teacher_students = await db.users.find(
-            {"id": {"$in": list(all_teacher_student_ids)}, "role": "student"},
-            {"_id": 0, "id": 1, "name": 1, "xp": 1}
-        ).to_list(5000)
-        teacher_students.sort(key=lambda x: x.get("xp", 0), reverse=True)
-        
-        for i, s in enumerate(teacher_students):
-            if s["id"] == student_id:
-                teacher_rank = i + 1
-                break
-        
-        teacher_top3 = [{"name": s["name"], "xp": s.get("xp", 0)} for s in teacher_students[:3]]
-    
-    # --- Overall Rank ---
-    all_students = await db.users.find(
-        {"role": "student"},
-        {"_id": 0, "id": 1, "name": 1, "xp": 1}
-    ).to_list(10000)
-    all_students.sort(key=lambda x: x.get("xp", 0), reverse=True)
-    
-    overall_rank = None
-    for i, s in enumerate(all_students):
-        if s["id"] == student_id:
-            overall_rank = i + 1
-            break
-    
-    overall_top3 = [{"name": s["name"], "xp": s.get("xp", 0)} for s in all_students[:3]]
-    
+            all_teacher_student_ids.update(tc.get("students", []) or [])
+
+        teacher_xp = await _year_xp_map(list(all_teacher_student_ids))
+        if student_id in teacher_xp:
+            student_year_xp = teacher_xp[student_id]
+        teacher_rank, teacher_top3_pairs, _ = _rank_of(student_id, teacher_xp)
+        teacher_top3 = await _names_for(teacher_top3_pairs)
+
+    # ── School Rank ───────────────────────────────────────────────────────
+    school_rank = None
+    school_top3 = []
+    school_name = ""
+
+    school_val = (teacher_doc or {}).get("school") if teacher_doc else None
+    if school_val:
+        school_name = school_val
+        # Find every teacher at the same school
+        school_teachers = await db.users.find(
+            {"role": "teacher", "school": school_val},
+            {"_id": 0, "id": 1},
+        ).to_list(500)
+        school_teacher_ids = [t["id"] for t in school_teachers]
+        # Aggregate all their students
+        school_classrooms = await db.classrooms.find(
+            {"teacher_id": {"$in": school_teacher_ids}},
+            {"_id": 0, "students": 1},
+        ).to_list(2000)
+        all_school_student_ids = set()
+        for sc in school_classrooms:
+            all_school_student_ids.update(sc.get("students", []) or [])
+        school_xp = await _year_xp_map(list(all_school_student_ids))
+        school_rank, school_top3_pairs, _ = _rank_of(student_id, school_xp)
+        school_top3 = await _names_for(school_top3_pairs)
+
+    # ── Overall Rank (whole platform, active-this-year only) ──────────────
+    all_students_docs = await db.users.find(
+        {"role": "student"}, {"_id": 0, "id": 1}
+    ).to_list(20000)
+    all_student_ids = [s["id"] for s in all_students_docs]
+    overall_xp = await _year_xp_map(all_student_ids)
+    if student_id in overall_xp and overall_xp[student_id] > student_year_xp:
+        student_year_xp = overall_xp[student_id]
+    overall_rank, overall_top3_pairs, total_active = _rank_of(
+        student_id, overall_xp, min_activity=True
+    )
+    overall_top3 = await _names_for(overall_top3_pairs)
+
     def ordinal(n):
         if n is None:
             return "N/A"
@@ -9870,10 +9973,12 @@ async def get_student_ranks(student_id: str, request: Request):
         if s.endswith("3"):
             return f"{n}rd"
         return f"{n}th"
-    
+
     return {
         "student_name": student_name,
-        "student_xp": student_xp,
+        "student_xp": student_year_xp,  # this-year XP so the UI matches ranks
+        "student_all_time_xp": student.get("xp", 0),  # keep all-time available too
+        "school_year_start": cutoff_iso,
         "class_rank": ordinal(class_rank),
         "class_rank_num": class_rank,
         "class_name": class_name,
@@ -9882,10 +9987,14 @@ async def get_student_ranks(student_id: str, request: Request):
         "teacher_rank_num": teacher_rank,
         "teacher_name": teacher_name,
         "teacher_top3": teacher_top3,
+        "school_rank": ordinal(school_rank),
+        "school_rank_num": school_rank,
+        "school_name": school_name,  # empty string if the teacher hasn't set a school
+        "school_top3": school_top3,
         "overall_rank": ordinal(overall_rank),
         "overall_rank_num": overall_rank,
         "overall_top3": overall_top3,
-        "total_students": len(all_students),
+        "total_students": total_active,  # active students this school year
     }
 
 
