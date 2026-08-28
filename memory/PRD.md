@@ -502,3 +502,8 @@ A coding education platform for K-12 students featuring multiple programming env
 - Submit responses now return `xp_earned`. `TestTaking.jsx` shows a lime "+N XP earned!" badge (`data-testid=quiz-xp-earned`) on the results screen.
 - **Verified** via curl end-to-end: first attempt (100%) → +250 XP + award row + user xp bumped; retake (50%) → xp_earned=0, user xp unchanged, award count stays 1; `/leaderboard/beast` reflects the 250 year-XP. Test artifacts cleaned up afterward.
 
+## Top Quiz Scorers strip (Mar 2026)
+- New `GET /api/leaderboard/top-quiz-scorers?days=7&limit=5` — top students by quiz/chapter-test XP earned in the last N days, sourced from `test_xp_awards` only (recent quiz effort, not cumulative). Returns `{days, scorers:[{rank,id,name,picture,xp}]}`. Signed-in users only; days clamped 1-90, limit 1-20.
+- New `frontend/src/components/TopQuizScorers.jsx` — compact horizontal strip on the Student Dashboard (above the Leaderboard card). Medals for top 3 (crown/silver/bronze), avatar/initials, "+N XP", highlights the viewer as "You". Empty-state nudge when no one has scored this week. `data-testid=top-quiz-scorers`, `quiz-scorer-<rank>`.
+- Verified endpoint via curl (returns ranked scorers). Component compiles clean; visual confirm blocked only by the synthetic preview student having no full dashboard render.
+

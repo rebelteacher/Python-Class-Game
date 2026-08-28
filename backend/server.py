@@ -10141,6 +10141,56 @@ async def get_reigning_beast(request: Request):
     }
 
 
+@api_router.get("/leaderboard/top-quiz-scorers")
+async def get_top_quiz_scorers(request: Request, days: int = 7, limit: int = 5):
+    """Top students by quiz + chapter-test XP earned in the last `days` days.
+
+    Powers the "Top Quiz Scorers this week" strip on the Student Dashboard.
+    Sources XP strictly from `test_xp_awards` (first-attempt quiz/chapter-test
+    points) so it reflects recent quiz effort, not cumulative problem XP.
+    """
+    await get_current_user(request)  # any signed-in user
+    days = max(1, min(days, 90))
+    limit = max(1, min(limit, 20))
+    cutoff = (datetime.now(timezone.utc) - timedelta(days=days)).isoformat()
+
+    xp_by_student: dict = {}
+    cursor = db.test_xp_awards.find(
+        {"xp_earned": {"$gt": 0}, "submitted_at": {"$gte": cutoff}},
+        {"_id": 0, "student_id": 1, "xp_earned": 1},
+    )
+    async for doc in cursor:
+        sid = doc.get("student_id")
+        if not sid:
+            continue
+        xp_by_student[sid] = xp_by_student.get(sid, 0) + (doc.get("xp_earned") or 0)
+
+    if not xp_by_student:
+        return {"days": days, "scorers": []}
+
+    top = sorted(xp_by_student.items(), key=lambda kv: kv[1], reverse=True)[:limit]
+    top_ids = [sid for sid, _ in top]
+    users = await db.users.find(
+        {"id": {"$in": top_ids}}, {"_id": 0, "id": 1, "name": 1, "picture": 1}
+    ).to_list(len(top_ids))
+    user_map = {u["id"]: u for u in users}
+
+    scorers = []
+    for rank, (sid, xp) in enumerate(top, start=1):
+        u = user_map.get(sid)
+        if not u:
+            continue
+        scorers.append({
+            "rank": rank,
+            "id": sid,
+            "name": u.get("name", "Student"),
+            "picture": u.get("picture"),
+            "xp": xp,
+        })
+
+    return {"days": days, "scorers": scorers}
+
+
 @api_router.post("/admin/bind-schools")
 async def admin_bind_existing_schools(request: Request):
     """Admin-only: iterate the `schools` collection and back-fill `users.school`

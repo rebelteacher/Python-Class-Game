@@ -11,7 +11,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { BookOpen, Plus, LogOut, Code2, Trophy, ShoppingBag, Zap, FileText, Folder, FolderOpen, ChevronRight, ChevronDown, FileQuestion, Calendar, Award, Users, TrendingUp, CheckCircle, Video } from "lucide-react";
 import RankBadge from "@/components/RankBadge";
 import Leaderboard from "@/components/Leaderboard";
-import WelcomeBanner from "@/components/WelcomeBanner";
+import TopQuizScorers from "@/components/TopQuizScorers";import WelcomeBanner from "@/components/WelcomeBanner";
 import BeastRibbon from "@/components/BeastRibbon";
 
 // Animated Pet Component
@@ -664,6 +664,9 @@ export default function StudentDashboard({ user, setUser, refreshUser }) {
             </CardContent>
           </Card>
         </div>
+
+        {/* Top Quiz Scorers strip */}
+        <TopQuizScorers currentUserId={user.id} />
 
         {/* Leaderboard Section */}
         <Card className="mb-8 bg-cyber-navy/40 border border-cyber-cyan/20 rounded-none">
