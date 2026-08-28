@@ -7759,22 +7759,66 @@ async def get_gradebook_report(classroom_id: str, request: Request):
 
     ordered_chapters = sorted(chapters_set, key=_natural_key)
 
-    # All MC tests we own — sorted into lesson quizzes vs chapter tests
-    tests = await db.mc_tests.find(
-        {"creator_id": user["id"]},
-        {"_id": 0, "id": 1, "chapter": 1, "lesson": 1, "num_questions": 1, "title": 1},
+    # Lesson quizzes & chapter tests: prefer curriculum_test_placements (canonical
+    # since Feb 2026); fall back to legacy mc_tests.chapter/lesson tagging for
+    # teachers who haven't migrated their tests to the placements system yet.
+    placements = await db.curriculum_test_placements.find(
+        {}, {"_id": 0}
     ).to_list(2000)
-    lesson_test = {}
-    chapter_test = {}
-    for t in tests:
+    lesson_test = {}  # (chapter, lesson) -> {test_id, test_type}
+    chapter_test = {}  # chapter -> {test_id, test_type}
+    for pl in placements:
+        chap = (pl.get("chapter") or "").strip()
+        if not chap:
+            continue
+        entry = {"test_id": pl["test_id"], "test_type": pl.get("test_type", "mc")}
+        if pl["placement_type"] == "lesson_quiz" and pl.get("lesson"):
+            lesson_test[(chap, pl["lesson"].strip())] = entry
+        elif pl["placement_type"] == "chapter_test":
+            chapter_test[chap] = entry
+
+    # Legacy fallback: MC tests tagged directly with chapter/lesson (only where
+    # no placement claims that slot). Prefer this teacher's own tests, then
+    # admin-shared tests.
+    legacy_tests = await db.mc_tests.find(
+        {"chapter": {"$nin": [None, ""]}},
+        {"_id": 0, "id": 1, "chapter": 1, "lesson": 1, "teacher_id": 1, "creator_id": 1},
+    ).to_list(3000)
+    # Sort so this teacher's tests take precedence
+    def _ownership_key(t):
+        owner = t.get("teacher_id") or t.get("creator_id")
+        return 0 if owner == user["id"] else 1
+    legacy_tests.sort(key=_ownership_key)
+    for t in legacy_tests:
         chap = (t.get("chapter") or "").strip()
         less = (t.get("lesson") or "").strip()
         if not chap:
             continue
+        entry = {"test_id": t["id"], "test_type": "mc"}
         if less:
-            lesson_test[(chap, less)] = t
+            lesson_test.setdefault((chap, less), entry)
         else:
-            chapter_test[chap] = t
+            chapter_test.setdefault(chap, entry)
+
+    # Collect ids for the num_questions lookup used to normalize legacy attempts
+    all_mc_ids = set()
+    for e in list(lesson_test.values()) + list(chapter_test.values()):
+        if e.get("test_type", "mc") == "mc":
+            all_mc_ids.add(e["test_id"])
+    mc_tests = await db.mc_tests.find(
+        {"id": {"$in": list(all_mc_ids)}},
+        {"_id": 0, "id": 1, "num_questions": 1},
+    ).to_list(2000) if all_mc_ids else []
+    mc_test_nq = {t["id"]: t.get("num_questions") or 0 for t in mc_tests}
+
+    # Helpers to build short labels like "Lesson 1: Quiz" / "Chapter 1: Test"
+    def _lesson_prefix(name: str) -> str:
+        m = re.match(r"^\s*(Lesson\s*\d+)", name or "")
+        return m.group(1) if m else (name or "").strip()
+
+    def _chapter_prefix(name: str) -> str:
+        m = re.match(r"^\s*(Chapter\s*\d+)", name or "")
+        return m.group(1) if m else (name or "").strip()
 
     # Build ordered columns
     columns = []
@@ -7786,26 +7830,28 @@ async def get_gradebook_report(classroom_id: str, request: Request):
                 "type": "lesson_avg",
                 "chapter": chap,
                 "lesson": less,
-                "label": f"{less} Avg",
+                "label": less,
             })
             lq = lesson_test.get((chap, less))
             if lq:
                 columns.append({
-                    "key": f"lquiz::{lq['id']}",
+                    "key": f"lquiz::{lq['test_id']}::{chap}::{less}",
                     "type": "lesson_quiz",
                     "chapter": chap,
                     "lesson": less,
-                    "test_id": lq["id"],
-                    "label": f"{less} Quiz",
+                    "test_id": lq["test_id"],
+                    "test_type": lq.get("test_type", "mc"),
+                    "label": f"{_lesson_prefix(less)}: Quiz",
                 })
         ct = chapter_test.get(chap)
         if ct:
             columns.append({
-                "key": f"ctest::{ct['id']}",
+                "key": f"ctest::{ct['test_id']}::{chap}",
                 "type": "chapter_test",
                 "chapter": chap,
-                "test_id": ct["id"],
-                "label": f"{chap} Test",
+                "test_id": ct["test_id"],
+                "test_type": ct.get("test_type", "mc"),
+                "label": f"{_chapter_prefix(chap)}: Test",
             })
 
     # Fetch all submissions + all mc test attempts for these students in bulk
@@ -7825,28 +7871,48 @@ async def get_gradebook_report(classroom_id: str, request: Request):
         if k not in best_problem or sc > best_problem[k]:
             best_problem[k] = sc
 
-    all_test_ids = [c["test_id"] for c in columns if c["type"] in ("lesson_quiz", "chapter_test")]
-    attempts = []
-    if all_test_ids and student_ids:
-        attempts = await db.mc_test_attempts.find(
+    # Fetch best MC + coding test attempts for these students in bulk
+    mc_col_test_ids = [c["test_id"] for c in columns if c["type"] in ("lesson_quiz", "chapter_test") and c.get("test_type", "mc") == "mc"]
+    coding_col_test_ids = [c["test_id"] for c in columns if c["type"] in ("lesson_quiz", "chapter_test") and c.get("test_type") == "coding"]
+
+    best_attempt = {}
+    if mc_col_test_ids and student_ids:
+        mc_attempts = await db.mc_test_attempts.find(
             {
                 "student_id": {"$in": student_ids},
-                "test_id": {"$in": all_test_ids},
+                "test_id": {"$in": mc_col_test_ids},
                 "submitted_at": {"$ne": None},
             },
             {"_id": 0, "student_id": 1, "test_id": 1, "score": 1, "percentage": 1},
         ).to_list(50000)
-    test_nq = {t["id"]: t.get("num_questions") or 0 for t in tests}
-    best_attempt = {}
-    for a in attempts:
-        k = (a["student_id"], a["test_id"])
-        pct = a.get("percentage")
-        if pct is None and a.get("score") is not None and test_nq.get(a["test_id"]):
-            pct = (a["score"] / test_nq[a["test_id"]]) * 100
-        if pct is None:
-            continue
-        if k not in best_attempt or pct > best_attempt[k]:
-            best_attempt[k] = pct
+        for a in mc_attempts:
+            k = (a["student_id"], a["test_id"])
+            pct = a.get("percentage")
+            if pct is None and a.get("score") is not None and mc_test_nq.get(a["test_id"]):
+                pct = (a["score"] / mc_test_nq[a["test_id"]]) * 100
+            if pct is None:
+                continue
+            if k not in best_attempt or pct > best_attempt[k]:
+                best_attempt[k] = pct
+
+    if coding_col_test_ids and student_ids:
+        coding_attempts = await db.coding_test_attempts.find(
+            {
+                "student_id": {"$in": student_ids},
+                "test_id": {"$in": coding_col_test_ids},
+                "submitted_at": {"$ne": None},
+            },
+            {"_id": 0, "student_id": 1, "test_id": 1, "score": 1, "percentage": 1, "total_score": 1, "max_score": 1},
+        ).to_list(50000)
+        for a in coding_attempts:
+            k = (a["student_id"], a["test_id"])
+            pct = a.get("percentage")
+            if pct is None and a.get("max_score"):
+                pct = (a.get("total_score") or a.get("score") or 0) / a["max_score"] * 100
+            if pct is None:
+                continue
+            if k not in best_attempt or pct > best_attempt[k]:
+                best_attempt[k] = pct
 
     # Assemble rows
     rows = []

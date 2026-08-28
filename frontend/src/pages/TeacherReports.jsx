@@ -187,10 +187,31 @@ export default function TeacherReports({ user }) {
     }
   };
 
+  // Group columns by chapter (contiguous run) for merged header banners
+  const chapterGroups = React.useMemo(() => {
+    if (!curriculumData) return [];
+    const groups = [];
+    let cur = null;
+    curriculumData.columns.forEach((col, idx) => {
+      if (!cur || cur.chapter !== col.chapter) {
+        cur = { chapter: col.chapter, start: idx, span: 1 };
+        groups.push(cur);
+      } else {
+        cur.span += 1;
+      }
+    });
+    return groups;
+  }, [curriculumData]);
+
   const downloadCurriculumExcel = () => {
     if (!curriculumData) return;
+
+    // Row 1: chapter banner (merged across each chapter's columns)
+    const bannerRow = [""];
+    curriculumData.columns.forEach((c) => bannerRow.push(c.chapter));
+    // Row 2: column headers
     const headerRow = ["Student", ...curriculumData.columns.map((c) => c.label)];
-    const data = [headerRow];
+    const data = [bannerRow, headerRow];
     curriculumData.rows.forEach((row) => {
       const line = [row.student_name];
       curriculumData.columns.forEach((col) => {
@@ -201,8 +222,23 @@ export default function TeacherReports({ user }) {
     });
     const wb = XLSX.utils.book_new();
     const ws = XLSX.utils.aoa_to_sheet(data);
-    ws["!cols"] = [{ wch: 26 }, ...curriculumData.columns.map(() => ({ wch: 14 }))];
-    ws["!freeze"] = { xSplit: 1, ySplit: 1 };
+    ws["!cols"] = [{ wch: 26 }, ...curriculumData.columns.map(() => ({ wch: 16 }))];
+    ws["!freeze"] = {
+      xSplit: "1",
+      ySplit: "2",
+      topLeftCell: "B3",
+      activePane: "bottomRight",
+      state: "frozen",
+    };
+
+    // Merge banner cells for each chapter run
+    ws["!merges"] = chapterGroups
+      .filter((g) => g.span > 1)
+      .map((g) => ({
+        s: { r: 0, c: g.start + 1 },
+        e: { r: 0, c: g.start + g.span },
+      }));
+
     XLSX.utils.book_append_sheet(wb, ws, "Gradebook");
     const clsName = classrooms.find((c) => c.id === curriculumClassroomId)?.name || "Class";
     XLSX.writeFile(wb, `Gradebook_${clsName}_${new Date().toISOString().split("T")[0]}.xlsx`);
@@ -558,13 +594,29 @@ export default function TeacherReports({ user }) {
                 >
                   <table className="border-collapse text-sm">
                     <thead>
+                      {/* Row 1: merged chapter banner */}
                       <tr>
                         <th
+                          rowSpan={2}
                           className="sticky top-0 left-0 z-30 bg-cyber-navy text-white px-4 py-3 text-left font-semibold border-r border-b border-cyber-cyan/25 min-w-[220px] shadow-[2px_0_6px_rgba(0,0,0,0.5)]"
                           data-testid="gradebook-corner-header"
                         >
                           Student
                         </th>
+                        {chapterGroups.map((g) => (
+                          <th
+                            key={`chap-${g.start}`}
+                            colSpan={g.span}
+                            className="sticky top-0 z-20 bg-gradient-to-b from-indigo-950 to-cyber-navy text-white px-3 py-2 text-center font-semibold border-r border-b border-cyber-cyan/25 whitespace-nowrap"
+                            data-testid={`gradebook-chapter-${g.start}`}
+                            title={g.chapter}
+                          >
+                            {g.chapter}
+                          </th>
+                        ))}
+                      </tr>
+                      {/* Row 2: column labels */}
+                      <tr>
                         {curriculumData.columns.map((col) => {
                           const isQuiz = col.type === "lesson_quiz";
                           const isChapter = col.type === "chapter_test";
@@ -572,14 +624,12 @@ export default function TeacherReports({ user }) {
                           return (
                             <th
                               key={col.key}
-                              className={`sticky top-0 z-20 ${bg} text-white px-3 py-3 text-center font-medium border-r border-b border-cyber-cyan/25 whitespace-nowrap`}
+                              className={`sticky z-20 ${bg} text-white px-3 py-2 text-center font-medium border-r border-b border-cyber-cyan/25 whitespace-nowrap`}
+                              style={{ top: "44px" }}
                               data-testid={`gradebook-col-${col.key}`}
                               title={`${col.chapter}${col.lesson ? " · " + col.lesson : ""} · ${col.type.replace("_", " ")}`}
                             >
-                              <div className="text-[10px] uppercase tracking-wider text-slate-400 leading-tight">
-                                {col.chapter}
-                              </div>
-                              <div className="mt-0.5">{col.label}</div>
+                              {col.label}
                             </th>
                           );
                         })}
