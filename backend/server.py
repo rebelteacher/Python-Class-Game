@@ -2058,13 +2058,64 @@ async def remove_student_from_classroom(classroom_id: str, student_id: str, requ
     if classroom["teacher_id"] != user["id"]:
         raise HTTPException(status_code=403, detail="You can only remove students from your own classrooms")
     
-    # Remove student from classroom
-    await db.classrooms.update_one(
-        {"id": classroom_id},
-        {"$pull": {"students": student_id}}
+    # Remove student from classroom — handle BOTH shapes the roster can take:
+    # a plain id string ["id"] and an object [{id, name, email}]. A plain
+    # $pull by string silently misses object entries, leaving the student
+    # enrolled (and still on the leaderboard).
+    await db.classrooms.update_one({"id": classroom_id}, {"$pull": {"students": student_id}})
+    await db.classrooms.update_one({"id": classroom_id}, {"$pull": {"students": {"id": student_id}}})
+    await db.classrooms.update_one({"id": classroom_id}, {"$pull": {"students": {"student_id": student_id}}})
+    # If the student's home classroom pointer is this class, clear it
+    await db.users.update_one(
+        {"id": student_id, "classroom_id": classroom_id}, {"$set": {"classroom_id": None}}
     )
-    
+
     return {"success": True, "message": "Student removed from classroom"}
+
+
+@api_router.delete("/students/{student_id}")
+async def delete_student_account(student_id: str, request: Request):
+    """Permanently delete a student account and ALL their data (submissions,
+    test attempts, quiz XP awards, sessions). Also removes them from every
+    classroom roster so they drop off the leaderboard immediately.
+
+    A teacher may delete a student who is in one of their own classes; a
+    platform admin may delete any student.
+    """
+    user = await get_current_user(request)
+
+    target = await db.users.find_one(
+        {"id": student_id}, {"_id": 0, "id": 1, "role": 1, "name": 1}
+    )
+    if not target:
+        raise HTTPException(status_code=404, detail="Student not found")
+    if target.get("role") != "student":
+        raise HTTPException(status_code=400, detail="Only student accounts can be deleted here")
+
+    if not user.get("is_admin"):
+        if user["role"] != "teacher":
+            raise HTTPException(status_code=403, detail="Not allowed")
+        owns = await db.classrooms.find_one(
+            {"teacher_id": user["id"], "$or": [{"students": student_id}, {"students.id": student_id}]},
+            {"_id": 0, "id": 1},
+        )
+        if not owns:
+            raise HTTPException(status_code=403, detail="You can only delete students in your own classes")
+
+    # Remove from every classroom roster (both string + object shapes)
+    await db.classrooms.update_many({}, {"$pull": {"students": student_id}})
+    await db.classrooms.update_many({}, {"$pull": {"students": {"id": student_id}}})
+    await db.classrooms.update_many({}, {"$pull": {"students": {"student_id": student_id}}})
+
+    # Purge their data
+    await db.submissions.delete_many({"student_id": student_id})
+    await db.mc_test_attempts.delete_many({"student_id": student_id})
+    await db.coding_test_submissions.delete_many({"student_id": student_id})
+    await db.test_xp_awards.delete_many({"student_id": student_id})
+    await db.sessions.delete_many({"user_id": student_id})
+    await db.users.delete_one({"id": student_id})
+
+    return {"ok": True, "deleted_student_id": student_id, "name": target.get("name")}
 
 # ----- Assignment Routes -----
 

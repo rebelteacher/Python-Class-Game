@@ -555,3 +555,11 @@ A coding education platform for K-12 students featuring multiple programming env
   - Admin UI button "Backfill Block/Turtle XP" added to `AdminDashboard.jsx` (`data-testid=admin-backfill-xp-btn`), next to Bind Existing Schools.
 - **Verified** on seeded preview data: run → 550 XP / 3 lessons / 2 students, correct per-student totals (s1 0→400, s2 100→250), duplicate 80-score submission NOT double-awarded; re-run → all zeros (idempotent). Test data cleaned up. Frontend compiles clean.
 - ⚠️ Run the backfill on **production** via the Admin Dashboard button (I can only run it on preview — separate DBs). Redeploy first.
+
+## Remove / delete students → off leaderboard (Mar 2026)
+- **Root bug**: `remove_student_from_classroom` used `$pull {students: student_id}`, which only matches STRING roster entries. Rosters can store students as objects `[{id,name,email}]`, so the pull silently missed them — the student stayed enrolled and kept appearing on the leaderboard (e.g. the teacher's dummy account knocking out real students).
+- Fix: removal now pulls all three shapes (`student_id`, `{id: student_id}`, `{student_id: student_id}`) and clears the student's `classroom_id` if it pointed at that class. Since the leaderboard reads `classrooms.students`, a removed student now drops off immediately.
+- New `DELETE /api/students/{student_id}` — permanently deletes a student account + ALL data (submissions, mc_test_attempts, coding_test_submissions, test_xp_awards, sessions, user) and pulls them from every classroom roster. Auth: platform admin can delete anyone; a teacher can delete only students in their own classes (else 403).
+- Frontend: class **Students** tab cards now have **Remove** (amber, unenroll) and **Delete** (red, permanent) buttons with confirm prompts. testids `remove-student-<id>`, `delete-student-<id>`.
+- **Verified** via curl: object-form remove drops student from roster but keeps account; full delete purges user+submissions+awards and removes from roster; non-admin teacher deleting an outsider → 403 (student preserved); admin bypass works. Frontend compiles clean; all test data cleaned up.
+- NOTE: in **Preview** — redeploy to push to production.

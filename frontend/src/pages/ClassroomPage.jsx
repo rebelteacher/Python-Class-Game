@@ -11,7 +11,7 @@ import { Label } from "@/components/ui/label";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Switch } from "@/components/ui/switch";
-import { ArrowLeft, Plus, Users, BookOpen, Trash2, Code2, Trophy, Swords, Edit, Calendar, Clock, Folder, FolderOpen, ChevronRight, ChevronDown, FileQuestion, Lock, Unlock, X } from "lucide-react";
+import { ArrowLeft, Plus, Users, BookOpen, Trash2, Code2, Trophy, Swords, Edit, Calendar, Clock, Folder, FolderOpen, ChevronRight, ChevronDown, FileQuestion, Lock, Unlock, X, UserMinus } from "lucide-react";
 import Leaderboard from "@/components/Leaderboard";
 import BattleZone from "@/components/BattleZone";
 
@@ -165,6 +165,31 @@ export default function ClassroomPage({ user }) {
       setLoading(false);
     }
   };
+
+  const handleRemoveStudent = async (student) => {
+    if (!window.confirm(`Remove ${student.name} from this class? They keep their account but drop off this class's leaderboard.`)) return;
+    try {
+      await axios.delete(`${API}/classrooms/${classroomId}/students/${student.id}`, { withCredentials: true });
+      toast.success(`${student.name} removed from class`);
+      fetchClassroom();
+    } catch (error) {
+      console.error("Remove student failed:", error);
+      toast.error(error.response?.data?.detail || "Could not remove student");
+    }
+  };
+
+  const handleDeleteStudent = async (student) => {
+    if (!window.confirm(`PERMANENTLY delete ${student.name}'s account and ALL their data (submissions, XP, test attempts)? This cannot be undone.`)) return;
+    try {
+      await axios.delete(`${API}/students/${student.id}`, { withCredentials: true });
+      toast.success(`${student.name}'s account deleted`);
+      fetchClassroom();
+    } catch (error) {
+      console.error("Delete student failed:", error);
+      toast.error(error.response?.data?.detail || "Could not delete account");
+    }
+  };
+
 
   const fetchAssignments = async () => {
     try {
@@ -880,6 +905,28 @@ export default function ClassroomPage({ user }) {
                       <CardHeader>
                         <CardTitle className="text-base">{student.name}</CardTitle>
                         <CardDescription className="text-sm">{student.email}</CardDescription>
+                        <div className="flex gap-2 pt-3">
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            data-testid={`remove-student-${student.id}`}
+                            onClick={() => handleRemoveStudent(student)}
+                            className="h-8 px-2 text-xs border-amber-500/40 text-amber-400 hover:bg-amber-500/10"
+                          >
+                            <UserMinus className="w-3.5 h-3.5 mr-1" />
+                            Remove
+                          </Button>
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            data-testid={`delete-student-${student.id}`}
+                            onClick={() => handleDeleteStudent(student)}
+                            className="h-8 px-2 text-xs border-cyber-red/40 text-cyber-red hover:bg-cyber-red/10"
+                          >
+                            <Trash2 className="w-3.5 h-3.5 mr-1" />
+                            Delete
+                          </Button>
+                        </div>
                       </CardHeader>
                     </Card>
                   ))}
