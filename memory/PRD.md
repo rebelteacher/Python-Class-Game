@@ -528,3 +528,11 @@ A coding education platform for K-12 students featuring multiple programming env
 - **Verified** via curl on a real preview class: before seeding year-XP → all top-3 empty + total 0 ("No data yet"); after seeding one student 250 XP → that student appears in class/teacher top-3 and their personal `class_rank` = 1st. Frontend compiles clean; seed data cleaned up.
 - NOTE: fix is in **Preview** — user must redeploy to push to production (byte-dashboard.emergent.host).
 
+## Leaderboard → total users.xp + coding collection fix (Mar 2026, production blank-board)
+- Production leaderboard was blank: historical attempt collections don't carry `xp_earned`/`submitted_at`, so the school-year-scoped sum was 0 for everyone (and min_activity hid them all). Per user decision, the leaderboard now ranks by **cumulative `users.xp`** (lifetime total); the school-year date filter no longer applies to ranks/beast.
+- Changed: `get_student_ranks` nested `_year_xp_map` and module-level `_lb_year_xp_map` now read `users.xp` directly. `/leaderboard/beast` now returns the top `role:student` by `users.xp` (single indexed query). Classroom-ranks inherits the change. Frontend label changed to "Ranked by total XP".
+- Hall of Fame + Top Quiz Scorers + weekly champions **unchanged** (still driven by `test_xp_awards`, which correctly carries per-week XP).
+- **Naming-mismatch fix**: every read of the non-existent `coding_test_attempts` replaced with `coding_test_submissions` (grep count now 0). Two spots — the Gradebook cell aggregation and the test-assignments stats — now read coding `score` (already 0-100) as best-per-problem averaged into a test-level %. This also fixes coding-test scores that previously never appeared in the gradebook.
+- **Verified** via curl on real preview data: beast → Amy Stapp 7100 XP; class board shows ranked names (7100, 1500); personal ranks → 1st of 19 active. Frontend compiles clean; test session cleaned up.
+- NOTE: in **Preview** — redeploy to push to production.
+

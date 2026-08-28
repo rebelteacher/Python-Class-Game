@@ -8031,23 +8031,30 @@ async def get_gradebook_report(classroom_id: str, request: Request, assignment_t
                 best_attempt[k] = pct
 
     if coding_col_test_ids and student_ids:
-        coding_attempts = await db.coding_test_attempts.find(
+        # Coding submissions live in `coding_test_submissions` (one row per problem,
+        # `score` already a 0-100 percentage). Take best score per problem, then
+        # average across a test's problems for the student's test-level score.
+        coding_subs = await db.coding_test_submissions.find(
             {
                 "student_id": {"$in": student_ids},
                 "test_id": {"$in": coding_col_test_ids},
-                "submitted_at": {"$ne": None},
             },
-            {"_id": 0, "student_id": 1, "test_id": 1, "score": 1, "percentage": 1, "total_score": 1, "max_score": 1},
+            {"_id": 0, "student_id": 1, "test_id": 1, "problem_id": 1, "score": 1},
         ).to_list(50000)
-        for a in coding_attempts:
-            k = (a["student_id"], a["test_id"])
-            pct = a.get("percentage")
-            if pct is None and a.get("max_score"):
-                pct = (a.get("total_score") or a.get("score") or 0) / a["max_score"] * 100
+        best_by_problem = {}
+        for a in coding_subs:
+            pct = a.get("score")
             if pct is None:
                 continue
-            if k not in best_attempt or pct > best_attempt[k]:
-                best_attempt[k] = pct
+            pct = max(0, min(100, pct))
+            pk = (a["student_id"], a["test_id"], a.get("problem_id"))
+            if pk not in best_by_problem or pct > best_by_problem[pk]:
+                best_by_problem[pk] = pct
+        agg = {}
+        for (sid, tid, _pid), pct in best_by_problem.items():
+            agg.setdefault((sid, tid), []).append(pct)
+        for k, vals in agg.items():
+            best_attempt[k] = sum(vals) / len(vals)
 
     # Assemble rows
     rows = []
@@ -9902,23 +9909,19 @@ def _lb_extract_ids(students_field):
     return out
 
 
-async def _lb_year_xp_map(sids, cutoff_iso):
-    """{student_id: XP earned since cutoff} across submissions, mc/coding test
-    attempts, and quiz/chapter-test awards."""
+async def _lb_year_xp_map(sids, cutoff_iso=None):
+    """{student_id: total XP} read directly from `users.xp` (cumulative lifetime
+    total). Historical attempt collections don't reliably carry xp_earned, so the
+    leaderboard ranks by the stored user total. `cutoff_iso` is accepted for
+    signature compatibility but no longer used."""
     if not sids:
         return {}
     xp_map = {sid: 0 for sid in sids}
-    base_filter = {
-        "student_id": {"$in": sids},
-        "xp_earned": {"$exists": True, "$ne": None, "$gt": 0},
-        "submitted_at": {"$gte": cutoff_iso},
-    }
-    for coll in (db.submissions, db.mc_test_attempts, db.coding_test_attempts, db.test_xp_awards):
-        cursor = coll.find(base_filter, {"_id": 0, "student_id": 1, "xp_earned": 1})
-        async for doc in cursor:
-            sid = doc.get("student_id")
-            if sid in xp_map:
-                xp_map[sid] += (doc.get("xp_earned") or 0)
+    cursor = db.users.find({"id": {"$in": sids}}, {"_id": 0, "id": 1, "xp": 1})
+    async for doc in cursor:
+        sid = doc.get("id")
+        if sid in xp_map:
+            xp_map[sid] = doc.get("xp") or 0
     return xp_map
 
 
@@ -9967,27 +9970,19 @@ async def get_student_ranks(student_id: str, request: Request):
 
     student_name = student.get("name", "Unknown")
 
-    # ── Helper: aggregate year-scoped XP for a set of student ids ─────────
+    # ── Helper: total XP for a set of student ids (from users.xp) ─────────
     async def _year_xp_map(sids):
-        """Return {student_id: total XP earned since school year start}.
-        Sums xp_earned from submissions, mc_test_attempts, and coding_test_attempts
-        where submitted_at is on or after the school year cutoff.
-        """
+        """Return {student_id: total XP} read directly from `users.xp`
+        (cumulative lifetime total). Historical attempt collections don't
+        reliably carry xp_earned, so the leaderboard ranks by the stored total."""
         if not sids:
             return {}
         xp_map = {sid: 0 for sid in sids}
-        base_filter = {
-            "student_id": {"$in": sids},
-            "xp_earned": {"$exists": True, "$ne": None, "$gt": 0},
-            "submitted_at": {"$gte": cutoff_iso},
-        }
-        for coll in (db.submissions, db.mc_test_attempts, db.coding_test_attempts, db.test_xp_awards):
-            cursor = coll.find(base_filter, {"_id": 0, "student_id": 1, "xp_earned": 1})
-            async for doc in cursor:
-                sid = doc.get("student_id")
-                xp = doc.get("xp_earned") or 0
-                if sid in xp_map:
-                    xp_map[sid] += xp
+        cursor = db.users.find({"id": {"$in": sids}}, {"_id": 0, "id": 1, "xp": 1})
+        async for doc in cursor:
+            sid = doc.get("id")
+            if sid in xp_map:
+                xp_map[sid] = doc.get("xp") or 0
         return xp_map
 
     def _rank_of(sid, xp_map, min_activity=False):
@@ -10254,46 +10249,28 @@ async def get_classroom_ranks(classroom_id: str, request: Request):
 
 @api_router.get("/leaderboard/beast")
 async def get_reigning_beast(request: Request):
-    """Return the current #1 student across the platform by year-scoped XP —
+    """Return the current #1 student across the platform by total XP —
     the "Reigning ByteBattles Beast". Used by the frontend `<BeastBadge>` to
     stamp a permanent badge on that student's card everywhere they appear.
+    Ranks by the stored `users.xp` total (cumulative lifetime).
     """
     await get_current_user(request)  # any signed-in user can look up the beast
 
-    school_year_start = await _get_school_year_start()
-    cutoff_iso = school_year_start.isoformat()
-
-    # Aggregate xp_earned across all three attempt collections since cutoff
-    xp_by_student: dict = {}
-    base_filter = {
-        "xp_earned": {"$exists": True, "$ne": None, "$gt": 0},
-        "submitted_at": {"$gte": cutoff_iso},
-    }
-    for coll in (db.submissions, db.mc_test_attempts, db.coding_test_attempts, db.test_xp_awards):
-        cursor = coll.find(base_filter, {"_id": 0, "student_id": 1, "xp_earned": 1})
-        async for doc in cursor:
-            sid = doc.get("student_id")
-            if not sid:
-                continue
-            xp_by_student[sid] = xp_by_student.get(sid, 0) + (doc.get("xp_earned") or 0)
-
-    if not xp_by_student:
-        return {"beast": None, "school_year_start": cutoff_iso}
-
-    top_id = max(xp_by_student, key=xp_by_student.get)
-    top_xp = xp_by_student[top_id]
-    top_user = await db.users.find_one({"id": top_id}, {"_id": 0, "id": 1, "name": 1, "picture": 1})
+    top_user = await db.users.find_one(
+        {"role": "student", "xp": {"$gt": 0}},
+        {"_id": 0, "id": 1, "name": 1, "picture": 1, "xp": 1},
+        sort=[("xp", -1)],
+    )
     if not top_user:
-        return {"beast": None, "school_year_start": cutoff_iso}
+        return {"beast": None}
 
     return {
         "beast": {
             "id": top_user["id"],
             "name": top_user.get("name", "Beast"),
             "picture": top_user.get("picture"),
-            "year_xp": top_xp,
+            "year_xp": top_user.get("xp", 0),
         },
-        "school_year_start": cutoff_iso,
     }
 
 
@@ -12809,24 +12786,42 @@ async def list_classroom_test_assignments(classroom_id: str, request: Request):
             avg_score = None
             attempts_done = 0
             if enrolled_ids:
-                coll_attempts = db.mc_test_attempts if a["test_type"] == "mc" else db.coding_test_attempts
-                attempt_docs = await coll_attempts.find(
-                    {"test_id": a["test_id"], "student_id": {"$in": enrolled_ids}, "submitted_at": {"$ne": None}},
-                    {"_id": 0, "student_id": 1, "score": 1, "percentage": 1},
-                ).to_list(1000)
-                # Keep the BEST attempt per student
-                best_pct = {}
-                for at in attempt_docs:
-                    sid = at.get("student_id")
-                    pct = at.get("percentage")
-                    if pct is None and at.get("score") is not None:
-                        # Older docs stored raw score — normalize using num_questions when possible
-                        nq = assignment_row["num_questions"] or 0
-                        pct = (at["score"] / nq * 100) if nq else None
-                    if pct is None:
-                        continue
-                    if sid not in best_pct or pct > best_pct[sid]:
-                        best_pct[sid] = pct
+                if a["test_type"] == "mc":
+                    attempt_docs = await db.mc_test_attempts.find(
+                        {"test_id": a["test_id"], "student_id": {"$in": enrolled_ids}, "submitted_at": {"$ne": None}},
+                        {"_id": 0, "student_id": 1, "score": 1, "percentage": 1},
+                    ).to_list(1000)
+                    best_pct = {}
+                    for at in attempt_docs:
+                        sid = at.get("student_id")
+                        pct = at.get("percentage")
+                        if pct is None and at.get("score") is not None:
+                            nq = assignment_row["num_questions"] or 0
+                            pct = (at["score"] / nq * 100) if nq else None
+                        if pct is None:
+                            continue
+                        if sid not in best_pct or pct > best_pct[sid]:
+                            best_pct[sid] = pct
+                else:
+                    # Coding tests: submissions live in `coding_test_submissions`
+                    # (one row per problem, `score` already 0-100). Best per problem,
+                    # then average across the test's problems per student.
+                    subs = await db.coding_test_submissions.find(
+                        {"test_id": a["test_id"], "student_id": {"$in": enrolled_ids}},
+                        {"_id": 0, "student_id": 1, "problem_id": 1, "score": 1},
+                    ).to_list(5000)
+                    best_bp = {}
+                    for s in subs:
+                        pct = s.get("score")
+                        if pct is None:
+                            continue
+                        pk = (s["student_id"], s.get("problem_id"))
+                        if pk not in best_bp or pct > best_bp[pk]:
+                            best_bp[pk] = pct
+                    per_student = {}
+                    for (sid, _pid), pct in best_bp.items():
+                        per_student.setdefault(sid, []).append(pct)
+                    best_pct = {sid: sum(v) / len(v) for sid, v in per_student.items()}
                 attempts_done = len(best_pct)
                 if best_pct:
                     avg_score = sum(best_pct.values()) / len(best_pct)

@@ -150,7 +150,7 @@ export default function Leaderboard({ classroomId, currentUserId }) {
         )}
         {data.school_year_start && (
           <p className="text-[11px] text-slate-500 font-chakra text-right">
-            Ranked on XP earned since {new Date(data.school_year_start).toLocaleDateString(undefined, { year: "numeric", month: "short", day: "numeric" })}
+            Ranked by total XP
           </p>
         )}
       </div>
