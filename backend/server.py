@@ -7708,14 +7708,17 @@ async def get_student_lesson_scores(student_id: str, classroom_id: str, request:
     return assignment_scores
 
 @api_router.get("/reports/gradebook")
-async def get_gradebook_report(classroom_id: str, request: Request):
+async def get_gradebook_report(classroom_id: str, request: Request, assignment_type: Optional[str] = None):
     """Build a wide gradebook grid for a classroom: rows = students, columns =
     (Lesson Avg | Lesson Quiz | ... | Chapter Test) ordered by chapter then lesson.
 
+    Optional query param `assignment_type` narrows to a single curriculum
+    ("block", "turtle", "python", "microbit"). When omitted, every chapter with
+    problems in the DB is included.
+
     Lesson Avg = mean of best-per-problem score across every problem in the lesson.
-    Lesson Quiz score = best MC test attempt where the test's `lesson` field matches.
-    Chapter Test score = best MC test attempt where the test's `lesson` is empty/None
-    (i.e. attached to the chapter itself, not a specific lesson).
+    Lesson Quiz score = best MC/coding test attempt attached to the (chapter, lesson) slot.
+    Chapter Test score = best MC/coding test attempt attached to the chapter slot.
     """
     user = await get_current_user(request)
     if user["role"] != "teacher":
@@ -7740,12 +7743,16 @@ async def get_gradebook_report(classroom_id: str, request: Request):
     students.sort(key=_student_sort_key)
 
     # Discover every (chapter, lesson) combo — use natural sort so Lesson 2 < Lesson 10
+    problem_query: dict = {}
+    if assignment_type:
+        problem_query["assignment_type"] = assignment_type
     problems = await db.problems.find(
-        {}, {"_id": 0, "id": 1, "chapter": 1, "lesson": 1, "assignment_type": 1}
+        problem_query, {"_id": 0, "id": 1, "chapter": 1, "lesson": 1, "assignment_type": 1}
     ).to_list(20000)
     chapters_set = set()
     lessons_by_chapter: dict[str, set] = {}
     problems_by_lesson: dict[tuple, list] = {}
+    chapter_assignment_type: dict[str, str] = {}
     for p in problems:
         chap = (p.get("chapter") or "").strip()
         less = (p.get("lesson") or "").strip()
@@ -7753,6 +7760,12 @@ async def get_gradebook_report(classroom_id: str, request: Request):
             continue
         chapters_set.add(chap)
         lessons_by_chapter.setdefault(chap, set())
+        # First-seen assignment_type wins (chapters with problems in only one
+        # curriculum will be labelled correctly; ambiguous chapters get the
+        # first one encountered).
+        at = (p.get("assignment_type") or "").strip()
+        if at and chap not in chapter_assignment_type:
+            chapter_assignment_type[chap] = at
         if less:
             lessons_by_chapter[chap].add(less)
             problems_by_lesson.setdefault((chap, less), []).append(p["id"])
@@ -7823,12 +7836,14 @@ async def get_gradebook_report(classroom_id: str, request: Request):
     # Build ordered columns
     columns = []
     for chap in ordered_chapters:
+        at = chapter_assignment_type.get(chap, "")
         lesson_list = sorted(lessons_by_chapter.get(chap, set()), key=_natural_key)
         for less in lesson_list:
             columns.append({
                 "key": f"lavg::{chap}::{less}",
                 "type": "lesson_avg",
                 "chapter": chap,
+                "assignment_type": at,
                 "lesson": less,
                 "label": less,
             })
@@ -7838,6 +7853,7 @@ async def get_gradebook_report(classroom_id: str, request: Request):
                     "key": f"lquiz::{lq['test_id']}::{chap}::{less}",
                     "type": "lesson_quiz",
                     "chapter": chap,
+                    "assignment_type": at,
                     "lesson": less,
                     "test_id": lq["test_id"],
                     "test_type": lq.get("test_type", "mc"),
@@ -7849,6 +7865,7 @@ async def get_gradebook_report(classroom_id: str, request: Request):
                 "key": f"ctest::{ct['test_id']}::{chap}",
                 "type": "chapter_test",
                 "chapter": chap,
+                "assignment_type": at,
                 "test_id": ct["test_id"],
                 "test_type": ct.get("test_type", "mc"),
                 "label": f"{_chapter_prefix(chap)}: Test",

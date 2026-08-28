@@ -8,7 +8,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Checkbox } from "@/components/ui/checkbox";
-import { ArrowLeft, Download, FileSpreadsheet, AlertCircle, User } from "lucide-react";
+import { ArrowLeft, Download, FileSpreadsheet, AlertCircle, User, Printer } from "lucide-react";
 
 const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
 const API = `${BACKEND_URL}/api`;
@@ -25,6 +25,8 @@ export default function TeacherReports({ user }) {
   const [reportData, setReportData] = useState(null);
   const [curriculumClassroomId, setCurriculumClassroomId] = useState(""); // single-classroom selection for gradebook grid
   const [curriculumData, setCurriculumData] = useState(null); // { columns, rows } from /reports/gradebook GET
+  const [filterUnit, setFilterUnit] = useState("all"); // all | block | turtle | code | microbit
+  const [filterChapter, setFilterChapter] = useState("all"); // "all" or a specific chapter name
 
   useEffect(() => {
     fetchClassrooms();
@@ -187,12 +189,60 @@ export default function TeacherReports({ user }) {
     }
   };
 
-  // Group columns by chapter (contiguous run) for merged header banners
+  // Which columns are visible after Unit + Chapter filters
+  const UNIT_LABELS = {
+    all: "All Units",
+    block: "Unit 1: Blocks",
+    turtle: "Unit 2: Turtle Graphics",
+    code: "Unit 3: Python",
+    microbit: "Unit 4: Micro:bit",
+  };
+
+  const unitOptions = React.useMemo(() => {
+    if (!curriculumData) return ["all"];
+    const seen = new Set(["all"]);
+    curriculumData.columns.forEach((c) => {
+      if (c.assignment_type) seen.add(c.assignment_type);
+    });
+    return ["all", "block", "turtle", "code", "microbit"].filter((u) => seen.has(u));
+  }, [curriculumData]);
+
+  const chapterOptions = React.useMemo(() => {
+    if (!curriculumData) return [];
+    const chaps = [];
+    const seen = new Set();
+    curriculumData.columns.forEach((c) => {
+      if (filterUnit !== "all" && c.assignment_type !== filterUnit) return;
+      if (!seen.has(c.chapter)) {
+        seen.add(c.chapter);
+        chaps.push(c.chapter);
+      }
+    });
+    return chaps;
+  }, [curriculumData, filterUnit]);
+
+  // Reset chapter filter when unit filter changes so we don't get stuck on a hidden chapter
+  useEffect(() => {
+    if (filterChapter !== "all" && !chapterOptions.includes(filterChapter)) {
+      setFilterChapter("all");
+    }
+  }, [filterUnit, chapterOptions, filterChapter]);
+
+  const visibleColumns = React.useMemo(() => {
+    if (!curriculumData) return [];
+    return curriculumData.columns.filter((c) => {
+      if (filterUnit !== "all" && c.assignment_type !== filterUnit) return false;
+      if (filterChapter !== "all" && c.chapter !== filterChapter) return false;
+      return true;
+    });
+  }, [curriculumData, filterUnit, filterChapter]);
+
+  // Group visible columns by chapter (contiguous run) for merged header banners
   const chapterGroups = React.useMemo(() => {
     if (!curriculumData) return [];
     const groups = [];
     let cur = null;
-    curriculumData.columns.forEach((col, idx) => {
+    visibleColumns.forEach((col, idx) => {
       if (!cur || cur.chapter !== col.chapter) {
         cur = { chapter: col.chapter, start: idx, span: 1 };
         groups.push(cur);
@@ -201,20 +251,21 @@ export default function TeacherReports({ user }) {
       }
     });
     return groups;
-  }, [curriculumData]);
+  }, [curriculumData, visibleColumns]);
 
   const downloadCurriculumExcel = () => {
     if (!curriculumData) return;
+    const cols = visibleColumns;
 
     // Row 1: chapter banner (merged across each chapter's columns)
     const bannerRow = [""];
-    curriculumData.columns.forEach((c) => bannerRow.push(c.chapter));
+    cols.forEach((c) => bannerRow.push(c.chapter));
     // Row 2: column headers
-    const headerRow = ["Student", ...curriculumData.columns.map((c) => c.label)];
+    const headerRow = ["Student", ...cols.map((c) => c.label)];
     const data = [bannerRow, headerRow];
     curriculumData.rows.forEach((row) => {
       const line = [row.student_name];
-      curriculumData.columns.forEach((col) => {
+      cols.forEach((col) => {
         const v = row.cells[col.key];
         line.push(v === null || v === undefined ? "" : v);
       });
@@ -222,7 +273,7 @@ export default function TeacherReports({ user }) {
     });
     const wb = XLSX.utils.book_new();
     const ws = XLSX.utils.aoa_to_sheet(data);
-    ws["!cols"] = [{ wch: 26 }, ...curriculumData.columns.map(() => ({ wch: 16 }))];
+    ws["!cols"] = [{ wch: 26 }, ...cols.map(() => ({ wch: 16 }))];
     ws["!freeze"] = {
       xSplit: "1",
       ySplit: "2",
@@ -573,12 +624,65 @@ export default function TeacherReports({ user }) {
 
         {/* Curriculum Gradebook Grid — sticky first column + sticky header row */}
         {reportType === "curriculum" && curriculumData && (
-          <Card className="mt-6 max-w-none mx-auto" data-testid="curriculum-gradebook-card">
+          <Card className="mt-6 max-w-none mx-auto gradebook-print-card" data-testid="curriculum-gradebook-card">
             <CardHeader>
-              <CardTitle>Curriculum Gradebook</CardTitle>
-              <CardDescription>
-                {curriculumData.rows.length} student(s) × {curriculumData.columns.length} column(s) — scroll horizontally. Blank cells = not attempted yet.
-              </CardDescription>
+              <div className="flex flex-wrap items-start justify-between gap-4">
+                <div>
+                  <CardTitle>
+                    Curriculum Gradebook
+                    <span className="ml-3 text-sm font-normal text-slate-400 print:text-black">
+                      · {classrooms.find((c) => c.id === curriculumClassroomId)?.name || ""}
+                    </span>
+                  </CardTitle>
+                  <CardDescription>
+                    {curriculumData.rows.length} student(s) × {visibleColumns.length} of {curriculumData.columns.length} column(s) — scroll horizontally. Blank cells = not attempted yet.
+                  </CardDescription>
+                </div>
+
+                {/* Filter + Print toolbar */}
+                <div className="flex flex-wrap items-end gap-3 no-print">
+                  <div>
+                    <Label className="text-xs text-slate-400">Unit</Label>
+                    <Select value={filterUnit} onValueChange={setFilterUnit}>
+                      <SelectTrigger className="w-[200px] mt-1" data-testid="gradebook-filter-unit">
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {unitOptions.map((u) => (
+                          <SelectItem key={u} value={u}>
+                            {UNIT_LABELS[u] || u}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <div>
+                    <Label className="text-xs text-slate-400">Chapter</Label>
+                    <Select value={filterChapter} onValueChange={setFilterChapter}>
+                      <SelectTrigger className="w-[260px] mt-1" data-testid="gradebook-filter-chapter">
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="all">All chapters</SelectItem>
+                        {chapterOptions.map((ch) => (
+                          <SelectItem key={ch} value={ch}>
+                            {ch}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <Button
+                    onClick={() => window.print()}
+                    variant="outline"
+                    className="border-cyber-cyan/40 hover:border-cyber-cyan text-cyber-cyan hover:bg-cyber-cyan/10"
+                    data-testid="gradebook-print-btn"
+                  >
+                    <Printer className="w-4 h-4 mr-2" />
+                    Print
+                  </Button>
+                </div>
+              </div>
             </CardHeader>
             <CardContent>
               {curriculumData.rows.length === 0 ? (
@@ -586,13 +690,17 @@ export default function TeacherReports({ user }) {
                   <User className="w-12 h-12 mx-auto mb-3 opacity-50" />
                   <p>No students enrolled in this class yet.</p>
                 </div>
+              ) : visibleColumns.length === 0 ? (
+                <div className="text-center py-8 text-slate-500">
+                  <p>No columns match the current Unit/Chapter filter.</p>
+                </div>
               ) : (
                 <div
-                  className="overflow-auto border border-cyber-cyan/20 rounded-lg"
+                  className="overflow-auto border border-cyber-cyan/20 rounded-lg gradebook-print-scroll"
                   style={{ maxHeight: "70vh" }}
                   data-testid="gradebook-scroll-container"
                 >
-                  <table className="border-collapse text-sm">
+                  <table className="border-collapse text-sm gradebook-print-table">
                     <thead>
                       {/* Row 1: merged chapter banner */}
                       <tr>
@@ -617,7 +725,7 @@ export default function TeacherReports({ user }) {
                       </tr>
                       {/* Row 2: column labels */}
                       <tr>
-                        {curriculumData.columns.map((col) => {
+                        {visibleColumns.map((col) => {
                           const isQuiz = col.type === "lesson_quiz";
                           const isChapter = col.type === "chapter_test";
                           const bg = isChapter ? "bg-fuchsia-950/80" : isQuiz ? "bg-cyan-950/80" : "bg-cyber-navy/90";
@@ -644,7 +752,7 @@ export default function TeacherReports({ user }) {
                           >
                             {row.student_name}
                           </td>
-                          {curriculumData.columns.map((col) => {
+                          {visibleColumns.map((col) => {
                             const v = row.cells[col.key];
                             const hasValue = v !== null && v !== undefined;
                             const score = Number(v) || 0;
@@ -674,7 +782,7 @@ export default function TeacherReports({ user }) {
                   </table>
                 </div>
               )}
-              <p className="text-xs text-slate-500 mt-3">
+              <p className="text-xs text-slate-500 mt-3 no-print">
                 Colour key:
                 <span className="ml-2 inline-block px-2 py-0.5 rounded bg-green-500/25 text-green-200">≥ 90</span>
                 <span className="ml-1 inline-block px-2 py-0.5 rounded bg-yellow-500/25 text-yellow-100">70–89</span>

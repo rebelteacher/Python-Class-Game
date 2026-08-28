@@ -23,3 +23,84 @@ code {
 .App {
   min-height: 100vh;
 }
+
+/* ─────────────── Gradebook Print Styles ─────────────── */
+@media print {
+  @page {
+    size: landscape;
+    margin: 0.35in;
+  }
+
+  /* Hide everything outside the gradebook card */
+  body * {
+    visibility: hidden;
+  }
+  .gradebook-print-card,
+  .gradebook-print-card * {
+    visibility: visible;
+  }
+  .gradebook-print-card {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    background: white !important;
+    color: black !important;
+    border: none !important;
+    box-shadow: none !important;
+  }
+
+  /* Do not render toolbar/legend/nav on print */
+  .no-print,
+  .no-print * {
+    display: none !important;
+  }
+
+  /* Let the table flow across pages instead of scrolling in a fixed box */
+  .gradebook-print-scroll {
+    max-height: none !important;
+    overflow: visible !important;
+    border: none !important;
+  }
+  .gradebook-print-table {
+    width: 100%;
+    font-size: 9pt;
+    border-collapse: collapse;
+    color: black !important;
+  }
+  .gradebook-print-table thead {
+    display: table-header-group; /* repeat headers on every page */
+  }
+  .gradebook-print-table th,
+  .gradebook-print-table td {
+    background: white !important;
+    color: black !important;
+    border: 1px solid #999 !important;
+    padding: 4px 6px !important;
+    text-shadow: none !important;
+    box-shadow: none !important;
+    position: static !important; /* undo sticky for print */
+    min-width: 0 !important;
+    white-space: normal !important;
+  }
+  .gradebook-print-table thead th {
+    background: #eee !important;
+    font-weight: 600;
+  }
+  /* Score colour bands adapted for print */
+  .gradebook-print-table td.bg-green-500\/25 { background: #d1fadf !important; }
+  .gradebook-print-table td.bg-yellow-500\/25 { background: #fef3c7 !important; }
+  .gradebook-print-table td.bg-orange-500\/25 { background: #ffedd5 !important; }
+  .gradebook-print-table td.bg-red-500\/20 { background: #fee2e2 !important; }
+
+  /* Try to avoid splitting a student row across pages */
+  .gradebook-print-table tbody tr {
+    page-break-inside: avoid;
+  }
+
+  /* Hide the site-wide help/chat FAB & other overlays if any leaked in */
+  [data-testid="help-fab"],
+  .help-fab {
+    display: none !important;
+  }
+}
