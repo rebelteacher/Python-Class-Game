@@ -485,3 +485,6 @@ A coding education platform for K-12 students featuring multiple programming env
   - Verified in preview end-to-end: opened Analytics → card showed "August 1, 2025" default → set to 2026-08-15 → toast "New school year starts 2026-08-15" → card refreshed showing "August 15, 2026" + "Last set 8/28/2026, 11:24:30 AM" → reset back to 2025-08-01. Backend cleanup: `db.settings.school_year_start` doc is created on first save, deleted on cleanup.
 
 *Last Updated: Mar, 2026*
+
+## Deferred backlog (user-parked)
+- **Missing-School Teacher Report (Mar 2, 2026)**: On `/admin-dashboard`, add a small "Teachers still missing a school" panel that lists every teacher account whose `users.school` is empty. Shows count + names + a quick action to open Reset-User-Password or email them so admins can chase down stragglers after running "Bind Existing Schools". Saved for later per user.
