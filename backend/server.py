@@ -10142,17 +10142,24 @@ async def get_reigning_beast(request: Request):
 
 
 @api_router.get("/leaderboard/top-quiz-scorers")
-async def get_top_quiz_scorers(request: Request, days: int = 7, limit: int = 5):
-    """Top students by quiz + chapter-test XP earned in the last `days` days.
+async def get_top_quiz_scorers(request: Request, limit: int = 5):
+    """Top students by quiz + chapter-test XP earned this calendar week.
 
     Powers the "Top Quiz Scorers this week" strip on the Student Dashboard.
-    Sources XP strictly from `test_xp_awards` (first-attempt quiz/chapter-test
-    points) so it reflects recent quiz effort, not cumulative problem XP.
+    The window is anchored to the current week (Monday 00:00 UTC → next Monday)
+    so it genuinely "resets every Monday". Sources XP strictly from
+    `test_xp_awards` (first-attempt quiz/chapter-test points) so it reflects
+    recent quiz effort, not cumulative problem XP.
     """
     await get_current_user(request)  # any signed-in user
-    days = max(1, min(days, 90))
     limit = max(1, min(limit, 20))
-    cutoff = (datetime.now(timezone.utc) - timedelta(days=days)).isoformat()
+
+    now = datetime.now(timezone.utc)
+    week_start = (now - timedelta(days=now.weekday())).replace(
+        hour=0, minute=0, second=0, microsecond=0
+    )
+    resets_at = week_start + timedelta(days=7)
+    cutoff = week_start.isoformat()
 
     xp_by_student: dict = {}
     cursor = db.test_xp_awards.find(
@@ -10165,8 +10172,10 @@ async def get_top_quiz_scorers(request: Request, days: int = 7, limit: int = 5):
             continue
         xp_by_student[sid] = xp_by_student.get(sid, 0) + (doc.get("xp_earned") or 0)
 
+    meta = {"week_start": cutoff, "resets_at": resets_at.isoformat()}
+
     if not xp_by_student:
-        return {"days": days, "scorers": []}
+        return {**meta, "scorers": []}
 
     top = sorted(xp_by_student.items(), key=lambda kv: kv[1], reverse=True)[:limit]
     top_ids = [sid for sid, _ in top]
@@ -10188,7 +10197,7 @@ async def get_top_quiz_scorers(request: Request, days: int = 7, limit: int = 5):
             "xp": xp,
         })
 
-    return {"days": days, "scorers": scorers}
+    return {**meta, "scorers": scorers}
 
 
 @api_router.post("/admin/bind-schools")

@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import axios from "axios";
-import { Trophy, Crown, Medal, Zap } from "lucide-react";
+import { Trophy, Crown, Medal, Zap, Clock } from "lucide-react";
 
 const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
 const API = `${BACKEND_URL}/api`;
@@ -14,18 +14,35 @@ const RANK_STYLES = {
 const initials = (name = "") =>
   name.trim().split(/\s+/).slice(0, 2).map((w) => w[0]?.toUpperCase() || "").join("") || "?";
 
+const formatCountdown = (resetsAt) => {
+  if (!resetsAt) return null;
+  const diff = new Date(resetsAt).getTime() - Date.now();
+  if (diff <= 0) return "resetting…";
+  const days = Math.floor(diff / 86400000);
+  const hours = Math.floor((diff % 86400000) / 3600000);
+  const mins = Math.floor((diff % 3600000) / 60000);
+  if (days > 0) return `${days}d ${hours}h left`;
+  if (hours > 0) return `${hours}h ${mins}m left`;
+  return `${mins}m left`;
+};
+
 export const TopQuizScorers = ({ currentUserId }) => {
   const [scorers, setScorers] = useState([]);
+  const [resetsAt, setResetsAt] = useState(null);
+  const [countdown, setCountdown] = useState(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     let alive = true;
     (async () => {
       try {
-        const res = await axios.get(`${API}/leaderboard/top-quiz-scorers?days=7&limit=5`, {
+        const res = await axios.get(`${API}/leaderboard/top-quiz-scorers?limit=5`, {
           withCredentials: true,
         });
-        if (alive) setScorers(res.data?.scorers || []);
+        if (alive) {
+          setScorers(res.data?.scorers || []);
+          setResetsAt(res.data?.resets_at || null);
+        }
       } catch (e) {
         if (alive) setScorers([]);
       } finally {
@@ -37,6 +54,14 @@ export const TopQuizScorers = ({ currentUserId }) => {
     };
   }, []);
 
+  useEffect(() => {
+    if (!resetsAt) return;
+    const tick = () => setCountdown(formatCountdown(resetsAt));
+    tick();
+    const id = setInterval(tick, 60000);
+    return () => clearInterval(id);
+  }, [resetsAt]);
+
   if (loading) return null;
 
   return (
@@ -44,11 +69,25 @@ export const TopQuizScorers = ({ currentUserId }) => {
       data-testid="top-quiz-scorers"
       className="mb-8 rounded-none border border-cyber-lime/25 bg-cyber-navy/40 px-5 py-4"
     >
-      <div className="flex items-center gap-2 mb-4">
-        <Trophy className="w-5 h-5 text-cyber-lime" />
-        <h3 className="font-orbitron uppercase tracking-wider text-cyber-lime text-sm sm:text-base">
-          Top Quiz Scorers · This Week
-        </h3>
+      <div className="flex flex-wrap items-center justify-between gap-2 mb-4">
+        <div className="flex items-center gap-2">
+          <Trophy className="w-5 h-5 text-cyber-lime" />
+          <h3 className="font-orbitron uppercase tracking-wider text-cyber-lime text-sm sm:text-base">
+            Top Quiz Scorers · This Week
+          </h3>
+        </div>
+        <div className="flex items-center gap-3 text-xs font-chakra">
+          <span className="text-slate-500">Resets every Monday</span>
+          {countdown && (
+            <span
+              data-testid="quiz-scorers-countdown"
+              className="inline-flex items-center gap-1 rounded-full border border-cyber-lime/30 bg-cyber-black/40 px-2.5 py-1 font-orbitron text-cyber-lime"
+            >
+              <Clock className="w-3.5 h-3.5" />
+              {countdown}
+            </span>
+          )}
+        </div>
       </div>
 
       {scorers.length === 0 ? (
