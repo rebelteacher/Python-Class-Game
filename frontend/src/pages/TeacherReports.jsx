@@ -9,6 +9,7 @@ import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Checkbox } from "@/components/ui/checkbox";
 import { ArrowLeft, Download, FileSpreadsheet, AlertCircle, User, Printer } from "lucide-react";
+import BeastBadge from "../components/BeastBadge";
 
 const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
 const API = `${BACKEND_URL}/api`;
@@ -750,7 +751,10 @@ export default function TeacherReports({ user }) {
                             className={`sticky left-0 z-10 ${idx % 2 === 0 ? "bg-[#0b1220]" : "bg-[#111a2c]"} text-white px-4 py-2 font-medium border-r border-b border-cyber-cyan/20 whitespace-nowrap shadow-[2px_0_6px_rgba(0,0,0,0.4)]`}
                             data-testid={`gradebook-student-${row.student_id}`}
                           >
-                            {row.student_name}
+                            <span className="inline-flex items-center gap-1.5">
+                              {row.student_name}
+                              <BeastBadge studentId={row.student_id} showLabel={false} />
+                            </span>
                           </td>
                           {visibleColumns.map((col) => {
                             const v = row.cells[col.key];

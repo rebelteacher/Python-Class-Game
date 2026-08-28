@@ -9870,7 +9870,7 @@ async def get_student_ranks(student_id: str, request: Request):
             {"id": {"$in": ids}}, {"_id": 0, "id": 1, "name": 1}
         ).to_list(len(ids))
         name_by_id = {u["id"]: u.get("name", "Student") for u in users_docs}
-        return [{"name": name_by_id.get(i, "Student"), "xp": xp} for i, xp in id_xp_pairs]
+        return [{"id": i, "name": name_by_id.get(i, "Student"), "xp": xp} for i, xp in id_xp_pairs]
 
     # ── Class Rank ────────────────────────────────────────────────────────
     classrooms = await db.classrooms.find(
@@ -9997,6 +9997,102 @@ async def get_student_ranks(student_id: str, request: Request):
         "total_students": total_active,  # active students this school year
     }
 
+
+
+@api_router.get("/leaderboard/beast")
+async def get_reigning_beast(request: Request):
+    """Return the current #1 student across the platform by year-scoped XP —
+    the "Reigning ByteBattles Beast". Used by the frontend `<BeastBadge>` to
+    stamp a permanent badge on that student's card everywhere they appear.
+    """
+    await get_current_user(request)  # any signed-in user can look up the beast
+
+    school_year_start_iso = os.environ.get("SCHOOL_YEAR_START", "2025-08-01T00:00:00+00:00")
+    try:
+        cutoff = datetime.fromisoformat(school_year_start_iso)
+    except ValueError:
+        cutoff = datetime(2025, 8, 1, tzinfo=timezone.utc)
+    if cutoff.tzinfo is None:
+        cutoff = cutoff.replace(tzinfo=timezone.utc)
+    cutoff_iso = cutoff.isoformat()
+
+    # Aggregate xp_earned across all three attempt collections since cutoff
+    xp_by_student: dict = {}
+    base_filter = {
+        "xp_earned": {"$exists": True, "$ne": None, "$gt": 0},
+        "submitted_at": {"$gte": cutoff_iso},
+    }
+    for coll in (db.submissions, db.mc_test_attempts, db.coding_test_attempts):
+        cursor = coll.find(base_filter, {"_id": 0, "student_id": 1, "xp_earned": 1})
+        async for doc in cursor:
+            sid = doc.get("student_id")
+            if not sid:
+                continue
+            xp_by_student[sid] = xp_by_student.get(sid, 0) + (doc.get("xp_earned") or 0)
+
+    if not xp_by_student:
+        return {"beast": None, "school_year_start": cutoff_iso}
+
+    top_id = max(xp_by_student, key=xp_by_student.get)
+    top_xp = xp_by_student[top_id]
+    top_user = await db.users.find_one({"id": top_id}, {"_id": 0, "id": 1, "name": 1, "picture": 1})
+    if not top_user:
+        return {"beast": None, "school_year_start": cutoff_iso}
+
+    return {
+        "beast": {
+            "id": top_user["id"],
+            "name": top_user.get("name", "Beast"),
+            "picture": top_user.get("picture"),
+            "year_xp": top_xp,
+        },
+        "school_year_start": cutoff_iso,
+    }
+
+
+@api_router.post("/admin/bind-schools")
+async def admin_bind_existing_schools(request: Request):
+    """Admin-only: iterate the `schools` collection and back-fill `users.school`
+    and `users.district` for every teacher that already appears in a school's
+    `teacher_ids` list but whose user record has an empty school. Idempotent —
+    only writes when the user's field is currently empty/null.
+    """
+    user = await get_current_user(request)
+    if not user.get("is_admin"):
+        raise HTTPException(status_code=403, detail="Admin only")
+
+    schools_cursor = db.schools.find({}, {"_id": 0, "name": 1, "district": 1, "teacher_ids": 1})
+    teachers_updated = 0
+    districts_updated = 0
+    schools_processed = 0
+
+    async for sch in schools_cursor:
+        schools_processed += 1
+        name = (sch.get("name") or "").strip()
+        district = (sch.get("district") or "").strip()
+        teacher_ids = sch.get("teacher_ids") or []
+        if not name or not teacher_ids:
+            continue
+
+        # Only update users whose school is empty/missing
+        res = await db.users.update_many(
+            {"id": {"$in": teacher_ids}, "$or": [{"school": {"$in": [None, ""]}}, {"school": {"$exists": False}}]},
+            {"$set": {"school": name}},
+        )
+        teachers_updated += res.modified_count
+
+        if district:
+            dres = await db.users.update_many(
+                {"id": {"$in": teacher_ids}, "$or": [{"district": {"$in": [None, ""]}}, {"district": {"$exists": False}}]},
+                {"$set": {"district": district}},
+            )
+            districts_updated += dres.modified_count
+
+    return {
+        "schools_processed": schools_processed,
+        "teachers_school_backfilled": teachers_updated,
+        "teachers_district_backfilled": districts_updated,
+    }
 
 
 @api_router.get("/shop")

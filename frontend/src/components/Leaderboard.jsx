@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import axios from "axios";
 import { Trophy, Crown, Medal, Award } from "lucide-react";
 import { toast } from "sonner";
+import BeastBadge from "./BeastBadge";
 
 const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
 const API = `${BACKEND_URL}/api`;
@@ -48,7 +49,10 @@ function RankColumn({ title, top3, color, subtitle, secondaryTitle }) {
                 <BadgeIcon className={`w-4 h-4 ${badge.text}`} />
               </div>
               <div className="flex-1 min-w-0">
-                <p className="text-sm font-chakra text-white truncate">{student.name}</p>
+                <p className="text-sm font-chakra text-white truncate flex items-center gap-1.5">
+                  <span className="truncate">{student.name}</span>
+                  {student.id && <BeastBadge studentId={student.id} showLabel={false} />}
+                </p>
                 <p className={`text-xs font-fira ${badge.text}`}>{student.xp} XP</p>
               </div>
               <span className={`text-xs font-orbitron ${badge.text}`}>{badge.label}</span>
@@ -137,7 +141,10 @@ export default function Leaderboard({ classroomId, currentUserId }) {
         <div className="grid grid-cols-5 gap-4 text-center">
           <div>
             <p className="text-xs text-slate-500 font-orbitron uppercase tracking-wider mb-1">Name</p>
-            <p className="text-sm font-chakra text-white font-semibold" data-testid="leaderboard-my-name">{data.student_name}</p>
+            <p className="text-sm font-chakra text-white font-semibold flex items-center justify-center gap-1.5" data-testid="leaderboard-my-name">
+              <span className="truncate">{data.student_name}</span>
+              <BeastBadge studentId={currentUserId} showLabel={false} />
+            </p>
             <p className="text-[11px] text-slate-500 font-fira mt-0.5" data-testid="leaderboard-my-xp">{data.student_xp} XP</p>
           </div>
           <div>

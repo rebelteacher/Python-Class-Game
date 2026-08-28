@@ -24,7 +24,8 @@ import {
   Code2,
   Cpu,
   Video,
-  KeyRound
+  KeyRound,
+  School
 } from "lucide-react";
 
 const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
@@ -38,6 +39,26 @@ export default function AdminDashboard({ user }) {
   const [loading, setLoading] = useState(true);
   const [generatingCode, setGeneratingCode] = useState(false);
   const [unreadCount, setUnreadCount] = useState(0);
+  const [bindingSchools, setBindingSchools] = useState(false);
+
+  const handleBindSchools = async () => {
+    if (!window.confirm("Backfill `school`/`district` on every teacher who has a matching entry in the schools collection? Idempotent — only fills empty fields.")) {
+      return;
+    }
+    setBindingSchools(true);
+    try {
+      const res = await axios.post(`${API}/admin/bind-schools`, {}, { withCredentials: true });
+      const d = res.data || {};
+      toast.success(
+        `Processed ${d.schools_processed || 0} schools · backfilled ${d.teachers_school_backfilled || 0} teacher school(s), ${d.teachers_district_backfilled || 0} district(s)`
+      );
+    } catch (error) {
+      console.error("Bind schools failed:", error);
+      toast.error(error.response?.data?.detail || "Bind schools failed");
+    } finally {
+      setBindingSchools(false);
+    }
+  };
 
   useEffect(() => {
     if (!user?.is_admin) {
@@ -303,6 +324,15 @@ export default function AdminDashboard({ user }) {
               >
                 <KeyRound className="w-4 h-4 mr-2" />
                 Reset User Password
+              </Button>
+              <Button
+                onClick={handleBindSchools}
+                disabled={bindingSchools}
+                data-testid="admin-bind-schools-btn"
+                className="bg-amber-500 hover:bg-amber-600 text-black font-semibold"
+              >
+                <School className="w-4 h-4 mr-2" />
+                {bindingSchools ? "Binding…" : "Bind Existing Schools"}
               </Button>
             </div>
           </CardContent>
