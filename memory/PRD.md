@@ -562,4 +562,13 @@ A coding education platform for K-12 students featuring multiple programming env
 - New `DELETE /api/students/{student_id}` — permanently deletes a student account + ALL data (submissions, mc_test_attempts, coding_test_submissions, test_xp_awards, sessions, user) and pulls them from every classroom roster. Auth: platform admin can delete anyone; a teacher can delete only students in their own classes (else 403).
 - Frontend: class **Students** tab cards now have **Remove** (amber, unenroll) and **Delete** (red, permanent) buttons with confirm prompts. testids `remove-student-<id>`, `delete-student-<id>`.
 - **Verified** via curl: object-form remove drops student from roster but keeps account; full delete purges user+submissions+awards and removes from roster; non-admin teacher deleting an outsider → 403 (student preserved); admin bypass works. Frontend compiles clean; all test data cleaned up.
+
+## Test/Dummy student flag (Mar 2026)
+- New `is_test_account` bool on users. Flagged students are KEPT but hidden from every leaderboard.
+- `PATCH /api/students/{student_id}/test-flag` body `{is_test: bool}` — admin can flag anyone; teacher only students in their own classes (else 403).
+- Exclusion applied at the choke points: both XP-map helpers (`_lb_year_xp_map` + nested `_year_xp_map`) drop flagged sids → covers ranks, class/teacher/school/overall + classroom-ranks; `/leaderboard/beast` query adds `is_test_account != True`; `_lb_test_account_ids()` used to filter top-quiz-scorers, weekly-champion finalize, and hall-of-fame.
+- `GET /classrooms/{id}` `student_details` now handles object-form rosters (via `_lb_extract_ids`) and returns `is_test_account`.
+- Frontend: class Students tab card shows a **TEST** badge + a **Mark as test / Unmark test** toggle (`test-flag-<id>`, `test-badge-<id>`), alongside Remove & Delete.
+- **Verified** via curl: flagging a 99999-XP dummy removed it from class ranks + beast (real student remained); roster reflects flag; unflagging restored it. Frontend compiles clean; test data cleaned up.
+- NOTE: in **Preview** — redeploy to push to production.
 - NOTE: in **Preview** — redeploy to push to production.

@@ -11,7 +11,7 @@ import { Label } from "@/components/ui/label";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Switch } from "@/components/ui/switch";
-import { ArrowLeft, Plus, Users, BookOpen, Trash2, Code2, Trophy, Swords, Edit, Calendar, Clock, Folder, FolderOpen, ChevronRight, ChevronDown, FileQuestion, Lock, Unlock, X, UserMinus } from "lucide-react";
+import { ArrowLeft, Plus, Users, BookOpen, Trash2, Code2, Trophy, Swords, Edit, Calendar, Clock, Folder, FolderOpen, ChevronRight, ChevronDown, FileQuestion, Lock, Unlock, X, UserMinus, FlaskConical } from "lucide-react";
 import Leaderboard from "@/components/Leaderboard";
 import BattleZone from "@/components/BattleZone";
 
@@ -175,6 +175,18 @@ export default function ClassroomPage({ user }) {
     } catch (error) {
       console.error("Remove student failed:", error);
       toast.error(error.response?.data?.detail || "Could not remove student");
+    }
+  };
+
+  const handleToggleTestFlag = async (student) => {
+    const makeTest = !student.is_test_account;
+    try {
+      await axios.patch(`${API}/students/${student.id}/test-flag`, { is_test: makeTest }, { withCredentials: true });
+      toast.success(makeTest ? `${student.name} marked as test — hidden from leaderboards` : `${student.name} restored to leaderboards`);
+      fetchClassroom();
+    } catch (error) {
+      console.error("Toggle test flag failed:", error);
+      toast.error(error.response?.data?.detail || "Could not update student");
     }
   };
 
@@ -903,9 +915,29 @@ export default function ClassroomPage({ user }) {
                   {classroom.student_details.map((student) => (
                     <Card key={student.id} data-testid={`student-card-${student.id}`}>
                       <CardHeader>
-                        <CardTitle className="text-base">{student.name}</CardTitle>
+                        <CardTitle className="text-base flex items-center gap-2">
+                          {student.name}
+                          {student.is_test_account && (
+                            <span
+                              data-testid={`test-badge-${student.id}`}
+                              className="text-[10px] font-orbitron uppercase tracking-wider px-1.5 py-0.5 rounded-none border border-slate-500/50 text-slate-400 bg-slate-500/10"
+                            >
+                              Test
+                            </span>
+                          )}
+                        </CardTitle>
                         <CardDescription className="text-sm">{student.email}</CardDescription>
-                        <div className="flex gap-2 pt-3">
+                        <div className="flex flex-wrap gap-2 pt-3">
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            data-testid={`test-flag-${student.id}`}
+                            onClick={() => handleToggleTestFlag(student)}
+                            className={`h-8 px-2 text-xs ${student.is_test_account ? "border-cyber-cyan/40 text-cyber-cyan hover:bg-cyber-cyan/10" : "border-slate-500/40 text-slate-400 hover:bg-slate-500/10"}`}
+                          >
+                            <FlaskConical className="w-3.5 h-3.5 mr-1" />
+                            {student.is_test_account ? "Unmark test" : "Mark as test"}
+                          </Button>
                           <Button
                             size="sm"
                             variant="outline"

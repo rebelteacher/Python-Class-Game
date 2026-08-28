@@ -1953,15 +1953,16 @@ async def get_classroom(classroom_id: str, request: Request):
     if user["role"] == "student" and user["id"] not in classroom.get("students", []):
         raise HTTPException(status_code=403, detail="Access denied")
     
-    # Get student details
+    # Get student details (roster may be [id] or [{id,...}])
     students = []
-    for student_id in classroom.get("students", []):
-        student = await db.users.find_one({"id": student_id}, {"_id": 0})
+    for sid in _lb_extract_ids(classroom.get("students", [])):
+        student = await db.users.find_one({"id": sid}, {"_id": 0})
         if student:
             students.append({
                 "id": student["id"],
-                "name": student["name"],
-                "email": student["email"]
+                "name": student.get("name", "Student"),
+                "email": student.get("email", ""),
+                "is_test_account": bool(student.get("is_test_account", False)),
             })
     
     classroom["student_details"] = students
@@ -2116,6 +2117,37 @@ async def delete_student_account(student_id: str, request: Request):
     await db.users.delete_one({"id": student_id})
 
     return {"ok": True, "deleted_student_id": student_id, "name": target.get("name")}
+
+
+class TestFlagUpdate(BaseModel):
+    is_test: bool
+
+
+@api_router.patch("/students/{student_id}/test-flag")
+async def set_student_test_flag(student_id: str, payload: TestFlagUpdate, request: Request):
+    """Mark/unmark a student as a test/dummy account. Flagged accounts are kept
+    (not deleted) but hidden from every leaderboard. A teacher may flag students
+    in their own classes; a platform admin may flag anyone."""
+    user = await get_current_user(request)
+
+    target = await db.users.find_one(
+        {"id": student_id}, {"_id": 0, "id": 1, "role": 1, "name": 1}
+    )
+    if not target or target.get("role") != "student":
+        raise HTTPException(status_code=404, detail="Student not found")
+
+    if not user.get("is_admin"):
+        if user["role"] != "teacher":
+            raise HTTPException(status_code=403, detail="Not allowed")
+        owns = await db.classrooms.find_one(
+            {"teacher_id": user["id"], "$or": [{"students": student_id}, {"students.id": student_id}]},
+            {"_id": 0, "id": 1},
+        )
+        if not owns:
+            raise HTTPException(status_code=403, detail="You can only flag students in your own classes")
+
+    await db.users.update_one({"id": student_id}, {"$set": {"is_test_account": payload.is_test}})
+    return {"ok": True, "student_id": student_id, "is_test_account": payload.is_test}
 
 # ----- Assignment Routes -----
 
@@ -9988,17 +10020,22 @@ def _lb_extract_ids(students_field):
 
 async def _lb_year_xp_map(sids, cutoff_iso=None):
     """{student_id: total XP} read directly from `users.xp` (cumulative lifetime
-    total). Historical attempt collections don't reliably carry xp_earned, so the
-    leaderboard ranks by the stored user total. `cutoff_iso` is accepted for
-    signature compatibility but no longer used."""
+    total). Students flagged `is_test_account` are dropped so test/dummy accounts
+    never appear on any leaderboard. `cutoff_iso` kept for signature compat."""
     if not sids:
         return {}
     xp_map = {sid: 0 for sid in sids}
-    cursor = db.users.find({"id": {"$in": sids}}, {"_id": 0, "id": 1, "xp": 1})
+    cursor = db.users.find(
+        {"id": {"$in": sids}}, {"_id": 0, "id": 1, "xp": 1, "is_test_account": 1}
+    )
     async for doc in cursor:
         sid = doc.get("id")
-        if sid in xp_map:
-            xp_map[sid] = doc.get("xp") or 0
+        if sid not in xp_map:
+            continue
+        if doc.get("is_test_account"):
+            xp_map.pop(sid, None)
+            continue
+        xp_map[sid] = doc.get("xp") or 0
     return xp_map
 
 
@@ -10026,6 +10063,16 @@ async def _lb_names_for(id_xp_pairs):
     ).to_list(len(ids))
     name_by_id = {u["id"]: u.get("name", "Student") for u in users_docs}
     return [{"id": i, "name": name_by_id.get(i, "Student"), "xp": xp} for i, xp in id_xp_pairs]
+
+
+async def _lb_test_account_ids():
+    """Ids of students flagged as test/dummy accounts — excluded from all boards."""
+    ids = set()
+    cursor = db.users.find({"is_test_account": True}, {"_id": 0, "id": 1})
+    async for u in cursor:
+        ids.add(u["id"])
+    return ids
+
 
 
 async def _lb_enrolled_student_ids():
@@ -10064,16 +10111,22 @@ async def get_student_ranks(student_id: str, request: Request):
     # ── Helper: total XP for a set of student ids (from users.xp) ─────────
     async def _year_xp_map(sids):
         """Return {student_id: total XP} read directly from `users.xp`
-        (cumulative lifetime total). Historical attempt collections don't
-        reliably carry xp_earned, so the leaderboard ranks by the stored total."""
+        (cumulative lifetime total). Students flagged `is_test_account` are
+        dropped so test/dummy accounts never appear on the leaderboard."""
         if not sids:
             return {}
         xp_map = {sid: 0 for sid in sids}
-        cursor = db.users.find({"id": {"$in": sids}}, {"_id": 0, "id": 1, "xp": 1})
+        cursor = db.users.find(
+            {"id": {"$in": sids}}, {"_id": 0, "id": 1, "xp": 1, "is_test_account": 1}
+        )
         async for doc in cursor:
             sid = doc.get("id")
-            if sid in xp_map:
-                xp_map[sid] = doc.get("xp") or 0
+            if sid not in xp_map:
+                continue
+            if doc.get("is_test_account"):
+                xp_map.pop(sid, None)
+                continue
+            xp_map[sid] = doc.get("xp") or 0
         return xp_map
 
     def _rank_of(sid, xp_map, min_activity=False):
@@ -10347,7 +10400,7 @@ async def get_reigning_beast(request: Request):
         return {"beast": None}
 
     top_user = await db.users.find_one(
-        {"id": {"$in": list(enrolled_ids)}, "role": "student", "xp": {"$gt": 0}},
+        {"id": {"$in": list(enrolled_ids)}, "role": "student", "xp": {"$gt": 0}, "is_test_account": {"$ne": True}},
         {"_id": 0, "id": 1, "name": 1, "picture": 1, "xp": 1},
         sort=[("xp", -1)],
     )
@@ -10403,6 +10456,7 @@ async def _finalize_past_quiz_weeks():
             {"week_start": ws_iso}, {"_id": 0, "week_start": 1}
         )
         if not exists:
+            test_ids = await _lb_test_account_ids()
             xp_by: dict = {}
             cur = db.test_xp_awards.find(
                 {"xp_earned": {"$gt": 0},
@@ -10411,7 +10465,7 @@ async def _finalize_past_quiz_weeks():
             )
             async for d in cur:
                 sid = d.get("student_id")
-                if sid:
+                if sid and sid not in test_ids:
                     xp_by[sid] = xp_by.get(sid, 0) + (d.get("xp_earned") or 0)
             champ_id = max(xp_by, key=xp_by.get) if xp_by else None
             champ_xp = xp_by[champ_id] if champ_id else 0
@@ -10495,13 +10549,14 @@ async def get_top_quiz_scorers(request: Request, limit: int = 5):
     cutoff = week_start.isoformat()
 
     xp_by_student: dict = {}
+    test_ids = await _lb_test_account_ids()
     cursor = db.test_xp_awards.find(
         {"xp_earned": {"$gt": 0}, "submitted_at": {"$gte": cutoff}},
         {"_id": 0, "student_id": 1, "xp_earned": 1},
     )
     async for doc in cursor:
         sid = doc.get("student_id")
-        if not sid:
+        if not sid or sid in test_ids:
             continue
         xp_by_student[sid] = xp_by_student.get(sid, 0) + (doc.get("xp_earned") or 0)
 
@@ -10575,8 +10630,11 @@ async def get_quiz_hall_of_fame(request: Request, limit: int = 12):
     user_map = {u["id"]: u for u in users}
 
     entries = []
+    test_ids = await _lb_test_account_ids()
     for d in docs:
         cid = d["champion_id"]
+        if cid in test_ids:
+            continue
         u = user_map.get(cid, {})
         try:
             ws = datetime.fromisoformat(d["week_start"])
