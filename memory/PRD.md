@@ -520,3 +520,11 @@ A coding education platform for K-12 students featuring multiple programming env
 - New `frontend/src/components/HallOfFame.jsx` — "Hall of Fame · Past Champions" card on the Student Dashboard (between the Top Quiz Scorers strip and the Leaderboard). Rows show week label + avatar + name + XP; the top row (most recent week) is gold-highlighted with a "Reigning" tag; repeat winners get a 👑 "N×" badge; the viewer is labelled "You". Hidden entirely until the first champion is crowned. testids `hall-of-fame`, `hof-row-<idx>`.
 - **Verified** via curl with seeded 3 weeks: returns Aug17→B, Aug10→A, Aug3→A in order, correct labels + repeat-winner counts. Frontend compiles clean. Seed data cleaned up.
 
+## Class Leaderboard fix + fresh-year reset (Mar 2026, production bug)
+- **Bug 1 (class shows "No data yet")**: `ClassroomPage.jsx` rendered `<Leaderboard classroomId currentUserId={user.id}>` but the component ignored `classroomId` and always ranked the current user. A teacher opening their class's Leaderboard tab ranked the *teacher* (in no student pool) → everything "No data yet".
+  - Fix: new `GET /api/leaderboard/classroom/{classroom_id}/ranks` returns the Class/Teacher/School/Overall top-3 the class's students see. `Leaderboard.jsx` now enters "classroom mode" when `classroomId` is set — fetches that endpoint, hides the personal "your rank" row, keeps a teacher "Set your school" affordance.
+- **Bug 2 ("still shows last year's names")**: class/teacher/school top-3 listed 0-XP roster students. Now all pools use `min_activity=True` (exclude 0 year-XP), matching the fresh-new-year reset — old names stay hidden until a student earns XP this school year (and quizzes now award XP, so boards fill as students play).
+- Promoted the ranking helpers to module level (`_lb_extract_ids`/`_lb_year_xp_map`/`_lb_rank_of`/`_lb_names_for`) — `_lb_extract_ids` handles both `students:[id]` and `students:[{id}]` production shapes.
+- **Verified** via curl on a real preview class: before seeding year-XP → all top-3 empty + total 0 ("No data yet"); after seeding one student 250 XP → that student appears in class/teacher top-3 and their personal `class_rank` = 1st. Frontend compiles clean; seed data cleaned up.
+- NOTE: fix is in **Preview** — user must redeploy to push to production (byte-dashboard.emergent.host).
+

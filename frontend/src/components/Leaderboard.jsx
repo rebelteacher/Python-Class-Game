@@ -71,13 +71,17 @@ export default function Leaderboard({ classroomId, currentUserId }) {
   const [data, setData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [viewer, setViewer] = useState(null); // { role, school } — for the "Set school" prompt
+  const isClassroomMode = !!classroomId;
 
   useEffect(() => {
-    if (!currentUserId) return;
+    if (isClassroomMode ? !classroomId : !currentUserId) return;
     const fetchRanks = async () => {
       try {
+        const endpoint = isClassroomMode
+          ? `${API}/leaderboard/classroom/${classroomId}/ranks`
+          : `${API}/leaderboard/ranks/${currentUserId}`;
         const [ranksRes, meRes] = await Promise.all([
-          axios.get(`${API}/leaderboard/ranks/${currentUserId}`, { withCredentials: true }),
+          axios.get(endpoint, { withCredentials: true }),
           axios.get(`${API}/auth/me`, { withCredentials: true }).catch(() => null),
         ]);
         setData(ranksRes.data);
@@ -89,7 +93,7 @@ export default function Leaderboard({ classroomId, currentUserId }) {
       }
     };
     fetchRanks();
-  }, [currentUserId]);
+  }, [classroomId, currentUserId]);
 
   const handleSetSchool = async () => {
     const school = window.prompt(
@@ -110,7 +114,10 @@ export default function Leaderboard({ classroomId, currentUserId }) {
       );
       toast.success(`School set to "${trimmed}" — reloading rankings…`);
       // Refetch ranks so the new school shows up
-      const res = await axios.get(`${API}/leaderboard/ranks/${currentUserId}`, { withCredentials: true });
+      const endpoint = isClassroomMode
+        ? `${API}/leaderboard/classroom/${classroomId}/ranks`
+        : `${API}/leaderboard/ranks/${currentUserId}`;
+      const res = await axios.get(endpoint, { withCredentials: true });
       setData(res.data);
       setViewer((v) => ({ ...v, school: trimmed }));
     } catch (error) {
@@ -130,13 +137,26 @@ export default function Leaderboard({ classroomId, currentUserId }) {
   return (
     <div data-testid="leaderboard-card" className="space-y-6">
       {/* School year context */}
-      {data.school_year_start && (
-        <p className="text-[11px] text-slate-500 font-chakra text-right">
-          Ranked on XP earned since {new Date(data.school_year_start).toLocaleDateString(undefined, { year: "numeric", month: "short", day: "numeric" })}
-        </p>
-      )}
+      <div className="flex items-center justify-end gap-3">
+        {isClassroomMode && !data.school_name && viewer?.role === "teacher" && (
+          <button
+            type="button"
+            onClick={handleSetSchool}
+            data-testid="set-school-btn"
+            className="text-[11px] text-amber-500/90 hover:text-amber-300 underline font-chakra"
+          >
+            Set your school →
+          </button>
+        )}
+        {data.school_year_start && (
+          <p className="text-[11px] text-slate-500 font-chakra text-right">
+            Ranked on XP earned since {new Date(data.school_year_start).toLocaleDateString(undefined, { year: "numeric", month: "short", day: "numeric" })}
+          </p>
+        )}
+      </div>
 
-      {/* Your Ranks Row */}
+      {/* Your Ranks Row — only in personal (student) mode */}
+      {!isClassroomMode && (
       <div className="bg-cyber-navy/60 border border-cyber-cyan/20 p-4 rounded-none">
         <div className="grid grid-cols-5 gap-4 text-center">
           <div>
@@ -183,6 +203,7 @@ export default function Leaderboard({ classroomId, currentUserId }) {
           </div>
         </div>
       </div>
+      )}
 
       {/* Top 3 Columns */}
       <div className="flex gap-3 flex-wrap md:flex-nowrap">

@@ -9885,6 +9885,69 @@ async def get_classroom_leaderboard(classroom_id: str, request: Request):
     
     return leaderboard[:10]  # Top 10
 
+
+def _lb_extract_ids(students_field):
+    """Flatten a classroom `students` field that may be [id_str,...] OR
+    [{id,name,email},...] (production has both shapes) into id strings."""
+    if not students_field:
+        return []
+    out = []
+    for s in students_field:
+        if isinstance(s, str):
+            out.append(s)
+        elif isinstance(s, dict):
+            sid = s.get("id") or s.get("student_id")
+            if sid:
+                out.append(sid)
+    return out
+
+
+async def _lb_year_xp_map(sids, cutoff_iso):
+    """{student_id: XP earned since cutoff} across submissions, mc/coding test
+    attempts, and quiz/chapter-test awards."""
+    if not sids:
+        return {}
+    xp_map = {sid: 0 for sid in sids}
+    base_filter = {
+        "student_id": {"$in": sids},
+        "xp_earned": {"$exists": True, "$ne": None, "$gt": 0},
+        "submitted_at": {"$gte": cutoff_iso},
+    }
+    for coll in (db.submissions, db.mc_test_attempts, db.coding_test_attempts, db.test_xp_awards):
+        cursor = coll.find(base_filter, {"_id": 0, "student_id": 1, "xp_earned": 1})
+        async for doc in cursor:
+            sid = doc.get("student_id")
+            if sid in xp_map:
+                xp_map[sid] += (doc.get("xp_earned") or 0)
+    return xp_map
+
+
+def _lb_rank_of(sid, xp_map, min_activity=False):
+    """(rank, top3_pairs, total). When min_activity, students with 0 year-XP are
+    excluded (so last year's 0-XP roster names don't appear until someone earns)."""
+    entries = list(xp_map.items())
+    if min_activity:
+        entries = [(k, v) for k, v in entries if v > 0]
+    entries.sort(key=lambda kv: kv[1], reverse=True)
+    rank_val = None
+    for i, (peer_id, _) in enumerate(entries):
+        if peer_id == sid:
+            rank_val = i + 1
+            break
+    return rank_val, entries[:3], len(entries)
+
+
+async def _lb_names_for(id_xp_pairs):
+    ids = [i for i, _ in id_xp_pairs]
+    if not ids:
+        return []
+    users_docs = await db.users.find(
+        {"id": {"$in": ids}}, {"_id": 0, "id": 1, "name": 1}
+    ).to_list(len(ids))
+    name_by_id = {u["id"]: u.get("name", "Student") for u in users_docs}
+    return [{"id": i, "name": name_by_id.get(i, "Student"), "xp": xp} for i, xp in id_xp_pairs]
+
+
 @api_router.get("/leaderboard/ranks/{student_id}")
 async def get_student_ranks(student_id: str, request: Request):
     """Get a student's rank across Class, Teacher, School, and Overall categories +
@@ -9988,7 +10051,7 @@ async def get_student_ranks(student_id: str, request: Request):
         class_student_ids = _extract_ids(classroom.get("students"))
         class_xp = await _year_xp_map(class_student_ids)
         student_year_xp = class_xp.get(student_id, 0)
-        class_rank, class_top3_pairs, _ = _rank_of(student_id, class_xp)
+        class_rank, class_top3_pairs, _ = _rank_of(student_id, class_xp, min_activity=True)
         class_top3 = await _names_for(class_top3_pairs)
 
     # ── Teacher Rank ──────────────────────────────────────────────────────
@@ -10015,7 +10078,7 @@ async def get_student_ranks(student_id: str, request: Request):
         teacher_xp = await _year_xp_map(list(all_teacher_student_ids))
         if student_id in teacher_xp:
             student_year_xp = teacher_xp[student_id]
-        teacher_rank, teacher_top3_pairs, _ = _rank_of(student_id, teacher_xp)
+        teacher_rank, teacher_top3_pairs, _ = _rank_of(student_id, teacher_xp, min_activity=True)
         teacher_top3 = await _names_for(teacher_top3_pairs)
 
     # ── School Rank ───────────────────────────────────────────────────────
@@ -10041,7 +10104,7 @@ async def get_student_ranks(student_id: str, request: Request):
         for sc in school_classrooms:
             all_school_student_ids.update(_extract_ids(sc.get("students")))
         school_xp = await _year_xp_map(list(all_school_student_ids))
-        school_rank, school_top3_pairs, _ = _rank_of(student_id, school_xp)
+        school_rank, school_top3_pairs, _ = _rank_of(student_id, school_xp, min_activity=True)
         school_top3 = await _names_for(school_top3_pairs)
 
     # ── Overall Rank (whole platform, active-this-year only) ──────────────
@@ -10093,6 +10156,99 @@ async def get_student_ranks(student_id: str, request: Request):
         "overall_top3": overall_top3,
         "total_students": total_active,  # active students this school year
     }
+
+
+@api_router.get("/leaderboard/classroom/{classroom_id}/ranks")
+async def get_classroom_ranks(classroom_id: str, request: Request):
+    """Class-scoped leaderboard: the Class/Teacher/School/Overall top-3 that the
+    students of THIS class see. Lets a teacher open their class's Leaderboard tab
+    and view the class's rankings (teachers aren't in any student pool, so ranking
+    the teacher would always be empty). 0-year-XP students are excluded so last
+    year's roster names don't show until someone earns XP this school year.
+    """
+    await get_current_user(request)
+
+    classroom = await db.classrooms.find_one(
+        {"id": classroom_id},
+        {"_id": 0, "id": 1, "students": 1, "teacher_id": 1, "name": 1},
+    )
+    if not classroom:
+        raise HTTPException(status_code=404, detail="Classroom not found")
+
+    school_year_start = await _get_school_year_start()
+    cutoff_iso = school_year_start.isoformat()
+
+    class_name = classroom.get("name", "")
+    teacher_id = classroom.get("teacher_id")
+
+    # ── Class ──
+    class_ids = _lb_extract_ids(classroom.get("students"))
+    class_xp = await _lb_year_xp_map(class_ids, cutoff_iso)
+    _, class_top3_pairs, _ = _lb_rank_of(None, class_xp, min_activity=True)
+    class_top3 = await _lb_names_for(class_top3_pairs)
+
+    # ── Teacher ──
+    teacher_name = ""
+    teacher_top3 = []
+    school_val = None
+    if teacher_id:
+        teacher_doc = await db.users.find_one(
+            {"id": teacher_id}, {"_id": 0, "name": 1, "school": 1}
+        )
+        if teacher_doc:
+            teacher_name = teacher_doc.get("name", "")
+            school_val = teacher_doc.get("school")
+        teacher_classrooms = await db.classrooms.find(
+            {"teacher_id": teacher_id}, {"_id": 0, "students": 1}
+        ).to_list(100)
+        all_teacher_ids = set()
+        for tc in teacher_classrooms:
+            all_teacher_ids.update(_lb_extract_ids(tc.get("students")))
+        teacher_xp = await _lb_year_xp_map(list(all_teacher_ids), cutoff_iso)
+        _, teacher_top3_pairs, _ = _lb_rank_of(None, teacher_xp, min_activity=True)
+        teacher_top3 = await _lb_names_for(teacher_top3_pairs)
+
+    # ── School ──
+    school_name = ""
+    school_top3 = []
+    if school_val:
+        school_name = school_val
+        school_teachers = await db.users.find(
+            {"role": "teacher", "school": school_val}, {"_id": 0, "id": 1}
+        ).to_list(500)
+        school_teacher_ids = [t["id"] for t in school_teachers]
+        school_classrooms = await db.classrooms.find(
+            {"teacher_id": {"$in": school_teacher_ids}}, {"_id": 0, "students": 1}
+        ).to_list(2000)
+        all_school_ids = set()
+        for sc in school_classrooms:
+            all_school_ids.update(_lb_extract_ids(sc.get("students")))
+        school_xp = await _lb_year_xp_map(list(all_school_ids), cutoff_iso)
+        _, school_top3_pairs, _ = _lb_rank_of(None, school_xp, min_activity=True)
+        school_top3 = await _lb_names_for(school_top3_pairs)
+
+    # ── Overall (whole platform, active-this-year only) ──
+    all_students_docs = await db.users.find(
+        {"role": "student"}, {"_id": 0, "id": 1}
+    ).to_list(20000)
+    all_student_ids = [s["id"] for s in all_students_docs]
+    overall_xp = await _lb_year_xp_map(all_student_ids, cutoff_iso)
+    _, overall_top3_pairs, total_active = _lb_rank_of(None, overall_xp, min_activity=True)
+    overall_top3 = await _lb_names_for(overall_top3_pairs)
+
+    return {
+        "classroom_mode": True,
+        "school_year_start": cutoff_iso,
+        "class_name": class_name,
+        "class_top3": class_top3,
+        "teacher_name": teacher_name,
+        "teacher_top3": teacher_top3,
+        "school_name": school_name or "",
+        "school_top3": school_top3,
+        "overall_top3": overall_top3,
+        "total_students": total_active,
+    }
+
 
 
 
