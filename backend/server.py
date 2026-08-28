@@ -10329,6 +10329,57 @@ async def get_quiz_champion_stats(student_id: str, request: Request):
     }
 
 
+@api_router.get("/leaderboard/hall-of-fame")
+async def get_quiz_hall_of_fame(request: Request, limit: int = 12):
+    """Past weekly quiz champions, most-recent completed week first — the
+    "Hall of Fame". Each entry: the week window label, the champion's
+    name/picture, their winning XP for that week, and their all-time
+    champion-week count so repeat winners stand out."""
+    await get_current_user(request)
+    limit = max(1, min(limit, 52))
+
+    await _finalize_past_quiz_weeks()
+    stats = await _champion_stats_map()
+
+    docs = await db.weekly_quiz_champions.find(
+        {"champion_id": {"$ne": None}}, {"_id": 0, "week_start": 1, "champion_id": 1, "xp": 1}
+    ).sort("week_start", -1).to_list(limit)
+
+    champ_ids = list({d["champion_id"] for d in docs})
+    users = await db.users.find(
+        {"id": {"$in": champ_ids}}, {"_id": 0, "id": 1, "name": 1, "picture": 1}
+    ).to_list(len(champ_ids)) if champ_ids else []
+    user_map = {u["id"]: u for u in users}
+
+    entries = []
+    for d in docs:
+        cid = d["champion_id"]
+        u = user_map.get(cid, {})
+        try:
+            ws = datetime.fromisoformat(d["week_start"])
+        except (ValueError, TypeError):
+            continue
+        we = ws + timedelta(days=6)
+        # e.g. "Aug 17 – 23" or "Aug 31 – Sep 6"
+        if ws.month == we.month:
+            label = f"{ws.strftime('%b %-d')} – {we.strftime('%-d')}"
+        else:
+            label = f"{ws.strftime('%b %-d')} – {we.strftime('%b %-d')}"
+        entries.append({
+            "week_start": d["week_start"],
+            "week_label": label,
+            "champion_id": cid,
+            "champion_name": u.get("name", "Champion"),
+            "champion_picture": u.get("picture"),
+            "xp": d.get("xp", 0),
+            "champion_weeks": stats.get(cid, {}).get("total_weeks", 0),
+        })
+
+    return {"champions": entries}
+
+
+
+
 
 
 @api_router.post("/admin/bind-schools")

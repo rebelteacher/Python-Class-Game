@@ -515,3 +515,8 @@ A coding education platform for K-12 students featuring multiple programming env
 - Frontend strip stamps two badges under each scorer: 🔥 **Flame** (orange, shown when `champion_streak >= 2`) for weeks-in-a-row, and 👑 **Crown "N×"** (gold, shown when `champion_weeks >= 1`) for total weeks as champion. testids `quiz-flame-<rank>`, `quiz-champ-<rank>`.
 - **Verified** via curl with seeded 3-week history: champions Aug3→A, Aug10→A, Aug17→B ⇒ A `{weeks:2, streak:0}`, B `{weeks:1, streak:1}`; current-week scorers correctly carried their champion stats. Seed data cleaned up.
 
+## Hall of Fame · Past Champions (Mar 2026)
+- New `GET /api/leaderboard/hall-of-fame?limit=12` — returns past weekly champions most-recent-first from `weekly_quiz_champions` (skips no-champion weeks). Each entry: `week_label` (e.g. "Aug 17 – 23", cross-month aware), champion name/picture, winning `xp`, and all-time `champion_weeks` so repeat winners stand out. Calls `_finalize_past_quiz_weeks()` so history is always current.
+- New `frontend/src/components/HallOfFame.jsx` — "Hall of Fame · Past Champions" card on the Student Dashboard (between the Top Quiz Scorers strip and the Leaderboard). Rows show week label + avatar + name + XP; the top row (most recent week) is gold-highlighted with a "Reigning" tag; repeat winners get a 👑 "N×" badge; the viewer is labelled "You". Hidden entirely until the first champion is crowned. testids `hall-of-fame`, `hof-row-<idx>`.
+- **Verified** via curl with seeded 3 weeks: returns Aug17→B, Aug10→A, Aug3→A in order, correct labels + repeat-winner counts. Frontend compiles clean. Seed data cleaned up.
+
