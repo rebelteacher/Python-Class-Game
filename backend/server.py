@@ -5496,11 +5496,14 @@ async def submit_assignment(submission: SubmissionCreate, request: Request):
                     'repeat': 0, 'for': 0, 'while': 0, 'if': 0,
                     'say': 0, 'hide': 0, 'show': 0, 'home': 0, 'pensize': 0,
                     'variable': 0, 'random': 0, 'comparison': 0, 'bgcolor': 0,
-                    'dot': 0, 'circle': 0, 'math': 0, 'sensing': 0
+                    'dot': 0, 'circle': 0, 'math': 0, 'sensing': 0,
+                    'setheading': 0, 'heading': 0
                 }
                 for cmd in commands:
                     if 't.forward' in cmd or 't.fd(' in cmd:
                         counts['forward'] += 1
+                    elif 't.setheading' in cmd or 't.seth(' in cmd:
+                        counts['setheading'] += 1
                     elif 't.backward' in cmd or 't.bk(' in cmd:
                         counts['backward'] += 1
                     elif 't.right' in cmd or 't.rt(' in cmd:
@@ -5548,6 +5551,10 @@ async def submit_assignment(submission: SubmissionCreate, request: Request):
                         counts['comparison'] += 1
                     if 't.xcor' in cmd or 't.ycor' in cmd or 't.heading' in cmd:
                         counts['sensing'] += 1
+                    # The heading reporter block generates t.heading() (distinct
+                    # from t.setheading which sets it) — count it explicitly.
+                    if 't.heading(' in cmd and 't.setheading(' not in cmd:
+                        counts['heading'] += 1
                     if ' + ' in cmd or ' - ' in cmd or ' * ' in cmd or ' / ' in cmd or ' % ' in cmd:
                         counts['math'] += 1
                 return counts
@@ -5564,6 +5571,10 @@ async def submit_assignment(submission: SubmissionCreate, request: Request):
                 'turn_left': 'left', 'left': 'left', 'turtle_left': 'left',
                 'go_to': 'goto', 'goto': 'goto', 'turtle_goto': 'goto',
                 'home': 'home', 'go_home': 'home', 'turtle_home': 'home',
+                # Set heading / heading blocks
+                'setheading': 'setheading', 'set_heading': 'setheading',
+                'seth': 'setheading', 'turtle_setheading': 'setheading',
+                'heading': 'heading', 'get_heading': 'heading', 'turtle_heading': 'heading',
                 # Pen blocks
                 'pen_up': 'penup', 'penup': 'penup', 'turtle_penup': 'penup',
                 'pen_down': 'pendown', 'pendown': 'pendown', 'turtle_pendown': 'pendown',
@@ -5578,8 +5589,8 @@ async def submit_assignment(submission: SubmissionCreate, request: Request):
                 'turtle_dot': 'dot', 'dot': 'dot',
                 'turtle_circle': 'circle', 'circle': 'circle',
                 # Sensing blocks
-                'turtle_xposition': 'sensing', 'turtle_yposition': 'sensing', 'turtle_direction': 'sensing',
-                'x_position': 'sensing', 'y_position': 'sensing', 'direction': 'sensing',
+                'turtle_xposition': 'sensing', 'turtle_yposition': 'sensing', 'turtle_direction': 'heading',
+                'x_position': 'sensing', 'y_position': 'sensing', 'direction': 'heading',
                 # Loop blocks
                 'repeat': 'repeat', 'loop': 'repeat', 'turtle_repeat': 'repeat',
                 'controls_repeat_ext': 'repeat',

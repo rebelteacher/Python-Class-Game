@@ -571,4 +571,12 @@ A coding education platform for K-12 students featuring multiple programming env
 - Frontend: class Students tab card shows a **TEST** badge + a **Mark as test / Unmark test** toggle (`test-flag-<id>`, `test-badge-<id>`), alongside Remove & Delete.
 - **Verified** via curl: flagging a 99999-XP dummy removed it from class ranks + beast (real student remained); roster reflects flag; unflagging restored it. Frontend compiles clean; test data cleaned up.
 - NOTE: in **Preview** — redeploy to push to production.
+
+## Block auto-grader: setheading/heading not detected (Mar 2026, scoring bug)
+- Symptom: a turtle block solution using `when key pressed`, `setheading`, `forward`, `say`, `heading` scored 60% — the "Uses setheading" and "Uses heading" block tests failed though the student clearly used them.
+- Root cause: block-test grading (`submit_assignment`, blockly_turtle pattern branch ~L5490) infers block usage from the GENERATED turtle code via `count_command_types` + `pattern_to_command`. Neither had any rule for `setheading` (block generates `t.setheading(...)`), so it always counted 0 → auto-fail. `heading` (`turtle_direction` → `t.heading()`) was only bucketed under generic `sensing`.
+- Fix: added a `setheading` counter (`t.setheading(` / `t.seth(`) and an explicit `heading` counter (`t.heading(`, excluding `t.setheading(`); added pattern_to_command entries for `setheading`/`turtle_setheading`/`set_heading`/`seth` → `setheading` and `heading`/`turtle_heading`/`get_heading`/`turtle_direction`/`direction` → `heading`.
+- **Verified** by replicating the exact grader against the generated code (`t.setheading(90)`, `t.forward(50)`, `t.write(t.heading(), ...)`): all 5 block tests now PASS (was 3/5) → 100%. Backend reloads clean.
+- Note: the per-problem 60% vs the "Final Grade 15%" header differ because the overall grade averages across all 4 problems (only 1 attempted → 60%/4 ≈ 15%). heading credits only when the block is actually connected (generates `t.heading()`); a disconnected reporter can't be credited.
+- NOTE: in **Preview** — redeploy to push to production.
 - NOTE: in **Preview** — redeploy to push to production.
