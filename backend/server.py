@@ -591,6 +591,7 @@ class SubmissionCreate(BaseModel):
     assignment_id: str
     problem_id: Optional[str] = None  # Optional for backward compatibility
     code: str
+    blocks_xml: Optional[str] = ""  # Block workspace XML — graded directly when present
     screenshot: Optional[str] = None  # Base64 encoded screenshot for Scratch grading
 
 
@@ -5424,6 +5425,7 @@ async def submit_assignment(submission: SubmissionCreate, request: Request):
                     "coins_earned": turtle_rewards["coins"],
                     "turtle_image": turtle_image,
                     "turtle_tracking_data": tracking_data,
+                    "blocks_xml": getattr(submission, "blocks_xml", "") or "",
                     "submission_type": "blockly_turtle_ordered"
                 }
                 await db.submissions.insert_one(new_submission)
@@ -5609,6 +5611,33 @@ async def submit_assignment(submission: SubmissionCreate, request: Request):
                 'math_arithmetic': 'math', 'math_number': 'math',
                 'math_number_property': 'comparison', 'math_modulo': 'math',
             }
+
+            # ── Grade straight from the saved block workspace XML when present ──
+            # Reading the workspace (rather than the generated code) means a block
+            # counts as "used" regardless of whether it's wired into the run path.
+            blocks_xml = getattr(submission, "blocks_xml", "") or ""
+            if blocks_xml:
+                event_type_map = {
+                    'event_start': 'event_start', 'event_key_pressed': 'event_key',
+                    'event_clicked': 'event_click', 'event_mouse_move': 'event_mouse',
+                }
+                xml_counts = {}
+                xml_events = {'event_start': 0, 'event_key': 0, 'event_click': 0, 'event_mouse': 0}
+                for bt in re.findall(r'type="([^"]+)"', blocks_xml):
+                    if bt in event_type_map:
+                        ev = event_type_map[bt]
+                        xml_events[ev] = xml_events.get(ev, 0) + 1
+                        continue
+                    canon = pattern_to_command.get(bt)
+                    if not canon and bt.startswith('turtle_'):
+                        canon = pattern_to_command.get(bt[len('turtle_'):])
+                    if not canon:
+                        canon = bt  # fall back to the raw block type
+                    xml_counts[canon] = xml_counts.get(canon, 0) + 1
+                student_counts = xml_counts
+                event_counts = xml_events
+                logger.info(f"Grading from workspace XML: counts={xml_counts}, events={xml_events}")
+
             
             test_results = []
             total_points = 0
@@ -5808,6 +5837,7 @@ async def submit_assignment(submission: SubmissionCreate, request: Request):
                 "coins_earned": turtle_rewards["coins"],
                 "turtle_image": turtle_image,
                 "turtle_tracking_data": tracking_data,
+                "blocks_xml": getattr(submission, "blocks_xml", "") or "",
                 "submission_type": "blockly_turtle"
             }
             

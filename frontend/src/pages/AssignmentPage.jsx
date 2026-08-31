@@ -648,11 +648,30 @@ export default function AssignmentPage({ user, lessonData }) {
 
     setSubmitting(true);
     try {
+      // Capture the current block workspace so grading reads the blocks directly
+      // (not just the generated code) and the finished work is saved for review.
+      let currentXml = "";
+      try {
+        currentXml = turtleBlocksRef.current?.getXml?.() || savedXmlPerProblem[problemId] || blockXml || "";
+      } catch (e) {
+        currentXml = savedXmlPerProblem[problemId] || blockXml || "";
+      }
+      // Flush the draft immediately (don't rely on the debounce) so the finished
+      // workspace is persisted server-side for later review.
+      if (currentXml) {
+        axios.post(`${API}/drafts`, {
+          assignment_id: effectiveAssignmentId,
+          problem_id: problemId,
+          xml: currentXml,
+        }, { withCredentials: true }).catch(() => {});
+      }
+
       // Build submission payload
       const submissionData = {
         assignment_id: effectiveAssignmentId,
         problem_id: problemId,
         code: code || "",
+        blocks_xml: currentXml,
       };
       
       const response = await axios.post(
