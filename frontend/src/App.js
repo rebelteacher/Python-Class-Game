@@ -4,6 +4,7 @@ import { BrowserRouter, Routes, Route, Navigate, useNavigate, useLocation } from
 import axios from "axios";
 import { Toaster, toast } from "sonner";
 import LandingPage from "./pages/LandingPage";
+import WhyCoding from "./pages/WhyCoding";
 import CurriculumPreview from "./pages/CurriculumPreview";
 import CurriculumPreviewLesson from "./pages/CurriculumPreviewLesson";
 import StateMeetingLanding from "./pages/StateMeetingLanding";
@@ -237,6 +238,7 @@ function App() {
               <HelpButton user={user} />
               <Routes>
               <Route path="/" element={user ? <Navigate to={getDashboardRoute(user.role)} replace /> : <LandingPage />} />
+              <Route path="/why-coding" element={<WhyCoding />} />
               
               <Route
                 path="/teacher/dashboard"

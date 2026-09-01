@@ -34,6 +34,15 @@ export default function LandingPage() {
         </div>
         <div className="flex items-center gap-3">
           <Button 
+            onClick={() => navigate("/why-coding")} 
+            variant="ghost"
+            data-testid="nav-why-coding-btn"
+            className="gap-2 text-slate-400 hover:text-cyber-lime hover:bg-cyber-lime/5 font-chakra hidden sm:flex"
+          >
+            <Cpu className="w-4 h-4" />
+            Why Coding?
+          </Button>
+          <Button 
             onClick={() => setContactOpen(true)} 
             variant="ghost"
             className="gap-2 text-slate-400 hover:text-cyber-cyan hover:bg-cyber-cyan/5 font-chakra"
@@ -111,6 +120,17 @@ export default function LandingPage() {
               Start 14-Day Trial
             </Button>
           </div>
+
+          <button
+            onClick={() => navigate("/why-coding")}
+            data-testid="hero-why-coding-link"
+            className="mt-8 inline-flex items-center gap-2 text-sm font-chakra text-slate-400 hover:text-cyber-lime transition-colors group"
+          >
+            <Cpu className="w-4 h-4 text-cyber-lime" />
+            <span className="border-b border-cyber-lime/40 group-hover:border-cyber-lime text-left">
+              Think AI made coding obsolete? Here&apos;s why it matters more than ever &rarr;
+            </span>
+          </button>
         </section>
 
         {/* Features Grid */}

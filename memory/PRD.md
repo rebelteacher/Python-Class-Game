@@ -586,3 +586,8 @@ A coding education platform for K-12 students featuring multiple programming env
 - **Verified** e2e via the `lesson_` submit path: workspace with when-key/setheading/forward/say + a DISCONNECTED heading reporter → score 100%, all 5 block tests pass; `blocks_xml` persisted on the submission. Standalone reproductions confirmed both code-path and XML-path counting. Frontend compiles clean; test data cleaned up.
 - NOTE: in **Preview** — redeploy to push to production.
 - NOTE: in **Preview** — redeploy to push to production.
+## "Why Coding in the Age of AI" page (Mar 2026)
+- New public page at `/why-coding` (`pages/WhyCoding.jsx`, route in App.js) making the case that coding still matters despite AI. On-brand cyber theme: hero, calculator-vs-AI pull quote, 5 "core reasons" cards (computational thinking, imperfect AI collaborator, understanding systems, careers, creativity), a "Why Python" grid, closing statement, and CTAs (trial/preview/teacher).
+- Two entry points on the landing page: a nav "Why Coding?" button and a lime hero link ("Think AI made coding obsolete? Here's why it matters more than ever"). testids: `nav-why-coding-btn`, `hero-why-coding-link`, `whycoding-*`.
+- Used static Tailwind class strings per card (avoided dynamic `border-${color}` which JIT would purge). Verified via screenshots: page renders correctly and landing links appear. Frontend compiles clean.
+- NOTE: in Preview — redeploy to push to production.
