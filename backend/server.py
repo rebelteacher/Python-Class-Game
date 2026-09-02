@@ -13281,9 +13281,9 @@ async def start_mc_test(test_id: str, request: Request):
     if existing_attempt:
         # Check if retakes are allowed
         if test.get("allow_retake", False):
-            # Delete old completed attempt to allow retake
-            await db.mc_test_attempts.delete_one({"id": existing_attempt["id"]})
-            # Also delete any incomplete attempts from previous retakes
+            # Keep the previous COMPLETED attempt (it holds their best score) — the
+            # highest score is preserved until they beat it (deduped on submit).
+            # Only clear stale in-progress attempts from previous retakes.
             await db.mc_test_attempts.delete_many({
                 "test_id": test_id,
                 "student_id": user["id"],
@@ -13501,8 +13501,23 @@ async def submit_mc_test(test_id: str, submission: MCTestSubmission, request: Re
     # Award XP/coins — first attempt only (lesson quiz / chapter test)
     xp_awarded = await award_test_xp(user, test_id, score)
 
+    # Retakes keep the HIGHEST score: keep only the best completed attempt and
+    # delete the rest (so a lower retake never overwrites a higher earlier score).
+    completed = await db.mc_test_attempts.find(
+        {"test_id": test_id, "student_id": user["id"], "is_complete": True},
+        {"_id": 0, "id": 1, "score": 1},
+    ).to_list(100)
+    best_score = score
+    if completed:
+        best = max(completed, key=lambda a: a.get("score") or 0)
+        best_score = best.get("score") or 0
+        for a in completed:
+            if a["id"] != best["id"]:
+                await db.mc_test_attempts.delete_one({"id": a["id"]})
+
     return {
         "score": round(score, 1),
+        "best_score": round(best_score, 1),
         "correct_count": correct_count,
         "total_questions": total_questions,
         "xp_earned": xp_awarded,

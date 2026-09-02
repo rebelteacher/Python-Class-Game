@@ -591,3 +591,11 @@ A coding education platform for K-12 students featuring multiple programming env
 - Two entry points on the landing page: a nav "Why Coding?" button and a lime hero link ("Think AI made coding obsolete? Here's why it matters more than ever"). testids: `nav-why-coding-btn`, `hero-why-coding-link`, `whycoding-*`.
 - Used static Tailwind class strings per card (avoided dynamic `border-${color}` which JIT would purge). Verified via screenshots: page renders correctly and landing links appear. Frontend compiles clean.
 - NOTE: in Preview — redeploy to push to production.
+
+## Lesson quiz retakes keep HIGHEST score (Mar 2026)
+- Previously `start_mc_test` DELETED the prior completed attempt on retake, so a lower retake overwrote a higher earlier score.
+- Now retake start keeps the previous completed attempt (only clears stale in-progress ones). `submit_mc_test` dedups to a single completed attempt = the HIGHEST score: it keeps the best and deletes the rest. Response returns `best_score` alongside this attempt`s `score`.
+- XP (test_xp_awards) stays first-attempt-only (unchanged). Gradebook already reads best attempt.
+- Frontend `TestTaking.jsx` shows a cyan "Best score kept: N%" badge when a retake scores lower than the stored best.
+- Verified e2e: A1=100 then retake 50 -> kept 100 (1 attempt); 50 then 100 -> kept 100. Frontend compiles clean.
+- NOTE: in Preview — redeploy to push to production.

@@ -7,7 +7,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Label } from "@/components/ui/label";
 import { Progress } from "@/components/ui/progress";
-import { ArrowLeft, ArrowRight, Clock, CheckCircle, AlertCircle, Lock, Zap } from "lucide-react";
+import { ArrowLeft, ArrowRight, Clock, CheckCircle, AlertCircle, Lock, Zap, Trophy } from "lucide-react";
 
 const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
 const API = `${BACKEND_URL}/api`;
@@ -179,7 +179,8 @@ export default function TestTaking({ user }) {
   const [submitting, setSubmitting] = useState(false);
   const [submitted, setSubmitted] = useState(false);
   const [score, setScore] = useState(null);
-  const [xpEarned, setXpEarned] = useState(0);  const [questionResults, setQuestionResults] = useState([]);
+  const [xpEarned, setXpEarned] = useState(0);
+  const [bestScore, setBestScore] = useState(null);  const [questionResults, setQuestionResults] = useState([]);
   const [showAnswers, setShowAnswers] = useState(true);
   const [resultsReleased, setResultsReleased] = useState(false);
   const [timeRemaining, setTimeRemaining] = useState(null);
@@ -300,6 +301,7 @@ export default function TestTaking({ user }) {
       setTotalQuestions(data.total_questions || questions.length);
       setCorrectCount(data.correct_count || 0);
       setXpEarned(typeof data.xp_earned === 'number' ? data.xp_earned : 0);
+      setBestScore(typeof data.best_score === 'number' ? data.best_score : null);
       setSubmitted(true);
       
       if (timerRef.current) {
@@ -397,6 +399,16 @@ export default function TestTaking({ user }) {
                   {correctCount} correct out of {totalQuestions || questions.length} questions
                 </p>
               </div>
+
+              {bestScore !== null && Math.round(bestScore) > Math.round(score) && (
+                <div
+                  data-testid="quiz-best-kept"
+                  className="inline-flex items-center gap-2 px-5 py-2.5 rounded-full bg-cyber-cyan/10 border border-cyber-cyan/40 text-cyber-cyan font-orbitron font-bold"
+                >
+                  <Trophy className="w-5 h-5" />
+                  Best score kept: {Math.round(bestScore)}%
+                </div>
+              )}
 
               {xpEarned > 0 && (
                 <div
