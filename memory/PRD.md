@@ -209,14 +209,19 @@ A coding education platform for K-12 students featuring multiple programming env
 
 ## Recent Fixes
 
+- Chapter-test teacher unlock never reached students (Jun 2026 — production bug fix):
+  - User need: publish/bypass a chapter test on the teacher's schedule instead of waiting for every student to finish all chapter problems (progress gate). A per-class teacher unlock already existed but had no effect on students.
+  - Root cause: student-side `ChapterTestRow.jsx` calls `GET /api/curriculum/test-placements` WITHOUT a `classroom_id`, so the backend's `unlocked_set` was always empty → `unlocked_by_teacher` was always False for students. The teacher's "Unlock for class" toggle (writes `classrooms.unlocked_test_placements`) therefore did nothing for them.
+  - Fix: `list_test_placements` now, when the caller is a student and no `classroom_id` is passed, unions `unlocked_test_placements` across EVERY classroom the student is enrolled in. So a teacher unlock in any of the student's classes flips `is_available=True` regardless of progress. `/app/backend/server.py` (`list_test_placements`).
+  - Verified end-to-end via curl with a real student session: before unlock `is_available=False` (progress incomplete); after teacher unlock `unlocked_by_teacher=True` → `is_available=True`. Test placement/session cleaned up afterward.
+  - Teacher control location: Classroom → Lesson Locks tab → Class Progress widget → "Unlock for class" (only shows chapters that have a chapter_test curriculum placement).
+
 - Gradebook missing MC/coding test scores (Jun 2026 — production bug fix):
-  - Root cause: `GET /api/reports/gradebook` only built quiz/test columns from `curriculum_test_placements` or legacy `mc_tests` tagged with a chapter/lesson. Tests built in the MC/Coding Test builder and assigned via `classroom_ids` (students reach them from the "My Tests" dashboard) carry no chapter/lesson tag, so they never got a gradebook column — their scores were invisible.
-  - Fix: after building curriculum columns, the endpoint now also gathers tests assigned to the classroom via `mc_tests.classroom_ids`, `coding_tests.classroom_ids`, and `test_assignments`, dedupes against curriculum columns, and appends them as `type: "assigned_test"` columns under a "📋 Assigned Tests" banner. Attempt lookups extended to include this type. `/app/backend/server.py` (`get_gradebook_report`).
-  - Verified via curl on preview with real data: student "2nd Period" gradebook now shows the previously-missing MC test (100) plus all assigned MC + coding test scores. Frontend renders generically (no FE change).
+  - Root cause: gradebook only built columns from curriculum placements / legacy chapter-tagged MC tests. Tests built in the MC/Coding Test builder and assigned via `classroom_ids` (reached via "My Tests") had no column → scores invisible.
+  - Fix: `get_gradebook_report` now also surfaces classroom-assigned tests (`mc_tests.classroom_ids`, `coding_tests.classroom_ids`, `test_assignments`) as `assigned_test` columns under a "📋 Assigned Tests" banner. Verified via curl with real data.
 
 - Teacher Panel "Failed to load student code" on lesson pages (Jun 2026 — production bug fix):
-  - Root cause: `GET /api/assignments/{id}/student-code/...` required a real `assignments` doc and 404'd for synthetic lesson ids (`lesson_*`). Sibling `/student-progress` was already lesson-aware; `student-code` was missed.
-  - Fix: allow `lesson_*` ids through the ownership check (submissions keyed by lesson id). Verified via curl.
+  - Root cause: `student-code` endpoint 404'd for synthetic `lesson_*` ids. Fix: allow lesson ids through the ownership check. Verified via curl.
 
 ## Known Issues
 

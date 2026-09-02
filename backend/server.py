@@ -3644,6 +3644,12 @@ async def list_test_placements(request: Request, assignment_type: str, chapter: 
         classroom = await db.classrooms.find_one({"id": classroom_id}, {"_id": 0, "unlocked_test_placements": 1})
         if classroom:
             unlocked_set = set(classroom.get("unlocked_test_placements", []) or [])
+    elif user["role"] == "student":
+        # Students don't pass a classroom_id, but a teacher's "unlock for class" must still
+        # reach them. Union the unlocked placements across EVERY classroom the student is
+        # enrolled in so a manual teacher unlock in any of their classes takes effect.
+        async for c in db.classrooms.find({"students": user["id"]}, {"_id": 0, "unlocked_test_placements": 1}):
+            unlocked_set |= set(c.get("unlocked_test_placements", []) or [])
 
     out = []
     for p in placements:
