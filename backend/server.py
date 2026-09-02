@@ -8132,6 +8132,57 @@ async def get_gradebook_report(classroom_id: str, request: Request, assignment_t
                 "label": f"{_chapter_prefix(chap)}: Test",
             })
 
+    # ── Standalone assigned tests (MC Test builder / Coding Test builder) ──
+    # Tests assigned directly to this classroom via `classroom_ids` (students reach
+    # them from the "My Tests" dashboard) or via the `test_assignments` collection are
+    # NOT curriculum placements and carry no chapter/lesson tag, so they'd otherwise
+    # never get a gradebook column. Surface them under a synthetic "Assigned Tests"
+    # banner so their scores show up.
+    placed_test_ids = {c["test_id"] for c in columns if c.get("test_id")}
+    assigned_mc_ids = set()
+    assigned_coding_ids = set()
+    async for t in db.mc_tests.find({"classroom_ids": classroom_id}, {"_id": 0, "id": 1}):
+        assigned_mc_ids.add(t["id"])
+    async for t in db.coding_tests.find({"classroom_ids": classroom_id}, {"_id": 0, "id": 1}):
+        assigned_coding_ids.add(t["id"])
+    async for a in db.test_assignments.find({"classroom_id": classroom_id}, {"_id": 0, "test_id": 1, "test_type": 1}):
+        if a.get("test_type") == "coding":
+            assigned_coding_ids.add(a["test_id"])
+        else:
+            assigned_mc_ids.add(a["test_id"])
+    assigned_mc_ids -= placed_test_ids
+    assigned_coding_ids -= placed_test_ids
+
+    extra_mc = await db.mc_tests.find(
+        {"id": {"$in": list(assigned_mc_ids)}}, {"_id": 0, "id": 1, "title": 1, "num_questions": 1}
+    ).to_list(2000) if assigned_mc_ids else []
+    extra_coding = await db.coding_tests.find(
+        {"id": {"$in": list(assigned_coding_ids)}}, {"_id": 0, "id": 1, "title": 1}
+    ).to_list(2000) if assigned_coding_ids else []
+    for t in extra_mc:
+        mc_test_nq[t["id"]] = t.get("num_questions") or 0
+    ASSIGNED_CHAPTER = "\U0001F4CB Assigned Tests"
+    for t in sorted(extra_mc, key=lambda x: (x.get("title") or "").lower()):
+        columns.append({
+            "key": f"atest::{t['id']}",
+            "type": "assigned_test",
+            "chapter": ASSIGNED_CHAPTER,
+            "assignment_type": "",
+            "test_id": t["id"],
+            "test_type": "mc",
+            "label": t.get("title") or "Test",
+        })
+    for t in sorted(extra_coding, key=lambda x: (x.get("title") or "").lower()):
+        columns.append({
+            "key": f"atest::{t['id']}",
+            "type": "assigned_test",
+            "chapter": ASSIGNED_CHAPTER,
+            "assignment_type": "",
+            "test_id": t["id"],
+            "test_type": "coding",
+            "label": t.get("title") or "Test",
+        })
+
     # Fetch all submissions + all mc test attempts for these students in bulk
     subs = []
     if student_ids:
@@ -8150,8 +8201,8 @@ async def get_gradebook_report(classroom_id: str, request: Request, assignment_t
             best_problem[k] = sc
 
     # Fetch best MC + coding test attempts for these students in bulk
-    mc_col_test_ids = [c["test_id"] for c in columns if c["type"] in ("lesson_quiz", "chapter_test") and c.get("test_type", "mc") == "mc"]
-    coding_col_test_ids = [c["test_id"] for c in columns if c["type"] in ("lesson_quiz", "chapter_test") and c.get("test_type") == "coding"]
+    mc_col_test_ids = [c["test_id"] for c in columns if c["type"] in ("lesson_quiz", "chapter_test", "assigned_test") and c.get("test_type", "mc") == "mc"]
+    coding_col_test_ids = [c["test_id"] for c in columns if c["type"] in ("lesson_quiz", "chapter_test", "assigned_test") and c.get("test_type") == "coding"]
 
     best_attempt = {}
     if mc_col_test_ids and student_ids:

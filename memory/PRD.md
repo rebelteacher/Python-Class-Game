@@ -209,10 +209,14 @@ A coding education platform for K-12 students featuring multiple programming env
 
 ## Recent Fixes
 
+- Gradebook missing MC/coding test scores (Jun 2026 — production bug fix):
+  - Root cause: `GET /api/reports/gradebook` only built quiz/test columns from `curriculum_test_placements` or legacy `mc_tests` tagged with a chapter/lesson. Tests built in the MC/Coding Test builder and assigned via `classroom_ids` (students reach them from the "My Tests" dashboard) carry no chapter/lesson tag, so they never got a gradebook column — their scores were invisible.
+  - Fix: after building curriculum columns, the endpoint now also gathers tests assigned to the classroom via `mc_tests.classroom_ids`, `coding_tests.classroom_ids`, and `test_assignments`, dedupes against curriculum columns, and appends them as `type: "assigned_test"` columns under a "📋 Assigned Tests" banner. Attempt lookups extended to include this type. `/app/backend/server.py` (`get_gradebook_report`).
+  - Verified via curl on preview with real data: student "2nd Period" gradebook now shows the previously-missing MC test (100) plus all assigned MC + coding test scores. Frontend renders generically (no FE change).
+
 - Teacher Panel "Failed to load student code" on lesson pages (Jun 2026 — production bug fix):
-  - Root cause: `GET /api/assignments/{id}/student-code/{student}/{problem}` required a real `assignments` document and 404'd for synthetic lesson ids (`lesson_*`), which have no such doc. The sibling `/student-progress` endpoint was already fixed for lessons; `student-code` was missed.
-  - Fix: allow `lesson_*` ids through the ownership check (submissions are keyed by the lesson id). `/app/backend/server.py` ~L6732.
-  - Verified via curl on preview: lesson student-code now returns 200 with code/blocks_xml/score/attempts.
+  - Root cause: `GET /api/assignments/{id}/student-code/...` required a real `assignments` doc and 404'd for synthetic lesson ids (`lesson_*`). Sibling `/student-progress` was already lesson-aware; `student-code` was missed.
+  - Fix: allow `lesson_*` ids through the ownership check (submissions keyed by lesson id). Verified via curl.
 
 ## Known Issues
 
