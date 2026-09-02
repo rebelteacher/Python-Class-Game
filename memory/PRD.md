@@ -207,6 +207,13 @@ A coding education platform for K-12 students featuring multiple programming env
 
 ---
 
+## Recent Fixes
+
+- Teacher Panel "Failed to load student code" on lesson pages (Jun 2026 — production bug fix):
+  - Root cause: `GET /api/assignments/{id}/student-code/{student}/{problem}` required a real `assignments` document and 404'd for synthetic lesson ids (`lesson_*`), which have no such doc. The sibling `/student-progress` endpoint was already fixed for lessons; `student-code` was missed.
+  - Fix: allow `lesson_*` ids through the ownership check (submissions are keyed by the lesson id). `/app/backend/server.py` ~L6732.
+  - Verified via curl on preview: lesson student-code now returns 200 with code/blocks_xml/score/attempts.
+
 ## Known Issues
 
 ### Carried Over (P2)

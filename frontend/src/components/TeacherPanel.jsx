@@ -6,6 +6,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { ChevronRight, ChevronLeft, Users, User, Eye, X } from "lucide-react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import Editor from "@monaco-editor/react";
+import TurtleBlocklyEditor from "./TurtleBlocklyEditor";
 import BeastBadge from "./BeastBadge";
 
 const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
@@ -327,7 +328,7 @@ export default function TeacherPanel({
                   
                   {/* Student Name */}
                   <div className="flex-1 min-w-0">
-                    <div className="font-medium text-slate-200 truncate text-sm flex items-center gap-2">
+                    <div className="font-semibold text-slate-900 truncate text-sm flex items-center gap-2">
                       <span className="truncate">{student.name}</span>
                       <BeastBadge studentId={student.id} showLabel={false} />
                       {typeof student.problems_solved === "number" && typeof student.problems_total === "number" && (
@@ -427,7 +428,18 @@ export default function TeacherPanel({
                 </div>
               </div>
               
-              {/* Code Editor (Read-Only) */}
+              {/* Read-only block workspace (block/turtle submissions) */}
+              {studentCode.blocks_xml && studentCode.blocks_xml.trim() ? (
+                <div className="flex-1 border rounded-lg overflow-hidden bg-white" style={{ minHeight: '360px', height: '360px' }} data-testid="student-blocks-viewer">
+                  <TurtleBlocklyEditor
+                    key={`${studentCode.student_id}-${studentCode.problem_id}`}
+                    initialXml={studentCode.blocks_xml}
+                    readOnly={true}
+                    showRunButton={false}
+                  />
+                </div>
+              ) : (
+              /* Code Editor (Read-Only) */
               <div className="flex-1 border rounded-lg overflow-hidden" style={{ minHeight: '300px' }}>
                 <Editor
                   height="100%"
@@ -444,6 +456,7 @@ export default function TeacherPanel({
                   theme="vs-light"
                 />
               </div>
+              )}
               
               {/* Feedback Section */}
               {studentCode.feedback && (

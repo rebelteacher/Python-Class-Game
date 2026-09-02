@@ -6729,14 +6729,18 @@ async def get_student_code(assignment_id: str, student_id: str, problem_id: str,
     if user["role"] != "teacher":
         raise HTTPException(status_code=403, detail="Only teachers can view student code")
     
-    # Verify teacher owns this assignment
+    # Verify teacher owns this assignment.
+    # Lesson pages use a synthetic id (`lesson_...`) with no real assignment document —
+    # submissions are still stored keyed by that lesson id, so allow lesson ids through
+    # (mirrors the /student-progress endpoint which was already fixed for lessons).
     assignment = await db.assignments.find_one({"id": assignment_id}, {"_id": 0})
     if not assignment:
-        raise HTTPException(status_code=404, detail="Assignment not found")
-    
-    teacher_id = assignment.get("teacher_id")
-    if teacher_id and teacher_id != user["id"]:
-        raise HTTPException(status_code=403, detail="Access denied")
+        if not assignment_id.startswith("lesson_"):
+            raise HTTPException(status_code=404, detail="Assignment not found")
+    else:
+        teacher_id = assignment.get("teacher_id")
+        if teacher_id and teacher_id != user["id"]:
+            raise HTTPException(status_code=403, detail="Access denied")
     
     # Get the student info
     student = await db.users.find_one({"id": student_id}, {"_id": 0, "id": 1, "name": 1})
@@ -6776,6 +6780,8 @@ async def get_student_code(assignment_id: str, student_id: str, problem_id: str,
         "student_name": student["name"],
         "problem_id": problem_id,
         "code": best_submission.get("code", ""),
+        "blocks_xml": best_submission.get("blocks_xml", ""),
+        "submission_type": best_submission.get("submission_type", ""),
         "score": best_submission.get("score", 0),
         "is_final": best_submission.get("is_final", False),
         "is_passing": best_submission.get("is_passing", False),
