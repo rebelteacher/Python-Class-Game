@@ -599,3 +599,10 @@ A coding education platform for K-12 students featuring multiple programming env
 - Frontend `TestTaking.jsx` shows a cyan "Best score kept: N%" badge when a retake scores lower than the stored best.
 - Verified e2e: A1=100 then retake 50 -> kept 100 (1 attempt); 50 then 100 -> kept 100. Frontend compiles clean.
 - NOTE: in Preview — redeploy to push to production.
+
+## Fix: teacher "Show Solution" not showing blocks (Mar 2026, production)
+- Symptom: Unit 1 block problems, teacher clicks Show Solution -> toast fires but no solution blocks appear on the canvas.
+- Root cause: the teacher Show Solution button in AssignmentPage.jsx only set the `code` string. Block problems render from the workspace XML (not the code text), so the block canvas never changed.
+- Fix: for `assignment_type === "block"`, the button now calls `turtleBlocksRef.current.setXml(problem.solution_blocks_xml)` to load the solution BLOCKS into the workspace (label -> "Show Solution Blocks"). Non-block problems keep the code-toggle behavior.
+- Data confirmed present: block problems store `solution_blocks_xml` (used to build the test cases); `/assignments/{id}` returns full problem docs incl. that field for teachers.
+- Frontend compiles clean. NOTE: in Preview — redeploy to push to production.

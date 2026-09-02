@@ -1238,6 +1238,20 @@ export default function AssignmentPage({ user, lessonData }) {
                       <Button
                         onClick={() => {
                           const problem = assignment.problems ? assignment.problems[currentProblemIndex] : assignment;
+                          const isBlock = problem?.assignment_type === "block";
+                          if (isBlock) {
+                            // Block problems: the canvas is driven by XML, not the
+                            // code string — load the solution BLOCKS into the workspace.
+                            const solXml = problem?.solution_blocks_xml;
+                            if (solXml && solXml.trim() && turtleBlocksRef.current?.setXml) {
+                              turtleBlocksRef.current.setXml(solXml);
+                              if (problem.solution_code) setCode(problem.solution_code);
+                              toast.success("Solution blocks loaded!");
+                            } else {
+                              toast.info("No solution blocks saved for this problem");
+                            }
+                            return;
+                          }
                           if (problem.solution_code) {
                             if (code === problem.solution_code) {
                               // Hide solution - load starter code
@@ -1259,6 +1273,7 @@ export default function AssignmentPage({ user, lessonData }) {
                         <Code2 className="w-4 h-4" />
                         {(() => {
                           const problem = assignment.problems ? assignment.problems[currentProblemIndex] : assignment;
+                          if (problem?.assignment_type === "block") return "Show Solution Blocks";
                           return code === problem?.solution_code ? "Hide Solution" : "Show Solution Code";
                         })()}
                       </Button>
