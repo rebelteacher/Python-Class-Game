@@ -209,6 +209,13 @@ A coding education platform for K-12 students featuring multiple programming env
 
 ## Recent Fixes
 
+- Block grader: "count with" (for) loop not recognized → correct block solution capped at 66% (Jun 2026 — production bug fix):
+  - Symptom: a correct Turtle-block solution (count-with loop + forward + turn) scored 66%; the "Uses a for ... loop" rubric check failed while forward/turn checks passed.
+  - Root cause: the "count with" block's type is `turtle_for`. `submit_solution` block-grading (`/app/backend/server.py` ~L5580-5720): (1) `pattern_to_command` had `turtle_repeat`/`turtle_while` but NOT `turtle_for`; (2) the rubric pattern→cmd_type lookup used `pattern_to_command.get(pattern, pattern)` WITHOUT the `turtle_` strip fallback the XML counter uses, so a `turtle_for` (or `loop`/`repeat`) pattern didn't resolve to the `for` count → actual_count 0 → fail.
+  - Fix: added `turtle_for`/`turtle_count`/`controls_for` → `for` mapping; the rubric lookup now strips `turtle_` like the counter; loop types (for/repeat/while) are treated as interchangeable for a loop requirement (sum their counts); added loop keywords to the description-inference `infer_map`.
+  - Verified by replaying the grader on the student's exact workspace across every plausible pattern (`turtle_for`, `for`, `count`, `loop`, `controls_for`, inferred) — all now pass → 100%.
+  - Note: resubmit/re-grade to pick up (highest-score retention makes resubmit safe).
+
 - Turtle rubric grader: "for loop that repeats N times" always failed (Jun 2026 — production bug fix):
   - Symptom: a correct turtle solution scored 80% instead of 100%.
   - Root cause: in the code-based pattern grader (`submit_solution`, ~L5107), the "N times" min_count heuristic (`re.search(r'(\d+)\s*times?')`) fired on the rubric line "Sets up a for loop that repeats 200 times", setting `min_count=200`. It then required the literal "200" to appear 200 times; `range(200)` has it once → 20-pt item failed → 80%.

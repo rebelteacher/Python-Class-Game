@@ -5608,7 +5608,8 @@ async def submit_assignment(submission: SubmissionCreate, request: Request):
                 # Loop blocks
                 'repeat': 'repeat', 'loop': 'repeat', 'turtle_repeat': 'repeat',
                 'controls_repeat_ext': 'repeat',
-                'for': 'for', 'count': 'for',
+                'for': 'for', 'count': 'for', 'turtle_for': 'for', 'turtle_count': 'for',
+                'controls_for': 'for',
                 'while': 'while', 'turtle_while': 'while',
                 # Logic/Control blocks
                 'if': 'if', 'if_else': 'if', 'turtle_if': 'if', 'turtle_if_else': 'if',
@@ -5684,6 +5685,8 @@ async def submit_assignment(submission: SubmissionCreate, request: Request):
                             'set color': 'set_color', 'color': 'set_color',
                             'circle': 'turtle_circle', 'dot': 'turtle_dot',
                             'hide': 'turtle_hide', 'show': 'turtle_show',
+                            'for loop': 'for', 'count with': 'for', 'count loop': 'for',
+                            'while loop': 'while', 'repeat': 'repeat', 'loop': 'for',
                         }
                         for keyword, inferred in infer_map.items():
                             if keyword in desc_lower:
@@ -5691,12 +5694,25 @@ async def submit_assignment(submission: SubmissionCreate, request: Request):
                                 logger.info(f"Inferred pattern '{pattern}' from description '{description}'")
                                 break
                     
-                    # Map pattern to command type
-                    cmd_type = pattern_to_command.get(pattern, pattern)
-                    
+                    # Map pattern to command type. Strip a leading "turtle_" the same
+                    # way the XML block counter does, so a test pattern like
+                    # "turtle_for" resolves to the canonical "for" count.
+                    cmd_type = pattern_to_command.get(pattern)
+                    if cmd_type is None and pattern.startswith('turtle_'):
+                        cmd_type = pattern_to_command.get(pattern[len('turtle_'):])
+                    if cmd_type is None:
+                        cmd_type = pattern
+
+                    # Loop blocks (for / count / repeat / while) are interchangeable when a
+                    # rubric just asks for "a loop": a count-with (for) block should satisfy
+                    # a "uses a loop" / "repeat" check and vice-versa.
+                    loop_cmd_types = {'for', 'repeat', 'while'}
+
                     # Check event blocks first (from XML comments), then regular commands
                     if cmd_type in event_counts or pattern in event_counts:
                         actual_count = event_counts.get(cmd_type, event_counts.get(pattern, 0))
+                    elif cmd_type in loop_cmd_types:
+                        actual_count = sum(student_counts.get(k, 0) for k in loop_cmd_types)
                     else:
                         actual_count = student_counts.get(cmd_type, 0)
                     
