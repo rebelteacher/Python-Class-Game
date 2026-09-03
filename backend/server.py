@@ -5103,8 +5103,14 @@ async def submit_assignment(submission: SubmissionCreate, request: Request):
                     # Get min_count requirement (default 1 = just check existence)
                     min_count = tc.get("min_count", 1) or 1
                     
-                    # Auto-extract count requirement from description like "5 times" or "x5"
-                    if min_count == 1:
+                    # Auto-extract count requirement from description like "5 times" or "x5".
+                    # Skip when the description describes a LOOP ("for loop that repeats 200
+                    # times", "loop 10 times") — there the number is the loop/range count,
+                    # not how many times a literal pattern must appear in the code. Otherwise
+                    # a rubric like "repeats 200 times" would wrongly demand the literal "200"
+                    # appear 200 times and always fail.
+                    loop_context = 'loop' in desc_lower or 'repeat' in desc_lower or 'range' in desc_lower
+                    if min_count == 1 and not loop_context:
                         count_match = re.search(r'(\d+)\s*times?', desc_lower)
                         if count_match:
                             min_count = int(count_match.group(1))

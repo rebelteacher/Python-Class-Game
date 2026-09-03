@@ -209,6 +209,13 @@ A coding education platform for K-12 students featuring multiple programming env
 
 ## Recent Fixes
 
+- Turtle rubric grader: "for loop that repeats N times" always failed (Jun 2026 — production bug fix):
+  - Symptom: a correct turtle solution scored 80% instead of 100%.
+  - Root cause: in the code-based pattern grader (`submit_solution`, ~L5107), the "N times" min_count heuristic (`re.search(r'(\d+)\s*times?')`) fired on the rubric line "Sets up a for loop that repeats 200 times", setting `min_count=200`. It then required the literal "200" to appear 200 times; `range(200)` has it once → 20-pt item failed → 80%.
+  - Fix: skip the "N times"/"xN" min_count heuristic when the description describes a loop (contains "loop", "repeat", or "range"), since the number is a loop/range count, not a code-occurrence count. `/app/backend/server.py` ~L5106. Block-grading path (uses explicit `min_count`) unaffected.
+  - Verified by replaying the exact grading algorithm on the student's code: the for-loop item now passes → 100%.
+  - Note: existing graded submissions keep stored score; resubmit or re-grade to pick up the fix (highest-score retention makes resubmit safe).
+
 - Chapter-test teacher unlock never reached students (Jun 2026 — production bug fix):
   - User need: publish/bypass a chapter test on the teacher's schedule instead of waiting for every student to finish all chapter problems (progress gate). A per-class teacher unlock already existed but had no effect on students.
   - Root cause: student-side `ChapterTestRow.jsx` calls `GET /api/curriculum/test-placements` WITHOUT a `classroom_id`, so the backend's `unlocked_set` was always empty → `unlocked_by_teacher` was always False for students. The teacher's "Unlock for class" toggle (writes `classrooms.unlocked_test_placements`) therefore did nothing for them.
